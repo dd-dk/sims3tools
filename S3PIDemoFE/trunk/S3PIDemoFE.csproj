@@ -182,7 +182,6 @@
     <Compile Include="Filter\ResourceFields.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="TGIN.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="gpl-3.0.txt">

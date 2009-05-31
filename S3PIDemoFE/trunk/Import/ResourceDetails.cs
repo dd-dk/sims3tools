@@ -23,6 +23,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using s3pi.Extensions;
 
 namespace S3PIDemoFE
 {

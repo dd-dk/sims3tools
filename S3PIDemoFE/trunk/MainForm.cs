@@ -24,6 +24,7 @@ using System.IO;
 using System.Windows.Forms;
 using s3pi.Interfaces;
 using s3pi.Package;
+using s3pi.Extensions;
 
 namespace S3PIDemoFE
 {
