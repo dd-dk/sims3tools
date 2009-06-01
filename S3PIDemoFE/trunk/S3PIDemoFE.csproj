@@ -37,6 +37,7 @@
     <Reference Include="s3pi.DemoPlugins">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\s3pi\s3pi.DemoPlugins.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="s3pi.Extensions">
       <SpecificVersion>False</SpecificVersion>

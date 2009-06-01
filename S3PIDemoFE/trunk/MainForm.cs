@@ -135,6 +135,7 @@ namespace S3PIDemoFE
 
         #region Current Resource
         string resourceName = "";
+        s3pi.DemoPlugins.DemoPlugins plug = null;
 
         IResource resource = null;
         bool resourceIsDirty = false;
@@ -646,13 +647,22 @@ namespace S3PIDemoFE
             controlPanel1.HexEnabled = (resource != null);
             if (resource != null)
             {
-                List<string> lf = resource.ContentFields;
-                foreach (string f in (new string[] { "Stream", "AsBytes", "Value" }))
-                    if (lf.Contains(f)) lf.Remove(f);
-                controlPanel1.DataGridEnabled = lf.Count > 0;
+                plug = new s3pi.DemoPlugins.DemoPlugins(browserWidget1.SelectedResource, resource);
+                if (plug.IsValid)
+                    controlPanel1.EditEnabled = true;
+                else
+                {
+                    List<string> lf = resource.ContentFields;
+                    foreach (string f in (new string[] { "Stream", "AsBytes", "Value" }))
+                        if (lf.Contains(f)) lf.Remove(f);
+                    controlPanel1.EditEnabled = lf.Count > 0;
+                }
             }
-            else controlPanel1.DataGridEnabled = false;
-            controlPanel1.DataGridEnabled = true;
+            else
+            {
+                plug = null;
+                controlPanel1.EditEnabled = false;
+            }
 
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_export, resource != null || browserWidget1.SelectedResources.Count > 0);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBE_cut, resource != null);
@@ -742,7 +752,7 @@ namespace S3PIDemoFE
             }
         }
 
-        private void controlPanel1_UnwrappedClick(object sender, EventArgs e)
+        private void controlPanel1_ViewClick(object sender, EventArgs e)
         {
             try
             {
@@ -786,18 +796,21 @@ namespace S3PIDemoFE
             finally { this.Enabled = true; }
         }
 
-        private void controlPanel1_DataGridClick(object sender, EventArgs e)
+        private void controlPanel1_EditClick(object sender, EventArgs e)
         {
             try
             {
-                s3pi.DemoPlugins.DemoPlugins plug = new s3pi.DemoPlugins.DemoPlugins(CurrentPackage, browserWidget1.SelectedResource);
-                if (plug.IsValid)
+                this.Enabled = false;
+                if (plug != null && plug.IsValid)
                 {
                     editCopy();
 
                     bool res = plug.Execute(resource);
 
                     this.Focus();
+                    Application.DoEvents();
+                    this.BringToFront();
+                    Application.DoEvents();
 
                     if (res && Clipboard.ContainsData(DataFormats.Serializable))
                         editPaste();

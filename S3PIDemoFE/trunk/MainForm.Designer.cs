@@ -160,7 +160,7 @@
             // controlPanel1
             // 
             this.controlPanel1.CommitEnabled = false;
-            this.controlPanel1.DataGridEnabled = false;
+            this.controlPanel1.EditEnabled = false;
             this.controlPanel1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.controlPanel1.HexEnabled = false;
             this.controlPanel1.Location = new System.Drawing.Point(0, 74);
@@ -171,12 +171,12 @@
             this.controlPanel1.Sort = false;
             this.controlPanel1.TabIndex = 1;
             this.controlPanel1.UnwrappedEnabled = false;
-            this.controlPanel1.DataGridClick += new System.EventHandler(this.controlPanel1_DataGridClick);
+            this.controlPanel1.EditClick += new System.EventHandler(this.controlPanel1_EditClick);
             this.controlPanel1.CommitClick += new System.EventHandler(this.controlPanel1_CommitClick);
             this.controlPanel1.HexClick += new System.EventHandler(this.controlPanel1_HexClick);
             this.controlPanel1.UseNamesChanged += new System.EventHandler(this.controlPanel1_UseNamesChanged);
             this.controlPanel1.SortChanged += new System.EventHandler(this.controlPanel1_SortChanged);
-            this.controlPanel1.UnwrappedClick += new System.EventHandler(this.controlPanel1_UnwrappedClick);
+            this.controlPanel1.UnwrappedClick += new System.EventHandler(this.controlPanel1_ViewClick);
             this.controlPanel1.HexOnlyChanged += new System.EventHandler(this.controlPanel1_HexOnlyChanged);
             // 
             // resourceFilterWidget1
