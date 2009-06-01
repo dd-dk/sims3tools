@@ -42,6 +42,8 @@ namespace S3PIDemoFE
 
         public bool Rename { get { return ckbRename.Checked; } }
 
+        public bool Compress { get { return ckbCompress.Checked; } }
+
         void addDrop(string[] fileDrop)
         {
             batch = (string[])fileDrop.Clone();

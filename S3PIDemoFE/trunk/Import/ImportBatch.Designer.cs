@@ -33,6 +33,7 @@
             this.lbFiles = new System.Windows.Forms.ListBox();
             this.ckbUseName = new System.Windows.Forms.CheckBox();
             this.ckbRename = new System.Windows.Forms.CheckBox();
+            this.ckbCompress = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // btnOK
@@ -93,6 +94,16 @@
             this.ckbRename.Text = "Rename if present";
             this.ckbRename.UseVisualStyleBackColor = true;
             // 
+            // ckbCompress
+            // 
+            this.ckbCompress.AutoSize = true;
+            this.ckbCompress.Location = new System.Drawing.Point(254, 12);
+            this.ckbCompress.Name = "ckbCompress";
+            this.ckbCompress.Size = new System.Drawing.Size(72, 17);
+            this.ckbCompress.TabIndex = 6;
+            this.ckbCompress.Text = "Compress";
+            this.ckbCompress.UseVisualStyleBackColor = true;
+            // 
             // ImportBatch
             // 
             this.AcceptButton = this.btnOK;
@@ -101,6 +112,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(401, 260);
+            this.Controls.Add(this.ckbCompress);
             this.Controls.Add(this.ckbUseName);
             this.Controls.Add(this.ckbRename);
             this.Controls.Add(this.lbFiles);
@@ -108,7 +120,6 @@
             this.Controls.Add(this.btnOK);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Name = "ImportBatch";
-            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Import Files";
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.ImportBatch_DragDrop);
@@ -125,5 +136,6 @@
         private System.Windows.Forms.ListBox lbFiles;
         private System.Windows.Forms.CheckBox ckbUseName;
         private System.Windows.Forms.CheckBox ckbRename;
+        private System.Windows.Forms.CheckBox ckbCompress;
     }
 }
