@@ -136,6 +136,7 @@ namespace S3PIDemoFE
                 {
                     this.listView1.ListViewItemSorter = value ? lvwColumnSorter : null;
                     listView1.Sorting = value ? SortOrder.Ascending : SortOrder.None;
+                    listView1.HeaderStyle = value ? ColumnHeaderStyle.Clickable : ColumnHeaderStyle.Nonclickable;
                 }
                 finally { Application.UseWaitCursor = false; Application.DoEvents(); listView1.EndUpdate(); }
             }
