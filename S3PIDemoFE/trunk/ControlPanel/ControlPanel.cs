@@ -26,7 +26,6 @@ namespace S3PIDemoFE
 {
     public partial class ControlPanel : UserControl
     {
-
         public ControlPanel()
         {
             InitializeComponent();
@@ -107,19 +106,19 @@ namespace S3PIDemoFE
         private void btnView_Click(object sender, EventArgs e) { OnUnwrappedClick(sender, e); }
         #endregion
 
-        #region DataGrid button
+        #region Edit button
         [Browsable(true)]
         [Category("Behavior")]
-        [Description("The state of the DataGrid button")]
-        public bool DataGridEnabled { get { return btnDataGrid.Enabled; } set { btnDataGrid.Enabled = value; } }
+        [Description("The state of the Edit button")]
+        public bool EditEnabled { get { return btnEdit.Enabled; } set { btnEdit.Enabled = value; } }
 
         [Browsable(true)]
         [Category("Action")]
         [DefaultValue(false)]
-        [Description("Occurs when the DataGrid button is clicked")]
-        public event EventHandler DataGridClick;
-        protected virtual void OnDataGridClick(object sender, EventArgs e) { if (DataGridClick != null) DataGridClick(sender, e); }
-        private void btnDataGrid_Click(object sender, EventArgs e) { OnDataGridClick(sender, e); }
+        [Description("Occurs when the Edit button is clicked")]
+        public event EventHandler EditClick;
+        protected virtual void OnEditClick(object sender, EventArgs e) { if (EditClick != null) EditClick(sender, e); }
+        private void btnEdit_Click(object sender, EventArgs e) { OnEditClick(sender, e); }
         #endregion
 
         #region UseNames checkbox

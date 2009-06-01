@@ -36,7 +36,7 @@ namespace S3PIDemoFE
             this.ckbUseNames = new System.Windows.Forms.CheckBox();
             this.btnCommit = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.btnDataGrid = new System.Windows.Forms.Button();
+            this.btnEdit = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -92,7 +92,7 @@ namespace S3PIDemoFE
             this.btnView.Name = "btnView";
             this.btnView.Size = new System.Drawing.Size(75, 23);
             this.btnView.TabIndex = 5;
-            this.btnView.Text = "&Unwrapped";
+            this.btnView.Text = "V&iew";
             this.btnView.UseVisualStyleBackColor = true;
             this.btnView.Click += new System.EventHandler(this.btnView_Click);
             // 
@@ -159,7 +159,7 @@ namespace S3PIDemoFE
             this.tableLayoutPanel1.Controls.Add(this.ckbAutoHex, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.btnHex, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.ckbNoUnWrap, 3, 0);
-            this.tableLayoutPanel1.Controls.Add(this.btnDataGrid, 6, 0);
+            this.tableLayoutPanel1.Controls.Add(this.btnEdit, 6, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
@@ -169,18 +169,18 @@ namespace S3PIDemoFE
             this.tableLayoutPanel1.Size = new System.Drawing.Size(722, 27);
             this.tableLayoutPanel1.TabIndex = 8;
             // 
-            // btnDataGrid
+            // btnEdit
             // 
-            this.btnDataGrid.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnDataGrid.Enabled = false;
-            this.btnDataGrid.Location = new System.Drawing.Point(366, 2);
-            this.btnDataGrid.Margin = new System.Windows.Forms.Padding(0);
-            this.btnDataGrid.Name = "btnDataGrid";
-            this.btnDataGrid.Size = new System.Drawing.Size(75, 23);
-            this.btnDataGrid.TabIndex = 8;
-            this.btnDataGrid.Text = "Data &Grid";
-            this.btnDataGrid.UseVisualStyleBackColor = true;
-            this.btnDataGrid.Click += new System.EventHandler(this.btnDataGrid_Click);
+            this.btnEdit.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnEdit.Enabled = false;
+            this.btnEdit.Location = new System.Drawing.Point(366, 2);
+            this.btnEdit.Margin = new System.Windows.Forms.Padding(0);
+            this.btnEdit.Name = "btnEdit";
+            this.btnEdit.Size = new System.Drawing.Size(75, 23);
+            this.btnEdit.TabIndex = 8;
+            this.btnEdit.Text = "E&dit";
+            this.btnEdit.UseVisualStyleBackColor = true;
+            this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
             // 
             // ControlPanel
             // 
@@ -203,7 +203,7 @@ namespace S3PIDemoFE
         private System.Windows.Forms.CheckBox ckbUseNames;
         private System.Windows.Forms.Button btnCommit;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.Button btnDataGrid;
+        private System.Windows.Forms.Button btnEdit;
     }
 }
 
