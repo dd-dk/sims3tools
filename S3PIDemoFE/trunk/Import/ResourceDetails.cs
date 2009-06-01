@@ -40,7 +40,7 @@ namespace S3PIDemoFE
             lbFilename.Visible = tbFilename.Visible = requestFilename;
         }
 
-        public string Filename { get { return tbFilename.Text; } }
+        public string Filename { get { return tbFilename.Text; } set { this.tbFilename.Text = value; } }
         public TGIN TGIN { get { return this.tbFilename.Text; } }
         public uint ResourceType
         {
@@ -94,8 +94,6 @@ namespace S3PIDemoFE
             }
 
             this.tbFilename.Text = openFileDialog1.FileName;
-
-            FillPanel();
         }
 
         private void tbTGI_TextChanged(object sender, EventArgs e)
@@ -127,10 +125,12 @@ namespace S3PIDemoFE
         {
             string[] fileDrop = e.Data.GetData("FileDrop") as String[];
             if (fileDrop != null && fileDrop.Length > 0)
-            {
                 this.tbFilename.Text = fileDrop[0];
-                FillPanel();
-            }
+        }
+
+        private void tbFilename_TextChanged(object sender, EventArgs e)
+        {
+            FillPanel();
         }
     }
 }

@@ -189,6 +189,7 @@
             this.tbFilename.Size = new System.Drawing.Size(326, 13);
             this.tbFilename.TabIndex = 11;
             this.tbFilename.DoubleClick += new System.EventHandler(this.tbFilename_DoubleClick);
+            this.tbFilename.TextChanged += new System.EventHandler(this.tbFilename_TextChanged);
             this.tbFilename.DragDrop += new System.Windows.Forms.DragEventHandler(this.tbFilename_DragDrop);
             this.tbFilename.DragOver += new System.Windows.Forms.DragEventHandler(this.tbFilename_DragOver);
             // 
@@ -272,7 +273,6 @@
             this.Controls.Add(this.btnOK);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Name = "ResourceDetails";
-            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Resource Details";
             this.Load += new System.EventHandler(this.ImportResource_Load);
