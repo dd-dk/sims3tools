@@ -144,8 +144,6 @@ namespace S3PIDemoFE
         #region Menu Bar
         private void menuBarWidget1_MBDropDownOpening(object sender, MenuBarWidget.MBDropDownOpeningEventArgs mn)
         {
-            //this.Enabled = false;
-            //Application.DoEvents();
             switch (mn.mn)
             {
                 case MenuBarWidget.MD.MBF: break;
@@ -154,27 +152,29 @@ namespace S3PIDemoFE
                 case MenuBarWidget.MD.MBH: break;
                 default: break;
             }
-            //this.Enabled = true;
         }
 
         #region File menu
         private void menuBarWidget1_MBFile_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
         {
-            this.Enabled = false;
-            Application.DoEvents();
-            switch (mn.mn)
+            try
             {
-                case MenuBarWidget.MB.MBF_new: fileNew(); break;
-                case MenuBarWidget.MB.MBF_open: fileOpen(); break;
-                case MenuBarWidget.MB.MBF_save: fileSave(); break;
-                case MenuBarWidget.MB.MBF_saveAs: fileSaveAs(); break;
-                case MenuBarWidget.MB.MBF_saveCopyAs: fileSaveCopyAs(); break;
-                case MenuBarWidget.MB.MBF_close: fileClose(); break;
-                case MenuBarWidget.MB.MBF_import: fileImport(); break;
-                case MenuBarWidget.MB.MBF_export: fileExport(); break;
-                case MenuBarWidget.MB.MBF_exit: fileExit(); break;
+                this.Enabled = false;
+                Application.DoEvents();
+                switch (mn.mn)
+                {
+                    case MenuBarWidget.MB.MBF_new: fileNew(); break;
+                    case MenuBarWidget.MB.MBF_open: fileOpen(); break;
+                    case MenuBarWidget.MB.MBF_save: fileSave(); break;
+                    case MenuBarWidget.MB.MBF_saveAs: fileSaveAs(); break;
+                    case MenuBarWidget.MB.MBF_saveCopyAs: fileSaveCopyAs(); break;
+                    case MenuBarWidget.MB.MBF_close: fileClose(); break;
+                    case MenuBarWidget.MB.MBF_import: fileImport(); break;
+                    case MenuBarWidget.MB.MBF_export: fileExport(); break;
+                    case MenuBarWidget.MB.MBF_exit: fileExit(); break;
+                }
             }
-            this.Enabled = true;
+            finally { this.Enabled = true; }
         }
 
         private void fileNew()
@@ -266,24 +266,23 @@ namespace S3PIDemoFE
             tgin.ResGroup = ir.ResourceGroup;
             tgin.ResInstance = ir.Instance;
             tgin.ResName = ir.ResourceName;
-            importFile(ir.Filename, tgin, ir.UseName, ir.AllowRename);
+            importFile(ir.Filename, tgin, ir.UseName, ir.AllowRename, ir.Compress);
         }
 
-        void importFile(string filename, TGIN tgin, bool useName, bool rename)
+        void importFile(string filename, TGIN tgin, bool useName, bool rename, bool compress)
         {
-            MemoryStream ms = new MemoryStream();
-            BinaryReader r = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read));
-            BinaryWriter w = new BinaryWriter(ms);
-            w.Write(r.ReadBytes((int)r.BaseStream.Length));
-            w.Flush();
-
-            IResourceIndexEntry rie = CurrentPackage.AddResource(tgin.ResType, tgin.ResGroup, tgin.ResInstance, ms, false);
-
-            browserWidget1.Add(rie);
-            IsPackageDirty = true;
-
             if (useName && tgin.ResName != null && tgin.ResName.Length > 0)
                 UpdateNameMap(tgin.ResInstance, tgin.ResName, true, rename);
+
+            MemoryStream ms = new MemoryStream();
+            BinaryWriter w = new BinaryWriter(ms);
+            BinaryReader r = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read));
+            w.Write(r.ReadBytes((int)r.BaseStream.Length));
+            r.Close();
+            w.Flush();
+
+            IResourceIndexEntry rie = NewResource(tgin.ResType, tgin.ResGroup, tgin.ResInstance, ms, false, compress);
+            browserWidget1.Add(rie);
         }
 
         private void UpdateNameMap(ulong instance, string resourceName, bool create, bool replace)
@@ -306,6 +305,18 @@ namespace S3PIDemoFE
             else
                 nmap.Add(instance, resourceName);
             CurrentPackage.ReplaceResource(rie, (IResource)nmap);
+            IsPackageDirty = true;
+        }
+
+        private IResourceIndexEntry NewResource(uint type, uint group, ulong instance, MemoryStream ms, bool rejectDups, bool compress)
+        {
+            IResourceIndexEntry rie = CurrentPackage.AddResource(type, group, instance, ms, rejectDups);
+            rie.Compressed = (ushort)(compress ? 0xffff : 0);
+            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, true);
+            package.ReplaceResource(rie, res); // Commit new resource to package
+            IsPackageDirty = true;
+
+            return rie;
         }
 
         private void fileExport()
@@ -378,15 +389,18 @@ namespace S3PIDemoFE
 
         private void menuBarWidget1_MBEdit_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
         {
-            this.Enabled = false;
-            Application.DoEvents();
-            switch (mn.mn)
+            try
             {
-                case MenuBarWidget.MB.MBE_cut: editCut(); break;
-                case MenuBarWidget.MB.MBE_copy: editCopy(); break;
-                case MenuBarWidget.MB.MBE_paste: editPaste(); break;
+                this.Enabled = false;
+                Application.DoEvents();
+                switch (mn.mn)
+                {
+                    case MenuBarWidget.MB.MBE_cut: editCut(); break;
+                    case MenuBarWidget.MB.MBE_copy: editCopy(); break;
+                    case MenuBarWidget.MB.MBE_paste: editPaste(); break;
+                }
             }
-            this.Enabled = true;
+            finally { this.Enabled = true; }
         }
 
         private void editCut()
@@ -416,6 +430,10 @@ namespace S3PIDemoFE
                 ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) }) != null);
                 DialogResult dr = ir.ShowDialog();
                 if (dr != DialogResult.OK) return;
+
+                if (ir.UseName && ir.ResourceName != null && ir.ResourceName.Length > 0)
+                    UpdateNameMap(ir.Instance, ir.ResourceName, true, ir.AllowRename);
+
                 type = ir.ResourceType;
                 group = ir.ResourceGroup;
                 instance = ir.Instance;
@@ -427,32 +445,33 @@ namespace S3PIDemoFE
                 group = browserWidget1.SelectedResource.ResourceGroup;
                 instance = browserWidget1.SelectedResource.Instance;
                 compress = browserWidget1.SelectedResource.Compressed != 0;
+
                 package.DeleteResource(browserWidget1.SelectedResource);
             }
 
             MemoryStream ms = null;
             if (Clipboard.ContainsData(DataFormats.Serializable)) ms = Clipboard.GetData(DataFormats.Serializable) as MemoryStream;
 
-            IResourceIndexEntry rie = CurrentPackage.AddResource(type, group, instance, ms, false);
-            rie.Compressed = (ushort)(compress ? 0xffff : 0);
-
+            IResourceIndexEntry rie = NewResource(type, group, instance, ms, false, compress);
             browserWidget1.Add(rie);
-            IsPackageDirty = true;
         }
         #endregion
 
         #region Resource menu
         private void menuBarWidget1_MBResource_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
         {
-            this.Enabled = false;
-            Application.DoEvents();
-            switch (mn.mn)
+            try
             {
-                case MenuBarWidget.MB.MBR_add: resourceAdd(); break;
-                case MenuBarWidget.MB.MBR_details: resourceDetails(); break;
-                case MenuBarWidget.MB.MBR_compressed: resourceCompressed(); break;
+                this.Enabled = false;
+                Application.DoEvents();
+                switch (mn.mn)
+                {
+                    case MenuBarWidget.MB.MBR_add: resourceAdd(); break;
+                    case MenuBarWidget.MB.MBR_details: resourceDetails(); break;
+                    case MenuBarWidget.MB.MBR_compressed: resourceCompressed(); break;
+                }
             }
-            this.Enabled = true;
+            finally { this.Enabled = true; }
         }
 
         private void resourceDropDownOpening()
@@ -467,15 +486,11 @@ namespace S3PIDemoFE
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            IResourceIndexEntry rie = CurrentPackage.AddResource(ir.ResourceType, ir.ResourceGroup, ir.Instance, null, false);
-            rie.Compressed = (ushort)(ir.Compress ? 0xffff : 0);
-            IsPackageDirty = true;
-
-            browserWidget1.Add(rie);
-            package.ReplaceResource(browserWidget1.SelectedResource, resource); // Commit new resource to package
-
             if (ir.UseName && ir.ResourceName != null && ir.ResourceName.Length > 0)
                 UpdateNameMap(ir.Instance, ir.ResourceName, true, ir.AllowRename);
+
+            IResourceIndexEntry rie = NewResource(ir.ResourceType, ir.ResourceGroup, ir.Instance, null, false, ir.Compress);
+            browserWidget1.Add(rie);
         }
 
         private void resourceDetails()
@@ -492,14 +507,14 @@ namespace S3PIDemoFE
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;
 
+            if (ir.UseName && ir.ResourceName != null && ir.ResourceName.Length > 0)
+                UpdateNameMap(ir.Instance, ir.ResourceName, true, ir.AllowRename);
+
             browserWidget1.SelectedResource.ResourceType = ir.ResourceType;
             browserWidget1.SelectedResource.ResourceGroup = ir.ResourceGroup;
             browserWidget1.SelectedResource.Instance = ir.Instance;
             browserWidget1.SelectedResource.Compressed = (ushort)(ir.Compress ? 0xffff : 0);
             IsPackageDirty = true;
-
-            if (ir.UseName && ir.ResourceName != null && ir.ResourceName.Length > 0)
-                UpdateNameMap(ir.Instance, ir.ResourceName, true, ir.AllowRename);
         }
 
         private void resourceCompressed()
@@ -512,15 +527,18 @@ namespace S3PIDemoFE
         #region Help menu
         private void menuBarWidget1_MBHelp_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
         {
-            this.Enabled = false;
-            Application.DoEvents();
-            switch (mn.mn)
+            try
             {
-                case MenuBarWidget.MB.MBH_about: helpAbout(); break;
-                case MenuBarWidget.MB.MBH_warranty: helpWarranty(); break;
-                case MenuBarWidget.MB.MBH_licence: helpLicence(); break;
+                this.Enabled = false;
+                Application.DoEvents();
+                switch (mn.mn)
+                {
+                    case MenuBarWidget.MB.MBH_about: helpAbout(); break;
+                    case MenuBarWidget.MB.MBH_warranty: helpWarranty(); break;
+                    case MenuBarWidget.MB.MBH_licence: helpLicence(); break;
+                }
             }
-            this.Enabled = true;
+            finally { this.Enabled = true; }
         }
 
         private void helpAbout()
@@ -634,6 +652,7 @@ namespace S3PIDemoFE
                 controlPanel1.DataGridEnabled = lf.Count > 0;
             }
             else controlPanel1.DataGridEnabled = false;
+            controlPanel1.DataGridEnabled = true;
 
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_export, resource != null || browserWidget1.SelectedResources.Count > 0);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBE_cut, resource != null);
@@ -670,7 +689,7 @@ namespace S3PIDemoFE
             if (dr != DialogResult.OK) return;
 
             foreach (string filename in ib.Batch)
-                importFile(filename, filename, ib.UseNames, ib.Rename);
+                importFile(filename, filename, ib.UseNames, ib.Rename, false);
         }
 
         private void browserWidget1_ItemActivate(object sender, EventArgs e)
@@ -682,25 +701,34 @@ namespace S3PIDemoFE
         #region Resource Filter Widget
         private void resourceFilterWidget1_FilterChanged(object sender, EventArgs e)
         {
-            this.Enabled = false;
-            browserWidget1.Filter = resourceFilterWidget1.FilterEnabled ? resourceFilterWidget1.Filter : null;
-            this.Enabled = true;
+            try
+            {
+                this.Enabled = false;
+                browserWidget1.Filter = resourceFilterWidget1.FilterEnabled ? resourceFilterWidget1.Filter : null;
+            }
+            finally { this.Enabled = true; }
         }
         #endregion
 
         #region Control Panel Widget
         private void controlPanel1_SortChanged(object sender, EventArgs e)
         {
-            this.Enabled = false;
-            browserWidget1.Sortable = controlPanel1.Sort;
-            this.Enabled = true;
+            try
+            {
+                this.Enabled = false;
+                browserWidget1.Sortable = controlPanel1.Sort;
+            }
+            finally { this.Enabled = true; }
         }
 
         private void controlPanel1_HexClick(object sender, EventArgs e)
         {
-            this.Enabled = false;
-            hexWidget1.Stream = resource == null ? null : resource.Stream;
-            this.Enabled = true;
+            try
+            {
+                this.Enabled = false;
+                hexWidget1.Stream = resource == null ? null : resource.Stream;
+            }
+            finally { this.Enabled = true; }
         }
 
         private void controlPanel1_HexOnlyChanged(object sender, EventArgs e)
@@ -716,55 +744,77 @@ namespace S3PIDemoFE
 
         private void controlPanel1_UnwrappedClick(object sender, EventArgs e)
         {
-            this.Enabled = false;
-
-            string title = this.Text;
-            if (resourceName != null && resourceName.Length > 0) title += " - " + resourceName;
-
-            TypedValue v = resource["Value"];
-            if (typeof(String).IsAssignableFrom(v.Type))
+            try
             {
-                Form f = new Form();
-                RichTextBox rtf = new RichTextBox();
-                rtf.Text = (string)v.Value;
-                rtf.Font = new Font("DejaVu Sans Mono", 8);
-                rtf.Size = new Size(this.Width - (this.Width / 5), this.Height - (this.Height / 5));
-                rtf.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
-                rtf.ReadOnly = true;
-                f.Size = new Size(rtf.Width + 12, rtf.Height + 36);
-                f.Text = title;
-                f.StartPosition = FormStartPosition.CenterParent;
-                f.Controls.Add(rtf);
-                f.ShowDialog();
-            }
-            else if (typeof(Image).IsAssignableFrom(v.Type))
-            {
-                Form f = new Form();
-                PictureBox pb = new PictureBox();
-                pb.Image = (Image)v.Value;
-                pb.Size = ((Image)v.Value).Size;
-                f.AutoSize = true;
-                f.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-                f.SizeGripStyle = SizeGripStyle.Hide;
-                f.Text = title;
-                f.StartPosition = FormStartPosition.CenterParent;
-                f.Controls.Add(pb);
-                f.ShowDialog();
-            }
+                this.Enabled = false;
 
-            this.Enabled = true;
+                string title = this.Text;
+                if (resourceName != null && resourceName.Length > 0) title += " - " + resourceName;
+
+                TypedValue v = resource["Value"];
+                if (typeof(String).IsAssignableFrom(v.Type))
+                {
+                    Form f = new Form();
+                    RichTextBox rtf = new RichTextBox();
+                    rtf.Text = (string)v.Value;
+                    rtf.Font = new Font("DejaVu Sans Mono", 8);
+                    rtf.Size = new Size(this.Width - (this.Width / 5), this.Height - (this.Height / 5));
+                    rtf.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+                    rtf.ReadOnly = true;
+                    f.Size = new Size(rtf.Width + 12, rtf.Height + 36);
+                    f.Text = title;
+                    f.StartPosition = FormStartPosition.CenterParent;
+                    f.Controls.Add(rtf);
+                    f.ShowDialog();
+                }
+                else if (typeof(Image).IsAssignableFrom(v.Type))
+                {
+                    Form f = new Form();
+                    PictureBox pb = new PictureBox();
+                    pb.Image = (Image)v.Value;
+                    pb.Size = ((Image)v.Value).Size;
+                    f.AutoSize = true;
+                    f.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+                    f.SizeGripStyle = SizeGripStyle.Hide;
+                    f.Text = title;
+                    f.StartPosition = FormStartPosition.CenterParent;
+                    f.Controls.Add(pb);
+                    f.ShowDialog();
+                }
+
+            }
+            finally { this.Enabled = true; }
         }
 
         private void controlPanel1_DataGridClick(object sender, EventArgs e)
         {
-            (new DataSheet(resource)).ShowDialog();
+            try
+            {
+                s3pi.DemoPlugins.DemoPlugins plug = new s3pi.DemoPlugins.DemoPlugins(CurrentPackage, browserWidget1.SelectedResource);
+                if (plug.IsValid)
+                {
+                    editCopy();
+
+                    bool res = plug.Execute(resource);
+
+                    this.Focus();
+
+                    if (res && Clipboard.ContainsData(DataFormats.Serializable))
+                        editPaste();
+                }
+                else (new DataSheet(resource)).ShowDialog();
+            }
+            finally { this.Enabled = true; }
         }
 
         private void controlPanel1_UseNamesChanged(object sender, EventArgs e)
         {
-            this.Enabled = false;
-            browserWidget1.DisplayResourceNames = controlPanel1.UseNames;
-            this.Enabled = true;
+            try
+            {
+                this.Enabled = false;
+                browserWidget1.DisplayResourceNames = controlPanel1.UseNames;
+            }
+            finally { this.Enabled = true; }
         }
 
         private void controlPanel1_CommitClick(object sender, EventArgs e)
