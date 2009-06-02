@@ -160,8 +160,9 @@
             // controlPanel1
             // 
             this.controlPanel1.CommitEnabled = false;
-            this.controlPanel1.EditEnabled = false;
             this.controlPanel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.controlPanel1.EditorEnabled = false;
+            this.controlPanel1.GridEnabled = false;
             this.controlPanel1.HexEnabled = false;
             this.controlPanel1.Location = new System.Drawing.Point(0, 74);
             this.controlPanel1.Margin = new System.Windows.Forms.Padding(0);
@@ -170,21 +171,24 @@
             this.controlPanel1.Size = new System.Drawing.Size(876, 29);
             this.controlPanel1.Sort = false;
             this.controlPanel1.TabIndex = 1;
-            this.controlPanel1.UnwrappedEnabled = false;
-            this.controlPanel1.EditClick += new System.EventHandler(this.controlPanel1_EditClick);
+            this.controlPanel1.ValueEnabled = false;
+            this.controlPanel1.ViewerEnabled = false;
             this.controlPanel1.CommitClick += new System.EventHandler(this.controlPanel1_CommitClick);
+            this.controlPanel1.ViewerClick += new System.EventHandler(this.controlPanel1_ViewerClick);
             this.controlPanel1.HexClick += new System.EventHandler(this.controlPanel1_HexClick);
             this.controlPanel1.UseNamesChanged += new System.EventHandler(this.controlPanel1_UseNamesChanged);
+            this.controlPanel1.GridClick += new System.EventHandler(this.controlPanel1_GridClick);
             this.controlPanel1.SortChanged += new System.EventHandler(this.controlPanel1_SortChanged);
-            this.controlPanel1.UnwrappedClick += new System.EventHandler(this.controlPanel1_ViewClick);
+            this.controlPanel1.ValueClick += new System.EventHandler(this.controlPanel1_ValueClick);
             this.controlPanel1.HexOnlyChanged += new System.EventHandler(this.controlPanel1_HexOnlyChanged);
+            this.controlPanel1.EditorClick += new System.EventHandler(this.controlPanel1_EditorClick);
             // 
             // resourceFilterWidget1
             // 
             this.resourceFilterWidget1.BrowserWidget = this.browserWidget1;
             this.resourceFilterWidget1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.resourceFilterWidget1.Fields = null;
-            this.resourceFilterWidget1.Filter = null;
+            this.resourceFilterWidget1.Filter = ((System.Collections.Generic.IList<System.Collections.Generic.KeyValuePair<string, s3pi.Interfaces.TypedValue>>)(resources.GetObject("resourceFilterWidget1.Filter")));
             this.resourceFilterWidget1.Location = new System.Drawing.Point(0, 0);
             this.resourceFilterWidget1.Name = "resourceFilterWidget1";
             this.resourceFilterWidget1.Size = new System.Drawing.Size(876, 103);

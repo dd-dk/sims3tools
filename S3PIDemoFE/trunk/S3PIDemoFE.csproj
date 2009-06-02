@@ -76,11 +76,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataSheet.cs">
+    <Compile Include="GridForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DataSheet.Designer.cs">
-      <DependentUpon>DataSheet.cs</DependentUpon>
+    <Compile Include="GridForm.Designer.cs">
+      <DependentUpon>GridForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyVersion.cs" />
     <Compile Include="BrowserWidget\BrowserWidget.cs">
@@ -156,8 +156,8 @@
     <EmbeddedResource Include="ControlPanel\ControlPanel.resx">
       <DependentUpon>ControlPanel.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DataSheet.resx">
-      <DependentUpon>DataSheet.cs</DependentUpon>
+    <EmbeddedResource Include="GridForm.resx">
+      <DependentUpon>GridForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Filter\FilterField.resx">
       <DependentUpon>FilterField.cs</DependentUpon>

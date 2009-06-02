@@ -28,7 +28,7 @@ using s3pi.Interfaces;
 
 namespace S3PIDemoFE
 {
-    public partial class DataSheet : Form
+    public partial class GridForm : Form
     {
         interface exporterResult { } // just to differentiate delegate signatures - return null
         interface importerResult { } // just to differentiate delegate signatures - return null
@@ -36,7 +36,7 @@ namespace S3PIDemoFE
         delegate importerResult Importer(IResource resource, string field);
         delegate Control ControlCreator(IResource resource, string field);
 
-        struct DataSheetRow
+        struct Row
         {
             public IResource resource;
             public Label fieldName;
@@ -46,10 +46,10 @@ namespace S3PIDemoFE
             public Exporter exporter;
             public Importer importer;
 
-            public DataSheetRow(IResource resource, string fieldName, Control value, Exporter exporter, Importer importer)
+            public Row(IResource resource, string fieldName, Control value, Exporter exporter, Importer importer)
                 : this(resource, fieldName, value, exporter, importer, "Export...", "Import...") { }
 
-            public DataSheetRow(IResource resource, string fieldName, Control value, Exporter exporter, Importer importer, string btnExporterText, string btnImporterText)
+            public Row(IResource resource, string fieldName, Control value, Exporter exporter, Importer importer, string btnExporterText, string btnImporterText)
                 : this(resource, fieldName, value)
             {
                 if (exporter != null)
@@ -71,7 +71,7 @@ namespace S3PIDemoFE
                 }
             }
 
-            public DataSheetRow(IResource resource, string fieldNameText, Control value)
+            public Row(IResource resource, string fieldNameText, Control value)
             {
                 this.resource = resource;
 
@@ -96,13 +96,13 @@ namespace S3PIDemoFE
         Dictionary<Type, Importer> typeImporterMap = new Dictionary<Type, Importer>();
         Dictionary<Type, ControlCreator> typeControlCreatorMap = new Dictionary<Type, ControlCreator>();
 
-        public DataSheet()
+        public GridForm()
         {
             InitializeComponent();
             typeExporterMap.Add(typeof(TextReader), exportTextReader);
             typeImporterMap.Add(typeof(TextReader), importTextReader);
-            typeExporterMap.Add(typeof(Stream), exportStream);
-            typeImporterMap.Add(typeof(Stream), importStream);
+            //typeExporterMap.Add(typeof(Stream), exportStream);
+            //typeImporterMap.Add(typeof(Stream), importStream);
             typeControlCreatorMap.Add(typeof(String), textboxCreator);
             typeControlCreatorMap.Add(typeof(bool), labelCreator);
             typeControlCreatorMap.Add(typeof(int), labelCreator);
@@ -111,7 +111,7 @@ namespace S3PIDemoFE
             typeControlCreatorMap.Add(typeof(byte), labelCreator);
         }
 
-        public DataSheet(IResource resource) : this()
+        public GridForm(IResource resource) : this()
         {
             tableLayoutPanel1.RowCount = 0;
             tableLayoutPanel1.Controls.Clear();
@@ -121,7 +121,7 @@ namespace S3PIDemoFE
             tableLayoutPanel1.Controls.Add(label2, 1, 0);
             tableLayoutPanel1.RowStyles.Insert(0, new RowStyle(SizeType.AutoSize));
 
-            List<DataSheetRow> ldsr = new List<DataSheetRow>();
+            List<Row> ldsr = new List<Row>();
             Dictionary<string, Type> dst = AResource.GetContentFieldTypes(0, resource.GetType());
             
             foreach (string f in resource.ContentFields)
@@ -135,11 +135,11 @@ namespace S3PIDemoFE
                 
                 if (cntl == null && exp == null && imp == null) continue;
 
-                DataSheetRow dsr = new DataSheetRow(resource, f, cntl == null ? null : cntl(resource, f), exp, imp);
+                Row dsr = new Row(resource, f, cntl == null ? null : cntl(resource, f), exp, imp);
                 ldsr.Add(dsr);
             }
 
-            foreach (DataSheetRow dsr in ldsr)
+            foreach (Row dsr in ldsr)
             {
                 int row = tableLayoutPanel1.RowCount - 1;
                 tableLayoutPanel1.RowCount++;

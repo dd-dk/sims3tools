@@ -1,6 +1,6 @@
 ﻿namespace S3PIDemoFE
 {
-    partial class DataSheet
+    partial class GridForm
     {
         /// <summary>
         /// Required designer variable.

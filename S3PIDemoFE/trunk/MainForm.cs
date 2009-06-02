@@ -618,7 +618,7 @@ namespace S3PIDemoFE
             if (resourceIsDirty)
             {
                 DialogResult dr = MessageBox.Show(
-                    String.Format("Save changes to {0}?",
+                    String.Format("Commit changes to {0}?",
                         e.name.Length > 0
                         ? e.name
                         : String.Format("TGI {0:X8}-{1:X8}-{2:X16}", browserWidget1.SelectedResource.ResourceType, browserWidget1.SelectedResource.ResourceGroup, browserWidget1.SelectedResource.Instance)
@@ -638,38 +638,42 @@ namespace S3PIDemoFE
             resourceName = e.name;
             resource = browserWidget1.SelectedResource == null
                 ? null
-                : s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, browserWidget1.SelectedResource, controlPanel1.UnwrappedEnabled);
+                : s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, browserWidget1.SelectedResource, controlPanel1.ValueEnabled);
 
             if (resource != null) resource.ResourceChanged += new EventHandler(resource_ResourceChanged);
 
             resourceIsDirty = controlPanel1.CommitEnabled = false;
 
             controlPanel1.HexEnabled = (resource != null);
-            if (resource != null)
+            if (resource != null && !controlPanel1.HexOnly)
             {
-                plug = new s3pi.DemoPlugins.DemoPlugins(browserWidget1.SelectedResource, resource);
-                if (plug.IsValid)
-                    controlPanel1.EditEnabled = true;
-                else
+                if (resource.ContentFields.Contains("Value"))
                 {
-                    List<string> lf = resource.ContentFields;
-                    foreach (string f in (new string[] { "Stream", "AsBytes", "Value" }))
-                        if (lf.Contains(f)) lf.Remove(f);
-                    controlPanel1.EditEnabled = lf.Count > 0;
+                    Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
+                    controlPanel1.ValueEnabled = typeof(string).IsAssignableFrom(t) || typeof(Image).IsAssignableFrom(t);
                 }
+
+                List<string> lf = resource.ContentFields;
+                foreach (string f in (new string[] { "Stream", "AsBytes", "Value" }))
+                    if (lf.Contains(f)) lf.Remove(f);
+                controlPanel1.GridEnabled = lf.Count > 0;
+
+                plug = new s3pi.DemoPlugins.DemoPlugins(browserWidget1.SelectedResource, resource);
+                controlPanel1.ViewerEnabled = plug.HasViewer;
+                controlPanel1.EditorEnabled = plug.HasEditor;
             }
             else
             {
                 plug = null;
-                controlPanel1.EditEnabled = false;
+                controlPanel1.ValueEnabled = controlPanel1.GridEnabled = controlPanel1.ViewerEnabled = controlPanel1.EditorEnabled = false;
             }
 
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_export, resource != null || browserWidget1.SelectedResources.Count > 0);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBE_cut, resource != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBE_copy, resource != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_compressed, resource != null);
+
             resourceFilterWidget1.IndexEntry = browserWidget1.SelectedResource;
-            controlPanel1.UnwrappedEnabled = !controlPanel1.HexOnly && resource != null && resource.ContentFields.Contains("Value");
             hexWidget1.Stream = (controlPanel1.HexEnabled && controlPanel1.AutoHex && resource != null) ? resource.Stream : null;
         }
 
@@ -752,11 +756,12 @@ namespace S3PIDemoFE
             }
         }
 
-        private void controlPanel1_ViewClick(object sender, EventArgs e)
+        private void controlPanel1_ValueClick(object sender, EventArgs e)
         {
             try
             {
                 this.Enabled = false;
+                Application.DoEvents();
 
                 string title = this.Text;
                 if (resourceName != null && resourceName.Length > 0) title += " - " + resourceName;
@@ -796,38 +801,19 @@ namespace S3PIDemoFE
             finally { this.Enabled = true; }
         }
 
-        private void controlPanel1_EditClick(object sender, EventArgs e)
+        private void controlPanel1_GridClick(object sender, EventArgs e)
         {
             try
             {
                 this.Enabled = false;
-                if (plug != null && plug.IsValid)
-                {
-                    editCopy();
-
-                    bool res = plug.Execute(resource);
-
-                    this.Focus();
-                    Application.DoEvents();
-                    this.BringToFront();
-                    Application.DoEvents();
-
-                    if (res && Clipboard.ContainsData(DataFormats.Serializable))
-                        editPaste();
-                }
-                else (new DataSheet(resource)).ShowDialog();
+                (new GridForm(resource)).ShowDialog();
             }
             finally { this.Enabled = true; }
         }
 
         private void controlPanel1_UseNamesChanged(object sender, EventArgs e)
         {
-            try
-            {
-                this.Enabled = false;
-                browserWidget1.DisplayResourceNames = controlPanel1.UseNames;
-            }
-            finally { this.Enabled = true; }
+            browserWidget1.DisplayResourceNames = controlPanel1.UseNames;
         }
 
         private void controlPanel1_CommitClick(object sender, EventArgs e)
@@ -837,6 +823,53 @@ namespace S3PIDemoFE
             package.ReplaceResource(browserWidget1.SelectedResource, resource);
             resourceIsDirty = controlPanel1.CommitEnabled = false;
             IsPackageDirty = true;
+        }
+
+        private void controlPanel1_ViewerClick(object sender, EventArgs e)
+        {
+            try
+            {
+                this.Enabled = false;
+                Application.DoEvents();
+
+                editCopy();
+
+                plug.View(resource);
+
+                this.Focus();
+                Application.DoEvents();
+                this.BringToFront();
+                Application.DoEvents();
+            }
+            finally { this.Enabled = true; }
+        }
+
+        private void controlPanel1_EditorClick(object sender, EventArgs e)
+        {
+            try
+            {
+                this.Enabled = false;
+                Application.DoEvents();
+
+                editCopy();
+
+                bool res = plug.Edit(resource);
+
+                this.Focus();
+                Application.DoEvents();
+                this.BringToFront();
+                Application.DoEvents();
+
+                if (res && Clipboard.ContainsData(DataFormats.Serializable))
+                {
+                    DialogResult dr = MessageBox.Show("Resource has been updated.  Commit changes?", "Commit changes?",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+
+                    if (dr == DialogResult.Yes)
+                        editPaste();
+                }
+            }
+            finally { this.Enabled = true; }
         }
         #endregion
     }
