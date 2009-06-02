@@ -34,7 +34,7 @@ namespace S3PIDemoFE
         #region Sort checkbox
         [Browsable(true)]
         [Category("Appearance")]
-        [DefaultValue(true)]
+        [DefaultValue(false)]
         [Description("The state of the Sort checkbox")]
         public bool Sort { get { return ckbSortable.Checked; } set { ckbSortable.Checked = value; } }
 
@@ -49,12 +49,12 @@ namespace S3PIDemoFE
         #region Hex button
         [Browsable(true)]
         [Category("Behavior")]
+        [DefaultValue(false)]
         [Description("The state of the Hex button")]
         public bool HexEnabled { get { return btnHex.Enabled; } set { btnHex.Enabled = value; } }
 
         [Browsable(true)]
         [Category("Action")]
-        [DefaultValue(false)]
         [Description("Occurs when the Hex button is clicked")]
         public event EventHandler HexClick;
         protected virtual void OnHexClick(object sender, EventArgs e) { if (HexClick != null) HexClick(sender, e); }
@@ -91,34 +91,34 @@ namespace S3PIDemoFE
         private void ckbNoUnWrap_CheckedChanged(object sender, EventArgs e) { OnHexOnlyChanged(sender, e); }
         #endregion
 
-        #region Unwrapped button
+        #region Value button
         [Browsable(true)]
         [Category("Behavior")]
-        [Description("The state of the Unwrapped button")]
-        public bool UnwrappedEnabled { get { return btnView.Enabled; } set { btnView.Enabled = value; } }
+        [DefaultValue(false)]
+        [Description("The state of the Value button")]
+        public bool ValueEnabled { get { return btnValue.Enabled; } set { btnValue.Enabled = value; } }
 
         [Browsable(true)]
         [Category("Action")]
-        [DefaultValue(false)]
-        [Description("Occurs when the Unwrapped button is clicked")]
-        public event EventHandler UnwrappedClick;
-        protected virtual void OnUnwrappedClick(object sender, EventArgs e) { if (UnwrappedClick != null) UnwrappedClick(sender, e); }
-        private void btnView_Click(object sender, EventArgs e) { OnUnwrappedClick(sender, e); }
+        [Description("Occurs when the Value button is clicked")]
+        public event EventHandler ValueClick;
+        protected virtual void OnValueClick(object sender, EventArgs e) { if (ValueClick != null) ValueClick(sender, e); }
+        private void btnValue_Click(object sender, EventArgs e) { OnValueClick(sender, e); }
         #endregion
 
-        #region Edit button
+        #region Grid button
         [Browsable(true)]
         [Category("Behavior")]
-        [Description("The state of the Edit button")]
-        public bool EditEnabled { get { return btnEdit.Enabled; } set { btnEdit.Enabled = value; } }
+        [DefaultValue(false)]
+        [Description("The state of the Grid button")]
+        public bool GridEnabled { get { return btnGrid.Enabled; } set { btnGrid.Enabled = value; } }
 
         [Browsable(true)]
         [Category("Action")]
-        [DefaultValue(false)]
-        [Description("Occurs when the Edit button is clicked")]
-        public event EventHandler EditClick;
-        protected virtual void OnEditClick(object sender, EventArgs e) { if (EditClick != null) EditClick(sender, e); }
-        private void btnEdit_Click(object sender, EventArgs e) { OnEditClick(sender, e); }
+        [Description("Occurs when the Grid button is clicked")]
+        public event EventHandler GridClick;
+        protected virtual void OnGridClick(object sender, EventArgs e) { if (GridClick != null) GridClick(sender, e); }
+        private void btnGrid_Click(object sender, EventArgs e) { OnGridClick(sender, e); }
         #endregion
 
         #region UseNames checkbox
@@ -136,15 +136,45 @@ namespace S3PIDemoFE
         private void ckbUseNames_CheckedChanged(object sender, EventArgs e) { OnUseNamesChanged(sender, e); }
         #endregion
 
+        #region Viewer button
+        [Browsable(true)]
+        [Category("Behavior")]
+        [DefaultValue(false)]
+        [Description("The state of the Viewer button")]
+        public bool ViewerEnabled { get { return btnViewer.Enabled; } set { btnViewer.Enabled = value; } }
+
+        [Browsable(true)]
+        [Category("Action")]
+        [Description("Occurs when the Viewer button is clicked")]
+        public event EventHandler ViewerClick;
+        protected virtual void OnViewerClick(object sender, EventArgs e) { if (ViewerClick != null) ViewerClick(sender, e); }
+        private void btnViewer_Click(object sender, EventArgs e) { OnViewerClick(sender, e); }
+        #endregion
+
+        #region Editor button
+        [Browsable(true)]
+        [Category("Behavior")]
+        [DefaultValue(false)]
+        [Description("The state of the Editor button")]
+        public bool EditorEnabled { get { return btnEditor.Enabled; } set { btnEditor.Enabled = value; } }
+
+        [Browsable(true)]
+        [Category("Action")]
+        [Description("Occurs when the Editor button is clicked")]
+        public event EventHandler EditorClick;
+        protected virtual void OnEditorClick(object sender, EventArgs e) { if (EditorClick != null) EditorClick(sender, e); }
+        private void btnEditor_Click(object sender, EventArgs e) { OnEditorClick(sender, e); }
+        #endregion
+
         #region Commit button
         [Browsable(true)]
         [Category("Behavior")]
+        [DefaultValue(false)]
         [Description("The state of the Commit button")]
         public bool CommitEnabled { get { return btnCommit.Enabled; } set { btnCommit.Enabled = value; } }
 
         [Browsable(true)]
         [Category("Action")]
-        [DefaultValue(false)]
         [Description("Occurs when the Commit button is clicked")]
         public event EventHandler CommitClick;
         protected virtual void OnCommitClick(object sender, EventArgs e) { if (CommitClick != null) CommitClick(sender, e); }
