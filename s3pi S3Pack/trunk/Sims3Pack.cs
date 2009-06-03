@@ -56,13 +56,7 @@ namespace S3Pack
 
             long basePos = fs.Position;
 
-            XmlReaderSettings xrs = new XmlReaderSettings();
-            xrs.IgnoreComments = true;
-            xrs.IgnoreProcessingInstructions = true;
-            xrs.IgnoreWhitespace = true;
-            XmlReader xr = XmlReader.Create(ms, xrs);
-            XmlDocument xdoc = new XmlDocument();
-            xdoc.Load(xr);
+            System.Xml.XPath.XPathDocument xdoc = new System.Xml.XPath.XPathDocument(ms);
             System.Xml.XPath.XPathNavigator nav = xdoc.CreateNavigator();
 
             string filename = Path.Combine(target, nav.SelectSingleNode("/Sims3Package/DisplayName").Value + ".xml");
