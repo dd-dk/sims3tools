@@ -58,10 +58,11 @@ namespace S3PIDemoFE
             set { tbInstance.Text = "0x" + value.ToString("X16"); }
         }
         public string ResourceName { get { return tbName.Text; } set { tbName.Text = value; } }
+        public bool Overwrite { get { return ckbOverwrite.Checked; } set { ckbOverwrite.Checked = value; } }
         public bool Compress { get { return ckbCompress.Checked; } set { ckbCompress.Checked = value; } }
 
         public bool UseName { get { return ckbUseName.Checked; } set { ckbRename.Enabled = tbName.Enabled = ckbUseName.Checked = value; } }
-        public bool AllowRename { get { return ckbRename.Checked; } }
+        public bool AllowRename { get { return ckbRename.Checked; } set { ckbRename.Checked = value; } }
 
         private void FillPanel()
         {

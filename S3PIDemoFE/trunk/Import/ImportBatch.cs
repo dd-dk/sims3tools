@@ -38,11 +38,13 @@ namespace S3PIDemoFE
 
         public string[] Batch { get { return (string[])batch.Clone(); } }
 
+        public bool Overwrite { get { return ckbOverwrite.Checked; } }
+
+        public bool Compress { get { return ckbCompress.Checked; } }
+
         public bool UseNames { get { return ckbUseName.Checked; } }
 
         public bool Rename { get { return ckbRename.Checked; } }
-
-        public bool Compress { get { return ckbCompress.Checked; } }
 
         void addDrop(string[] fileDrop)
         {
