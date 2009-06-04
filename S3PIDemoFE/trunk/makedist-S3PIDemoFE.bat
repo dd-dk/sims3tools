@@ -42,7 +42,7 @@ del /f %TargetName%-Version.txt
 popd
 
 7za x -o"%base%-%suffix%" "%out%%base%_%suffix%.7z"
-"%PROGRAMFILES%\nsis\makensis" "/DTARGET=%base%-%suffix%" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%.exe"
+"%PROGRAMFILES%\nsis\makensis" "/DTARGET=%base%-%suffix%" "/DS3PIVERSION=0906-04-1329" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%.exe"
 
 rmdir /s/q %base%-%suffix%
 pause

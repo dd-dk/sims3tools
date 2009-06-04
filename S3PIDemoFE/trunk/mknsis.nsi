@@ -5,6 +5,9 @@
 !ifndef TARGET
   !error "Caller didn't define TARGET"
 !endif
+!ifndef S3PIVERSION
+  !error "Caller didn't define S3PIVERSION"
+!endif  
 !cd ${TARGET}
 
 XPStyle on
@@ -13,6 +16,7 @@ SetCompressor /SOLID LZMA
 Var wasInUse
 Var wantAll
 Var wantSM
+Var s3piDir
 
 
 Name "${PROGRAM_NAME}"
@@ -98,10 +102,11 @@ SectionEnd
 
 
 Function .onGUIInit
+  Call Checks3pi
+  Call Checks3piVersion
   Call GetInstDir
   Call CheckInUse
   Call CheckOldVersion
-  Call Checks3pi
 FunctionEnd
 
 Function GetInstDir
@@ -148,7 +153,7 @@ NotInstalledCU:
   StrCmp $R0 "" NotInstalled
 Installed:
   MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
-    "${PROGRAM_NAME} is already installed. $\n$\nClick [OK] to remove the previous version or [Cancel] to abort this upgrade." \
+    "${PROGRAM_NAME} is already installed.$\n$\nClick [OK] to remove the previous version or [Cancel] to abort this upgrade." \
     IDOK UnInstall
   Quit
 UnInstall:
@@ -158,16 +163,54 @@ NotInstalled:
 FunctionEnd
 
 Function Checks3pi
-  Push $0
-  ReadRegStr $0 HKLM Software\s3pi\s3pi "InstallDir"
-  StrCmp "" $0 NoCustomLM
-  IfFileExists "$0\s3pi.Interfaces.dll" DoneChecks3pi
+  ReadRegStr $s3piDir HKLM Software\s3pi\s3pi "InstallDir"
+  StrCmp "" $s3piDir NoCustomLM
+  IfFileExists "$s3piDir\s3pi.Interfaces.dll" DoneChecks3pi
 NoCustomLM:
-  ReadRegStr $0 HKCU Software\s3pi\s3pi "InstallDir"
-  StrCmp "" $0 DoneChecks3pi
-  IfFileExists "$0\s3pi.Interfaces.dll" DoneChecks3pi
+  ReadRegStr $s3piDir HKCU Software\s3pi\s3pi "InstallDir"
+  StrCmp "" $s3piDir DoneChecks3pi
+  IfFileExists "$s3piDir\s3pi.Interfaces.dll" DoneChecks3pi
   MessageBox MB_OK "This program requires s3pi.  Please install the library first."
   Quit
 DoneChecks3pi:
+FunctionEnd
+
+Function Checks3piVersion
+  Push $R0
+  Push $0
+  Push $1
+  Push $2
+  
+  ClearErrors
+  FileOpen $R0 "$s3piDir\s3pi-Version.txt" r
+  IfErrors Nos3piVersion
+  FileRead $R0 $0
+  FileClose $R0
+  
+  DetailPrint "s3pi Version installed: $0"
+  DetailPrint "s3pi Version required:  ${S3PIVERSION}"
+
+  StrCpy $1 $0 4
+  StrCpy $2 "${S3PIVERSION}" 4
+  IntCmp $1 $2 yymmequal NeedNew3piVersion DoneChecks3piVersion
+yymmequal:
+  StrCpy $1 $0 2 5
+  StrCpy $2 "${S3PIVERSION}" 2 5
+  IntCmp $1 $2 ddequal NeedNew3piVersion DoneChecks3piVersion
+ddequal:
+  StrCpy $1 $0 2 8
+  StrCpy $2 "${S3PIVERSION}" 2 8
+  IntCmp $1 $2 DoneChecks3piVersion NeedNew3piVersion DoneChecks3piVersion
+
+NeedNew3piVersion:
+  MessageBox MB_OK \
+    "This program requires s3pi library version\$\n${S3PIVERSION}$\nor later.  Please install that first."
+  Quit
+Nos3piVersion:
+  MessageBox MB_OK "This program requires s3pi.  Please install the library first."
+  Quit
+DoneChecks3piVersion:
+  Pop $1
   Pop $0
+  Pop $R0
 FunctionEnd
