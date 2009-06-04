@@ -32,6 +32,9 @@ namespace S3PIDemoFE
         public ImportBatch()
         {
             InitializeComponent();
+#if !DEBUG
+            this.ckbCompress.Enabled = false;
+#endif
         }
 
         public ImportBatch(string[] fileDrop) : this() { addDrop(fileDrop); }
