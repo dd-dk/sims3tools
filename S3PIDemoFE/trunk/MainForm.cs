@@ -139,7 +139,13 @@ namespace S3PIDemoFE
 
         IResource resource = null;
         bool resourceIsDirty = false;
-        void resource_ResourceChanged(object sender, EventArgs e) { controlPanel1.CommitEnabled = resourceIsDirty = true; }
+        void resource_ResourceChanged(object sender, EventArgs e)
+        {
+#if !DEBUG
+            browserWidget1.SelectedResource.Compressed = 0;
+#endif
+            controlPanel1.CommitEnabled = resourceIsDirty = true;
+        }
         #endregion
 
         #region Menu Bar
@@ -267,10 +273,10 @@ namespace S3PIDemoFE
             tgin.ResGroup = ir.ResourceGroup;
             tgin.ResInstance = ir.Instance;
             tgin.ResName = ir.ResourceName;
-            importFile(ir.Filename, tgin, ir.UseName, ir.AllowRename, ir.Compress);
+            importFile(ir.Filename, tgin, ir.UseName, ir.AllowRename, ir.Compress, ir.Overwrite);
         }
 
-        void importFile(string filename, TGIN tgin, bool useName, bool rename, bool compress)
+        void importFile(string filename, TGIN tgin, bool useName, bool rename, bool compress, bool overwrite)
         {
             if (useName && tgin.ResName != null && tgin.ResName.Length > 0)
                 UpdateNameMap(tgin.ResInstance, tgin.ResName, true, rename);
@@ -282,8 +288,8 @@ namespace S3PIDemoFE
             r.Close();
             w.Flush();
 
-            IResourceIndexEntry rie = NewResource(tgin.ResType, tgin.ResGroup, tgin.ResInstance, ms, false, compress);
-            browserWidget1.Add(rie);
+            IResourceIndexEntry rie = NewResource(tgin.ResType, tgin.ResGroup, tgin.ResInstance, ms, overwrite, compress);
+            if (rie != null) browserWidget1.Add(rie);
         }
 
         private void UpdateNameMap(ulong instance, string resourceName, bool create, bool replace)
@@ -309,9 +315,22 @@ namespace S3PIDemoFE
             IsPackageDirty = true;
         }
 
-        private IResourceIndexEntry NewResource(uint type, uint group, ulong instance, MemoryStream ms, bool rejectDups, bool compress)
+        private IResourceIndexEntry NewResource(uint type, uint group, ulong instance, MemoryStream ms, bool overwrite, bool compress)
         {
-            IResourceIndexEntry rie = CurrentPackage.AddResource(type, group, instance, ms, rejectDups);
+#if !DEBUG
+            compress = false;
+#endif
+            IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType", "ResourceGroup", "Instance" },
+                new TypedValue[] { new TypedValue(type.GetType(), type), new TypedValue(group.GetType(), group), new TypedValue(instance.GetType(), instance), });
+            if (rie != null)
+            {
+                if (!overwrite) return null;
+                CurrentPackage.DeleteResource(rie);
+            }
+            
+            rie = CurrentPackage.AddResource(type, group, instance, ms, true);
+            if (rie == null) return null;
+
             rie.Compressed = (ushort)(compress ? 0xffff : 0);
             IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, true);
             package.ReplaceResource(rie, res); // Commit new resource to package
@@ -424,7 +443,7 @@ namespace S3PIDemoFE
         {
             uint type, group;
             ulong instance;
-            bool compress;
+            bool compress, overwrite;
 
             if (browserWidget1.SelectedResource == null)
             {
@@ -439,6 +458,7 @@ namespace S3PIDemoFE
                 group = ir.ResourceGroup;
                 instance = ir.Instance;
                 compress = ir.Compress;
+                overwrite = ir.Overwrite;
             }
             else
             {
@@ -446,15 +466,14 @@ namespace S3PIDemoFE
                 group = browserWidget1.SelectedResource.ResourceGroup;
                 instance = browserWidget1.SelectedResource.Instance;
                 compress = browserWidget1.SelectedResource.Compressed != 0;
-
-                package.DeleteResource(browserWidget1.SelectedResource);
+                overwrite = true;
             }
 
             MemoryStream ms = null;
             if (Clipboard.ContainsData(DataFormats.Serializable)) ms = Clipboard.GetData(DataFormats.Serializable) as MemoryStream;
 
-            IResourceIndexEntry rie = NewResource(type, group, instance, ms, false, compress);
-            browserWidget1.Add(rie);
+            IResourceIndexEntry rie = NewResource(type, group, instance, ms, overwrite, compress);
+            if (rie != null) browserWidget1.Add(rie);
         }
         #endregion
 
@@ -490,7 +509,7 @@ namespace S3PIDemoFE
             if (ir.UseName && ir.ResourceName != null && ir.ResourceName.Length > 0)
                 UpdateNameMap(ir.Instance, ir.ResourceName, true, ir.AllowRename);
 
-            IResourceIndexEntry rie = NewResource(ir.ResourceType, ir.ResourceGroup, ir.Instance, null, false, ir.Compress);
+            IResourceIndexEntry rie = NewResource(ir.ResourceType, ir.ResourceGroup, ir.Instance, null, ir.Overwrite, ir.Compress);
             browserWidget1.Add(rie);
         }
 
@@ -671,7 +690,9 @@ namespace S3PIDemoFE
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_export, resource != null || browserWidget1.SelectedResources.Count > 0);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBE_cut, resource != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBE_copy, resource != null);
+#if DEBUG
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_compressed, resource != null);
+#endif
 
             resourceFilterWidget1.IndexEntry = browserWidget1.SelectedResource;
             hexWidget1.Stream = (controlPanel1.HexEnabled && controlPanel1.AutoHex && resource != null) ? resource.Stream : null;
@@ -698,12 +719,21 @@ namespace S3PIDemoFE
             string[] fileDrop = e.Data.GetData("FileDrop") as String[];
             if (fileDrop == null || fileDrop.Length == 0) return;
 
+            Application.DoEvents();
             ImportBatch ib = new ImportBatch(fileDrop);
             DialogResult dr = ib.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            foreach (string filename in ib.Batch)
-                importFile(filename, filename, ib.UseNames, ib.Rename, false);
+            try
+            {
+                this.Enabled = false;
+                foreach (string filename in ib.Batch)
+                {
+                    importFile(filename, filename, ib.UseNames, ib.Rename, ib.Compress, ib.Overwrite);
+                    Application.DoEvents();
+                }
+            }
+            finally { this.Enabled = true; }
         }
 
         private void browserWidget1_ItemActivate(object sender, EventArgs e)
@@ -836,9 +866,7 @@ namespace S3PIDemoFE
 
                 plug.View(resource);
 
-                this.Focus();
-                Application.DoEvents();
-                this.BringToFront();
+                this.Activate();
                 Application.DoEvents();
             }
             finally { this.Enabled = true; }
@@ -855,9 +883,7 @@ namespace S3PIDemoFE
 
                 bool res = plug.Edit(resource);
 
-                this.Focus();
-                Application.DoEvents();
-                this.BringToFront();
+                this.Activate();
                 Application.DoEvents();
 
                 if (res && Clipboard.ContainsData(DataFormats.Serializable))
