@@ -33,6 +33,7 @@ namespace S3PIDemoFE
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Settings();
 #if DEBUG
             Application.Run(new MainForm());
 #else
@@ -62,6 +63,27 @@ namespace S3PIDemoFE
             }
 #endif
             return 0;
+        }
+
+        static void Settings()
+        {
+            if( Properties.Settings.Default.UpgradeRequired ) {
+                // Bulk migrate settings from previous version
+                try
+                {
+                    Properties.Settings.Default.Upgrade();
+                    Properties.Settings.Default.Reload();
+                }
+                catch (System.Configuration.ConfigurationException)
+                {
+                    // Any problems, overwrite with current!
+                    Properties.Settings.Default.Reset();
+                }
+
+                // Prevent further upgrades
+                Properties.Settings.Default.UpgradeRequired = false;
+                Properties.Settings.Default.Save();
+            }
         }
     }
 }
