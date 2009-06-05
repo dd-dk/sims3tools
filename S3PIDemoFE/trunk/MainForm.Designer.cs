@@ -159,20 +159,13 @@
             // 
             // controlPanel1
             // 
-            this.controlPanel1.CommitEnabled = false;
             this.controlPanel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.controlPanel1.EditorEnabled = false;
-            this.controlPanel1.GridEnabled = false;
-            this.controlPanel1.HexEnabled = false;
             this.controlPanel1.Location = new System.Drawing.Point(0, 74);
             this.controlPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.controlPanel1.Name = "controlPanel1";
             this.controlPanel1.Padding = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.controlPanel1.Size = new System.Drawing.Size(876, 29);
-            this.controlPanel1.Sort = false;
             this.controlPanel1.TabIndex = 1;
-            this.controlPanel1.ValueEnabled = false;
-            this.controlPanel1.ViewerEnabled = false;
             this.controlPanel1.CommitClick += new System.EventHandler(this.controlPanel1_CommitClick);
             this.controlPanel1.ViewerClick += new System.EventHandler(this.controlPanel1_ViewerClick);
             this.controlPanel1.HexClick += new System.EventHandler(this.controlPanel1_HexClick);
@@ -223,10 +216,11 @@
             this.menuBarWidget1.Size = new System.Drawing.Size(880, 23);
             this.menuBarWidget1.TabIndex = 0;
             this.menuBarWidget1.MBHelp_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBHelp_Click);
-            this.menuBarWidget1.MBDropDownOpening += new S3PIDemoFE.MenuBarWidget.MBDropDownOpeningEventHandler(this.menuBarWidget1_MBDropDownOpening);
+            this.menuBarWidget1.MBResource_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBResource_Click);
             this.menuBarWidget1.MBEdit_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBEdit_Click);
             this.menuBarWidget1.MBFile_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBFile_Click);
-            this.menuBarWidget1.MBResource_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBResource_Click);
+            this.menuBarWidget1.MBDropDownOpening += new S3PIDemoFE.MenuBarWidget.MBDropDownOpeningEventHandler(this.menuBarWidget1_MBDropDownOpening);
+            this.menuBarWidget1.MRUClick += new S3PIDemoFE.MenuBarWidget.MRUClickEventHandler(this.menuBarWidget1_MRUClick);
             // 
             // exportBatchTarget
             // 

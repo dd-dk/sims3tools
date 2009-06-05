@@ -49,13 +49,22 @@ namespace S3PIDemoFE
         {
             Filename = "";
             if (CurrentPackage != null) e.Cancel = true;
+            S3PIDemoFE.Properties.Settings.Default.Save();
         }
 
         private void MainForm_PackageFilenameChanged(object sender, EventArgs e)
         {
             if (Filename.Length > 0 && File.Exists(Filename))
             {
-                this.Text = String.Format("{0}: {1}", myName, Filename);
+                menuBarWidget1.AddRecentFile(Filename);
+                string s = Filename;
+                if (s.Length > 128)
+                {
+                    s = System.IO.Path.GetDirectoryName(s);
+                    s = s.Substring(Math.Max(0, s.Length - 40));
+                    s = "..." + System.IO.Path.Combine(s, System.IO.Path.GetFileName(Filename));
+                }
+                this.Text = String.Format("{0}: {1}", myName, s);
                 CurrentPackage = Package.OpenPackage(0, Filename);
             }
             else
@@ -83,6 +92,8 @@ namespace S3PIDemoFE
             get { return filename; }
             set
             {
+                if (filename != "" && filename == value) return;
+
                 CurrentPackage = null;
                 if (CurrentPackage != null) return;
 
@@ -343,8 +354,8 @@ namespace S3PIDemoFE
         {
             if (browserWidget1.SelectedResources.Count > 1) { exportBatch(); return; }
 
+            if (browserWidget1.SelectedResource as AResourceIndexEntry == null) return;
             TGIN tgin = browserWidget1.SelectedResource as AResourceIndexEntry;
-            if (tgin == null) return;
             tgin.ResName = resourceName;
 
             exportFileDialog.FileName = tgin;
@@ -369,8 +380,8 @@ namespace S3PIDemoFE
             {
                 foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources)
                 {
+                    if (rie as AResourceIndexEntry == null) continue;
                     TGIN tgin = rie as AResourceIndexEntry;
-                    if (tgin == null) continue;
                     tgin.ResName = browserWidget1.ResourceName(rie);
                     exportFile(rie, Path.Combine(exportBatchTarget.SelectedPath, tgin));
                 }
@@ -387,6 +398,11 @@ namespace S3PIDemoFE
             BinaryWriter w = new BinaryWriter(new FileStream(filename, FileMode.Create));
             w.Write((new BinaryReader(s)).ReadBytes((int)s.Length));
             w.Close();
+        }
+
+        private void menuBarWidget1_MRUClick(object sender, MenuBarWidget.MRUClickEventArgs filename)
+        {
+            Filename = filename.filename;
         }
 
         private void fileExit()
