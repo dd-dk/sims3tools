@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -38,14 +38,20 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="BeforeBuild" command="preBuild.bat ${ProjectDir}\Properties\AssemblyVersion.cs" workingdir="" />
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -75,33 +81,21 @@
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
       <Visible>False</Visible>
-      <ProductName>.NET Framework Client Profile</ProductName>
-      <Install>false</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
       <Visible>False</Visible>
-      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
-      <Install>false</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
       <Visible>False</Visible>
-      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
-      <Install>false</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
       <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5</ProductName>
-      <Install>false</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
       <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
       <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
-      <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
@@ -126,17 +120,16 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "$(TargetDir)pack.exe"
-copy "$(TargetPath)" "$(TargetDir)unpack.exe"
+    <PostBuildEvent>rem copy "$(TargetPath)" "$(TargetDir)pack.exe"
+rem copy "$(TargetPath)" "$(TargetDir)unpack.exe"
 </PostBuildEvent>
-    <PreBuildEvent>set MAJOR=1
-set mydate=%25date: =0%25
+    <PreBuildEvent>set mydate=%25date: =0%25
 set dd=%25mydate:~0,2%25
 set mm=%25mydate:~3,2%25
 set yy=%25mydate:~8,2%25
 set mytime=%25time: =0%25
 set h=%25mytime:~0,2%25
-set version="%25MAJOR%25.%25yy%25%25mm%25.%25dd%25%25h%25.*"
+set version="%25yy%25%25mm%25.%25dd%25.%25h%25%25m%25.*"
 
 (echo using System.Reflection;
 echo using System.Runtime.CompilerServices;
@@ -145,4 +138,7 @@ echo /*"*/ [assembly: AssemblyVersion(%25version%25)] /*"*/
 )&gt;"$(ProjectDir)Properties\AssemblyVersion.cs"
 </PreBuildEvent>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="preBuild.bat" />
+  </ItemGroup>
 </Project>
