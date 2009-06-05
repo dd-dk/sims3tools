@@ -5,7 +5,7 @@ set base=%TargetName%
 rem -%ConfigurationName%
 set src=%TargetName%-Source
 
-set out=S:\PJSE_etc\s3pi\
+set out=S:\Sims3\s3pi\
 
 set mydate=%date: =0%
 set dd=%mydate:~0,2%
