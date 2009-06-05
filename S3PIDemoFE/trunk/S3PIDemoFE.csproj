@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -34,46 +34,39 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="s3pi.DemoPlugins">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.DemoPlugins.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="s3pi.Extensions">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.Extensions.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="s3pi.Interfaces">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.Interfaces.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="s3pi.Package">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.Package.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="s3pi.Settings">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.Settings.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="s3pi.WrapperDealer">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.WrapperDealer.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Custom">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Common Files\s3pi\System.Custom.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="s3pi.DemoPlugins, Version=906.5.17.28906, Culture=neutral, PublicKeyToken=95792da617faeee1">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.DemoPlugins.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Extensions, Version=906.5.17.28858, Culture=neutral, PublicKeyToken=80159b679e88de38">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Interfaces, Version=906.5.16.28770, Culture=neutral, PublicKeyToken=596917de85953130">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Package, Version=906.5.16.28770, Culture=neutral, PublicKeyToken=b04bd8c032523d4e">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.Package.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Settings, Version=906.5.16.28770, Culture=neutral, PublicKeyToken=b395e91fe381bfac">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.Settings.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.WrapperDealer, Version=906.5.16.28770, Culture=neutral, PublicKeyToken=27f8fcb7ad5fda58">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.WrapperDealer.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Custom, Version=906.5.16.28716, Culture=neutral, PublicKeyToken=dbb438eea69badfa">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\s3pi\System.Custom.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GridForm.cs">
@@ -187,11 +180,21 @@
     <Compile Include="Filter\ResourceFields.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="gpl-3.0.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
