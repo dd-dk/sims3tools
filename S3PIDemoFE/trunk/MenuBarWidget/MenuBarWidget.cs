@@ -96,5 +96,48 @@ namespace S3PIDemoFE
         public event MBClickEventHandler MBHelp_Click;
         protected void OnMBHelp_Click(object sender, MB mn) { if (MBHelp_Click != null) MBHelp_Click(sender, new MBClickEventArgs(mn)); }
         private void tsMBH_Click(object sender, EventArgs e) { OnMBHelp_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
+
+        public void AddRecentFile(string value)
+        {
+            if (S3PIDemoFE.Properties.Settings.Default.MRUList == null)
+                S3PIDemoFE.Properties.Settings.Default.MRUList = new System.Collections.Specialized.StringCollection();
+            if (S3PIDemoFE.Properties.Settings.Default.MRUList.Contains(value))
+                S3PIDemoFE.Properties.Settings.Default.MRUList.Remove(value);
+            S3PIDemoFE.Properties.Settings.Default.MRUList.Insert(0, value);
+            while (S3PIDemoFE.Properties.Settings.Default.MRUList.Count > S3PIDemoFE.Properties.Settings.Default.MRUListSize)
+                S3PIDemoFE.Properties.Settings.Default.MRUList.RemoveAt(S3PIDemoFE.Properties.Settings.Default.MRUList.Count - 1);
+        }
+
+        public class MRUClickEventArgs : EventArgs { public readonly string filename; public MRUClickEventArgs(string filename) { this.filename = filename; } }
+        public delegate void MRUClickEventHandler(object sender, MRUClickEventArgs filename);
+        public event MRUClickEventHandler MRUClick;
+        protected void OnMRUClick(object sender, int i) { if (MRUClick != null) MRUClick(sender, new MRUClickEventArgs(S3PIDemoFE.Properties.Settings.Default.MRUList[i])); }
+        private void tsMRU_Click(object sender, EventArgs e) { OnMRUClick(sender, mRUListToolStripMenuItem.DropDownItems.IndexOf(sender as ToolStripMenuItem)); }
+
+        private void mRUListToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            this.mRUListToolStripMenuItem.DropDownItems.Clear();
+            int i = 1;
+            if (S3PIDemoFE.Properties.Settings.Default.MRUList != null)
+                foreach (string f in S3PIDemoFE.Properties.Settings.Default.MRUList)
+                {
+                    string s = f;
+                    if (f.Length > 128)
+                    {
+                        s = System.IO.Path.GetDirectoryName(f);
+                        s = s.Substring(Math.Max(0, s.Length - 40));
+                        s = "..." + System.IO.Path.Combine(s, System.IO.Path.GetFileName(f));
+                    }
+                    ToolStripMenuItem tsmiMRUListEntry = new ToolStripMenuItem();
+                    tsmiMRUListEntry.Name = "tsmi" + i;
+                    tsmiMRUListEntry.ShortcutKeys = (Keys)(Keys.Control | ((Keys)(48 + i)));
+                    tsmiMRUListEntry.Text = string.Format("{0}. {1}", i, s);
+                    tsmiMRUListEntry.Click += new System.EventHandler(tsMRU_Click);
+                    mRUListToolStripMenuItem.DropDownItems.Add(tsmiMRUListEntry);
+                    i++;
+                }
+            if (i == 1)
+                mRUListToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
+        }
     }
 }
