@@ -5,7 +5,8 @@ set base=%TargetName%
 rem -%ConfigurationName%
 set src=%TargetName%-Source
 
-set out=S:\PJSE_etc\s3pi\
+set out=S:\Sims3\s3pi\
+set s3piDir=%CommonProgramFiles%\s3pi
 
 set mydate=%date: =0%
 set dd=%mydate:~0,2%
@@ -41,8 +42,22 @@ attrib +r %TargetName%-Version.txt
 del /f %TargetName%-Version.txt
 popd
 
-7za x -o"%base%-%suffix%" "%out%%base%_%suffix%.7z"
-"%PROGRAMFILES%\nsis\makensis" "/DTARGET=%base%-%suffix%" "/DS3PIVERSION=0906-04-1329" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%.exe"
 
+set s3piV=%s3piDir%\s3pi-Version.txt
+if exist "%s3piV%" goto found
+echo s3pi-Version.txt was not found: %s3piV%
+goto done
+
+:found:
+for /f "usebackq" %%v in ("%s3piV%") do set S3PIVERSION=%%v
+if not x%S3PIVERSION%==x goto gotVersion
+echo s3pi-Version.txt did not contain a version string
+goto done
+
+:gotVersion:
+7za x -o"%base%-%suffix%" "%out%%base%_%suffix%.7z"
+"%PROGRAMFILES%\nsis\makensis" "/DTARGET=%base%-%suffix%" "/DS3PIVERSION=%S3PIVERSION%" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%.exe"
+
+:done:
 rmdir /s/q %base%-%suffix%
 pause
