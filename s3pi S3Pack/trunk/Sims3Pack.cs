@@ -1,4 +1,4 @@
-﻿/***************************************************************************
+/***************************************************************************
  *  Copyright (C) 2009 by Peter L Jones                                    *
  *  peter@users.sf.net                                                     *
  *                                                                         *
@@ -62,7 +62,6 @@ namespace S3Pack
             string filename = Path.Combine(target, nav.SelectSingleNode("/Sims3Package/DisplayName").Value + ".xml");
             if (File.Exists(filename)) File.Delete(filename);
             BinaryWriter bw = new BinaryWriter(new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write));
-            ms.Position = 0;
             bw.Write(ms.ToArray());
             bw.Close();
 
