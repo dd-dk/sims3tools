@@ -57,5 +57,20 @@ namespace S3PIDemoFE.Properties {
                 this["UpgradeRequired"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DemoPluginsConfig
+        {
+            get
+            {
+                return ((string)(this["DemoPluginsConfig"]));
+            }
+            set
+            {
+                this["DemoPluginsConfig"] = value;
+            }
+        }
     }
 }

@@ -693,6 +693,7 @@ namespace S3PIDemoFE
                     if (lf.Contains(f)) lf.Remove(f);
                 controlPanel1.GridEnabled = lf.Count > 0;
 
+                s3pi.DemoPlugins.DemoPlugins.Config = S3PIDemoFE.Properties.Settings.Default.DemoPluginsConfig;
                 plug = new s3pi.DemoPlugins.DemoPlugins(browserWidget1.SelectedResource, resource);
                 controlPanel1.ViewerEnabled = plug.HasViewer;
                 controlPanel1.EditorEnabled = plug.HasEditor;
