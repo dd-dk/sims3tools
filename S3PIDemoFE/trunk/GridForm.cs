@@ -101,8 +101,8 @@ namespace S3PIDemoFE
             InitializeComponent();
             typeExporterMap.Add(typeof(TextReader), exportTextReader);
             typeImporterMap.Add(typeof(TextReader), importTextReader);
-            //typeExporterMap.Add(typeof(Stream), exportStream);
-            //typeImporterMap.Add(typeof(Stream), importStream);
+            typeExporterMap.Add(typeof(BinaryReader), exportBinaryReader);
+            typeImporterMap.Add(typeof(BinaryReader), importBinaryReader);
             typeControlCreatorMap.Add(typeof(String), textboxCreator);
             typeControlCreatorMap.Add(typeof(bool), labelCreator);
             typeControlCreatorMap.Add(typeof(int), labelCreator);
@@ -241,11 +241,11 @@ namespace S3PIDemoFE
             return null;
         }
 
-        exporterResult exportStream(IResource resource, string field)
+        exporterResult exportBinaryReader(IResource resource, string field)
         {
             if (!resource.ContentFields.Contains(field))
                 throw new InvalidOperationException();
-            Stream s = resource[field].Value as Stream;
+            BinaryReader s = resource[field].Value as BinaryReader;
             if (s == null)
                 throw new InvalidCastException();
 
@@ -254,23 +254,17 @@ namespace S3PIDemoFE
             if (dr != DialogResult.OK) return null;
 
             FileStream fs = new FileStream(saveFileDialog1.FileName, FileMode.Create, FileAccess.Write);
-            if (s.CanSeek)
-                (new BinaryWriter(fs)).Write((new BinaryReader(s)).ReadBytes((int)s.Length));
-            else
-            {
-                byte[] buffer = new byte[1024 * 1024];
-                for (int len = fs.Read(buffer, 0, buffer.Length); len > 0; len = fs.Read(buffer, 0, buffer.Length))
-                    s.Write(buffer, 0, len);
-            }
+            (new BinaryWriter(fs)).Write(s.ReadBytes((int)s.BaseStream.Length));
+            fs.Close();
 
             return null;
         }
 
-        importerResult importStream(IResource resource, string field)
+        importerResult importBinaryReader(IResource resource, string field)
         {
             if (!resource.ContentFields.Contains(field))
                 throw new InvalidOperationException();
-            Stream s = resource[field].Value as Stream;
+            BinaryReader s = resource[field].Value as BinaryReader;
             if (s == null)
                 throw new InvalidCastException();
 
@@ -278,7 +272,7 @@ namespace S3PIDemoFE
             DialogResult dr = openFileDialog1.ShowDialog();
             if (dr != DialogResult.OK) return null;
 
-            resource[field] = new TypedValue(resource[field].Type, new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read));
+            resource[field] = new TypedValue(resource[field].Type, new BinaryReader(new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read)));
 
             this.Close();
 
