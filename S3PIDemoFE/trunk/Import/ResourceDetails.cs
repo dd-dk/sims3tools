@@ -35,9 +35,6 @@ namespace S3PIDemoFE
         public ResourceDetails(bool useName, bool requestFilename)
         {
             InitializeComponent();
-#if !DEBUG
-            this.ckbCompress.Enabled = false;
-#endif
             this.requestFilename = requestFilename;
             UseName = requestFilename && useName;
             lbFilename.Visible = tbFilename.Visible = requestFilename;

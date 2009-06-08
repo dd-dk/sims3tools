@@ -328,9 +328,6 @@ namespace S3PIDemoFE
 
         private IResourceIndexEntry NewResource(uint type, uint group, ulong instance, MemoryStream ms, bool overwrite, bool compress)
         {
-#if !DEBUG
-            compress = false;
-#endif
             IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType", "ResourceGroup", "Instance" },
                 new TypedValue[] { new TypedValue(type.GetType(), type), new TypedValue(group.GetType(), group), new TypedValue(instance.GetType(), instance), });
             if (rie != null)
@@ -707,9 +704,7 @@ namespace S3PIDemoFE
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_export, resource != null || browserWidget1.SelectedResources.Count > 0);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBE_cut, resource != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBE_copy, resource != null);
-#if DEBUG
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_compressed, resource != null);
-#endif
 
             resourceFilterWidget1.IndexEntry = browserWidget1.SelectedResource;
             hexWidget1.Stream = (controlPanel1.HexEnabled && controlPanel1.AutoHex && resource != null) ? resource.Stream : null;
