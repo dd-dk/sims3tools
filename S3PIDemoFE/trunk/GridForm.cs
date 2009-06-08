@@ -234,7 +234,9 @@ namespace S3PIDemoFE
             DialogResult dr = openFileDialog1.ShowDialog();
             if (dr != DialogResult.OK) return null;
 
-            resource[field] = new TypedValue(resource[field].Type, new StreamReader(openFileDialog1.FileName));
+            FileStream fs = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read);
+            resource[field] = new TypedValue(resource[field].Type, new StreamReader(fs));
+            fs.Close();
 
             this.Close();
 
@@ -272,7 +274,9 @@ namespace S3PIDemoFE
             DialogResult dr = openFileDialog1.ShowDialog();
             if (dr != DialogResult.OK) return null;
 
-            resource[field] = new TypedValue(resource[field].Type, new BinaryReader(new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read)));
+            FileStream fs = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read);
+            resource[field] = new TypedValue(resource[field].Type, new BinaryReader(fs));
+            fs.Close();
 
             this.Close();
 
