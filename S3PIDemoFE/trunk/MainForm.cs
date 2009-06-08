@@ -125,13 +125,14 @@ namespace S3PIDemoFE
                 if (package == value) return;
 
                 browserWidget1.SelectedResource = null;
+                if (browserWidget1.SelectedResource != null) return;
 
                 if (isPackageDirty)
                 {
                     DialogResult dr = MessageBox.Show("Current package has unsaved changes.\nSave now?",
                         myName, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button3);
                     if (dr == DialogResult.Cancel) return;
-                    if (dr == DialogResult.Yes) fileSave();
+                    if (dr == DialogResult.Yes) if (!fileSave()) return;
                     IsPackageDirty = false;
                 }
                 if (package != null) Package.ClosePackage(0, package);
@@ -211,37 +212,33 @@ namespace S3PIDemoFE
             Filename = openFileDialog1.FileName;
         }
 
-        private void fileSave()
+        private bool fileSave()
         {
-            if (CurrentPackage == null) return;
+            if (CurrentPackage == null) return false;
 
-            if (Filename == null || Filename.Length == 0) fileSaveAs();
-            else
+            if (Filename == null || Filename.Length == 0) return fileSaveAs();
+
+            Application.UseWaitCursor = true;
+            Application.DoEvents();
+            try
             {
-                Application.UseWaitCursor = true;
-                Application.DoEvents();
-                try
-                {
-                    CurrentPackage.SavePackage();
-                    IsPackageDirty = false;
-                }
-                finally { Application.UseWaitCursor = false; }
+                CurrentPackage.SavePackage();
+                IsPackageDirty = false;
             }
+            finally { Application.UseWaitCursor = false; }
+            return true;
         }
 
-        private void fileSaveAs()
+        private bool fileSaveAs()
         {
-            if (CurrentPackage == null) return;
+            if (CurrentPackage == null) return false;
 
             saveAsFileDialog.FileName = "";
             DialogResult dr = saveAsFileDialog.ShowDialog();
-            if (dr != DialogResult.OK) return;
+            if (dr != DialogResult.OK) return false;
 
             if (Filename != null && Filename.Length > 0 && Path.GetFullPath(saveAsFileDialog.FileName).Equals(Path.GetFullPath(Filename)))
-            {
-                fileSave();
-                return;
-            }
+                return fileSave();
 
             Application.UseWaitCursor = true;
             Application.DoEvents();
@@ -252,6 +249,7 @@ namespace S3PIDemoFE
                 Filename = saveAsFileDialog.FileName;
             }
             finally { Application.UseWaitCursor = false; }
+            return true;
         }
 
         private void fileSaveCopyAs()
@@ -340,7 +338,7 @@ namespace S3PIDemoFE
             if (rie == null) return null;
 
             rie.Compressed = (ushort)(compress ? 0xffff : 0);
-            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, true);
+            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, false);
             package.ReplaceResource(rie, res); // Commit new resource to package
             IsPackageDirty = true;
 
