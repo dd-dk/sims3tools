@@ -41,14 +41,8 @@
             this.tbFilename = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.tbName = new System.Windows.Forms.TextBox();
-            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.ckbUseName = new System.Windows.Forms.CheckBox();
-            this.ckbRename = new System.Windows.Forms.CheckBox();
-            this.ckbCompress = new System.Windows.Forms.CheckBox();
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.ckbOverwrite = new System.Windows.Forms.CheckBox();
+            this.importSettings1 = new S3PIDemoFE.Import.ImportSettings();
             this.tableLayoutPanel1.SuspendLayout();
-            this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnOK
@@ -56,7 +50,7 @@
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnOK.Enabled = false;
-            this.btnOK.Location = new System.Drawing.Point(240, 176);
+            this.btnOK.Location = new System.Drawing.Point(240, 196);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 2;
@@ -68,7 +62,7 @@
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(159, 176);
+            this.btnCancel.Location = new System.Drawing.Point(159, 196);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 3;
@@ -94,7 +88,7 @@
             this.tableLayoutPanel1.Controls.Add(this.tbFilename, 1, 5);
             this.tableLayoutPanel1.Controls.Add(this.label4, 0, 4);
             this.tableLayoutPanel1.Controls.Add(this.tbName, 1, 4);
-            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel1, 1, 3);
+            this.tableLayoutPanel1.Controls.Add(this.importSettings1, 1, 3);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 12);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 7;
@@ -105,8 +99,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(303, 158);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(303, 178);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // label3
@@ -189,7 +182,6 @@
             this.tbFilename.ReadOnly = true;
             this.tbFilename.Size = new System.Drawing.Size(242, 13);
             this.tbFilename.TabIndex = 11;
-            this.tbFilename.DoubleClick += new System.EventHandler(this.tbFilename_DoubleClick);
             this.tbFilename.TextChanged += new System.EventHandler(this.tbFilename_TextChanged);
             this.tbFilename.DragDrop += new System.Windows.Forms.DragEventHandler(this.tbFilename_DragDrop);
             this.tbFilename.DragOver += new System.Windows.Forms.DragEventHandler(this.tbFilename_DragOver);
@@ -213,66 +205,16 @@
             this.tbName.Size = new System.Drawing.Size(242, 20);
             this.tbName.TabIndex = 9;
             // 
-            // flowLayoutPanel1
+            // importSettings1
             // 
-            this.flowLayoutPanel1.AutoSize = true;
-            this.flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.flowLayoutPanel1.Controls.Add(this.ckbOverwrite);
-            this.flowLayoutPanel1.Controls.Add(this.ckbCompress);
-            this.flowLayoutPanel1.Controls.Add(this.ckbUseName);
-            this.flowLayoutPanel1.Controls.Add(this.ckbRename);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(58, 81);
-            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(242, 46);
-            this.flowLayoutPanel1.TabIndex = 7;
-            // 
-            // ckbUseName
-            // 
-            this.ckbUseName.AutoSize = true;
-            this.ckbUseName.Location = new System.Drawing.Point(3, 26);
-            this.ckbUseName.Name = "ckbUseName";
-            this.ckbUseName.Size = new System.Drawing.Size(118, 17);
-            this.ckbUseName.TabIndex = 1;
-            this.ckbUseName.Text = "Use resource name";
-            this.ckbUseName.UseVisualStyleBackColor = true;
-            this.ckbUseName.CheckedChanged += new System.EventHandler(this.ckbUseName_CheckedChanged);
-            // 
-            // ckbRename
-            // 
-            this.ckbRename.AutoSize = true;
-            this.ckbRename.Enabled = false;
-            this.ckbRename.Location = new System.Drawing.Point(127, 26);
-            this.ckbRename.Name = "ckbRename";
-            this.ckbRename.Size = new System.Drawing.Size(112, 17);
-            this.ckbRename.TabIndex = 2;
-            this.ckbRename.Text = "Rename if present";
-            this.ckbRename.UseVisualStyleBackColor = true;
-            // 
-            // ckbCompress
-            // 
-            this.ckbCompress.AutoSize = true;
-            this.flowLayoutPanel1.SetFlowBreak(this.ckbCompress, true);
-            this.ckbCompress.Location = new System.Drawing.Point(126, 3);
-            this.ckbCompress.Name = "ckbCompress";
-            this.ckbCompress.Size = new System.Drawing.Size(72, 17);
-            this.ckbCompress.TabIndex = 3;
-            this.ckbCompress.Text = "Compress";
-            this.ckbCompress.UseVisualStyleBackColor = true;
-            // 
-            // openFileDialog1
-            // 
-            this.openFileDialog1.Filter = "Exported files (S3_*.*)|S3_*.*|All files (*.*)|*.*";
-            this.openFileDialog1.Title = "Import Resource";
-            // 
-            // ckbOverwrite
-            // 
-            this.ckbOverwrite.AutoSize = true;
-            this.ckbOverwrite.Location = new System.Drawing.Point(3, 3);
-            this.ckbOverwrite.Name = "ckbOverwrite";
-            this.ckbOverwrite.Size = new System.Drawing.Size(117, 17);
-            this.ckbOverwrite.TabIndex = 4;
-            this.ckbOverwrite.Text = "Overwrite duplicate";
-            this.ckbOverwrite.UseVisualStyleBackColor = true;
+            this.importSettings1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.importSettings1.AutoSize = true;
+            this.importSettings1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.importSettings1.Location = new System.Drawing.Point(58, 81);
+            this.importSettings1.Name = "importSettings1";
+            this.importSettings1.Size = new System.Drawing.Size(242, 46);
+            this.importSettings1.TabIndex = 12;
+            this.importSettings1.UseNameCheckedChanged += new System.EventHandler(this.ckbUseName_CheckedChanged);
             // 
             // ResourceDetails
             // 
@@ -280,7 +222,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(327, 211);
+            this.ClientSize = new System.Drawing.Size(327, 231);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
@@ -288,11 +230,8 @@
             this.Name = "ResourceDetails";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Resource Details";
-            this.Load += new System.EventHandler(this.ImportResource_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
-            this.flowLayoutPanel1.ResumeLayout(false);
-            this.flowLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -310,13 +249,8 @@
         private System.Windows.Forms.TextBox tbInstance;
         private System.Windows.Forms.Label lbFilename;
         private System.Windows.Forms.TextBox tbFilename;
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox tbName;
-        private System.Windows.Forms.CheckBox ckbUseName;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
-        private System.Windows.Forms.CheckBox ckbRename;
-        private System.Windows.Forms.CheckBox ckbCompress;
-        private System.Windows.Forms.CheckBox ckbOverwrite;
+        private S3PIDemoFE.Import.ImportSettings importSettings1;
     }
 }

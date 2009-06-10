@@ -29,15 +29,12 @@ namespace S3PIDemoFE
 {
     public partial class ResourceDetails : Form
     {
-        bool requestFilename = false;
-        public ResourceDetails() : this(false, false) { }
-        public ResourceDetails(bool useName) : this(useName, false) { }
-        public ResourceDetails(bool useName, bool requestFilename)
+        public ResourceDetails() : this(true, true) { }
+        public ResourceDetails(bool useName, bool displayFilename)
         {
             InitializeComponent();
-            this.requestFilename = requestFilename;
-            UseName = requestFilename && useName;
-            lbFilename.Visible = tbFilename.Visible = requestFilename;
+            tbName.Enabled = UseName = useName;
+            lbFilename.Visible = tbFilename.Visible = displayFilename;
         }
 
         public string Filename { get { return tbFilename.Text; } set { this.tbFilename.Text = value; } }
@@ -58,11 +55,11 @@ namespace S3PIDemoFE
             set { tbInstance.Text = "0x" + value.ToString("X16"); }
         }
         public string ResourceName { get { return tbName.Text; } set { tbName.Text = value; } }
-        public bool Overwrite { get { return ckbOverwrite.Checked; } set { ckbOverwrite.Checked = value; } }
-        public bool Compress { get { return ckbCompress.Checked; } set { ckbCompress.Checked = value; } }
+        public bool Overwrite { get { return importSettings1.Overwrite; } set { importSettings1.Overwrite = value; } }
+        public bool Compress { get { return importSettings1.Compress; } set { importSettings1.Compress = value; } }
 
-        public bool UseName { get { return ckbUseName.Checked; } set { ckbRename.Enabled = tbName.Enabled = ckbUseName.Checked = value; } }
-        public bool AllowRename { get { return ckbRename.Checked; } set { ckbRename.Checked = value; } }
+        public bool UseName { get { return importSettings1.UseName; } set { importSettings1.UseName = value; } }
+        public bool AllowRename { get { return importSettings1.AllowRename; } set { importSettings1.AllowRename = value; } }
 
         private void FillPanel()
         {
@@ -76,25 +73,6 @@ namespace S3PIDemoFE
         private void btnOKCancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = (sender as Button).DialogResult;
-        }
-
-        private void tbFilename_DoubleClick(object sender, EventArgs e)
-        {
-            ImportResource_Load(null, null);
-        }
-
-        private void ImportResource_Load(object sender, EventArgs e)
-        {
-            if (!requestFilename) return;
-
-            DialogResult dr = openFileDialog1.ShowDialog();
-            if (dr != DialogResult.OK && Filename == "")
-            {
-                this.DialogResult = DialogResult.Cancel;
-                this.Close();
-            }
-
-            this.tbFilename.Text = openFileDialog1.FileName;
         }
 
         private void tbTGI_TextChanged(object sender, EventArgs e)
@@ -113,7 +91,7 @@ namespace S3PIDemoFE
 
         private void ckbUseName_CheckedChanged(object sender, EventArgs e)
         {
-            ckbRename.Enabled = tbName.Enabled = ckbUseName.Checked;
+            tbName.Enabled = importSettings1.UseName;
         }
 
         private void tbFilename_DragOver(object sender, DragEventArgs e)

@@ -82,6 +82,15 @@
     <Compile Include="GridForm.Designer.cs">
       <DependentUpon>GridForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Import\Import.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Import\ImportSettings.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Import\ImportSettings.Designer.cs">
+      <DependentUpon>ImportSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyVersion.cs" />
     <Compile Include="BrowserWidget\BrowserWidget.cs">
       <SubType>UserControl</SubType>
@@ -168,6 +177,9 @@
     <EmbeddedResource Include="Import\ImportBatch.resx">
       <DependentUpon>ImportBatch.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Import\ImportSettings.resx">
+      <DependentUpon>ImportSettings.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -188,6 +200,8 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
@@ -201,7 +215,7 @@
     <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings1.Designer.cs</LastGenOutput>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -213,7 +227,8 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy "$(CommonProgramFiles)\s3pi\s3pi.Template.Config" "$(TargetPath).Config"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
     <PreBuildEvent>set mydate=%25date: =0%25
 set dd=%25mydate:~0,2%25
 set mm=%25mydate:~3,2%25
@@ -227,6 +242,7 @@ echo using System.Runtime.CompilerServices;
 echo using System.Runtime.InteropServices;
 echo /*"*/ [assembly: AssemblyVersion(%25version%25)] /*"*/
 )&gt;"$(ProjectDir)Properties\AssemblyVersion.cs"
-</PreBuildEvent>
+
+copy "$(CommonProgramFiles)\s3pi\s3pi.Template.Config" $(ProjectDir)app.config</PreBuildEvent>
   </PropertyGroup>
 </Project>

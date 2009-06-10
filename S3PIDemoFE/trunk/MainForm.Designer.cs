@@ -45,6 +45,7 @@
             this.packageInfoFields1 = new S3PIDemoFE.PackageInfo.PackageInfoFields();
             this.resourceFields1 = new S3PIDemoFE.Filter.ResourceFields();
             this.exportBatchTarget = new System.Windows.Forms.FolderBrowserDialog();
+            this.fileImportDialog = new System.Windows.Forms.OpenFileDialog();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -226,6 +227,12 @@
             // 
             this.exportBatchTarget.Description = "Choose the folder to receive the exported resources";
             // 
+            // fileImportDialog
+            // 
+            this.fileImportDialog.Filter = "Exported files (S3_*.*)|S3_*.*|All files (*.*)|*.*";
+            this.fileImportDialog.Multiselect = true;
+            this.fileImportDialog.Title = "Import Resource";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -267,5 +274,6 @@
         private Filter.ResourceFilterWidget resourceFilterWidget1;
         private ControlPanel controlPanel1;
         private System.Windows.Forms.FolderBrowserDialog exportBatchTarget;
+        private System.Windows.Forms.OpenFileDialog fileImportDialog;
     }
 }

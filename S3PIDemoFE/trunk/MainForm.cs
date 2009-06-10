@@ -271,35 +271,7 @@ namespace S3PIDemoFE
             Filename = "";
         }
 
-        private void fileImport()
-        {
-            ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) }) != null, true);
-            DialogResult dr = ir.ShowDialog();
-            if (dr != DialogResult.OK) return;
-
-            TGIN tgin = new TGIN();
-            tgin.ResType = ir.ResourceType;
-            tgin.ResGroup = ir.ResourceGroup;
-            tgin.ResInstance = ir.Instance;
-            tgin.ResName = ir.ResourceName;
-            importFile(ir.Filename, tgin, ir.UseName, ir.AllowRename, ir.Compress, ir.Overwrite);
-        }
-
-        void importFile(string filename, TGIN tgin, bool useName, bool rename, bool compress, bool overwrite)
-        {
-            if (useName && tgin.ResName != null && tgin.ResName.Length > 0)
-                UpdateNameMap(tgin.ResInstance, tgin.ResName, true, rename);
-
-            MemoryStream ms = new MemoryStream();
-            BinaryWriter w = new BinaryWriter(ms);
-            BinaryReader r = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read));
-            w.Write(r.ReadBytes((int)r.BaseStream.Length));
-            r.Close();
-            w.Flush();
-
-            IResourceIndexEntry rie = NewResource(tgin.ResType, tgin.ResGroup, tgin.ResInstance, ms, overwrite, compress);
-            if (rie != null) browserWidget1.Add(rie);
-        }
+        // For "fileImport()", see Import/Import.cs
 
         private void UpdateNameMap(ulong instance, string resourceName, bool create, bool replace)
         {
@@ -458,7 +430,7 @@ namespace S3PIDemoFE
 
             if (browserWidget1.SelectedResource == null)
             {
-                ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) }) != null);
+                ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) }) != null, false);
                 DialogResult dr = ir.ShowDialog();
                 if (dr != DialogResult.OK) return;
 
@@ -513,7 +485,7 @@ namespace S3PIDemoFE
 
         private void resourceAdd()
         {
-            ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) }) != null);
+            ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) }) != null, false);
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;
 
@@ -528,7 +500,7 @@ namespace S3PIDemoFE
         {
             if (browserWidget1.SelectedResource == null) return;
 
-            ResourceDetails ir = new ResourceDetails(resourceName != null && resourceName.Length > 0);
+            ResourceDetails ir = new ResourceDetails(resourceName != null && resourceName.Length > 0, false);
             ir.ResourceType = browserWidget1.SelectedResource.ResourceType;
             ir.ResourceGroup = browserWidget1.SelectedResource.ResourceGroup;
             ir.Instance = browserWidget1.SelectedResource.Instance;
@@ -724,27 +696,7 @@ namespace S3PIDemoFE
                 e.Effect = DragDropEffects.Copy;
         }
 
-        private void browserWidget1_DragDrop(object sender, DragEventArgs e)
-        {
-            string[] fileDrop = e.Data.GetData("FileDrop") as String[];
-            if (fileDrop == null || fileDrop.Length == 0) return;
-
-            Application.DoEvents();
-            ImportBatch ib = new ImportBatch(fileDrop);
-            DialogResult dr = ib.ShowDialog();
-            if (dr != DialogResult.OK) return;
-
-            try
-            {
-                this.Enabled = false;
-                foreach (string filename in ib.Batch)
-                {
-                    importFile(filename, filename, ib.UseNames, ib.Rename, ib.Compress, ib.Overwrite);
-                    Application.DoEvents();
-                }
-            }
-            finally { this.Enabled = true; }
-        }
+        // For browserWidget1_DragDrop(), see Import/Import.cs
 
         private void browserWidget1_ItemActivate(object sender, EventArgs e)
         {
