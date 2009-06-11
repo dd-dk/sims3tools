@@ -1,6 +1,6 @@
 /***************************************************************************
  *  Copyright (C) 2009 by Peter L Jones                                    *
- *  peter@users.sf.net                                                     *
+ *  pljones@users.sf.net                                                   *
  *                                                                         *
  *  This file is part of the Sims 3 Package Interface (s3pi)               *
  *                                                                         *
