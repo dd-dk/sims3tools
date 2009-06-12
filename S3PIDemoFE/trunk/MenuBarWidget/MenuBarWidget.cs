@@ -47,6 +47,7 @@ namespace S3PIDemoFE
                 //Help
                 aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
+            UpdateMRUList();
         }
 
         public enum MD
@@ -106,15 +107,9 @@ namespace S3PIDemoFE
             S3PIDemoFE.Properties.Settings.Default.MRUList.Insert(0, value);
             while (S3PIDemoFE.Properties.Settings.Default.MRUList.Count > S3PIDemoFE.Properties.Settings.Default.MRUListSize)
                 S3PIDemoFE.Properties.Settings.Default.MRUList.RemoveAt(S3PIDemoFE.Properties.Settings.Default.MRUList.Count - 1);
+            UpdateMRUList();
         }
-
-        public class MRUClickEventArgs : EventArgs { public readonly string filename; public MRUClickEventArgs(string filename) { this.filename = filename; } }
-        public delegate void MRUClickEventHandler(object sender, MRUClickEventArgs filename);
-        public event MRUClickEventHandler MRUClick;
-        protected void OnMRUClick(object sender, int i) { if (MRUClick != null) MRUClick(sender, new MRUClickEventArgs(S3PIDemoFE.Properties.Settings.Default.MRUList[i])); }
-        private void tsMRU_Click(object sender, EventArgs e) { OnMRUClick(sender, mRUListToolStripMenuItem.DropDownItems.IndexOf(sender as ToolStripMenuItem)); }
-
-        private void mRUListToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
+        void UpdateMRUList()
         {
             this.mRUListToolStripMenuItem.DropDownItems.Clear();
             int i = 1;
@@ -139,5 +134,11 @@ namespace S3PIDemoFE
             if (i == 1)
                 mRUListToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
         }
+
+        public class MRUClickEventArgs : EventArgs { public readonly string filename; public MRUClickEventArgs(string filename) { this.filename = filename; } }
+        public delegate void MRUClickEventHandler(object sender, MRUClickEventArgs filename);
+        public event MRUClickEventHandler MRUClick;
+        protected void OnMRUClick(object sender, int i) { if (MRUClick != null) MRUClick(sender, new MRUClickEventArgs(S3PIDemoFE.Properties.Settings.Default.MRUList[i])); }
+        private void tsMRU_Click(object sender, EventArgs e) { OnMRUClick(sender, mRUListToolStripMenuItem.DropDownItems.IndexOf(sender as ToolStripMenuItem)); }
     }
 }

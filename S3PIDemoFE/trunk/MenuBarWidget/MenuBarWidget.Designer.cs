@@ -39,6 +39,9 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.mRUListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mRUListToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -53,9 +56,6 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.mRUListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mRUListToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -163,6 +163,25 @@
             this.exportToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.exportToolStripMenuItem.Text = "&Export...";
             this.exportToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(164, 6);
+            // 
+            // mRUListToolStripMenuItem
+            // 
+            this.mRUListToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mRUListToolStripMenuItem1});
+            this.mRUListToolStripMenuItem.Name = "mRUListToolStripMenuItem";
+            this.mRUListToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.mRUListToolStripMenuItem.Text = "&Recent packages";
+            // 
+            // mRUListToolStripMenuItem1
+            // 
+            this.mRUListToolStripMenuItem1.Name = "mRUListToolStripMenuItem1";
+            this.mRUListToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.mRUListToolStripMenuItem1.Text = "MRUList";
             // 
             // toolStripSeparator1
             // 
@@ -281,26 +300,6 @@
             this.licenceToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.licenceToolStripMenuItem.Text = "&Licence...";
             this.licenceToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(164, 6);
-            // 
-            // mRUListToolStripMenuItem
-            // 
-            this.mRUListToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mRUListToolStripMenuItem1});
-            this.mRUListToolStripMenuItem.Name = "mRUListToolStripMenuItem";
-            this.mRUListToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
-            this.mRUListToolStripMenuItem.Text = "&Recent packages";
-            this.mRUListToolStripMenuItem.DropDownOpening += new System.EventHandler(this.mRUListToolStripMenuItem_DropDownOpening);
-            // 
-            // mRUListToolStripMenuItem1
-            // 
-            this.mRUListToolStripMenuItem1.Name = "mRUListToolStripMenuItem1";
-            this.mRUListToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
-            this.mRUListToolStripMenuItem1.Text = "MRUList";
             // 
             // MenuBarWidget
             // 
