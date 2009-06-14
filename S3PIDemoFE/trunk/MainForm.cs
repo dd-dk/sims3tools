@@ -296,13 +296,13 @@ namespace S3PIDemoFE
             IsPackageDirty = true;
         }
 
-        private IResourceIndexEntry NewResource(uint type, uint group, ulong instance, MemoryStream ms, bool overwrite, bool compress)
+        private IResourceIndexEntry NewResource(uint type, uint group, ulong instance, MemoryStream ms, bool replace, bool compress)
         {
             IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType", "ResourceGroup", "Instance" },
                 new TypedValue[] { new TypedValue(type.GetType(), type), new TypedValue(group.GetType(), group), new TypedValue(instance.GetType(), instance), });
             if (rie != null)
             {
-                if (!overwrite) return null;
+                if (!replace) return null;
                 CurrentPackage.DeleteResource(rie);
             }
             
@@ -441,7 +441,7 @@ namespace S3PIDemoFE
                 group = ir.ResourceGroup;
                 instance = ir.Instance;
                 compress = ir.Compress;
-                overwrite = ir.Overwrite;
+                overwrite = ir.Replace;
             }
             else
             {
@@ -492,7 +492,7 @@ namespace S3PIDemoFE
             if (ir.UseName && ir.ResourceName != null && ir.ResourceName.Length > 0)
                 UpdateNameMap(ir.Instance, ir.ResourceName, true, ir.AllowRename);
 
-            IResourceIndexEntry rie = NewResource(ir.ResourceType, ir.ResourceGroup, ir.Instance, null, ir.Overwrite, ir.Compress);
+            IResourceIndexEntry rie = NewResource(ir.ResourceType, ir.ResourceGroup, ir.Instance, null, ir.Replace, ir.Compress);
             browserWidget1.Add(rie);
         }
 

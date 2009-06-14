@@ -32,12 +32,13 @@ namespace S3PIDemoFE.Import
         {
             InitializeComponent();
             ckbRename.Enabled = ckbUseName.Checked;
+            rb1Reject.Checked = !rb1Replace.Checked;
         }
 
         #region Properties
         [Category("Appearance")]
-        [DefaultValue(false)]
-        public bool Overwrite { get { return ckbOverwrite.Checked; } set { ckbOverwrite.Checked = value; } }
+        [DefaultValue(true)]
+        public bool Replace { get { return rb1Replace.Checked; } set { rb1Reject.Checked = !(rb1Replace.Checked = value); } }
         [Category("Appearance")]
         [DefaultValue(false)]
         public bool Compress { get { return ckbCompress.Checked; } set { ckbCompress.Checked = value; } }
@@ -51,30 +52,30 @@ namespace S3PIDemoFE.Import
 
         #region Events
         [Category("Property Changed")]
-        [Description("Raised when the Overwrite checkbox changes state")]
-        public event EventHandler OverwriteCheckedChanged;
+        [Description("Raised when the Replace property changes")]
+        public event EventHandler ReplaceChanged;
 
         [Category("Property Changed")]
-        [Description("Raised when the Compress checkbox changes state")]
-        public event EventHandler CompressCheckedChanged;
+        [Description("Raised when the Compress property changes")]
+        public event EventHandler CompressChanged;
 
         [Category("Property Changed")]
-        [Description("Raised when the UseName checkbox changes state")]
-        public event EventHandler UseNameCheckedChanged;
+        [Description("Raised when the UseName property changes")]
+        public event EventHandler UseNameChanged;
 
         [Category("Property Changed")]
-        [Description("Raised when the AllowRename checkbox changes state")]
-        public event EventHandler AllowRenameCheckedChanged;
+        [Description("Raised when the AllowRename property changes")]
+        public event EventHandler AllowRenameChanged;
         #endregion
 
-        protected virtual void OnOverwriteCheckedChanged(object sender, EventArgs e) { if (OverwriteCheckedChanged != null) OverwriteCheckedChanged(sender, e); }
-        protected virtual void OnCompressCheckedChanged(object sender, EventArgs e) { if (CompressCheckedChanged != null) CompressCheckedChanged(sender, e); }
-        protected virtual void OnUseNameCheckedChanged(object sender, EventArgs e) { if (UseNameCheckedChanged != null) UseNameCheckedChanged(sender, e); }
-        protected virtual void OnAllowRenameCheckedChanged(object sender, EventArgs e) { if (AllowRenameCheckedChanged != null) AllowRenameCheckedChanged(sender, e); }
+        protected virtual void OnReplaceChanged(object sender, EventArgs e) { if (ReplaceChanged != null) ReplaceChanged(sender, e); }
+        protected virtual void OnCompressChanged(object sender, EventArgs e) { if (CompressChanged != null) CompressChanged(sender, e); }
+        protected virtual void OnUseNameChanged(object sender, EventArgs e) { if (UseNameChanged != null) UseNameChanged(sender, e); }
+        protected virtual void OnAllowRenameChanged(object sender, EventArgs e) { if (AllowRenameChanged != null) AllowRenameChanged(sender, e); }
 
-        private void ckbOverwrite_CheckedChanged(object sender, EventArgs e) { OnOverwriteCheckedChanged(sender, e); }
-        private void ckbCompress_CheckedChanged(object sender, EventArgs e) { OnCompressCheckedChanged(sender, e); }
-        private void ckbUseName_CheckedChanged(object sender, EventArgs e) { ckbRename.Enabled = ckbUseName.Checked; OnUseNameCheckedChanged(sender, e); }
-        private void ckbRename_CheckedChanged(object sender, EventArgs e) { OnAllowRenameCheckedChanged(sender, e); }
+        private void rb1_CheckedChanged(object sender, EventArgs e) { OnReplaceChanged(sender, e); }
+        private void ckbCompress_CheckedChanged(object sender, EventArgs e) { OnCompressChanged(sender, e); }
+        private void ckbUseName_CheckedChanged(object sender, EventArgs e) { ckbRename.Enabled = ckbUseName.Checked; OnUseNameChanged(sender, e); }
+        private void ckbRename_CheckedChanged(object sender, EventArgs e) { OnAllowRenameChanged(sender, e); }
     }
 }

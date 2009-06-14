@@ -55,7 +55,7 @@ namespace S3PIDemoFE
             set { tbInstance.Text = "0x" + value.ToString("X16"); }
         }
         public string ResourceName { get { return tbName.Text; } set { tbName.Text = value; } }
-        public bool Overwrite { get { return importSettings1.Overwrite; } set { importSettings1.Overwrite = value; } }
+        public bool Replace { get { return importSettings1.Replace; } }
         public bool Compress { get { return importSettings1.Compress; } set { importSettings1.Compress = value; } }
 
         public bool UseName { get { return importSettings1.UseName; } set { importSettings1.UseName = value; } }

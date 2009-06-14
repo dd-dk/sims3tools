@@ -65,7 +65,7 @@ namespace S3PIDemoFE
             tgin.ResGroup = ir.ResourceGroup;
             tgin.ResInstance = ir.Instance;
             tgin.ResName = ir.ResourceName;
-            importFile(ir.Filename, tgin, ir.UseName, ir.AllowRename, ir.Compress, ir.Overwrite);
+            importFile(ir.Filename, tgin, ir.UseName, ir.AllowRename, ir.Compress, ir.Replace);
         }
 
         void importBatch(string[] batch)
@@ -79,14 +79,14 @@ namespace S3PIDemoFE
                 this.Enabled = false;
                 foreach (string filename in batch)
                 {
-                    importFile(filename, filename, ib.UseNames, ib.Rename, ib.Compress, ib.Overwrite);
+                    importFile(filename, filename, ib.UseNames, ib.Rename, ib.Compress, ib.Replace);
                     Application.DoEvents();
                 }
             }
             finally { this.Enabled = true; }
         }
 
-        void importFile(string filename, TGIN tgin, bool useName, bool rename, bool compress, bool overwrite)
+        void importFile(string filename, TGIN tgin, bool useName, bool rename, bool compress, bool replace)
         {
             if (useName && tgin.ResName != null && tgin.ResName.Length > 0)
                 UpdateNameMap(tgin.ResInstance, tgin.ResName, true, rename);
@@ -98,7 +98,7 @@ namespace S3PIDemoFE
             r.Close();
             w.Flush();
 
-            IResourceIndexEntry rie = NewResource(tgin.ResType, tgin.ResGroup, tgin.ResInstance, ms, overwrite, compress);
+            IResourceIndexEntry rie = NewResource(tgin.ResType, tgin.ResGroup, tgin.ResInstance, ms, replace, compress);
             if (rie != null) browserWidget1.Add(rie);
         }
     }

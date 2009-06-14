@@ -38,7 +38,7 @@ namespace S3PIDemoFE
 
         public string[] Batch { get { return (string[])batch.Clone(); } }
 
-        public bool Overwrite { get { return importSettings1.Overwrite; } }
+        public bool Replace { get { return importSettings1.Replace; } }
 
         public bool Compress { get { return importSettings1.Compress; } }
 
