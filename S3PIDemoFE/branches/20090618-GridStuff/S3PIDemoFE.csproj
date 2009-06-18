@@ -1,0 +1,248 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0663C11D-1A90-476F-A04D-34D93464A1E0}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>S3PIDemoFE</RootNamespace>
+    <AssemblyName>S3PIDemoFE</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Custom">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\s3pi\System.Custom.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="s3pi.DemoPlugins">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.DemoPlugins.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="s3pi.Extensions">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.Extensions.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="s3pi.Interfaces">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.Interfaces.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="s3pi.Package">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.Package.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="s3pi.Settings">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.Settings.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="s3pi.WrapperDealer">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.WrapperDealer.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GridForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GridForm.Designer.cs">
+      <DependentUpon>GridForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Import\Import.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Import\ImportSettings.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Import\ImportSettings.Designer.cs">
+      <DependentUpon>ImportSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyVersion.cs" />
+    <Compile Include="BrowserWidget\BrowserWidget.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="BrowserWidget\BrowserWidget.Designer.cs">
+      <DependentUpon>BrowserWidget.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BrowserWidget\SortingListviews.cs" />
+    <Compile Include="ControlPanel\ControlPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ControlPanel\ControlPanel.designer.cs">
+      <DependentUpon>ControlPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Filter\FilterField.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Filter\FilterField.Designer.cs">
+      <DependentUpon>FilterField.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Filter\ResourceFilterWidget.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Filter\ResourceFilterWidget.Designer.cs">
+      <DependentUpon>ResourceFilterWidget.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Import\ImportBatch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Import\ImportBatch.Designer.cs">
+      <DependentUpon>ImportBatch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HexWidget\HexWidget.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="HexWidget\HexWidget.Designer.cs">
+      <DependentUpon>HexWidget.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Import\ResourceDetails.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Import\ResourceDetails.designer.cs">
+      <DependentUpon>ResourceDetails.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MenuBarWidget\MenuBarWidget.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MenuBarWidget\MenuBarWidget.Designer.cs">
+      <DependentUpon>MenuBarWidget.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PackageInfo\PackageInfoFields.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="PackageInfo\PackageInfoWidget.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PackageInfo\PackageInfoWidget.Designer.cs">
+      <DependentUpon>PackageInfoWidget.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="BrowserWidget\BrowserWidget.resx">
+      <DependentUpon>BrowserWidget.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ControlPanel\ControlPanel.resx">
+      <DependentUpon>ControlPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GridForm.resx">
+      <DependentUpon>GridForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Filter\FilterField.resx">
+      <DependentUpon>FilterField.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Filter\ResourceFilterWidget.resx">
+      <DependentUpon>ResourceFilterWidget.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Import\ImportBatch.resx">
+      <DependentUpon>ImportBatch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Import\ImportSettings.resx">
+      <DependentUpon>ImportSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HexWidget\HexWidget.resx">
+      <DependentUpon>HexWidget.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Import\ResourceDetails.resx">
+      <DependentUpon>ResourceDetails.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MenuBarWidget\MenuBarWidget.resx">
+      <DependentUpon>MenuBarWidget.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PackageInfo\PackageInfoWidget.resx">
+      <DependentUpon>PackageInfoWidget.cs</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="Filter\ResourceFields.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Settings.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="gpl-3.0.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+    <PreBuildEvent>set mydate=%25date: =0%25
+set dd=%25mydate:~0,2%25
+set mm=%25mydate:~3,2%25
+set yy=%25mydate:~8,2%25
+set mytime=%25time: =0%25
+set h=%25mytime:~0,2%25
+set version="%25yy%25%25mm%25.%25dd%25.%25h%25%25m%25.*"
+
+(echo using System.Reflection;
+echo using System.Runtime.CompilerServices;
+echo using System.Runtime.InteropServices;
+echo /*"*/ [assembly: AssemblyVersion(%25version%25)] /*"*/
+)&gt;"$(ProjectDir)Properties\AssemblyVersion.cs"
+
+copy "$(CommonProgramFiles)\s3pi\s3pi.Template.Config" $(ProjectDir)app.config</PreBuildEvent>
+  </PropertyGroup>
+</Project>
