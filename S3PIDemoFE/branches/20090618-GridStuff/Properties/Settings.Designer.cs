@@ -57,19 +57,86 @@ namespace S3PIDemoFE.Properties {
                 this["UpgradeRequired"] = value;
             }
         }
-
+        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string DemoPluginsConfig
-        {
-            get
-            {
+        public string DemoPluginsConfig {
+            get {
                 return ((string)(this["DemoPluginsConfig"]));
             }
-            set
-            {
+            set {
                 this["DemoPluginsConfig"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool OverrideExtensions {
+            get {
+                return ((bool)(this["OverrideExtensions"]));
+            }
+            set {
+                this["OverrideExtensions"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection ExtensionsConfig {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["ExtensionsConfig"]));
+            }
+            set {
+                this["ExtensionsConfig"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CurrentProfile {
+            get {
+                return ((string)(this["CurrentProfile"]));
+            }
+            set {
+                this["CurrentProfile"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection ProfileList {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["ProfileList"]));
+            }
+            set {
+                this["ProfileList"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int PersistentHeight {
+            get {
+                return ((int)(this["PersistentHeight"]));
+            }
+            set {
+                this["PersistentHeight"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int PersistentWidth {
+            get {
+                return ((int)(this["PersistentWidth"]));
+            }
+            set {
+                this["PersistentWidth"] = value;
             }
         }
     }

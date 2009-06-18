@@ -76,6 +76,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\Configuration.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Configuration\Configuration.Designer.cs">
+      <DependentUpon>Configuration.cs</DependentUpon>
+    </Compile>
     <Compile Include="GridForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -90,6 +96,8 @@
     </Compile>
     <Compile Include="Import\ImportSettings.Designer.cs">
       <DependentUpon>ImportSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Configuration\Profile.cs">
     </Compile>
     <Compile Include="Properties\AssemblyVersion.cs" />
     <Compile Include="BrowserWidget\BrowserWidget.cs">
@@ -162,6 +170,9 @@
       <DependentUpon>BrowserWidget.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Configuration\Configuration.resx">
+      <DependentUpon>Configuration.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ControlPanel\ControlPanel.resx">
       <DependentUpon>ControlPanel.cs</DependentUpon>
     </EmbeddedResource>
@@ -203,6 +214,9 @@
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="S3PIPropertyGrid.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Settings.cs" />
   </ItemGroup>

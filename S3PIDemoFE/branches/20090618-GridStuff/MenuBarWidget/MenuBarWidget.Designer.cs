@@ -41,7 +41,6 @@
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.mRUListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mRUListToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,11 +50,19 @@
             this.resourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.detailsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.compressedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.configureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.saveProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.switchProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -65,10 +72,11 @@
             this.fileToolStripMenuItem,
             this.editToolStripMenuItem,
             this.resourceToolStripMenuItem,
+            this.settingsToolStripMenuItem,
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(274, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(360, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -172,16 +180,10 @@
             // mRUListToolStripMenuItem
             // 
             this.mRUListToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mRUListToolStripMenuItem1});
+            this.toolStripSeparator7});
             this.mRUListToolStripMenuItem.Name = "mRUListToolStripMenuItem";
             this.mRUListToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.mRUListToolStripMenuItem.Text = "&Recent packages";
-            // 
-            // mRUListToolStripMenuItem1
-            // 
-            this.mRUListToolStripMenuItem1.Name = "mRUListToolStripMenuItem1";
-            this.mRUListToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
-            this.mRUListToolStripMenuItem1.Text = "MRUList";
             // 
             // toolStripSeparator1
             // 
@@ -236,6 +238,7 @@
             this.resourceToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.addToolStripMenuItem,
             this.detailsToolStripMenuItem,
+            this.toolStripSeparator6,
             this.compressedToolStripMenuItem});
             this.resourceToolStripMenuItem.Enabled = false;
             this.resourceToolStripMenuItem.Name = "resourceToolStripMenuItem";
@@ -261,6 +264,11 @@
             this.detailsToolStripMenuItem.Text = "&Details...";
             this.detailsToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
             // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(195, 6);
+            // 
             // compressedToolStripMenuItem
             // 
             this.compressedToolStripMenuItem.Enabled = false;
@@ -268,6 +276,49 @@
             this.compressedToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
             this.compressedToolStripMenuItem.Text = "&Compressed";
             this.compressedToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
+            // 
+            // settingsToolStripMenuItem
+            // 
+            this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.configureToolStripMenuItem,
+            this.toolStripSeparator4,
+            this.saveProfileToolStripMenuItem,
+            this.switchProfileToolStripMenuItem});
+            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(58, 20);
+            this.settingsToolStripMenuItem.Text = "&Settings";
+            // 
+            // configureToolStripMenuItem
+            // 
+            this.configureToolStripMenuItem.Name = "configureToolStripMenuItem";
+            this.configureToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.configureToolStripMenuItem.Text = "&Configure...";
+            this.configureToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(151, 6);
+            // 
+            // saveProfileToolStripMenuItem
+            // 
+            this.saveProfileToolStripMenuItem.Name = "saveProfileToolStripMenuItem";
+            this.saveProfileToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.saveProfileToolStripMenuItem.Text = "Save profile...";
+            this.saveProfileToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
+            // switchProfileToolStripMenuItem
+            // 
+            this.switchProfileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripSeparator5});
+            this.switchProfileToolStripMenuItem.Name = "switchProfileToolStripMenuItem";
+            this.switchProfileToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.switchProfileToolStripMenuItem.Text = "Switch profile";
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(149, 6);
             // 
             // helpToolStripMenuItem
             // 
@@ -301,11 +352,16 @@
             this.licenceToolStripMenuItem.Text = "&Licence...";
             this.licenceToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
             // 
+            // toolStripSeparator7
+            // 
+            this.toolStripSeparator7.Name = "toolStripSeparator7";
+            this.toolStripSeparator7.Size = new System.Drawing.Size(149, 6);
+            // 
             // MenuBarWidget
             // 
             this.Controls.Add(this.menuStrip1);
             this.Name = "MenuBarWidget";
-            this.Size = new System.Drawing.Size(274, 150);
+            this.Size = new System.Drawing.Size(360, 150);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -342,6 +398,13 @@
         private System.Windows.Forms.ToolStripMenuItem detailsToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem mRUListToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem mRUListToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem configureToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripMenuItem saveProfileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem switchProfileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
     }
 }

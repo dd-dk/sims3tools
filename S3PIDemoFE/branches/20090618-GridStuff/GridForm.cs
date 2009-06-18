@@ -30,6 +30,7 @@ namespace S3PIDemoFE
 {
     public partial class GridForm : Form
     {
+#if UNDEF
         interface exporterResult { } // just to differentiate delegate signatures - return null
         interface importerResult { } // just to differentiate delegate signatures - return null
         delegate exporterResult Exporter(IResource resource, string field);
@@ -95,10 +96,11 @@ namespace S3PIDemoFE
         Dictionary<Type, Exporter> typeExporterMap = new Dictionary<Type, Exporter>();
         Dictionary<Type, Importer> typeImporterMap = new Dictionary<Type, Importer>();
         Dictionary<Type, ControlCreator> typeControlCreatorMap = new Dictionary<Type, ControlCreator>();
-
+#endif
         public GridForm()
         {
             InitializeComponent();
+#if UNDEF
             typeExporterMap.Add(typeof(TextReader), exportTextReader);
             typeImporterMap.Add(typeof(TextReader), importTextReader);
             typeExporterMap.Add(typeof(BinaryReader), exportBinaryReader);
@@ -109,10 +111,12 @@ namespace S3PIDemoFE
             typeControlCreatorMap.Add(typeof(uint), labelCreator);
             typeControlCreatorMap.Add(typeof(ushort), labelCreator);
             typeControlCreatorMap.Add(typeof(byte), labelCreator);
+#endif
         }
 
         public GridForm(IResource resource) : this()
         {
+#if UNDEF
             tableLayoutPanel1.RowCount = 0;
             tableLayoutPanel1.Controls.Clear();
             tableLayoutPanel1.RowStyles.Clear();
@@ -154,8 +158,11 @@ namespace S3PIDemoFE
                     tableLayoutPanel1.Controls.Add(dsr.btnImporter, 3, row);
             }
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+#endif
+            s3PIPropertyGrid1.s3piObject = resource as AResource;
         }
 
+#if UNDEF
         Control textboxCreator(IResource resource, string field)
         {
             if (!resource.ContentFields.Contains(field))
@@ -282,5 +289,6 @@ namespace S3PIDemoFE
 
             return null;
         }
+#endif
     }
 }

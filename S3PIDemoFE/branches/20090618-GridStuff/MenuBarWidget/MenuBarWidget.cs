@@ -44,6 +44,8 @@ namespace S3PIDemoFE
                 cutToolStripMenuItem, copyToolStripMenuItem, pasteToolStripMenuItem,
                 //Resource
                 addToolStripMenuItem, detailsToolStripMenuItem, compressedToolStripMenuItem,
+                //Settings
+                configureToolStripMenuItem, saveProfileToolStripMenuItem, switchProfileToolStripMenuItem,
                 //Help
                 aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
@@ -55,16 +57,16 @@ namespace S3PIDemoFE
             MBF,
             MBE,
             MBR,
+            MBS,
             MBH,
         }
 
         public enum MB
         {
-            MBF_new = 0, MBF_open, MBF_save, MBF_saveAs,
-            MBF_saveCopyAs, MBF_close, MBF_import, MBF_export,
-            MBF_exit,
+            MBF_new = 0, MBF_open, MBF_save, MBF_saveAs, MBF_saveCopyAs, MBF_close, MBF_import, MBF_export, MBF_exit,
             MBE_cut, MBE_copy, MBE_paste,
             MBR_add, MBR_details, MBR_compressed,
+            MBS_configure, MBS_saveprofile, MBS_switchprofile,
             MBH_about, MBH_warranty, MBH_licence,
         }
 
@@ -93,6 +95,10 @@ namespace S3PIDemoFE
         public event MBClickEventHandler MBResource_Click;
         protected void OnMBResource_Click(object sender, MB mn) { if (MBResource_Click != null) MBResource_Click(sender, new MBClickEventArgs(mn)); }
         private void tsMBR_Click(object sender, EventArgs e) { OnMBResource_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
+
+        public event MBClickEventHandler MBSettings_Click;
+        protected void OnMBSettings_Click(object sender, MB mn) { if (MBSettings_Click != null) MBSettings_Click(sender, new MBClickEventArgs(mn)); }
+        private void tsMBS_Click(object sender, EventArgs e) { OnMBSettings_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
 
         public event MBClickEventHandler MBHelp_Click;
         protected void OnMBHelp_Click(object sender, MB mn) { if (MBHelp_Click != null) MBHelp_Click(sender, new MBClickEventArgs(mn)); }
@@ -126,7 +132,7 @@ namespace S3PIDemoFE
                     ToolStripMenuItem tsmiMRUListEntry = new ToolStripMenuItem();
                     tsmiMRUListEntry.Name = "tsmi" + i;
                     tsmiMRUListEntry.ShortcutKeys = (Keys)(Keys.Control | ((Keys)(48 + i)));
-                    tsmiMRUListEntry.Text = string.Format("{0}. {1}", i, s);
+                    tsmiMRUListEntry.Text = string.Format("&{0}. {1}", i, s);
                     tsmiMRUListEntry.Click += new System.EventHandler(tsMRU_Click);
                     mRUListToolStripMenuItem.DropDownItems.Add(tsmiMRUListEntry);
                     i++;
@@ -140,5 +146,23 @@ namespace S3PIDemoFE
         public event MRUClickEventHandler MRUClick;
         protected void OnMRUClick(object sender, int i) { if (MRUClick != null) MRUClick(sender, new MRUClickEventArgs(S3PIDemoFE.Properties.Settings.Default.MRUList[i])); }
         private void tsMRU_Click(object sender, EventArgs e) { OnMRUClick(sender, mRUListToolStripMenuItem.DropDownItems.IndexOf(sender as ToolStripMenuItem)); }
+
+        public void AddProfile(string value)
+        {
+            UpdateProfileDD();
+        }
+        void UpdateProfileDD()
+        {
+            this.switchProfileToolStripMenuItem.DropDownItems.Clear();
+            int i = 1;
+            if (i == 1)
+                switchProfileToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
+        }
+
+        public class ProfileClickEventArgs : EventArgs { public readonly int profile; public ProfileClickEventArgs(int profile) { this.profile = profile; } }
+        public delegate void ProfileClickEventHandler(object sender, ProfileClickEventArgs profile);
+        public event ProfileClickEventHandler ProfileClick;
+        protected void OnProfileClick(object sender, int i) { if (ProfileClick != null) ProfileClick(sender, new ProfileClickEventArgs(i)); }
+        private void tsProfile_Click(object sender, EventArgs e) { OnProfileClick(sender, switchProfileToolStripMenuItem.DropDownItems.IndexOf(sender as ToolStripMenuItem)); }
     }
 }

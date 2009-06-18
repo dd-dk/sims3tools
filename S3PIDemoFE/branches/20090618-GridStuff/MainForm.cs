@@ -35,6 +35,14 @@ namespace S3PIDemoFE
         {
             InitializeComponent();
 
+            int h = S3PIDemoFE.Properties.Settings.Default.PersistentHeight;
+            if (h == -1) h = 4 * System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Height / 5;
+            this.Height = h;
+
+            int w = S3PIDemoFE.Properties.Settings.Default.PersistentWidth;
+            if (w == -1) w = 4 * System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Width / 5;
+            this.Width = w;
+
             this.Text = myName;
 
             browserWidget1.Sortable = controlPanel1.Sort;
@@ -168,6 +176,7 @@ namespace S3PIDemoFE
                 case MenuBarWidget.MD.MBF: break;
                 case MenuBarWidget.MD.MBE: editDropDownOpening(); break;
                 case MenuBarWidget.MD.MBR: resourceDropDownOpening(); break;
+                case MenuBarWidget.MD.MBS: break;
                 case MenuBarWidget.MD.MBH: break;
                 default: break;
             }
@@ -525,6 +534,32 @@ namespace S3PIDemoFE
             browserWidget1.SelectedResource.Compressed = (ushort)(browserWidget1.SelectedResource.Compressed == 0 ? 0xffff : 0);
             IsPackageDirty = true;
         }
+        #endregion
+
+        #region Settings menu
+        private void menuBarWidget1_MBSettings_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
+        {
+            try
+            {
+                this.Enabled = false;
+                Application.DoEvents();
+                switch (mn.mn)
+                {
+                    case MenuBarWidget.MB.MBS_configure: settingsConfigure(); break;
+                    case MenuBarWidget.MB.MBS_saveprofile: settingsSaveprofile(); break;
+                    case MenuBarWidget.MB.MBS_switchprofile: settingsSwitchprofile(); break;
+                }
+            }
+            finally { this.Enabled = true; }
+        }
+
+        private void settingsConfigure()
+        {
+            (new Configuration()).ShowDialog();
+        }
+        private void settingsSaveprofile() { MessageBox.Show("Not implemented"); }
+        private void settingsSwitchprofile() { MessageBox.Show("Not implemented"); }
+
         #endregion
 
         #region Help menu
