@@ -559,7 +559,7 @@ namespace S3PIDemoFE
                 "Library Distribution: {2}"
                 , copyright
                 , getVersion(typeof(MainForm), "S3PIDemoFE")
-                , getVersion(typeof(s3pi.Interfaces.AApiVersionedFields), "s3pi")
+                , getVersion(typeof(s3pi.Interfaces.AApiVersionedFields), "S3PIDemoFE")
                 ), this.Text, MessageBoxButtons.OK);
         }
 
