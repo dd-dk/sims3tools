@@ -23,6 +23,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using s3pi.Interfaces;
 using System.Collections;
+using System.Drawing.Design;
 
 namespace S3PIDemoFE
 {
@@ -108,7 +109,7 @@ namespace S3PIDemoFE
                 get
                 {
                     Type t = AApiVersionedFields.GetContentFieldTypes(0, ComponentType)[field];
-                    if (typeof(AApiVersionedFields).IsAssignableFrom(t)) return typeof(AApiVersionedFieldsCTD);
+                    if (t.IsEnum) return t; // Don't want these falling into the next section
                     if (t.IsPrimitive)
                         try
                         {
@@ -116,6 +117,11 @@ namespace S3PIDemoFE
                             return typeof(AsHexConverterCTD);
                         }
                         catch { }
+                    if (t.IsValueType) return t; // It's a struct
+                    if (t.Name.StartsWith("IList`") && typeof(AApiVersionedFields).IsAssignableFrom(t.GetGenericArguments()[0]))
+                        return typeof(IList<AApiVersionedFieldsCTD>);
+                    if (typeof(AApiVersionedFields).IsAssignableFrom(t)) return typeof(AApiVersionedFieldsCTD);
+                    //if (typeof(Boolset).IsAssignableFrom(t)) return t; Hmm...
                     return t;
                 }
             }
@@ -123,8 +129,9 @@ namespace S3PIDemoFE
             public override object GetValue(object component)
             {
                 Type t = PropertyType;
-                if (t.Equals(typeof(AApiVersionedFieldsCTD))) return new AApiVersionedFieldsCTD((AApiVersionedFields)owner[field].Value);
                 if (t.Equals(typeof(AsHexConverterCTD))) return new AsHexConverterCTD(owner, field, component);
+                if (t.Equals(typeof(IList<AApiVersionedFieldsCTD>))) return new IListCTD(owner, field, component);
+                if (t.Equals(typeof(AApiVersionedFieldsCTD))) return new AApiVersionedFieldsCTD((AApiVersionedFields)owner[field].Value);
                 return owner[field].Value;
             }
 
@@ -155,60 +162,6 @@ namespace S3PIDemoFE
                 if (destinationType.Equals(typeof(string))) return "";
                 return base.ConvertTo(context, culture, value, destinationType);
             }
-        }
-    }
-
-    [TypeConverter(typeof(TGIBlockCTDConverter))]
-    public class TGIBlockCTD : AApiVersionedFieldsCTD
-    {
-        public TGIBlockCTD(AApiVersionedFieldsCTD t) : base(t) { }
-
-        public class TGIBlockCTDConverter : ExpandableObjectConverter
-        {
-            AApiVersionedFieldsCTD t;
-            TGIBlockCTDConverter(AApiVersionedFieldsCTD t) { this.t = t; }
-
-            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
-            {
-                if (sourceType.Equals(typeof(string))) return true;
-                return base.CanConvertFrom(context, sourceType);
-            }
-
-            public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
-            {
-                if (value.GetType().Equals(typeof(string)))
-                {
-                    try
-                    {
-                        s3pi.Extensions.TGIN tgin = new s3pi.Extensions.TGIN();
-                        tgin = (string)value;
-                        t["ResourceType"] = new TypedValue(typeof(uint), (uint)tgin.ResType, "X");
-                        t["ResourceGroup"] = new TypedValue(typeof(uint), (uint)tgin.ResGroup, "X");
-                        t["Instance"] = new TypedValue(typeof(ulong), (ulong)tgin.ResInstance, "X");
-                    }
-                    catch { }
-                    return t.Value;
-                }
-                return base.ConvertFrom(context, culture, value);
-            }
-
-            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-            {
-                if (destinationType.Equals(typeof(string))) return true;
-                return base.CanConvertTo(context, destinationType);
-            }
-
-            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
-            {
-                if (destinationType.Equals(typeof(string))) return "" + t.Value;
-                return base.ConvertTo(context, culture, value, destinationType);
-            }
-
-            public override bool GetPropertiesSupported(ITypeDescriptorContext context) { return base.GetPropertiesSupported(context); }
-            public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes) { return base.GetProperties(context, value, attributes); }
-            public override bool GetCreateInstanceSupported(ITypeDescriptorContext context) { return base.GetCreateInstanceSupported(context); }
-            public override object CreateInstance(ITypeDescriptorContext context, IDictionary propertyValues) { return base.CreateInstance(context, propertyValues); }
-            public override bool IsValid(ITypeDescriptorContext context, object value) { return base.IsValid(context, value); }
         }
     }
 
@@ -327,6 +280,91 @@ namespace S3PIDemoFE
                 }
                 return base.ConvertTo(context, culture, value, destinationType);
             }
+        }
+    }
+
+    [TypeConverter(typeof(AApiVersionedFieldsCTD.AApiVersionedFieldsCTDConverter))]
+    public class IListCTD : ICustomTypeDescriptor
+    {
+        AApiVersionedFields owner;
+        string field;
+        object component;
+        Type IListT;
+
+        public IListCTD(AApiVersionedFields owner, string field, object component)
+        {
+            this.owner = owner; this.field = field; this.component = component;
+            IListT = owner[field].Type.GetGenericArguments()[0];
+        }
+
+
+        #region ICustomTypeDescriptor Members
+
+        public AttributeCollection GetAttributes() { return TypeDescriptor.GetAttributes(this, true); }
+
+        public string GetClassName() { return TypeDescriptor.GetClassName(this, true); }
+
+        public string GetComponentName() { return TypeDescriptor.GetComponentName(this, true); }
+
+        public TypeConverter GetConverter() { return TypeDescriptor.GetConverter(this, true); }
+
+        public EventDescriptor GetDefaultEvent() { return TypeDescriptor.GetDefaultEvent(this, true); }
+
+        public System.ComponentModel.PropertyDescriptor GetDefaultProperty() { return TypeDescriptor.GetDefaultProperty(this, true); }
+
+        public object GetEditor(Type editorBaseType) { return TypeDescriptor.GetEditor(this, editorBaseType, true); }
+
+        public EventDescriptorCollection GetEvents(Attribute[] attributes) { return TypeDescriptor.GetEvents(this, attributes, true); }
+
+        public EventDescriptorCollection GetEvents() { return TypeDescriptor.GetEvents(this, true); }
+
+        public PropertyDescriptorCollection GetProperties(Attribute[] attributes) { return GetProperties(); }
+
+        public PropertyDescriptorCollection GetProperties()
+        {
+            PropertyDescriptorCollection pc = new PropertyDescriptorCollection(null);
+            pc.Add(new PropertyDescriptor(owner, field, component, null));
+            return pc;
+        }
+
+        public object GetPropertyOwner(System.ComponentModel.PropertyDescriptor pd) { return this; }
+
+        #endregion
+
+        public class PropertyDescriptor : System.ComponentModel.PropertyDescriptor
+        {
+            AApiVersionedFields owner;
+            string field;
+            object component;
+            Type IListT;
+
+            public PropertyDescriptor(AApiVersionedFields owner, string field, object component, Attribute[] attr)
+                : base(field, attr)
+            {
+                this.owner = owner; this.field = field; this.component = component;
+                IListT = owner[field].Type.GetGenericArguments()[0];
+            }
+
+            public override string Name { get { return field; } }
+
+            public override bool CanResetValue(object component) { return false; }
+
+            public override void ResetValue(object component) { throw new InvalidOperationException(); }
+
+            public override Type PropertyType { get { return IListT.MakeArrayType(); } }
+
+            public override object GetValue(object component)
+            {
+                return PropertyType.InvokeMember(null, System.Reflection.BindingFlags.CreateInstance, null, null, new object[] { (ICollection)owner[field].Value });
+            }
+
+            public override bool IsReadOnly { get { return true; } }
+
+            public override void SetValue(object component, object value) { throw new InvalidOperationException(); }
+
+            public override Type ComponentType { get { return null; } }
+
+            public override bool ShouldSerializeValue(object component) { return true; }
         }
     }
 }
