@@ -5,9 +5,6 @@
 !ifndef TARGET
   !error "Caller didn't define TARGET"
 !endif
-!ifndef S3PIVERSION
-  !error "Caller didn't define S3PIVERSION"
-!endif  
 !cd ${TARGET}
 
 XPStyle on
@@ -17,7 +14,6 @@ Var wasInUse
 Var wantAll
 Var wantSM
 Var delSettings
-Var s3piDir
 
 
 Name "${PROGRAM_NAME}"
@@ -38,12 +34,6 @@ Page directory
 ;Var StartMenuFolder
 ;!insertmacro MUI_PAGE_STARTMENU "Application" $StartMenuFolder
 Page instfiles
-
-UninstPage uninstConfirm
-PageEx un.components
-  ComponentText "Select the uninstallation options.  Click Next to continue." " " " "
-PageExEnd
-UninstPage instfiles
 
 Section "Install for all users"
   StrCpy $wantAll "Y"
@@ -71,10 +61,7 @@ gotAll:
 
   WriteUninstaller uninst-${tla}.exe
   
-  File /a S3PIDemoFE.exe gpl-3.0.txt ${tla}-Version.txt ;  thanks.txt
-
-  ReadRegStr $0 SHCTX Software\s3pi\s3pi "InstallDir"
-  CopyFiles /SILENT $0\s3pi.Template.Config $INSTDIR\S3PIDemoFE.exe.Config
+  File /a *.dll *.txt S3PIDemoFE.exe gpl-3.0.txt ${tla}-Version.txt ;  thanks.txt
 
   StrCmp "Y" $wantSM wantSM noWantSM
 wantSM:
@@ -82,40 +69,10 @@ wantSM:
   CreateShortCut "$SMPROGRAMS\${tla}\${tla}.lnk" "$INSTDIR\S3PIDemoFE.exe" "" "" "" SW_SHOWNORMAL "" "${PROGRAM_NAME}"
   CreateShortCut "$SMPROGRAMS\${tla}\Uninstall.lnk" "$INSTDIR\uninst-${tla}.exe" "" "" "" SW_SHOWNORMAL "" "Uninstall"
   CreateShortCut "$SMPROGRAMS\${tla}\${tla}-Version.lnk" "$INSTDIR\${tla}-Version.txt" "" "" "" SW_SHOWNORMAL "" "Show version"
-  CreateShortCut "$SMPROGRAMS\${tla}\s3pi-Version.lnk" "$0\s3pi-Version.txt" "" "" "" SW_SHOWNORMAL "" "Show library version"
 noWantSM:
 SectionEnd
 
-
-
-Section /o "un.Delete user settings"
-  StrCpy $delSettings "Y"
-SectionEnd
-
-
-Section "Uninstall"
-  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}"
-  DeleteRegKey HKCU Software\s3pi\${tla}
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}"
-  DeleteRegKey HKLM Software\s3pi\${tla}
- 
-  Delete $INSTDIR\S3PIDemoFE.exe*
-  Delete $INSTDIR\gpl-3.0.txt
-;  Delete $INSTDIR\thanks.txt
-  Delete $INSTDIR\${tla}-Version.txt
-  RMDir /r "$SMPROGRAMS\${tla}"
-
-  Delete $INSTDIR\uninst-${tla}.exe
-  StrCmp "Y" $delSettings DelSettings UninstallDone
-DelSettings:
-  Call un.InstallUserSettings
-UninstallDone:
-SectionEnd
-
-
 Function .onGUIInit
-  Call Checks3pi
-  Call Checks3piVersion
   Call GetInstDir
   Call CheckInUse
   Call CheckOldVersion
@@ -174,58 +131,36 @@ NotInstalled:
   ClearErrors
 FunctionEnd
 
-Function Checks3pi
-  ReadRegStr $s3piDir HKLM Software\s3pi\s3pi "InstallDir"
-  StrCmp "" $s3piDir NoCustomLM
-  IfFileExists "$s3piDir\s3pi.Interfaces.dll" DoneChecks3pi
-NoCustomLM:
-  ReadRegStr $s3piDir HKCU Software\s3pi\s3pi "InstallDir"
-  StrCmp "" $s3piDir DoneChecks3pi
-  IfFileExists "$s3piDir\s3pi.Interfaces.dll" DoneChecks3pi
-  MessageBox MB_OK "This program requires s3pi.  Please install the library first."
-  Quit
-DoneChecks3pi:
-FunctionEnd
 
-Function Checks3piVersion
-  Push $R0
-  Push $0
-  Push $1
-  Push $2
-  
-  ClearErrors
-  FileOpen $R0 "$s3piDir\s3pi-Version.txt" r
-  IfErrors Nos3piVersion
-  FileRead $R0 $0
-  FileClose $R0
-  
-  DetailPrint "s3pi Version installed: $0"
-  DetailPrint "s3pi Version required:  ${S3PIVERSION}"
 
-  StrCpy $1 $0 4
-  StrCpy $2 "${S3PIVERSION}" 4
-  IntCmp $1 $2 yymmequal NeedNew3piVersion DoneChecks3piVersion
-yymmequal:
-  StrCpy $1 $0 2 5
-  StrCpy $2 "${S3PIVERSION}" 2 5
-  IntCmp $1 $2 ddequal NeedNew3piVersion DoneChecks3piVersion
-ddequal:
-  StrCpy $1 $0 2 8
-  StrCpy $2 "${S3PIVERSION}" 2 8
-  IntCmp $1 $2 DoneChecks3piVersion NeedNew3piVersion DoneChecks3piVersion
 
-NeedNew3piVersion:
-  MessageBox MB_OK \
-    "This program requires s3pi library version\$\n${S3PIVERSION}$\nor later.  Please install that first."
-  Quit
-Nos3piVersion:
-  MessageBox MB_OK "This program requires s3pi.  Please install the library first."
-  Quit
-DoneChecks3piVersion:
-  Pop $1
-  Pop $0
-  Pop $R0
-FunctionEnd
+UninstPage uninstConfirm
+PageEx un.components
+  ComponentText "Select the uninstallation options.  Click Next to continue." " " " "
+PageExEnd
+UninstPage instfiles
+
+Section /o "un.Delete user settings"
+  StrCpy $delSettings "Y"
+SectionEnd
+
+Section "Uninstall"
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}"
+  DeleteRegKey HKCU Software\s3pi\${tla}
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}"
+  DeleteRegKey HKLM Software\s3pi\${tla}
+ 
+  Delete $INSTDIR\S3PIDemoFE.exe*
+  Delete $INSTDIR\gpl-3.0.txt
+  Delete $INSTDIR\${tla}-Version.txt
+  RMDir /r "$SMPROGRAMS\${tla}"
+
+  Delete $INSTDIR\uninst-${tla}.exe
+  StrCmp "Y" $delSettings DelSettings UninstallDone
+DelSettings:
+  Call un.InstallUserSettings
+UninstallDone:
+SectionEnd
 
 Function un.InstallUserSettings
   Push "S3PIDemoFE.exe_Url_*"

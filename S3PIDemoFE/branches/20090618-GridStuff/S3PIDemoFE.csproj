@@ -34,46 +34,39 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="s3pi.DemoPlugins, Version=906.19.14.24845, Culture=neutral, PublicKeyToken=95792da617faeee1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.DemoPlugins.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Extensions, Version=906.19.14.24843, Culture=neutral, PublicKeyToken=80159b679e88de38, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Interfaces, Version=906.19.14.24842, Culture=neutral, PublicKeyToken=596917de85953130, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Package, Version=906.19.14.24846, Culture=neutral, PublicKeyToken=b04bd8c032523d4e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.Package.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Settings, Version=906.19.14.24842, Culture=neutral, PublicKeyToken=b395e91fe381bfac, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.Settings.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.WrapperDealer, Version=906.19.14.24843, Culture=neutral, PublicKeyToken=27f8fcb7ad5fda58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.WrapperDealer.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Custom, Version=906.19.14.24842, Culture=neutral, PublicKeyToken=dbb438eea69badfa, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\System.Custom.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="System.Custom">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Common Files\s3pi\System.Custom.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="s3pi.DemoPlugins">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.DemoPlugins.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="s3pi.Extensions">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.Extensions.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="s3pi.Interfaces">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.Interfaces.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="s3pi.Package">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.Package.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="s3pi.Settings">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.Settings.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="s3pi.WrapperDealer">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Common Files\s3pi\s3pi.WrapperDealer.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\Configuration.cs">
@@ -221,12 +214,63 @@
     <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\s3pi\build\bin\Release\ComplateResources.txt">
+      <Link>ComplateResources.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\DemoPlugins.txt">
+      <Link>DemoPlugins.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\Extensions.txt">
+      <Link>Extensions.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\ImageResources.txt">
+      <Link>ImageResources.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.CatalogResource.dll">
+      <Link>s3pi.CatalogResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.ComplateResource.dll">
+      <Link>s3pi.ComplateResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.DefaultResource.dll">
+      <Link>s3pi.DefaultResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.ImageResource.dll">
+      <Link>s3pi.ImageResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.NameMapResource.dll">
+      <Link>s3pi.NameMapResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.ObjKeyResource.dll">
+      <Link>s3pi.ObjKeyResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.ScriptResource.dll">
+      <Link>s3pi.ScriptResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.TextResource.dll">
+      <Link>s3pi.TextResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\TextResources.txt">
+      <Link>TextResources.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="gpl-3.0.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -256,7 +300,6 @@ echo using System.Runtime.CompilerServices;
 echo using System.Runtime.InteropServices;
 echo /*"*/ [assembly: AssemblyVersion(%25version%25)] /*"*/
 )&gt;"$(ProjectDir)Properties\AssemblyVersion.cs"
-
-copy "$(CommonProgramFiles)\s3pi\s3pi.Template.Config" $(ProjectDir)app.config</PreBuildEvent>
+</PreBuildEvent>
   </PropertyGroup>
 </Project>
