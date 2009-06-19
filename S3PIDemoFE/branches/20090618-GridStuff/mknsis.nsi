@@ -2,10 +2,12 @@
 
 !define PROGRAM_NAME "Sims3 Demo Front End (S3PIDemoFE)"
 !define tla "S3PIDemoFE"
-!ifndef TARGET
-  !error "Caller didn't define TARGET"
+!ifndef INSTFILES
+  !error "Caller didn't define INSTFILES"
 !endif
-!cd ${TARGET}
+!ifndef UNINSTFILES
+  !error "Caller didn't define UNINSTFILES"
+!endif
 
 XPStyle on
 SetCompressor /SOLID LZMA
@@ -61,7 +63,8 @@ gotAll:
 
   WriteUninstaller uninst-${tla}.exe
   
-  File /a *.dll *.txt S3PIDemoFE.exe gpl-3.0.txt ${tla}-Version.txt ;  thanks.txt
+  !include ${INSTFILES}
+;  File /a *.dll *.txt S3PIDemoFE.exe gpl-3.0.txt ${tla}-Version.txt ;  thanks.txt
 
   StrCmp "Y" $wantSM wantSM noWantSM
 wantSM:
@@ -145,17 +148,24 @@ Section /o "un.Delete user settings"
 SectionEnd
 
 Section "Uninstall"
-  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}"
-  DeleteRegKey HKCU Software\s3pi\${tla}
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}"
-  DeleteRegKey HKLM Software\s3pi\${tla}
- 
-  Delete $INSTDIR\S3PIDemoFE.exe*
-  Delete $INSTDIR\gpl-3.0.txt
-  Delete $INSTDIR\${tla}-Version.txt
-  RMDir /r "$SMPROGRAMS\${tla}"
+  SetShellVarContext all
+  ClearErrors
+  Push $0
+  ReadRegStr $0 HKCU Software\s3pi\${tla} "InstallDir"
+  Pop $0
+  IfErrors notCU
+  SetShellVarContext current
+notCU:  
 
+  DeleteRegKey SHCTX Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}
+  DeleteRegKey SHCTX Software\s3pi\${tla}
+ 
+  RMDir /r $SMPROGRAMS\${tla}
+
+  !include ${UNINSTFILES}
   Delete $INSTDIR\uninst-${tla}.exe
+  RMDir $INSTDIR ; safe - will not delete unless folder empty
+
   StrCmp "Y" $delSettings DelSettings UninstallDone
 DelSettings:
   Call un.InstallUserSettings

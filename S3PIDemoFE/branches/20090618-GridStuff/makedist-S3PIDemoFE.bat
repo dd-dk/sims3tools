@@ -42,8 +42,21 @@ del /f %TargetName%-Version.txt
 popd
 
 7za x -o"%base%-%suffix%" "%out%%base%_%suffix%.7z"
-"%PROGRAMFILES%\nsis\makensis" "/DTARGET=%base%-%suffix%" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%.exe"
+pushd "%base%-%suffix%"
+(
+echo !cd %base%-%suffix%
+for %%f in (*) do echo File /a %%f
+) > ..\INSTFILES.txt
+
+(
+for %%f in (*) do echo Delete $INSTDIR\%%f
+) > UNINST.LOG
+attrib +r +h UNINST.LOG
+popd
+
+"%PROGRAMFILES%\nsis\makensis" "/DINSTFILES=INSTFILES.txt" "/DUNINSTFILES=UNINST.LOG" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%.exe"
 
 :done:
 rmdir /s/q %base%-%suffix%
+del INSTFILES.txt
 pause
