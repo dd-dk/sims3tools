@@ -61,7 +61,7 @@ gotAll:
 
   WriteUninstaller uninst-${tla}.exe
   
-  File /a *.dll *.txt S3PIDemoFE.exe S3PIDemoFE.exe.Config gpl-3.0.txt ${tla}-Version.txt ;  thanks.txt
+  File /a *.dll *.txt S3PIDemoFE.exe gpl-3.0.txt ${tla}-Version.txt ;  thanks.txt
 
   StrCmp "Y" $wantSM wantSM noWantSM
 wantSM:
