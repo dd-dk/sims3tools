@@ -206,7 +206,7 @@ namespace S3PIDemoFE
             Label res = new Label();
             res.Anchor = AnchorStyles.Left;
             res.AutoSize = true;
-            res.Text = "[" + resource[field].Type.Name + "]";
+            res.Text = "[" + AResource.GetContentFieldTypes(0, resource.GetType())[field].Name + "]";
             return res;
         }
 
@@ -214,8 +214,8 @@ namespace S3PIDemoFE
         {
             if (!resource.ContentFields.Contains(field))
                 throw new InvalidOperationException();
-            TextReader s = resource[field].Value as TextReader;
-            if (s == null)
+            Type t = AResource.GetContentFieldTypes(0, resource.GetType())[field];
+            if (!typeof(TextReader).IsAssignableFrom(t))
                 throw new InvalidCastException();
 
             saveFileDialog1.Filter = "Text files|*.txt;*.xml|All files|*.*";
@@ -223,7 +223,8 @@ namespace S3PIDemoFE
             if (dr != DialogResult.OK) return null;
 
             FileStream fs = new FileStream(saveFileDialog1.FileName, FileMode.Create, FileAccess.Write);
-            (new BinaryWriter(fs)).Write(s.ReadToEnd().ToCharArray());
+            TextReader r = resource[field].Value as TextReader;
+            (new BinaryWriter(fs)).Write(r.ReadToEnd().ToCharArray());
             fs.Close();
 
             return null;
@@ -233,8 +234,8 @@ namespace S3PIDemoFE
         {
             if (!resource.ContentFields.Contains(field))
                 throw new InvalidOperationException();
-            TextReader s = resource[field].Value as TextReader;
-            if (s == null)
+            Type t = AResource.GetContentFieldTypes(0, resource.GetType())[field];
+            if (!typeof(TextReader).IsAssignableFrom(t))
                 throw new InvalidCastException();
 
             openFileDialog1.Filter = "Text files|*.txt;*.xml|All files|*.*";
@@ -242,7 +243,7 @@ namespace S3PIDemoFE
             if (dr != DialogResult.OK) return null;
 
             FileStream fs = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read);
-            resource[field] = new TypedValue(resource[field].Type, new StreamReader(fs));
+            resource[field] = new TypedValue(t, new StreamReader(fs));
             fs.Close();
 
             this.Close();
@@ -254,8 +255,8 @@ namespace S3PIDemoFE
         {
             if (!resource.ContentFields.Contains(field))
                 throw new InvalidOperationException();
-            BinaryReader s = resource[field].Value as BinaryReader;
-            if (s == null)
+            Type t = AResource.GetContentFieldTypes(0, resource.GetType())[field];
+            if (!typeof(BinaryReader).IsAssignableFrom(t))
                 throw new InvalidCastException();
 
             saveFileDialog1.Filter = "All files|*.*";
@@ -263,7 +264,8 @@ namespace S3PIDemoFE
             if (dr != DialogResult.OK) return null;
 
             FileStream fs = new FileStream(saveFileDialog1.FileName, FileMode.Create, FileAccess.Write);
-            (new BinaryWriter(fs)).Write(s.ReadBytes((int)s.BaseStream.Length));
+            BinaryReader r = resource[field].Value as BinaryReader;
+            (new BinaryWriter(fs)).Write(r.ReadBytes((int)r.BaseStream.Length));
             fs.Close();
 
             return null;
@@ -273,8 +275,8 @@ namespace S3PIDemoFE
         {
             if (!resource.ContentFields.Contains(field))
                 throw new InvalidOperationException();
-            BinaryReader s = resource[field].Value as BinaryReader;
-            if (s == null)
+            Type t = AResource.GetContentFieldTypes(0, resource.GetType())[field];
+            if (!typeof(BinaryReader).IsAssignableFrom(t))
                 throw new InvalidCastException();
 
             openFileDialog1.Filter = "All files|*.*";
@@ -282,7 +284,7 @@ namespace S3PIDemoFE
             if (dr != DialogResult.OK) return null;
 
             FileStream fs = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read);
-            resource[field] = new TypedValue(resource[field].Type, new BinaryReader(fs));
+            resource[field] = new TypedValue(t, new BinaryReader(fs));
             fs.Close();
 
             this.Close();
