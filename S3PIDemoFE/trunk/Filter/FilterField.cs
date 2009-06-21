@@ -30,92 +30,71 @@ namespace S3PIDemoFE.Filter
     {
         TypedValue tvValue = null;
         TypedValue tvFilter = null;
-        bool internalchg = false;
 
         public FilterField()
         {
             InitializeComponent();
-            tbFilter.Enabled = ckbFilter.Checked;
         }
 
 
-        [Category("Behavior")]
+        [Category("Appearance")]
+        [Description("Indicate whether the filter field checkbox is checked")]
+        public bool Checked { get { return ckbFilter.Checked; } set { ckbFilter.Checked = value; } }
+
+        [Category("Appearance")]
+        [Description("Value to filter for")]
+        public TypedValue Filter
+        {
+            get { return tvFilter; }
+            set
+            {
+                if (value == null) throw new ArgumentNullException();
+                tvFilter = value;
+                tbApplied.Text = (tvFilter.Value == null) ? "*" : tvFilter;
+            }
+        }
+
+        [Category("Appearance")]
         [Description("Title for the field")]
         public string Title { get { return lbField.Text; } set { lbField.Text = value; } }
 
-        [Category("Behavior")]
-        [Description("Currently selected row value for the field")]
-        public TypedValue Value { get { return tvValue; } set { tvValue = value; if (tvValue != null) tbValue.Text = tvValue; } }
-
-        [Category("Behavior")]
-        [Description("Whether to field on the field")]
-        public bool EnableFilter { get { return ckbFilter.Checked; } set { ckbFilter.Checked = value; } }
-
-        [Category("Behavior")]
-        [Description("Value to filter for")]
-        public TypedValue Filter { get { return tvFilter; } set { tvFilter = value; internalchg = true; if (tvFilter != null) tbFilter.Text = tvFilter; internalchg = false;} }
-
-
-        [Description("Raised when the value of the filter changes")]
-        public event EventHandler FilterChanged;
-
-        
-        protected virtual void OnFilterChanged(object sender, EventArgs e) { if (FilterChanged != null) FilterChanged(sender, e); }
-
-        
-        private void ckbFilter_CheckedChanged(object sender, EventArgs e)
+        [Category("Appearance")]
+        [Description("Value being entered")]
+        public TypedValue Value
         {
-            tbFilter.Enabled = ckbFilter.Checked;
-            internalchg = true;
-            if (tbFilter.Enabled)
+            get { return tvValue; }
+            set
             {
-                tvFilter = new TypedValue(tvValue.Type, tvValue.Value, "X");
-                tbFilter.Text = tbValue.Text;
+                if (value == null) throw new ArgumentNullException();
+                tvValue = value;
+                tbEntry.Text = (tvValue.Value == null) ? "" : tvValue;
             }
-            else
-            {
-                tbFilter.Text = "";
-            }
-            internalchg = false;
-            OnFilterChanged(this, new EventArgs());
         }
 
-        private void tbFilter_TextChanged(object sender, EventArgs e)
+        /// <summary>
+        /// Set Value from Filter
+        /// </summary>
+        [Description("Set Value from Filter")]
+        public void Revise() { Value = Filter; }
+
+        /// <summary>
+        /// Set Filter from Value taking Checked into account
+        /// </summary>
+        [Description("Set Filter from Value taking Checked into account")]
+        public void Set() { Filter = Checked ? Value : Filter = new TypedValue(tvFilter.Type, null, "X"); }
+
+
+
+        private void tbEntry_Leave(object sender, EventArgs e)
         {
-            if (internalchg) return;
             try
             {
-                if (tvValue.Type.IsPrimitive)
-                {
-                    //Boolean, Byte, SByte, Int16, UInt16, Int32, UInt32, Int64, UInt64, IntPtr, UIntPtr, Char, Double, and Single
-                    if (tbFilter.Text.ToLower().StartsWith("0x"))
-                        tvFilter = new TypedValue(tvValue.Type, Convert.ChangeType(UInt64.Parse(tbFilter.Text.Substring(2), System.Globalization.NumberStyles.HexNumber), tvValue.Type), "X");
-                    else
-                        tvFilter = new TypedValue(tvValue.Type, Convert.ChangeType(Int64.Parse(tbFilter.Text, System.Globalization.NumberStyles.Number), tvValue.Type), "X");
-                }
-                /*else if (tvValue.Type.IsArray)
-                {
-                }
-                else if (tvValue.Type.IsClass)
-                {
-                    tvFilter = new TypedValue(tvValue.Type, Convert.ChangeType(tbFilter.Text, tvValue.Type));
-                }/**/
-                else if (tvValue.Type.IsEnum)
-                {
-                    tvFilter = new TypedValue(tvValue.Type, Enum.Parse(tvValue.Type, tbFilter.Text), "X");
-                }
-                /*else if (tvValue.Type.IsValueType)
-                {
-                }/**/
-                else
-                    tvFilter = new TypedValue(tvValue.Type, Convert.ChangeType(tbFilter.Text, tvValue.Type), "X");
+                if (tbEntry.Text.Length == 0) { tvValue = new TypedValue(tvValue.Type, null, "X"); return; }
+                TypedValue tv = new TypedValue(tvValue.Type, Convert.ChangeType(Convert.ToUInt64(tbEntry.Text, tbEntry.Text.StartsWith("0x") ? 16 : 10), tvValue.Type), "X");
+                tvValue = tv;
             }
-            catch
-            {
-                tvFilter = new TypedValue(tvValue.Type, "", "X");
-                tbFilter.Text = "";
-            }
-            OnFilterChanged(this, new EventArgs());
+            catch (System.FormatException) { Value = tvValue; tbApplied.SelectAll(); }
+            catch (System.InvalidCastException) { Value = tvValue; tbApplied.SelectAll(); }
         }
     }
 }

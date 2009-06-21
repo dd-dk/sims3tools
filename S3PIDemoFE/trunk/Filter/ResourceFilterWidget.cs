@@ -53,6 +53,40 @@ namespace S3PIDemoFE.Filter
             }
         }
 
+        void SetFields()
+        {
+            Dictionary<string, Type> cft = AApiVersionedFields.GetContentFieldTypes(0, typeof(IResourceIndexEntry));
+            values = new Dictionary<string, FilterField>();
+            tlpResourceInfo.ColumnCount = fields.Count + 1;
+            tlpResourceInfo.RowCount = 1;
+            tlpResourceInfo.RowStyles.Clear();
+            tlpResourceInfo.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            tlpResourceInfo.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            tlpResourceInfo.ColumnStyles.Clear();
+            tlpResourceInfo.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            tlpResourceInfo.Controls.Add(tlpControls, 0, 0);
+            for (int i = 0; i < fields.Count; i++)
+            {
+                if (fields[i] == "Instance")
+                    tlpResourceInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 150));
+                else if (i > 5)
+                    tlpResourceInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 75));
+                else
+                    tlpResourceInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+                FilterField ff = new FilterField();
+                ff.Name = fields[i];
+                ff.Dock = DockStyle.Fill;
+                ff.Checked = false;
+                ff.Filter = new TypedValue(cft[fields[i]], null);
+                ff.Title = fields[i];
+                ff.Value = new TypedValue(cft[fields[i]], null);
+                ff.TabIndex = i + 2;
+                tlpResourceInfo.Controls.Add(ff, i + 1, 0);
+                values.Add(fields[i], ff);
+            }
+            tlpResourceInfo.PerformLayout();
+        }
+
         [Browsable(true)]
         [Category("Behavior")]
         [DefaultValue(false)]
@@ -68,8 +102,6 @@ namespace S3PIDemoFE.Filter
             {
                 if (ie == value) return;
                 ie = value;
-                foreach (string s in fields)
-                    values[s].Value = ie == null ? new TypedValue(typeof(string), "") : ie[s];
             }
         }
 
@@ -82,7 +114,7 @@ namespace S3PIDemoFE.Filter
             {
                 if (values == null) return new List<KeyValuePair<string, TypedValue>>();
                 List<KeyValuePair<string, TypedValue>> f = new List<KeyValuePair<string, TypedValue>>();
-                foreach(string s in fields) if (values[s].EnableFilter) f.Add(new KeyValuePair<string, TypedValue>(s, values[s].Filter));
+                foreach (string s in fields) if (values[s].Filter.Value != null) f.Add(new KeyValuePair<string, TypedValue>(s, values[s].Filter));
                 return f;
             }
             set
@@ -90,14 +122,14 @@ namespace S3PIDemoFE.Filter
                 if (values == null) return;
 
                 foreach (string s in values.Keys)
-                    values[s].EnableFilter = false;
+                    values[s].Checked = false;
 
                 foreach (KeyValuePair<string, TypedValue> kvp in value)
                 {
                     if (values.ContainsKey(kvp.Key))
                     {
-                        values[kvp.Key].EnableFilter = true;
-                        values[kvp.Key].Filter = kvp.Value;
+                        values[kvp.Key].Checked = true;
+                        values[kvp.Key].Value = kvp.Value;
                     }
                 }
             }
@@ -121,57 +153,21 @@ namespace S3PIDemoFE.Filter
         [Description("Raised when the value of the filter changes")]
         [Category("Property Changed")]
         public event EventHandler FilterChanged;
-
-        void SetFields()
-        {
-            Dictionary<string, Type> cft = AApiVersionedFields.GetContentFieldTypes(0, typeof(IResourceIndexEntry));
-            values = new Dictionary<string, FilterField>();
-            tlpResourceInfo.ColumnCount = fields.Count + 1;
-            tlpResourceInfo.RowCount = 1;
-            tlpResourceInfo.RowStyles.Clear();
-            tlpResourceInfo.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-            tlpResourceInfo.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-            tlpResourceInfo.ColumnStyles.Clear();
-            tlpResourceInfo.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-            tlpResourceInfo.Controls.Add(flpControls, 0, 0);
-            for (int i = 0; i < fields.Count; i++)
-            {
-                if (fields[i] == "Instance")
-                    tlpResourceInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 150));
-                else if (i > 5)
-                    tlpResourceInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 75));
-                else
-                    tlpResourceInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-                FilterField ff = new FilterField();
-                ff.Dock = DockStyle.Fill;
-                ff.Title = fields[i];
-                ff.Value = new TypedValue(cft[fields[i]], "");
-                ff.EnableFilter = false;
-                ff.Filter = new TypedValue(cft[fields[i]], "");
-                tlpResourceInfo.Controls.Add(ff, i + 1, 0);
-                values.Add(fields[i], ff);
-                ff.FilterChanged += new EventHandler(ff_FilterChanged);
-            }
-            tlpResourceInfo.PerformLayout();
-        }
-
         protected virtual void OnFilterChanged(object sender, EventArgs e) { if (FilterChanged != null) FilterChanged(sender, e); }
 
-        private void ckbFilter_CheckedChanged(object sender, EventArgs e)
-        {
-            OnFilterChanged(this, new EventArgs());
-        }
 
-        private void ff_FilterChanged(object sender, EventArgs e)
+        private void ckbFilter_CheckedChanged(object sender, EventArgs e) { OnFilterChanged(this, new EventArgs()); }
+
+        private void btnRevise_Click(object sender, EventArgs e) { foreach (KeyValuePair<string, FilterField> kvp in values) kvp.Value.Revise(); }
+
+        private void btnQBE_Click(object sender, EventArgs e) { if (ie == null || values == null) return; foreach (string s in fields) values[s].Value = ie[s]; }
+
+        private void btnSet_Click(object sender, EventArgs e)
         {
-            FilterField ff = sender as FilterField;
-            if (ff == null) return;
+            foreach (KeyValuePair<string, FilterField> kvp in values) kvp.Value.Set();
             if (ckbFilter.Checked) OnFilterChanged(this, new EventArgs());
         }
 
-        private void bw_ListUpdated(object sender, EventArgs e)
-        {
-            lbCount.Text = (sender as BrowserWidget).Count.ToString();
-        }
+        private void bw_ListUpdated(object sender, EventArgs e) { lbCount.Text = (sender as BrowserWidget).Count.ToString(); }
     }
 }

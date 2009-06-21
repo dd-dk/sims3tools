@@ -29,12 +29,17 @@
         private void InitializeComponent()
         {
             this.tlpResourceInfo = new System.Windows.Forms.TableLayoutPanel();
-            this.flpControls = new System.Windows.Forms.FlowLayoutPanel();
+            this.tlpControls = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
-            this.lbCount = new System.Windows.Forms.Label();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.btnSet = new System.Windows.Forms.Button();
+            this.btnRevise = new System.Windows.Forms.Button();
             this.ckbFilter = new System.Windows.Forms.CheckBox();
+            this.btnQBE = new System.Windows.Forms.Button();
+            this.lbCount = new System.Windows.Forms.Label();
             this.tlpResourceInfo.SuspendLayout();
-            this.flpControls.SuspendLayout();
+            this.tlpControls.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tlpResourceInfo
@@ -42,7 +47,7 @@
             this.tlpResourceInfo.ColumnCount = 2;
             this.tlpResourceInfo.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tlpResourceInfo.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tlpResourceInfo.Controls.Add(this.flpControls, 0, 0);
+            this.tlpResourceInfo.Controls.Add(this.tlpControls, 0, 0);
             this.tlpResourceInfo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tlpResourceInfo.Location = new System.Drawing.Point(0, 0);
             this.tlpResourceInfo.Name = "tlpResourceInfo";
@@ -52,53 +57,116 @@
             this.tlpResourceInfo.Size = new System.Drawing.Size(844, 150);
             this.tlpResourceInfo.TabIndex = 0;
             // 
-            // flpControls
+            // tlpControls
             // 
-            this.flpControls.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.flpControls.AutoSize = true;
-            this.flpControls.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.flpControls.Controls.Add(this.label1);
-            this.flpControls.Controls.Add(this.lbCount);
-            this.flpControls.Controls.Add(this.ckbFilter);
-            this.flpControls.Location = new System.Drawing.Point(3, 19);
-            this.flpControls.Name = "flpControls";
-            this.flpControls.Size = new System.Drawing.Size(90, 36);
-            this.flpControls.TabIndex = 1;
+            this.tlpControls.AutoSize = true;
+            this.tlpControls.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tlpControls.ColumnCount = 4;
+            this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tlpControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpControls.Controls.Add(this.label1, 0, 0);
+            this.tlpControls.Controls.Add(this.tableLayoutPanel1, 3, 0);
+            this.tlpControls.Controls.Add(this.lbCount, 1, 0);
+            this.tlpControls.Location = new System.Drawing.Point(3, 3);
+            this.tlpControls.Name = "tlpControls";
+            this.tlpControls.RowCount = 1;
+            this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpControls.Size = new System.Drawing.Size(247, 64);
+            this.tlpControls.TabIndex = 1;
             // 
             // label1
             // 
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(0, 0);
+            this.label1.Location = new System.Drawing.Point(0, 25);
             this.label1.Margin = new System.Windows.Forms.Padding(0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(41, 13);
-            this.label1.TabIndex = 0;
+            this.label1.TabIndex = 1;
             this.label1.Text = "Count: ";
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.AutoSize = true;
+            this.tableLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tableLayoutPanel1.ColumnCount = 2;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.Controls.Add(this.btnSet, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.btnRevise, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.ckbFilter, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.btnQBE, 1, 0);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(113, 3);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(131, 58);
+            this.tableLayoutPanel1.TabIndex = 3;
+            // 
+            // btnSet
+            // 
+            this.btnSet.AutoSize = true;
+            this.btnSet.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnSet.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnSet.Location = new System.Drawing.Point(89, 32);
+            this.btnSet.Name = "btnSet";
+            this.btnSet.Size = new System.Drawing.Size(39, 23);
+            this.btnSet.TabIndex = 4;
+            this.btnSet.Text = "Set";
+            this.btnSet.UseVisualStyleBackColor = true;
+            this.btnSet.Click += new System.EventHandler(this.btnSet_Click);
+            // 
+            // btnRevise
+            // 
+            this.btnRevise.AutoSize = true;
+            this.btnRevise.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnRevise.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnRevise.Location = new System.Drawing.Point(3, 3);
+            this.btnRevise.Name = "btnRevise";
+            this.btnRevise.Size = new System.Drawing.Size(80, 23);
+            this.btnRevise.TabIndex = 1;
+            this.btnRevise.Text = "Revise";
+            this.btnRevise.UseVisualStyleBackColor = true;
+            this.btnRevise.Click += new System.EventHandler(this.btnRevise_Click);
+            // 
+            // ckbFilter
+            // 
+            this.ckbFilter.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbFilter.AutoSize = true;
+            this.ckbFilter.Location = new System.Drawing.Point(3, 35);
+            this.ckbFilter.Name = "ckbFilter";
+            this.ckbFilter.Size = new System.Drawing.Size(80, 17);
+            this.ckbFilter.TabIndex = 3;
+            this.ckbFilter.Text = "Filter active";
+            this.ckbFilter.UseVisualStyleBackColor = true;
+            this.ckbFilter.CheckedChanged += new System.EventHandler(this.ckbFilter_CheckedChanged);
+            // 
+            // btnQBE
+            // 
+            this.btnQBE.AutoSize = true;
+            this.btnQBE.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnQBE.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnQBE.Location = new System.Drawing.Point(89, 3);
+            this.btnQBE.Name = "btnQBE";
+            this.btnQBE.Size = new System.Drawing.Size(39, 23);
+            this.btnQBE.TabIndex = 2;
+            this.btnQBE.Text = "QBE";
+            this.btnQBE.UseVisualStyleBackColor = true;
+            this.btnQBE.Click += new System.EventHandler(this.btnQBE_Click);
             // 
             // lbCount
             // 
             this.lbCount.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lbCount.AutoSize = true;
-            this.flpControls.SetFlowBreak(this.lbCount, true);
-            this.lbCount.Location = new System.Drawing.Point(41, 0);
+            this.lbCount.Location = new System.Drawing.Point(41, 25);
             this.lbCount.Margin = new System.Windows.Forms.Padding(0);
             this.lbCount.Name = "lbCount";
             this.lbCount.Size = new System.Drawing.Size(49, 13);
-            this.lbCount.TabIndex = 1;
+            this.lbCount.TabIndex = 2;
             this.lbCount.Text = "nnnnnnn";
-            // 
-            // ckbFilter
-            // 
-            this.ckbFilter.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ckbFilter.AutoSize = true;
-            this.ckbFilter.Location = new System.Drawing.Point(3, 16);
-            this.ckbFilter.Name = "ckbFilter";
-            this.ckbFilter.Size = new System.Drawing.Size(84, 17);
-            this.ckbFilter.TabIndex = 0;
-            this.ckbFilter.Text = "Enable Filter";
-            this.ckbFilter.UseVisualStyleBackColor = true;
-            this.ckbFilter.CheckedChanged += new System.EventHandler(this.ckbFilter_CheckedChanged);
             // 
             // ResourceFilterWidget
             // 
@@ -109,8 +177,10 @@
             this.Size = new System.Drawing.Size(844, 150);
             this.tlpResourceInfo.ResumeLayout(false);
             this.tlpResourceInfo.PerformLayout();
-            this.flpControls.ResumeLayout(false);
-            this.flpControls.PerformLayout();
+            this.tlpControls.ResumeLayout(false);
+            this.tlpControls.PerformLayout();
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -119,8 +189,12 @@
 
         private System.Windows.Forms.TableLayoutPanel tlpResourceInfo;
         private System.Windows.Forms.CheckBox ckbFilter;
-        private System.Windows.Forms.FlowLayoutPanel flpControls;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label lbCount;
+        private System.Windows.Forms.TableLayoutPanel tlpControls;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.Button btnSet;
+        private System.Windows.Forms.Button btnRevise;
+        private System.Windows.Forms.Button btnQBE;
     }
 }

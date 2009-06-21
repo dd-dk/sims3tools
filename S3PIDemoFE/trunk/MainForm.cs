@@ -39,7 +39,14 @@ namespace S3PIDemoFE
 
             browserWidget1.Sortable = controlPanel1.Sort;
             browserWidget1.DisplayResourceNames = controlPanel1.UseNames;
-            resourceFilterWidget1.Fields = browserWidget1.Fields = resourceFields1.Fields;
+
+            browserWidget1.Fields = resourceFields1.Fields;
+            List<string> fields = new List<string>(resourceFields1.Fields);
+            fields.Remove("Chunkoffset");
+            fields.Remove("Filesize");
+            fields.Remove("Memsize");
+            resourceFilterWidget1.Fields = fields;
+
             packageInfoWidget1.Fields = packageInfoFields1.Fields;
             this.PackageFilenameChanged += new EventHandler(MainForm_PackageFilenameChanged);
             this.PackageChanged += new EventHandler(MainForm_PackageChanged);
