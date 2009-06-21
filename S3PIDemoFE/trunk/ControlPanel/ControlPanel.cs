@@ -37,14 +37,14 @@ namespace S3PIDemoFE
             Sort = S3PIDemoFE.Properties.Settings.Default.Sort;
             AutoHex = S3PIDemoFE.Properties.Settings.Default.AutoHex;
             HexOnly = S3PIDemoFE.Properties.Settings.Default.HexOnly;
-            UseNames = S3PIDemoFE.Properties.Settings.Default.HexOnly;
+            UseNames = S3PIDemoFE.Properties.Settings.Default.UseNames;
         }
         public void ControlPanel_SaveSettings(object sender, EventArgs e)
         {
             S3PIDemoFE.Properties.Settings.Default.Sort = Sort;
             S3PIDemoFE.Properties.Settings.Default.AutoHex = AutoHex;
             S3PIDemoFE.Properties.Settings.Default.HexOnly = HexOnly;
-            S3PIDemoFE.Properties.Settings.Default.HexOnly = UseNames;
+            S3PIDemoFE.Properties.Settings.Default.UseNames = UseNames;
         }
 
         #region Sort checkbox
