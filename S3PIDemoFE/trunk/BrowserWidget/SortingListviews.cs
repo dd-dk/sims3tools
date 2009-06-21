@@ -26,14 +26,25 @@ namespace System.Windows.Forms
         /// </summary>
         public ListViewColumnSorter()
         {
-            // Initialize the column to '0'
-            ColumnToSort = 0;
-
-            // Initialize the sort order to 'none'
-            OrderOfSort = SortOrder.None;
-
             // Initialize the CaseInsensitiveComparer object
             ObjectCompare = new CaseInsensitiveComparer();
+
+            ListViewColumnSorter_LoadSettings();
+        }
+
+        void ListViewColumnSorter_LoadSettings()
+        {
+            ColumnToSort = S3PIDemoFE.Properties.Settings.Default.ColumnToSort;
+
+            OrderOfSort = Enum.IsDefined(typeof(SortOrder), S3PIDemoFE.Properties.Settings.Default.SortOrder)
+                ? (SortOrder)S3PIDemoFE.Properties.Settings.Default.SortOrder
+                : SortOrder.None;
+        }
+
+        public void ListViewColumnSorter_SaveSettings(object sender, EventArgs e)
+        {
+            S3PIDemoFE.Properties.Settings.Default.ColumnToSort = ColumnToSort;
+            S3PIDemoFE.Properties.Settings.Default.SortOrder = (int)OrderOfSort;
         }
 
         /// <summary>

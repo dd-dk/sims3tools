@@ -48,9 +48,17 @@ namespace S3PIDemoFE
         public BrowserWidget()
         {
             InitializeComponent();
+            BrowserWidget_LoadSettings();
+
             lvwColumnSorter = new ListViewColumnSorter();
             lookup = new Dictionary<IResourceIndexEntry, ListViewItem>();
             OnListUpdated(this, new EventArgs());
+        }
+
+        void BrowserWidget_LoadSettings() { }
+        public void BrowserWidget_SaveSettings(object sender, EventArgs e)
+        {
+            lvwColumnSorter.ListViewColumnSorter_SaveSettings(sender, e);
         }
 
         #region Methods

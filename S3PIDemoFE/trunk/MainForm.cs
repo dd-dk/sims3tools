@@ -34,6 +34,7 @@ namespace S3PIDemoFE
         public MainForm()
         {
             InitializeComponent();
+            MainForm_LoadSettings();
 
             this.Text = myName;
 
@@ -50,12 +51,51 @@ namespace S3PIDemoFE
             packageInfoWidget1.Fields = packageInfoFields1.Fields;
             this.PackageFilenameChanged += new EventHandler(MainForm_PackageFilenameChanged);
             this.PackageChanged += new EventHandler(MainForm_PackageChanged);
+
+            this.SaveSettings += new EventHandler(MainForm_SaveSettings);
+            this.SaveSettings += new EventHandler(browserWidget1.BrowserWidget_SaveSettings);
+            this.SaveSettings += new EventHandler(controlPanel1.ControlPanel_SaveSettings);
+        }
+
+        void MainForm_LoadSettings()
+        {
+            int h = S3PIDemoFE.Properties.Settings.Default.PersistentHeight;
+            if (h == -1) h = 4 * System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Height / 5;
+            this.Height = h;
+
+            int w = S3PIDemoFE.Properties.Settings.Default.PersistentWidth;
+            if (w == -1) w = 4 * System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Width / 5;
+            this.Width = w;
+
+            FormWindowState s =
+                Enum.IsDefined(typeof(FormWindowState), S3PIDemoFE.Properties.Settings.Default.FormWindowState)
+                ? (FormWindowState)S3PIDemoFE.Properties.Settings.Default.FormWindowState
+                : FormWindowState.Normal;
+            this.WindowState = s;
+        }
+
+        void MainForm_SaveSettings(object sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Normal)
+            {
+                S3PIDemoFE.Properties.Settings.Default.PersistentHeight = this.Height;
+                S3PIDemoFE.Properties.Settings.Default.PersistentWidth = this.Width;
+            }
+            else
+            {
+                S3PIDemoFE.Properties.Settings.Default.PersistentHeight = -1;
+                S3PIDemoFE.Properties.Settings.Default.PersistentWidth = -1;
+            }
+            S3PIDemoFE.Properties.Settings.Default.FormWindowState = (int)this.WindowState;
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             Filename = "";
             if (CurrentPackage != null) e.Cancel = true;
+
+            OnSaveSettings(this, new EventArgs());
+
             S3PIDemoFE.Properties.Settings.Default.Save();
         }
 
@@ -91,6 +131,10 @@ namespace S3PIDemoFE
             //menuBarWidget1.Enable(MenuBarWidget.MD.MBE, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBR, CurrentPackage != null);
         }
+
+        public event EventHandler SaveSettings;
+        protected virtual void OnSaveSettings(object sender, EventArgs e) { if (SaveSettings != null) SaveSettings(sender, e); }
+
 
         #region Package Filename
         string filename;

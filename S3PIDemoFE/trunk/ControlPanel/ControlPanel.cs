@@ -29,6 +29,22 @@ namespace S3PIDemoFE
         public ControlPanel()
         {
             InitializeComponent();
+            ControlPanel_LoadSettings();
+        }
+
+        void ControlPanel_LoadSettings()
+        {
+            Sort = S3PIDemoFE.Properties.Settings.Default.Sort;
+            AutoHex = S3PIDemoFE.Properties.Settings.Default.AutoHex;
+            HexOnly = S3PIDemoFE.Properties.Settings.Default.HexOnly;
+            UseNames = S3PIDemoFE.Properties.Settings.Default.HexOnly;
+        }
+        public void ControlPanel_SaveSettings(object sender, EventArgs e)
+        {
+            S3PIDemoFE.Properties.Settings.Default.Sort = Sort;
+            S3PIDemoFE.Properties.Settings.Default.AutoHex = AutoHex;
+            S3PIDemoFE.Properties.Settings.Default.HexOnly = HexOnly;
+            S3PIDemoFE.Properties.Settings.Default.HexOnly = UseNames;
         }
 
         #region Sort checkbox
