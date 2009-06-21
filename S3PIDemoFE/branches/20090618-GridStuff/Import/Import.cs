@@ -56,7 +56,7 @@ namespace S3PIDemoFE
         void importSingle(string filename)
         {
             ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) }) != null, true);
-            ir.Filename = fileImportDialog.FileName;
+            ir.Filename = filename;
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;
 
