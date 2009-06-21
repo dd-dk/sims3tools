@@ -45,7 +45,7 @@ namespace S3PIDemoFE
                 //Resource
                 addToolStripMenuItem, detailsToolStripMenuItem, compressedToolStripMenuItem,
                 //Help
-                aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
+                contentsToolStripMenuItem, aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
             UpdateMRUList();
         }
@@ -65,7 +65,7 @@ namespace S3PIDemoFE
             MBF_exit,
             MBE_cut, MBE_copy, MBE_paste,
             MBR_add, MBR_details, MBR_compressed,
-            MBH_about, MBH_warranty, MBH_licence,
+            MBH_contents, MBH_about, MBH_warranty, MBH_licence,
         }
 
         public void Enable(MD mn, bool state) { tsMD[(int)mn].Enabled = state; }

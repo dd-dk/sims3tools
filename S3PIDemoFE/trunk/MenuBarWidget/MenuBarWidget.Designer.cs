@@ -56,6 +56,8 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -180,7 +182,7 @@
             // mRUListToolStripMenuItem1
             // 
             this.mRUListToolStripMenuItem1.Name = "mRUListToolStripMenuItem1";
-            this.mRUListToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.mRUListToolStripMenuItem1.Size = new System.Drawing.Size(123, 22);
             this.mRUListToolStripMenuItem1.Text = "MRUList";
             // 
             // toolStripSeparator1
@@ -272,6 +274,8 @@
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.contentsToolStripMenuItem,
+            this.toolStripSeparator4,
             this.aboutToolStripMenuItem,
             this.warrantyToolStripMenuItem,
             this.licenceToolStripMenuItem});
@@ -283,23 +287,35 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.aboutToolStripMenuItem.Text = "&About...";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
             // 
             // warrantyToolStripMenuItem
             // 
             this.warrantyToolStripMenuItem.Name = "warrantyToolStripMenuItem";
-            this.warrantyToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.warrantyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.warrantyToolStripMenuItem.Text = "&Warranty...";
             this.warrantyToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
             // 
             // licenceToolStripMenuItem
             // 
             this.licenceToolStripMenuItem.Name = "licenceToolStripMenuItem";
-            this.licenceToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.licenceToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.licenceToolStripMenuItem.Text = "&Licence...";
             this.licenceToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
+            // 
+            // contentsToolStripMenuItem
+            // 
+            this.contentsToolStripMenuItem.Name = "contentsToolStripMenuItem";
+            this.contentsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.contentsToolStripMenuItem.Text = "Contents...";
+            this.contentsToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(149, 6);
             // 
             // MenuBarWidget
             // 
@@ -343,5 +359,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem mRUListToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mRUListToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem contentsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
     }
 }

@@ -1,11 +1,13 @@
 ;!include "MUI.nsh"
 
-!define PROGRAM_NAME "Sims3 Demo Front End (S3PIDemoFE)"
-!define tla "S3PIDemoFE"
-!ifndef TARGET
-  !error "Caller didn't define TARGET"
+!define PROGRAM_NAME "Sims3 Package Editor"
+!define tla "s3pe"
+!ifndef INSTFILES
+  !error "Caller didn't define INSTFILES"
 !endif
-!cd ${TARGET}
+!ifndef UNINSTFILES
+  !error "Caller didn't define UNINSTFILES"
+!endif
 
 XPStyle on
 SetCompressor /SOLID LZMA
@@ -17,7 +19,7 @@ Var delSettings
 
 
 Name "${PROGRAM_NAME}"
-InstallDir $PROGRAMFILES\S3PIDemoFE
+InstallDir $PROGRAMFILES\s3pe
 
 
 ; Request application privileges for Windows Vista
@@ -61,12 +63,13 @@ gotAll:
 
   WriteUninstaller uninst-${tla}.exe
   
-  File /a *.dll *.txt S3PIDemoFE.exe gpl-3.0.txt ${tla}-Version.txt ;  thanks.txt
+  !include ${INSTFILES}
+;  File /a *.dll *.txt s3pe.exe gpl-3.0.txt ${tla}-Version.txt
 
   StrCmp "Y" $wantSM wantSM noWantSM
 wantSM:
   CreateDirectory "$SMPROGRAMS\${tla}"
-  CreateShortCut "$SMPROGRAMS\${tla}\${tla}.lnk" "$INSTDIR\S3PIDemoFE.exe" "" "" "" SW_SHOWNORMAL "" "${PROGRAM_NAME}"
+  CreateShortCut "$SMPROGRAMS\${tla}\${tla}.lnk" "$INSTDIR\s3pe.exe" "" "" "" SW_SHOWNORMAL "" "${PROGRAM_NAME}"
   CreateShortCut "$SMPROGRAMS\${tla}\Uninstall.lnk" "$INSTDIR\uninst-${tla}.exe" "" "" "" SW_SHOWNORMAL "" "Uninstall"
   CreateShortCut "$SMPROGRAMS\${tla}\${tla}-Version.lnk" "$INSTDIR\${tla}-Version.txt" "" "" "" SW_SHOWNORMAL "" "Show version"
 noWantSM:
@@ -95,11 +98,11 @@ FunctionEnd
 Function CheckInUse
   StrCpy $wasInUse 0
 
-  IfFileExists "$INSTDIR\S3PIDemoFE.exe" Exists
+  IfFileExists "$INSTDIR\s3pe.exe" Exists
   Return
 Exists:
   ClearErrors
-  FileOpen $0 "$INSTDIR\S3PIDemoFE.exe" a
+  FileOpen $0 "$INSTDIR\s3pe.exe" a
   IfErrors InUse
   FileClose $0
   Return
@@ -107,10 +110,10 @@ InUse:
   StrCpy $wasInUse 1
 
   MessageBox MB_RETRYCANCEL|MB_ICONQUESTION \
-    "S3PIDemoFE.exe is running.$\r$\nPlease close it and retry.$\r$\n$INSTDIR\S3PIDemoFE.exe" \
+    "s3pe.exe is running.$\r$\nPlease close it and retry.$\r$\n$INSTDIR\s3pe.exe" \
     IDRETRY Exists
 
-  MessageBox MB_OK|MB_ICONSTOP "Cannot continue to install if S3PIDemoFE.exe is running."
+  MessageBox MB_OK|MB_ICONSTOP "Cannot continue to install if s3pe.exe is running."
   Quit
 FunctionEnd
 
@@ -145,17 +148,24 @@ Section /o "un.Delete user settings"
 SectionEnd
 
 Section "Uninstall"
-  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}"
-  DeleteRegKey HKCU Software\s3pi\${tla}
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}"
-  DeleteRegKey HKLM Software\s3pi\${tla}
- 
-  Delete $INSTDIR\S3PIDemoFE.exe*
-  Delete $INSTDIR\gpl-3.0.txt
-  Delete $INSTDIR\${tla}-Version.txt
+  SetShellVarContext all
+  ClearErrors
+  Push $0
+  ReadRegStr $0 HKCU Software\s3pi\${tla} "InstallDir"
+  Pop $0
+  IfErrors notCU
+  SetShellVarContext current
+notCU:  
+
+  DeleteRegKey SHCTX Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}
+  DeleteRegKey SHCTX Software\s3pi\${tla}
+
   RMDir /r "$SMPROGRAMS\${tla}"
 
+  !include ${UNINSTFILES}
   Delete $INSTDIR\uninst-${tla}.exe
+  RMDir $INSTDIR ; safe - will not delete unless folder empty
+
   StrCmp "Y" $delSettings DelSettings UninstallDone
 DelSettings:
   Call un.InstallUserSettings
@@ -163,7 +173,7 @@ UninstallDone:
 SectionEnd
 
 Function un.InstallUserSettings
-  Push "S3PIDemoFE.exe_Url_*"
+  Push "s3pe.exe_Url_*"
   Push "$LOCALAPPDATA"
 
   Push $0

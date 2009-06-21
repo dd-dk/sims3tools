@@ -30,7 +30,7 @@ namespace S3PIDemoFE
 {
     public partial class MainForm : Form
     {
-        const string myName = "S3PIDemoFE";
+        const string myName = "s3pe";
         public MainForm()
         {
             InitializeComponent();
@@ -587,12 +587,18 @@ namespace S3PIDemoFE
                 Application.DoEvents();
                 switch (mn.mn)
                 {
+                    case MenuBarWidget.MB.MBH_contents: helpContents(); break;
                     case MenuBarWidget.MB.MBH_about: helpAbout(); break;
                     case MenuBarWidget.MB.MBH_warranty: helpWarranty(); break;
                     case MenuBarWidget.MB.MBH_licence: helpLicence(); break;
                 }
             }
             finally { this.Enabled = true; }
+        }
+
+        private void helpContents()
+        {
+            Help.ShowHelp(this, "file:///" + Path.Combine(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "HelpFiles"), "Contents.htm"));
         }
 
         private void helpAbout()
