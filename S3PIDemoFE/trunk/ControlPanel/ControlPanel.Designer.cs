@@ -208,14 +208,14 @@ namespace S3PIDemoFE
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(161, 25);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(163, 25);
             this.tableLayoutPanel2.TabIndex = 8;
             // 
             // btnViewer
             // 
             this.btnViewer.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnViewer.Enabled = false;
-            this.btnViewer.Location = new System.Drawing.Point(52, 1);
+            this.btnViewer.Location = new System.Drawing.Point(54, 1);
             this.btnViewer.Margin = new System.Windows.Forms.Padding(0);
             this.btnViewer.Name = "btnViewer";
             this.btnViewer.Size = new System.Drawing.Size(50, 23);
@@ -228,7 +228,7 @@ namespace S3PIDemoFE
             // 
             this.btnEditor.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnEditor.Enabled = false;
-            this.btnEditor.Location = new System.Drawing.Point(110, 1);
+            this.btnEditor.Location = new System.Drawing.Point(112, 1);
             this.btnEditor.Margin = new System.Windows.Forms.Padding(0);
             this.btnEditor.Name = "btnEditor";
             this.btnEditor.Size = new System.Drawing.Size(50, 23);
@@ -243,9 +243,9 @@ namespace S3PIDemoFE
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(4, 6);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(44, 13);
+            this.label1.Size = new System.Drawing.Size(46, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Plugins:";
+            this.label1.Text = "Helpers:";
             // 
             // ControlPanel
             // 
