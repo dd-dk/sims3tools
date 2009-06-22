@@ -84,6 +84,12 @@
     <Compile Include="Import\ImportSettings.Designer.cs">
       <DependentUpon>ImportSettings.cs</DependentUpon>
     </Compile>
+    <Compile Include="New Grid\NewGridForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="New Grid\NewGridForm.Designer.cs">
+      <DependentUpon>NewGridForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyVersion.cs" />
     <Compile Include="BrowserWidget\BrowserWidget.cs">
       <SubType>UserControl</SubType>
@@ -196,6 +202,9 @@
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="New Grid\S3PIPropertyGrid.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Settings.cs" />
   </ItemGroup>
