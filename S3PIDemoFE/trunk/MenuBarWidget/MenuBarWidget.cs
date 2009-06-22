@@ -41,9 +41,10 @@ namespace S3PIDemoFE
                 saveCopyAsToolStripMenuItem, closeToolStripMenuItem, importToolStripMenuItem, exportToolStripMenuItem,
                 exitToolStripMenuItem,
                 //Edit
-                cutToolStripMenuItem, copyToolStripMenuItem, pasteToolStripMenuItem,
+                editCutToolStripMenuItem, editCopyToolStripMenuItem, editPasteToolStripMenuItem,
                 //Resource
-                addToolStripMenuItem, detailsToolStripMenuItem, compressedToolStripMenuItem,
+                addToolStripMenuItem, resCopyToolStripMenuItem1, resPasteToolStripMenuItem1, duplicateToolStripMenuItem,
+                compressedToolStripMenuItem, deletedToolStripMenuItem, detailsToolStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
@@ -64,13 +65,14 @@ namespace S3PIDemoFE
             MBF_saveCopyAs, MBF_close, MBF_import, MBF_export,
             MBF_exit,
             MBE_cut, MBE_copy, MBE_paste,
-            MBR_add, MBR_details, MBR_compressed,
+            MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_compressed, MBR_isdeleted, MBR_details,
             MBH_contents, MBH_about, MBH_warranty, MBH_licence,
         }
 
         public void Enable(MD mn, bool state) { tsMD[(int)mn].Enabled = state; }
         public void Enable(MB mn, bool state) { tsMB[(int)mn].Enabled = state; }
-        public void Checked(MB mn, bool state) { tsMB[(int)mn].Checked = state; }
+        public void Checked(MB mn, bool state) { tsMB[(int)mn].Checked = state; tsMB[(int)mn].CheckState = state ? CheckState.Checked : CheckState.Unchecked; }
+        public void Indeterminate(MB mn) { tsMB[(int)mn].CheckState = CheckState.Indeterminate; }
         public bool IsChecked(MB mn) { return tsMB[(int)mn].Checked; }
 
         public class MBDropDownOpeningEventArgs : EventArgs { public readonly MD mn; public MBDropDownOpeningEventArgs(MD mn) { this.mn = mn; } }

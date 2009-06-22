@@ -25,6 +25,8 @@ using System.Windows.Forms;
 using s3pi.Interfaces;
 using s3pi.Package;
 using s3pi.Extensions;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace S3PIDemoFE
 {
@@ -130,6 +132,7 @@ namespace S3PIDemoFE
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_close, CurrentPackage != null);
             //menuBarWidget1.Enable(MenuBarWidget.MD.MBE, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBR, CurrentPackage != null);
+            resourceDropDownOpening();
         }
 
         public event EventHandler SaveSettings;
@@ -361,6 +364,7 @@ namespace S3PIDemoFE
             if (rie == null) return null;
 
             rie.Compressed = (ushort)(compress ? 0xffff : 0);
+
             IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, false);
             package.ReplaceResource(rie, res); // Commit new resource to package
             IsPackageDirty = true;
@@ -430,16 +434,7 @@ namespace S3PIDemoFE
         #endregion
 
         #region Edit menu
-        private void editDropDownOpening()
-        {
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBE_paste, CurrentPackage != null &&
-                (
-                Clipboard.ContainsData(DataFormats.Serializable)
-                //|| Clipboard.ContainsFileDropList()
-                //|| Clipboard.ContainsText()
-                )
-            );
-        }
+        private void editDropDownOpening() { }
 
         private void menuBarWidget1_MBEdit_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
         {
@@ -457,58 +452,11 @@ namespace S3PIDemoFE
             finally { this.Enabled = true; }
         }
 
-        private void editCut()
-        {
-            editCopy();
-            if (browserWidget1.SelectedResource != null) package.DeleteResource(browserWidget1.SelectedResource);
-        }
+        private void editCut() { }
 
-        private void editCopy()
-        {
-            if (resource == null) return;
+        private void editCopy() { }
 
-            Application.UseWaitCursor = true;
-            Application.DoEvents();
-            try { Clipboard.SetData(DataFormats.Serializable, resource.Stream); }
-            finally { Application.UseWaitCursor = false; Application.DoEvents(); }
-        }
-
-        private void editPaste()
-        {
-            uint type, group;
-            ulong instance;
-            bool compress, overwrite;
-
-            if (browserWidget1.SelectedResource == null)
-            {
-                ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) }) != null, false);
-                DialogResult dr = ir.ShowDialog();
-                if (dr != DialogResult.OK) return;
-
-                if (ir.UseName && ir.ResourceName != null && ir.ResourceName.Length > 0)
-                    UpdateNameMap(ir.Instance, ir.ResourceName, true, ir.AllowRename);
-
-                type = ir.ResourceType;
-                group = ir.ResourceGroup;
-                instance = ir.Instance;
-                compress = ir.Compress;
-                overwrite = ir.Replace;
-            }
-            else
-            {
-                type = browserWidget1.SelectedResource.ResourceType;
-                group = browserWidget1.SelectedResource.ResourceGroup;
-                instance = browserWidget1.SelectedResource.Instance;
-                compress = browserWidget1.SelectedResource.Compressed != 0;
-                overwrite = true;
-            }
-
-            MemoryStream ms = null;
-            if (Clipboard.ContainsData(DataFormats.Serializable)) ms = Clipboard.GetData(DataFormats.Serializable) as MemoryStream;
-
-            IResourceIndexEntry rie = NewResource(type, group, instance, ms, overwrite, compress);
-            if (rie != null) browserWidget1.Add(rie);
-        }
+        private void editPaste() { }
         #endregion
 
         #region Resource menu
@@ -516,22 +464,58 @@ namespace S3PIDemoFE
         {
             try
             {
-                this.Enabled = false;
+                //this.Enabled = false;
                 Application.DoEvents();
                 switch (mn.mn)
                 {
                     case MenuBarWidget.MB.MBR_add: resourceAdd(); break;
-                    case MenuBarWidget.MB.MBR_details: resourceDetails(); break;
+                    case MenuBarWidget.MB.MBR_copy: resourceCopy(); break;
+                    case MenuBarWidget.MB.MBR_paste: resourcePaste(); break;
+                    case MenuBarWidget.MB.MBR_duplicate: resourceDuplicate(); break;
                     case MenuBarWidget.MB.MBR_compressed: resourceCompressed(); break;
+                    case MenuBarWidget.MB.MBR_isdeleted: resourceIsDeleted(); break;
+                    case MenuBarWidget.MB.MBR_details: resourceDetails(); break;
                 }
             }
-            finally { this.Enabled = true; }
+            finally { /*this.Enabled = true;/**/ }
         }
 
         private void resourceDropDownOpening()
         {
-            if (resource != null)
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_paste, CurrentPackage != null &&
+                (
+                Clipboard.ContainsData(myDataFormatSingleFile)
+                || Clipboard.ContainsData(myDataFormatBatch)
+                || Clipboard.ContainsFileDropList()
+                //|| Clipboard.ContainsText()
+                )
+            );
+            if (browserWidget1.SelectedResources.Count == 0)
+            {
+                menuBarWidget1.Checked(MenuBarWidget.MB.MBR_compressed, false);
+                menuBarWidget1.Checked(MenuBarWidget.MB.MBR_isdeleted, false);
+            }
+            else if (browserWidget1.SelectedResources.Count == 1)
+            {
                 menuBarWidget1.Checked(MenuBarWidget.MB.MBR_compressed, browserWidget1.SelectedResource.Compressed != 0);
+                menuBarWidget1.Checked(MenuBarWidget.MB.MBR_isdeleted, browserWidget1.SelectedResource.IsDeleted);
+            }
+            else
+            {
+                int state = 0;
+                foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources) if (rie.Compressed != 0) state++;
+                if (state > 0 && state != browserWidget1.SelectedResources.Count)
+                    menuBarWidget1.Indeterminate(MenuBarWidget.MB.MBR_compressed);
+                else
+                    menuBarWidget1.Checked(MenuBarWidget.MB.MBR_compressed, state == browserWidget1.SelectedResources.Count);
+
+                state = 0;
+                foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources) if (rie.IsDeleted) state++;
+                if (state > 0 && state != browserWidget1.SelectedResources.Count)
+                    menuBarWidget1.Indeterminate(MenuBarWidget.MB.MBR_isdeleted);
+                else
+                    menuBarWidget1.Checked(MenuBarWidget.MB.MBR_isdeleted, state == browserWidget1.SelectedResources.Count);
+            }
         }
 
         private void resourceAdd()
@@ -545,6 +529,88 @@ namespace S3PIDemoFE
 
             IResourceIndexEntry rie = NewResource(ir.ResourceType, ir.ResourceGroup, ir.Instance, null, ir.Replace, ir.Compress);
             browserWidget1.Add(rie);
+        }
+
+        //private void resourceCut() { resourceCopy(); if (browserWidget1.SelectedResource != null) package.DeleteResource(browserWidget1.SelectedResource); }
+
+        private void resourceCopy()
+        {
+            if (browserWidget1.SelectedResources.Count == 0) return;
+
+            Application.UseWaitCursor = true;
+            Application.DoEvents();
+            try
+            {
+                if (browserWidget1.SelectedResources.Count == 1)
+                {
+                    myDataFormat d = new myDataFormat();
+                    d.tgin = browserWidget1.SelectedResource as AResourceIndexEntry;
+                    d.data = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, browserWidget1.SelectedResource, false).AsBytes;
+
+                    IFormatter formatter = new BinaryFormatter();
+                    MemoryStream ms = new MemoryStream();
+                    formatter.Serialize(ms, d);
+                    DataFormats.Format f = DataFormats.GetFormat(myDataFormatSingleFile);
+                    Clipboard.SetData(myDataFormatSingleFile, ms);
+                }
+                else
+                {
+                    List<myDataFormat> l = new List<myDataFormat>();
+                    foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources)
+                    {
+                        myDataFormat d = new myDataFormat();
+                        d.tgin = rie as AResourceIndexEntry;
+                        d.data = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, false).AsBytes;
+                        l.Add(d);
+                    }
+
+                    IFormatter formatter = new BinaryFormatter();
+                    MemoryStream ms = new MemoryStream();
+                    formatter.Serialize(ms, l);
+                    DataFormats.Format f = DataFormats.GetFormat(myDataFormatBatch);
+                    Clipboard.SetData(myDataFormatBatch, ms);
+                }
+            }
+            finally { Application.UseWaitCursor = false; Application.DoEvents(); }
+        }
+
+        // For "resourcePaste()" see Import/Import.cs
+
+        private void resourceDuplicate()
+        {
+            if (resource == null) return;
+            byte[] buffer = resource.AsBytes;
+            MemoryStream ms = new MemoryStream();
+            ms.Write(buffer, 0, buffer.Length);
+
+            IResourceIndexEntry rie = CurrentPackage.AddResource(
+                browserWidget1.SelectedResource.ResourceType, browserWidget1.SelectedResource.ResourceGroup, browserWidget1.SelectedResource.Instance,
+                ms, false);
+            rie.Compressed = browserWidget1.SelectedResource.Compressed;
+
+            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, false);
+            package.ReplaceResource(rie, res); // Commit new resource to package
+            IsPackageDirty = true;
+
+            browserWidget1.Add(rie);
+        }
+
+        private void resourceCompressed()
+        {
+            foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources)
+            {
+                rie.Compressed = (ushort)(rie.Compressed == 0 ? 0xffff : 0);
+                IsPackageDirty = true;
+            }
+        }
+
+        private void resourceIsDeleted()
+        {
+            foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources)
+            {
+                rie.IsDeleted = !rie.IsDeleted;
+                IsPackageDirty = true;
+            }
         }
 
         private void resourceDetails()
@@ -568,12 +634,6 @@ namespace S3PIDemoFE
             browserWidget1.SelectedResource.ResourceGroup = ir.ResourceGroup;
             browserWidget1.SelectedResource.Instance = ir.Instance;
             browserWidget1.SelectedResource.Compressed = (ushort)(ir.Compress ? 0xffff : 0);
-            IsPackageDirty = true;
-        }
-
-        private void resourceCompressed()
-        {
-            browserWidget1.SelectedResource.Compressed = (ushort)(browserWidget1.SelectedResource.Compressed == 0 ? 0xffff : 0);
             IsPackageDirty = true;
         }
         #endregion
@@ -729,21 +789,15 @@ namespace S3PIDemoFE
             }
 
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_export, resource != null || browserWidget1.SelectedResources.Count > 0);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBE_cut, resource != null);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBE_copy, resource != null);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_compressed, resource != null);
+            //menuBarWidget1.Enable(MenuBarWidget.MB.MBE_cut, resource != null);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copy, resource != null || browserWidget1.SelectedResources.Count > 0);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_duplicate, resource != null);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_compressed, resource != null || browserWidget1.SelectedResources.Count > 0);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_isdeleted, resource != null || browserWidget1.SelectedResources.Count > 0);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_details, resource != null);
 
             resourceFilterWidget1.IndexEntry = browserWidget1.SelectedResource;
             hexWidget1.Stream = (controlPanel1.HexEnabled && controlPanel1.AutoHex && resource != null) ? resource.Stream : null;
-        }
-
-        private void browserWidget1_SelectedResourceDeleted(object sender, EventArgs e)
-        {
-            if (browserWidget1.SelectedResource != null)
-            {
-                package.DeleteResource(browserWidget1.SelectedResource);
-                IsPackageDirty = true;
-            }
         }
 
         private void browserWidget1_DragOver(object sender, DragEventArgs e)

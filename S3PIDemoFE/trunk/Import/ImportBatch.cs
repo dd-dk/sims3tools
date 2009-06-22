@@ -35,6 +35,15 @@ namespace S3PIDemoFE
         }
 
         public ImportBatch(string[] fileDrop) : this() { addDrop(fileDrop); }
+        public ImportBatch(IList<MainForm.myDataFormat> ldata)
+            :this()
+        {
+            this.AllowDrop = false;
+
+            string[] fileDrop = new string[ldata.Count];
+            for (int i = 0; i < ldata.Count; i++) fileDrop[i] = ldata[i].tgin;
+            addDrop(fileDrop);
+        }
 
         public string[] Batch { get { return (string[])batch.Clone(); } }
 

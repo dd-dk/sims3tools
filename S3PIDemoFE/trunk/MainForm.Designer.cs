@@ -108,7 +108,6 @@
             this.browserWidget1.Sortable = false;
             this.browserWidget1.TabIndex = 0;
             this.browserWidget1.DragOver += new System.Windows.Forms.DragEventHandler(this.browserWidget1_DragOver);
-            this.browserWidget1.SelectedResourceDeleted += new System.EventHandler(this.browserWidget1_SelectedResourceDeleted);
             this.browserWidget1.DragDrop += new System.Windows.Forms.DragEventHandler(this.browserWidget1_DragDrop);
             this.browserWidget1.ItemActivate += new System.EventHandler(this.browserWidget1_ItemActivate);
             this.browserWidget1.SelectedResourceChanging += new System.EventHandler<S3PIDemoFE.BrowserWidget.ResourceChangingEventArgs>(this.browserWidget1_SelectedResourceChanging);

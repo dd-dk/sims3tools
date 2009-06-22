@@ -257,11 +257,6 @@ namespace S3PIDemoFE
         [Category("Property Changed")]
         [Description("Raised when the selection changes")]
         public event EventHandler<ResourceChangedEventArgs> SelectedResourceChanged;
-
-        [Browsable(true)]
-        [Category("Property Changed")]
-        [Description("Raised when the user presses DELETE with a resource selected")]
-        public event EventHandler SelectedResourceDeleted;
         #endregion
 
         #region Sub-classes
@@ -419,8 +414,6 @@ namespace S3PIDemoFE
 
         protected virtual void OnSelectedResourceChanged(object sender, ResourceChangedEventArgs e) { if (SelectedResourceChanged != null) SelectedResourceChanged(sender, e); }
 
-        protected virtual void OnSelectedResourceDeleted(object sender, EventArgs e) { if (SelectedResourceDeleted != null) SelectedResourceDeleted(sender, e); }
-
 
         private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(sender, e); }
 
@@ -481,18 +474,6 @@ namespace S3PIDemoFE
             finally { Application.UseWaitCursor = false; Application.DoEvents(); listView1.EndUpdate(); }
             if (listView1.SelectedIndices.Count > 0)
                 listView1.SelectedItems[0].EnsureVisible();
-        }
-
-        private void listView1_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (listView1.SelectedIndices.Count == 0) return;
-            switch (e.KeyCode)
-            {
-                case System.Windows.Forms.Keys.Delete:
-                    e.Handled = true;
-                    OnSelectedResourceDeleted(this, new EventArgs());
-                    break;
-            }
         }
 
         private void BrowserWidget_ResourceIndexEntryChanged(object sender, EventArgs e)
