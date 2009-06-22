@@ -490,32 +490,46 @@ namespace S3PIDemoFE
                 //|| Clipboard.ContainsText()
                 )
             );
-            if (browserWidget1.SelectedResources.Count == 0)
-            {
-                menuBarWidget1.Checked(MenuBarWidget.MB.MBR_compressed, false);
-                menuBarWidget1.Checked(MenuBarWidget.MB.MBR_isdeleted, false);
-            }
-            else if (browserWidget1.SelectedResources.Count == 1)
-            {
-                menuBarWidget1.Checked(MenuBarWidget.MB.MBR_compressed, browserWidget1.SelectedResource.Compressed != 0);
-                menuBarWidget1.Checked(MenuBarWidget.MB.MBR_isdeleted, browserWidget1.SelectedResource.IsDeleted);
-            }
-            else
-            {
-                int state = 0;
-                foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources) if (rie.Compressed != 0) state++;
-                if (state > 0 && state != browserWidget1.SelectedResources.Count)
-                    menuBarWidget1.Indeterminate(MenuBarWidget.MB.MBR_compressed);
-                else
-                    menuBarWidget1.Checked(MenuBarWidget.MB.MBR_compressed, state == browserWidget1.SelectedResources.Count);
 
-                state = 0;
-                foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources) if (rie.IsDeleted) state++;
-                if (state > 0 && state != browserWidget1.SelectedResources.Count)
-                    menuBarWidget1.Indeterminate(MenuBarWidget.MB.MBR_isdeleted);
-                else
-                    menuBarWidget1.Checked(MenuBarWidget.MB.MBR_isdeleted, state == browserWidget1.SelectedResources.Count);
-            }
+            CheckState res = CompressedCheckState();
+            if (res == CheckState.Indeterminate)
+                menuBarWidget1.Indeterminate(MenuBarWidget.MB.MBR_compressed);
+            else
+                menuBarWidget1.Checked(MenuBarWidget.MB.MBR_compressed, res == CheckState.Checked);
+
+            res = IsDeletedCheckState();
+            if (res == CheckState.Indeterminate)
+                menuBarWidget1.Indeterminate(MenuBarWidget.MB.MBR_isdeleted);
+            else
+                menuBarWidget1.Checked(MenuBarWidget.MB.MBR_isdeleted, res == CheckState.Checked);
+        }
+        private CheckState CompressedCheckState()
+        {
+            if (browserWidget1.SelectedResources.Count == 0)
+                return CheckState.Unchecked;
+            else if (browserWidget1.SelectedResources.Count == 1)
+                return browserWidget1.SelectedResource.Compressed != 0 ? CheckState.Checked : CheckState.Unchecked;
+
+            int state = 0;
+            foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources) if (rie.Compressed != 0) state++;
+            if (state == 0 || state == browserWidget1.SelectedResources.Count)
+                return state == browserWidget1.SelectedResources.Count ? CheckState.Checked : CheckState.Unchecked;
+
+            return CheckState.Indeterminate;
+        }
+        private CheckState IsDeletedCheckState()
+        {
+            if (browserWidget1.SelectedResources.Count == 0)
+                return CheckState.Unchecked;
+            else if (browserWidget1.SelectedResources.Count == 1)
+                return browserWidget1.SelectedResource.IsDeleted ? CheckState.Checked : CheckState.Unchecked;
+
+            int state = 0;
+            foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources) if (rie.IsDeleted) state++;
+            if (state == 0 || state == browserWidget1.SelectedResources.Count)
+                return state == browserWidget1.SelectedResources.Count ? CheckState.Checked : CheckState.Unchecked;
+            
+            return CheckState.Indeterminate;
         }
 
         private void resourceAdd()
@@ -597,19 +611,23 @@ namespace S3PIDemoFE
 
         private void resourceCompressed()
         {
+            ushort target = 0xffff;
+            if (CompressedCheckState() == CheckState.Checked) target = 0;
             foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources)
             {
-                rie.Compressed = (ushort)(rie.Compressed == 0 ? 0xffff : 0);
-                IsPackageDirty = true;
+                IsPackageDirty = !isPackageDirty || rie.Compressed != target;
+                rie.Compressed = target;
             }
         }
 
         private void resourceIsDeleted()
         {
+            bool target = true;
+            if (IsDeletedCheckState() == CheckState.Checked) target = false;
             foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources)
             {
-                rie.IsDeleted = !rie.IsDeleted;
-                IsPackageDirty = true;
+                IsPackageDirty = !isPackageDirty || rie.IsDeleted != target;
+                rie.IsDeleted = target;
             }
         }
 
