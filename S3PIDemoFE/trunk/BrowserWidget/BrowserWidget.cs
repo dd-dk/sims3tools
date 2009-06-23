@@ -300,7 +300,7 @@ namespace S3PIDemoFE
                 ach[i] = new ColumnHeader();
                 ach[i].DisplayIndex = i;
                 ach[i].Text = ach[i].Name = fields[i - 1].Replace("Resource", "");
-                ach[i].Width = 80;
+                ach[i].Width = ach[i].Text.Equals("Instance") ? 140 : 80;
                 listView1.Columns.Add(ach[i]);
             }
         }
@@ -315,6 +315,8 @@ namespace S3PIDemoFE
             Application.UseWaitCursor = true;
             Application.DoEvents();
             this.listView1.ListViewItemSorter = null;
+            this.listView1.Enabled = false;
+            List<ListViewItem> llvi = new List<ListViewItem>();
             try
             {
                 listView1.Items.Clear();
@@ -335,7 +337,7 @@ namespace S3PIDemoFE
                         {
                             ListViewItem lvi = CreateItem(ie);
                             if (lvi == null) continue;
-                            listView1.Items.Add(lvi);
+                            llvi.Add(lvi);
                             lookup.Add(ie, lvi);
                         }
                         finally
@@ -350,6 +352,8 @@ namespace S3PIDemoFE
             finally
             {
                 this.listView1.ListViewItemSorter = cmp;
+                listView1.Items.AddRange(llvi.ToArray());
+                this.listView1.Enabled = true;
                 Application.UseWaitCursor = false;
                 Application.DoEvents();
                 if (sie != null && lookup.ContainsKey(sie))
@@ -465,13 +469,14 @@ namespace S3PIDemoFE
 
             // Perform the sort with these new sort options.
             listView1.BeginUpdate();
+            listView1.Enabled = false;
             Application.UseWaitCursor = true;
             Application.DoEvents();
             try
             {
                 this.listView1.Sort();
             }
-            finally { Application.UseWaitCursor = false; Application.DoEvents(); listView1.EndUpdate(); }
+            finally { Application.UseWaitCursor = false; Application.DoEvents(); listView1.Enabled = true; listView1.EndUpdate(); }
             if (listView1.SelectedIndices.Count > 0)
                 listView1.SelectedItems[0].EnsureVisible();
         }
@@ -543,11 +548,12 @@ namespace S3PIDemoFE
             UpdateList();
             if (resourceList == null) return;
 
-            listView1.BeginUpdate();
+            //removed for speed; made Instance column wider by default
+            /*listView1.BeginUpdate();
             if (listView1.Items.Count > 0)
                 for (int i = 1; i < listView1.Columns.Count; i++)
                     listView1.Columns[i].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
-            listView1.EndUpdate();
+            listView1.EndUpdate();/**/
         }
     }
 }
