@@ -24,6 +24,7 @@ using System.Windows.Forms;
 using s3pi.Interfaces;
 using System.Collections;
 using System.Drawing.Design;
+using System.Reflection;
 
 namespace S3PIDemoFE
 {
@@ -52,7 +53,15 @@ namespace S3PIDemoFE
 
         #region ICustomTypeDescriptor Members
 
-        public AttributeCollection GetAttributes() { return TypeDescriptor.GetAttributes(this, true); }
+        public AttributeCollection GetAttributes()
+        {
+            AttributeCollection ac = TypeDescriptor.GetAttributes(this, true);
+            if (ac.Contains(new TypeConverterAttribute(typeof(AApiVersionedFieldsCTDConverter)))) return ac;
+            Attribute[] newAttrs = new Attribute[ac.Count + 1];
+            newAttrs[0] = new TypeConverterAttribute(typeof(AApiVersionedFieldsCTDConverter));
+            ac.CopyTo(newAttrs, 1);
+            return new AttributeCollection(newAttrs);
+        }
 
         public string GetClassName() { return TypeDescriptor.GetClassName(this, true); }
 
@@ -119,7 +128,7 @@ namespace S3PIDemoFE
                         catch { }
                     if (t.IsValueType) return t; // It's a struct
                     if (t.Name.StartsWith("IList`") && typeof(AApiVersionedFields).IsAssignableFrom(t.GetGenericArguments()[0]))
-                        return typeof(IList<AApiVersionedFieldsCTD>);
+                        return typeof(IListCTD);
                     if (typeof(AApiVersionedFields).IsAssignableFrom(t)) return typeof(AApiVersionedFieldsCTD);
                     //if (typeof(Boolset).IsAssignableFrom(t)) return t; Hmm...
                     return t;
@@ -130,7 +139,7 @@ namespace S3PIDemoFE
             {
                 Type t = PropertyType;
                 if (t.Equals(typeof(AsHexConverterCTD))) return new AsHexConverterCTD(owner, field, component);
-                if (t.Equals(typeof(IList<AApiVersionedFieldsCTD>))) return new IListCTD(owner, field, component);
+                if (t.Equals(typeof(IListCTD))) return new IListCTD(owner, field, component);
                 if (t.Equals(typeof(AApiVersionedFieldsCTD))) return new AApiVersionedFieldsCTD((AApiVersionedFields)owner[field].Value);
                 return owner[field].Value;
             }
@@ -283,20 +292,160 @@ namespace S3PIDemoFE
         }
     }
 
-    [TypeConverter(typeof(AApiVersionedFieldsCTD.AApiVersionedFieldsCTDConverter))]
-    public class IListCTD : ICustomTypeDescriptor
+    public class IListCTD : IList, ICollection, IEnumerable, IEnumerator, ICustomTypeDescriptor
     {
-        AApiVersionedFields owner;
-        string field;
-        object component;
-        Type IListT;
+        protected AApiVersionedFields owner;
+        protected string field;
+        protected object component;
+
+        protected TypedValue tv; // tv.Value is the list
+        protected Type TIList;
+        protected Type IListT;
 
         public IListCTD(AApiVersionedFields owner, string field, object component)
         {
             this.owner = owner; this.field = field; this.component = component;
-            IListT = owner[field].Type.GetGenericArguments()[0];
+            tv = owner[field];
+            TIList = tv.Value.GetType();
+            IListT = tv.Type.GetGenericArguments()[0];
         }
 
+        #region IList Members
+
+        public object this[int index]
+        {
+            get
+            {
+                System.Reflection.MethodInfo m = TIList.GetMethod("get_Item", new Type[] { typeof(int) });
+                object o = m.Invoke(tv.Value, new object[] { index });
+                return new AApiVersionedFieldsCTD((AApiVersionedFields)o);
+            }
+            set
+            {
+                object o = value;
+                if (typeof(AApiVersionedFieldsCTD).IsAssignableFrom(value.GetType())) o = ((AApiVersionedFieldsCTD)value).Value;
+                if (!IListT.IsAssignableFrom(value.GetType())) throw new InvalidCastException();
+                System.Reflection.MethodInfo m = TIList.GetMethod("set_Item", new Type[] { typeof(int), IListT });
+                m.Invoke(tv.Value, new object[] { index, value });
+            }
+        }
+
+        public int Add(object value)
+        {
+            if (!IListT.IsAssignableFrom(value.GetType())) throw new InvalidCastException();
+            System.Reflection.MethodInfo m = TIList.GetMethod("Add", new Type[] { IListT });
+            m.Invoke(tv.Value, new object[] { value });
+            return Count - 1;
+        }
+
+        public void Clear()
+        {
+            System.Reflection.MethodInfo m = TIList.GetMethod("Clear", new Type[] { });
+            m.Invoke(tv.Value, new object[] { });
+        }
+
+        public bool Contains(object value)
+        {
+            System.Reflection.MethodInfo m = TIList.GetMethod("Contains", new Type[] { value.GetType() });
+            return (bool)m.Invoke(tv.Value, new object[] { value });
+        }
+
+        public int IndexOf(object value)
+        {
+            System.Reflection.MethodInfo m = TIList.GetMethod("IndexOf", new Type[] { value.GetType() });
+            return (int)m.Invoke(tv.Value, new object[] { value });
+        }
+
+        public void Insert(int index, object value)
+        {
+            System.Reflection.MethodInfo m = TIList.GetMethod("Insert", new Type[] { typeof(int), value.GetType() });
+            m.Invoke(tv.Value, new object[] { index, value });
+        }
+
+        public bool IsFixedSize
+        {
+            get
+            {
+                System.Reflection.MethodInfo m = TIList.GetMethod("get_IsFixedSize", new Type[] { });
+                return (bool)m.Invoke(tv.Value, new object[] { });
+            }
+        }
+
+        public bool IsReadOnly { get { return false; } }
+
+        public void Remove(object value)
+        {
+            if (!IListT.IsAssignableFrom(value.GetType())) throw new InvalidCastException();
+            System.Reflection.MethodInfo m = TIList.GetMethod("Remove", new Type[] { IListT });
+            m.Invoke(tv.Value, new object[] { value });
+        }
+
+        public void RemoveAt(int index)
+        {
+            System.Reflection.MethodInfo m = TIList.GetMethod("RemoveAt", new Type[] { typeof(int) });
+            m.Invoke(tv.Value, new object[] { index });
+        }
+
+        #endregion
+
+        #region ICollection Members
+
+        public void CopyTo(Array array, int index)
+        {
+            System.Reflection.MethodInfo m = TIList.GetMethod("CopyTo", new Type[] { array.GetType(), typeof(int) });
+            m.Invoke(tv.Value, new object[] { array, index });
+        }
+
+        public int Count
+        {
+            get
+            {
+                System.Reflection.MethodInfo m = TIList.GetMethod("get_Count", new Type[] { });
+                return (int)m.Invoke(tv.Value, new object[] { });
+            }
+        }
+
+        public bool IsSynchronized
+        {
+            get
+            {
+                System.Reflection.MethodInfo m = TIList.GetMethod("get_IsSynchronized", new Type[] { });
+                return (bool)m.Invoke(tv.Value, new object[] { });
+            }
+        }
+
+        public object SyncRoot
+        {
+            get
+            {
+                System.Reflection.MethodInfo m = TIList.GetMethod("get_SyncRoot", new Type[] { });
+                return m.Invoke(tv.Value, new object[] { });
+            }
+        }
+
+        #endregion
+
+        #region IEnumerable Members
+
+        public IEnumerator GetEnumerator()
+        {
+            return this;
+            //System.Reflection.MethodInfo m = TIList.GetMethod("GetEnumerator", new Type[] { });
+            //return (IEnumerator)m.Invoke(tv.Value, new object[] { });
+        }
+
+        #endregion
+
+        #region IEnumerator Members
+
+        int enumeratorCurrent = -1;
+        public object Current { get { return this[enumeratorCurrent]; } }
+
+        public bool MoveNext() { enumeratorCurrent++; return enumeratorCurrent < Count; }
+
+        public void Reset() { enumeratorCurrent = -1; }
+
+        #endregion
 
         #region ICustomTypeDescriptor Members
 
@@ -323,7 +472,9 @@ namespace S3PIDemoFE
         public PropertyDescriptorCollection GetProperties()
         {
             PropertyDescriptorCollection pc = new PropertyDescriptorCollection(null);
-            pc.Add(new PropertyDescriptor(owner, field, component, null));
+            int count = Count;
+            for (int i = 0; i < count; i++)
+                pc.Add(new PropertyDescriptor(this, i));
             return pc;
         }
 
@@ -333,38 +484,53 @@ namespace S3PIDemoFE
 
         public class PropertyDescriptor : System.ComponentModel.PropertyDescriptor
         {
-            AApiVersionedFields owner;
-            string field;
-            object component;
-            Type IListT;
+            IListCTD list;
+            int index;
 
-            public PropertyDescriptor(AApiVersionedFields owner, string field, object component, Attribute[] attr)
-                : base(field, attr)
-            {
-                this.owner = owner; this.field = field; this.component = component;
-                IListT = owner[field].Type.GetGenericArguments()[0];
-            }
+            public PropertyDescriptor(IListCTD list, int index) : base("[" + index + "]", null) { this.list = list; this.index = index; }
 
-            public override string Name { get { return field; } }
+            public override AttributeCollection Attributes { get { return new AttributeCollection(null); } }
 
             public override bool CanResetValue(object component) { return false; }
 
-            public override void ResetValue(object component) { throw new InvalidOperationException(); }
+            public override Type ComponentType { get { return typeof(IListCTD); } }
 
-            public override Type PropertyType { get { return IListT.MakeArrayType(); } }
+            public override string DisplayName { get { return ""; } }
 
-            public override object GetValue(object component)
+            public override string Description { get { return ""; } }
+
+            public override object GetValue(object component) { return list[index]; }
+
+            public override bool IsReadOnly { get { return false; } }
+
+            public override string Name { get { return "[" + index + "]"; } }
+
+            public override Type PropertyType
             {
-                return PropertyType.InvokeMember(null, System.Reflection.BindingFlags.CreateInstance, null, null, new object[] { (ICollection)owner[field].Value });
+                get
+                {
+                    object value = GetValue(null);
+                    if (typeof(TypedValue).IsAssignableFrom(list.IListT))
+                        return typeof(AApiVersionedFields).IsAssignableFrom(((TypedValue)value).Type) ? typeof(AApiVersionedFieldsCTD) : ((TypedValue)value).Type;
+                    return typeof(AApiVersionedFields).IsAssignableFrom(list.IListT) ? typeof(AApiVersionedFieldsCTD) : list.IListT;
+                }
             }
 
-            public override bool IsReadOnly { get { return true; } }
-
-            public override void SetValue(object component, object value) { throw new InvalidOperationException(); }
-
-            public override Type ComponentType { get { return null; } }
+            public override void ResetValue(object component) { }
 
             public override bool ShouldSerializeValue(object component) { return true; }
+
+            public override void SetValue(object component, object value)
+            {
+                object o;
+                if (typeof(TypedValue).IsAssignableFrom(list.IListT))
+                {
+                    o = typeof(AApiVersionedFieldsCTD).IsAssignableFrom(value.GetType()) ? ((AApiVersionedFieldsCTD)value).Value : value;
+                    list[index] = new TypedValue(o.GetType(), o, "X");
+                }
+                else
+                    list[index] = value;
+            }
         }
     }
 }
