@@ -78,13 +78,13 @@ namespace S3PIDemoFE
             for (int row = 0; row < b.Length; row += rowLength)
             {
                 sb.Append(row.ToString(rowFmt) + ": ");
-                for (int col = 0; col < rowLength && row + col < b.Length; col++)
-                    sb.Append(b[row + col].ToString("X2") + " ");
 
-                if (row + rowLength >= b.Length) for (int j = rowLength - (b.Length % rowLength); j > 0; j--) sb.Append("   ");
+                int col = 0;
+                for (; col < rowLength && row + col < b.Length; col++) sb.Append(b[row + col].ToString("X2") + " ");
+                for (; col < rowLength; col++) sb.Append("   ");
 
                 sb.Append(" : ");
-                for (int col = 0; col < rowLength && row + col < b.Length; col++)
+                for (col = 0; col < rowLength && row + col < b.Length; col++)
                     sb.Append(b[row + col] < 0x20 || b[row + col] > 0x7e ? '.' : (char)b[row + col]);
 
                 sb.AppendLine();
