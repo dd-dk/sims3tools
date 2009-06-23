@@ -29,146 +29,68 @@ namespace S3PIDemoFE
 {
     public partial class HexWidget : UserControl
     {
-        DataGridViewCellStyle asHexStyle = new DataGridViewCellStyle();
-        DataGridViewCellStyle asFixedStyle = new DataGridViewCellStyle();
-        Stream stream = null;
+        int rowLength = 16;
+        IResource res;
+
         public HexWidget()
         {
-            Font fixedwidth = new Font("DejaVu Sans Mono", 8);
-            if (fixedwidth == null) fixedwidth = new Font("Lucida Console", 8);
-
-            asHexStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            asHexStyle.Font = fixedwidth;
-            asHexStyle.Padding = new Padding(0);
-
-            asFixedStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            asFixedStyle.Font = fixedwidth;
-            asFixedStyle.Padding = new Padding(0);
-
             InitializeComponent();
-
-            dataGridView1.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            dataGridView1.DefaultCellStyle = asHexStyle;
-            dataGridView1.ColumnCount = 18;
-            SetHeaders();
+            HexWidget_LoadSettings();
+            this.richTextBox1.Font = new Font(FontFamily.GenericMonospace, 10 * (rowLength > 16 ? 0.85f : 1f));
+            this.Enabled = res != null;
         }
 
-        [Browsable(true)]
-        public Stream Stream
+        void HexWidget_LoadSettings()
         {
-            get { return stream; }
-            set
-            {
-                if (stream == value) return;
-                stream = value;
-                Refill();
-            }
+            Rowsize = S3PIDemoFE.Properties.Settings.Default.HexRowsize;
+        }
+        public void HexWidget_SaveSettings(object sender, EventArgs e)
+        {
+            S3PIDemoFE.Properties.Settings.Default.HexRowsize = Rowsize;
         }
 
-        [Browsable(true)]
+        public IResource Resource { get { return res; } set { if (res != value) { res = value; Refill(); } } }
+
         [DefaultValue(16)]
-        public int Rowsize
-        {
-            get { return dataGridView1.ColumnCount - 2; }
-            set
-            {
-                if (value == Rowsize) return;
-
-                dataGridView1.ColumnCount = value + 2;
-                SetHeaders();
-                Refill();
-            }
-        }
-
-        bool filling = false;
-        void SetHeaders()
-        {
-            filling = true;
-            try
-            {
-                dataGridView1.Columns[0].Name = "offset";
-                dataGridView1.Columns[0].ValueType = typeof(Int32);
-                dataGridView1.Columns[0].HeaderText = "Offset";
-                dataGridView1.Columns[0].ReadOnly = true;
-                dataGridView1.Columns[0].Width = 0x47;
-
-                for (int i = 1; i < dataGridView1.ColumnCount - 1; i++)
-                {
-                    dataGridView1.Columns[i].Name = "col" + (i - 1);
-                    dataGridView1.Columns[i].ValueType = typeof(byte);
-                    dataGridView1.Columns[i].HeaderText = ((byte)i - 1).ToString("X").PadLeft(2, '0');
-                    dataGridView1.Columns[i].Width = 0x18;
-                }
-
-                dataGridView1.Columns[dataGridView1.ColumnCount - 1].Name = "text";
-                dataGridView1.Columns[dataGridView1.ColumnCount - 1].ValueType = typeof(string);
-                dataGridView1.Columns[dataGridView1.ColumnCount - 1].HeaderText = "As text";
-                dataGridView1.Columns[dataGridView1.ColumnCount - 1].ReadOnly = true;
-                dataGridView1.Columns[dataGridView1.ColumnCount - 1].DefaultCellStyle = asFixedStyle;
-                dataGridView1.Columns[dataGridView1.ColumnCount - 1].Width = 0xe8;
-                dataGridView1.Columns[dataGridView1.ColumnCount - 1].HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            }
-            finally { filling = false; }
-        }
+        public int Rowsize { get { return rowLength; } set { if (rowLength != value) { rowLength = value; Refill(); } } }
 
         private void Refill()
         {
-            filling = true;
-            try
+            this.Enabled = res != null;
+
+            this.richTextBox1.Clear();
+            if (res == null) return;
+
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            this.Enabled = false;
+            byte[] b = res.AsBytes;
+            int padLength = 8;// +b.Length.ToString("X").Length;
+            string rowFmt = "X" + padLength;
+
+            sb.Append("".PadLeft(padLength + 2));
+            for (int col = 0; col < rowLength; col++) sb.Append(col.ToString("X2") + " ");
+            sb.AppendLine();
+            sb.Append("".PadLeft(padLength + 2));
+            for (int col = 0; col < rowLength; col++) sb.Append("---");
+            sb.AppendLine();
+
+            for (int row = 0; row < b.Length; row += rowLength)
             {
-                dataGridView1.Rows.Clear();
-                if (stream == null) return;
-                stream.Position = 0;
+                sb.Append(row.ToString(rowFmt) + ": ");
+                for (int col = 0; col < rowLength && row + col < b.Length; col++)
+                    sb.Append(b[row + col].ToString("X2") + " ");
 
-                BinaryReader r = new BinaryReader(stream);
-                for (int oset = 0; oset < stream.Length; )
-                {
-                    List<object> lrow = new List<object>();
+                if (row + rowLength >= b.Length) for (int j = rowLength - (b.Length % rowLength); j > 0; j--) sb.Append("   ");
 
-                    lrow.Add(oset.ToString("X").PadLeft(8, '0'));
+                sb.Append(" : ");
+                for (int col = 0; col < rowLength && row + col < b.Length; col++)
+                    sb.Append(b[row + col] < 0x20 || b[row + col] > 0x7e ? '.' : (char)b[row + col]);
 
-                    byte[] bytes = r.ReadBytes((int)Math.Min(Rowsize, stream.Length - oset));
-                    foreach (byte b in bytes) lrow.Add(b.ToString("X").PadLeft(2, '0'));
-                    while (lrow.Count < dataGridView1.ColumnCount - 1) lrow.Add("");
-
-                    string text = "";
-                    for (int i = 0; i < bytes.Length; i++) text += (bytes[i] >= 32 && bytes[i] < 127) ? ((char)bytes[i]).ToString() : ".";
-                    lrow.Add(text);
-
-                    dataGridView1.Rows.Add(lrow.ToArray());
-
-                    oset += bytes.Length;
-                }
+                sb.AppendLine();
             }
-            finally { filling = false; }
-        }
-
-        public event EventHandler HexChanged;
-        [Browsable(true)]
-        [Description("Raised when a value in the byte stream is changed.")]
-        protected virtual void OnHexChanged(object sender, EventArgs e) { if (HexChanged != null) HexChanged(sender, e); }
-
-        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
-        {
-            if (filling) return;
-            if (e.ColumnIndex == 0 || e.ColumnIndex == Rowsize - 1) return;
-            stream.Seek(e.ColumnIndex - 1 + e.RowIndex * Rowsize, SeekOrigin.Begin);
-            long p = stream.Position;
-            byte b = (new BinaryReader(stream)).ReadByte(), newb = Convert.ToByte(dataGridView1[e.ColumnIndex, e.RowIndex].FormattedValue as string, 16);
-            if (b != newb)
-            {
-                stream.Position = p;
-                stream.WriteByte(newb);
-                OnHexChanged(this, new EventArgs());
-            }
-        }
-
-        private void dataGridView1_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
-        {
-            if (filling) return;
-            if (e.ColumnIndex == 0 || e.ColumnIndex == dataGridView1.ColumnCount - 1 || e.ColumnIndex - 1 + this.Rowsize * e.RowIndex >= stream.Length) return;
-            try { Convert.ToByte(e.FormattedValue as string, 16); }
-            catch { e.Cancel = true; }
+            this.richTextBox1.Text = sb.ToString();
+            this.Enabled = true;
         }
     }
 }
