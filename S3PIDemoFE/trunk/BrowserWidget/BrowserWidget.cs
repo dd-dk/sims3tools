@@ -559,6 +559,8 @@ namespace S3PIDemoFE
             List<TypedValue> values;
             ILKvpToListList(filter, out keys, out values);
 
+            pbLabel.Text = "Finding resources...";
+            Application.DoEvents();
             resourceList = pkg == null ? null : filter != null ? pkg.FindAll(keys.ToArray(), values.ToArray()) : pkg.GetResourceList;
 
             UpdateList();
