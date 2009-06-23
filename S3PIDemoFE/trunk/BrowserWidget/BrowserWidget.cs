@@ -31,6 +31,7 @@ namespace S3PIDemoFE
         #region Attributes
         IList<string> fields = null;
         ProgressBar pb = null;
+        Label pbLabel = null;
         IPackage pkg = null;
         ListViewColumnSorter lvwColumnSorter;
         string sortColumn = "Chunkoffset";
@@ -109,6 +110,11 @@ namespace S3PIDemoFE
         [Category("Behavior")]
         [Description("The progress bar is used when loading the displayed list")]
         public ProgressBar ProgressBar { get { return pb; } set { pb = value; } }
+
+        [Browsable(true)]
+        [Category("Behavior")]
+        [Description("The progress label is used when loading the displayed list")]
+        public Label ProgressLabel { get { return pbLabel; } set { pbLabel = value; } }
 
         [Browsable(true)]
         [Category("Behavior")]
@@ -311,11 +317,12 @@ namespace S3PIDemoFE
             IResourceIndexEntry sie = (listView1.SelectedItems.Count == 0 ? null : listView1.SelectedItems[0].Tag) as IResourceIndexEntry;
             System.Collections.IComparer cmp = this.listView1.ListViewItemSorter;
 
-            listView1.BeginUpdate();
             Application.UseWaitCursor = true;
+            listView1.BeginUpdate();
+            listView1.ListViewItemSorter = null;
+            listView1.Enabled = false;
+            pbLabel.Text = "Updating resource list...";
             Application.DoEvents();
-            this.listView1.ListViewItemSorter = null;
-            this.listView1.Enabled = false;
             List<ListViewItem> llvi = new List<ListViewItem>();
             try
             {
@@ -351,10 +358,15 @@ namespace S3PIDemoFE
             }
             finally
             {
-                this.listView1.ListViewItemSorter = cmp;
+                pbLabel.Text = "Updating display...";
+                Application.DoEvents();
                 listView1.Items.AddRange(llvi.ToArray());
-                this.listView1.Enabled = true;
-                Application.UseWaitCursor = false;
+
+                pbLabel.Text = "Restoring sorter...";
+                Application.DoEvents();
+                this.listView1.ListViewItemSorter = cmp;
+
+                pbLabel.Text = "";
                 Application.DoEvents();
                 if (sie != null && lookup.ContainsKey(sie))
                 {
@@ -363,7 +375,10 @@ namespace S3PIDemoFE
                         listView1.SelectedItems[0].EnsureVisible();
                 }
                 SelectedResource = sie;
+                listView1.Enabled = true;
                 listView1.EndUpdate();
+                Application.UseWaitCursor = false;
+                Application.DoEvents();
                 OnListUpdated(this, new EventArgs());
             }
         }
@@ -471,12 +486,13 @@ namespace S3PIDemoFE
             listView1.BeginUpdate();
             listView1.Enabled = false;
             Application.UseWaitCursor = true;
+            pbLabel.Text = "Sorting display...";
             Application.DoEvents();
             try
             {
                 this.listView1.Sort();
             }
-            finally { Application.UseWaitCursor = false; Application.DoEvents(); listView1.Enabled = true; listView1.EndUpdate(); }
+            finally { pbLabel.Text = ""; Application.UseWaitCursor = false; Application.DoEvents(); listView1.Enabled = true; listView1.EndUpdate(); }
             if (listView1.SelectedIndices.Count > 0)
                 listView1.SelectedItems[0].EnsureVisible();
         }

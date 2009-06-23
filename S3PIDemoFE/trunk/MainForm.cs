@@ -45,6 +45,7 @@ namespace S3PIDemoFE
         public MainForm()
         {
             InitializeComponent();
+            lbProgress.Text = "";
             MainForm_LoadSettings();
 
             this.Text = myName;
