@@ -208,19 +208,19 @@ namespace S3PIDemoFE
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(163, 25);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(165, 25);
             this.tableLayoutPanel2.TabIndex = 8;
             // 
             // btnViewer
             // 
             this.btnViewer.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnViewer.Enabled = false;
-            this.btnViewer.Location = new System.Drawing.Point(54, 1);
+            this.btnViewer.Location = new System.Drawing.Point(56, 1);
             this.btnViewer.Margin = new System.Windows.Forms.Padding(0);
             this.btnViewer.Name = "btnViewer";
             this.btnViewer.Size = new System.Drawing.Size(50, 23);
             this.btnViewer.TabIndex = 1;
-            this.btnViewer.Text = "RO";
+            this.btnViewer.Text = "Viewer";
             this.btnViewer.UseVisualStyleBackColor = true;
             this.btnViewer.Click += new System.EventHandler(this.btnViewer_Click);
             // 
@@ -228,12 +228,12 @@ namespace S3PIDemoFE
             // 
             this.btnEditor.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnEditor.Enabled = false;
-            this.btnEditor.Location = new System.Drawing.Point(112, 1);
+            this.btnEditor.Location = new System.Drawing.Point(114, 1);
             this.btnEditor.Margin = new System.Windows.Forms.Padding(0);
             this.btnEditor.Name = "btnEditor";
             this.btnEditor.Size = new System.Drawing.Size(50, 23);
             this.btnEditor.TabIndex = 2;
-            this.btnEditor.Text = "RW";
+            this.btnEditor.Text = "Editor";
             this.btnEditor.UseVisualStyleBackColor = true;
             this.btnEditor.Click += new System.EventHandler(this.btnEditor_Click);
             // 
@@ -243,9 +243,9 @@ namespace S3PIDemoFE
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(4, 6);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(46, 13);
+            this.label1.Size = new System.Drawing.Size(48, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Helpers:";
+            this.label1.Text = "External:";
             // 
             // ControlPanel
             // 
