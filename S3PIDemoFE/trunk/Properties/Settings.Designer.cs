@@ -223,5 +223,17 @@ namespace S3PIDemoFE.Properties {
                 this["UseNames"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("16")]
+        public int HexRowsize {
+            get {
+                return ((int)(this["HexRowsize"]));
+            }
+            set {
+                this["HexRowsize"] = value;
+            }
+        }
     }
 }

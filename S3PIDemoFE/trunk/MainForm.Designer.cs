@@ -43,7 +43,6 @@
             this.exportFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.menuBarWidget1 = new S3PIDemoFE.MenuBarWidget();
             this.packageInfoFields1 = new S3PIDemoFE.PackageInfo.PackageInfoFields();
-            this.resourceFields1 = new S3PIDemoFE.Filter.ResourceFields();
             this.exportBatchTarget = new System.Windows.Forms.FolderBrowserDialog();
             this.fileImportDialog = new System.Windows.Forms.OpenFileDialog();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -137,15 +136,14 @@
             this.hexWidget1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.hexWidget1.Enabled = false;
             this.hexWidget1.Location = new System.Drawing.Point(0, 103);
             this.hexWidget1.Margin = new System.Windows.Forms.Padding(0);
             this.hexWidget1.Name = "hexWidget1";
             this.hexWidget1.Padding = new System.Windows.Forms.Padding(3, 0, 3, 0);
-            this.hexWidget1.Rowsize = 32;
+            this.hexWidget1.Resource = null;
             this.hexWidget1.Size = new System.Drawing.Size(876, 242);
-            this.hexWidget1.Stream = null;
             this.hexWidget1.TabIndex = 1;
-            this.hexWidget1.HexChanged += new System.EventHandler(this.resource_ResourceChanged);
             // 
             // panel1
             // 
@@ -267,7 +265,6 @@
         private PackageInfo.PackageInfoWidget packageInfoWidget1;
         private System.Windows.Forms.ProgressBar progressBar1;
         private PackageInfo.PackageInfoFields packageInfoFields1;
-        private Filter.ResourceFields resourceFields1;
         private HexWidget hexWidget1;
         private System.Windows.Forms.Panel panel1;
         private Filter.ResourceFilterWidget resourceFilterWidget1;

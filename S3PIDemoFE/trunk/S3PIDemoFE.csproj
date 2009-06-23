@@ -195,9 +195,6 @@
     <EmbeddedResource Include="PackageInfo\PackageInfoWidget.resx">
       <DependentUpon>PackageInfoWidget.cs</DependentUpon>
     </EmbeddedResource>
-    <Compile Include="Filter\ResourceFields.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -213,8 +210,8 @@
       <Link>ComplateResources.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\s3pi\build\bin\Release\DemoPlugins.txt">
-      <Link>DemoPlugins.txt</Link>
+    <Content Include="..\s3pi\build\bin\Release\Helpers.txt">
+      <Link>Helpers.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\s3pi\build\bin\Release\Extensions.txt">

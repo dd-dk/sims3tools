@@ -32,6 +32,15 @@ namespace S3PIDemoFE
 {
     public partial class MainForm : Form
     {
+        static List<string> fields = null;
+        static MainForm()
+        {
+            fields = new List<string>();
+            foreach (string s in AApiVersionedFields.GetContentFields(0, typeof(AResourceIndexEntry)))
+                if (!s.Contains("Stream"))
+                    fields.Add(s);
+        }
+
         const string myName = "s3pe";
         public MainForm()
         {
@@ -43,12 +52,12 @@ namespace S3PIDemoFE
             browserWidget1.Sortable = controlPanel1.Sort;
             browserWidget1.DisplayResourceNames = controlPanel1.UseNames;
 
-            browserWidget1.Fields = resourceFields1.Fields;
-            List<string> fields = new List<string>(resourceFields1.Fields);
-            fields.Remove("Chunkoffset");
-            fields.Remove("Filesize");
-            fields.Remove("Memsize");
-            resourceFilterWidget1.Fields = fields;
+            browserWidget1.Fields = new List<string>(fields.ToArray());
+            List<string> filterFields = new List<string>(fields.ToArray());
+            filterFields.Remove("Chunkoffset");
+            filterFields.Remove("Filesize");
+            filterFields.Remove("Memsize");
+            resourceFilterWidget1.Fields = filterFields;
 
             packageInfoWidget1.Fields = packageInfoFields1.Fields;
             this.PackageFilenameChanged += new EventHandler(MainForm_PackageFilenameChanged);
@@ -57,6 +66,7 @@ namespace S3PIDemoFE
             this.SaveSettings += new EventHandler(MainForm_SaveSettings);
             this.SaveSettings += new EventHandler(browserWidget1.BrowserWidget_SaveSettings);
             this.SaveSettings += new EventHandler(controlPanel1.ControlPanel_SaveSettings);
+            this.SaveSettings += new EventHandler(hexWidget1.HexWidget_SaveSettings);
         }
 
         void MainForm_LoadSettings()
@@ -93,6 +103,7 @@ namespace S3PIDemoFE
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            this.Enabled = false;
             Filename = "";
             if (CurrentPackage != null) e.Cancel = true;
 
@@ -125,7 +136,7 @@ namespace S3PIDemoFE
         private void MainForm_PackageChanged(object sender, EventArgs e)
         {
             browserWidget1.Package = packageInfoWidget1.Package = CurrentPackage;
-            hexWidget1.Stream = null;
+            hexWidget1.Resource = null;
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_saveAs, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_saveCopyAs, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_import, CurrentPackage != null);
@@ -815,7 +826,7 @@ namespace S3PIDemoFE
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_details, resource != null);
 
             resourceFilterWidget1.IndexEntry = browserWidget1.SelectedResource;
-            hexWidget1.Stream = (controlPanel1.HexEnabled && controlPanel1.AutoHex && resource != null) ? resource.Stream : null;
+            hexWidget1.Resource = (controlPanel1.HexEnabled && controlPanel1.AutoHex && resource != null) ? resource : null;
         }
 
         private void browserWidget1_DragOver(object sender, DragEventArgs e)
@@ -861,7 +872,7 @@ namespace S3PIDemoFE
             try
             {
                 this.Enabled = false;
-                hexWidget1.Stream = resource == null ? null : resource.Stream;
+                hexWidget1.Resource = resource == null ? null : resource;
             }
             finally { this.Enabled = true; }
         }
@@ -927,7 +938,11 @@ namespace S3PIDemoFE
             try
             {
                 this.Enabled = false;
+#if DEBUG
+                (new NewGridForm(resource)).ShowDialog();
+#else
                 (new GridForm(resource)).ShowDialog();
+#endif
             }
             finally { this.Enabled = true; }
         }
@@ -953,7 +968,7 @@ namespace S3PIDemoFE
                 this.Enabled = false;
                 Application.DoEvents();
 
-                editCopy();
+                Clipboard.SetData(DataFormats.Serializable, resource.Stream);
 
                 plug.View(resource);
 
@@ -970,7 +985,7 @@ namespace S3PIDemoFE
                 this.Enabled = false;
                 Application.DoEvents();
 
-                editCopy();
+                Clipboard.SetData(DataFormats.Serializable, resource.Stream);
 
                 bool res = plug.Edit(resource);
 
@@ -982,8 +997,13 @@ namespace S3PIDemoFE
                     DialogResult dr = MessageBox.Show("Resource has been updated.  Commit changes?", "Commit changes?",
                         MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
 
-                    if (dr == DialogResult.Yes)
-                        editPaste();
+                    if (dr != DialogResult.Yes) return;
+
+                    MemoryStream ms = Clipboard.GetData(DataFormats.Serializable) as MemoryStream;
+                    IResourceIndexEntry rie = NewResource(
+                        browserWidget1.SelectedResource.ResourceType, browserWidget1.SelectedResource.ResourceGroup, browserWidget1.SelectedResource.Instance,
+                        ms, true, browserWidget1.SelectedResource.Compressed != 0);
+                    if (rie != null) browserWidget1.Add(rie);
                 }
             }
             finally { this.Enabled = true; }
