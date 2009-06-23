@@ -219,9 +219,6 @@ namespace S3PIDemoFE
         bool resourceIsDirty = false;
         void resource_ResourceChanged(object sender, EventArgs e)
         {
-#if !DEBUG
-            browserWidget1.SelectedResource.Compressed = 0;
-#endif
             controlPanel1.CommitEnabled = resourceIsDirty = true;
         }
         #endregion
@@ -939,7 +936,7 @@ namespace S3PIDemoFE
             try
             {
                 this.Enabled = false;
-#if DEBUG
+#if true//DEBUG
                 (new NewGridForm(resource)).ShowDialog();
 #else
                 (new GridForm(resource)).ShowDialog();

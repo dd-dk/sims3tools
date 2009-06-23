@@ -28,19 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.btnOK = new System.Windows.Forms.Button();
             this.s3PIPropertyGrid1 = new S3PIDemoFE.S3PIPropertyGrid();
             this.SuspendLayout();
-            // 
-            // openFileDialog1
-            // 
-            this.openFileDialog1.Title = "Import...";
-            // 
-            // saveFileDialog1
-            // 
-            this.saveFileDialog1.Title = "Export...";
             // 
             // btnOK
             // 
@@ -67,7 +57,7 @@
             this.s3PIPropertyGrid1.TabIndex = 1;
             this.s3PIPropertyGrid1.ToolbarVisible = false;
             // 
-            // GridForm
+            // NewGridForm
             // 
             this.AcceptButton = this.btnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -76,7 +66,7 @@
             this.Controls.Add(this.s3PIPropertyGrid1);
             this.Controls.Add(this.btnOK);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
-            this.Name = "GridForm";
+            this.Name = "NewGridForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Data Grid";
             this.ResumeLayout(false);
@@ -85,8 +75,6 @@
 
         #endregion
 
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.Button btnOK;
         private S3PIPropertyGrid s3PIPropertyGrid1;
     }
