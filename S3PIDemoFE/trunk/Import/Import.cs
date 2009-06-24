@@ -47,15 +47,61 @@ namespace S3PIDemoFE
             try
             {
                 this.Enabled = false;
-                DialogResult dr = fileImportDialog.ShowDialog();
+                DialogResult dr = importResourcesDialog.ShowDialog();
                 if (dr != DialogResult.OK) return;
 
-                if (fileImportDialog.FileNames.Length > 1)
-                    importBatch(fileImportDialog.FileNames);
+                if (importResourcesDialog.FileNames.Length > 1)
+                    importBatch(importResourcesDialog.FileNames);
                 else
-                    importSingle(fileImportDialog.FileName);
+                    importSingle(importResourcesDialog.FileName);
             }
             finally { this.Enabled = true; }
+        }
+
+        private void fileImportPackages()
+        {
+            try
+            {
+                this.Enabled = false;
+                DialogResult dr = importPackagesDialog.ShowDialog();
+                if (dr != DialogResult.OK) return;
+
+                dr = MessageBox.Show(
+                    "Do you want to replace any duplicate resources discovered during import?\n\n" +
+                    "Click \"Yes\" to Replace.\n" +
+                    "Click \"No\" to Reject.\n" +
+                    "Click \"Cancel\" to abandon import",
+                    "Import Packages", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                if (dr == DialogResult.Cancel) return;
+
+                browserWidget1.Visible = false;
+                foreach (string filename in importPackagesDialog.FileNames)
+                {
+                    lbProgress.Text = "Importing " + Path.GetFileNameWithoutExtension(filename) + "...";
+                    Application.DoEvents();
+                    IPackage imppkg = Package.OpenPackage(0, filename);
+                    IList<IResourceIndexEntry> lrie = imppkg.GetResourceList;
+                    try
+                    {
+                        progressBar1.Value = 0;
+                        progressBar1.Maximum = lrie.Count;
+                        foreach (IResourceIndexEntry rie in lrie)
+                        {
+                            myDataFormat impres;
+                            impres.tgin = rie as AResourceIndexEntry;
+                            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, imppkg, rie, true);
+                            impres.data = res.AsBytes;
+                            importStream(impres, false, false, rie.Compressed != 0, dr == DialogResult.Yes);
+                            progressBar1.Value++;
+                            if (progressBar1.Value % 100 == 0)
+                                Application.DoEvents();
+                        }
+                    }
+                    finally { progressBar1.Maximum = 0; }
+                    Package.ClosePackage(0, imppkg);
+                }
+            }
+            finally { lbProgress.Text = ""; Application.DoEvents(); browserWidget1.Visible = true; this.Enabled = true; }
         }
 
         private void resourcePaste()

@@ -140,7 +140,8 @@ namespace S3PIDemoFE
             hexWidget1.Resource = null;
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_saveAs, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_saveCopyAs, CurrentPackage != null);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_import, CurrentPackage != null);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_importResources, CurrentPackage != null);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_importPackages, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_close, CurrentPackage != null);
             //menuBarWidget1.Enable(MenuBarWidget.MD.MBE, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBR, CurrentPackage != null);
@@ -251,8 +252,9 @@ namespace S3PIDemoFE
                     case MenuBarWidget.MB.MBF_saveAs: fileSaveAs(); break;
                     case MenuBarWidget.MB.MBF_saveCopyAs: fileSaveCopyAs(); break;
                     case MenuBarWidget.MB.MBF_close: fileClose(); break;
-                    case MenuBarWidget.MB.MBF_import: fileImport(); break;
-                    case MenuBarWidget.MB.MBF_export: fileExport(); break;
+                    case MenuBarWidget.MB.MBF_importResources: fileImport(); break;
+                    case MenuBarWidget.MB.MBF_importPackages: fileImportPackages(); break;
+                    case MenuBarWidget.MB.MBF_exportResources: fileExport(); break;
                     case MenuBarWidget.MB.MBF_exit: fileExit(); break;
                 }
             }
@@ -815,7 +817,7 @@ namespace S3PIDemoFE
                 controlPanel1.ValueEnabled = controlPanel1.GridEnabled = controlPanel1.ViewerEnabled = controlPanel1.EditorEnabled = false;
             }
 
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_export, resource != null || browserWidget1.SelectedResources.Count > 0);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_exportResources, resource != null || browserWidget1.SelectedResources.Count > 0);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBE_cut, resource != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copy, resource != null || browserWidget1.SelectedResources.Count > 0);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_duplicate, resource != null);

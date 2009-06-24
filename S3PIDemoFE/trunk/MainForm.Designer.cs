@@ -46,7 +46,8 @@
             this.menuBarWidget1 = new S3PIDemoFE.MenuBarWidget();
             this.packageInfoFields1 = new S3PIDemoFE.PackageInfo.PackageInfoFields();
             this.exportBatchTarget = new System.Windows.Forms.FolderBrowserDialog();
-            this.fileImportDialog = new System.Windows.Forms.OpenFileDialog();
+            this.importResourcesDialog = new System.Windows.Forms.OpenFileDialog();
+            this.importPackagesDialog = new System.Windows.Forms.OpenFileDialog();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -255,11 +256,17 @@
             // 
             this.exportBatchTarget.Description = "Choose the folder to receive the exported resources";
             // 
-            // fileImportDialog
+            // importResourcesDialog
             // 
-            this.fileImportDialog.Filter = "Exported files (S3_*.*)|S3_*.*|All files (*.*)|*.*";
-            this.fileImportDialog.Multiselect = true;
-            this.fileImportDialog.Title = "Import Resource";
+            this.importResourcesDialog.Filter = "Exported files (S3_*.*)|S3_*.*|All files (*.*)|*.*";
+            this.importResourcesDialog.Multiselect = true;
+            this.importResourcesDialog.Title = "Import Resources";
+            // 
+            // importPackagesDialog
+            // 
+            this.importPackagesDialog.Filter = "DBPF Packages|*.package;*.world|All Files|*.*";
+            this.importPackagesDialog.Multiselect = true;
+            this.importPackagesDialog.Title = "Import Packages";
             // 
             // MainForm
             // 
@@ -302,8 +309,9 @@
         private Filter.ResourceFilterWidget resourceFilterWidget1;
         private ControlPanel controlPanel1;
         private System.Windows.Forms.FolderBrowserDialog exportBatchTarget;
-        private System.Windows.Forms.OpenFileDialog fileImportDialog;
+        private System.Windows.Forms.OpenFileDialog importResourcesDialog;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Label lbProgress;
+        private System.Windows.Forms.OpenFileDialog importPackagesDialog;
     }
 }

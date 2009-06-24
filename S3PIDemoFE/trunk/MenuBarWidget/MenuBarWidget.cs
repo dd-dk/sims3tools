@@ -37,8 +37,8 @@ namespace S3PIDemoFE
             });
             tsMB = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //File
-                newToolStripMenuItem, openToolStripMenuItem, saveToolStripMenuItem, saveAsToolStripMenuItem,
-                saveCopyAsToolStripMenuItem, closeToolStripMenuItem, importToolStripMenuItem, exportToolStripMenuItem,
+                newToolStripMenuItem, openToolStripMenuItem, saveToolStripMenuItem, saveAsToolStripMenuItem, saveCopyAsToolStripMenuItem, closeToolStripMenuItem,
+                importToolStripMenuItem, importPackagesToolStripMenuItem, exportToolStripMenuItem,
                 exitToolStripMenuItem,
                 //Edit
                 editCutToolStripMenuItem, editCopyToolStripMenuItem, editPasteToolStripMenuItem,
@@ -61,11 +61,12 @@ namespace S3PIDemoFE
 
         public enum MB
         {
-            MBF_new = 0, MBF_open, MBF_save, MBF_saveAs,
-            MBF_saveCopyAs, MBF_close, MBF_import, MBF_export,
+            MBF_new = 0, MBF_open, MBF_save, MBF_saveAs, MBF_saveCopyAs, MBF_close,
+            MBF_importResources, MBF_importPackages, MBF_exportResources,
             MBF_exit,
             MBE_cut, MBE_copy, MBE_paste,
-            MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_compressed, MBR_isdeleted, MBR_details,
+            MBR_add, MBR_copy, MBR_paste, MBR_duplicate,
+            MBR_compressed, MBR_isdeleted, MBR_details,
             MBH_contents, MBH_about, MBH_warranty, MBH_licence,
         }
 
