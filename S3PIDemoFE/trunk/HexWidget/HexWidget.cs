@@ -56,41 +56,42 @@ namespace S3PIDemoFE
 
         private void Refill()
         {
-            this.Enabled = res != null;
-
-            this.richTextBox1.Clear();
-            if (res == null) return;
-
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
-            this.Enabled = false;
-            byte[] b = res.AsBytes;
-            int padLength = 8;// +b.Length.ToString("X").Length;
-            string rowFmt = "X" + padLength;
-
-            sb.Append("".PadLeft(padLength + 2));
-            for (int col = 0; col < rowLength; col++) sb.Append(col.ToString("X2") + " ");
-            sb.AppendLine();
-            sb.Append("".PadLeft(padLength + 2));
-            for (int col = 0; col < rowLength; col++) sb.Append("---");
-            sb.AppendLine();
-
-            for (int row = 0; row < b.Length; row += rowLength)
+            try
             {
-                sb.Append(row.ToString(rowFmt) + ": ");
+                this.richTextBox1.Clear();
+                if (res == null) return;
 
-                int col = 0;
-                for (; col < rowLength && row + col < b.Length; col++) sb.Append(b[row + col].ToString("X2") + " ");
-                for (; col < rowLength; col++) sb.Append("   ");
+                System.Text.StringBuilder sb = new System.Text.StringBuilder();
 
-                sb.Append(" : ");
-                for (col = 0; col < rowLength && row + col < b.Length; col++)
-                    sb.Append(b[row + col] < 0x20 || b[row + col] > 0x7e ? '.' : (char)b[row + col]);
+                this.Enabled = false;
+                byte[] b = res.AsBytes;
+                int padLength = 8;// +b.Length.ToString("X").Length;
+                string rowFmt = "X" + padLength;
 
+                sb.Append("".PadLeft(padLength + 2));
+                for (int col = 0; col < rowLength; col++) sb.Append(col.ToString("X2") + " ");
                 sb.AppendLine();
+                sb.Append("".PadLeft(padLength + 2));
+                for (int col = 0; col < rowLength; col++) sb.Append("---");
+                sb.AppendLine();
+
+                for (int row = 0; row < b.Length; row += rowLength)
+                {
+                    sb.Append(row.ToString(rowFmt) + ": ");
+
+                    int col = 0;
+                    for (; col < rowLength && row + col < b.Length; col++) sb.Append(b[row + col].ToString("X2") + " ");
+                    for (; col < rowLength; col++) sb.Append("   ");
+
+                    sb.Append(" : ");
+                    for (col = 0; col < rowLength && row + col < b.Length; col++)
+                        sb.Append(b[row + col] < 0x20 || b[row + col] > 0x7e ? '.' : (char)b[row + col]);
+
+                    sb.AppendLine();
+                }
+                this.richTextBox1.Text = sb.ToString();
             }
-            this.richTextBox1.Text = sb.ToString();
-            this.Enabled = true;
+            finally { this.Enabled = res != null; }
         }
     }
 }
