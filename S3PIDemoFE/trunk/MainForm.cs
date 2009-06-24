@@ -106,10 +106,9 @@ namespace S3PIDemoFE
         {
             this.Enabled = false;
             Filename = "";
-            if (CurrentPackage != null) e.Cancel = true;
+            if (CurrentPackage != null) { e.Cancel = true; this.Enabled = true; return; }
 
             OnSaveSettings(this, new EventArgs());
-
             S3PIDemoFE.Properties.Settings.Default.Save();
         }
 
@@ -255,6 +254,7 @@ namespace S3PIDemoFE
                     case MenuBarWidget.MB.MBF_importResources: fileImport(); break;
                     case MenuBarWidget.MB.MBF_importPackages: fileImportPackages(); break;
                     case MenuBarWidget.MB.MBF_exportResources: fileExport(); break;
+                    case MenuBarWidget.MB.MBF_exportToPackage: fileExportToPackage(); break;
                     case MenuBarWidget.MB.MBF_exit: fileExit(); break;
                 }
             }
@@ -265,6 +265,7 @@ namespace S3PIDemoFE
         {
             Filename = "";
             CurrentPackage = Package.NewPackage(0);
+            IsPackageDirty = true;
         }
 
         private void fileOpen()
@@ -337,6 +338,7 @@ namespace S3PIDemoFE
         }
 
         // For "fileImport()", see Import/Import.cs
+        // For "fileImportPackages()", see Import/Import.cs
 
         private void UpdateNameMap(ulong instance, string resourceName, bool create, bool replace)
         {
@@ -431,6 +433,77 @@ namespace S3PIDemoFE
             BinaryWriter w = new BinaryWriter(new FileStream(filename, FileMode.Create));
             w.Write((new BinaryReader(s)).ReadBytes((int)s.Length));
             w.Close();
+        }
+
+        private void fileExportToPackage()
+        {
+            DialogResult dr = exportToPackageDialog.ShowDialog();
+            if (dr != DialogResult.OK) return;
+
+            IPackage target;
+            try
+            {
+                target = Package.OpenPackage(0, exportToPackageDialog.FileName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not open package:\n" + ex.Message, "Export to package", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            try
+            {
+                dr = MessageBox.Show(
+                    "Do you want to replace any duplicate resources in the target package discovered during export?\n\n" +
+                    "Click \"Yes\" to Replace.\n" +
+                    "Click \"No\" to Reject.\n" +
+                    "Click \"Cancel\" to abandon import",
+                    "Import Packages", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                if (dr == DialogResult.Cancel) return;
+
+                Application.UseWaitCursor = true;
+                lbProgress.Text = "Exporting to " + Path.GetFileNameWithoutExtension(exportToPackageDialog.FileName) + "...";
+                Application.DoEvents();
+
+
+                progressBar1.Value = 0;
+                progressBar1.Maximum = browserWidget1.SelectedResources.Count;
+                foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources)
+                {
+                    exportResourceToPackage(target, rie, dr == DialogResult.Yes);
+                    progressBar1.Value++;
+                    if (progressBar1.Value % 100 == 0)
+                        Application.DoEvents();
+                }
+                progressBar1.Value = 0;
+
+                lbProgress.Text = "Saving...";
+                Application.DoEvents();
+                target.SavePackage();
+            }
+            finally { Package.ClosePackage(0, target); lbProgress.Text = ""; Application.UseWaitCursor = false; Application.DoEvents(); }
+        }
+
+        private void exportResourceToPackage(IPackage tgtpkg, IResourceIndexEntry srcrie, bool replace)
+        {
+            IResourceIndexEntry rie = tgtpkg.Find(new string[] { "ResourceType", "ResourceGroup", "Instance" },
+                new TypedValue[] {
+                            new TypedValue(srcrie.ResourceType.GetType(), srcrie.ResourceType),
+                            new TypedValue(srcrie.ResourceGroup.GetType(), srcrie.ResourceGroup),
+                            new TypedValue(srcrie.Instance.GetType(), srcrie.Instance),
+                        });
+            if (rie != null)
+            {
+                if (!replace) return;
+                tgtpkg.DeleteResource(rie);
+            }
+
+            rie = tgtpkg.AddResource(srcrie.ResourceType, srcrie.ResourceGroup, srcrie.Instance, null, true);
+            if (rie == null) return;
+            rie.Compressed = srcrie.Compressed;
+
+            IResource srcres = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, srcrie, true);
+            tgtpkg.ReplaceResource(rie, srcres);
         }
 
         private void menuBarWidget1_MRUClick(object sender, MenuBarWidget.MRUClickEventArgs filename)
@@ -704,8 +777,8 @@ namespace S3PIDemoFE
                 "Front-end Distribution: {1}\n" +
                 "Library Distribution: {2}"
                 , copyright
-                , getVersion(typeof(MainForm), "S3PIDemoFE")
-                , getVersion(typeof(s3pi.Interfaces.AApiVersionedFields), "S3PIDemoFE")
+                , getVersion(typeof(MainForm), "s3pe")
+                , getVersion(typeof(s3pi.Interfaces.AApiVersionedFields), "s3pe")
                 ), this.Text, MessageBoxButtons.OK);
         }
 
@@ -818,6 +891,7 @@ namespace S3PIDemoFE
             }
 
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_exportResources, resource != null || browserWidget1.SelectedResources.Count > 0);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_exportToPackage, resource != null || browserWidget1.SelectedResources.Count > 0);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBE_cut, resource != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copy, resource != null || browserWidget1.SelectedResources.Count > 0);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_duplicate, resource != null);

@@ -40,7 +40,7 @@
             // 
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOK.Location = new System.Drawing.Point(264, 181);
+            this.btnOK.Location = new System.Drawing.Point(816, 181);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 2;
@@ -52,7 +52,7 @@
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(183, 181);
+            this.btnCancel.Location = new System.Drawing.Point(735, 181);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 3;
@@ -69,7 +69,7 @@
             this.lbFiles.IntegralHeight = false;
             this.lbFiles.Location = new System.Drawing.Point(3, 61);
             this.lbFiles.Name = "lbFiles";
-            this.lbFiles.Size = new System.Drawing.Size(321, 99);
+            this.lbFiles.Size = new System.Drawing.Size(873, 99);
             this.lbFiles.TabIndex = 2;
             this.lbFiles.DragOver += new System.Windows.Forms.DragEventHandler(this.ImportBatch_DragOver);
             this.lbFiles.DragDrop += new System.Windows.Forms.DragEventHandler(this.ImportBatch_DragDrop);
@@ -88,17 +88,17 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(327, 163);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(879, 163);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // importSettings1
             // 
-            this.importSettings1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.importSettings1.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.importSettings1.AutoSize = true;
             this.importSettings1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.importSettings1.Location = new System.Drawing.Point(4, 3);
+            this.importSettings1.Location = new System.Drawing.Point(3, 3);
             this.importSettings1.Name = "importSettings1";
-            this.importSettings1.Size = new System.Drawing.Size(319, 52);
+            this.importSettings1.Size = new System.Drawing.Size(320, 52);
             this.importSettings1.TabIndex = 1;
             // 
             // ImportBatch
@@ -108,7 +108,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(351, 216);
+            this.ClientSize = new System.Drawing.Size(903, 216);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);

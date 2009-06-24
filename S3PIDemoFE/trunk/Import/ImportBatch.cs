@@ -28,18 +28,31 @@ namespace S3PIDemoFE
 {
     public partial class ImportBatch : Form
     {
+        public enum Mode
+        {
+            file = 0,
+            package,
+            paste
+        }
         private string[] batch = null;
+        private Mode mode = Mode.file;
         public ImportBatch()
         {
             InitializeComponent();
+            this.Width = (int)(Application.OpenForms[0].Width * 0.8);
         }
 
-        public ImportBatch(string[] fileDrop) : this() { addDrop(fileDrop); }
-        public ImportBatch(IList<MainForm.myDataFormat> ldata)
-            :this()
+        private ImportBatch(Mode mode) : this()
         {
-            this.AllowDrop = false;
+            this.mode = mode;
+            this.AllowDrop = this.mode == Mode.file;
+            importSettings1[S3PIDemoFE.Import.ImportSettings.ImportSettingsControl.UseName] = this.mode != Mode.package;
+        }
 
+        public ImportBatch(string[] batch, Mode mode) : this(mode) { addDrop(batch); }
+        public ImportBatch(string[] fileDrop) : this(fileDrop, Mode.file) { }
+        public ImportBatch(IList<MainForm.myDataFormat> ldata) : this(Mode.paste)
+        {
             string[] fileDrop = new string[ldata.Count];
             for (int i = 0; i < ldata.Count; i++) fileDrop[i] = ldata[i].tgin;
             addDrop(fileDrop);

@@ -38,7 +38,7 @@ namespace S3PIDemoFE
             tsMB = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //File
                 newToolStripMenuItem, openToolStripMenuItem, saveToolStripMenuItem, saveAsToolStripMenuItem, saveCopyAsToolStripMenuItem, closeToolStripMenuItem,
-                importToolStripMenuItem, importPackagesToolStripMenuItem, exportToolStripMenuItem,
+                importToolStripMenuItem, importPackagesToolStripMenuItem, exportToolStripMenuItem, exportToPackageToolStripMenuItem,
                 exitToolStripMenuItem,
                 //Edit
                 editCutToolStripMenuItem, editCopyToolStripMenuItem, editPasteToolStripMenuItem,
@@ -62,7 +62,7 @@ namespace S3PIDemoFE
         public enum MB
         {
             MBF_new = 0, MBF_open, MBF_save, MBF_saveAs, MBF_saveCopyAs, MBF_close,
-            MBF_importResources, MBF_importPackages, MBF_exportResources,
+            MBF_importResources, MBF_importPackages, MBF_exportResources, MBF_exportToPackage,
             MBF_exit,
             MBE_cut, MBE_copy, MBE_paste,
             MBR_add, MBR_copy, MBR_paste, MBR_duplicate,

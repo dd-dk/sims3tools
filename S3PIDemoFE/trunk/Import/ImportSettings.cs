@@ -35,6 +35,23 @@ namespace S3PIDemoFE.Import
             rb1Reject.Checked = !rb1Replace.Checked;
         }
 
+        public enum ImportSettingsControl
+        {
+            Replace,
+            Compress,
+            UseName,
+            AllowRename,
+        }
+        public bool this[ImportSettingsControl control]
+        {
+            get { return (new Control[] { rb1Replace, ckbCompress, ckbUseName, ckbRename })[(int)control].Enabled; }
+            set
+            {
+                if (control == ImportSettingsControl.Replace) rb1Replace.Enabled = rb1Reject.Enabled = value;
+                else (new Control[] { null, ckbCompress, ckbUseName, ckbRename })[(int)control].Enabled = value;
+            }
+        }
+
         #region Properties
         [Category("Appearance")]
         [DefaultValue(true)]

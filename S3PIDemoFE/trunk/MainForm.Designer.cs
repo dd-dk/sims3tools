@@ -48,6 +48,7 @@
             this.exportBatchTarget = new System.Windows.Forms.FolderBrowserDialog();
             this.importResourcesDialog = new System.Windows.Forms.OpenFileDialog();
             this.importPackagesDialog = new System.Windows.Forms.OpenFileDialog();
+            this.exportToPackageDialog = new System.Windows.Forms.OpenFileDialog();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -268,6 +269,11 @@
             this.importPackagesDialog.Multiselect = true;
             this.importPackagesDialog.Title = "Import Packages";
             // 
+            // exportToPackageDialog
+            // 
+            this.exportToPackageDialog.Filter = "DBPF Packages|*.package;*.world|All Files|*.*";
+            this.exportToPackageDialog.Title = "Export to package";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -313,5 +319,6 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Label lbProgress;
         private System.Windows.Forms.OpenFileDialog importPackagesDialog;
+        private System.Windows.Forms.OpenFileDialog exportToPackageDialog;
     }
 }
