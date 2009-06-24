@@ -60,7 +60,7 @@ popd
 (
 for %%f in (*) do echo Delete $INSTDIR\%%f
 pushd HelpFiles
-for %%f in (*) do echo Delete HelpFiles\%%f
+for %%f in (*) do echo Delete $INSTDIR\HelpFiles\%%f
 echo RmDir HelpFiles
 popd
 ) > UNINST.LOG
