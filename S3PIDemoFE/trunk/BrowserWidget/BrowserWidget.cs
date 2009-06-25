@@ -41,7 +41,8 @@ namespace S3PIDemoFE
         //used internally
         Dictionary<IResourceIndexEntry, ListViewItem> lookup = null;
         IList<IResourceIndexEntry> resourceList = null;
-        IResource nameMap = null;
+        List<IResource> nameMap = null;
+        List<IResourceIndexEntry> nameMapRIEs = null;
         ListViewItem selectedResource = null;
         bool internalchg = false;
         #endregion
@@ -67,22 +68,22 @@ namespace S3PIDemoFE
         {
             ListViewItem lvi = CreateItem(rie);
             if (lvi == null) return;
+            if (rie.ResourceType == 0x0166038C) { ClearNameMap(); nameMap_ResourceChanged(null, null); }
 
             listView1.BeginUpdate();
             listView1.Items.Add(lvi);
             lookup.Add(rie, lvi);
             SelectedResource = rie;
             listView1.EndUpdate();
-
-            if (rie.ResourceType == 0x0166038C) { nameMap = null; setNameMap(true); }
         }
 
         public string ResourceName(IResourceIndexEntry rie)
         {
             if (!displayResourceNames) return "";
             if (nameMap == null) return "";
-            IDictionary<ulong, string> nmap = (IDictionary<ulong, string>)nameMap;
-            return (nmap.ContainsKey(rie.Instance)) ? nmap[rie.Instance] : "";
+            foreach (IDictionary<ulong, string> nmap in nameMap)
+                if (nmap.ContainsKey(rie.Instance)) return nmap[rie.Instance];
+            return "";
         }
         #endregion
 
@@ -188,7 +189,7 @@ namespace S3PIDemoFE
                 displayResourceNames = value;
                 if (pkg == null) return;
 
-                if (displayResourceNames) setNameMap(true);
+                if (displayResourceNames) nameMap_ResourceChanged(null, null);
                 else listView1.Columns[0].Width = 0;
             }
         }
@@ -313,7 +314,7 @@ namespace S3PIDemoFE
 
         void UpdateList()
         {
-            listView1.Columns[0].Width = displayResourceNames && nameMap != null ? 80 : 0;
+            listView1.Columns[0].Width = displayResourceNames && nameMap != null ? listView1.Columns[0].Width == 0 ? 80 : listView1.Columns[0].Width : 0;
             IResourceIndexEntry sie = (listView1.SelectedItems.Count == 0 ? null : listView1.SelectedItems[0].Tag) as IResourceIndexEntry;
             System.Collections.IComparer cmp = this.listView1.ListViewItemSorter;
 
@@ -321,12 +322,16 @@ namespace S3PIDemoFE
             listView1.BeginUpdate();
             listView1.ListViewItemSorter = null;
             listView1.Enabled = false;
+
+            pbLabel.Text = "Clear resource list...";
+            Application.DoEvents();
+            listView1.Items.Clear();
+
             pbLabel.Text = "Updating resource list...";
             Application.DoEvents();
             List<ListViewItem> llvi = new List<ListViewItem>();
             try
             {
-                listView1.Items.Clear();
                 lookup = new Dictionary<IResourceIndexEntry, ListViewItem>();
                 if (resourceList == null) return;
 
@@ -400,19 +405,92 @@ namespace S3PIDemoFE
             return lvi;
         }
 
-        void setNameMap(bool updateNames)
+        void ClearNameMap()
         {
-            if (displayResourceNames && pkg != null)
+            if (nameMap == null) return;
+            foreach (IResource res in nameMap)
+                res.ResourceChanged -= new EventHandler(nameMap_ResourceChanged);
+            nameMap.Clear();
+            nameMap = null;
+
+            if (nameMapRIEs == null) return;
+            nameMapRIEs.Clear();
+            nameMapRIEs = null;
+        }
+
+        void CreateNameMap()
+        {
+            if (pkg == null) return;
+            if (nameMap != null) return;
+            string oldLabel = pbLabel.Text;
+            pbLabel.Text = "Loading name map resources...";
+            Application.DoEvents();
+
+            nameMap = new List<IResource>();
+            nameMapRIEs = new List<IResourceIndexEntry>();
+
+            IList<IResourceIndexEntry> lrie = pkg.FindAll(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) });
+            foreach (IResourceIndexEntry rie in lrie)
             {
-                if (nameMap == null)
-                {
-                    IResourceIndexEntry rie = pkg.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) });
-                    if (rie != null) nameMap = s3pi.WrapperDealer.WrapperDealer.GetResource(0, pkg, rie);
-                    if (nameMap == null) return;
-                    nameMap.ResourceChanged += new EventHandler(nameMap_ResourceChanged);
-                }
-                if (updateNames) nameMap_ResourceChanged(null, null);
+                IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, pkg, rie);
+                if (res == null) continue;
+                nameMap.Add(res);
+                nameMapRIEs.Add(rie);
+                res.ResourceChanged += new EventHandler(nameMap_ResourceChanged);
             }
+
+            pbLabel.Text = oldLabel;
+            Application.DoEvents();
+        }
+
+        private void nameMap_ResourceChanged(object sender, EventArgs e)
+        {
+            if (!displayResourceNames) return;
+            if (lookup == null) return;
+
+            if (nameMap == null) CreateNameMap();
+            if (nameMap == null) return;
+
+            string oldLabel = pbLabel.Text;
+            pbLabel.Text = "Updating resource names...";
+            Application.DoEvents();
+            listView1.Enabled = false;
+
+            int oldValue = -1;
+            int oldMax = -1;
+            if (pb != null)
+            {
+                oldValue = pb.Value;
+                pb.Value = 0;
+                oldMax = pb.Maximum;
+                pb.Maximum = lookup.Count;
+            }
+
+            int i = 0;
+            bool hasNames = false;
+            foreach (KeyValuePair<IResourceIndexEntry, ListViewItem> kvp in lookup)
+            {
+                kvp.Value.Text = ResourceName(kvp.Key);
+                hasNames = hasNames || kvp.Value.Text.Length > 0;
+                i++;
+                if (i % 100 == 0)
+                {
+                    if (pb != null) pb.Value = i;
+                    Application.DoEvents();
+                }
+            }
+            listView1.Columns[0].Width = hasNames ? listView1.Columns[0].Width == 0 ? 80 : listView1.Columns[0].Width : 0;
+            listView1.Enabled = true;
+
+            pbLabel.Text = oldLabel;
+            if (pb != null)
+            {
+                pb.Value = 0;
+                pb.Maximum = oldMax;
+                pb.Value = oldValue;
+            }
+
+            Application.DoEvents();
         }
 
 
@@ -501,77 +579,35 @@ namespace S3PIDemoFE
         {
             IResourceIndexEntry rie = sender as IResourceIndexEntry;
             if (rie == null) return;
-            if (!lookup.ContainsKey(rie)) return;
+            if (!lookup.ContainsKey(rie)) { rie.ResourceIndexEntryChanged -= new EventHandler(BrowserWidget_ResourceIndexEntryChanged); return; }
 
-            int i = listView1.Items.IndexOf(lookup[rie]);
-            bool isSelected = listView1.SelectedIndices.Contains(i);
-            bool isFocused = listView1.Items[i].Focused;
+            ListViewItem lvi = lookup[rie];
 
-            internalchg = true;
-            listView1.Items[i] = CreateItem(rie);
-            listView1.Items[i].Selected = isSelected;
-            listView1.Items[i].Focused = isFocused;
-            internalchg = false;
+            ListViewItem newlvi = CreateItem(rie);
+            lvi.SubItems.Clear(); for (int i = 1; i < newlvi.SubItems.Count; i++) lvi.SubItems.Add(newlvi.SubItems[i]);
+            lvi.Font = newlvi.Font;
+            lvi.Text = newlvi.Text;
 
-            lookup[rie] = listView1.Items[i];
-            if (rie.ResourceType == 0x0166038C) { nameMap = null; setNameMap(true); }
-        }
-
-        private void nameMap_ResourceChanged(object sender, EventArgs e)
-        {
-            if (!displayResourceNames) return;
-            UpdateList();
-#if this_was_faster_it_would_get_used_but_unbelievably_it_is_not
-            bool hasNames = false;
-            if (pb != null)
-            {
-                pb.Maximum = lookup.Count / 100;
-                pb.Value = 0;
-            }
-            try
-            {
-                int i = 0;
-                foreach (KeyValuePair<IResourceIndexEntry,ListViewItem> kvp in lookup)
-                {
-                    try
-                    {
-                        kvp.Value.Text = ResourceName(kvp.Key);
-                        hasNames = hasNames || kvp.Value.Text.Length > 0;
-                    }
-                    finally
-                    {
-                        i++;
-                        if (i % 100 == 0) { if (pb != null) pb.Value++; Application.DoEvents(); }
-                    }
-                }
-            }
-            finally { if (pb != null) pb.Value = 0; }
-            listView1.Columns[0].Width = hasNames ? 80 : 0;
-#endif
+            if (nameMapRIEs.Contains(rie)) { ClearNameMap(); nameMap_ResourceChanged(null, null); }
         }
 
         private void pkg_ResourceIndexInvalidated(object sender, EventArgs e)
         {
             nameMap = null;
-            setNameMap(false);
+            CreateNameMap();
 
             List<string> keys;
             List<TypedValue> values;
             ILKvpToListList(filter, out keys, out values);
 
+            string oldLabel = pbLabel.Text;
             pbLabel.Text = "Finding resources...";
             Application.DoEvents();
             resourceList = pkg == null ? null : filter != null ? pkg.FindAll(keys.ToArray(), values.ToArray()) : pkg.GetResourceList;
 
             UpdateList();
-            if (resourceList == null) return;
 
-            //removed for speed; made Instance column wider by default
-            /*listView1.BeginUpdate();
-            if (listView1.Items.Count > 0)
-                for (int i = 1; i < listView1.Columns.Count; i++)
-                    listView1.Columns[i].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
-            listView1.EndUpdate();/**/
+            pbLabel.Text = oldLabel;
         }
     }
 }
