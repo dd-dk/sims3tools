@@ -78,6 +78,8 @@ namespace S3PIDemoFE
                 controlPanel1.UseNames = false;
                 foreach (string filename in ib.Batch)
                 {
+                    if (Path.GetFullPath(Filename).Equals(Path.GetFullPath(exportToPackageDialog.FileName))) continue;
+
                     lbProgress.Text = "Importing " + Path.GetFileNameWithoutExtension(filename) + "...";
                     Application.DoEvents();
                     IPackage imppkg = Package.OpenPackage(0, filename);
