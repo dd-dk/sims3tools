@@ -40,6 +40,7 @@
             this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importPackagesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportToPackageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.mRUListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mRUListToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,7 +65,6 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exportToPackageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -182,6 +182,14 @@
             this.exportToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
             this.exportToolStripMenuItem.Text = "&Export...";
             this.exportToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
+            // 
+            // exportToPackageToolStripMenuItem
+            // 
+            this.exportToPackageToolStripMenuItem.Enabled = false;
+            this.exportToPackageToolStripMenuItem.Name = "exportToPackageToolStripMenuItem";
+            this.exportToPackageToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.exportToPackageToolStripMenuItem.Text = "Ex&port to package...";
+            this.exportToPackageToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
             // 
             // toolStripSeparator3
             // 
@@ -381,14 +389,6 @@
             this.licenceToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.licenceToolStripMenuItem.Text = "&Licence...";
             this.licenceToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
-            // 
-            // exportToPackageToolStripMenuItem
-            // 
-            this.exportToPackageToolStripMenuItem.Enabled = false;
-            this.exportToPackageToolStripMenuItem.Name = "exportToPackageToolStripMenuItem";
-            this.exportToPackageToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
-            this.exportToPackageToolStripMenuItem.Text = "Export to package...";
-            this.exportToPackageToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
             // 
             // MenuBarWidget
             // 
