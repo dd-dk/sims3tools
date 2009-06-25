@@ -271,6 +271,8 @@
             // 
             // exportToPackageDialog
             // 
+            this.exportToPackageDialog.CheckFileExists = false;
+            this.exportToPackageDialog.DefaultExt = "package";
             this.exportToPackageDialog.Filter = "DBPF Packages|*.package;*.world|All Files|*.*";
             this.exportToPackageDialog.Title = "Export to package";
             // 

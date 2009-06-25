@@ -440,10 +440,45 @@ namespace S3PIDemoFE
             DialogResult dr = exportToPackageDialog.ShowDialog();
             if (dr != DialogResult.OK) return;
 
+            if (Path.GetFullPath(Filename).Equals(Path.GetFullPath(exportToPackageDialog.FileName)))
+            {
+                MessageBox.Show("Target must not be same as source", "Export to package", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            bool isNew = false;
             IPackage target;
+            if (!File.Exists(exportToPackageDialog.FileName))
+            {
+                try
+                {
+                    target = Package.NewPackage(0);
+                    target.SaveAs(exportToPackageDialog.FileName);
+                    Package.ClosePackage(0, target);
+                    isNew = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Could not create package:\n" + ex.Message, "Export to package", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    return;
+                }
+            }
+
             try
             {
                 target = Package.OpenPackage(0, exportToPackageDialog.FileName);
+
+                if (!isNew)
+                {
+                    dr = MessageBox.Show(
+                        "Do you want to replace any duplicate resources in the target package discovered during export?\n\n" +
+                        "Click \"Yes\" to Replace duplicates.\n" +
+                        "Click \"No\" to Reject duplicates.\n\n" +
+                        "Click \"Cancel\" to abandon import",
+                        "Export to package", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                    if (dr == DialogResult.Cancel) return;
+                }
+
             }
             catch (Exception ex)
             {
@@ -453,14 +488,6 @@ namespace S3PIDemoFE
 
             try
             {
-                dr = MessageBox.Show(
-                    "Do you want to replace any duplicate resources in the target package discovered during export?\n\n" +
-                    "Click \"Yes\" to Replace.\n" +
-                    "Click \"No\" to Reject.\n" +
-                    "Click \"Cancel\" to abandon import",
-                    "Import Packages", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
-                if (dr == DialogResult.Cancel) return;
-
                 Application.UseWaitCursor = true;
                 lbProgress.Text = "Exporting to " + Path.GetFileNameWithoutExtension(exportToPackageDialog.FileName) + "...";
                 Application.DoEvents();
@@ -1023,7 +1050,12 @@ namespace S3PIDemoFE
 
         private void controlPanel1_UseNamesChanged(object sender, EventArgs e)
         {
-            browserWidget1.DisplayResourceNames = controlPanel1.UseNames;
+            try
+            {
+                this.Enabled = false;
+                browserWidget1.DisplayResourceNames = controlPanel1.UseNames;
+            }
+            finally { this.Enabled = true; }
         }
 
         private void controlPanel1_CommitClick(object sender, EventArgs e)
