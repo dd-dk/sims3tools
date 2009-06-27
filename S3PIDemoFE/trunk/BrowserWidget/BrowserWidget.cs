@@ -577,6 +577,8 @@ namespace S3PIDemoFE
 
         private void BrowserWidget_ResourceIndexEntryChanged(object sender, EventArgs e)
         {
+            if (lookup == null) return;
+
             IResourceIndexEntry rie = sender as IResourceIndexEntry;
             if (rie == null) return;
             if (!lookup.ContainsKey(rie)) { rie.ResourceIndexEntryChanged -= new EventHandler(BrowserWidget_ResourceIndexEntryChanged); return; }
@@ -588,7 +590,7 @@ namespace S3PIDemoFE
             lvi.Font = newlvi.Font;
             lvi.Text = newlvi.Text;
 
-            if (nameMapRIEs.Contains(rie)) { ClearNameMap(); nameMap_ResourceChanged(null, null); }
+            if (nameMapRIEs != null && nameMapRIEs.Contains(rie)) { ClearNameMap(); nameMap_ResourceChanged(null, null); }
         }
 
         private void pkg_ResourceIndexInvalidated(object sender, EventArgs e)
