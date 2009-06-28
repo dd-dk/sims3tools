@@ -195,10 +195,12 @@ namespace S3PIDemoFE
 
                 if (isPackageDirty)
                 {
-                    DialogResult dr = MessageBox.Show("Current package has unsaved changes.\nSave now?",
-                        myName, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button3);
-                    if (dr == DialogResult.Cancel) return;
-                    if (dr == DialogResult.Yes) if (!fileSave()) return;
+                    /*int res = CopyableMessageBox.Show("Current package has unsaved changes.\nSave now?",
+                        myName, CopyableMessageBoxButtons.YesNoCancel, CopyableMessageBoxIcon.Warning, 2);/**///Causes error on Application.Exit();
+                    DialogResult drx = MessageBox.Show("Current package has unsaved changes.\nSave now?", myName, MessageBoxButtons.YesNoCancel);
+                    int res = drx == DialogResult.Yes ? 0 : drx == DialogResult.No ? 1 : 2;
+                    if (res == 2) return;
+                    if (res == 0) if (!fileSave()) return;
                     IsPackageDirty = false;
                 }
                 if (package != null) Package.ClosePackage(0, package);
@@ -429,7 +431,7 @@ namespace S3PIDemoFE
             IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, true);
             Stream s = res.Stream;
             s.Position = 0;
-            if (s.Length != rie.Memsize) MessageBox.Show(String.Format("Resource stream has {0} bytes; index entry says {1}.", s.Length, rie.Memsize));
+            if (s.Length != rie.Memsize) CopyableMessageBox.Show(String.Format("Resource stream has {0} bytes; index entry says {1}.", s.Length, rie.Memsize));
             BinaryWriter w = new BinaryWriter(new FileStream(filename, FileMode.Create));
             w.Write((new BinaryReader(s)).ReadBytes((int)s.Length));
             w.Close();
@@ -440,9 +442,9 @@ namespace S3PIDemoFE
             DialogResult dr = exportToPackageDialog.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            if (Path.GetFullPath(Filename).Equals(Path.GetFullPath(exportToPackageDialog.FileName)))
+            if (Filename != null && Filename.Length > 0 && Path.GetFullPath(Filename).Equals(Path.GetFullPath(exportToPackageDialog.FileName)))
             {
-                MessageBox.Show("Target must not be same as source", "Export to package", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                CopyableMessageBox.Show("Target must not be same as source.", "Export to package", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
                 return;
             }
 
@@ -459,30 +461,29 @@ namespace S3PIDemoFE
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Could not create package:\n" + ex.Message, "Export to package", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    CopyableMessageBox.Show("Could not create package:\n" + ex.Message, "Export to package", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
                     return;
                 }
             }
 
+            bool replace = false;
             try
             {
                 target = Package.OpenPackage(0, exportToPackageDialog.FileName);
 
                 if (!isNew)
                 {
-                    dr = MessageBox.Show(
-                        "Do you want to replace any duplicate resources in the target package discovered during export?\n\n" +
-                        "Click \"Yes\" to Replace duplicates.\n" +
-                        "Click \"No\" to Reject duplicates.\n\n" +
-                        "Click \"Cancel\" to abandon import",
-                        "Export to package", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
-                    if (dr == DialogResult.Cancel) return;
+                    int res = CopyableMessageBox.Show(
+                        "Do you want to replace any duplicate resources in the target package discovered during export?",
+                        "Export to package", CopyableMessageBoxIcon.Question, new List<string>(new string[] { "Re&place", "Re&ject", "&Abandon" }), 1, 2);
+                    if (res == 2) return;
+                    replace = res == 0;
                 }
 
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Could not open package:\n" + ex.Message, "Export to package", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                CopyableMessageBox.Show("Could not open package:\n" + ex.Message, "Export to package", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
                 return;
             }
 
@@ -497,7 +498,7 @@ namespace S3PIDemoFE
                 progressBar1.Maximum = browserWidget1.SelectedResources.Count;
                 foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources)
                 {
-                    exportResourceToPackage(target, rie, dr == DialogResult.Yes);
+                    exportResourceToPackage(target, rie, replace);
                     progressBar1.Value++;
                     if (progressBar1.Value % 100 == 0)
                         Application.DoEvents();
@@ -507,6 +508,7 @@ namespace S3PIDemoFE
                 lbProgress.Text = "Saving...";
                 Application.DoEvents();
                 target.SavePackage();
+                Package.ClosePackage(0, target);
             }
             finally { Package.ClosePackage(0, target); lbProgress.Text = ""; Application.UseWaitCursor = false; Application.DoEvents(); }
         }
@@ -799,14 +801,14 @@ namespace S3PIDemoFE
                 "\n" +
                 "This is free software, and you are welcome to redistribute it\n" +
                 "under certain conditions; see Help->Licence for details.\n";
-            MessageBox.Show(String.Format(
+            CopyableMessageBox.Show(String.Format(
                 "{0}\n"+
                 "Front-end Distribution: {1}\n" +
                 "Library Distribution: {2}"
                 , copyright
                 , getVersion(typeof(MainForm), "s3pe")
                 , getVersion(typeof(s3pi.Interfaces.AApiVersionedFields), "s3pe")
-                ), this.Text, MessageBoxButtons.OK);
+                ), this.Text);
         }
 
         private string getVersion(Type type, string p)
@@ -825,7 +827,7 @@ namespace S3PIDemoFE
 
         private void helpWarranty()
         {
-            MessageBox.Show("\n" +
+            CopyableMessageBox.Show("\n" +
                 "Disclaimer of Warranty.\n" +
                 "\n" +
                 "THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM â€œAS ISâ€� WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.\n" +
@@ -835,14 +837,13 @@ namespace S3PIDemoFE
                 "\n" +
                 "IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.\n" +
                 "\n",
-                this.Text,
-                MessageBoxButtons.OK);
+                this.Text);
 
         }
 
         private void helpLicence()
         {
-            DialogResult dr = MessageBox.Show("\n" +
+            int dr = CopyableMessageBox.Show("\n" +
                 "This program is distributed under the terms of the\nGNU General Public Licence version 3.\n" +
                 "\n" +
                 "If you wish to see the full text of the licence,\nplease visit http://www.fsf.org/licensing/licenses/gpl.html.\n" +
@@ -850,8 +851,8 @@ namespace S3PIDemoFE
                 "Do you wish to visit this site now?" +
                 "\n",
                 this.Text,
-                MessageBoxButtons.YesNo);
-            if (dr != DialogResult.Yes) return;
+                CopyableMessageBoxButtons.YesNo, CopyableMessageBoxIcon.Question, 1);
+            if (dr != 0) return;
             Help.ShowHelp(this, "http://www.fsf.org/licensing/licenses/gpl.html");
         }
         #endregion
@@ -865,18 +866,18 @@ namespace S3PIDemoFE
             resource.ResourceChanged -= new EventHandler(resource_ResourceChanged);
             if (resourceIsDirty)
             {
-                DialogResult dr = MessageBox.Show(
+                int dr = CopyableMessageBox.Show(
                     String.Format("Commit changes to {0}?",
                         e.name.Length > 0
                         ? e.name
                         : String.Format("TGI {0:X8}-{1:X8}-{2:X16}", browserWidget1.SelectedResource.ResourceType, browserWidget1.SelectedResource.ResourceGroup, browserWidget1.SelectedResource.Instance)
-                    ), this.Text, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button2);
-                if (dr == DialogResult.Cancel)
+                    ), this.Text, CopyableMessageBoxButtons.YesNoCancel, CopyableMessageBoxIcon.Question, 1);
+                if (dr == 2)
                 {
                     e.Cancel = true;
                     return;
                 }
-                if (dr != DialogResult.No)
+                if (dr != 1)
                     controlPanel1_CommitClick(null, null);
             }
         }
@@ -1100,10 +1101,10 @@ namespace S3PIDemoFE
 
                 if (res && Clipboard.ContainsData(DataFormats.Serializable))
                 {
-                    DialogResult dr = MessageBox.Show("Resource has been updated.  Commit changes?", "Commit changes?",
-                        MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
+                    int dr = CopyableMessageBox.Show("Resource has been updated.  Commit changes?", "Commit changes?",
+                        CopyableMessageBoxButtons.YesNo, CopyableMessageBoxIcon.Question, 0);
 
-                    if (dr != DialogResult.Yes) return;
+                    if (dr != 0) return;
 
                     MemoryStream ms = Clipboard.GetData(DataFormats.Serializable) as MemoryStream;
                     IResourceIndexEntry rie = NewResource(

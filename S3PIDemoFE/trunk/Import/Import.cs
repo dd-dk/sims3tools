@@ -78,7 +78,11 @@ namespace S3PIDemoFE
                 controlPanel1.UseNames = false;
                 foreach (string filename in ib.Batch)
                 {
-                    if (Filename != null && Filename.Length > 0 && Path.GetFullPath(Filename).Equals(Path.GetFullPath(filename))) continue;
+                    if (Filename != null && Filename.Length > 0 && Path.GetFullPath(Filename).Equals(Path.GetFullPath(filename)))
+                    {
+                        CopyableMessageBox.Show("Skipping current package", importPackagesDialog.Title, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
+                        continue;
+                    }
 
                     lbProgress.Text = "Importing " + Path.GetFileNameWithoutExtension(filename) + "...";
                     Application.DoEvents();
