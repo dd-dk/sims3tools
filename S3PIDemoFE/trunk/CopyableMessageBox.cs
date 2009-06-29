@@ -30,42 +30,30 @@ namespace S3PIDemoFE
         public static int Show(string message)
         {
             return Show(message, Application.OpenForms.Count > 0 ? Application.OpenForms[0].Text : "",
-                CopyableMessageBoxIcon.Information, new List<string>(new string[] { "OK" }), -1, -1);
+                CopyableMessageBoxIcon.None, new List<string>(new string[] { "OK" }), 0, 0);
         }
         public static int Show(string message, string caption)
         {
-            return Show(message, caption,
-                CopyableMessageBoxIcon.Information, new List<string>(new string[] { "OK" }), -1, -1);
+            return Show(message, caption, CopyableMessageBoxIcon.None, new List<string>(new string[] { "OK" }), 0, 0);
         }
         public static int Show(string message, string caption, CopyableMessageBoxButtons buttons)
         {
-            return Show(message, caption,
-                CopyableMessageBoxIcon.Information, enumToList(buttons), -1, -1);
+            int cncBtn = enumToCncBtn(buttons);
+            return Show(message, caption, CopyableMessageBoxIcon.None, enumToList(buttons), 0, cncBtn);
         }
         public static int Show(string message, string caption, CopyableMessageBoxButtons buttons, CopyableMessageBoxIcon icon)
         {
-            return Show(message, caption, icon, enumToList(buttons), -1, -1);
+            int cncBtn = enumToCncBtn(buttons);
+            return Show(message, caption, icon, enumToList(buttons), 0, cncBtn);
         }
         public static int Show(string message, string caption, CopyableMessageBoxButtons buttons, CopyableMessageBoxIcon icon, int defBtn)
         {
-            return Show(message, caption, icon, enumToList(buttons), defBtn, -1);
+            int cncBtn = enumToCncBtn(buttons);
+            return Show(message, caption, icon, enumToList(buttons), defBtn, cncBtn);
         }
         public static int Show(string message, string caption, CopyableMessageBoxButtons buttons, CopyableMessageBoxIcon icon, int defBtn, int cncBtn)
         {
             return Show(message, caption, icon, enumToList(buttons), defBtn, cncBtn);
-        }
-
-        private static IList<string> enumToList(CopyableMessageBoxButtons buttons)
-        {
-            switch (buttons)
-            {
-                case CopyableMessageBoxButtons.OKCancel: return new List<string>(new string[] { "&OK", "&Cancel", });
-                case CopyableMessageBoxButtons.AbortRetryIgnore: return new List<string>(new string[] { "&Abort", "&Retry", "&Ignore", });
-                case CopyableMessageBoxButtons.YesNoCancel: return new List<string>(new string[] { "&Yes", "&No", "&Cancel", });
-                case CopyableMessageBoxButtons.YesNo: return new List<string>(new string[] { "&Yes", "&No", });
-                case CopyableMessageBoxButtons.OK:
-                default: return new List<string>(new string[] { "&OK", });
-            }
         }
 
         public static int Show(string message, string caption, CopyableMessageBoxIcon icon, IList<string> buttons, int defBtn, int cncBtn)
@@ -76,12 +64,41 @@ namespace S3PIDemoFE
         public static int Show(IWin32Window owner, string message, string caption, CopyableMessageBoxIcon icon, IList<string> buttons, int defBtn, int cncBtn)
         {
             CopyableMessageBox cmb = new CopyableMessageBox(message, caption, icon, buttons, defBtn, cncBtn);
-            cmb.theButton = null;
-            cmb.ShowDialog(owner);
+            if (cmb.ShowDialog(owner) == DialogResult.Cancel) return cncBtn;
             return (cmb.theButton != null) ? buttons.IndexOf(cmb.theButton.Text) : -1;
         }
 
 
+        private static int enumToCncBtn(CopyableMessageBoxButtons buttons)
+        {
+            switch (buttons)
+            {
+                case CopyableMessageBoxButtons.OK: return 0;
+                case CopyableMessageBoxButtons.OKCancel: return 1;
+                case CopyableMessageBoxButtons.RetryCancel: return 1;
+                case CopyableMessageBoxButtons.AbortRetryIgnore: return -1;
+                case CopyableMessageBoxButtons.YesNoCancel: return 2;
+                case CopyableMessageBoxButtons.YesNo: return -1;
+                default: return -1;
+            }
+        }
+
+        private static IList<string> enumToList(CopyableMessageBoxButtons buttons)
+        {
+            switch (buttons)
+            {
+                case CopyableMessageBoxButtons.OKCancel: return new List<string>(new string[] { "&OK", "&Cancel", });
+                case CopyableMessageBoxButtons.AbortRetryIgnore: return new List<string>(new string[] { "&Abort", "&Retry", "&Ignore", });
+                case CopyableMessageBoxButtons.RetryCancel: return new List<string>(new string[] { "&Retry", "&Cancel", });
+                case CopyableMessageBoxButtons.YesNoCancel: return new List<string>(new string[] { "&Yes", "&No", "&Cancel", });
+                case CopyableMessageBoxButtons.YesNo: return new List<string>(new string[] { "&Yes", "&No", });
+                case CopyableMessageBoxButtons.OK:
+                default: return new List<string>(new string[] { "&OK", });
+            }
+        }
+
+
+        private Button theButton = null;
         private CopyableMessageBox()
         {
             InitializeComponent();
@@ -94,44 +111,64 @@ namespace S3PIDemoFE
                 throw new ArgumentLengthException("At least one button text must be supplied");
 
             this.SuspendLayout();
-            this.Text = caption;
 
+            int formWidth = 8; // screen estate used by the form border
+            int formHeight = 28; // screen estate used by the form border
+            int tbPadding = 24; // screen estate used by the text box regardless of content
+            int buttonHeight = 42; // screen estate reserved for the buttons
 
+            int iconWidth = icon == CopyableMessageBoxIcon.None ? 0 : 80; // icon area, if icon present
+            int iconHeight = icon == CopyableMessageBoxIcon.None ? 0 : 77; // icon area, if icon present
+
+            // To calculate the text box size, we get an autosize label to tell us how big it should be
             Label lb = new Label();
-            lb.MaximumSize = new Size((int)(Application.OpenForms[0].Height * .8) - 90, (int)(Application.OpenForms[0].Width * .8) - 112);
+            lb.MaximumSize = new Size((int)(Application.OpenForms[0].Width * .8) - (formWidth + tbPadding + iconWidth),
+                (int)(Application.OpenForms[0].Height * .8) - (formHeight + buttonHeight + tbPadding));
             lb.AutoSize = true;
             lb.Text = message;
 
-            string[] lines = message.Split('\n');
-            this.tbMessage.Lines = lines;
+            int buttonWidth = 15 + (81 * (buttons.Count - 1)) + 75 + 15;
+            int textWidth = tbPadding + lb.PreferredWidth;
+            int textHeight = tbPadding + lb.PreferredHeight;
 
-            Size tbSize = new Size(lb.PreferredHeight, lb.PreferredWidth);
-            this.Size = new Size(tbSize.Height + 90, tbSize.Width + 112);
+            this.Size = new Size(formWidth + Math.Max(buttonWidth, iconWidth + textWidth),
+                formHeight + buttonHeight + Math.Max(iconHeight, textHeight));
+
+
+            this.Text = caption;
+
+            this.tbMessage.Lines = message.Split('\n');
+
+            enumToGlyph(icon, lbIcon);
             
             CreateButtons(buttons, defBtn, cncBtn);
 
+
+            this.ResumeLayout();
+
+            this.DialogResult = DialogResult.OK;
+        }
+
+        private void enumToGlyph(CopyableMessageBoxIcon icon, Label lb)
+        {
             switch (icon)
             {
                 case CopyableMessageBoxIcon.Information:
-                    lbIcon.Visible = true; lbIcon.Text = "i"; lbIcon.ForeColor = Color.Blue; lbIcon.Font = new Font(lbIcon.Font, FontStyle.Italic); break;
+                    lb.Visible = true; lb.Text = "i"; lb.ForeColor = Color.Blue; lb.BackColor = Color.FromArgb(240, 240, 255); lb.Font = new Font(lb.Font, FontStyle.Italic); break;
                 case CopyableMessageBoxIcon.Question:
-                    lbIcon.Visible = true; lbIcon.Text = "?"; lbIcon.ForeColor = Color.Green; lbIcon.Font = new Font(lbIcon.Font, FontStyle.Regular); break;
+                    lb.Visible = true; lb.Text = "?"; lb.ForeColor = Color.Green; lb.BackColor = Color.FromArgb(240, 255, 240); lb.Font = new Font(lb.Font, FontStyle.Regular); break;
                 case CopyableMessageBoxIcon.Warning:
-                    lbIcon.Visible = true; lbIcon.Text = "!"; lbIcon.ForeColor = Color.Brown; lbIcon.Font = new Font(lbIcon.Font, FontStyle.Bold); break;
+                    lb.Visible = true; lb.Text = "!"; lb.ForeColor = Color.Black; lb.BackColor = Color.Yellow; lb.Font = new Font(lb.Font, FontStyle.Bold); break;
                 case CopyableMessageBoxIcon.Error:
-                    lbIcon.Visible = true; lbIcon.Text = "X"; lbIcon.ForeColor = Color.Red; lbIcon.Font = new Font(lbIcon.Font, FontStyle.Bold); break;
+                    lb.Visible = true; lb.Text = "X"; lb.ForeColor = Color.White; lb.BackColor = Color.Red; lb.Font = new Font(lb.Font, FontStyle.Bold); break;
                 case CopyableMessageBoxIcon.None:
                 default:
-                    lbIcon.Visible = false; break;
+                    lb.Visible = false; break;
             }
-
-            this.ResumeLayout();
         }
 
-        void CreateButtons(IList<string> buttons, int defBtn, int cncBtn)
+        private void CreateButtons(IList<string> buttons, int defBtn, int cncBtn)
         {
-            if (defBtn == -1) defBtn = 0;
-            if (cncBtn == -1) cncBtn = buttons.Count - 1;
             flpButtons.SuspendLayout();
             flpButtons.Controls.Clear();
             for (int i = buttons.Count; i > 0; i--)
@@ -144,7 +181,7 @@ namespace S3PIDemoFE
             flpButtons.ResumeLayout();
         }
 
-        Button CreateButton(string Name, int TabIndex, string Text)
+        private Button CreateButton(string Name, int TabIndex, string Text)
         {
             Button newButton = new Button();
             newButton.Anchor = System.Windows.Forms.AnchorStyles.None;
@@ -157,7 +194,6 @@ namespace S3PIDemoFE
             return newButton;
         }
 
-        Button theButton = null;
         private void button_Click(object sender, EventArgs e)
         {
             theButton = sender as Button;
@@ -167,11 +203,15 @@ namespace S3PIDemoFE
 
     public enum CopyableMessageBoxIcon
     {
-        None,
-        Information,
-        Question,
-        Warning,
-        Error,
+        None = 0,
+        Information = 1,
+        Asterisk = 1,
+        Question = 2,
+        Warning = 3,
+        Exclamation = 3,
+        Error = 4,
+        Hand = 4,
+        Stop = 4,
     }
 
     public enum CopyableMessageBoxButtons
