@@ -80,7 +80,7 @@ namespace S3PIDemoFE
                 {
                     if (Filename != null && Filename.Length > 0 && Path.GetFullPath(Filename).Equals(Path.GetFullPath(filename)))
                     {
-                        CopyableMessageBox.Show("Skipping current package", importPackagesDialog.Title, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
+                        CopyableMessageBox.Show("Skipping current package.", importPackagesDialog.Title);
                         continue;
                     }
 
