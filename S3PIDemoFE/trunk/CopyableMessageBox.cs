@@ -196,6 +196,7 @@ namespace S3PIDemoFE
 
         private void button_Click(object sender, EventArgs e)
         {
+            this.DialogResult = DialogResult.OK;//To avoid it becoming Cancel
             theButton = sender as Button;
             this.Close();
         }
