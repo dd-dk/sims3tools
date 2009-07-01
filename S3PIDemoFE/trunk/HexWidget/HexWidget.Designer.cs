@@ -49,6 +49,7 @@ namespace S3PIDemoFE
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.richTextBox1);
             this.Name = "HexWidget";
+            this.Load += new System.EventHandler(this.HexWidget_Load);
             this.ResumeLayout(false);
 
         }

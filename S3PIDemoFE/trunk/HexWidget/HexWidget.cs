@@ -35,9 +35,13 @@ namespace S3PIDemoFE
         public HexWidget()
         {
             InitializeComponent();
-            HexWidget_LoadSettings();
             this.richTextBox1.Font = new Font(FontFamily.GenericMonospace, 10 * (rowLength > 16 ? 0.85f : 1f));
-            this.Enabled = res != null;
+            this.Enabled = false;
+        }
+
+        private void HexWidget_Load(object sender, EventArgs e)
+        {
+            HexWidget_LoadSettings();
         }
 
         void HexWidget_LoadSettings()
@@ -52,7 +56,17 @@ namespace S3PIDemoFE
         public IResource Resource { get { return res; } set { if (res != value) { res = value; Refill(); } } }
 
         [DefaultValue(16)]
-        public int Rowsize { get { return rowLength; } set { if (rowLength != value) { rowLength = value; Refill(); } } }
+        public int Rowsize
+        {
+            get { return rowLength; }
+            set
+            {
+                if (rowLength == value) return;
+                rowLength = value;
+                this.richTextBox1.Font = new Font(FontFamily.GenericMonospace, 10 * (rowLength > 16 ? 0.85f : 1f));
+                Refill();
+            }
+        }
 
         private void Refill()
         {
