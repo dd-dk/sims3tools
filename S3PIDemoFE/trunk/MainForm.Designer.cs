@@ -199,6 +199,7 @@
             this.controlPanel1.TabIndex = 1;
             this.controlPanel1.CommitClick += new System.EventHandler(this.controlPanel1_CommitClick);
             this.controlPanel1.ViewerClick += new System.EventHandler(this.controlPanel1_ViewerClick);
+            this.controlPanel1.UseTagsChanged += new System.EventHandler(this.controlPanel1_UseTagsChanged);
             this.controlPanel1.HexClick += new System.EventHandler(this.controlPanel1_HexClick);
             this.controlPanel1.UseNamesChanged += new System.EventHandler(this.controlPanel1_UseNamesChanged);
             this.controlPanel1.GridClick += new System.EventHandler(this.controlPanel1_GridClick);

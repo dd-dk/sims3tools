@@ -45,13 +45,10 @@ namespace S3PIDemoFE
         public MainForm()
         {
             InitializeComponent();
-            lbProgress.Text = "";
-            MainForm_LoadSettings();
-
+            MainForm_LoadFormSettings();
+            
+            this.lbProgress.Text = "";
             this.Text = myName;
-
-            browserWidget1.Sortable = controlPanel1.Sort;
-            browserWidget1.DisplayResourceNames = controlPanel1.UseNames;
 
             browserWidget1.Fields = new List<string>(fields.ToArray());
             List<string> filterFields = new List<string>(fields.ToArray());
@@ -70,7 +67,7 @@ namespace S3PIDemoFE
             this.SaveSettings += new EventHandler(hexWidget1.HexWidget_SaveSettings);
         }
 
-        void MainForm_LoadSettings()
+        void MainForm_LoadFormSettings()
         {
             int h = S3PIDemoFE.Properties.Settings.Default.PersistentHeight;
             if (h == -1) h = 4 * System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Height / 5;
@@ -1055,6 +1052,16 @@ namespace S3PIDemoFE
             {
                 this.Enabled = false;
                 browserWidget1.DisplayResourceNames = controlPanel1.UseNames;
+            }
+            finally { this.Enabled = true; }
+        }
+
+        private void controlPanel1_UseTagsChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                this.Enabled = false;
+                browserWidget1.DisplayResourceTags = controlPanel1.UseTags;
             }
             finally { this.Enabled = true; }
         }

@@ -36,6 +36,7 @@ namespace S3PIDemoFE
         ListViewColumnSorter lvwColumnSorter;
         string sortColumn = "Chunkoffset";
         bool displayResourceNames = false;
+        bool displayResourceTags = false;
         IList<KeyValuePair<string, TypedValue>> filter = null;
 
         //used internally
@@ -50,17 +51,38 @@ namespace S3PIDemoFE
         public BrowserWidget()
         {
             InitializeComponent();
-            BrowserWidget_LoadSettings();
+            BrowserWidget_LoadListSettings();
 
             lvwColumnSorter = new ListViewColumnSorter();
             lookup = new Dictionary<IResourceIndexEntry, ListViewItem>();
             OnListUpdated(this, new EventArgs());
         }
 
-        void BrowserWidget_LoadSettings() { }
+        int[] columnWidths = new int[0];
+        void BrowserWidget_LoadListSettings()
+        {
+            string cw = S3PIDemoFE.Properties.Settings.Default.ColumnWidths;
+            if (cw != null && cw.Length > 0)
+            {
+                string[] cws = cw == null ? new string[] { } : cw.Split(':');
+
+                int w;
+                columnWidths = new int[cws.Length];
+                for (int i = 0; i < cws.Length; i++)
+                    columnWidths[i] = int.TryParse(cws[i], out w) && w > 0 ? w : -1;
+            }
+        }
         public void BrowserWidget_SaveSettings(object sender, EventArgs e)
         {
             lvwColumnSorter.ListViewColumnSorter_SaveSettings(sender, e);
+
+            if (listView1.Columns.Count > 0)
+            {
+                string columnWidths = "";
+                foreach (ColumnHeader ch in listView1.Columns)
+                    columnWidths += ":" + ch.Width;
+                S3PIDemoFE.Properties.Settings.Default.ColumnWidths = columnWidths.Trim(':');
+            }
         }
 
         #region Methods
@@ -95,43 +117,36 @@ namespace S3PIDemoFE
 
         [Browsable(true)]
         [Category("Behavior")]
-        [Description("Specifies the list of fields to display")]
-        public IList<string> Fields
+        [DefaultValue(false)]
+        [Description("Set to true to display resource names found in the package")]
+        public bool DisplayResourceNames
         {
-            get { return fields; }
+            get { return displayResourceNames; }
             set
             {
-                if (fields == value) return;
-                fields = value;
-                SetColumns();
+                if (displayResourceNames == value) return;
+                displayResourceNames = value;
+
+                if (pkg != null && displayResourceNames) nameMap_ResourceChanged(null, null);
+                if (listView1.Columns.Count == 0) return;
+                listView1.Columns[0].Width = nameMap != null && displayResourceNames ? listView1.Columns[0].Width == 0 ? (columnWidths.Length > 0 && columnWidths[0] >= 0 ? columnWidths[0] : 80) : listView1.Columns[0].Width : 0;
             }
         }
 
         [Browsable(true)]
         [Category("Behavior")]
-        [Description("The progress bar is used when loading the displayed list")]
-        public ProgressBar ProgressBar { get { return pb; } set { pb = value; } }
-
-        [Browsable(true)]
-        [Category("Behavior")]
-        [Description("The progress label is used when loading the displayed list")]
-        public Label ProgressLabel { get { return pbLabel; } set { pbLabel = value; } }
-
-        [Browsable(true)]
-        [Category("Behavior")]
-        [Description("The current package")]
-        public IPackage Package
+        [DefaultValue(false)]
+        [Description("Set to true to display resource tags")]
+        public bool DisplayResourceTags
         {
-            get { return null; }
+            get { return displayResourceTags; }
             set
             {
-                if (pkg == value) return;
-                if (pkg != null)
-                    pkg.ResourceIndexInvalidated -= new EventHandler(pkg_ResourceIndexInvalidated);
-                pkg = value;
-                pkg_ResourceIndexInvalidated(null, null);
-                if (pkg != null)
-                    pkg.ResourceIndexInvalidated += new EventHandler(pkg_ResourceIndexInvalidated);
+                if (displayResourceTags == value) return;
+                displayResourceTags = value;
+
+                if (listView1.Columns.Count == 0) return;
+                listView1.Columns[1].Width = displayResourceTags ? listView1.Columns[1].Width == 0 ? (columnWidths.Length > 1 && columnWidths[1] >= 0 ? columnWidths[1] : 50) : listView1.Columns[1].Width : 0;
             }
         }
 
@@ -176,27 +191,74 @@ namespace S3PIDemoFE
             }
         }
 
-        [Browsable(true)]
-        [Category("Behavior")]
-        [DefaultValue(false)]
-        [Description("Set to true to display resource names found in the package")]
-        public bool DisplayResourceNames
+
+        //----
+
+        /// <summary>
+        /// Specifies the list of fields to display
+        /// </summary>
+        [Browsable(false)]
+        public IList<string> Fields
         {
-            get { return displayResourceNames; }
+            get { return fields; }
             set
             {
-                if (displayResourceNames == value) return;
-                displayResourceNames = value;
-                if (pkg == null) return;
-
-                if (displayResourceNames) nameMap_ResourceChanged(null, null);
-                else listView1.Columns[0].Width = 0;
+                if (fields == value) return;
+                fields = value;
+                SetColumns();
             }
         }
 
-        [Browsable(true)]
-        [Category("Behavior")]
-        [Description("The single resource selected")]
+        /// <summary>
+        /// Specify how to filter the package resource list
+        /// </summary>
+        [Browsable(false)]
+        public IList<KeyValuePair<string, TypedValue>> Filter
+        {
+            get { return filter; }
+            set
+            {
+                if (filter == null && value == null) return;
+                filter = value;
+                pkg_ResourceIndexInvalidated(null, null);
+            }
+        }
+
+        /// <summary>
+        /// The current package
+        /// </summary>
+        [Browsable(false)]
+        public IPackage Package
+        {
+            get { return null; }
+            set
+            {
+                if (pkg == value) return;
+                if (pkg != null)
+                    pkg.ResourceIndexInvalidated -= new EventHandler(pkg_ResourceIndexInvalidated);
+                pkg = value;
+                pkg_ResourceIndexInvalidated(null, null);
+                if (pkg != null)
+                    pkg.ResourceIndexInvalidated += new EventHandler(pkg_ResourceIndexInvalidated);
+            }
+        }
+
+        /// <summary>
+        /// A progress bar to be used during long operations
+        /// </summary>
+        [Browsable(false)]
+        public ProgressBar ProgressBar { get { return pb; } set { pb = value; } }
+
+        /// <summary>
+        /// A progress label to be used during long operations
+        /// </summary>
+        [Browsable(false)]
+        public Label ProgressLabel { get { return pbLabel; } set { pbLabel = value; } }
+
+        /// <summary>
+        /// The single resource selected
+        /// </summary>
+        [Browsable(false)]
         public IResourceIndexEntry SelectedResource
         {
             get { return selectedResource == null ? null : selectedResource.Tag as IResourceIndexEntry; }
@@ -215,9 +277,10 @@ namespace S3PIDemoFE
             }
         }
 
-        [Browsable(true)]
-        [Category("Behavior")]
-        [Description("The list of resources selected")]
+        /// <summary>
+        /// The list of resources selected
+        /// </summary>
+        [Browsable(false)]
         public IList<IResourceIndexEntry> SelectedResources
         {
             get
@@ -226,20 +289,6 @@ namespace S3PIDemoFE
                 foreach (ListViewItem lvi in listView1.SelectedItems)
                     if (lvi.Tag as IResourceIndexEntry != null) res.Add(lvi.Tag as IResourceIndexEntry);
                 return res;
-            }
-        }
-
-        [Browsable(true)]
-        [Category("Behavior")]
-        [Description("Specify how to filter the package resource list")]
-        public IList<KeyValuePair<string, TypedValue>> Filter
-        {
-            get { return filter; }
-            set
-            {
-                if (filter == null && value == null) return;
-                filter = value;
-                pkg_ResourceIndexInvalidated(null, null);
             }
         }
         #endregion
@@ -292,29 +341,33 @@ namespace S3PIDemoFE
         {
             listView1.Columns.Clear();
             if (fields == null) return;
-            // Create an instance of a ListView column sorter and assign it 
-            // to the ListView control.
-            //
 
-            ColumnHeader[] ach = new ColumnHeader[fields.Count + 1];
+            ColumnHeader[] ach = new ColumnHeader[fields.Count + 2];
+            
             ach[0] = new ColumnHeader();
             ach[0].DisplayIndex = 0;
             ach[0].Text = ach[0].Name = "Name";
-            ach[0].Width = displayResourceNames ? 80 : 0;
+            ach[0].Width = displayResourceNames ? (columnWidths.Length > 0 && columnWidths[0] >= 0 ? columnWidths[0] : 80) : 0;
             listView1.Columns.Add(ach[0]);
-            for (int i = 1; i < ach.Length; i++)
+
+            ach[1] = new ColumnHeader();
+            ach[1].DisplayIndex = 0;
+            ach[1].Text = ach[0].Name = "Tag";
+            ach[1].Width = displayResourceTags ? (columnWidths.Length > 1 && columnWidths[1] >= 0 ? columnWidths[1] : 50) : 0;
+            listView1.Columns.Add(ach[1]);
+            
+            for (int i = 2; i < ach.Length; i++)
             {
                 ach[i] = new ColumnHeader();
                 ach[i].DisplayIndex = i;
-                ach[i].Text = ach[i].Name = fields[i - 1].Replace("Resource", "");
-                ach[i].Width = ach[i].Text.Equals("Instance") ? 140 : 80;
+                ach[i].Text = ach[i].Name = fields[i - 2].Replace("Resource", "");
+                ach[i].Width = columnWidths.Length > i && columnWidths[i] >= 0 ? columnWidths[i] : (ach[i].Text.Equals("Instance") ? 140 : 80);
                 listView1.Columns.Add(ach[i]);
             }
         }
 
         void UpdateList()
         {
-            listView1.Columns[0].Width = displayResourceNames && nameMap != null ? listView1.Columns[0].Width == 0 ? 80 : listView1.Columns[0].Width : 0;
             IResourceIndexEntry sie = (listView1.SelectedItems.Count == 0 ? null : listView1.SelectedItems[0].Tag) as IResourceIndexEntry;
             System.Collections.IComparer cmp = this.listView1.ListViewItemSorter;
 
@@ -334,6 +387,10 @@ namespace S3PIDemoFE
             {
                 lookup = new Dictionary<IResourceIndexEntry, ListViewItem>();
                 if (resourceList == null) return;
+                listView1.Columns[0].Width = (nameMap == null || !displayResourceNames) ? 0 : (
+                    (listView1.Columns[0].Width != 0) ? listView1.Columns[0].Width : (
+                    (columnWidths.Length > 0 && columnWidths[0] >= 0) ? columnWidths[0] : 80
+                    ));
 
                 if (pb != null)
                 {
@@ -391,13 +448,15 @@ namespace S3PIDemoFE
         ListViewItem CreateItem(IResourceIndexEntry ie)
         {
             ListViewItem lvi = new ListViewItem();
-            if (ie.IsDeleted) lvi.Font = new Font(lvi.Font, FontStyle.Strikeout);
+            if (ie.IsDeleted) lvi.Font = new Font(lvi.Font, lvi.Font.Style | FontStyle.Strikeout);
             for (int j = 0; j < fields.Count + 1; j++)
             {
                 if (j == 0)
                     lvi.Text = ResourceName(ie);
+                else if (j == 1)
+                    lvi.SubItems.Add(ResourceTag(ie));
                 else
-                    lvi.SubItems.Add(ie[fields[j - 1]] + "");
+                    lvi.SubItems.Add(ie[fields[j - 2]] + "");
             }
             lvi.Tag = ie;
             (ie as AResourceIndexEntry).ResourceIndexEntryChanged -= new EventHandler(BrowserWidget_ResourceIndexEntryChanged);
@@ -491,6 +550,12 @@ namespace S3PIDemoFE
             }
 
             Application.DoEvents();
+        }
+
+        string ResourceTag(IResourceIndexEntry rie)
+        {
+            List<string> exts = s3pi.Extensions.ExtList.Ext[rie["ResourceType"]];
+            return (exts.Count > 0) ? exts[0] : "";
         }
 
 

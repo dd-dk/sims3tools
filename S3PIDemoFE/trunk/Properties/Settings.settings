@@ -56,5 +56,11 @@
     <Setting Name="HexRowsize" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">16</Value>
     </Setting>
+    <Setting Name="UseTags" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="ColumnWidths" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>
