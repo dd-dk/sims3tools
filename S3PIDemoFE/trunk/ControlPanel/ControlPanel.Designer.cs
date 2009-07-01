@@ -41,8 +41,12 @@ namespace S3PIDemoFE
             this.btnViewer = new System.Windows.Forms.Button();
             this.btnEditor = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+            this.label2 = new System.Windows.Forms.Label();
+            this.ckbUseTags = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
+            this.tableLayoutPanel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // ckbSortable
@@ -120,12 +124,12 @@ namespace S3PIDemoFE
             this.ckbUseNames.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ckbUseNames.AutoSize = true;
             this.ckbUseNames.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.ckbUseNames.Location = new System.Drawing.Point(382, 5);
-            this.ckbUseNames.Margin = new System.Windows.Forms.Padding(12, 0, 12, 0);
+            this.ckbUseNames.Location = new System.Drawing.Point(44, 0);
+            this.ckbUseNames.Margin = new System.Windows.Forms.Padding(0);
             this.ckbUseNames.Name = "ckbUseNames";
-            this.ckbUseNames.Size = new System.Drawing.Size(138, 17);
+            this.ckbUseNames.Size = new System.Drawing.Size(59, 17);
             this.ckbUseNames.TabIndex = 7;
-            this.ckbUseNames.Text = "Display resource names";
+            this.ckbUseNames.Text = "Names";
             this.ckbUseNames.UseVisualStyleBackColor = true;
             this.ckbUseNames.CheckedChanged += new System.EventHandler(this.ckbUseNames_CheckedChanged);
             // 
@@ -146,7 +150,7 @@ namespace S3PIDemoFE
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel1.ColumnCount = 11;
+            this.tableLayoutPanel1.ColumnCount = 13;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
@@ -154,19 +158,21 @@ namespace S3PIDemoFE
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 6F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 12F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 6F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.Controls.Add(this.ckbSortable, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.btnCommit, 10, 0);
+            this.tableLayoutPanel1.Controls.Add(this.btnCommit, 12, 0);
             this.tableLayoutPanel1.Controls.Add(this.btnValue, 4, 0);
-            this.tableLayoutPanel1.Controls.Add(this.ckbUseNames, 7, 0);
             this.tableLayoutPanel1.Controls.Add(this.ckbAutoHex, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.btnHex, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.ckbNoUnWrap, 3, 0);
             this.tableLayoutPanel1.Controls.Add(this.btnGrid, 6, 0);
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 8, 0);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 10, 0);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 8, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
@@ -203,7 +209,7 @@ namespace S3PIDemoFE
             this.tableLayoutPanel2.Controls.Add(this.btnViewer, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.btnEditor, 3, 0);
             this.tableLayoutPanel2.Controls.Add(this.label1, 0, 0);
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(532, 1);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(541, 1);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
@@ -247,15 +253,64 @@ namespace S3PIDemoFE
             this.label1.TabIndex = 0;
             this.label1.Text = "External:";
             // 
+            // tableLayoutPanel3
+            // 
+            this.tableLayoutPanel3.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.tableLayoutPanel3.AutoSize = true;
+            this.tableLayoutPanel3.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tableLayoutPanel3.ColumnCount = 3;
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel3.Controls.Add(this.label2, 0, 0);
+            this.tableLayoutPanel3.Controls.Add(this.ckbUseNames, 1, 0);
+            this.tableLayoutPanel3.Controls.Add(this.ckbUseTags, 2, 0);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(382, 5);
+            this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
+            this.tableLayoutPanel3.RowCount = 1;
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(153, 17);
+            this.tableLayoutPanel3.TabIndex = 11;
+            // 
+            // label2
+            // 
+            this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(0, 2);
+            this.label2.Margin = new System.Windows.Forms.Padding(0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(44, 13);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "Display:";
+            // 
+            // ckbUseTags
+            // 
+            this.ckbUseTags.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbUseTags.AutoSize = true;
+            this.ckbUseTags.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.ckbUseTags.Location = new System.Drawing.Point(103, 0);
+            this.ckbUseTags.Margin = new System.Windows.Forms.Padding(0);
+            this.ckbUseTags.Name = "ckbUseTags";
+            this.ckbUseTags.Size = new System.Drawing.Size(50, 17);
+            this.ckbUseTags.TabIndex = 7;
+            this.ckbUseTags.Text = "Tags";
+            this.ckbUseTags.UseVisualStyleBackColor = true;
+            this.ckbUseTags.CheckedChanged += new System.EventHandler(this.ckbUseTags_CheckedChanged);
+            // 
             // ControlPanel
             // 
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "ControlPanel";
             this.Size = new System.Drawing.Size(911, 27);
+            this.Load += new System.EventHandler(this.ControlPanel_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
+            this.tableLayoutPanel3.ResumeLayout(false);
+            this.tableLayoutPanel3.PerformLayout();
             this.ResumeLayout(false);
 
           }
@@ -275,6 +330,9 @@ namespace S3PIDemoFE
         private System.Windows.Forms.Button btnViewer;
         private System.Windows.Forms.Button btnEditor;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.CheckBox ckbUseTags;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
     }
 }
 

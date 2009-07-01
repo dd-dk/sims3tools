@@ -29,7 +29,6 @@ namespace S3PIDemoFE
         public ControlPanel()
         {
             InitializeComponent();
-            ControlPanel_LoadSettings();
         }
 
         void ControlPanel_LoadSettings()
@@ -38,6 +37,7 @@ namespace S3PIDemoFE
             AutoHex = S3PIDemoFE.Properties.Settings.Default.AutoHex;
             HexOnly = S3PIDemoFE.Properties.Settings.Default.HexOnly;
             UseNames = S3PIDemoFE.Properties.Settings.Default.UseNames;
+            UseTags = S3PIDemoFE.Properties.Settings.Default.UseTags;
         }
         public void ControlPanel_SaveSettings(object sender, EventArgs e)
         {
@@ -45,6 +45,12 @@ namespace S3PIDemoFE
             S3PIDemoFE.Properties.Settings.Default.AutoHex = AutoHex;
             S3PIDemoFE.Properties.Settings.Default.HexOnly = HexOnly;
             S3PIDemoFE.Properties.Settings.Default.UseNames = UseNames;
+            S3PIDemoFE.Properties.Settings.Default.UseTags = UseTags;
+        }
+
+        private void ControlPanel_Load(object sender, EventArgs e)
+        {
+            ControlPanel_LoadSettings();
         }
 
         #region Sort checkbox
@@ -150,6 +156,21 @@ namespace S3PIDemoFE
         public event EventHandler UseNamesChanged;
         protected virtual void OnUseNamesChanged(object sender, EventArgs e) { if (UseNamesChanged != null) UseNamesChanged(sender, e); }
         private void ckbUseNames_CheckedChanged(object sender, EventArgs e) { OnUseNamesChanged(sender, e); }
+        #endregion
+
+        #region UseTags checkbox
+        [Browsable(true)]
+        [Category("Appearance")]
+        [DefaultValue(false)]
+        [Description("The state of the UseTags checkbox")]
+        public bool UseTags { get { return ckbUseTags.Checked; } set { ckbUseTags.Checked = value; } }
+
+        [Browsable(true)]
+        [Category("Property Changed")]
+        [Description("Occurs when the UseNames checkbox changes")]
+        public event EventHandler UseTagsChanged;
+        protected virtual void OnUseTagsChanged(object sender, EventArgs e) { if (UseTagsChanged != null) UseTagsChanged(sender, e); }
+        private void ckbUseTags_CheckedChanged(object sender, EventArgs e) { OnUseTagsChanged(sender, e); }
         #endregion
 
         #region Viewer button
