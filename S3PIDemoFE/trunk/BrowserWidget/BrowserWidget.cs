@@ -554,8 +554,10 @@ namespace S3PIDemoFE
 
         string ResourceTag(IResourceIndexEntry rie)
         {
-            List<string> exts = s3pi.Extensions.ExtList.Ext[rie["ResourceType"]];
-            return (exts.Count > 0) ? exts[0] : "";
+            string key = rie["ResourceType"];
+            if (s3pi.Extensions.ExtList.Ext.ContainsKey(key)) return s3pi.Extensions.ExtList.Ext[key][0];
+            if (s3pi.Extensions.ExtList.Ext.ContainsKey("*")) return s3pi.Extensions.ExtList.Ext["*"][0];
+            return "";
         }
 
 
