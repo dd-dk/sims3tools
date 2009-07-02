@@ -884,7 +884,7 @@ namespace S3PIDemoFE
             resourceName = e.name;
             resource = browserWidget1.SelectedResource == null
                 ? null
-                : s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, browserWidget1.SelectedResource, controlPanel1.ValueEnabled);
+                : s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, browserWidget1.SelectedResource, controlPanel1.HexOnly);
 
             if (resource != null) resource.ResourceChanged += new EventHandler(resource_ResourceChanged);
 
