@@ -34,6 +34,10 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="s3pi.CopyableMessageBox, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.CopyableMessageBox.dll</HintPath>
+    </Reference>
     <Reference Include="s3pi.DemoPlugins, Version=906.19.14.24845, Culture=neutral, PublicKeyToken=95792da617faeee1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.DemoPlugins.dll</HintPath>
@@ -69,12 +73,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CopyableMessageBox.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="CopyableMessageBox.Designer.cs">
-      <DependentUpon>CopyableMessageBox.cs</DependentUpon>
-    </Compile>
     <Compile Include="GridForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -175,9 +173,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ControlPanel\ControlPanel.resx">
       <DependentUpon>ControlPanel.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="CopyableMessageBox.resx">
-      <DependentUpon>CopyableMessageBox.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GridForm.resx">
       <DependentUpon>GridForm.cs</DependentUpon>
