@@ -377,7 +377,7 @@ namespace S3PIDemoFE
 
             rie.Compressed = (ushort)(compress ? 0xffff : 0);
 
-            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, false);
+            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, controlPanel1.HexOnly);
             package.ReplaceResource(rie, res); // Commit new resource to package
             IsPackageDirty = true;
 
@@ -425,7 +425,7 @@ namespace S3PIDemoFE
 
         private void exportFile(IResourceIndexEntry rie, string filename)
         {
-            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, true);
+            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, controlPanel1.HexOnly);
             Stream s = res.Stream;
             s.Position = 0;
             if (s.Length != rie.Memsize) CopyableMessageBox.Show(String.Format("Resource stream has {0} bytes; index entry says {1}.", s.Length, rie.Memsize));
