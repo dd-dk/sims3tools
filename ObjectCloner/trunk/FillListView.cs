@@ -87,6 +87,7 @@ namespace ObjectCloner
 
 
                 int i = 0;
+                int freq = lrie.Count / 20;
                 updateProgress(true, "Please wait, loading objects...", true, lrie.Count, true, i);
                 foreach (IResourceIndexEntry rie in lrie)
                 {
@@ -105,7 +106,7 @@ namespace ObjectCloner
                     }/**/
                     createListViewItem(item);
 
-                    if (++i % 100 == 0)
+                    if (++i % freq == 0)
                         updateProgress(false, "", false, -1, true, i);
                 }
                 complete = true;
@@ -139,27 +140,36 @@ namespace ObjectCloner
             res.i = Convert.ToUInt64(v[2], v[2].StartsWith("0x") ? 16 : 10);
             return res;
         }
+        public static implicit operator TGI(s3pi.Extensions.TGIN tgin) { return new TGI(tgin.ResType, tgin.ResGroup, tgin.ResInstance); }
     }
 
     public struct RIE
     {
-        IPackage pkg;
+        IPackage package;
         TGI tgi;
-        public RIE(IPackage pkg, TGI tgi) : this() { this.pkg = pkg; this.tgi = tgi; }
-        public IResourceIndexEntry rie
+        public RIE(IPackage pkg, TGI tgi) : this() { this.package = pkg; this.tgi = tgi; }
+        public IPackage pkg { get { return package; } }
+        public AResourceIndexEntry rie { get { return (AResourceIndexEntry)this; } }
+        public static implicit operator AResourceIndexEntry(RIE rie)
         {
-            get
-            {
-                IResourceIndexEntry res = pkg.Find(new string[] { "ResourceType", "ResourceGroup", "Instance", },
-                    new TypedValue[] {
-                    new TypedValue(typeof(uint), tgi.t),
-                    new TypedValue(typeof(uint), tgi.g),
-                    new TypedValue(typeof(ulong), tgi.i),
-                }
-                    );
-                return res;
-            }
+            return rie.package.Find(new string[] { "ResourceType", "ResourceGroup", "Instance", },
+                new TypedValue[] {
+                    new TypedValue(typeof(uint), rie.tgi.t),
+                    new TypedValue(typeof(uint), rie.tgi.g),
+                    new TypedValue(typeof(ulong), rie.tgi.i),
+                    }
+                ) as AResourceIndexEntry;
         }
+    }
+
+    public struct RES
+    {
+        RIE ie;
+        public RES(RIE rie) : this() { this.ie = rie; }
+        public IPackage pkg { get { return ie.pkg; } }
+        public AResource res { get { return (AResource)this; } }
+        public static implicit operator AResource(RES res) { return s3pi.WrapperDealer.WrapperDealer.GetResource(0, res.ie.pkg, res.ie.rie) as AResource; }
+        public static implicit operator RIE(RES res) { return res.ie; }
     }
 
     public class Item : IEquatable<Item>, IEqualityComparer<Item>

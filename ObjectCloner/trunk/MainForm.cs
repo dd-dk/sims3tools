@@ -25,11 +25,8 @@ using System.IO;
 using System.Threading;
 using System.Windows.Forms;
 using s3pi.Interfaces;
+using s3pi.Extensions;
 using ObjectCloner.TopPanelComponents;
-
-
-//Type: 0x00B2D882 resources are in Fullbuild2, everything else is in Fullbuild0
-
 
 namespace ObjectCloner
 {
@@ -40,6 +37,18 @@ namespace ObjectCloner
         static Dictionary<View, MenuBarWidget.MB> viewMap;
         static List<View> viewMapKeys;
         static List<MenuBarWidget.MB> viewMapValues;
+
+        static string[] subPageText = new string[] {
+            "You should never see this",
+            "Step 1: Selected OBJD",
+            "Step 2: OBJD-referenced resources",
+            "Step 3: VPXY",
+            "Step 4: VPXY-referenced resources",
+            "Step 5: MODL-referenced resources",
+            "Step 6: MLOD-referenced resources",
+            "Step 7: All thumbnails for OBJD",
+            "You should never see this",
+        };
 
         static MainForm()
         {
@@ -76,16 +85,23 @@ namespace ObjectCloner
         SubPage subPage = SubPage.None;
         View currentView;
         IPackage pkg = null;
+        TGI clone;//0x319E4F1D
+        RES resObjd;
+        RES resObjk;
+
+        Dictionary<string, TGI> tgiLookup = new Dictionary<string,TGI>();
 
         private bool haveLoaded = false;
         private ObjectCloner.TopPanelComponents.ObjectChooser objectChooser;
         private ObjectCloner.TopPanelComponents.ResourceList resourceList;
+        private ObjectCloner.TopPanelComponents.PleaseWait pleaseWait;
         public MainForm()
         {
             InitializeComponent();
             objectChooser = new ObjectChooser();
             objectChooser.SelectedIndexChanged += new EventHandler(objectChooser_SelectedIndexChanged);
             resourceList = new ResourceList();
+            pleaseWait = new PleaseWait();
 
             this.Text = myName;
             menuBarWidget1.Enable(MenuBarWidget.MD.MBV, false);
@@ -101,13 +117,8 @@ namespace ObjectCloner
         }
 
 
-
         private void MainForm_LoadFormSettings()
         {
-            currentView = Enum.IsDefined(typeof(View), ObjectCloner.Properties.Settings.Default.View)
-                ? (View)ObjectCloner.Properties.Settings.Default.View
-                : View.Details;
-
             int h = ObjectCloner.Properties.Settings.Default.PersistentHeight;
             if (h == -1) h = 4 * System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Height / 5;
             this.Height = h;
@@ -117,9 +128,18 @@ namespace ObjectCloner
             this.Width = w;
         }
 
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            View view = Enum.IsDefined(typeof(View), ObjectCloner.Properties.Settings.Default.View)
+                ? viewMapKeys[ObjectCloner.Properties.Settings.Default.View]
+                : View.Details;
+            menuBarWidget1_MBView_Click(null, new MenuBarWidget.MBClickEventArgs(viewMap[view]));
+        }
+
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             AbortLoading();
+            AbortSaving();
             if (pkg != null) s3pi.Package.Package.ClosePackage(0, pkg);
 
             objectChooser.ObjectChooser_SaveSettings();
@@ -142,10 +162,9 @@ namespace ObjectCloner
         }
 
         #region TopPanelComponents
-        bool waitingToDisplayObjectChooser;
         private void DisplayObjectChooser()
         {
-            waitingToDisplayObjectChooser = false;
+            waitingToDisplayResources = false;
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(objectChooser);
             objectChooser.Dock = DockStyle.Fill;
@@ -155,14 +174,23 @@ namespace ObjectCloner
         bool waitingToDisplayResources;
         private void DisplayResources()
         {
-            waitingToDisplayResources = false;
+            resourceList.Page = subPageText[(int)subPage];
             splitContainer1.Panel1.Controls.Clear();
-            resourceList.Page = "" + subPage;
             splitContainer1.Panel1.Controls.Add(resourceList);
-            objectChooser.Dock = DockStyle.Fill;
+            resourceList.Dock = DockStyle.Fill;
+            waitingToDisplayResources = false;
             setButtons(Page.Listing, subPage);
         }
+
+        private void DoWait()
+        {
+            splitContainer1.Panel1.Controls.Clear();
+            splitContainer1.Panel1.Controls.Add(pleaseWait);
+            pleaseWait.Dock = DockStyle.Fill;
+            Application.DoEvents();
+        }
         #endregion
+
 
         #region Loading thread
         Thread loadThread;
@@ -180,7 +208,7 @@ namespace ObjectCloner
 
         void AbortLoading()
         {
-            waitingToDisplayObjectChooser = false;
+            waitingForSavePackage = false;
             if (!loading) MainForm_LoadingComplete(null, new BoolEventArgs(false));
             else loading = false;
         }
@@ -199,7 +227,7 @@ namespace ObjectCloner
             {
                 haveLoaded = true;
 
-                if (waitingToDisplayObjectChooser) DisplayObjectChooser();
+                if (waitingToDisplayResources) DisplayObjectChooser();
 
                 menuBarWidget1.Enable(MenuBarWidget.MD.MBV, true);
                 menuBarWidget1_MBView_Click(null, new MenuBarWidget.MBClickEventArgs(viewMap[currentView]));
@@ -227,6 +255,166 @@ namespace ObjectCloner
             objectChooser.Items.Add(lvi);
         }
 
+        public delegate bool stopLoadingCallback();
+        private bool stopLoading() { return !loading; }
+
+        private event EventHandler<BoolEventArgs> LoadingComplete;
+        public delegate void loadingCompleteCallback(IPackage pkg, bool complete);
+        public void OnLoadingComplete(IPackage pkg, bool complete) { this.pkg = pkg; if (LoadingComplete != null) { LoadingComplete(this, new BoolEventArgs(complete)); } }
+
+        #endregion
+
+        #region Saving thread
+        Thread saveThread;
+        bool saving;
+        void StartSaving()
+        {
+            this.SavingComplete += new EventHandler<BoolEventArgs>(MainForm_SavingComplete);
+
+            SaveList sl = new SaveList(this, tgiLookup, packageFile, pkg, saveFileDialog1.FileName,
+                updateProgress, stopSaving, OnSavingComplete);
+
+            saveThread = new Thread(new ThreadStart(sl.SavePackage));
+            saving = true;
+            saveThread.Start();
+        }
+
+        void AbortSaving()
+        {
+            if (!saving) MainForm_SavingComplete(null, new BoolEventArgs(false));
+            else saving = false;
+        }
+
+        bool waitingForSavePackage;
+        void MainForm_SavingComplete(object sender, BoolEventArgs e)
+        {
+            saving = false;
+            tlpButtons.Enabled = true;
+            while (saveThread != null && saveThread.IsAlive)
+                saveThread.Join(100);
+            saveThread = null;
+
+            this.toolStripProgressBar1.Visible = false;
+            this.toolStripStatusLabel1.Visible = false;
+
+            if (waitingForSavePackage)
+            {
+                waitingForSavePackage = false;
+                if (e.arg)
+                    CopyableMessageBox.Show("OK", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
+                else
+                    CopyableMessageBox.Show("Save not complete", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
+            }
+        }
+
+        public delegate bool stopSavingCallback();
+        private bool stopSaving() { return !saving; }
+
+        private event EventHandler<BoolEventArgs> SavingComplete;
+        public delegate void savingCompleteCallback(bool complete);
+        public void OnSavingComplete(bool complete) { if (SavingComplete != null) { SavingComplete(this, new BoolEventArgs(complete)); } }
+
+        class SaveList
+        {
+            MainForm mainForm;
+            Dictionary<string, TGI> tgiList;
+            string fullBuild0;
+            IPackage pkgfb0;
+            string outputPackage;
+            updateProgressCallback updateProgressCB;
+            stopSavingCallback stopSavingCB;
+            savingCompleteCallback savingCompleteCB;
+            public SaveList(MainForm form, Dictionary<string, TGI> tgiList, string fullBuild0, IPackage pkgfb0, string outputPackage,
+                updateProgressCallback updateProgressCB, stopSavingCallback stopSavingCB, savingCompleteCallback savingCompleteCB)
+            {
+                this.mainForm = form;
+                this.tgiList = tgiList;
+                this.fullBuild0 = fullBuild0;
+                this.outputPackage = outputPackage;
+                this.pkgfb0 = pkgfb0;
+                this.updateProgressCB = updateProgressCB;
+                this.stopSavingCB = stopSavingCB;
+                this.savingCompleteCB = savingCompleteCB;
+            }
+
+            //Type: 0x00B2D882 resources are in Fullbuild2, everything else is in Fullbuild0, except thumbs
+            //FullBuild0 is:
+            //  ...\Gamedata\Shared\Packages\FullBuild0.package
+            //Relative path to ALLThumbnails is:
+            // .\..\..\..\Thumbnails\ALLThumbnails.package
+            public void SavePackage()
+            {
+                updateProgress(true, "Creating output package...", false, -1, false, -1);
+                IPackage target = s3pi.Package.Package.NewPackage(0);
+
+                string folder = Path.GetDirectoryName(fullBuild0);
+
+                updateProgress(true, "Opening FullBuild2...", false, -1, false, -1);
+                IPackage pkgfb2 = s3pi.Package.Package.OpenPackage(0, Path.Combine(folder, "FullBuild2.package"));
+
+                updateProgress(true, "Opening ALLThumbnails...", false, -1, false, -1);
+                IPackage thumbpkg = s3pi.Package.Package.OpenPackage(0, Path.GetFullPath(Path.Combine(folder, @"../../../Thumbnails/ALLThumbnails.package")));
+                updateProgress(true, "Please wait...", false, -1, false, -1);
+
+                bool complete = false;
+                try
+                {
+                    updateProgress(false, "", true, tgiList.Count, true, 0);
+                    int i = 0;
+                    int freq = tgiList.Count / 20;
+                    string lastSaved = "nothing yet";
+                    foreach (var kvp in tgiList)
+                    {
+                        if (stopSaving) break;
+
+                        IPackage pkg = kvp.Value.t == 0x00B2D882 ? pkgfb2 : kvp.Key.StartsWith("thumb[") ? thumbpkg : pkgfb0;
+                        RES res = new RES(new RIE(pkg, kvp.Value));
+                        if (((RIE)res).rie != null)
+                        {
+                            target.AddResource(kvp.Value.t, kvp.Value.g, kvp.Value.i, res.res.Stream, true);
+                            lastSaved = kvp.Key;
+                        }
+
+                        if (++i % freq == 0)
+                            updateProgress(true, "Saved " + lastSaved + "...", false, -1, true, i);
+                    }
+                    complete = true;
+                }
+                finally
+                {
+                    updateProgress(false, "", false, tgiList.Count, true, tgiList.Count);
+                    s3pi.Package.Package.ClosePackage(0, thumbpkg);
+                    s3pi.Package.Package.ClosePackage(0, pkgfb2);
+                    target.SaveAs(outputPackage);
+                    s3pi.Package.Package.ClosePackage(0, target);
+                    savingComplete(complete);
+                }
+            }
+
+            void updateProgress(bool changeText, string text, bool changeMax, int max, bool changeValue, int value)
+            {
+                Thread.Sleep(0);
+                if (mainForm.IsHandleCreated) mainForm.Invoke(updateProgressCB, new object[] { changeText, text, changeMax, max, changeValue, value, });
+            }
+
+            bool stopSaving { get { Thread.Sleep(0); return !mainForm.IsHandleCreated || (bool)mainForm.Invoke(stopSavingCB); } }
+
+            void savingComplete(bool complete)
+            {
+                Thread.Sleep(0);
+                if (mainForm.IsHandleCreated)
+                    mainForm.BeginInvoke(savingCompleteCB, new object[] { complete, });
+            }
+        }
+        #endregion
+
+        #region Common to threads
+        public class BoolEventArgs : EventArgs
+        {
+            public bool arg;
+            public BoolEventArgs(bool arg) { this.arg = arg; }
+        }
+
         public delegate void updateProgressCallback(bool changeText, string text, bool changeMax, int max, bool changeValue, int value);
         void updateProgress(bool changeText, string text, bool changeMax, int max, bool changeValue, int value)
         {
@@ -248,27 +436,15 @@ namespace ObjectCloner
             if (changeValue)
                 toolStripProgressBar1.Value = value;
         }
-
-        public class BoolEventArgs : EventArgs
-        {
-            public bool arg;
-            public BoolEventArgs(bool arg) { this.arg = arg; }
-        }
-        private event EventHandler<BoolEventArgs> LoadingComplete;
-        public delegate void loadingCompleteCallback(IPackage pkg, bool complete);
-        public void OnLoadingComplete(IPackage pkg, bool complete) { this.pkg = pkg; if (LoadingComplete != null) { LoadingComplete(this, new BoolEventArgs(complete)); } }
-
-        public delegate bool stopLoadingCallback();
-        private bool stopLoading()
-        {
-            return !loading;
-        }
         #endregion
+
 
         #region ObjectChooser
         private void objectChooser_SelectedIndexChanged(object sender, EventArgs e)
         {
             subPage = SubPage.None;
+            resourceList.Clear();
+            tgiLookup.Clear();
             if (objectChooser.SelectedItems.Count == 0) ClearTabs();
             else FillTabs((TGI)objectChooser.SelectedItems[0].SubItems[2].Text);
             setButtons(Page.Choose, subPage);
@@ -305,16 +481,16 @@ namespace ObjectCloner
             InitialiseOverviewTab(res);
         }
 
-        void InitialiseOverviewTab(IResource res)
+        void InitialiseOverviewTab(IResource objd)
         {
-            Dictionary<string, Type> types = AApiVersionedFields.GetContentFieldTypes(0, res.GetType());
+            Dictionary<string, Type> types = AApiVersionedFields.GetContentFieldTypes(0, objd.GetType());
             foreach (string field in overviewTabFields)
             {
-                CreateField(tlpOverviewMain, types[field], res as AResource, field);
+                CreateField(tlpOverviewMain, types[field], objd as AResource, field);
             }
 
-            AApiVersionedFields common = res["CommonBlock"].Value as AApiVersionedFields;
-            types = AApiVersionedFields.GetContentFieldTypes(0, res["CommonBlock"].Type);
+            AApiVersionedFields common = objd["CommonBlock"].Value as AApiVersionedFields;
+            types = AApiVersionedFields.GetContentFieldTypes(0, objd["CommonBlock"].Type);
             foreach (string field in overviewTabCommonFields)
             {
                 CreateField(tlpOverviewCommon, types[field], common, field);
@@ -401,14 +577,13 @@ namespace ObjectCloner
         }
         void FillTabs(TGI tgi)
         {
-            RIE rie = new RIE(pkg, tgi);
-            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, pkg, rie.rie);
+            RES res = new RES(new RIE(pkg, tgi));
             for (int i = 1; i < tlpOverviewMain.RowCount - 1; i++)
             {
                 Label lb = (Label)tlpOverviewMain.GetControlFromPosition(0, i);
                 TextBox tb = (TextBox)tlpOverviewMain.GetControlFromPosition(1, i);
 
-                TypedValue tv = res[lb.Text];
+                TypedValue tv = res.res[lb.Text];
                 tb.Text = tv;
             }
             for (int i = 2; i < tlpOverviewCommon.RowCount - 1; i++)
@@ -416,7 +591,7 @@ namespace ObjectCloner
                 Label lb = (Label)tlpOverviewCommon.GetControlFromPosition(0, i);
                 TextBox tb = (TextBox)tlpOverviewCommon.GetControlFromPosition(1, i);
 
-                TypedValue tv = ((AApiVersionedFields)res["CommonBlock"].Value)[lb.Text];
+                TypedValue tv = ((AApiVersionedFields)res.res["CommonBlock"].Value)[lb.Text];
                 tb.Text = tv;
             }
         }
@@ -655,6 +830,8 @@ namespace ObjectCloner
                 btnClone.Enabled = false;
                 btnNext.Enabled = false;
             }
+            tlpButtons.Enabled = true;
+
             btnChoose.BackColor = btnChooseBackColor;
             btnClone.BackColor = btnCloneBackColor;
             btnNext.BackColor = btnNextBackColor;
@@ -665,42 +842,236 @@ namespace ObjectCloner
         {
             if (!haveLoaded && !setPackageFile()) return;
             btnChoose.Enabled = false;
+
+            DoWait();
+            waitingToDisplayResources = true;
             Application.DoEvents();
             if (!haveLoaded)
-            {
-                waitingToDisplayObjectChooser = true;
                 StartLoading();
-            }
             else
                 DisplayObjectChooser();
         }
 
         private void btnClone_Click(object sender, EventArgs e)
         {
-            btnClone.Enabled = false;
+            tlpButtons.Enabled = false;
             waitingToDisplayResources = true;
+            resourceList.Clear();
+            tgiLookup.Clear();
+
             subPage = SubPage.Step1;
+            DoWait();
+            Step1();
             DisplayResources();
+        }
+        //Bring in the OBJD the user selected
+        void Step1()
+        {
+            clone = objectChooser.SelectedItems[0].SubItems[2].Text;
+            Add("clone", clone);
+            resObjd = new RES(new RIE(pkg, clone));
         }
 
         private void btnNext_Click(object sender, EventArgs e)
         {
-            btnNext.Enabled = false;
-            waitingToDisplayResources = true;
+            tlpButtons.Enabled = false;
+
+            DoWait();
             subPage = (SubPage)((int)subPage) + 1;
+            switch (subPage)
+            {
+                case SubPage.Step2: Step2(); break;
+                case SubPage.Step3: Step3(); break;
+                case SubPage.Step4: Step4(); break;
+                case SubPage.Step5: Step5(); break;
+                case SubPage.Step6: Step6(); break;
+                case SubPage.Step7: Step7(); break;
+            }
             DisplayResources();
         }
+        //Bring in all the resources in all the TGI blocks of the OBJD
+        void Step2()
+        {
+            SlurpTGIsFromField("clone", resObjd.res);
+        }
+        //Bring in the VPXY pointed to by the OBJK
+        void Step3()
+        {
+            uint index = (uint)resObjd.res["OBJKIndex"].Value;
+            TGI objk = tgiLookup["clone[TGIBlock][" + index + "]"];
+            SlurpTGIsFromTGI("clone_objk", objk);
+            resObjk = new RES(new RIE(pkg, objk));
+        }
+        //Try to get everything referenced from the VPXY (some may be not found but that's OK)
+        void Step4()
+        {
+            int index = -1;
+            TypedValue tv = resObjk.res["Keys"];
+            foreach (AHandlerElement element in (System.Collections.IEnumerable)tv.Value)
+            {
+                if (((string)element["EntryName"].Value).Equals("modelKey") && ((byte)element["ControlCode"].Value).Equals(2))
+                    index = (int)element["CcIndex"].Value;
+            }
+            if (index == -1)
+            {
+                subPage = SubPage.Step6;//can't do step 5/6 without vpxy but don't crash
+                return;
+            }
+            TGI vpxy = tgiLookup["clone_objk.TGIBlocks[" + index + "]"];
+            SlurpTGIsFromTGI("clone_vpxy", vpxy);
+        }
+        //Bring in all the resources in the TGI blocks of the MODL
+        void Step5()
+        {
+            int i = 0;
+            List<string> keys = new List<string>(tgiLookup.Keys);
+            foreach (string key in keys)
+                if (key.StartsWith("clone_vpxy[ChunkEntry][0].RCOLBlock.TGIBlocks["))
+                {
+                    RIE rie = new RIE(pkg, tgiLookup[key]);
+                    if (rie.rie != null)
+                    {
+                        if (rie.rie.ResourceType != 0x01661233) continue;
+                        SlurpTGIsFromTGI("clone_modl[" + i + "]", tgiLookup[key]);
+                        i++;
+                    }
+                }
+        }
+        //Bring in all the resources in the TGI blocks of each MLOD (disregard duplicates)
+        void Step6()
+        {
+            int i = 0;
+            List<string> keys = new List<string>(tgiLookup.Keys);
+            foreach (string key in keys)
+                if (key.StartsWith("clone_modl[") && (key.Contains("].Resources[") || key.Contains("].TGIBlocks[")))
+                {
+                    RIE rie = new RIE(pkg, tgiLookup[key]);
+                    if (rie.rie != null)
+                    {
+                        if (rie.rie.ResourceType != 0x01D10F34) continue;
+                        SlurpTGIsFromTGI("clone_mlod[" + i + "]", tgiLookup[key]);
+                        i++;
+                    }
+                }
+        }
 
+        //Bring in all resources from ...\The Sims 3\Thumbnails\ALLThumbnails.package that match the instance number of the OBJD
+        void Step7()
+        {
+            SlurpThumbnails(clone.i);
+        }
+
+
+        //Bring in all resources from ...\The Sims 3\Thumbnails\ALLThumbnails.package that match the instance number of the OBJD
         private void btnSave_Click(object sender, EventArgs e)
         {
+            waitingForSavePackage = true;
             this.Enabled = false;
             try
             {
                 DialogResult dr = saveFileDialog1.ShowDialog();
                 if (dr != DialogResult.OK) return;
-                //...
+
+                tlpButtons.Enabled = false;
+                StartSaving();
             }
             finally { this.Enabled = true; }
+        }
+        #endregion
+
+
+
+        #region Fetch resources
+        private void Add(string key, TGI tgi)
+        {
+            if (resourceList.Count % 100 == 0) Application.DoEvents();
+            tgiLookup.Add(key, tgi);
+
+            TGIN tgin = new TGIN();
+            tgin.ResType = tgi.t;
+            tgin.ResGroup = tgi.g;
+            tgin.ResInstance = tgi.i;
+            tgin.ResName = key;
+            resourceList.Add(tgin);
+        }
+
+        private void SlurpTGIsFromTGI(string key, TGI tgi) { SlurpTGIsFromField(key, new RES(new RIE(pkg, tgi))); }
+        private void SlurpTGIsFromField(string key, AApiVersionedFields field)
+        {
+            Type t = field.GetType();
+            if (typeof(AResource.TGIBlock).IsAssignableFrom(t))
+            {
+                Add(key, "" + (AResource.TGIBlock)field);
+            }
+            else
+            {
+                if (typeof(System.Collections.IEnumerable).IsAssignableFrom(t))
+                {
+                    System.Collections.IEnumerable ienum = (System.Collections.IEnumerable)field;
+                    int i = 0;
+                    foreach (object o in ienum)
+                    {
+                        if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
+                        {
+                            SlurpTGIsFromField(key + "[" + o.GetType().Name + "][" + i + "]", (AApiVersionedFields)o);
+                            i++;
+                        }
+                    }
+                }
+                SlurpTGIsFromAApiVersionedFields(key, field);
+            }
+        }
+        private void SlurpTGIsFromAApiVersionedFields(string key, AApiVersionedFields field)
+        {
+            List<string> fields = field.ContentFields;
+            foreach (string f in fields)
+            {
+                if ((new List<string>(new string[] { "Stream", "AsBytes", "Value", })).Contains(f)) continue;
+
+                Type t = AApiVersionedFields.GetContentFieldTypes(0, field.GetType())[f];
+                if (typeof(AResource.TGIBlockList).IsAssignableFrom(t))
+                {
+                    AResource.TGIBlockList list = (AResource.TGIBlockList)field[f].Value;
+                    int i = 0;
+                    foreach (AResource.TGIBlock value in list)
+                    {
+                        Add(key + "." + f + "[" + i + "]", "" + value);
+                        i++;
+                    }
+                }
+                else if (typeof(AResource.CountedTGIBlockList).IsAssignableFrom(t))
+                {
+                    AResource.CountedTGIBlockList list = (AResource.CountedTGIBlockList)field[f].Value;
+                    int i = 0;
+                    foreach (AResource.TGIBlock value in list)
+                    {
+                        Add(key + "." + f + "[" + i + "]", "" + value);
+                        i++;
+                    }
+                }
+                else if (typeof(AApiVersionedFields).IsAssignableFrom(t))
+                    SlurpTGIsFromField(key + "." + f, (AApiVersionedFields)field[f].Value);
+            }
+        }
+
+        //FullBuild0 is:
+        //  ...\Gamedata\Shared\Packages\FullBuild0.package
+        //Relative path to ALLThumbnails is:
+        // .\..\..\..\Thumbnails\ALLThumbnails.package
+        private void SlurpThumbnails(ulong instance)
+        {
+            string path = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(packageFile), @"../../../Thumbnails/ALLThumbnails.package"));
+            IPackage thumbpkg = s3pi.Package.Package.OpenPackage(0, path);
+            IList<IResourceIndexEntry> thumbries = thumbpkg.FindAll(new string[] { "Instance" }, new TypedValue[]{
+                new TypedValue(typeof(ulong), instance),
+            });
+            int i = 0;
+            foreach (IResourceIndexEntry rie in thumbries)
+            {
+                Add("thumb[" + i + "]", new TGI(rie));
+                i++;
+            }
+            s3pi.Package.Package.ClosePackage(0, thumbpkg);
         }
         #endregion
     }

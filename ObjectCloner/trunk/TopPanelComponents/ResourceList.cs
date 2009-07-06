@@ -25,17 +25,63 @@ using System.Windows.Forms;
 
 namespace ObjectCloner.TopPanelComponents
 {
-    public partial class ResourceList : UserControl
+    public partial class ResourceList : UserControl, ICollection<string>
     {
         public ResourceList()
         {
             InitializeComponent();
+            listBox1.Font = new Font(FontFamily.GenericMonospace, listBox1.Font.Size);
         }
 
         public string Page
         {
             get { return label1.Text; }
             set { label1.Text = value; }
+        }
+
+        #region ICollection<string> Members
+
+        public void Add(string item) { listBox1.Items.Add(item); }
+
+        public void Clear() { listBox1.Items.Clear(); }
+
+        public bool Contains(string item) { return listBox1.Items.Contains(item); }
+
+        public void CopyTo(string[] array, int arrayIndex) { listBox1.Items.CopyTo(array, arrayIndex); }
+
+        public int Count { get { return listBox1.Items.Count; } }
+
+        public bool IsReadOnly { get { return listBox1.Items.IsReadOnly; } }
+
+        public bool Remove(string item) { if (!Contains(item)) return false; listBox1.Items.Remove(item); return true; }
+
+        #endregion
+
+        #region IEnumerable<string> Members
+
+        public IEnumerator<string> GetEnumerator() { return (IEnumerator<string>)listBox1.Items.GetEnumerator(); }
+
+        #endregion
+
+        #region IEnumerable Members
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { return listBox1.Items.GetEnumerator(); }
+
+        #endregion
+
+        public event EventHandler SelectedIndexChanged;
+        protected void OnSelectedIndexChanged(object sender, EventArgs e) { if (SelectedIndexChanged != null) SelectedIndexChanged(sender, e); }
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e) { OnSelectedIndexChanged(sender, e); }
+
+        public int SelectedIndex
+        {
+            get { return listBox1.SelectedIndex; }
+            set { listBox1.SelectedIndex = value; }
+        }
+
+        public string SelectedItem
+        {
+            get { return (string)listBox1.SelectedItem; }
         }
     }
 }

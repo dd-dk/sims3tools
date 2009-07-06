@@ -37,6 +37,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.CopyableMessageBox.dll</HintPath>
     </Reference>
+    <Reference Include="s3pi.Extensions, Version=907.4.11.19808, Culture=neutral, PublicKeyToken=80159b679e88de38, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.Extensions.dll</HintPath>
+    </Reference>
     <Reference Include="s3pi.Interfaces, Version=906.27.10.17894, Culture=neutral, PublicKeyToken=596917de85953130, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.Interfaces.dll</HintPath>
@@ -93,6 +97,12 @@
     <Compile Include="TopPanelComponents\ObjectChooser.Designer.cs">
       <DependentUpon>ObjectChooser.cs</DependentUpon>
     </Compile>
+    <Compile Include="TopPanelComponents\PleaseWait.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TopPanelComponents\PleaseWait.Designer.cs">
+      <DependentUpon>PleaseWait.cs</DependentUpon>
+    </Compile>
     <Compile Include="TopPanelComponents\ResourceList.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -110,13 +120,24 @@
     <EmbeddedResource Include="TopPanelComponents\ObjectChooser.resx">
       <DependentUpon>ObjectChooser.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="TopPanelComponents\PleaseWait.resx">
+      <DependentUpon>PleaseWait.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="TopPanelComponents\ResourceList.resx">
       <DependentUpon>ResourceList.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\s3pi\build\bin\Release\Extensions.txt">
+      <Link>Extensions.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\s3pi\build\bin\Release\ImageResources.txt">
       <Link>ImageResources.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\RCOLResources.txt">
+      <Link>RCOLResources.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.CatalogResource.dll">
@@ -127,8 +148,16 @@
       <Link>s3pi.DefaultResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.GenericRCOLResource.dll">
+      <Link>s3pi.GenericRCOLResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.ImageResource.dll">
       <Link>s3pi.ImageResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.ObjKeyResource.dll">
+      <Link>s3pi.ObjKeyResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.Settings.dll">
