@@ -91,23 +91,12 @@ namespace ObjectCloner
                 updateProgress(true, "Please wait, loading objects...", true, lrie.Count, true, i);
                 foreach (IResourceIndexEntry rie in lrie)
                 {
-                    if (stopLoading) break;
+                    if (stopLoading) return;
 
-                    Item item = new Item(pkg, rie);
-
-                    /* This is the wrong thumbnail
-                    ulong inst = (ulong)((AApiVersionedFields)item.ObjD["CommonBlock"].Value)["PngInstance"].Value;
-                    if (inst != 0)
-                    {
-                        updateProgress(true, "Please wait, loading images: 0x" + inst.ToString("X16"), false, -1, false, 0);
-                        item.FindImages(pkg);
-                        item.LoadImages(pkg);
-                        updateProgress(true, "Please wait, loading objects...", false, -1, true, i);
-                    }/**/
-                    createListViewItem(item);
+                    createListViewItem(new Item(pkg, rie));
 
                     if (++i % freq == 0)
-                        updateProgress(false, "", false, -1, true, i);
+                        updateProgress(false, "", true, lrie.Count, true, i);
                 }
                 complete = true;
             }
@@ -146,17 +135,22 @@ namespace ObjectCloner
     public struct RIE
     {
         IPackage package;
-        TGI tgi;
-        public RIE(IPackage pkg, TGI tgi) : this() { this.package = pkg; this.tgi = tgi; }
+        TGI mytgi;
+
+        IResourceIndexEntry irie;
+
+        public RIE(IPackage pkg, TGI tgi) : this() { this.package = pkg; this.mytgi = tgi; }
+        public RIE(IPackage pkg, IResourceIndexEntry rie) : this() { this.package = pkg; this.mytgi = new TGI(rie); if (pkg.GetResourceList.Contains(rie)) irie = rie; }
         public IPackage pkg { get { return package; } }
-        public AResourceIndexEntry rie { get { return (AResourceIndexEntry)this; } }
+        public AResourceIndexEntry rie { get { if (irie == null) irie = (AResourceIndexEntry)this; return irie as AResourceIndexEntry; } }
+        public TGI tgi { get { return mytgi; } }
         public static implicit operator AResourceIndexEntry(RIE rie)
         {
             return rie.package.Find(new string[] { "ResourceType", "ResourceGroup", "Instance", },
                 new TypedValue[] {
-                    new TypedValue(typeof(uint), rie.tgi.t),
-                    new TypedValue(typeof(uint), rie.tgi.g),
-                    new TypedValue(typeof(ulong), rie.tgi.i),
+                    new TypedValue(typeof(uint), rie.mytgi.t),
+                    new TypedValue(typeof(uint), rie.mytgi.g),
+                    new TypedValue(typeof(ulong), rie.mytgi.i),
                     }
                 ) as AResourceIndexEntry;
         }
@@ -172,111 +166,25 @@ namespace ObjectCloner
         public static implicit operator RIE(RES res) { return res.ie; }
     }
 
-    public class Item : IEquatable<Item>, IEqualityComparer<Item>
+    public class Item
     {
-        IPackage pkg;
-        IResourceIndexEntry objd;
-        IResourceIndexEntry objd_thum32_png;
-        IResourceIndexEntry objd_thum64_png;
-        IResourceIndexEntry objd_thum128_png;
+        RES myres;
+        IResource objd_res = null;
 
-        IResource objd_res;
-
-        Image thum32_png;
-        Image thum64_png;
-        Image thum128_png;
-
-        private Item(IPackage pkg, string value)
-        {
-            this.pkg = pkg;
-
-            string[] ries = value.Split(new char[] { ':' }, 5);
-            objd = (new RIE(pkg, ries[0])).rie;
-            objd_thum32_png = (new RIE(pkg, ries[1])).rie;
-            objd_thum64_png = (new RIE(pkg, ries[2])).rie;
-            objd_thum128_png = (new RIE(pkg, ries[3])).rie;
-        }
-
-        public Item(IPackage pkg, IResourceIndexEntry objd)
-        {
-            this.pkg = pkg;
-            this.objd = objd;
-        }
-
-        public static KeyValuePair<int, Item> FromString(IPackage pkg, string value)
-        {
-            string[] keyvalue = value.Split(new char[] { ':' }, 2);
-            int key = Int32.Parse(keyvalue[0]);
-            return new KeyValuePair<int, Item>(key, new Item(pkg, keyvalue[1]));
-        }
-
-        public static implicit operator string(Item value)
-        {
-            return value.objd +
-                ":" + value.objd_thum32_png +
-                ":" + value.objd_thum64_png +
-                ":" + value.objd_thum128_png
-                ;
-        }
+        public Item(IPackage pkg, IResourceIndexEntry rie) { this.myres = new RES(new RIE(pkg, rie)); }
 
         public IResource ObjD
         {
             get
             {
-                if (objd == null) return null;
-                if (objd_res == null)
-                {
-                    objd_res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, pkg, objd);
-                    if (objd_res == null) return null;
-                }
+                if (((RIE)myres).rie == null) return null;
+                if (objd_res == null) objd_res = myres.res;
                 return objd_res;
             }
         }
-        public IResourceIndexEntry rieObjD { get { return objd; } }
 
-        public Image Thum32 { get { return thum32_png; } }
-        public Image Thum64 { get { return thum64_png; } }
-        public Image Thum128 { get { return thum128_png; } }
+        public TGI tgi { get { return ((RIE)myres).tgi; } }
 
-        public void LoadImages(IPackage pkg)
-        {
-            thum32_png = LoadImage(pkg, objd_thum32_png);
-            thum64_png = LoadImage(pkg, objd_thum64_png);
-            thum128_png = LoadImage(pkg, objd_thum128_png);
-        }
-
-        Image LoadImage(IPackage pkg, IResourceIndexEntry rie)
-        {
-            if (rie == null || rie.Instance == 0) return null;
-            IResource res_img = s3pi.WrapperDealer.WrapperDealer.GetResource(0, pkg, rie);
-            return res_img["Value"].Value as Image;
-        }
-
-        public void FindImages(IPackage pkg)
-        {
-            if (objd_thum32_png != null && objd_thum64_png != null && objd_thum128_png != null) return;
-
-            if (ObjD == null) return;
-            ulong instance = (ulong)((AApiVersionedFields)ObjD["CommonBlock"].Value)["PngInstance"].Value;
-
-            /*0x2E75C764 small; 0x2E75C765 medium; 0x2E75C766 large*/
-            if (objd_thum32_png == null) objd_thum32_png = (new RIE(pkg, new TGI(0x2E75C764, objd.ResourceGroup, instance))).rie;
-            if (objd_thum64_png == null) objd_thum64_png = (new RIE(pkg, new TGI(0x2E75C765, objd.ResourceGroup, instance))).rie;
-            if (objd_thum128_png == null) objd_thum128_png = (new RIE(pkg, new TGI(0x2E75C766, objd.ResourceGroup, instance))).rie;
-        }
-
-        #region IEquatable<CacheItem> Members
-
-        public bool Equals(Item other) { return this.pkg.Equals(other.pkg) && this.objd.Equals(other.objd); }
-
-        #endregion
-
-        #region IEqualityComparer<CacheItem> Members
-
-        public bool Equals(Item x, Item y) { return x.Equals(y); }
-
-        public int GetHashCode(Item obj) { return pkg.GetHashCode() ^ objd.GetHashCode(); }
-
-        #endregion
+        public RES res { get { return myres; } }
     }
 }
