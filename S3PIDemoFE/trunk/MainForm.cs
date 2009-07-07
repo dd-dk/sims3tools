@@ -254,6 +254,9 @@ namespace S3PIDemoFE
                     case MenuBarWidget.MB.MBF_importPackages: fileImportPackages(); break;
                     case MenuBarWidget.MB.MBF_exportResources: fileExport(); break;
                     case MenuBarWidget.MB.MBF_exportToPackage: fileExportToPackage(); break;
+                    case MenuBarWidget.MB.MBF_setMaxRecent: fileSetMaxRecent(); break;
+                    case MenuBarWidget.MB.MBF_bookmarkCurrent: fileBookmarkCurrent(); break;
+                    case MenuBarWidget.MB.MBF_setMaxBookmarks: fileSetMaxBookmarks(); break;
                     case MenuBarWidget.MB.MBF_exit: fileExit(); break;
                 }
             }
@@ -535,6 +538,34 @@ namespace S3PIDemoFE
         private void menuBarWidget1_MRUClick(object sender, MenuBarWidget.MRUClickEventArgs filename)
         {
             Filename = filename.filename;
+        }
+
+        private void fileSetMaxRecent()
+        {
+            GetNumberDialog gnd = new GetNumberDialog("Max number of files:", "Recent Files list", 0, 9,
+                S3PIDemoFE.Properties.Settings.Default.MRUListSize);
+            DialogResult dr = gnd.ShowDialog();
+            if (dr != DialogResult.OK) return;
+            S3PIDemoFE.Properties.Settings.Default.MRUListSize = (short)gnd.Value;
+        }
+
+        private void menuBarWidget1_BookmarkClick(object sender, MenuBarWidget.BookmarkClickEventArgs filename)
+        {
+            Filename = filename.filename;
+        }
+
+        private void fileBookmarkCurrent()
+        {
+            menuBarWidget1.AddBookmark(Filename);
+        }
+
+        private void fileSetMaxBookmarks()
+        {
+            GetNumberDialog gnd = new GetNumberDialog("Max number of files:", "Bookmark list", 0, 9,
+                S3PIDemoFE.Properties.Settings.Default.BookmarkSize);
+            DialogResult dr = gnd.ShowDialog();
+            if (dr != DialogResult.OK) return;
+            S3PIDemoFE.Properties.Settings.Default.BookmarkSize = (short)gnd.Value;
         }
 
         private void fileExit()
@@ -853,6 +884,7 @@ namespace S3PIDemoFE
             Help.ShowHelp(this, "http://www.fsf.org/licensing/licenses/gpl.html");
         }
         #endregion
+
         #endregion
 
         #region Browser Widget

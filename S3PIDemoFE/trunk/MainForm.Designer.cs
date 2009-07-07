@@ -43,12 +43,12 @@
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveAsFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.exportFileDialog = new System.Windows.Forms.SaveFileDialog();
-            this.menuBarWidget1 = new S3PIDemoFE.MenuBarWidget();
-            this.packageInfoFields1 = new S3PIDemoFE.PackageInfo.PackageInfoFields();
             this.exportBatchTarget = new System.Windows.Forms.FolderBrowserDialog();
             this.importResourcesDialog = new System.Windows.Forms.OpenFileDialog();
             this.importPackagesDialog = new System.Windows.Forms.OpenFileDialog();
             this.exportToPackageDialog = new System.Windows.Forms.OpenFileDialog();
+            this.menuBarWidget1 = new S3PIDemoFE.MenuBarWidget();
+            this.packageInfoFields1 = new S3PIDemoFE.PackageInfo.PackageInfoFields();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -239,21 +239,6 @@
             this.exportFileDialog.Filter = "Exported files (S3_*.*)|S3_*.*|All files (*.*)|*.*";
             this.exportFileDialog.Title = "Export File";
             // 
-            // menuBarWidget1
-            // 
-            this.menuBarWidget1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.menuBarWidget1.Location = new System.Drawing.Point(0, 0);
-            this.menuBarWidget1.Margin = new System.Windows.Forms.Padding(0);
-            this.menuBarWidget1.Name = "menuBarWidget1";
-            this.menuBarWidget1.Size = new System.Drawing.Size(880, 23);
-            this.menuBarWidget1.TabIndex = 0;
-            this.menuBarWidget1.MBHelp_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBHelp_Click);
-            this.menuBarWidget1.MBResource_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBResource_Click);
-            this.menuBarWidget1.MBEdit_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBEdit_Click);
-            this.menuBarWidget1.MBFile_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBFile_Click);
-            this.menuBarWidget1.MBDropDownOpening += new S3PIDemoFE.MenuBarWidget.MBDropDownOpeningEventHandler(this.menuBarWidget1_MBDropDownOpening);
-            this.menuBarWidget1.MRUClick += new S3PIDemoFE.MenuBarWidget.MRUClickEventHandler(this.menuBarWidget1_MRUClick);
-            // 
             // exportBatchTarget
             // 
             this.exportBatchTarget.Description = "Choose the folder to receive the exported resources";
@@ -276,6 +261,22 @@
             this.exportToPackageDialog.DefaultExt = "package";
             this.exportToPackageDialog.Filter = "DBPF Packages|*.package;*.world|All Files|*.*";
             this.exportToPackageDialog.Title = "Export to package";
+            // 
+            // menuBarWidget1
+            // 
+            this.menuBarWidget1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.menuBarWidget1.Location = new System.Drawing.Point(0, 0);
+            this.menuBarWidget1.Margin = new System.Windows.Forms.Padding(0);
+            this.menuBarWidget1.Name = "menuBarWidget1";
+            this.menuBarWidget1.Size = new System.Drawing.Size(880, 23);
+            this.menuBarWidget1.TabIndex = 0;
+            this.menuBarWidget1.BookmarkClick += new S3PIDemoFE.MenuBarWidget.BookmarkClickEventHandler(this.menuBarWidget1_BookmarkClick);
+            this.menuBarWidget1.MBHelp_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBHelp_Click);
+            this.menuBarWidget1.MBResource_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBResource_Click);
+            this.menuBarWidget1.MBEdit_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBEdit_Click);
+            this.menuBarWidget1.MBFile_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBFile_Click);
+            this.menuBarWidget1.MBDropDownOpening += new S3PIDemoFE.MenuBarWidget.MBDropDownOpeningEventHandler(this.menuBarWidget1_MBDropDownOpening);
+            this.menuBarWidget1.MRUClick += new S3PIDemoFE.MenuBarWidget.MRUClickEventHandler(this.menuBarWidget1_MRUClick);
             // 
             // MainForm
             // 
