@@ -62,5 +62,11 @@
     <Setting Name="ColumnWidths" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="Bookmarks" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="BookmarkSize" Type="System.Int16" Scope="User">
+      <Value Profile="(Default)">4</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

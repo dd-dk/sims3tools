@@ -259,5 +259,28 @@ namespace S3PIDemoFE.Properties {
                 this["ColumnWidths"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection Bookmarks {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["Bookmarks"]));
+            }
+            set {
+                this["Bookmarks"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        public short BookmarkSize {
+            get {
+                return ((short)(this["BookmarkSize"]));
+            }
+            set {
+                this["BookmarkSize"] = value;
+            }
+        }
     }
 }
