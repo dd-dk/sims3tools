@@ -40,6 +40,7 @@ namespace ObjectCloner
                 exitToolStripMenuItem,
                 //View
                 tilesToolStripMenuItem, largeIconsToolStripMenuItem, smallIconsToolStripMenuItem, listToolStripMenuItem, detailedListToolStripMenuItem,
+                iconsToolStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
@@ -56,6 +57,7 @@ namespace ObjectCloner
         {
             MBF_exit = 0,
             MBV_tiles, MBV_largeIcons, MBV_smallIcons, MBV_list, MBV_detailedList,
+            MBV_icons,
             MBH_contents, MBH_about, MBH_warranty, MBH_licence,
         }
 

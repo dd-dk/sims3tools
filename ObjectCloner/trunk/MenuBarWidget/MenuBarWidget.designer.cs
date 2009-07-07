@@ -42,6 +42,8 @@
             this.smallIconsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.detailedListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.iconsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SuspendLayout();
             // 
             // fileToolStripMenuItem
@@ -114,7 +116,9 @@
             this.largeIconsToolStripMenuItem,
             this.smallIconsToolStripMenuItem,
             this.listToolStripMenuItem,
-            this.detailedListToolStripMenuItem});
+            this.detailedListToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.iconsToolStripMenuItem});
             this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
             this.viewToolStripMenuItem.Size = new System.Drawing.Size(41, 20);
             this.viewToolStripMenuItem.Text = "&View";
@@ -122,39 +126,50 @@
             // 
             // tilesToolStripMenuItem
             // 
-            this.tilesToolStripMenuItem.Enabled = false;
             this.tilesToolStripMenuItem.Name = "tilesToolStripMenuItem";
-            this.tilesToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.tilesToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.tilesToolStripMenuItem.Text = "&Tiles";
             this.tilesToolStripMenuItem.Click += new System.EventHandler(this.tsMBV_Click);
             // 
             // largeIconsToolStripMenuItem
             // 
             this.largeIconsToolStripMenuItem.Name = "largeIconsToolStripMenuItem";
-            this.largeIconsToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.largeIconsToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.largeIconsToolStripMenuItem.Text = "L&arge Icons";
             this.largeIconsToolStripMenuItem.Click += new System.EventHandler(this.tsMBV_Click);
             // 
             // smallIconsToolStripMenuItem
             // 
             this.smallIconsToolStripMenuItem.Name = "smallIconsToolStripMenuItem";
-            this.smallIconsToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.smallIconsToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.smallIconsToolStripMenuItem.Text = "S&mall Icons";
             this.smallIconsToolStripMenuItem.Click += new System.EventHandler(this.tsMBV_Click);
             // 
             // listToolStripMenuItem
             // 
             this.listToolStripMenuItem.Name = "listToolStripMenuItem";
-            this.listToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.listToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.listToolStripMenuItem.Text = "&List";
             this.listToolStripMenuItem.Click += new System.EventHandler(this.tsMBV_Click);
             // 
             // detailedListToolStripMenuItem
             // 
             this.detailedListToolStripMenuItem.Name = "detailedListToolStripMenuItem";
-            this.detailedListToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.detailedListToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.detailedListToolStripMenuItem.Text = "&Detailed List";
             this.detailedListToolStripMenuItem.Click += new System.EventHandler(this.tsMBV_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(164, 6);
+            // 
+            // iconsStripMenuItem1
+            // 
+            this.iconsToolStripMenuItem.Name = "iconsStripMenuItem1";
+            this.iconsToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.iconsToolStripMenuItem.Text = "Show &Thumbnails";
+            this.iconsToolStripMenuItem.Click += new System.EventHandler(this.tsMBV_Click);
             // 
             // MenuBarWidget
             // 
@@ -184,5 +199,7 @@
         private System.Windows.Forms.ToolStripMenuItem smallIconsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem listToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem detailedListToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem iconsToolStripMenuItem;
     }
 }
