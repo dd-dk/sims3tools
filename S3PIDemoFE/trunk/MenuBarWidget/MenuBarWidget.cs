@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace S3PIDemoFE
@@ -39,6 +40,7 @@ namespace S3PIDemoFE
                 //File
                 newToolStripMenuItem, openToolStripMenuItem, saveToolStripMenuItem, saveAsToolStripMenuItem, saveCopyAsToolStripMenuItem, closeToolStripMenuItem,
                 importToolStripMenuItem, importPackagesToolStripMenuItem, exportToolStripMenuItem, exportToPackageToolStripMenuItem,
+                setMaxRecentToolStripMenuItem, bookmarkCurrentToolStripMenuItem, setMaxBookmarksToolStripMenuItem,
                 exitToolStripMenuItem,
                 //Edit
                 editCutToolStripMenuItem, editCopyToolStripMenuItem, editPasteToolStripMenuItem,
@@ -63,6 +65,7 @@ namespace S3PIDemoFE
         {
             MBF_new = 0, MBF_open, MBF_save, MBF_saveAs, MBF_saveCopyAs, MBF_close,
             MBF_importResources, MBF_importPackages, MBF_exportResources, MBF_exportToPackage,
+            MBF_setMaxRecent, MBF_bookmarkCurrent, MBF_setMaxBookmarks,
             MBF_exit,
             MBE_cut, MBE_copy, MBE_paste,
             MBR_add, MBR_copy, MBR_paste, MBR_duplicate,
@@ -115,27 +118,24 @@ namespace S3PIDemoFE
         void UpdateMRUList()
         {
             this.mRUListToolStripMenuItem.DropDownItems.Clear();
-            int i = 1;
+            this.mRUListToolStripMenuItem.DropDownItems.Add(toolStripSeparator6);
+            this.mRUListToolStripMenuItem.DropDownItems.Add(setMaxRecentToolStripMenuItem);
+
+            int i = 0;
             if (S3PIDemoFE.Properties.Settings.Default.MRUList != null)
                 foreach (string f in S3PIDemoFE.Properties.Settings.Default.MRUList)
                 {
                     string s = f;
-                    if (f.Length > 128)
-                    {
-                        s = System.IO.Path.GetDirectoryName(f);
-                        s = s.Substring(Math.Max(0, s.Length - 40));
-                        s = "..." + System.IO.Path.Combine(s, System.IO.Path.GetFileName(f));
-                    }
+                    if (f.Length > 80)
+                        s = "..." + s.Substring(Math.Max(0, s.Length - Math.Max(80, Path.GetFileName(s).Length)));
                     ToolStripMenuItem tsmiMRUListEntry = new ToolStripMenuItem();
-                    tsmiMRUListEntry.Name = "tsmi" + i;
-                    tsmiMRUListEntry.ShortcutKeys = (Keys)(Keys.Control | ((Keys)(48 + i)));
-                    tsmiMRUListEntry.Text = string.Format("{0}. {1}", i, s);
+                    tsmiMRUListEntry.Name = "tsmiRecent" + i;
+                    tsmiMRUListEntry.ShortcutKeys = (Keys)(Keys.Control | ((Keys)(49 + i)));
+                    tsmiMRUListEntry.Text = string.Format("&{0}. {1}", i + 1, s);
                     tsmiMRUListEntry.Click += new System.EventHandler(tsMRU_Click);
-                    mRUListToolStripMenuItem.DropDownItems.Add(tsmiMRUListEntry);
+                    mRUListToolStripMenuItem.DropDownItems.Insert(i, tsmiMRUListEntry);
                     i++;
                 }
-            if (i == 1)
-                mRUListToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
         }
 
         public class MRUClickEventArgs : EventArgs { public readonly string filename; public MRUClickEventArgs(string filename) { this.filename = filename; } }
@@ -143,5 +143,46 @@ namespace S3PIDemoFE
         public event MRUClickEventHandler MRUClick;
         protected void OnMRUClick(object sender, int i) { if (MRUClick != null) MRUClick(sender, new MRUClickEventArgs(S3PIDemoFE.Properties.Settings.Default.MRUList[i])); }
         private void tsMRU_Click(object sender, EventArgs e) { OnMRUClick(sender, mRUListToolStripMenuItem.DropDownItems.IndexOf(sender as ToolStripMenuItem)); }
+
+        public void AddBookmark(string value)
+        {
+            if (S3PIDemoFE.Properties.Settings.Default.Bookmarks == null)
+                S3PIDemoFE.Properties.Settings.Default.Bookmarks = new System.Collections.Specialized.StringCollection();
+            if (S3PIDemoFE.Properties.Settings.Default.Bookmarks.Contains(value))
+                S3PIDemoFE.Properties.Settings.Default.Bookmarks.Remove(value);
+            S3PIDemoFE.Properties.Settings.Default.Bookmarks.Insert(0, value);
+            while (S3PIDemoFE.Properties.Settings.Default.Bookmarks.Count > S3PIDemoFE.Properties.Settings.Default.BookmarkSize)
+                S3PIDemoFE.Properties.Settings.Default.Bookmarks.RemoveAt(S3PIDemoFE.Properties.Settings.Default.Bookmarks.Count - 1);
+            UpdateBookmarks();
+        }
+        void UpdateBookmarks()
+        {
+            this.bookmarkedPackagesToolStripMenuItem.DropDownItems.Clear();
+            this.bookmarkedPackagesToolStripMenuItem.DropDownItems.Add(toolStripSeparator7);
+            this.bookmarkedPackagesToolStripMenuItem.DropDownItems.Add(bookmarkCurrentToolStripMenuItem);
+            this.bookmarkedPackagesToolStripMenuItem.DropDownItems.Add(setMaxBookmarksToolStripMenuItem);
+
+            int i = 0;
+            if (S3PIDemoFE.Properties.Settings.Default.Bookmarks != null)
+                foreach (string f in S3PIDemoFE.Properties.Settings.Default.Bookmarks)
+                {
+                    string s = f;
+                    if (f.Length > 80)
+                        s = "..." + s.Substring(Math.Max(0, s.Length - Math.Max(80, Path.GetFileName(s).Length)));
+                    ToolStripMenuItem tsmiBookmarkEntry = new ToolStripMenuItem();
+                    tsmiBookmarkEntry.Name = "tsmiBookmark" + i;
+                    tsmiBookmarkEntry.ShortcutKeys = (Keys)(Keys.Control | Keys.Shift | ((Keys)(49 + i)));
+                    tsmiBookmarkEntry.Text = string.Format("&{0}. {1}", i + 1, s);
+                    tsmiBookmarkEntry.Click += new System.EventHandler(tsBookmark_Click);
+                    bookmarkedPackagesToolStripMenuItem.DropDownItems.Insert(i, tsmiBookmarkEntry);
+                    i++;
+                }
+        }
+
+        public class BookmarkClickEventArgs : EventArgs { public readonly string filename; public BookmarkClickEventArgs(string filename) { this.filename = filename; } }
+        public delegate void BookmarkClickEventHandler(object sender, BookmarkClickEventArgs filename);
+        public event BookmarkClickEventHandler BookmarkClick;
+        protected void OnBookmarkClick(object sender, int i) { if (BookmarkClick != null) BookmarkClick(sender, new BookmarkClickEventArgs(S3PIDemoFE.Properties.Settings.Default.Bookmarks[i])); }
+        private void tsBookmark_Click(object sender, EventArgs e) { OnBookmarkClick(sender, bookmarkedPackagesToolStripMenuItem.DropDownItems.IndexOf(sender as ToolStripMenuItem)); }
     }
 }
