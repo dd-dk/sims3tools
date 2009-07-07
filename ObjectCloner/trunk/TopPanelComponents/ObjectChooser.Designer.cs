@@ -30,21 +30,16 @@
         {
             this.listView1 = new System.Windows.Forms.ListView();
             this.catlgName = new System.Windows.Forms.ColumnHeader();
-            this.catlgDesc = new System.Windows.Forms.ColumnHeader();
             this.TGI = new System.Windows.Forms.ColumnHeader();
-            this.nmName = new System.Windows.Forms.ColumnHeader();
             this.SuspendLayout();
             // 
             // listView1
             // 
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.catlgName,
-            this.catlgDesc,
-            this.TGI,
-            this.nmName});
+            this.TGI});
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.FullRowSelect = true;
-            this.listView1.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(0, 0);
             this.listView1.MultiSelect = false;
@@ -54,22 +49,15 @@
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
             this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
+            this.listView1.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView1_ColumnClick);
             // 
             // catlgName
             // 
             this.catlgName.Text = "Name";
             // 
-            // catlgDesc
-            // 
-            this.catlgDesc.Text = "Description";
-            // 
             // TGI
             // 
             this.TGI.Text = "Resource Key";
-            // 
-            // nmName
-            // 
-            this.nmName.Text = "Resource Name";
             // 
             // ObjectChooser
             // 
@@ -84,9 +72,7 @@
 
         private System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.ColumnHeader catlgName;
-        private System.Windows.Forms.ColumnHeader catlgDesc;
         private System.Windows.Forms.ColumnHeader TGI;
-        private System.Windows.Forms.ColumnHeader nmName;
 
     }
 }

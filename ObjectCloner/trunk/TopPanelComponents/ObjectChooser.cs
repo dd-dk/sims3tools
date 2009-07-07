@@ -19,6 +19,7 @@
  ***************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
@@ -27,9 +28,12 @@ namespace ObjectCloner.TopPanelComponents
 {
     public partial class ObjectChooser : UserControl
     {
+        ListViewColumnSorter lvwColumnSorter;
         public ObjectChooser()
         {
             InitializeComponent();
+            lvwColumnSorter = new ListViewColumnSorter();
+            this.listView1.ListViewItemSorter = lvwColumnSorter;
             ObjectChooser_LoadListViewSettings();
         }
 
@@ -39,20 +43,162 @@ namespace ObjectCloner.TopPanelComponents
             string[] cws = cw == null ? new string[] { } : cw.Split(':');
 
             int w;
-            listView1.Columns[0].Width = cws.Length > 0 && int.TryParse(cws[0], out w) && w > 0 ? w : (this.listView1.Width - 32) / 3;
-            listView1.Columns[1].Width = 0;
-            listView1.Columns[2].Width = cws.Length > 2 && int.TryParse(cws[2], out w) && w > 0 ? w : (this.listView1.Width - 32) / 3;
-            listView1.Columns[3].Width = cws.Length > 3 && int.TryParse(cws[3], out w) && w > 0 ? w : (this.listView1.Width - 32) / 3;
+            listView1.Columns[0].Width = cws.Length > 0 && int.TryParse(cws[0], out w) && w > 0 ? w : (this.listView1.Width - 32) / 2;
+            listView1.Columns[1].Width = cws.Length > 0 && int.TryParse(cws[1], out w) && w > 0 ? w : (this.listView1.Width - 32) / 2;
         }
         public void ObjectChooser_SaveSettings()
         {
-            ObjectCloner.Properties.Settings.Default.ColumnWidths = string.Format("{0}:-1:{2}:{3}"
+            lvwColumnSorter.ListViewColumnSorter_SaveSettings();
+            ObjectCloner.Properties.Settings.Default.ColumnWidths = string.Format("{0}:{1}"
                 , listView1.Columns[0].Width
                 , listView1.Columns[1].Width
-                , listView1.Columns[2].Width
-                , listView1.Columns[3].Width
                 );
         }
+
+        #region ListViewColumnSorter
+        /// <summary>
+        /// This class is an implementation of the 'IComparer' interface.
+        /// </summary>
+        public class ListViewColumnSorter : IComparer
+        {
+            /// <summary>
+            /// Specifies the column to be sorted
+            /// </summary>
+            private int ColumnToSort;
+            /// <summary>
+            /// Specifies the order in which to sort (i.e. 'Ascending').
+            /// </summary>
+            private SortOrder OrderOfSort;
+            /// <summary>
+            /// Case insensitive comparer object
+            /// </summary>
+            private CaseInsensitiveComparer ObjectCompare;
+
+            /// <summary>
+            /// Class constructor.  Initializes various elements
+            /// </summary>
+            public ListViewColumnSorter()
+            {
+                // Initialize the CaseInsensitiveComparer object
+                ObjectCompare = new CaseInsensitiveComparer();
+
+                ListViewColumnSorter_LoadSettings();
+            }
+
+            void ListViewColumnSorter_LoadSettings()
+            {
+                ColumnToSort = ObjectCloner.Properties.Settings.Default.ColumnToSort;
+
+                OrderOfSort = Enum.IsDefined(typeof(SortOrder), ObjectCloner.Properties.Settings.Default.SortOrder)
+                    ? (SortOrder)ObjectCloner.Properties.Settings.Default.SortOrder
+                    : SortOrder.None;
+            }
+
+            public void ListViewColumnSorter_SaveSettings()
+            {
+                ObjectCloner.Properties.Settings.Default.ColumnToSort = ColumnToSort;
+                ObjectCloner.Properties.Settings.Default.SortOrder = (int)OrderOfSort;
+            }
+
+            /// <summary>
+            /// This method is inherited from the IComparer interface.  It compares the two objects passed using a case insensitive comparison.
+            /// </summary>
+            /// <param name="x">First object to be compared</param>
+            /// <param name="y">Second object to be compared</param>
+            /// <returns>The result of the comparison. "0" if equal, negative if 'x' is less than 'y' and positive if 'x' is greater than 'y'</returns>
+            public int Compare(object x, object y)
+            {
+                if (ColumnToSort < 0 || ColumnToSort > ((ListViewItem)x).SubItems.Count) return 0;
+
+                int compareResult = 0;
+                ListViewItem listviewX, listviewY;
+
+                // Cast the objects to be compared to ListViewItem objects
+                listviewX = (ListViewItem)x;
+                listviewY = (ListViewItem)y;
+
+                // Compare the two items
+                compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
+
+                // Calculate correct return value based on object comparison
+                if (OrderOfSort == SortOrder.Ascending)
+                {
+                    // Ascending sort is selected, return normal result of compare operation
+                    return compareResult;
+                }
+                else if (OrderOfSort == SortOrder.Descending)
+                {
+                    // Descending sort is selected, return negative result of compare operation
+                    return (-compareResult);
+                }
+                else
+                {
+                    // Return '0' to indicate they are equal
+                    return 0;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the number of the column to which to apply the sorting operation (Defaults to '0').
+            /// </summary>
+            public int SortColumn
+            {
+                set
+                {
+                    ColumnToSort = value;
+                }
+                get
+                {
+                    return ColumnToSort;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the order of sorting to apply (for example, 'Ascending' or 'Descending').
+            /// </summary>
+            public SortOrder Order
+            {
+                set
+                {
+                    OrderOfSort = value;
+                }
+                get
+                {
+                    return OrderOfSort;
+                }
+            }
+
+        }
+
+        private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            // Determine if clicked column is already the column that is being sorted.
+            if (e.Column == lvwColumnSorter.SortColumn)
+            {
+                // Reverse the current sort direction for this column.
+                if (lvwColumnSorter.Order == SortOrder.Ascending)
+                {
+                    lvwColumnSorter.Order = SortOrder.Descending;
+                }
+                else
+                {
+                    lvwColumnSorter.Order = SortOrder.Ascending;
+                }
+            }
+            else
+            {
+                // Set the column number that is to be sorted; default to ascending.
+                lvwColumnSorter.SortColumn = e.Column;
+                lvwColumnSorter.Order = SortOrder.Ascending;
+            }
+
+            // Perform the sort with these new sort options.
+            this.listView1.Sort();
+
+            if (listView1.SelectedIndices.Count > 0)
+                listView1.SelectedItems[0].EnsureVisible();
+        }
+        #endregion
 
         public event EventHandler SelectedIndexChanged;
         protected void OnSelectedIndexChanged(object sender, EventArgs e) { if (SelectedIndexChanged != null)SelectedIndexChanged(sender, e); }
