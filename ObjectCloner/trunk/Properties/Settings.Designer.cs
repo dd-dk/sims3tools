@@ -96,7 +96,7 @@ namespace ObjectCloner.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("-1:-1:-1:-1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1:-1")]
         public string ColumnWidths {
             get {
                 return ((string)(this["ColumnWidths"]));
@@ -115,6 +115,42 @@ namespace ObjectCloner.Properties {
             }
             set {
                 this["Splitter1Width"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int ColumnToSort {
+            get {
+                return ((int)(this["ColumnToSort"]));
+            }
+            set {
+                this["ColumnToSort"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int SortOrder {
+            get {
+                return ((int)(this["SortOrder"]));
+            }
+            set {
+                this["SortOrder"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ShowThumbs {
+            get {
+                return ((bool)(this["ShowThumbs"]));
+            }
+            set {
+                this["ShowThumbs"] = value;
             }
         }
     }
