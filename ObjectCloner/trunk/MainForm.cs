@@ -126,6 +126,10 @@ namespace ObjectCloner
             int w = ObjectCloner.Properties.Settings.Default.PersistentWidth;
             if (w == -1) w = 4 * System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Width / 5;
             this.Width = w;
+
+            w = ObjectCloner.Properties.Settings.Default.Splitter1Width;
+            if (w != -1)
+                splitContainer1.SplitterDistance = w;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -146,6 +150,7 @@ namespace ObjectCloner
 
             ObjectCloner.Properties.Settings.Default.PersistentHeight = this.WindowState == FormWindowState.Normal ? this.Height : -1;
             ObjectCloner.Properties.Settings.Default.PersistentWidth = this.WindowState == FormWindowState.Normal ? this.Width : -1;
+            ObjectCloner.Properties.Settings.Default.Splitter1Width = splitContainer1.SplitterDistance;
             ObjectCloner.Properties.Settings.Default.Save();
         }
 
@@ -995,7 +1000,7 @@ namespace ObjectCloner
             resourceList.Add(tgin);
         }
 
-        private void SlurpTGIsFromTGI(string key, TGI tgi) { SlurpTGIsFromField(key, new RES(new RIE(pkg, tgi))); }
+        private void SlurpTGIsFromTGI(string key, TGI tgi) { RIE rie = new RIE(pkg, tgi); if (rie.rie != null) SlurpTGIsFromField(key, new RES(rie)); }
         private void SlurpTGIsFromField(string key, AApiVersionedFields field)
         {
             Type t = field.GetType();

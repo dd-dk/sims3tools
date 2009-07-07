@@ -105,5 +105,17 @@ namespace ObjectCloner.Properties {
                 this["ColumnWidths"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int Splitter1Width {
+            get {
+                return ((int)(this["Splitter1Width"]));
+            }
+            set {
+                this["Splitter1Width"] = value;
+            }
+        }
     }
 }
