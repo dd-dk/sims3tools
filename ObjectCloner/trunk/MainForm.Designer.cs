@@ -145,7 +145,7 @@
             this.btnChoose.Name = "btnChoose";
             this.btnChoose.Size = new System.Drawing.Size(90, 23);
             this.btnChoose.TabIndex = 1;
-            this.btnChoose.Text = "List Objects";
+            this.btnChoose.Text = "&List Objects";
             this.btnChoose.UseVisualStyleBackColor = false;
             this.btnChoose.Click += new System.EventHandler(this.btnChoose_Click);
             // 
@@ -158,7 +158,7 @@
             this.btnClone.Name = "btnClone";
             this.btnClone.Size = new System.Drawing.Size(90, 23);
             this.btnClone.TabIndex = 2;
-            this.btnClone.Text = "Start Cloning";
+            this.btnClone.Text = "&Start Cloning";
             this.btnClone.UseVisualStyleBackColor = true;
             this.btnClone.Click += new System.EventHandler(this.btnClone_Click);
             // 
@@ -171,7 +171,7 @@
             this.btnNext.Name = "btnNext";
             this.btnNext.Size = new System.Drawing.Size(90, 23);
             this.btnNext.TabIndex = 3;
-            this.btnNext.Text = ">>> Next >>>";
+            this.btnNext.Text = ">>> &Next >>>";
             this.btnNext.UseVisualStyleBackColor = true;
             this.btnNext.Click += new System.EventHandler(this.btnNext_Click);
             // 
@@ -183,7 +183,7 @@
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(90, 23);
             this.btnSave.TabIndex = 4;
-            this.btnSave.Text = "Make Package";
+            this.btnSave.Text = "&Make Package";
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 

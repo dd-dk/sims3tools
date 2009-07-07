@@ -85,13 +85,13 @@ namespace ObjectCloner
         SubPage subPage = SubPage.None;
         View currentView;
         IPackage pkg = null;
+        IPackage thumbpkg = null;
         TGI clone;//0x319E4F1D
         RES resObjd;
         RES resObjk;
 
         Dictionary<string, TGI> tgiLookup = new Dictionary<string,TGI>();
 
-        private bool haveLoaded = false;
         private ObjectCloner.TopPanelComponents.ObjectChooser objectChooser;
         private ObjectCloner.TopPanelComponents.ResourceList resourceList;
         private ObjectCloner.TopPanelComponents.PleaseWait pleaseWait;
@@ -104,13 +104,7 @@ namespace ObjectCloner
             pleaseWait = new PleaseWait();
 
             this.Text = myName;
-            menuBarWidget1.Enable(MenuBarWidget.MD.MBV, false);
             MainForm_LoadFormSettings();
-
-            objectChooser.SmallImageList = new ImageList();
-            objectChooser.SmallImageList.ImageSize = new System.Drawing.Size(32, 32);
-            objectChooser.LargeImageList = new ImageList();
-            objectChooser.LargeImageList.ImageSize = new System.Drawing.Size(64, 64);
 
             InitialiseTabs();
             setButtons(Page.None, SubPage.None);
@@ -128,8 +122,8 @@ namespace ObjectCloner
             this.Width = w;
 
             w = ObjectCloner.Properties.Settings.Default.Splitter1Width;
-            if (w != -1)
-                splitContainer1.SplitterDistance = w;
+            if (w > 0 && w < 100)
+                splitContainer1.SplitterDistance = this.Width * w / 100;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -138,19 +132,24 @@ namespace ObjectCloner
                 ? viewMapKeys[ObjectCloner.Properties.Settings.Default.View]
                 : View.Details;
             menuBarWidget1_MBView_Click(null, new MenuBarWidget.MBClickEventArgs(viewMap[view]));
+
+            menuBarWidget1.Checked(MenuBarWidget.MB.MBV_icons, ObjectCloner.Properties.Settings.Default.ShowThumbs);
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             AbortLoading();
+            AbortFetching();
             AbortSaving();
             if (pkg != null) s3pi.Package.Package.ClosePackage(0, pkg);
+            if (thumbpkg != null) s3pi.Package.Package.ClosePackage(0, thumbpkg);
 
             objectChooser.ObjectChooser_SaveSettings();
 
             ObjectCloner.Properties.Settings.Default.PersistentHeight = this.WindowState == FormWindowState.Normal ? this.Height : -1;
             ObjectCloner.Properties.Settings.Default.PersistentWidth = this.WindowState == FormWindowState.Normal ? this.Width : -1;
-            ObjectCloner.Properties.Settings.Default.Splitter1Width = splitContainer1.SplitterDistance;
+            ObjectCloner.Properties.Settings.Default.Splitter1Width = splitContainer1.SplitterDistance * 100 / this.Width;
+            ObjectCloner.Properties.Settings.Default.ShowThumbs = menuBarWidget1.IsChecked(MenuBarWidget.MB.MBV_icons);
             ObjectCloner.Properties.Settings.Default.Save();
         }
 
@@ -164,6 +163,15 @@ namespace ObjectCloner
             ObjectCloner.Properties.Settings.Default.FullBuild0Location = openFileDialog1.FileName;
             packageFile = openFileDialog1.FileName;
             return true;
+        }
+
+        void setThumbPackage()
+        {
+            if (thumbpkg == null)
+            {
+                string folder = Path.GetDirectoryName(packageFile);
+                thumbpkg = s3pi.Package.Package.OpenPackage(0, Path.GetFullPath(Path.Combine(folder, @"../../../Thumbnails/ALLThumbnails.package")));
+            }
         }
 
         #region TopPanelComponents
@@ -199,7 +207,8 @@ namespace ObjectCloner
 
         #region Loading thread
         Thread loadThread;
-        bool loading;
+        bool haveLoaded = false;
+        bool loading = false;
         void StartLoading()
         {
             this.LoadingComplete += new EventHandler<BoolEventArgs>(MainForm_LoadingComplete);
@@ -232,7 +241,16 @@ namespace ObjectCloner
             {
                 haveLoaded = true;
 
-                if (waitingToDisplayResources) DisplayObjectChooser();
+                if (waitingToDisplayResources)
+                {
+                    if (menuBarWidget1.IsChecked(MenuBarWidget.MB.MBV_icons))
+                    {
+                        waitingForImages = true;
+                        StartFetching();
+                    }
+                    
+                    DisplayObjectChooser();
+                }
 
                 menuBarWidget1.Enable(MenuBarWidget.MD.MBV, true);
                 menuBarWidget1_MBView_Click(null, new MenuBarWidget.MBClickEventArgs(viewMap[currentView]));
@@ -248,15 +266,8 @@ namespace ObjectCloner
             ListViewItem lvi = new ListViewItem();
             string objdtag = ((AApiVersionedFields)objd.ObjD["CommonBlock"].Value)["Name"];
             lvi.Text = (objdtag.IndexOf(':') < 0) ? objdtag : objdtag.Substring(objdtag.LastIndexOf(':') + 1);
-            objdtag = ((AApiVersionedFields)objd.ObjD["CommonBlock"].Value)["Desc"];
-            lvi.SubItems.AddRange(new string[]{
-                (objdtag.IndexOf(':') < 0) ? objdtag : objdtag.Substring(objdtag.LastIndexOf(':') + 1),
-                new TGI(objd.rieObjD),
-                ""
-            });
-            if (objd.Thum32 != null) { LItoIMG32.Add(objectChooser.Items.Count, objectChooser.SmallImageList.Images.Count); objectChooser.SmallImageList.Images.Add(objd.Thum32); }
-            if (objd.Thum64 != null) { LItoIMG64.Add(objectChooser.Items.Count, objectChooser.LargeImageList.Images.Count); objectChooser.LargeImageList.Images.Add(objd.Thum64); }
-
+            lvi.SubItems.AddRange(new string[] { objd.tgi, });
+            lvi.Tag = objd;
             objectChooser.Items.Add(lvi);
         }
 
@@ -269,14 +280,200 @@ namespace ObjectCloner
 
         #endregion
 
+        #region Fetch Images thread
+        Thread fetchThread;
+        bool haveFetched = false;
+        bool fetching = false;
+        void StartFetching()
+        {
+            if (!haveLoaded) return;
+
+            objectChooser.SmallImageList = new ImageList();
+            objectChooser.SmallImageList.ImageSize = new System.Drawing.Size(32, 32);
+            LItoIMG32 = new Dictionary<int, int>();
+            objectChooser.LargeImageList = new ImageList();
+            objectChooser.LargeImageList.ImageSize = new System.Drawing.Size(64, 64);
+            LItoIMG64 = new Dictionary<int, int>();
+
+            this.FetchingComplete += new EventHandler<BoolEventArgs>(MainForm_FetchingComplete);
+
+            setThumbPackage();
+            FetchImages fi = new FetchImages(this, objectChooser.Items.Count, thumbpkg,
+                getItem, setImage, updateProgress, stopFetching, OnFetchingComplete);
+
+            fetchThread = new Thread(new ThreadStart(fi.Fetch));
+            fetching = true;
+            fetchThread.Start();
+        }
+
+        void AbortFetching()
+        {
+            if (!fetching) MainForm_FetchingComplete(null, new BoolEventArgs(false));
+            else fetching = false;
+        }
+
+        bool waitingForImages;
+        void MainForm_FetchingComplete(object sender, BoolEventArgs e)
+        {
+            fetching = false;
+            while (fetchThread != null && fetchThread.IsAlive)
+                fetchThread.Join(100);
+            fetchThread = null;
+
+            this.toolStripProgressBar1.Visible = false;
+            this.toolStripStatusLabel1.Visible = false;
+
+            if (e.arg)
+            {
+                haveFetched = true;
+            }
+
+            if (waitingForImages)
+            {
+                waitingForImages = false;
+            }
+        }
+
+        public delegate bool stopFetchingCallback();
+        private bool stopFetching() { return !fetching; }
+
+        public delegate Item getItemCallback(int i);
+        private Item getItem(int i) { return objectChooser.Items[i].Tag as Item; }
+
+        public delegate void setImageCallback(bool smallImage, int i, Image image);
+        private void setImage(bool smallImage, int i, Image image)
+        {
+            if (smallImage)
+            {
+                LItoIMG32.Add(i, objectChooser.SmallImageList.Images.Count);
+                objectChooser.SmallImageList.Images.Add(image);
+                if (currentView != View.Tile && currentView != View.LargeIcon)
+                    objectChooser.Items[i].ImageIndex = LItoIMG32[i];
+            }
+            else
+            {
+                LItoIMG64.Add(i, objectChooser.LargeImageList.Images.Count);
+                objectChooser.LargeImageList.Images.Add(image);
+                if (currentView == View.Tile || currentView == View.LargeIcon)
+                    objectChooser.Items[i].ImageIndex = LItoIMG64[i];
+            }
+        }
+
+        private event EventHandler<BoolEventArgs> FetchingComplete;
+        public delegate void fetchingCompleteCallback(bool complete);
+        public void OnFetchingComplete(bool complete) { if (FetchingComplete != null) { FetchingComplete(this, new BoolEventArgs(complete)); } }
+
+        class FetchImages
+        {
+            MainForm mainForm;
+            int count;
+            IPackage thumbpkg;
+            getItemCallback getItemCB;
+            setImageCallback setImageCB;
+            updateProgressCallback updateProgressCB;
+            stopFetchingCallback stopFetchingCB;
+            fetchingCompleteCallback fetchingCompleteCB;
+
+            int imgcnt = 0;
+
+            public FetchImages(MainForm form, int count, IPackage thumbpkg,
+                getItemCallback getItemCB, setImageCallback setImageCB,
+                updateProgressCallback updateProgressCB, stopFetchingCallback stopFetchingCB, fetchingCompleteCallback fetchingCompleteCB)
+            {
+                this.mainForm = form;
+                this.count = count;
+                this.thumbpkg = thumbpkg;
+                this.getItemCB = getItemCB;
+                this.setImageCB = setImageCB;
+                this.updateProgressCB = updateProgressCB;
+                this.stopFetchingCB = stopFetchingCB;
+                this.fetchingCompleteCB = fetchingCompleteCB;
+
+            }
+
+            public void Fetch()
+            {
+                updateProgress(true, "Please wait, loading thumbnails...", false, -1, false, -1);
+
+                bool complete = false;
+                try
+                {
+                    updateProgress(false, "", true, count, true, 0);
+                    int freq = count / 100;
+                    for (int i = 0; i < count; i++)
+                    {
+                        if (stopFetching) return;
+
+                        Item objd = getItem(i);
+
+                        if (stopFetching) return;
+
+                        TGI img32 = objd.tgi; img32.t = 0x0580A2B4; RES img32_res = new RES(new RIE(thumbpkg, img32));
+                        if (((RIE)img32_res).rie != null) setImage(true, i, getImage(img32_res));
+                        else { Image img = getImage(0x2e75c764, objd); if (img != null) setImage(true, i, img); }
+
+                        if (stopFetching) return;
+
+                        TGI img64 = objd.tgi; img64.t = 0x0580A2B5; RES img64_res = new RES(new RIE(thumbpkg, img64));
+                        if (((RIE)img64_res).rie != null) setImage(false, i, getImage(img64_res));
+                        else { Image img = getImage(0x2e75c765, objd); if (img != null) setImage(false, i, img); }
+
+                        if (stopFetching) return;
+
+                        if (i % freq == 0)
+                            updateProgress(true, String.Format("Please wait, loading thumbnails... {0}%", i * 100 / count), true, count, true, i);
+                    }
+                    complete = true;
+                }
+                catch (ThreadInterruptedException) { }
+                finally
+                {
+                    updateProgress(true, "Finished loading thumnails", true, count, true, count);
+                    fetchingComplete(complete);
+                }
+            }
+
+            Image getImage(RES imgres) { return Image.FromStream(imgres.res.Stream); }
+
+            Image getImage(uint type, Item objd)
+            {
+                ulong png = (ulong)((AHandlerElement)objd.ObjD["CommonBlock"].Value)["PngInstance"].Value;
+                if (png != 0)
+                {
+                    IPackage pkg = objd.res.pkg;
+
+                    TGI tgi = new TGI(type, 0, png);
+                    RES res = new RES(new RIE(pkg, tgi));
+                    if (((RIE)res).rie != null) return getImage(res);
+                }
+                return null;
+            }
+
+            Item getItem(int i) { Thread.Sleep(0); return (Item)(!mainForm.IsHandleCreated ? null : mainForm.Invoke(getItemCB, new object[] { i, })); }
+
+            void setImage(bool flag, int i, Image image) { imgcnt++; Thread.Sleep(0); if (mainForm.IsHandleCreated) mainForm.Invoke(setImageCB, new object[] { flag, i, image, }); }
+
+            void updateProgress(bool changeText, string text, bool changeMax, int max, bool changeValue, int value)
+            {
+                Thread.Sleep(0);
+                if (mainForm.IsHandleCreated) mainForm.Invoke(updateProgressCB, new object[] { changeText, text, changeMax, max, changeValue, value, });
+            }
+
+            bool stopFetching { get { Thread.Sleep(0); return !mainForm.IsHandleCreated || (bool)mainForm.Invoke(stopFetchingCB); } }
+
+            void fetchingComplete(bool complete) { Thread.Sleep(0); if (mainForm.IsHandleCreated) mainForm.BeginInvoke(fetchingCompleteCB, new object[] { complete, }); }
+        }
+        #endregion
+
         #region Saving thread
         Thread saveThread;
-        bool saving;
+        bool saving = false;
         void StartSaving()
         {
             this.SavingComplete += new EventHandler<BoolEventArgs>(MainForm_SavingComplete);
 
-            SaveList sl = new SaveList(this, tgiLookup, packageFile, pkg, saveFileDialog1.FileName,
+            setThumbPackage();
+            SaveList sl = new SaveList(this, tgiLookup, packageFile, pkg, thumbpkg, saveFileDialog1.FileName,
                 updateProgress, stopSaving, OnSavingComplete);
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
@@ -325,11 +522,12 @@ namespace ObjectCloner
             Dictionary<string, TGI> tgiList;
             string fullBuild0;
             IPackage pkgfb0;
+            IPackage thumbpkg;
             string outputPackage;
             updateProgressCallback updateProgressCB;
             stopSavingCallback stopSavingCB;
             savingCompleteCallback savingCompleteCB;
-            public SaveList(MainForm form, Dictionary<string, TGI> tgiList, string fullBuild0, IPackage pkgfb0, string outputPackage,
+            public SaveList(MainForm form, Dictionary<string, TGI> tgiList, string fullBuild0, IPackage pkgfb0, IPackage thumbpkg, string outputPackage,
                 updateProgressCallback updateProgressCB, stopSavingCallback stopSavingCB, savingCompleteCallback savingCompleteCB)
             {
                 this.mainForm = form;
@@ -337,6 +535,7 @@ namespace ObjectCloner
                 this.fullBuild0 = fullBuild0;
                 this.outputPackage = outputPackage;
                 this.pkgfb0 = pkgfb0;
+                this.thumbpkg = thumbpkg;
                 this.updateProgressCB = updateProgressCB;
                 this.stopSavingCB = stopSavingCB;
                 this.savingCompleteCB = savingCompleteCB;
@@ -357,8 +556,6 @@ namespace ObjectCloner
                 updateProgress(true, "Opening FullBuild2...", false, -1, false, -1);
                 IPackage pkgfb2 = s3pi.Package.Package.OpenPackage(0, Path.Combine(folder, "FullBuild2.package"));
 
-                updateProgress(true, "Opening ALLThumbnails...", false, -1, false, -1);
-                IPackage thumbpkg = s3pi.Package.Package.OpenPackage(0, Path.GetFullPath(Path.Combine(folder, @"../../../Thumbnails/ALLThumbnails.package")));
                 updateProgress(true, "Please wait...", false, -1, false, -1);
 
                 bool complete = false;
@@ -370,7 +567,7 @@ namespace ObjectCloner
                     string lastSaved = "nothing yet";
                     foreach (var kvp in tgiList)
                     {
-                        if (stopSaving) break;
+                        if (stopSaving) return;
 
                         IPackage pkg = kvp.Value.t == 0x00B2D882 ? pkgfb2 : kvp.Key.StartsWith("thumb[") ? thumbpkg : pkgfb0;
                         RES res = new RES(new RIE(pkg, kvp.Value));
@@ -381,14 +578,14 @@ namespace ObjectCloner
                         }
 
                         if (++i % freq == 0)
-                            updateProgress(true, "Saved " + lastSaved + "...", false, -1, true, i);
+                            updateProgress(true, "Saved " + lastSaved + "...", true, tgiList.Count, true, i);
                     }
                     complete = true;
                 }
+                catch (ThreadInterruptedException) { }
                 finally
                 {
-                    updateProgress(false, "", false, tgiList.Count, true, tgiList.Count);
-                    s3pi.Package.Package.ClosePackage(0, thumbpkg);
+                    updateProgress(false, "", true, tgiList.Count, true, tgiList.Count);
                     s3pi.Package.Package.ClosePackage(0, pkgfb2);
                     target.SaveAs(outputPackage);
                     s3pi.Package.Package.ClosePackage(0, target);
@@ -451,7 +648,7 @@ namespace ObjectCloner
             resourceList.Clear();
             tgiLookup.Clear();
             if (objectChooser.SelectedItems.Count == 0) ClearTabs();
-            else FillTabs((TGI)objectChooser.SelectedItems[0].SubItems[2].Text);
+            else FillTabs(objectChooser.SelectedItems[0].Tag as Item);
             setButtons(Page.Choose, subPage);
         }
         #endregion
@@ -580,15 +777,14 @@ namespace ObjectCloner
             foreach (Control c in tlpOverviewCommon.Controls)
                 if (c is TextBox) ((TextBox)c).Text = "";
         }
-        void FillTabs(TGI tgi)
+        void FillTabs(Item objd)
         {
-            RES res = new RES(new RIE(pkg, tgi));
             for (int i = 1; i < tlpOverviewMain.RowCount - 1; i++)
             {
                 Label lb = (Label)tlpOverviewMain.GetControlFromPosition(0, i);
                 TextBox tb = (TextBox)tlpOverviewMain.GetControlFromPosition(1, i);
 
-                TypedValue tv = res.res[lb.Text];
+                TypedValue tv = objd.ObjD[lb.Text];
                 tb.Text = tv;
             }
             for (int i = 2; i < tlpOverviewCommon.RowCount - 1; i++)
@@ -596,7 +792,7 @@ namespace ObjectCloner
                 Label lb = (Label)tlpOverviewCommon.GetControlFromPosition(0, i);
                 TextBox tb = (TextBox)tlpOverviewCommon.GetControlFromPosition(1, i);
 
-                TypedValue tv = ((AApiVersionedFields)res.res["CommonBlock"].Value)[lb.Text];
+                TypedValue tv = ((AApiVersionedFields)objd.ObjD["CommonBlock"].Value)[lb.Text];
                 tb.Text = tv;
             }
         }
@@ -650,7 +846,7 @@ namespace ObjectCloner
                     case MenuBarWidget.MB.MBV_smallIcons: viewSetView(mn.mn, LItoIMG32); break;
                     case MenuBarWidget.MB.MBV_list: viewSetView(mn.mn, LItoIMG32); break;
                     case MenuBarWidget.MB.MBV_detailedList: viewSetView(mn.mn, LItoIMG32); break;
-                    //case MenuBarWidget.MB.MBV_showImage: viewShowImage(); break;
+                    case MenuBarWidget.MB.MBV_icons: viewIcons(); break;
                 }
             }
             finally { this.Enabled = true; }
@@ -662,22 +858,46 @@ namespace ObjectCloner
             if (viewMap.ContainsKey(currentView)) menuBarWidget1.Checked(viewMap[currentView], false);
             menuBarWidget1.Checked(mn, true);
 
-            for (int i = 0; i < objectChooser.Items.Count; i++)
-                objectChooser.Items[i].ImageIndex = imageMap.ContainsKey(i) ? imageMap[i] : -1;
+            if (menuBarWidget1.IsChecked(MenuBarWidget.MB.MBV_icons) && (LItoIMG64.Count > 0 || LItoIMG32.Count > 0))
+                for (int i = 0; i < objectChooser.Items.Count; i++)
+                    objectChooser.Items[i].ImageIndex = imageMap.ContainsKey(i) ? imageMap[i] : -1;
 
             ObjectCloner.Properties.Settings.Default.View = viewMapValues.IndexOf(mn);
             currentView = viewMapKeys[ObjectCloner.Properties.Settings.Default.View];
             objectChooser.View = currentView;
         }
 
-        private void viewShowImage()
+        private void viewIcons()
         {
-            //toggle check mark
-            //if checked
-            //  if images not loaded: disable the menu option, start the image loader thread
-            //  else run viewSetImage with the appropriate image map (hmm, may need to pull the code out)
-            //else
-            //  set all ImageIndex entries to -1
+            menuBarWidget1.Checked(MenuBarWidget.MB.MBV_icons, !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBV_icons));
+            if (haveLoaded)
+            {
+                if (menuBarWidget1.IsChecked(MenuBarWidget.MB.MBV_icons))
+                {
+                    if (waitingForImages) return;
+
+                    if (haveFetched)
+                    {
+                        if (LItoIMG64.Count > 0 || LItoIMG32.Count > 0)
+                        {
+                            Dictionary<int, int> imageMap = (currentView == View.Tile || currentView == View.LargeIcon) ? LItoIMG64 : LItoIMG32;
+                            for (int i = 0; i < objectChooser.Items.Count; i++)
+                                objectChooser.Items[i].ImageIndex = imageMap.ContainsKey(i) ? imageMap[i] : -1;
+                        }
+                    }
+                    else
+                    {
+                        waitingForImages = true;
+                        StartFetching();
+                    }
+                }
+                else
+                {
+                    AbortFetching();
+                    for (int i = 0; i < objectChooser.Items.Count; i++)
+                        objectChooser.Items[i].ImageIndex = -1;
+                }
+            }
         }
         #endregion
 
@@ -782,6 +1002,7 @@ namespace ObjectCloner
             Help.ShowHelp(this, "http://www.fsf.org/licensing/licenses/gpl.html");
         }
         #endregion
+
         #endregion
 
         #region Buttons
@@ -798,6 +1019,7 @@ namespace ObjectCloner
             {
                 case Page.None:
                     btnChooseBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
+                    this.AcceptButton = btnChoose;
                     btnChoose.Enabled = true;
                     break;
                 case Page.Choose:
@@ -814,6 +1036,7 @@ namespace ObjectCloner
                 if (s == SubPage.None)
                 {
                     btnCloneBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
+                    this.AcceptButton = btnChoose;
                     btnNext.Enabled = false;
                 }
                 else
@@ -821,11 +1044,13 @@ namespace ObjectCloner
                     if (s != SubPage.Last)
                     {
                         btnNextBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
+                        this.AcceptButton = btnNext;
                         btnNext.Enabled = true;
                     }
                     else
                     {
                         btnNext.Enabled = false;
+                        this.AcceptButton = btnSave;
                         btnSaveBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
                     }
                 }
@@ -872,7 +1097,7 @@ namespace ObjectCloner
         //Bring in the OBJD the user selected
         void Step1()
         {
-            clone = objectChooser.SelectedItems[0].SubItems[2].Text;
+            clone = objectChooser.SelectedItems[0].SubItems[1].Text;
             Add("clone", clone);
             resObjd = new RES(new RIE(pkg, clone));
         }
@@ -1065,8 +1290,7 @@ namespace ObjectCloner
         // .\..\..\..\Thumbnails\ALLThumbnails.package
         private void SlurpThumbnails(ulong instance)
         {
-            string path = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(packageFile), @"../../../Thumbnails/ALLThumbnails.package"));
-            IPackage thumbpkg = s3pi.Package.Package.OpenPackage(0, path);
+            setThumbPackage();
             IList<IResourceIndexEntry> thumbries = thumbpkg.FindAll(new string[] { "Instance" }, new TypedValue[]{
                 new TypedValue(typeof(ulong), instance),
             });
@@ -1076,7 +1300,6 @@ namespace ObjectCloner
                 Add("thumb[" + i + "]", new TGI(rie));
                 i++;
             }
-            s3pi.Package.Package.ClosePackage(0, thumbpkg);
         }
         #endregion
     }
