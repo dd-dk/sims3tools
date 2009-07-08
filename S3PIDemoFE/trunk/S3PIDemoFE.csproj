@@ -283,6 +283,10 @@
       <Link>s3pi.ScriptResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.StblResource.dll">
+      <Link>s3pi.StblResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.TextResource.dll">
       <Link>s3pi.TextResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
