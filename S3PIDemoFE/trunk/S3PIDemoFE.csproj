@@ -291,6 +291,10 @@
       <Link>s3pi.TextResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.TxtcResource.dll">
+      <Link>s3pi.TxtcResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\s3pi\build\bin\Release\TextResources.txt">
       <Link>TextResources.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
