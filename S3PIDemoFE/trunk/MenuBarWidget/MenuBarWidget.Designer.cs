@@ -214,7 +214,7 @@
             // toolStripSeparator6
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(133, 6);
+            this.toolStripSeparator6.Size = new System.Drawing.Size(149, 6);
             // 
             // setMaxRecentToolStripMenuItem
             // 
@@ -240,6 +240,7 @@
             // 
             // bookmarkCurrentToolStripMenuItem
             // 
+            this.bookmarkCurrentToolStripMenuItem.Enabled = false;
             this.bookmarkCurrentToolStripMenuItem.Name = "bookmarkCurrentToolStripMenuItem";
             this.bookmarkCurrentToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
             this.bookmarkCurrentToolStripMenuItem.Text = "&Bookmark current";

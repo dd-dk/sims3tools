@@ -139,7 +139,7 @@ namespace S3PIDemoFE
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_importResources, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_importPackages, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_close, CurrentPackage != null);
-            //menuBarWidget1.Enable(MenuBarWidget.MD.MBE, CurrentPackage != null);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_bookmarkCurrent, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBR, CurrentPackage != null);
             resourceDropDownOpening();
         }
