@@ -51,6 +51,7 @@ namespace S3PIDemoFE
                 contentsToolStripMenuItem, aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
             UpdateMRUList();
+            UpdateBookmarks();
         }
 
         public enum MD
