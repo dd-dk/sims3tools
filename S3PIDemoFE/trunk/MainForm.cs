@@ -1029,12 +1029,12 @@ namespace S3PIDemoFE
                 string title = this.Text;
                 if (resourceName != null && resourceName.Length > 0) title += " - " + resourceName;
 
-                TypedValue v = resource["Value"];
-                if (typeof(String).IsAssignableFrom(v.Type))
+                Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
+                if (typeof(String).IsAssignableFrom(t))
                 {
                     Form f = new Form();
                     RichTextBox rtf = new RichTextBox();
-                    rtf.Text = (string)v.Value;
+                    rtf.Text = "" + resource["Value"];
                     rtf.Font = new Font("DejaVu Sans Mono", 8);
                     rtf.Size = new Size(this.Width - (this.Width / 5), this.Height - (this.Height / 5));
                     rtf.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
@@ -1045,12 +1045,12 @@ namespace S3PIDemoFE
                     f.Controls.Add(rtf);
                     f.ShowDialog();
                 }
-                else if (typeof(Image).IsAssignableFrom(v.Type))
+                else if (typeof(Image).IsAssignableFrom(t))
                 {
                     Form f = new Form();
                     PictureBox pb = new PictureBox();
-                    pb.Image = (Image)v.Value;
-                    pb.Size = ((Image)v.Value).Size;
+                    pb.Image = (Image)resource["Value"].Value;
+                    pb.Size = pb.Image.Size;
                     f.AutoSize = true;
                     f.AutoSizeMode = AutoSizeMode.GrowAndShrink;
                     f.SizeGripStyle = SizeGripStyle.Hide;
@@ -1059,7 +1059,6 @@ namespace S3PIDemoFE
                     f.Controls.Add(pb);
                     f.ShowDialog();
                 }
-
             }
             finally { this.Enabled = true; }
         }
