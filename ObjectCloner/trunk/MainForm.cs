@@ -44,9 +44,10 @@ namespace ObjectCloner
             "Step 2: OBJD-referenced resources",
             "Step 3: VPXY",
             "Step 4: VPXY-referenced resources",
-            "Step 5: MODL-referenced resources",
-            "Step 6: MLOD-referenced resources",
-            "Step 7: All thumbnails for OBJD",
+            "Step 5: VPXY kindred resources (same instance)",
+            "Step 6: MODL-referenced resources",
+            "Step 7: MLOD-referenced resources",
+            "Step 8: All thumbnails for OBJD",
             "You should never see this",
         };
 
@@ -76,10 +77,11 @@ namespace ObjectCloner
             Step2,//Bring in all the resources in all the TGI blocks of the OBJD
             Step3,//Bring in the VPXY pointed to by the OBJK
             Step4,//Try to get everything referenced from the VPXY (some may be not found but that's OK)
-            Step5,//Bring in all the resources in the TGI blocks of the MODL
-            Step6,//Bring in all the resources in the TGI blocks of each MLOD (disregard duplicates)
-            Step7,//Bring in all resources from ...\The Sims 3\Thumbnails\ALLThumbnails.package that match the instance number of the OBJD
-            Last = 7,
+            Step5,//Bring in any resources with the same instance as the VPXY
+            Step6,//Bring in all the resources in the TGI blocks of the MODL
+            Step7,//Bring in all the resources in the TGI blocks of each MLOD (disregard duplicates)
+            Step8,//Bring in all resources from ...\The Sims 3\Thumbnails\ALLThumbnails.package that match the instance number of the OBJD
+            Last = 8,
         }
 
         SubPage subPage = SubPage.None;
@@ -89,6 +91,7 @@ namespace ObjectCloner
         TGI clone;//0x319E4F1D
         RES resObjd;
         RES resObjk;
+        TGI vpxy;
 
         Dictionary<string, TGI> tgiLookup = new Dictionary<string,TGI>();
 
@@ -100,6 +103,7 @@ namespace ObjectCloner
             InitializeComponent();
             objectChooser = new ObjectChooser();
             objectChooser.SelectedIndexChanged += new EventHandler(objectChooser_SelectedIndexChanged);
+            objectChooser.ItemActivate += new EventHandler(objectChooser_ItemActivate);
             resourceList = new ResourceList();
             pleaseWait = new PleaseWait();
 
@@ -193,6 +197,7 @@ namespace ObjectCloner
             resourceList.Dock = DockStyle.Fill;
             waitingToDisplayResources = false;
             setButtons(Page.Listing, subPage);
+            resourceList.Focus();
         }
 
         private void DoWait()
@@ -264,7 +269,7 @@ namespace ObjectCloner
         void createListViewItem(Item objd)
         {
             ListViewItem lvi = new ListViewItem();
-            string objdtag = ((AApiVersionedFields)objd.ObjD["CommonBlock"].Value)["Name"];
+            string objdtag = ((AApiVersionedFields)objd.Resource["CommonBlock"].Value)["Name"];
             lvi.Text = (objdtag.IndexOf(':') < 0) ? objdtag : objdtag.Substring(objdtag.LastIndexOf(':') + 1);
             lvi.SubItems.AddRange(new string[] { objd.tgi, });
             lvi.Tag = objd;
@@ -408,15 +413,23 @@ namespace ObjectCloner
 
                         if (stopFetching) return;
 
-                        TGI img32 = objd.tgi; img32.t = 0x0580A2B4; RES img32_res = new RES(new RIE(thumbpkg, img32));
-                        if (((RIE)img32_res).rie != null) setImage(true, i, getImage(img32_res));
-                        else { Image img = getImage(0x2e75c764, objd); if (img != null) setImage(true, i, img); }
+                        Image img = getImage(0x2e75c764, objd);
+                        if (img != null) setImage(true, i, img);
+                        else
+                        {
+                            TGI img32 = objd.tgi; img32.t = 0x0580A2B4; RES img32_res = new RES(new RIE(thumbpkg, img32));
+                            if (((RIE)img32_res).rie != null) setImage(true, i, getImage(img32_res));
+                        }
 
                         if (stopFetching) return;
 
-                        TGI img64 = objd.tgi; img64.t = 0x0580A2B5; RES img64_res = new RES(new RIE(thumbpkg, img64));
-                        if (((RIE)img64_res).rie != null) setImage(false, i, getImage(img64_res));
-                        else { Image img = getImage(0x2e75c765, objd); if (img != null) setImage(false, i, img); }
+                        img = getImage(0x2e75c765, objd);
+                        if (img != null) setImage(false, i, img);
+                        else
+                        {
+                            TGI img64 = objd.tgi; img64.t = 0x0580A2B5; RES img64_res = new RES(new RIE(thumbpkg, img64));
+                            if (((RIE)img64_res).rie != null) setImage(false, i, getImage(img64_res));
+                        }
 
                         if (stopFetching) return;
 
@@ -437,7 +450,7 @@ namespace ObjectCloner
 
             Image getImage(uint type, Item objd)
             {
-                ulong png = (ulong)((AHandlerElement)objd.ObjD["CommonBlock"].Value)["PngInstance"].Value;
+                ulong png = (ulong)((AHandlerElement)objd.Resource["CommonBlock"].Value)["PngInstance"].Value;
                 if (png != 0)
                 {
                     IPackage pkg = objd.res.pkg;
@@ -473,7 +486,7 @@ namespace ObjectCloner
             this.SavingComplete += new EventHandler<BoolEventArgs>(MainForm_SavingComplete);
 
             setThumbPackage();
-            SaveList sl = new SaveList(this, tgiLookup, packageFile, pkg, thumbpkg, saveFileDialog1.FileName,
+            SaveList sl = new SaveList(this, objectChooser.SelectedItems[0].Tag as Item, tgiLookup, packageFile, pkg, thumbpkg, saveFileDialog1.FileName,
                 updateProgress, stopSaving, OnSavingComplete);
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
@@ -519,6 +532,7 @@ namespace ObjectCloner
         class SaveList
         {
             MainForm mainForm;
+            Item objd;
             Dictionary<string, TGI> tgiList;
             string fullBuild0;
             IPackage pkgfb0;
@@ -527,10 +541,11 @@ namespace ObjectCloner
             updateProgressCallback updateProgressCB;
             stopSavingCallback stopSavingCB;
             savingCompleteCallback savingCompleteCB;
-            public SaveList(MainForm form, Dictionary<string, TGI> tgiList, string fullBuild0, IPackage pkgfb0, IPackage thumbpkg, string outputPackage,
+            public SaveList(MainForm form, Item objd, Dictionary<string, TGI> tgiList, string fullBuild0, IPackage pkgfb0, IPackage thumbpkg, string outputPackage,
                 updateProgressCallback updateProgressCB, stopSavingCallback stopSavingCB, savingCompleteCallback savingCompleteCB)
             {
                 this.mainForm = form;
+                this.objd = objd;
                 this.tgiList = tgiList;
                 this.fullBuild0 = fullBuild0;
                 this.outputPackage = outputPackage;
@@ -559,38 +574,85 @@ namespace ObjectCloner
                 updateProgress(true, "Please wait...", false, -1, false, -1);
 
                 bool complete = false;
+                Item fb0nmap = new Item(new RIE(pkgfb0, pkgfb0.Find(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C), })));
+                Item newnmap = NewResource(target, fb0nmap.tgi);
+                IDictionary<ulong, string> fb0namemap = (IDictionary<ulong, string>)fb0nmap.Resource;
+                IDictionary<ulong, string> newnamemap = (IDictionary<ulong, string>)newnmap.Resource;
                 try
                 {
-                    updateProgress(false, "", true, tgiList.Count, true, 0);
                     int i = 0;
-                    int freq = tgiList.Count / 20;
+                    int freq = Math.Max(1, tgiList.Count / 50);
+                    updateProgress(true, "Saving... 0%", true, tgiList.Count, true, i);
                     string lastSaved = "nothing yet";
                     foreach (var kvp in tgiList)
                     {
                         if (stopSaving) return;
 
                         IPackage pkg = kvp.Value.t == 0x00B2D882 ? pkgfb2 : kvp.Key.StartsWith("thumb[") ? thumbpkg : pkgfb0;
-                        RES res = new RES(new RIE(pkg, kvp.Value));
+                        RES res = new RES(new RIE(pkg, kvp.Value), true); // use default wrapper
                         if (((RIE)res).rie != null)
                         {
-                            target.AddResource(kvp.Value.t, kvp.Value.g, kvp.Value.i, res.res.Stream, true);
+                            if (!stopSaving) target.AddResource(kvp.Value.t, kvp.Value.g, kvp.Value.i, res.res.Stream, true);
                             lastSaved = kvp.Key;
+                            if (fb0namemap.ContainsKey(kvp.Value.i) && !newnamemap.ContainsKey(kvp.Value.i))
+                                if (!stopSaving) newnamemap.Add(kvp.Value.i, fb0namemap[kvp.Value.i]);
                         }
 
                         if (++i % freq == 0)
-                            updateProgress(true, "Saved " + lastSaved + "...", true, tgiList.Count, true, i);
+                            updateProgress(true, "Saved " + lastSaved + "... " + i * 100 / tgiList.Count + "%", true, tgiList.Count, true, i);
                     }
+                    updateProgress(true, "", true, tgiList.Count, true, tgiList.Count);
+
+                    updateProgress(true, "Finding string tables...", true, 0, true, 0);
+                    ulong nameGUID = (ulong)((AHandlerElement)objd.Resource["CommonBlock"].Value)["NameGUID"].Value;
+                    ulong descGUID = (ulong)((AHandlerElement)objd.Resource["CommonBlock"].Value)["DescGUID"].Value;
+                    IList<IResourceIndexEntry> lrie = pkgfb0.FindAll(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x220557DA), });
+                    i = 0;
+                    freq = 1;// Math.Max(1, lrie.Count / 10);
+
+                    updateProgress(true, "Creating string tables extracts... 0%", true, lrie.Count, true, i);
+                    foreach (IResourceIndexEntry rie in lrie)
+                    {
+                        if (stopSaving) return;
+
+                        Item fb0stbl = new Item(new RIE(pkgfb0, rie));
+                        Item newstbl = NewResource(target, fb0stbl.tgi);
+                        IDictionary<ulong, string> instbl = (IDictionary<ulong, string>)fb0stbl.Resource;
+                        IDictionary<ulong, string> outstbl = (IDictionary<ulong, string>)newstbl.Resource;
+
+                        if (fb0namemap.ContainsKey(rie.Instance) && !newnamemap.ContainsKey(rie.Instance))
+                            if (!stopSaving) newnamemap.Add(rie.Instance, fb0namemap[rie.Instance]);
+
+                        if (instbl.ContainsKey(nameGUID)) outstbl.Add(nameGUID, instbl[nameGUID]);
+                        if (instbl.ContainsKey(descGUID)) outstbl.Add(descGUID, instbl[descGUID]);
+                        if (!stopSaving) newstbl.Commit();
+
+                        if (++i % freq == 0)
+                            updateProgress(true, "Creating string tables extracts... " + i * 100 / lrie.Count + "%", true, lrie.Count, true, i);
+                    }
+                    updateProgress(true, "Committing new name map... ", true, 0, true, 0);
+                    if (!stopSaving) newnmap.Commit();
+
+                    updateProgress(true, "", true, 0, true, 0);
                     complete = true;
                 }
                 catch (ThreadInterruptedException) { }
                 finally
                 {
-                    updateProgress(false, "", true, tgiList.Count, true, tgiList.Count);
                     s3pi.Package.Package.ClosePackage(0, pkgfb2);
+
                     target.SaveAs(outputPackage);
                     s3pi.Package.Package.ClosePackage(0, target);
+
                     savingComplete(complete);
                 }
+            }
+
+            Item NewResource(IPackage pkg, TGI tgi)
+            {
+                RIE rie = new RIE(pkg, pkg.AddResource(tgi.t, tgi.g, tgi.i, null, true));
+                if (rie.rie == null) return null;
+                return new Item(rie);
             }
 
             void updateProgress(bool changeText, string text, bool changeMax, int max, bool changeValue, int value)
@@ -650,6 +712,11 @@ namespace ObjectCloner
             if (objectChooser.SelectedItems.Count == 0) ClearTabs();
             else FillTabs(objectChooser.SelectedItems[0].Tag as Item);
             setButtons(Page.Choose, subPage);
+        }
+
+        void objectChooser_ItemActivate(object sender, EventArgs e)
+        {
+            btnClone_Click(sender, e);
         }
         #endregion
 
@@ -784,7 +851,7 @@ namespace ObjectCloner
                 Label lb = (Label)tlpOverviewMain.GetControlFromPosition(0, i);
                 TextBox tb = (TextBox)tlpOverviewMain.GetControlFromPosition(1, i);
 
-                TypedValue tv = objd.ObjD[lb.Text];
+                TypedValue tv = objd.Resource[lb.Text];
                 tb.Text = tv;
             }
             for (int i = 2; i < tlpOverviewCommon.RowCount - 1; i++)
@@ -792,7 +859,7 @@ namespace ObjectCloner
                 Label lb = (Label)tlpOverviewCommon.GetControlFromPosition(0, i);
                 TextBox tb = (TextBox)tlpOverviewCommon.GetControlFromPosition(1, i);
 
-                TypedValue tv = ((AApiVersionedFields)objd.ObjD["CommonBlock"].Value)[lb.Text];
+                TypedValue tv = ((AApiVersionedFields)objd.Resource["CommonBlock"].Value)[lb.Text];
                 tb.Text = tv;
             }
         }
@@ -1036,7 +1103,7 @@ namespace ObjectCloner
                 if (s == SubPage.None)
                 {
                     btnCloneBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
-                    this.AcceptButton = btnChoose;
+                    this.AcceptButton = btnClone;
                     btnNext.Enabled = false;
                 }
                 else
@@ -1116,6 +1183,7 @@ namespace ObjectCloner
                 case SubPage.Step5: Step5(); break;
                 case SubPage.Step6: Step6(); break;
                 case SubPage.Step7: Step7(); break;
+                case SubPage.Step8: Step8(); break;
             }
             DisplayResources();
         }
@@ -1132,7 +1200,7 @@ namespace ObjectCloner
             SlurpTGIsFromTGI("clone_objk", objk);
             resObjk = new RES(new RIE(pkg, objk));
         }
-        //Try to get everything referenced from the VPXY (some may be not found but that's OK)
+        //Try to get everything referenced from the VPXY (some may be not found but that's OK), including 
         void Step4()
         {
             int index = -1;
@@ -1144,14 +1212,16 @@ namespace ObjectCloner
             }
             if (index == -1)
             {
-                subPage = SubPage.Step6;//can't do step 5/6 without vpxy but don't crash
+                subPage = SubPage.Step7;//can't do steps 5-7 without vpxy but don't crash
                 return;
             }
-            TGI vpxy = tgiLookup["clone_objk.TGIBlocks[" + index + "]"];
+            vpxy = tgiLookup["clone_objk.TGIBlocks[" + index + "]"];
             SlurpTGIsFromTGI("clone_vpxy", vpxy);
         }
+        //Bring in any resources with the same instance as the VPXY
+        void Step5() { SlurpVPXYKin(vpxy.i); }
         //Bring in all the resources in the TGI blocks of the MODL
-        void Step5()
+        void Step6()
         {
             int i = 0;
             List<string> keys = new List<string>(tgiLookup.Keys);
@@ -1168,7 +1238,7 @@ namespace ObjectCloner
                 }
         }
         //Bring in all the resources in the TGI blocks of each MLOD (disregard duplicates)
-        void Step6()
+        void Step7()
         {
             int i = 0;
             List<string> keys = new List<string>(tgiLookup.Keys);
@@ -1186,11 +1256,10 @@ namespace ObjectCloner
         }
 
         //Bring in all resources from ...\The Sims 3\Thumbnails\ALLThumbnails.package that match the instance number of the OBJD
-        void Step7()
+        void Step8()
         {
             SlurpThumbnails(clone.i);
         }
-
 
         //Bring in all resources from ...\The Sims 3\Thumbnails\ALLThumbnails.package that match the instance number of the OBJD
         private void btnSave_Click(object sender, EventArgs e)
@@ -1199,8 +1268,12 @@ namespace ObjectCloner
             this.Enabled = false;
             try
             {
+                if (ObjectCloner.Properties.Settings.Default.LastSaveFolder != null)
+                    saveFileDialog1.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder;
+                saveFileDialog1.FileName = objectChooser.SelectedItems[0].Text;
                 DialogResult dr = saveFileDialog1.ShowDialog();
                 if (dr != DialogResult.OK) return;
+                ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(saveFileDialog1.FileName);
 
                 tlpButtons.Enabled = false;
                 StartSaving();
@@ -1288,16 +1361,16 @@ namespace ObjectCloner
         //  ...\Gamedata\Shared\Packages\FullBuild0.package
         //Relative path to ALLThumbnails is:
         // .\..\..\..\Thumbnails\ALLThumbnails.package
-        private void SlurpThumbnails(ulong instance)
+        private void SlurpThumbnails(ulong instance) { setThumbPackage(); SlurpKindred("thumb", thumbpkg, instance); }
+        private void SlurpVPXYKin(ulong instance) { setThumbPackage(); SlurpKindred("vpxykin", pkg, instance); }
+
+        private void SlurpKindred(string key, IPackage pkg, ulong inst)
         {
-            setThumbPackage();
-            IList<IResourceIndexEntry> thumbries = thumbpkg.FindAll(new string[] { "Instance" }, new TypedValue[]{
-                new TypedValue(typeof(ulong), instance),
-            });
+            IList<IResourceIndexEntry> lrie = pkg.FindAll(new string[] { "Instance" }, new TypedValue[] { new TypedValue(typeof(ulong), inst), });
             int i = 0;
-            foreach (IResourceIndexEntry rie in thumbries)
+            foreach (IResourceIndexEntry rie in lrie)
             {
-                Add("thumb[" + i + "]", new TGI(rie));
+                Add(key + "[" + i + "]", new TGI(rie));
                 i++;
             }
         }

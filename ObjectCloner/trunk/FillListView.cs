@@ -87,8 +87,8 @@ namespace ObjectCloner
 
 
                 int i = 0;
-                int freq = lrie.Count / 20;
-                updateProgress(true, "Please wait, loading objects...", true, lrie.Count, true, i);
+                int freq = lrie.Count / 50;
+                updateProgress(true, "Please wait, loading objects... 0%", true, lrie.Count, true, i);
                 foreach (IResourceIndexEntry rie in lrie)
                 {
                     if (stopLoading) return;
@@ -96,7 +96,7 @@ namespace ObjectCloner
                     createListViewItem(new Item(pkg, rie));
 
                     if (++i % freq == 0)
-                        updateProgress(false, "", true, lrie.Count, true, i);
+                        updateProgress(true, "Please wait, loading objects... " + i * 100 / lrie.Count + "%", true, lrie.Count, true, i);
                 }
                 complete = true;
             }
@@ -140,7 +140,8 @@ namespace ObjectCloner
         IResourceIndexEntry irie;
 
         public RIE(IPackage pkg, TGI tgi) : this() { this.package = pkg; this.mytgi = tgi; }
-        public RIE(IPackage pkg, IResourceIndexEntry rie) : this() { this.package = pkg; this.mytgi = new TGI(rie); if (pkg.GetResourceList.Contains(rie)) irie = rie; }
+        public RIE(IPackage pkg, IResourceIndexEntry rie) : this(pkg, new TGI(rie)) { if (pkg.GetResourceList.Contains(rie)) irie = rie; }
+
         public IPackage pkg { get { return package; } }
         public AResourceIndexEntry rie { get { if (irie == null) irie = (AResourceIndexEntry)this; return irie as AResourceIndexEntry; } }
         public TGI tgi { get { return mytgi; } }
@@ -159,32 +160,40 @@ namespace ObjectCloner
     public struct RES
     {
         RIE ie;
-        public RES(RIE rie) : this() { this.ie = rie; }
+        bool defaultWrapper;
+
+        public RES(RIE rie) : this(rie, false) { }
+        public RES(RIE rie, bool defaultWrapper) : this() { this.ie = rie; this.defaultWrapper = defaultWrapper; }
+
         public IPackage pkg { get { return ie.pkg; } }
         public AResource res { get { return (AResource)this; } }
-        public static implicit operator AResource(RES res) { return s3pi.WrapperDealer.WrapperDealer.GetResource(0, res.ie.pkg, res.ie.rie) as AResource; }
+        public static implicit operator AResource(RES res) { return s3pi.WrapperDealer.WrapperDealer.GetResource(0, res.ie.pkg, res.ie.rie, res.defaultWrapper) as AResource; }
         public static implicit operator RIE(RES res) { return res.ie; }
     }
 
     public class Item
     {
         RES myres;
-        IResource objd_res = null;
+        IResource my_ires = null;
 
         public Item(IPackage pkg, IResourceIndexEntry rie) { this.myres = new RES(new RIE(pkg, rie)); }
+        public Item(RIE rie) { this.myres = new RES(rie); }
 
-        public IResource ObjD
+        public IResource Resource
         {
             get
             {
                 if (((RIE)myres).rie == null) return null;
-                if (objd_res == null) objd_res = myres.res;
-                return objd_res;
+                if (my_ires == null) my_ires = myres.res;
+                return my_ires;
             }
         }
+        public IResourceIndexEntry ResourceIndexEntry { get { return ((RIE)myres).rie; } }
 
         public TGI tgi { get { return ((RIE)myres).tgi; } }
 
         public RES res { get { return myres; } }
+
+        public void Commit() { myres.pkg.ReplaceResource(ResourceIndexEntry, Resource); }
     }
 }

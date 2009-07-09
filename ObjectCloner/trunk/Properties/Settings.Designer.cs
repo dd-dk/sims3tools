@@ -153,5 +153,17 @@ namespace ObjectCloner.Properties {
                 this["ShowThumbs"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastSaveFolder {
+            get {
+                return ((string)(this["LastSaveFolder"]));
+            }
+            set {
+                this["LastSaveFolder"] = value;
+            }
+        }
     }
 }

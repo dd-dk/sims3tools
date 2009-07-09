@@ -231,5 +231,9 @@ namespace ObjectCloner.TopPanelComponents
         {
             get { return listView1.SelectedItems; }
         }
+
+        public event EventHandler ItemActivate;
+        protected void OnItemActivate(object sender, EventArgs e) { if (ItemActivate != null)ItemActivate(sender, e); }
+        private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(sender, e); }
     }
 }
