@@ -141,6 +141,7 @@ namespace S3PIDemoFE
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_close, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_bookmarkCurrent, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBR, CurrentPackage != null);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBT_search, CurrentPackage != null);
             resourceDropDownOpening();
         }
 
@@ -797,6 +798,42 @@ namespace S3PIDemoFE
         }
         #endregion
 
+        #region Tools menu
+        private void menuBarWidget1_MBTools_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
+        {
+            try
+            {
+                this.Enabled = false;
+                Application.DoEvents();
+                switch (mn.mn)
+                {
+                    case MenuBarWidget.MB.MBT_fnvHash: toolsFNV(); break;
+                    case MenuBarWidget.MB.MBT_search: toolsSearch(); break;
+                }
+            }
+            finally { this.Enabled = true; }
+        }
+
+        private void toolsFNV()
+        {
+            Tools.FNVHashDialog fnvForm = new S3PIDemoFE.Tools.FNVHashDialog();
+            fnvForm.Show();
+        }
+
+        private void toolsSearch()
+        {
+            Tools.SearchForm searchForm = new S3PIDemoFE.Tools.SearchForm();
+            searchForm.CurrentPackage = CurrentPackage;
+            searchForm.Go += new EventHandler<S3PIDemoFE.Tools.SearchForm.GoEventArgs>(searchForm_Go);
+            searchForm.Show();
+        }
+
+        void searchForm_Go(object sender, S3PIDemoFE.Tools.SearchForm.GoEventArgs e)
+        {
+            browserWidget1.SelectedResource = e.ResourceIndexEntry;
+        }
+        #endregion
+
         #region Help menu
         private void menuBarWidget1_MBHelp_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
         {
@@ -928,8 +965,9 @@ namespace S3PIDemoFE
                 if (resource.ContentFields.Contains("Value"))
                 {
                     Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
-                    controlPanel1.ValueEnabled = typeof(string).IsAssignableFrom(t) || typeof(Image).IsAssignableFrom(t);
+                    controlPanel1.ValueEnabled = typeof(String).IsAssignableFrom(t) || typeof(Image).IsAssignableFrom(t);
                 }
+                else controlPanel1.ValueEnabled = false;
 
                 List<string> lf = resource.ContentFields;
                 foreach (string f in (new string[] { "Stream", "AsBytes", "Value" }))
@@ -1043,7 +1081,7 @@ namespace S3PIDemoFE
                     f.Text = title;
                     f.StartPosition = FormStartPosition.CenterParent;
                     f.Controls.Add(rtf);
-                    f.ShowDialog();
+                    f.Show();
                 }
                 else if (typeof(Image).IsAssignableFrom(t))
                 {
@@ -1057,7 +1095,7 @@ namespace S3PIDemoFE
                     f.Text = title;
                     f.StartPosition = FormStartPosition.CenterParent;
                     f.Controls.Add(pb);
-                    f.ShowDialog();
+                    f.Show();
                 }
             }
             finally { this.Enabled = true; }
