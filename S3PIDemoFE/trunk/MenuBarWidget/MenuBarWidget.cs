@@ -47,6 +47,8 @@ namespace S3PIDemoFE
                 //Resource
                 addToolStripMenuItem, resCopyToolStripMenuItem1, resPasteToolStripMenuItem1, duplicateToolStripMenuItem,
                 compressedToolStripMenuItem, deletedToolStripMenuItem, detailsToolStripMenuItem,
+                //Tools
+                fNVHashToolStripMenuItem, searchToolStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
@@ -71,6 +73,7 @@ namespace S3PIDemoFE
             MBE_cut, MBE_copy, MBE_paste,
             MBR_add, MBR_copy, MBR_paste, MBR_duplicate,
             MBR_compressed, MBR_isdeleted, MBR_details,
+            MBT_fnvHash, MBT_search,
             MBH_contents, MBH_about, MBH_warranty, MBH_licence,
         }
 
@@ -100,6 +103,10 @@ namespace S3PIDemoFE
         public event MBClickEventHandler MBResource_Click;
         protected void OnMBResource_Click(object sender, MB mn) { if (MBResource_Click != null) MBResource_Click(sender, new MBClickEventArgs(mn)); }
         private void tsMBR_Click(object sender, EventArgs e) { OnMBResource_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
+
+        public event MBClickEventHandler MBTools_Click;
+        protected void OnMBTools_Click(object sender, MB mn) { if (MBTools_Click != null) MBTools_Click(sender, new MBClickEventArgs(mn)); }
+        private void tsMBT_Click(object sender, EventArgs e) { OnMBTools_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
 
         public event MBClickEventHandler MBHelp_Click;
         protected void OnMBHelp_Click(object sender, MB mn) { if (MBHelp_Click != null) MBHelp_Click(sender, new MBClickEventArgs(mn)); }
