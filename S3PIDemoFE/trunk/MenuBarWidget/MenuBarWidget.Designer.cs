@@ -218,12 +218,12 @@
             // toolStripSeparator6
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator6.Size = new System.Drawing.Size(133, 6);
             // 
             // setMaxRecentToolStripMenuItem
             // 
             this.setMaxRecentToolStripMenuItem.Name = "setMaxRecentToolStripMenuItem";
-            this.setMaxRecentToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.setMaxRecentToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.setMaxRecentToolStripMenuItem.Text = "Set &Max...";
             this.setMaxRecentToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
             // 
@@ -288,7 +288,7 @@
             // 
             this.editCutToolStripMenuItem.Enabled = false;
             this.editCutToolStripMenuItem.Name = "editCutToolStripMenuItem";
-            this.editCutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.editCutToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.editCutToolStripMenuItem.Text = "Cu&t";
             this.editCutToolStripMenuItem.Click += new System.EventHandler(this.tsMBE_Click);
             // 
@@ -296,7 +296,7 @@
             // 
             this.editCopyToolStripMenuItem.Enabled = false;
             this.editCopyToolStripMenuItem.Name = "editCopyToolStripMenuItem";
-            this.editCopyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.editCopyToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.editCopyToolStripMenuItem.Text = "&Copy";
             this.editCopyToolStripMenuItem.Click += new System.EventHandler(this.tsMBE_Click);
             // 
@@ -304,7 +304,7 @@
             // 
             this.editPasteToolStripMenuItem.Enabled = false;
             this.editPasteToolStripMenuItem.Name = "editPasteToolStripMenuItem";
-            this.editPasteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.editPasteToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.editPasteToolStripMenuItem.Text = "&Paste";
             this.editPasteToolStripMenuItem.Click += new System.EventHandler(this.tsMBE_Click);
             // 
@@ -415,7 +415,7 @@
             // 
             this.searchToolStripMenuItem.Enabled = false;
             this.searchToolStripMenuItem.Name = "searchToolStripMenuItem";
-            this.searchToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.searchToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
             this.searchToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
             this.searchToolStripMenuItem.Text = "&Search...";
             this.searchToolStripMenuItem.Click += new System.EventHandler(this.tsMBT_Click);
