@@ -34,6 +34,8 @@ namespace S3PIDemoFE.Tools
         {
             InitializeComponent();
             lbxHits.Items.Clear();
+            lbxHits.Font = new Font(FontFamily.GenericMonospace, lbxHits.Font.Size);
+            comboBox1.SelectedIndex = 0;
         }
 
         #region Search form signal to main app
@@ -53,7 +55,7 @@ namespace S3PIDemoFE.Tools
         #endregion
 
         IPackage pkg;
-        public IPackage CurrentPackage { get { return pkg; } set { pkg = value; btnSearch.Enabled = (pkg != null && tbHex.Text.Length > 0); } }
+        public IPackage CurrentPackage { get { return pkg; } set { pkg = value; } }
 
         string fromRIE(IResourceIndexEntry rie) { return "0x" + rie.ResourceType.ToString("X8") + " 0x" + rie.ResourceGroup.ToString("X8") + " 0x" + rie.Instance.ToString("X16"); }
 
@@ -67,9 +69,51 @@ namespace S3PIDemoFE.Tools
             lbxHits.Items.Clear();
             this.SearchComplete += new EventHandler<BoolEventArgs>(SearchForm_SearchComplete);
 
-            string[] input = tbHex.Text.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            byte[] target = new byte[input.Length];
-            for (int i = 0; i < input.Length; i++) target[i] = Convert.ToByte(input[i], 16);
+            byte[] target;
+            if (tbHex.Text.StartsWith("U"))
+            {
+                //unicode
+                string hex = tbHex.Text.Substring(1).Trim('"');
+                target = new byte[hex.Length * 2];
+                if (comboBox1.SelectedIndex == 0)
+                    for (int i = 0; i < target.Length; i += 2) { char c = hex[i / 2]; target[i] = (byte)(c & 0xff); target[i + 1] = (byte)(c >> 8); }
+                else
+                    for (int i = 0; i < target.Length; i += 2) { char c = hex[i / 2]; target[i + 1] = (byte)(c & 0xff); target[i] = (byte)(c >> 8); }
+            }
+            else if (tbHex.Text.StartsWith("\""))
+            {
+                string hex = tbHex.Text.Trim('"');
+                target = new byte[hex.Length];
+                for (int i = 0; i < target.Length; i++) target[i] = (byte)hex[i];
+            }
+            else if (tbHex.Text.Contains(" "))
+            {
+                string[] input = tbHex.Text.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                target = new byte[input.Length];
+                if (comboBox1.SelectedIndex == 0)
+                    for (int i = 0; i < input.Length; i++) target[i] = Convert.ToByte(input[i], 16);
+                else
+                    for (int i = 0; i < input.Length; i++) target[i] = Convert.ToByte(input[input.Length - 1 - i], 16);
+            }
+            else
+            {
+                if (tbHex.Text.StartsWith("0x") || comboBox1.SelectedIndex == 1)
+                {
+                    string hex = tbHex.Text.Substring(tbHex.Text.StartsWith("0x") ? 2 : 0);
+                    if (hex.Length % 2 != 0) hex = "0" + hex;
+                    target = new byte[(hex.Length + 1) / 2];
+                    for (int i = 0; i < target.Length; i++)
+                        target[i] = Convert.ToByte(hex.Substring(hex.Length - 2 - (2 * i), 2), 16);
+                }
+                else
+                {
+                    string hex = tbHex.Text;
+                    if (hex.Length % 2 != 0) hex = "0" + hex;
+                    target = new byte[(hex.Length + 1) / 2];
+                    for (int i = 0; i < target.Length; i++)
+                        target[i] = Convert.ToByte(hex.Substring(2 * i, 2), 16);
+                }
+            }
 
             SearchThread st = new SearchThread(this, pkg, target, Add, updateProgress, stopSearch, OnSearchComplete);
 
@@ -226,22 +270,12 @@ namespace S3PIDemoFE.Tools
         #endregion
 
         #region Form control event handlers
-        static string valid = "0123456789abcdefABCDEF ";
-        private void tbHex_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar >= 32 && e.KeyChar < 0x7f && valid.IndexOf(e.KeyChar) < 0) e.Handled = true;
-        }
-
-        Regex rx = new Regex(@"^[0-9A-F][0-9A-F]?(\s+([0-9A-F][0-9A-F]?)?)*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        Regex rxX2 = new Regex(@"^[0-9A-F][0-9A-F]?(\s+([0-9A-F][0-9A-F]?)?)*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        Regex rxXn = new Regex(@"^(0x)?[0-9A-F]+$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        Regex rxStr = new Regex(@"^U?"".*""$", RegexOptions.Compiled);
         private void tbHex_TextChanged(object sender, EventArgs e)
         {
-            if (!rx.IsMatch(tbHex.Text))
-            {
-                if (tbHex.SelectionStart > 0) tbHex.SelectionStart--;
-                tbHex.SelectionLength = Math.Min(1, tbHex.Text.Length);
-                if (tbHex.SelectionLength > 0) tbHex.SelectedText = "";
-            }
-            else btnSearch.Enabled = tbHex.Text.Length > 0;
+            btnSearch.Enabled = (pkg != null) && (rxX2.IsMatch(tbHex.Text) || rxXn.IsMatch(tbHex.Text) || rxStr.IsMatch(tbHex.Text));
         }
 
         private void btnSearch_Click(object sender, EventArgs e)

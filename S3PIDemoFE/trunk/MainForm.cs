@@ -823,6 +823,8 @@ namespace S3PIDemoFE
         private void toolsSearch()
         {
             Tools.SearchForm searchForm = new S3PIDemoFE.Tools.SearchForm();
+            searchForm.Width = this.Width * 4 / 5;
+            searchForm.Height = this.Height * 4 / 5;
             searchForm.CurrentPackage = CurrentPackage;
             searchForm.Go += new EventHandler<S3PIDemoFE.Tools.SearchForm.GoEventArgs>(searchForm_Go);
             searchForm.Show();
