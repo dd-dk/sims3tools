@@ -213,7 +213,7 @@
             this.resourceFilterWidget1.BrowserWidget = this.browserWidget1;
             this.resourceFilterWidget1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.resourceFilterWidget1.Fields = null;
-            this.resourceFilterWidget1.Filter = ((System.Collections.Generic.IList<System.Collections.Generic.KeyValuePair<string, s3pi.Interfaces.TypedValue>>)(resources.GetObject("resourceFilterWidget1.Filter")));
+            this.resourceFilterWidget1.Filter = null;
             this.resourceFilterWidget1.Location = new System.Drawing.Point(0, 0);
             this.resourceFilterWidget1.Name = "resourceFilterWidget1";
             this.resourceFilterWidget1.Size = new System.Drawing.Size(876, 103);
