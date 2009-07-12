@@ -87,7 +87,7 @@ namespace ObjectCloner
 
 
                 int i = 0;
-                int freq = lrie.Count / 50;
+                int freq = Math.Max(1, lrie.Count / 50);
                 updateProgress(true, "Please wait, loading objects... 0%", true, lrie.Count, true, i);
                 foreach (IResourceIndexEntry rie in lrie)
                 {
@@ -116,6 +116,7 @@ namespace ObjectCloner
         public ulong i;
         public TGI(uint t, uint g, ulong i) { this.t = t; this.g = g; this.i = i; }
         public TGI(IResourceIndexEntry rie) { t = rie.ResourceType; g = rie.ResourceGroup; i = rie.Instance; }
+        public TGI(AResource.TGIBlock tgib) { t = tgib.ResourceType; g = tgib.ResourceGroup; i = tgib.Instance; }
         public static implicit operator String(TGI value)
         {
             return String.Format("0x{0:X8}-0x{1:X8}-0x{2:X16}", value.t, value.g, value.i);
