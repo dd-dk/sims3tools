@@ -20,11 +20,11 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Security.Cryptography;
 using System.Windows.Forms;
 
 namespace S3PIDemoFE.Tools
 {
-    // From the Sims3 wiki http://www.sims2wiki.info/wiki.php?title=FNV
     public partial class FNVHashDialog : Form
     {
         public FNVHashDialog()
@@ -32,30 +32,10 @@ namespace S3PIDemoFE.Tools
             InitializeComponent();
         }
 
-        byte[] fromString(string text)
-        {
-            byte[] res = new byte[text.Length];
-            for (int i = 0; i < text.Length; i++) res[i] = (byte)text[i];
-            return res;
-        }
-        private UInt32 hash32(string text) { return (uint)fnv(0x01000193, 0x811C9DC5, fromString(text.ToLower())); }
-        private UInt64 hash64(string text) { return fnv(0x00000100000001B3, 0xCBF29CE484222325, fromString(text.ToLower())); ; }
-
-        private UInt64 fnv(ulong prime, ulong offset, byte[] data)
-        {
-            ulong hash = offset;
-            foreach (byte b in data)
-            {
-                hash *= prime;
-                hash ^= b;
-            }
-            return hash;
-        }
-
         private void btnCalc_Click(object sender, EventArgs e)
         {
-            tbFNV32.Text = "0x" + hash32(tbInput.Text).ToString("X8");
-            tbFNV64.Text = "0x" + hash64(tbInput.Text).ToString("X16");
+            tbFNV32.Text = "0x" + FNV32.GetHash(tbInput.Text).ToString("X8");
+            tbFNV64.Text = "0x" + FNV64.GetHash(tbInput.Text).ToString("X16");
         }
 
         private void btnClose_Click(object sender, EventArgs e)
