@@ -133,9 +133,8 @@ namespace S3PIDemoFE
             if (S3PIDemoFE.Properties.Settings.Default.MRUList != null)
                 foreach (string f in S3PIDemoFE.Properties.Settings.Default.MRUList)
                 {
-                    string s = f;
-                    if (f.Length > 80)
-                        s = "..." + s.Substring(Math.Max(0, s.Length - Math.Max(80, Path.GetFileName(s).Length)));
+                    string s = makeName(f);
+
                     ToolStripMenuItem tsmiMRUListEntry = new ToolStripMenuItem();
                     tsmiMRUListEntry.Name = "tsmiRecent" + i;
                     tsmiMRUListEntry.ShortcutKeys = (Keys)(Keys.Control | ((Keys)(49 + i)));
@@ -174,9 +173,8 @@ namespace S3PIDemoFE
             if (S3PIDemoFE.Properties.Settings.Default.Bookmarks != null)
                 foreach (string f in S3PIDemoFE.Properties.Settings.Default.Bookmarks)
                 {
-                    string s = f;
-                    if (f.Length > 80)
-                        s = "..." + s.Substring(Math.Max(0, s.Length - Math.Max(80, Path.GetFileName(s).Length)));
+                    string s = makeName(f);
+
                     ToolStripMenuItem tsmiBookmarkEntry = new ToolStripMenuItem();
                     tsmiBookmarkEntry.Name = "tsmiBookmark" + i;
                     tsmiBookmarkEntry.ShortcutKeys = (Keys)(Keys.Control | Keys.Shift | ((Keys)(49 + i)));
@@ -185,6 +183,17 @@ namespace S3PIDemoFE
                     bookmarkedPackagesToolStripMenuItem.DropDownItems.Insert(i, tsmiBookmarkEntry);
                     i++;
                 }
+        }
+
+        string makeName(string savedName)
+        {
+            bool readWrite;
+            if (savedName.StartsWith("0:")) { savedName = savedName.Substring(2); readWrite = false; }
+            else if (savedName.StartsWith("1:")) { savedName = savedName.Substring(2); readWrite = true; }
+            else readWrite = true;
+            if (savedName.Length > 100)
+                savedName = "..." + savedName.Substring(Math.Max(0, savedName.Length - Math.Max(100, Path.GetFileName(savedName).Length)));
+            return (readWrite ? "[RW]" : "[RO]") + ": " + savedName;
         }
 
         public class BookmarkClickEventArgs : EventArgs { public readonly string filename; public BookmarkClickEventArgs(string filename) { this.filename = filename; } }

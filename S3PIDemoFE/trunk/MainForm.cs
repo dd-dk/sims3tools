@@ -55,6 +55,7 @@ namespace S3PIDemoFE
             filterFields.Remove("Chunkoffset");
             filterFields.Remove("Filesize");
             filterFields.Remove("Memsize");
+            resourceFilterWidget1.BrowserWidget = browserWidget1;
             resourceFilterWidget1.Fields = filterFields;
 
             packageInfoWidget1.Fields = packageInfoFields1.Fields;
@@ -113,7 +114,7 @@ namespace S3PIDemoFE
         {
             if (Filename.Length > 0 && File.Exists(Filename))
             {
-                menuBarWidget1.AddRecentFile(Filename);
+                menuBarWidget1.AddRecentFile((ReadWrite ? "1:" : "0:") + Filename);
                 string s = Filename;
                 if (s.Length > 128)
                 {
@@ -121,8 +122,8 @@ namespace S3PIDemoFE
                     s = s.Substring(Math.Max(0, s.Length - 40));
                     s = "..." + System.IO.Path.Combine(s, System.IO.Path.GetFileName(Filename));
                 }
-                this.Text = String.Format("{0}: {1}", myName, s);
-                CurrentPackage = Package.OpenPackage(0, Filename);
+                this.Text = String.Format("{0}: [{1}] {2}", myName, ReadWrite ? "RW" : "RO", s);
+                CurrentPackage = Package.OpenPackage(0, Filename, ReadWrite);
             }
             else
             {
@@ -151,9 +152,10 @@ namespace S3PIDemoFE
 
         #region Package Filename
         string filename;
+        bool ReadWrite { get { return filename.Length > 1 && filename.StartsWith("1:"); } }
         string Filename
         {
-            get { return filename; }
+            get { return filename.Substring(2); }
             set
             {
                 if (filename != "" && filename == value) return;
@@ -162,6 +164,9 @@ namespace S3PIDemoFE
                 if (CurrentPackage != null) return;
 
                 filename = value;
+                if (!filename.StartsWith("0:") && !filename.StartsWith("1:"))
+                    filename = "1:" + filename;
+
                 OnPackageFilenameChanged(this, new EventArgs());
             }
         }
@@ -173,9 +178,10 @@ namespace S3PIDemoFE
         bool isPackageDirty = false;
         bool IsPackageDirty
         {
+            get { return ReadWrite && isPackageDirty; }
             set
             {
-                menuBarWidget1.Enable(MenuBarWidget.MB.MBF_save, value);
+                menuBarWidget1.Enable(MenuBarWidget.MB.MBF_save, ReadWrite && value);
                 if (isPackageDirty == value) return;
                 isPackageDirty = value;
             }
@@ -198,7 +204,11 @@ namespace S3PIDemoFE
                     DialogResult drx = MessageBox.Show("Current package has unsaved changes.\nSave now?", myName, MessageBoxButtons.YesNoCancel);
                     int res = drx == DialogResult.Yes ? 0 : drx == DialogResult.No ? 1 : 2;
                     if (res == 2) return;
-                    if (res == 0) if (!fileSave()) return;
+                    if (res == 0)
+                    {
+                        if (ReadWrite) { if (!fileSave()) return; }
+                        else { if (!fileSaveAs()) return; }
+                    }
                     IsPackageDirty = false;
                 }
                 if (package != null) Package.ClosePackage(0, package);
@@ -273,12 +283,13 @@ namespace S3PIDemoFE
 
         private void fileOpen()
         {
-            openFileDialog1.FileName = "";
+            openFileDialog1.FileName = Filename;
             openFileDialog1.FilterIndex = 1;
+            openFileDialog1.ReadOnlyChecked = !ReadWrite;
             DialogResult dr = openFileDialog1.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            Filename = openFileDialog1.FileName;
+            Filename = (openFileDialog1.ReadOnlyChecked ? "0:" : "1:") + openFileDialog1.FileName;
         }
 
         private bool fileSave()
@@ -315,7 +326,7 @@ namespace S3PIDemoFE
             {
                 CurrentPackage.SaveAs(saveAsFileDialog.FileName);
                 IsPackageDirty = false;
-                Filename = saveAsFileDialog.FileName;
+                Filename = "1:" + saveAsFileDialog.FileName;
             }
             finally { Application.UseWaitCursor = false; }
             return true;
@@ -557,7 +568,7 @@ namespace S3PIDemoFE
 
         private void fileBookmarkCurrent()
         {
-            menuBarWidget1.AddBookmark(Filename);
+            menuBarWidget1.AddBookmark((ReadWrite ? "1:" : "0:") + Filename);
         }
 
         private void fileSetMaxBookmarks()
