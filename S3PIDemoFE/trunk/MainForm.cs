@@ -152,10 +152,10 @@ namespace S3PIDemoFE
 
         #region Package Filename
         string filename;
-        bool ReadWrite { get { return filename.Length > 1 && filename.StartsWith("1:"); } }
+        bool ReadWrite { get { return filename != null && filename.Length > 1 && filename.StartsWith("1:"); } }
         string Filename
         {
-            get { return filename.Substring(2); }
+            get { return filename == null || filename.Length < 2 ? "" : filename.Substring(2); }
             set
             {
                 if (filename != "" && filename == value) return;
