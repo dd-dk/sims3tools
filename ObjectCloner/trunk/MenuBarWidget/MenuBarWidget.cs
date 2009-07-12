@@ -37,10 +37,12 @@ namespace ObjectCloner
             });
             tsMB = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //File
-                exitToolStripMenuItem,
+                newToolStripMenuItem, openToolStripMenuItem, exitToolStripMenuItem,
                 //View
                 tilesToolStripMenuItem, largeIconsToolStripMenuItem, smallIconsToolStripMenuItem, listToolStripMenuItem, detailedListToolStripMenuItem,
                 iconsToolStripMenuItem,
+                //Settings
+                sims3FolderToolStripMenuItem, userNameToopStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
@@ -50,14 +52,16 @@ namespace ObjectCloner
         {
             MBF,
             MBV,
+            MBS,
             MBH,
         }
 
         public enum MB
         {
-            MBF_exit = 0,
+            MBF_new = 0, MBF_open, MBF_exit,
             MBV_tiles, MBV_largeIcons, MBV_smallIcons, MBV_list, MBV_detailedList,
             MBV_icons,
+            MBS_sims3Folder, MBS_userName,
             MBH_contents, MBH_about, MBH_warranty, MBH_licence,
         }
 
@@ -85,6 +89,11 @@ namespace ObjectCloner
         public event MBClickEventHandler MBView_Click;
         protected void OnMBView_Click(object sender, MB mn) { if (MBView_Click != null) MBView_Click(sender, new MBClickEventArgs(mn)); }
         private void tsMBV_Click(object sender, EventArgs e) { OnMBView_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
+
+        [Category("Action")]
+        public event MBClickEventHandler MBSettings_Click;
+        protected void OnMBSettings_Click(object sender, MB mn) { if (MBSettings_Click != null) MBSettings_Click(sender, new MBClickEventArgs(mn)); }
+        private void tsMBS_Click(object sender, EventArgs e) { OnMBSettings_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
 
         [Category("Action")]
         public event MBClickEventHandler MBHelp_Click;
