@@ -41,6 +41,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.Extensions.dll</HintPath>
     </Reference>
+    <Reference Include="s3pi.GenericRCOLResource, Version=907.12.15.26089, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.GenericRCOLResource.dll</HintPath>
+    </Reference>
     <Reference Include="s3pi.Interfaces, Version=906.27.10.17894, Culture=neutral, PublicKeyToken=596917de85953130, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.Interfaces.dll</HintPath>
@@ -70,6 +74,12 @@
     </Compile>
     <Compile Include="MenuBarWidget\MenuBarWidget.designer.cs">
       <DependentUpon>MenuBarWidget.cs</DependentUpon>
+    </Compile>
+    <Compile Include="StringInputDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="StringInputDialog.Designer.cs">
+      <DependentUpon>StringInputDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyVersion.cs" />
     <Compile Include="MainForm.cs">
@@ -117,6 +127,9 @@
     <EmbeddedResource Include="MenuBarWidget\MenuBarWidget.resx">
       <DependentUpon>MenuBarWidget.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="StringInputDialog.resx">
+      <DependentUpon>StringInputDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="TopPanelComponents\ObjectChooser.resx">
       <DependentUpon>ObjectChooser.cs</DependentUpon>
     </EmbeddedResource>
@@ -146,10 +159,6 @@
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.DefaultResource.dll">
       <Link>s3pi.DefaultResource.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\s3pi\build\bin\Release\s3pi.GenericRCOLResource.dll">
-      <Link>s3pi.GenericRCOLResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.ImageResource.dll">

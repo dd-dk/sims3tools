@@ -22,10 +22,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Windows.Forms;
 using s3pi.Interfaces;
 using s3pi.Extensions;
+using s3pi.GenericRCOLResource;
 using ObjectCloner.TopPanelComponents;
 
 namespace ObjectCloner
@@ -48,6 +50,7 @@ namespace ObjectCloner
             "Step 6: MODL-referenced resources",
             "Step 7: MLOD-referenced resources",
             "Step 8: All thumbnails for OBJD",
+            "Step 9: Fix integrity step",
             "You should never see this",
         };
 
@@ -67,8 +70,8 @@ namespace ObjectCloner
         enum Page
         {
             None = 0,
-            Choose,
-            Listing,
+            ObjectChooser,
+            Resources,
         }
         enum SubPage
         {
@@ -81,13 +84,20 @@ namespace ObjectCloner
             Step6,//Bring in all the resources in the TGI blocks of the MODL
             Step7,//Bring in all the resources in the TGI blocks of each MLOD (disregard duplicates)
             Step8,//Bring in all resources from ...\The Sims 3\Thumbnails\ALLThumbnails.package that match the instance number of the OBJD
-            Last = 8,
+            Step9,//Fix integrity step
+        }
+        enum Mode
+        {
+            None = 0,
+            Clone,
+            Fix,
         }
 
+        Mode mode = Mode.None;
         SubPage subPage = SubPage.None;
+        SubPage lastSubPage = SubPage.None;
         View currentView;
         IPackage pkg = null;
-        IPackage thumbpkg = null;
         TGI clone;//0x319E4F1D
         RES resObjd;
         RES resObjk;
@@ -157,55 +167,247 @@ namespace ObjectCloner
             ObjectCloner.Properties.Settings.Default.Save();
         }
 
-        string packageFile;
-        bool setPackageFile()
+        string fullBuild0Path = null;
+        string FullBuild0Path
         {
-            packageFile = ObjectCloner.Properties.Settings.Default.FullBuild0Location;
-            openFileDialog1.FileName = packageFile;
-            DialogResult dr = openFileDialog1.ShowDialog();
-            if (dr != DialogResult.OK) return false;
-            ObjectCloner.Properties.Settings.Default.FullBuild0Location = openFileDialog1.FileName;
-            packageFile = openFileDialog1.FileName;
-            return true;
-        }
-
-        void setThumbPackage()
-        {
-            if (thumbpkg == null)
+            get
             {
-                string folder = Path.GetDirectoryName(packageFile);
-                thumbpkg = s3pi.Package.Package.OpenPackage(0, Path.GetFullPath(Path.Combine(folder, @"../../../Thumbnails/ALLThumbnails.package")));
+                if (fullBuild0Path == null)
+                {
+                    if (ObjectCloner.Properties.Settings.Default.Sims3Folder == null || ObjectCloner.Properties.Settings.Default.Sims3Folder.Length == 0)
+                        settingsSims3Folder();
+                    if (ObjectCloner.Properties.Settings.Default.Sims3Folder == null || ObjectCloner.Properties.Settings.Default.Sims3Folder.Length == 0)
+                        return null;
+                }
+                fullBuild0Path = Path.Combine(ObjectCloner.Properties.Settings.Default.Sims3Folder, @"GameData\Shared\Packages\FullBuild0.package");
+                return fullBuild0Path;
             }
         }
 
+        string creatorName = null;
+        string CreatorName
+        {
+            get
+            {
+                if (creatorName == null)
+                {
+                    if (ObjectCloner.Properties.Settings.Default.CreatorName == null || ObjectCloner.Properties.Settings.Default.CreatorName.Length == 0)
+                        settingsSims3Folder();
+                }
+                if (ObjectCloner.Properties.Settings.Default.CreatorName == null || ObjectCloner.Properties.Settings.Default.CreatorName.Length == 0)
+                    creatorName = "";
+                else
+                    creatorName = ObjectCloner.Properties.Settings.Default.CreatorName;
+                return creatorName;
+            }
+        }
+
+        IPackage thumbpkg = null;
+        void setThumbPackage()
+        {
+            if (thumbpkg == null)
+                thumbpkg = s3pi.Package.Package.OpenPackage(0, Path.Combine(ObjectCloner.Properties.Settings.Default.Sims3Folder, @"Thumbnails/ALLThumbnails.package"));
+        }
+
         #region TopPanelComponents
+        bool waitingToDisplayObjects;
         private void DisplayObjectChooser()
         {
-            waitingToDisplayResources = false;
+            waitingToDisplayObjects = false;
+
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, mode == Mode.Fix); // don't need to re-do FB0
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true); // do need to allow changing other packages
+            setButtons(Page.ObjectChooser, subPage);
+
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(objectChooser);
             objectChooser.Dock = DockStyle.Fill;
-            setButtons(Page.Choose, subPage);
         }
 
         bool waitingToDisplayResources;
         private void DisplayResources()
         {
+            waitingToDisplayResources = false;
+
+            setButtons(Page.Resources, subPage);
+
             resourceList.Page = subPageText[(int)subPage];
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(resourceList);
             resourceList.Dock = DockStyle.Fill;
-            waitingToDisplayResources = false;
-            setButtons(Page.Listing, subPage);
             resourceList.Focus();
         }
 
-        private void DoWait()
+        private void DoWait() { DoWait("Please wait..."); }
+        private void DoWait(string waitText)
         {
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(pleaseWait);
             pleaseWait.Dock = DockStyle.Fill;
+            pleaseWait.Label = waitText;
             Application.DoEvents();
+        }
+        #endregion
+
+        #region ObjectChooser
+        private void objectChooser_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            subPage = SubPage.None;
+            resourceList.Clear();
+            tgiLookup.Clear();
+            if (objectChooser.SelectedItems.Count == 0) ClearTabs();
+            else FillTabs(objectChooser.SelectedItems[0].Tag as Item);
+            setButtons(Page.ObjectChooser, subPage);
+        }
+
+        void objectChooser_ItemActivate(object sender, EventArgs e)
+        {
+            btnStart_Click(sender, e);
+        }
+        #endregion
+
+        #region Details view
+        List<string> overviewTabFields = new List<string>();
+        List<string> overviewTabCommonFields = new List<string>();
+        List<string> flagsTabFields = new List<string>();
+        void InitialiseTabs()
+        {
+            IResource res = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x319E4F1D");
+            List<string> fields = AApiVersionedFields.GetContentFields(0, res.GetType());
+            foreach (string field in fields)
+            {
+                if (field.StartsWith("Unknown")) continue;
+                if (field.EndsWith("Flags")) flagsTabFields.Add(field);
+                else if (field.Equals("Materials")) { }
+                else if (field.Equals("MTDoors")) { }
+                else if (field.Equals("TGIBlocks")) { }
+                else if (field.Equals("CommonBlock"))
+                {
+                    List<string> commonfields = AApiVersionedFields.GetContentFields(0, res["CommonBlock"].Type);
+                    foreach (string commonfield in commonfields)
+                    {
+                        if (commonfield.StartsWith("Unknown")) continue;
+                        if (!commonfield.Equals("Value")) overviewTabCommonFields.Add(commonfield);
+                    }
+                }
+                else if (!field.Equals("AsBytes") && !field.Equals("Stream") && !field.Equals("Value") &&
+                    !field.Equals("Count") && !field.Equals("IsReadOnly") && !field.EndsWith("Reader")) overviewTabFields.Add(field);
+            }
+            InitialiseOverviewTab(res);
+        }
+
+        void InitialiseOverviewTab(IResource objd)
+        {
+            Dictionary<string, Type> types = AApiVersionedFields.GetContentFieldTypes(0, objd.GetType());
+            foreach (string field in overviewTabFields)
+            {
+                CreateField(tlpOverviewMain, types[field], objd as AResource, field);
+            }
+
+            AApiVersionedFields common = objd["CommonBlock"].Value as AApiVersionedFields;
+            types = AApiVersionedFields.GetContentFieldTypes(0, objd["CommonBlock"].Type);
+            foreach (string field in overviewTabCommonFields)
+            {
+                CreateField(tlpOverviewCommon, types[field], common, field);
+            }
+        }
+
+        void CreateField(TableLayoutPanel target, Type t, AApiVersionedFields obj, string field)
+        {
+            if (typeof(IConvertible).IsAssignableFrom(t))
+            {
+                switch (((IConvertible)obj[field].Value).GetTypeCode())
+                {
+                    case TypeCode.SByte:
+                    case TypeCode.Byte:
+                        CreateField(target, field, 2 + 2);
+                        break;
+                    case TypeCode.Boolean:
+                    case TypeCode.Char:
+                    case TypeCode.Int16:
+                    case TypeCode.UInt16:
+                        CreateField(target, field, 2 + 4);
+                        break;
+                    case TypeCode.Single:
+                    case TypeCode.DBNull:
+                    case TypeCode.Empty:
+                        CreateField(target, field, 8);
+                        break;
+                    case TypeCode.Int32:
+                    case TypeCode.UInt32:
+                        CreateField(target, field, 2 + 8);
+                        break;
+                    case TypeCode.Double:
+                        CreateField(target, field, 16);
+                        break;
+                    case TypeCode.Int64:
+                    case TypeCode.UInt64:
+                        CreateField(target, field, 2 + 16);
+                        break;
+                    case TypeCode.Decimal:
+                    case TypeCode.DateTime:
+                    case TypeCode.String:
+                    case TypeCode.Object:
+                        CreateField(target, field, 30);
+                        break;
+                }
+            }
+            else
+                CreateField(target, field, 30);
+        }
+
+        void CreateField(TableLayoutPanel tlp, string name, int len)
+        {
+            tlp.RowCount++;
+            tlp.RowStyles.Insert(tlp.RowCount - 2, new RowStyle(SizeType.AutoSize));
+
+            Label lb = new Label();
+            lb.Anchor = AnchorStyles.Right;
+            lb.AutoSize = true;
+            lb.Name = "lb" + name;
+            lb.TabIndex = 1;
+            lb.Text = name;
+            tlp.Controls.Add(lb, 0, tlp.RowCount - 2);
+
+            Label x = new Label();
+            x.AutoSize = true;
+            x.Text = "".PadLeft(len, 'X');
+
+            TextBox tb = new TextBox();
+            tb.Anchor = AnchorStyles.Left;
+            tb.Name = "tb" + name;
+            tb.ReadOnly = true;
+            tb.Size = new Size(x.PreferredWidth + 6, x.PreferredHeight + 6);
+            tb.TabIndex = 2;
+            //tb.Text = x.Text;
+            tlp.Controls.Add(tb, 1, tlp.RowCount - 2);
+        }
+
+        void ClearTabs()
+        {
+            foreach (Control c in tlpOverviewMain.Controls)
+                if (c is TextBox) ((TextBox)c).Text = "";
+            foreach (Control c in tlpOverviewCommon.Controls)
+                if (c is TextBox) ((TextBox)c).Text = "";
+        }
+        void FillTabs(Item objd)
+        {
+            for (int i = 1; i < tlpOverviewMain.RowCount - 1; i++)
+            {
+                Label lb = (Label)tlpOverviewMain.GetControlFromPosition(0, i);
+                TextBox tb = (TextBox)tlpOverviewMain.GetControlFromPosition(1, i);
+
+                TypedValue tv = objd.Resource[lb.Text];
+                tb.Text = tv;
+            }
+            for (int i = 2; i < tlpOverviewCommon.RowCount - 1; i++)
+            {
+                Label lb = (Label)tlpOverviewCommon.GetControlFromPosition(0, i);
+                TextBox tb = (TextBox)tlpOverviewCommon.GetControlFromPosition(1, i);
+
+                TypedValue tv = ((AApiVersionedFields)objd.Resource["CommonBlock"].Value)[lb.Text];
+                tb.Text = tv;
+            }
         }
         #endregion
 
@@ -214,11 +416,19 @@ namespace ObjectCloner
         Thread loadThread;
         bool haveLoaded = false;
         bool loading = false;
-        void StartLoading()
+        string loadedPackage;
+        void StartLoading(string path)
         {
+            if (loading) { AbortLoading(); }
+            if (haveLoaded && loadedPackage == path) return;
+            waitingToDisplayObjects = true;
+            haveLoaded = false;
+            loadedPackage = path;
+            objectChooser.Items.Clear();
+
             this.LoadingComplete += new EventHandler<BoolEventArgs>(MainForm_LoadingComplete);
 
-            FillListView flv = new FillListView(this, packageFile, createListViewItem, updateProgress, stopLoading, OnLoadingComplete);
+            FillListView flv = new FillListView(this, path, createListViewItem, updateProgress, stopLoading, OnLoadingComplete);
 
             loadThread = new Thread(new ThreadStart(flv.LoadPackage));
             loading = true;
@@ -227,7 +437,7 @@ namespace ObjectCloner
 
         void AbortLoading()
         {
-            waitingForSavePackage = false;
+            waitingToDisplayObjects = false;
             if (!loading) MainForm_LoadingComplete(null, new BoolEventArgs(false));
             else loading = false;
         }
@@ -246,9 +456,9 @@ namespace ObjectCloner
             {
                 haveLoaded = true;
 
-                if (waitingToDisplayResources)
+                if (waitingToDisplayObjects)
                 {
-                    if (menuBarWidget1.IsChecked(MenuBarWidget.MB.MBV_icons))
+                    if (mode == Mode.Clone && menuBarWidget1.IsChecked(MenuBarWidget.MB.MBV_icons))
                     {
                         waitingForImages = true;
                         StartFetching();
@@ -257,8 +467,8 @@ namespace ObjectCloner
                     DisplayObjectChooser();
                 }
 
-                menuBarWidget1.Enable(MenuBarWidget.MD.MBV, true);
-                menuBarWidget1_MBView_Click(null, new MenuBarWidget.MBClickEventArgs(viewMap[currentView]));
+                //menuBarWidget1.Enable(MenuBarWidget.MD.MBV, true);
+                //menuBarWidget1_MBView_Click(null, new MenuBarWidget.MBClickEventArgs(viewMap[currentView]));
             }
         }
 
@@ -486,7 +696,7 @@ namespace ObjectCloner
             this.SavingComplete += new EventHandler<BoolEventArgs>(MainForm_SavingComplete);
 
             setThumbPackage();
-            SaveList sl = new SaveList(this, objectChooser.SelectedItems[0].Tag as Item, tgiLookup, packageFile, pkg, thumbpkg, saveFileDialog1.FileName,
+            SaveList sl = new SaveList(this, objectChooser.SelectedItems[0].Tag as Item, tgiLookup, FullBuild0Path, pkg, thumbpkg, saveFileDialog1.FileName,
                 updateProgress, stopSaving, OnSavingComplete);
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
@@ -519,6 +729,7 @@ namespace ObjectCloner
                     CopyableMessageBox.Show("OK", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
                 else
                     CopyableMessageBox.Show("Save not complete", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
+                DisplayResources();
             }
         }
 
@@ -703,167 +914,130 @@ namespace ObjectCloner
         #endregion
 
 
-        #region ObjectChooser
-        private void objectChooser_SelectedIndexChanged(object sender, EventArgs e)
+        #region Make Unique bits
+
+        string uniqueObject;
+        void StartFixing()
         {
-            subPage = SubPage.None;
-            resourceList.Clear();
-            tgiLookup.Clear();
-            if (objectChooser.SelectedItems.Count == 0) ClearTabs();
-            else FillTabs(objectChooser.SelectedItems[0].Tag as Item);
-            setButtons(Page.Choose, subPage);
+            try
+            {
+                //
+            }
+            finally
+            {
+                tlpButtons.Enabled = true;
+            }
         }
 
-        void objectChooser_ItemActivate(object sender, EventArgs e)
-        {
-            btnClone_Click(sender, e);
-        }
+        int numNewInstances = 0;
+        ulong CreateInstance() { numNewInstances++; return FNV64.GetHash(uniqueObject + "_" + DateTime.UtcNow.ToBinary().ToString("X16") + "_" + numNewInstances.ToString("X8")); }
+
         #endregion
 
-        #region Details view
-        List<string> overviewTabFields = new List<string>();
-        List<string> overviewTabCommonFields = new List<string>();
-        List<string> flagsTabFields = new List<string>();
-        void InitialiseTabs()
+
+        #region Fetch resources
+        private void Add(string key, TGI tgi)
         {
-            IResource res = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x319E4F1D");
-            List<string> fields = AApiVersionedFields.GetContentFields(0, res.GetType());
-            foreach (string field in fields)
-            {
-                if (field.StartsWith("Unknown")) continue;
-                if (field.EndsWith("Flags")) flagsTabFields.Add(field);
-                else if (field.Equals("Materials")) { }
-                else if (field.Equals("MTDoors")) { }
-                else if (field.Equals("TGIBlocks")) { }
-                else if (field.Equals("CommonBlock"))
-                {
-                    List<string> commonfields = AApiVersionedFields.GetContentFields(0, res["CommonBlock"].Type);
-                    foreach (string commonfield in commonfields)
-                    {
-                        if (commonfield.StartsWith("Unknown")) continue;
-                        if (!commonfield.Equals("Value")) overviewTabCommonFields.Add(commonfield);
-                    }
-                }
-                else if (!field.Equals("AsBytes") && !field.Equals("Stream") && !field.Equals("Value") &&
-                    !field.Equals("Count") && !field.Equals("IsReadOnly") && !field.EndsWith("Reader")) overviewTabFields.Add(field);
-            }
-            InitialiseOverviewTab(res);
+            if (resourceList.Count % 100 == 0) Application.DoEvents();
+            tgiLookup.Add(key, tgi);
+
+            TGIN tgin = new TGIN();
+            tgin.ResType = tgi.t;
+            tgin.ResGroup = tgi.g;
+            tgin.ResInstance = tgi.i;
+            tgin.ResName = key;
+            resourceList.Add(tgin);
         }
 
-        void InitialiseOverviewTab(IResource objd)
+        private void SlurpTGIsFromTGI(string key, TGI tgi) { RIE rie = new RIE(pkg, tgi); if (rie.rie != null) SlurpTGIsFromField(key, new RES(rie)); }
+        private void SlurpTGIsFromField(string key, AApiVersionedFields field)
         {
-            Dictionary<string, Type> types = AApiVersionedFields.GetContentFieldTypes(0, objd.GetType());
-            foreach (string field in overviewTabFields)
+            Type t = field.GetType();
+            if (typeof(AResource.TGIBlock).IsAssignableFrom(t))
             {
-                CreateField(tlpOverviewMain, types[field], objd as AResource, field);
-            }
-
-            AApiVersionedFields common = objd["CommonBlock"].Value as AApiVersionedFields;
-            types = AApiVersionedFields.GetContentFieldTypes(0, objd["CommonBlock"].Type);
-            foreach (string field in overviewTabCommonFields)
-            {
-                CreateField(tlpOverviewCommon, types[field], common, field);
-            }
-        }
-
-        void CreateField(TableLayoutPanel target, Type t, AApiVersionedFields obj, string field)
-        {
-            if (typeof(IConvertible).IsAssignableFrom(t))
-            {
-                switch (((IConvertible)obj[field].Value).GetTypeCode())
-                {
-                    case TypeCode.SByte:
-                    case TypeCode.Byte:
-                        CreateField(target, field, 2 + 2);
-                        break;
-                    case TypeCode.Boolean:
-                    case TypeCode.Char:
-                    case TypeCode.Int16:
-                    case TypeCode.UInt16:
-                        CreateField(target, field, 2 + 4);
-                        break;
-                    case TypeCode.Single:
-                    case TypeCode.DBNull:
-                    case TypeCode.Empty:
-                        CreateField(target, field, 8);
-                        break;
-                    case TypeCode.Int32:
-                    case TypeCode.UInt32:
-                        CreateField(target, field, 2 + 8);
-                        break;
-                    case TypeCode.Double:
-                        CreateField(target, field, 16);
-                        break;
-                    case TypeCode.Int64:
-                    case TypeCode.UInt64:
-                        CreateField(target, field, 2 + 16);
-                        break;
-                    case TypeCode.Decimal:
-                    case TypeCode.DateTime:
-                    case TypeCode.String:
-                    case TypeCode.Object:
-                        CreateField(target, field, 30);
-                        break;
-                }
+                Add(key, "" + (AResource.TGIBlock)field);
             }
             else
-                CreateField(target, field, 30);
-        }
-
-        void CreateField(TableLayoutPanel tlp, string name, int len)
-        {
-            tlp.RowCount++;
-            tlp.RowStyles.Insert(tlp.RowCount - 2, new RowStyle(SizeType.AutoSize));
-
-            Label lb = new Label();
-            lb.Anchor = AnchorStyles.Right;
-            lb.AutoSize = true;
-            lb.Name = "lb" + name;
-            lb.TabIndex = 1;
-            lb.Text = name;
-            tlp.Controls.Add(lb, 0, tlp.RowCount - 2);
-
-            Label x = new Label();
-            x.AutoSize = true;
-            x.Text = "".PadLeft(len, 'X');
-
-            TextBox tb = new TextBox();
-            tb.Anchor = AnchorStyles.Left;
-            tb.Name = "tb" + name;
-            tb.ReadOnly = true;
-            tb.Size = new Size(x.PreferredWidth + 6, x.PreferredHeight + 6);
-            tb.TabIndex = 2;
-            //tb.Text = x.Text;
-            tlp.Controls.Add(tb, 1, tlp.RowCount - 2);
-        }
-
-        void ClearTabs()
-        {
-            foreach (Control c in tlpOverviewMain.Controls)
-                if (c is TextBox) ((TextBox)c).Text = "";
-            foreach (Control c in tlpOverviewCommon.Controls)
-                if (c is TextBox) ((TextBox)c).Text = "";
-        }
-        void FillTabs(Item objd)
-        {
-            for (int i = 1; i < tlpOverviewMain.RowCount - 1; i++)
             {
-                Label lb = (Label)tlpOverviewMain.GetControlFromPosition(0, i);
-                TextBox tb = (TextBox)tlpOverviewMain.GetControlFromPosition(1, i);
-
-                TypedValue tv = objd.Resource[lb.Text];
-                tb.Text = tv;
+                if (typeof(System.Collections.IEnumerable).IsAssignableFrom(t))
+                {
+                    System.Collections.IEnumerable ienum = (System.Collections.IEnumerable)field;
+                    int i = 0;
+                    foreach (object o in ienum)
+                    {
+                        if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
+                        {
+                            SlurpTGIsFromField(key + "[" + o.GetType().Name + "][" + i + "]", (AApiVersionedFields)o);
+                            i++;
+                        }
+                    }
+                }
+                SlurpTGIsFromAApiVersionedFields(key, field);
             }
-            for (int i = 2; i < tlpOverviewCommon.RowCount - 1; i++)
+        }
+        private void SlurpTGIsFromAApiVersionedFields(string key, AApiVersionedFields field)
+        {
+            List<string> fields = field.ContentFields;
+            foreach (string f in fields)
             {
-                Label lb = (Label)tlpOverviewCommon.GetControlFromPosition(0, i);
-                TextBox tb = (TextBox)tlpOverviewCommon.GetControlFromPosition(1, i);
+                if ((new List<string>(new string[] { "Stream", "AsBytes", "Value", })).Contains(f)) continue;
 
-                TypedValue tv = ((AApiVersionedFields)objd.Resource["CommonBlock"].Value)[lb.Text];
-                tb.Text = tv;
+                Type t = AApiVersionedFields.GetContentFieldTypes(0, field.GetType())[f];
+                if (typeof(AResource.TGIBlockList).IsAssignableFrom(t))
+                {
+                    AResource.TGIBlockList list = (AResource.TGIBlockList)field[f].Value;
+                    int i = 0;
+                    foreach (AResource.TGIBlock value in list)
+                    {
+                        Add(key + "." + f + "[" + i + "]", "" + value);
+                        i++;
+                    }
+                }
+                else if (typeof(AResource.CountedTGIBlockList).IsAssignableFrom(t))
+                {
+                    AResource.CountedTGIBlockList list = (AResource.CountedTGIBlockList)field[f].Value;
+                    int i = 0;
+                    foreach (AResource.TGIBlock value in list)
+                    {
+                        Add(key + "." + f + "[" + i + "]", "" + value);
+                        i++;
+                    }
+                }
+                else if (typeof(GenericRCOLResource.ChunkEntryList).IsAssignableFrom(t))
+                {
+                    GenericRCOLResource.ChunkEntryList list = (GenericRCOLResource.ChunkEntryList)field[f].Value;
+                    int i = 0;
+                    foreach (var chunk in list)
+                    {
+                        Add(key + "." + f + "[" + i + "].TGIBlock", "" + chunk.TGIBlock);
+                        SlurpTGIsFromField(key + "." + f + "[" + i + "].RCOLBlock", chunk.RCOLBlock);
+                        i++;
+                    }
+                }
+                else if (typeof(AApiVersionedFields).IsAssignableFrom(t))
+                    SlurpTGIsFromField(key + "." + f, (AApiVersionedFields)field[f].Value);
+            }
+        }
+
+        //FullBuild0 is:
+        //  ...\Gamedata\Shared\Packages\FullBuild0.package
+        //Relative path to ALLThumbnails is:
+        // .\..\..\..\Thumbnails\ALLThumbnails.package
+        private void SlurpThumbnails(ulong instance) { setThumbPackage(); SlurpKindred("thumb", mode == Mode.Clone ? thumbpkg : pkg, instance); }
+        private void SlurpVPXYKin(ulong instance) { setThumbPackage(); SlurpKindred("vpxykin", pkg, instance); }
+
+        private void SlurpKindred(string key, IPackage pkg, ulong inst)
+        {
+            IList<IResourceIndexEntry> lrie = pkg.FindAll(new string[] { "Instance" }, new TypedValue[] { new TypedValue(typeof(ulong), inst), });
+            int i = 0;
+            foreach (IResourceIndexEntry rie in lrie)
+            {
+                Add(key + "[" + i + "]", new TGI(rie));
+                i++;
             }
         }
         #endregion
+
 
         #region Menu Bar
         private void menuBarWidget1_MBDropDownOpening(object sender, MenuBarWidget.MBDropDownOpeningEventArgs mn)
@@ -872,6 +1046,7 @@ namespace ObjectCloner
             {
                 case MenuBarWidget.MD.MBF: break;
                 case MenuBarWidget.MD.MBV: break;
+                case MenuBarWidget.MD.MBS: break;
                 case MenuBarWidget.MD.MBH: break;
                 default: break;
             }
@@ -886,10 +1061,66 @@ namespace ObjectCloner
                 Application.DoEvents();
                 switch (mn.mn)
                 {
+                    case MenuBarWidget.MB.MBF_new: fileNew(); break;
+                    case MenuBarWidget.MB.MBF_open: fileOpen(); break;
                     case MenuBarWidget.MB.MBF_exit: fileExit(); break;
                 }
             }
             finally { this.Enabled = true; }
+        }
+
+        private void fileNew()
+        {
+            if (FullBuild0Path == null) return;
+            mode = Mode.Clone;
+            lastSubPage = SubPage.Step8;
+            fileNewOpen(FullBuild0Path);
+        }
+
+        private void fileOpen()
+        {
+            openPackageDialog.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder == null || ObjectCloner.Properties.Settings.Default.LastSaveFolder.Length == 0
+                ? "" : ObjectCloner.Properties.Settings.Default.LastSaveFolder;
+            DialogResult dr = openPackageDialog.ShowDialog();
+            if (dr != DialogResult.OK) return;
+            ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(openPackageDialog.FileName);
+            try
+            {
+                IPackage target = s3pi.Package.Package.OpenPackage(0, openPackageDialog.FileName, true);
+                s3pi.Package.Package.ClosePackage(0, target);
+            }
+            catch (Exception ex)
+            {
+                string s = ex.Message;
+                for (Exception inex = ex.InnerException; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
+                CopyableMessageBox.Show("Could not open package " + openPackageDialog.FileName + "\n\n" + s, "File Open", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+            }
+
+            StringInputDialog ond = new StringInputDialog();
+            ond.Caption = "Make Object Unique";
+            ond.Prompt = "Enter unique object identifier";
+            ond.Value = CreatorName + "_" + Path.GetFileNameWithoutExtension(openPackageDialog.FileName);
+            dr = ond.ShowDialog();
+            if (dr != DialogResult.OK) return;
+            uniqueObject = ond.Value;
+
+            mode = Mode.Fix;
+            lastSubPage = SubPage.Step9;
+
+            fileNewOpen(openPackageDialog.FileName);
+        }
+
+        void fileNewOpen(string pkg)
+        {
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, false);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, false);
+
+            DoWait("Please wait, loading object catalog...");
+            Application.DoEvents();
+            if (!haveLoaded || loadedPackage == null || loadedPackage != pkg)
+                StartLoading(pkg);
+            else
+                DisplayObjectChooser();
         }
 
         private void fileExit()
@@ -965,6 +1196,53 @@ namespace ObjectCloner
                         objectChooser.Items[i].ImageIndex = -1;
                 }
             }
+        }
+        #endregion
+
+        #region Settings menu
+        private void menuBarWidget1_MBSettings_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
+        {
+            try
+            {
+                this.Enabled = false;
+                Application.DoEvents();
+                switch (mn.mn)
+                {
+                    case MenuBarWidget.MB.MBS_sims3Folder: settingsSims3Folder(); break;
+                    case MenuBarWidget.MB.MBS_userName: settingsUserName(); break;
+                }
+            }
+            finally { this.Enabled = true; }
+        }
+
+        private void settingsSims3Folder()
+        {
+            folderBrowserDialog1.SelectedPath = ObjectCloner.Properties.Settings.Default.Sims3Folder == null || ObjectCloner.Properties.Settings.Default.Sims3Folder.Length == 0
+                ? "" : ObjectCloner.Properties.Settings.Default.Sims3Folder;
+            while (true)
+            {
+                DialogResult dr = folderBrowserDialog1.ShowDialog();
+                if (dr != DialogResult.OK) return;
+
+                string path = Path.Combine(folderBrowserDialog1.SelectedPath, @"GameData\Shared\Packages\FullBuild0.package");
+                if (File.Exists(path)) break;
+
+                if (CopyableMessageBox.Show(@"Cannot find ""GameData\Shared\Packages\FullBuild0.package""" + "\nin \"" + folderBrowserDialog1.SelectedPath + @"""",
+                    "Select Sims3 Install Folder", CopyableMessageBoxButtons.OKCancel, CopyableMessageBoxIcon.Error) != 0) return;
+            }
+            ObjectCloner.Properties.Settings.Default.Sims3Folder = folderBrowserDialog1.SelectedPath;
+        }
+
+        private void settingsUserName()
+        {
+            StringInputDialog cn = new StringInputDialog();
+            cn.Caption = "Creator name";
+            cn.Prompt = "Your creator name will be used by default\nto create new object names";
+            cn.Value = ObjectCloner.Properties.Settings.Default.CreatorName == null || ObjectCloner.Properties.Settings.Default.CreatorName.Length == 0
+                ? Environment.UserName : ObjectCloner.Properties.Settings.Default.CreatorName;
+            DialogResult dr = cn.ShowDialog();
+            if (dr != DialogResult.OK) return;
+            ObjectCloner.Properties.Settings.Default.CreatorName = cn.Value;
         }
         #endregion
 
@@ -1077,38 +1355,39 @@ namespace ObjectCloner
         {
             Application.DoEvents();
 
-            Color btnChooseBackColor = Color.FromKnownColor(KnownColor.Control);
-            Color btnCloneBackColor = Color.FromKnownColor(KnownColor.Control);
+            Color btnListBackColor = Color.FromKnownColor(KnownColor.Control);
+            Color btnStartBackColor = Color.FromKnownColor(KnownColor.Control);
             Color btnNextBackColor = Color.FromKnownColor(KnownColor.Control);
-            Color btnSaveBackColor = Color.FromKnownColor(KnownColor.Control);
+            Color btnCommitBackColor = Color.FromKnownColor(KnownColor.Control);
 
+            btnCommit.Enabled = p == Page.Resources;
             switch (p)
             {
                 case Page.None:
-                    btnChooseBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
-                    this.AcceptButton = btnChoose;
-                    btnChoose.Enabled = true;
+                    btnListBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
+                    this.AcceptButton = btnList;
+                    btnList.Enabled = haveLoaded;
                     break;
-                case Page.Choose:
-                    btnChoose.Enabled = false;
+                case Page.ObjectChooser:
+                    btnList.Enabled = false;
                     break;
-                case Page.Listing:
-                    btnChoose.Enabled = true;
+                case Page.Resources:
+                    btnList.Enabled = haveLoaded;
                     break;
             }
 
             if (objectChooser.SelectedItems.Count > 0)
             {
-                btnClone.Enabled = true;
+                btnStart.Enabled = true;
                 if (s == SubPage.None)
                 {
-                    btnCloneBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
-                    this.AcceptButton = btnClone;
+                    btnStartBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
+                    this.AcceptButton = btnStart;
                     btnNext.Enabled = false;
                 }
                 else
                 {
-                    if (s != SubPage.Last)
+                    if (s != lastSubPage)
                     {
                         btnNextBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
                         this.AcceptButton = btnNext;
@@ -1117,39 +1396,30 @@ namespace ObjectCloner
                     else
                     {
                         btnNext.Enabled = false;
-                        this.AcceptButton = btnSave;
-                        btnSaveBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
+                        this.AcceptButton = btnCommit;
+                        btnCommitBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
                     }
                 }
             }
             else
             {
-                btnClone.Enabled = false;
+                btnStart.Enabled = false;
                 btnNext.Enabled = false;
             }
             tlpButtons.Enabled = true;
 
-            btnChoose.BackColor = btnChooseBackColor;
-            btnClone.BackColor = btnCloneBackColor;
+            btnList.BackColor = btnListBackColor;
+            btnStart.BackColor = btnStartBackColor;
             btnNext.BackColor = btnNextBackColor;
-            btnSave.BackColor = btnSaveBackColor;
+            btnCommit.BackColor = btnCommitBackColor;
         }
 
-        private void btnChoose_Click(object sender, EventArgs e)
+        private void btnList_Click(object sender, EventArgs e)
         {
-            if (!haveLoaded && !setPackageFile()) return;
-            btnChoose.Enabled = false;
-
-            DoWait();
-            waitingToDisplayResources = true;
-            Application.DoEvents();
-            if (!haveLoaded)
-                StartLoading();
-            else
-                DisplayObjectChooser();
+            DisplayObjectChooser();
         }
 
-        private void btnClone_Click(object sender, EventArgs e)
+        private void btnStart_Click(object sender, EventArgs e)
         {
             tlpButtons.Enabled = false;
             waitingToDisplayResources = true;
@@ -1157,7 +1427,7 @@ namespace ObjectCloner
             tgiLookup.Clear();
 
             subPage = SubPage.Step1;
-            DoWait();
+            DoWait("Please wait, retrieving Object...");
             Step1();
             DisplayResources();
         }
@@ -1173,8 +1443,8 @@ namespace ObjectCloner
         {
             tlpButtons.Enabled = false;
 
-            DoWait();
             subPage = (SubPage)((int)subPage) + 1;
+            DoWait("Coming next: " + subPageText[(int)subPage]);
             switch (subPage)
             {
                 case SubPage.Step2: Step2(); break;
@@ -1184,6 +1454,7 @@ namespace ObjectCloner
                 case SubPage.Step6: Step6(); break;
                 case SubPage.Step7: Step7(); break;
                 case SubPage.Step8: Step8(); break;
+                case SubPage.Step9: Step9(); break;
             }
             DisplayResources();
         }
@@ -1208,7 +1479,10 @@ namespace ObjectCloner
             foreach (AHandlerElement element in (System.Collections.IEnumerable)tv.Value)
             {
                 if (((string)element["EntryName"].Value).Equals("modelKey") && ((byte)element["ControlCode"].Value).Equals(2))
+                {
                     index = (int)element["CcIndex"].Value;
+                    break;
+                }
             }
             if (index == -1)
             {
@@ -1226,7 +1500,7 @@ namespace ObjectCloner
             int i = 0;
             List<string> keys = new List<string>(tgiLookup.Keys);
             foreach (string key in keys)
-                if (key.StartsWith("clone_vpxy[ChunkEntry][0].RCOLBlock.TGIBlocks["))
+                if (key.StartsWith("clone_vpxy.ChunkEntries[0].RCOLBlock.TGIBlocks["))
                 {
                     RIE rie = new RIE(pkg, tgiLookup[key]);
                     if (rie.rie != null)
@@ -1256,123 +1530,81 @@ namespace ObjectCloner
         }
 
         //Bring in all resources from ...\The Sims 3\Thumbnails\ALLThumbnails.package that match the instance number of the OBJD
-        void Step8()
+        void Step8() { SlurpThumbnails(clone.i); }
+
+        //Fix integrity step
+        void Step9()
         {
-            SlurpThumbnails(clone.i);
+            Dictionary<TGI, Item> tgiToItem = new Dictionary<TGI, Item>();
+            Dictionary<Item, List<TGI>> itemToTGIs = new Dictionary<Item, List<TGI>>();
+            Dictionary<ulong, ulong> oldToNew = new Dictionary<ulong, ulong>();
+
+            ulong langInst = FNV64.GetHash("StringTable:" + uniqueObject + "_" + DateTime.UtcNow.ToBinary().ToString("X16")) >> 8;
+
+            foreach (IResourceIndexEntry rie in pkg.GetResourceList)
+            {
+                Item item = new Item(pkg, rie);
+                tgiToItem.Add(item.tgi, item);
+
+                List<TGI> itemTGIs = new List<TGI>(new TGI[] { item.tgi });
+                itemToTGIs.Add(item, itemTGIs);
+                if (typeof(GenericRCOLResource).IsAssignableFrom(item.Resource.GetType()))
+                {
+                    GenericRCOLResource.ChunkEntryList list = (GenericRCOLResource.ChunkEntryList)item.Resource["ChunkEntries"].Value;
+                    foreach (var chunk in list)
+                    {
+                        TGI tgi = new TGI(chunk.TGIBlock);
+                        if (!itemTGIs.Contains(tgi)) itemTGIs.Add(tgi);
+                        if (!tgiToItem.ContainsKey(tgi)) tgiToItem.Add(tgi, item);
+                    }
+                }
+            }
+
+            foreach (TGI tgi in tgiToItem.Keys)
+            {
+                if (tgi.t == 0x220557DA)
+                {
+                    ulong newInst = tgi.i & 0xFF00000000000000 | langInst;
+                    oldToNew.Add(tgi.i, newInst);
+                }
+                else if (!oldToNew.ContainsKey(tgi.i))
+                    oldToNew.Add(tgi.i, CreateInstance());
+            }
+
+            resourceList.Clear();
+            foreach(TGI tgi in tgiToItem.Keys)
+            {
+                string s = String.Format("Old: {0} --> New: {1}", "" + tgi, "" + new TGI(tgi.t, tgi.g, oldToNew[tgi.i]));
+                resourceList.Add(s);
+            }
         }
 
-        //Bring in all resources from ...\The Sims 3\Thumbnails\ALLThumbnails.package that match the instance number of the OBJD
-        private void btnSave_Click(object sender, EventArgs e)
+        private void btnCommit_Click(object sender, EventArgs e)
         {
-            waitingForSavePackage = true;
             this.Enabled = false;
             try
             {
-                if (ObjectCloner.Properties.Settings.Default.LastSaveFolder != null)
-                    saveFileDialog1.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder;
-                saveFileDialog1.FileName = objectChooser.SelectedItems[0].Text;
-                DialogResult dr = saveFileDialog1.ShowDialog();
-                if (dr != DialogResult.OK) return;
-                ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(saveFileDialog1.FileName);
+                if (mode == Mode.Clone)
+                {
+                    waitingForSavePackage = true;
+                    if (ObjectCloner.Properties.Settings.Default.LastSaveFolder != null)
+                        saveFileDialog1.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder;
+                    saveFileDialog1.FileName = objectChooser.SelectedItems.Count > 0 ? objectChooser.SelectedItems[0].Text : "";
+                    DialogResult dr = saveFileDialog1.ShowDialog();
+                    if (dr != DialogResult.OK) return;
+                    ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(saveFileDialog1.FileName);
 
-                tlpButtons.Enabled = false;
-                StartSaving();
+                    tlpButtons.Enabled = false;
+                    DoWait("Please wait, saving package...");
+                    StartSaving();
+                }
+                else
+                {
+                    tlpButtons.Enabled = false;
+                    StartFixing();
+                }
             }
             finally { this.Enabled = true; }
-        }
-        #endregion
-
-
-
-        #region Fetch resources
-        private void Add(string key, TGI tgi)
-        {
-            if (resourceList.Count % 100 == 0) Application.DoEvents();
-            tgiLookup.Add(key, tgi);
-
-            TGIN tgin = new TGIN();
-            tgin.ResType = tgi.t;
-            tgin.ResGroup = tgi.g;
-            tgin.ResInstance = tgi.i;
-            tgin.ResName = key;
-            resourceList.Add(tgin);
-        }
-
-        private void SlurpTGIsFromTGI(string key, TGI tgi) { RIE rie = new RIE(pkg, tgi); if (rie.rie != null) SlurpTGIsFromField(key, new RES(rie)); }
-        private void SlurpTGIsFromField(string key, AApiVersionedFields field)
-        {
-            Type t = field.GetType();
-            if (typeof(AResource.TGIBlock).IsAssignableFrom(t))
-            {
-                Add(key, "" + (AResource.TGIBlock)field);
-            }
-            else
-            {
-                if (typeof(System.Collections.IEnumerable).IsAssignableFrom(t))
-                {
-                    System.Collections.IEnumerable ienum = (System.Collections.IEnumerable)field;
-                    int i = 0;
-                    foreach (object o in ienum)
-                    {
-                        if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
-                        {
-                            SlurpTGIsFromField(key + "[" + o.GetType().Name + "][" + i + "]", (AApiVersionedFields)o);
-                            i++;
-                        }
-                    }
-                }
-                SlurpTGIsFromAApiVersionedFields(key, field);
-            }
-        }
-        private void SlurpTGIsFromAApiVersionedFields(string key, AApiVersionedFields field)
-        {
-            List<string> fields = field.ContentFields;
-            foreach (string f in fields)
-            {
-                if ((new List<string>(new string[] { "Stream", "AsBytes", "Value", })).Contains(f)) continue;
-
-                Type t = AApiVersionedFields.GetContentFieldTypes(0, field.GetType())[f];
-                if (typeof(AResource.TGIBlockList).IsAssignableFrom(t))
-                {
-                    AResource.TGIBlockList list = (AResource.TGIBlockList)field[f].Value;
-                    int i = 0;
-                    foreach (AResource.TGIBlock value in list)
-                    {
-                        Add(key + "." + f + "[" + i + "]", "" + value);
-                        i++;
-                    }
-                }
-                else if (typeof(AResource.CountedTGIBlockList).IsAssignableFrom(t))
-                {
-                    AResource.CountedTGIBlockList list = (AResource.CountedTGIBlockList)field[f].Value;
-                    int i = 0;
-                    foreach (AResource.TGIBlock value in list)
-                    {
-                        Add(key + "." + f + "[" + i + "]", "" + value);
-                        i++;
-                    }
-                }
-                else if (typeof(AApiVersionedFields).IsAssignableFrom(t))
-                    SlurpTGIsFromField(key + "." + f, (AApiVersionedFields)field[f].Value);
-            }
-        }
-
-        //FullBuild0 is:
-        //  ...\Gamedata\Shared\Packages\FullBuild0.package
-        //Relative path to ALLThumbnails is:
-        // .\..\..\..\Thumbnails\ALLThumbnails.package
-        private void SlurpThumbnails(ulong instance) { setThumbPackage(); SlurpKindred("thumb", thumbpkg, instance); }
-        private void SlurpVPXYKin(ulong instance) { setThumbPackage(); SlurpKindred("vpxykin", pkg, instance); }
-
-        private void SlurpKindred(string key, IPackage pkg, ulong inst)
-        {
-            IList<IResourceIndexEntry> lrie = pkg.FindAll(new string[] { "Instance" }, new TypedValue[] { new TypedValue(typeof(ulong), inst), });
-            int i = 0;
-            foreach (IResourceIndexEntry rie in lrie)
-            {
-                Add(key + "[" + i + "]", new TGI(rie));
-                i++;
-            }
         }
         #endregion
     }

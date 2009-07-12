@@ -28,14 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tlpButtons = new System.Windows.Forms.TableLayoutPanel();
-            this.btnChoose = new System.Windows.Forms.Button();
-            this.btnClone = new System.Windows.Forms.Button();
             this.btnNext = new System.Windows.Forms.Button();
-            this.btnSave = new System.Windows.Forms.Button();
+            this.btnCommit = new System.Windows.Forms.Button();
+            this.btnList = new System.Windows.Forms.Button();
+            this.btnStart = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tpMain = new System.Windows.Forms.TabPage();
             this.tlpOverviewAll = new System.Windows.Forms.TableLayoutPanel();
@@ -55,6 +54,8 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label6 = new System.Windows.Forms.Label();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.openPackageDialog = new System.Windows.Forms.OpenFileDialog();
+            this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
@@ -69,13 +70,6 @@
             this.statusStrip1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // openFileDialog1
-            // 
-            this.openFileDialog1.DefaultExt = "package";
-            this.openFileDialog1.FileName = "FullBuild0.package";
-            this.openFileDialog1.Filter = "FullBuild0|FullBuild0.package";
-            this.openFileDialog1.Title = "Locate FullBuild0.package";
             // 
             // toolStripContainer1
             // 
@@ -108,84 +102,95 @@
             this.splitContainer1.Panel2.Controls.Add(this.tabControl1);
             this.splitContainer1.Size = new System.Drawing.Size(904, 672);
             this.splitContainer1.SplitterDistance = 450;
-            this.splitContainer1.TabIndex = 1;
+            this.splitContainer1.TabIndex = 0;
+            this.splitContainer1.TabStop = false;
             // 
             // tlpButtons
             // 
             this.tlpButtons.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.tlpButtons.ColumnCount = 9;
-            this.tlpButtons.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tlpButtons.ColumnCount = 3;
+            this.tlpButtons.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tlpButtons.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tlpButtons.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tlpButtons.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tlpButtons.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tlpButtons.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tlpButtons.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tlpButtons.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tlpButtons.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tlpButtons.Controls.Add(this.btnChoose, 1, 1);
-            this.tlpButtons.Controls.Add(this.btnClone, 3, 1);
-            this.tlpButtons.Controls.Add(this.btnNext, 5, 1);
-            this.tlpButtons.Controls.Add(this.btnSave, 7, 1);
-            this.tlpButtons.Location = new System.Drawing.Point(0, 623);
+            this.tlpButtons.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            this.tlpButtons.Controls.Add(this.btnNext, 1, 5);
+            this.tlpButtons.Controls.Add(this.btnCommit, 1, 7);
+            this.tlpButtons.Controls.Add(this.btnList, 1, 1);
+            this.tlpButtons.Controls.Add(this.btnStart, 1, 3);
+            this.tlpButtons.Location = new System.Drawing.Point(0, 557);
             this.tlpButtons.Name = "tlpButtons";
-            this.tlpButtons.RowCount = 3;
-            this.tlpButtons.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tlpButtons.RowCount = 9;
+            this.tlpButtons.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tlpButtons.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpButtons.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tlpButtons.Size = new System.Drawing.Size(445, 44);
+            this.tlpButtons.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tlpButtons.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpButtons.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tlpButtons.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpButtons.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tlpButtons.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpButtons.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tlpButtons.Size = new System.Drawing.Size(445, 110);
             this.tlpButtons.TabIndex = 0;
-            // 
-            // btnChoose
-            // 
-            this.btnChoose.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnChoose.Location = new System.Drawing.Point(17, 10);
-            this.btnChoose.Margin = new System.Windows.Forms.Padding(0);
-            this.btnChoose.Name = "btnChoose";
-            this.btnChoose.Size = new System.Drawing.Size(90, 23);
-            this.btnChoose.TabIndex = 1;
-            this.btnChoose.Text = "&List Objects";
-            this.btnChoose.UseVisualStyleBackColor = false;
-            this.btnChoose.Click += new System.EventHandler(this.btnChoose_Click);
-            // 
-            // btnClone
-            // 
-            this.btnClone.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnClone.Enabled = false;
-            this.btnClone.Location = new System.Drawing.Point(124, 10);
-            this.btnClone.Margin = new System.Windows.Forms.Padding(0);
-            this.btnClone.Name = "btnClone";
-            this.btnClone.Size = new System.Drawing.Size(90, 23);
-            this.btnClone.TabIndex = 2;
-            this.btnClone.Text = "&Start Cloning";
-            this.btnClone.UseVisualStyleBackColor = true;
-            this.btnClone.Click += new System.EventHandler(this.btnClone_Click);
             // 
             // btnNext
             // 
-            this.btnNext.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnNext.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnNext.AutoSize = true;
+            this.btnNext.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnNext.Enabled = false;
-            this.btnNext.Location = new System.Drawing.Point(231, 10);
+            this.btnNext.Location = new System.Drawing.Point(340, 55);
             this.btnNext.Margin = new System.Windows.Forms.Padding(0);
             this.btnNext.Name = "btnNext";
-            this.btnNext.Size = new System.Drawing.Size(90, 23);
+            this.btnNext.Size = new System.Drawing.Size(81, 23);
             this.btnNext.TabIndex = 3;
             this.btnNext.Text = ">>> &Next >>>";
             this.btnNext.UseVisualStyleBackColor = true;
             this.btnNext.Click += new System.EventHandler(this.btnNext_Click);
             // 
-            // btnSave
+            // btnCommit
             // 
-            this.btnSave.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnSave.Location = new System.Drawing.Point(338, 10);
-            this.btnSave.Margin = new System.Windows.Forms.Padding(0);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(90, 23);
-            this.btnSave.TabIndex = 4;
-            this.btnSave.Text = "&Make Package";
-            this.btnSave.UseVisualStyleBackColor = true;
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            this.btnCommit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnCommit.AutoSize = true;
+            this.btnCommit.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnCommit.Enabled = false;
+            this.btnCommit.Location = new System.Drawing.Point(340, 81);
+            this.btnCommit.Margin = new System.Windows.Forms.Padding(0);
+            this.btnCommit.Name = "btnCommit";
+            this.btnCommit.Size = new System.Drawing.Size(81, 23);
+            this.btnCommit.TabIndex = 4;
+            this.btnCommit.Text = "&Commit";
+            this.btnCommit.UseVisualStyleBackColor = true;
+            this.btnCommit.Click += new System.EventHandler(this.btnCommit_Click);
+            // 
+            // btnList
+            // 
+            this.btnList.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnList.AutoSize = true;
+            this.btnList.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnList.Enabled = false;
+            this.btnList.Location = new System.Drawing.Point(340, 3);
+            this.btnList.Margin = new System.Windows.Forms.Padding(0);
+            this.btnList.Name = "btnList";
+            this.btnList.Size = new System.Drawing.Size(81, 23);
+            this.btnList.TabIndex = 1;
+            this.btnList.Text = "&List Objects";
+            this.btnList.UseVisualStyleBackColor = false;
+            this.btnList.Click += new System.EventHandler(this.btnList_Click);
+            // 
+            // btnStart
+            // 
+            this.btnStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnStart.AutoSize = true;
+            this.btnStart.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnStart.Enabled = false;
+            this.btnStart.Location = new System.Drawing.Point(340, 29);
+            this.btnStart.Margin = new System.Windows.Forms.Padding(0);
+            this.btnStart.Name = "btnStart";
+            this.btnStart.Size = new System.Drawing.Size(81, 23);
+            this.btnStart.TabIndex = 7;
+            this.btnStart.Text = "&Start";
+            this.btnStart.UseVisualStyleBackColor = true;
+            this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
             // 
             // tabControl1
             // 
@@ -197,7 +202,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(448, 617);
+            this.tabControl1.Size = new System.Drawing.Size(448, 551);
             this.tabControl1.TabIndex = 1;
             // 
             // tpMain
@@ -207,7 +212,7 @@
             this.tpMain.Location = new System.Drawing.Point(4, 22);
             this.tpMain.Name = "tpMain";
             this.tpMain.Padding = new System.Windows.Forms.Padding(3);
-            this.tpMain.Size = new System.Drawing.Size(440, 591);
+            this.tpMain.Size = new System.Drawing.Size(440, 525);
             this.tpMain.TabIndex = 0;
             this.tpMain.Text = "Overview";
             this.tpMain.UseVisualStyleBackColor = true;
@@ -332,7 +337,7 @@
             this.tpDetail.Location = new System.Drawing.Point(4, 22);
             this.tpDetail.Name = "tpDetail";
             this.tpDetail.Padding = new System.Windows.Forms.Padding(3);
-            this.tpDetail.Size = new System.Drawing.Size(440, 591);
+            this.tpDetail.Size = new System.Drawing.Size(440, 525);
             this.tpDetail.TabIndex = 1;
             this.tpDetail.Text = "Details";
             this.tpDetail.UseVisualStyleBackColor = true;
@@ -348,6 +353,7 @@
             this.menuBarWidget1.MBHelp_Click += new ObjectCloner.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBHelp_Click);
             this.menuBarWidget1.MBFile_Click += new ObjectCloner.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBFile_Click);
             this.menuBarWidget1.MBDropDownOpening += new ObjectCloner.MenuBarWidget.MBDropDownOpeningEventHandler(this.menuBarWidget1_MBDropDownOpening);
+            this.menuBarWidget1.MBSettings_Click += new ObjectCloner.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBSettings_Click);
             this.menuBarWidget1.MBView_Click += new ObjectCloner.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBView_Click);
             // 
             // toolStripProgressBar1
@@ -421,6 +427,18 @@
             this.saveFileDialog1.Filter = "DBPF Packages|*.package;*.world|All files|*.*";
             this.saveFileDialog1.Title = "Save cloned object";
             // 
+            // openPackageDialog
+            // 
+            this.openPackageDialog.DefaultExt = "package";
+            this.openPackageDialog.FileName = "*.package";
+            this.openPackageDialog.Filter = "DBPF Packages|*.package;*.world|All files|*.*";
+            this.openPackageDialog.Title = "Select package containing object";
+            // 
+            // folderBrowserDialog1
+            // 
+            this.folderBrowserDialog1.Description = "Select the folder where your Sims3 game is installed.";
+            this.folderBrowserDialog1.ShowNewFolderButton = false;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -442,6 +460,7 @@
             this.splitContainer1.Panel2.ResumeLayout(false);
             this.splitContainer1.ResumeLayout(false);
             this.tlpButtons.ResumeLayout(false);
+            this.tlpButtons.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tpMain.ResumeLayout(false);
             this.tpMain.PerformLayout();
@@ -462,7 +481,6 @@
 
         #endregion
 
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.ToolStripContainer toolStripContainer1;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
@@ -483,12 +501,14 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Label label6;
         private MenuBarWidget menuBarWidget1;
-        private System.Windows.Forms.Button btnSave;
+        private System.Windows.Forms.Button btnCommit;
         private System.Windows.Forms.Button btnNext;
-        private System.Windows.Forms.Button btnClone;
-        private System.Windows.Forms.Button btnChoose;
+        private System.Windows.Forms.Button btnList;
         private System.Windows.Forms.TableLayoutPanel tlpButtons;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+        private System.Windows.Forms.OpenFileDialog openPackageDialog;
+        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
+        private System.Windows.Forms.Button btnStart;
     }
 }
 
