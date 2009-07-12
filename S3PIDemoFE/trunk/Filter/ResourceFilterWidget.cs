@@ -39,9 +39,7 @@ namespace S3PIDemoFE.Filter
             lbCount.Text = "0";
         }
 
-        [Browsable(true)]
-        [Category("Behavior")]
-        [Description("Specifies the list of fields to display")]
+        [Browsable(false)]
         public IList<string> Fields
         {
             get { return fields; }
@@ -92,9 +90,7 @@ namespace S3PIDemoFE.Filter
         [DefaultValue(false)]
         public bool FilterEnabled { get { return ckbFilter.Checked; } set { ckbFilter.Checked = value; } }
 
-        [Browsable(true)]
-        [Category("Behavior")]
-        [DefaultValue(typeof(IResourceIndexEntry), "(null)")]
+        [Browsable(false)]
         public IResourceIndexEntry IndexEntry
         {
             get { return ie; }
@@ -105,9 +101,7 @@ namespace S3PIDemoFE.Filter
             }
         }
 
-        [Browsable(true)]
-        [Category("Behavior")]
-        [DefaultValue(typeof(IDictionary<string, string>), "(none)")]
+        [Browsable(false)]
         public IList<KeyValuePair<string, TypedValue>> Filter
         {
             get
@@ -135,9 +129,7 @@ namespace S3PIDemoFE.Filter
             }
         }
 
-        [Browsable(true)]
-        [Category("Behavior")]
-        [DefaultValue(typeof(BrowserWidget), "(none)")]
+        [Browsable(false)]
         public BrowserWidget BrowserWidget
         {
             get { return bw; }
