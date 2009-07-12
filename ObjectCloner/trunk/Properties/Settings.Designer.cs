@@ -25,18 +25,6 @@ namespace ObjectCloner.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string FullBuild0Location {
-            get {
-                return ((string)(this["FullBuild0Location"]));
-            }
-            set {
-                this["FullBuild0Location"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         public global::System.Collections.Specialized.StringCollection Packages_PATH {
             get {
                 return ((global::System.Collections.Specialized.StringCollection)(this["Packages_PATH"]));
@@ -163,6 +151,30 @@ namespace ObjectCloner.Properties {
             }
             set {
                 this["LastSaveFolder"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Sims3Folder {
+            get {
+                return ((string)(this["Sims3Folder"]));
+            }
+            set {
+                this["Sims3Folder"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CreatorName {
+            get {
+                return ((string)(this["CreatorName"]));
+            }
+            set {
+                this["CreatorName"] = value;
             }
         }
     }

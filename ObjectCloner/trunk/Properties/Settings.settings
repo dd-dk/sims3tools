@@ -2,9 +2,6 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ObjectCloner.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="FullBuild0Location" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="Packages_PATH" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
@@ -36,6 +33,12 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="LastSaveFolder" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Sims3Folder" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="CreatorName" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>
