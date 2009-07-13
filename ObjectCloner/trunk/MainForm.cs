@@ -99,8 +99,8 @@ namespace ObjectCloner
         View currentView;
         IPackage pkg = null;
         TGI clone;//0x319E4F1D
-        RES resObjd;
-        RES resObjk;
+        Item objdItem;
+        Item resObjk;
         TGI vpxy;
 
         Dictionary<string, TGI> tgiLookup = new Dictionary<string,TGI>();
@@ -155,8 +155,8 @@ namespace ObjectCloner
             AbortLoading();
             AbortFetching();
             AbortSaving();
-            if (pkg != null) s3pi.Package.Package.ClosePackage(0, pkg);
-            if (thumbpkg != null) s3pi.Package.Package.ClosePackage(0, thumbpkg);
+            if (pkg != null) { s3pi.Package.Package.ClosePackage(0, pkg); pkg = null; }
+            if (thumbpkg != null) { s3pi.Package.Package.ClosePackage(0, thumbpkg); thumbpkg = null; }
 
             objectChooser.ObjectChooser_SaveSettings();
 
@@ -278,6 +278,7 @@ namespace ObjectCloner
             {
                 if (field.StartsWith("Unknown")) continue;
                 if (field.EndsWith("Flags")) flagsTabFields.Add(field);
+                else if (field.EndsWith("Index")) { }//ignore
                 else if (field.Equals("Materials")) { }
                 else if (field.Equals("MTDoors")) { }
                 else if (field.Equals("TGIBlocks")) { }
@@ -419,8 +420,9 @@ namespace ObjectCloner
         string loadedPackage;
         void StartLoading(string path)
         {
-            if (loading) { AbortLoading(); }
             if (haveLoaded && loadedPackage == path) return;
+            if (loading) { AbortLoading(); }
+
             waitingToDisplayObjects = true;
             haveLoaded = false;
             loadedPackage = path;
@@ -428,7 +430,7 @@ namespace ObjectCloner
 
             this.LoadingComplete += new EventHandler<BoolEventArgs>(MainForm_LoadingComplete);
 
-            FillListView flv = new FillListView(this, path, createListViewItem, updateProgress, stopLoading, OnLoadingComplete);
+            FillListView flv = new FillListView(this, path, pkg, createListViewItem, updateProgress, stopLoading, OnLoadingComplete);
 
             loadThread = new Thread(new ThreadStart(flv.LoadPackage));
             loading = true;
@@ -463,12 +465,13 @@ namespace ObjectCloner
                         waitingForImages = true;
                         StartFetching();
                     }
-                    
+
                     DisplayObjectChooser();
                 }
-
-                //menuBarWidget1.Enable(MenuBarWidget.MD.MBV, true);
-                //menuBarWidget1_MBView_Click(null, new MenuBarWidget.MBClickEventArgs(viewMap[currentView]));
+            }
+            else
+            {
+                if (pkg != null) { s3pi.Package.Package.ClosePackage(0, pkg); pkg = null; }
             }
         }
 
@@ -490,8 +493,8 @@ namespace ObjectCloner
         private bool stopLoading() { return !loading; }
 
         private event EventHandler<BoolEventArgs> LoadingComplete;
-        public delegate void loadingCompleteCallback(IPackage pkg, bool complete);
-        public void OnLoadingComplete(IPackage pkg, bool complete) { this.pkg = pkg; if (LoadingComplete != null) { LoadingComplete(this, new BoolEventArgs(complete)); } }
+        public delegate void loadingCompleteCallback(bool complete);
+        public void OnLoadingComplete(bool complete) { if (LoadingComplete != null) { LoadingComplete(this, new BoolEventArgs(complete)); } }
 
         #endregion
 
@@ -627,8 +630,8 @@ namespace ObjectCloner
                         if (img != null) setImage(true, i, img);
                         else
                         {
-                            TGI img32 = objd.tgi; img32.t = 0x0580A2B4; RES img32_res = new RES(new RIE(thumbpkg, img32));
-                            if (((RIE)img32_res).rie != null) setImage(true, i, getImage(img32_res));
+                            TGI img32 = objd.tgi; img32.t = 0x0580A2B4; Item pngItem = new Item(thumbpkg, img32);
+                            if (pngItem.ResourceIndexEntry != null) setImage(true, i, getImage(pngItem));
                         }
 
                         if (stopFetching) return;
@@ -637,8 +640,8 @@ namespace ObjectCloner
                         if (img != null) setImage(false, i, img);
                         else
                         {
-                            TGI img64 = objd.tgi; img64.t = 0x0580A2B5; RES img64_res = new RES(new RIE(thumbpkg, img64));
-                            if (((RIE)img64_res).rie != null) setImage(false, i, getImage(img64_res));
+                            TGI img64 = objd.tgi; img64.t = 0x0580A2B5; Item pngItem = new Item(thumbpkg, img64);
+                            if (pngItem.ResourceIndexEntry != null) setImage(false, i, getImage(pngItem));
                         }
 
                         if (stopFetching) return;
@@ -656,18 +659,15 @@ namespace ObjectCloner
                 }
             }
 
-            Image getImage(RES imgres) { return Image.FromStream(imgres.res.Stream); }
+            Image getImage(Item pngItem) { return Image.FromStream(pngItem.Resource.Stream); }
 
             Image getImage(uint type, Item objd)
             {
                 ulong png = (ulong)((AHandlerElement)objd.Resource["CommonBlock"].Value)["PngInstance"].Value;
                 if (png != 0)
                 {
-                    IPackage pkg = objd.res.pkg;
-
-                    TGI tgi = new TGI(type, 0, png);
-                    RES res = new RES(new RIE(pkg, tgi));
-                    if (((RIE)res).rie != null) return getImage(res);
+                    Item pngItem = new Item(objd.Package, new TGI(type, 0, png));
+                    if (pngItem.ResourceIndexEntry != null) return getImage(pngItem);
                 }
                 return null;
             }
@@ -785,7 +785,7 @@ namespace ObjectCloner
                 updateProgress(true, "Please wait...", false, -1, false, -1);
 
                 bool complete = false;
-                Item fb0nmap = new Item(new RIE(pkgfb0, pkgfb0.Find(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C), })));
+                Item fb0nmap = new Item(pkgfb0, pkgfb0.Find(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C), }));
                 Item newnmap = NewResource(target, fb0nmap.tgi);
                 IDictionary<ulong, string> fb0namemap = (IDictionary<ulong, string>)fb0nmap.Resource;
                 IDictionary<ulong, string> newnamemap = (IDictionary<ulong, string>)newnmap.Resource;
@@ -800,10 +800,10 @@ namespace ObjectCloner
                         if (stopSaving) return;
 
                         IPackage pkg = kvp.Value.t == 0x00B2D882 ? pkgfb2 : kvp.Key.StartsWith("thumb[") ? thumbpkg : pkgfb0;
-                        RES res = new RES(new RIE(pkg, kvp.Value), true); // use default wrapper
-                        if (((RIE)res).rie != null)
+                        Item item = new Item(pkg, kvp.Value, true); // use default wrapper
+                        if (item.ResourceIndexEntry != null)
                         {
-                            if (!stopSaving) target.AddResource(kvp.Value.t, kvp.Value.g, kvp.Value.i, res.res.Stream, true);
+                            if (!stopSaving) target.AddResource(kvp.Value.t, kvp.Value.g, kvp.Value.i, item.Resource.Stream, true);
                             lastSaved = kvp.Key;
                             if (fb0namemap.ContainsKey(kvp.Value.i) && !newnamemap.ContainsKey(kvp.Value.i))
                                 if (!stopSaving) newnamemap.Add(kvp.Value.i, fb0namemap[kvp.Value.i]);
@@ -826,7 +826,7 @@ namespace ObjectCloner
                     {
                         if (stopSaving) return;
 
-                        Item fb0stbl = new Item(new RIE(pkgfb0, rie));
+                        Item fb0stbl = new Item(pkgfb0, rie);
                         Item newstbl = NewResource(target, fb0stbl.tgi);
                         IDictionary<ulong, string> instbl = (IDictionary<ulong, string>)fb0stbl.Resource;
                         IDictionary<ulong, string> outstbl = (IDictionary<ulong, string>)newstbl.Resource;
@@ -916,21 +916,99 @@ namespace ObjectCloner
 
         #region Make Unique bits
 
+        Dictionary<TGI, Item> tgiToItem;
+        List<TGI> rcols;
+        Dictionary<ulong, ulong> oldToNew;
         string uniqueObject;
         void StartFixing()
         {
             try
             {
-                //
+                //loadedPackage - filename
+                //pkg - IPackage
+                //tgiToItem - TGIs we're interested in and the Item they refer to
+                //rcols - those items which are RCOLs
+                //oldToNew = new Dictionary<ulong, ulong>();
+
+
+                Item objd = new Item(pkg, clone);
+
+                AHandlerElement commonBlock = (AHandlerElement)objd.Resource["CommonBlock"].Value;
+                ulong nameGUID = (ulong)commonBlock["NameGUID"].Value;
+                ulong descGUID = (ulong)commonBlock["DescGUID"].Value;
+                commonBlock["NameGUID"] = new TypedValue(typeof(ulong), oldToNew[nameGUID]);
+                commonBlock["DescGUID"] = new TypedValue(typeof(ulong), oldToNew[descGUID]);
+
+                commonBlock["Name"] = new TypedValue(typeof(string), "CatalogObjects/Name:" + uniqueObject);
+                commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + uniqueObject);
+
+                objd.Commit();
+
+                foreach (Item item in tgiToItem.Values)
+                {
+                    if (item.ResourceIndexEntry.ResourceType == 0x0166038C)
+                    {
+                        IDictionary<ulong, string> nm = (IDictionary<ulong, string>)item.Resource;
+                        foreach(ulong old in oldToNew.Keys)
+                            if (nm.ContainsKey(old) && !nm.ContainsKey(oldToNew[old]))
+                            {
+                                nm.Add(oldToNew[old], nm[old]);
+                                nm.Remove(old);
+                            }
+                        item.Commit();
+                    }
+                    else if (item.ResourceIndexEntry.ResourceType == 0x220557DA)
+                    {
+                        IDictionary<ulong, string> stbl = (IDictionary<ulong, string>)item.Resource;
+                        string name = stbl[nameGUID];
+                        string desc = stbl[descGUID];
+                        stbl.Remove(nameGUID);
+                        stbl.Remove(descGUID);
+                        stbl.Add(oldToNew[nameGUID], name);
+                        stbl.Add(oldToNew[descGUID], desc);
+                        item.Commit();
+                    }
+                }
+
+                foreach(TGI rcolTgi in rcols)
+                {
+                    GenericRCOLResource rcol = (GenericRCOLResource)tgiToItem[rcolTgi].Resource;
+                    bool dirty = false;
+                    foreach (var chunk in rcol.ChunkEntries)
+                    {
+                        //if it's one I'm looking for an we've a new instance, update it
+                        if (tgiToItem.ContainsKey(new TGI(chunk.TGIBlock)) && oldToNew.ContainsKey(chunk.TGIBlock.Instance))
+                        {
+                            chunk.TGIBlock.Instance = oldToNew[chunk.TGIBlock.Instance];
+                            dirty = true;
+                        }
+                    }
+                    if (dirty) tgiToItem[rcolTgi].Commit();
+                }
+
+                foreach (Item item in tgiToItem.Values)
+                    if (oldToNew.ContainsKey(item.ResourceIndexEntry.Instance))
+                        item.ResourceIndexEntry.Instance = oldToNew[item.ResourceIndexEntry.Instance];
+
+                pkg.SavePackage();
+
+                CopyableMessageBox.Show("OK");
             }
             finally
             {
+                splitContainer1.Panel1.Controls.Clear();
                 tlpButtons.Enabled = true;
+                objectChooser.Items.Clear();
+                ClearTabs();
+                s3pi.Package.Package.ClosePackage(0, pkg);
+                pkg = null;
+                subPage = SubPage.None;
+                setButtons(Page.None, SubPage.None);
             }
         }
 
         int numNewInstances = 0;
-        ulong CreateInstance() { numNewInstances++; return FNV64.GetHash(uniqueObject + "_" + DateTime.UtcNow.ToBinary().ToString("X16") + "_" + numNewInstances.ToString("X8")); }
+        ulong CreateInstance() { numNewInstances++; return FNV64.GetHash(numNewInstances.ToString("X8") + "_" + uniqueObject + "_" + DateTime.UtcNow.ToBinary().ToString("X16")); }
 
         #endregion
 
@@ -949,7 +1027,7 @@ namespace ObjectCloner
             resourceList.Add(tgin);
         }
 
-        private void SlurpTGIsFromTGI(string key, TGI tgi) { RIE rie = new RIE(pkg, tgi); if (rie.rie != null) SlurpTGIsFromField(key, new RES(rie)); }
+        private void SlurpTGIsFromTGI(string key, TGI tgi) { Item item = new Item(pkg, tgi); if (item.ResourceIndexEntry != null) SlurpTGIsFromField(key, (AResource)item.Resource); }
         private void SlurpTGIsFromField(string key, AApiVersionedFields field)
         {
             Type t = field.GetType();
@@ -1110,15 +1188,23 @@ namespace ObjectCloner
             fileNewOpen(openPackageDialog.FileName);
         }
 
-        void fileNewOpen(string pkg)
+        void fileNewOpen(string pkgName)
         {
+            if (pkg != null) { s3pi.Package.Package.ClosePackage(0, pkg); pkg = null; }
+            pkg = s3pi.Package.Package.OpenPackage(0, pkgName, mode == Mode.Fix);
+            if (pkg == null)
+            {
+                CopyableMessageBox.Show(@"Failed to open """ + pkgName + @"""", "File open error", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                return;
+            }
+
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, false);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, false);
 
             DoWait("Please wait, loading object catalog...");
             Application.DoEvents();
-            if (!haveLoaded || loadedPackage == null || loadedPackage != pkg)
-                StartLoading(pkg);
+            if (!haveLoaded || loadedPackage == null || loadedPackage != pkgName)
+                StartLoading(pkgName);
             else
                 DisplayObjectChooser();
         }
@@ -1406,12 +1492,13 @@ namespace ObjectCloner
                 btnStart.Enabled = false;
                 btnNext.Enabled = false;
             }
-            tlpButtons.Enabled = true;
 
             btnList.BackColor = btnListBackColor;
             btnStart.BackColor = btnStartBackColor;
             btnNext.BackColor = btnNextBackColor;
             btnCommit.BackColor = btnCommitBackColor;
+
+            tlpButtons.Enabled = pkg != null;
         }
 
         private void btnList_Click(object sender, EventArgs e)
@@ -1436,7 +1523,7 @@ namespace ObjectCloner
         {
             clone = objectChooser.SelectedItems[0].SubItems[1].Text;
             Add("clone", clone);
-            resObjd = new RES(new RIE(pkg, clone));
+            objdItem = new Item(pkg, clone);
         }
 
         private void btnNext_Click(object sender, EventArgs e)
@@ -1461,21 +1548,21 @@ namespace ObjectCloner
         //Bring in all the resources in all the TGI blocks of the OBJD
         void Step2()
         {
-            SlurpTGIsFromField("clone", resObjd.res);
+            SlurpTGIsFromField("clone", (AResource)objdItem.Resource);
         }
         //Bring in the VPXY pointed to by the OBJK
         void Step3()
         {
-            uint index = (uint)resObjd.res["OBJKIndex"].Value;
+            uint index = (uint)objdItem.Resource["OBJKIndex"].Value;
             TGI objk = tgiLookup["clone[TGIBlock][" + index + "]"];
             SlurpTGIsFromTGI("clone_objk", objk);
-            resObjk = new RES(new RIE(pkg, objk));
+            resObjk = new Item(pkg, objk);
         }
         //Try to get everything referenced from the VPXY (some may be not found but that's OK), including 
         void Step4()
         {
             int index = -1;
-            TypedValue tv = resObjk.res["Keys"];
+            TypedValue tv = resObjk.Resource["Keys"];
             foreach (AHandlerElement element in (System.Collections.IEnumerable)tv.Value)
             {
                 if (((string)element["EntryName"].Value).Equals("modelKey") && ((byte)element["ControlCode"].Value).Equals(2))
@@ -1535,48 +1622,82 @@ namespace ObjectCloner
         //Fix integrity step
         void Step9()
         {
-            Dictionary<TGI, Item> tgiToItem = new Dictionary<TGI, Item>();
-            Dictionary<Item, List<TGI>> itemToTGIs = new Dictionary<Item, List<TGI>>();
-            Dictionary<ulong, ulong> oldToNew = new Dictionary<ulong, ulong>();
+            //tgiLookup -- List of resources for cloned object, excludes name map and stbls
+
+            IList<IResourceIndexEntry> lnmaprie = pkg.FindAll(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C), });
+            foreach (IResourceIndexEntry rie in lnmaprie)
+            {
+                TGI tgi = new TGI(rie);
+                tgiLookup.Add("namemap", tgi);
+            }
+
+            IList<IResourceIndexEntry> lstblrie = pkg.FindAll(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x220557DA), });
+            foreach (IResourceIndexEntry rie in lstblrie)
+            {
+                TGI tgi = new TGI(rie);
+                tgiLookup.Add("lang_" + (tgi.i >> 56).ToString("X2"), tgi);
+            }
+
+            //tgiLookup -- List of resources for cloned object, *includes* name map and stbls now -- may include references to things not in package
+
+            oldToNew = new Dictionary<ulong, ulong>();
 
             ulong langInst = FNV64.GetHash("StringTable:" + uniqueObject + "_" + DateTime.UtcNow.ToBinary().ToString("X16")) >> 8;
-
-            foreach (IResourceIndexEntry rie in pkg.GetResourceList)
+            foreach(TGI tgi in tgiLookup.Values)
             {
-                Item item = new Item(pkg, rie);
-                tgiToItem.Add(item.tgi, item);
+                if (!oldToNew.ContainsKey(tgi.i))
+                {
+                    if (tgi.t == 0x220557DA)//STBL
+                        oldToNew.Add(tgi.i, tgi.i & 0xFF00000000000000 | langInst);
+                    else
+                        oldToNew.Add(tgi.i, CreateInstance());
+                }
+            }
 
-                List<TGI> itemTGIs = new List<TGI>(new TGI[] { item.tgi });
-                itemToTGIs.Add(item, itemTGIs);
+
+            tgiToItem = new Dictionary<TGI, Item>();
+            rcols = new List<TGI>();
+
+            foreach (var kvp in tgiLookup)
+            {
+                Item item = new Item(pkg, kvp.Value);
+                if (item.ResourceIndexEntry == null) continue; // Not a packed resource
+                if (tgiToItem.ContainsKey(kvp.Value)) continue; // seen this TGI before
+                tgiToItem.Add(kvp.Value, item);
+
                 if (typeof(GenericRCOLResource).IsAssignableFrom(item.Resource.GetType()))
                 {
-                    GenericRCOLResource.ChunkEntryList list = (GenericRCOLResource.ChunkEntryList)item.Resource["ChunkEntries"].Value;
-                    foreach (var chunk in list)
+                    rcols.Add(kvp.Value);
+                    // Add chunks we've identified an interest in and can find in the tgiLookup lookup
+                    foreach (var chunk in (GenericRCOLResource.ChunkEntryList)item.Resource["ChunkEntries"].Value)
                     {
                         TGI tgi = new TGI(chunk.TGIBlock);
-                        if (!itemTGIs.Contains(tgi)) itemTGIs.Add(tgi);
-                        if (!tgiToItem.ContainsKey(tgi)) tgiToItem.Add(tgi, item);
+                        if (tgiLookup.ContainsValue(tgi) && !tgiToItem.ContainsKey(tgi)) tgiToItem.Add(tgi, item);
                     }
                 }
             }
 
-            foreach (TGI tgi in tgiToItem.Keys)
-            {
-                if (tgi.t == 0x220557DA)
-                {
-                    ulong newInst = tgi.i & 0xFF00000000000000 | langInst;
-                    oldToNew.Add(tgi.i, newInst);
-                }
-                else if (!oldToNew.ContainsKey(tgi.i))
-                    oldToNew.Add(tgi.i, CreateInstance());
-            }
+            //tgiToItem -- List of tgis for cloned object, *includes* name map and stbls now -- should only include references to things in package
+            //rcols -- those tgiToItem values that refer to an RCOL resource
+
+
+            ulong nameGUID = (ulong)((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["NameGUID"].Value;
+            ulong descGUID = (ulong)((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["DescGUID"].Value;
+            oldToNew.Add(nameGUID, FNV64.GetHash("CatalogObjects/Name:" + uniqueObject));
+            oldToNew.Add(descGUID, FNV64.GetHash("CatalogObjects/Description:" + uniqueObject));
+
 
             resourceList.Clear();
-            foreach(TGI tgi in tgiToItem.Keys)
+            foreach (var kvp in tgiToItem)
             {
-                string s = String.Format("Old: {0} --> New: {1}", "" + tgi, "" + new TGI(tgi.t, tgi.g, oldToNew[tgi.i]));
+                string s = String.Format("Old: {0} --> New: {1}", "" + (TGIN)kvp.Key, "" + (TGIN)new TGI(kvp.Key.t, kvp.Key.g, oldToNew[kvp.Key.i]));
                 resourceList.Add(s);
             }
+
+            resourceList.Add("Old NameGUID: 0x" + nameGUID.ToString("X16") + " --> New NameGUID: 0x" + oldToNew[nameGUID].ToString("X16"));
+            resourceList.Add("Old DescGUID: 0x" + descGUID.ToString("X16") + " --> New DescGUID: 0x" + oldToNew[descGUID].ToString("X16"));
+            resourceList.Add("Old Name: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Name"] + "\" --> New Name: \"CatalogObjects/Name:" + uniqueObject + "\"");
+            resourceList.Add("Old Desc: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Desc"] + "\" --> New Desc: \"CatalogObjects/Description:" + uniqueObject + "\"");
         }
 
         private void btnCommit_Click(object sender, EventArgs e)
@@ -1601,6 +1722,7 @@ namespace ObjectCloner
                 else
                 {
                     tlpButtons.Enabled = false;
+                    DoWait("Please wait, applying new resource keys...");
                     StartFixing();
                 }
             }
