@@ -6,6 +6,7 @@ rem -%ConfigurationName%
 set src=%TargetName%-Source
 
 set out=S:\Sims3\Tools\ObjectCloner\
+set helpFolder=%out%\HelpFiles
 
 set mydate=%date: =0%
 set dd=%mydate:~0,2%
@@ -28,7 +29,7 @@ set pdb=-xr!*.pdb
 
 
 rem there shouldn't be any to delete...
-del %out%%TargetName%*%suffix%.*
+del /q /f %out%%TargetName%*%suffix%.*
 
 pushd ..
 7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" S3PIDemoFE
@@ -37,8 +38,11 @@ popd
 pushd bin\%ConfigurationName%
 echo %suffix% >%TargetName%-Version.txt
 attrib +r %TargetName%-Version.txt
-7za a -r -t7z -mx9 -ms -xr!.?* -xr!thanks.txt -xr!*vshost* %pdb% "%out%%base%_%suffix%.7z" *
+del /f /q HelpFiles
+xcopy "%helpFolder%\*" HelpFiles /s /i /y
+7za a -r -t7z -mx9 -ms -xr!.?* -xr!*vshost* -xr!*.Config %pdb% "%out%%base%_%suffix%.7z" *
 del /f %TargetName%-Version.txt
+del /f /q HelpFiles
 popd
 
 7za x -o"%base%-%suffix%" "%out%%base%_%suffix%.7z"
@@ -46,10 +50,19 @@ pushd "%base%-%suffix%"
 (
 echo !cd %base%-%suffix%
 for %%f in (*) do echo File /a %%f
+pushd HelpFiles
+echo SetOutPath $INSTDIR\HelpFiles
+for %%f in (*) do echo File /a HelpFiles\%%f
+echo SetOutPath $INSTDIR
+popd
 ) > ..\INSTFILES.txt
 
 (
 for %%f in (*) do echo Delete $INSTDIR\%%f
+pushd HelpFiles
+for %%f in (*) do echo Delete $INSTDIR\HelpFiles\%%f
+echo RmDir HelpFiles
+popd
 ) > UNINST.LOG
 attrib +r +h UNINST.LOG
 popd

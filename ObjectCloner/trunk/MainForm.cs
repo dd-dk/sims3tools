@@ -19,6 +19,7 @@
  ***************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
@@ -933,57 +934,70 @@ namespace ObjectCloner
 
                 Item objd = new Item(pkg, clone);
 
-                AHandlerElement commonBlock = (AHandlerElement)objd.Resource["CommonBlock"].Value;
-                ulong nameGUID = (ulong)commonBlock["NameGUID"].Value;
-                ulong descGUID = (ulong)commonBlock["DescGUID"].Value;
-                commonBlock["NameGUID"] = new TypedValue(typeof(ulong), oldToNew[nameGUID]);
-                commonBlock["DescGUID"] = new TypedValue(typeof(ulong), oldToNew[descGUID]);
-
-                commonBlock["Name"] = new TypedValue(typeof(string), "CatalogObjects/Name:" + uniqueObject);
-                commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + uniqueObject);
-
-                objd.Commit();
+                ulong nameGUID = (ulong)((AHandlerElement)objd.Resource["CommonBlock"].Value)["NameGUID"].Value;
+                ulong descGUID = (ulong)((AHandlerElement)objd.Resource["CommonBlock"].Value)["DescGUID"].Value;
 
                 foreach (Item item in tgiToItem.Values)
                 {
-                    if (item.ResourceIndexEntry.ResourceType == 0x0166038C)
+                    bool dirty = false;
+
+                    if (item.ResourceIndexEntry.ResourceType == 0x319E4F1D)
+                    {
+                        AHandlerElement commonBlock = ((AHandlerElement)item.Resource["CommonBlock"].Value);
+                        commonBlock["NameGUID"] = new TypedValue(typeof(ulong), oldToNew[nameGUID]);
+                        commonBlock["DescGUID"] = new TypedValue(typeof(ulong), oldToNew[descGUID]);
+
+                        commonBlock["Name"] = new TypedValue(typeof(string), "CatalogObjects/Name:" + uniqueObject);
+                        commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + uniqueObject);
+
+                        UpdateTGIsFromField((AResource)item.Resource);
+
+                        dirty = true;
+                    }
+                    else if (item.ResourceIndexEntry.ResourceType == 0x0166038C)
                     {
                         IDictionary<ulong, string> nm = (IDictionary<ulong, string>)item.Resource;
-                        foreach(ulong old in oldToNew.Keys)
+                        foreach (ulong old in oldToNew.Keys)
                             if (nm.ContainsKey(old) && !nm.ContainsKey(oldToNew[old]))
                             {
                                 nm.Add(oldToNew[old], nm[old]);
                                 nm.Remove(old);
+                                dirty = true;
                             }
-                        item.Commit();
                     }
                     else if (item.ResourceIndexEntry.ResourceType == 0x220557DA)
                     {
                         IDictionary<ulong, string> stbl = (IDictionary<ulong, string>)item.Resource;
-                        string name = stbl[nameGUID];
-                        string desc = stbl[descGUID];
-                        stbl.Remove(nameGUID);
-                        stbl.Remove(descGUID);
-                        stbl.Add(oldToNew[nameGUID], name);
-                        stbl.Add(oldToNew[descGUID], desc);
-                        item.Commit();
-                    }
-                }
-
-                foreach(TGI rcolTgi in rcols)
-                {
-                    GenericRCOLResource rcol = (GenericRCOLResource)tgiToItem[rcolTgi].Resource;
-                    bool dirty = false;
-                    foreach (var chunk in rcol.ChunkEntries)
-                    {
-                        //if it's one I'm looking for an we've a new instance, update it
-                        if (tgiToItem.ContainsKey(new TGI(chunk.TGIBlock)) && oldToNew.ContainsKey(chunk.TGIBlock.Instance))
+                        if (oldToNew.ContainsKey(nameGUID))
                         {
-                            chunk.TGIBlock.Instance = oldToNew[chunk.TGIBlock.Instance];
+                            string name = "";
+                            if (stbl.ContainsKey(nameGUID))
+                            {
+                                name = stbl[nameGUID];
+                                stbl.Remove(nameGUID);
+                            }
+                            stbl.Add(oldToNew[nameGUID], name);
+                            dirty = true;
+                        }
+                        if (oldToNew.ContainsKey(descGUID))
+                        {
+                            string desc = "";
+                            if (stbl.ContainsKey(descGUID))
+                            {
+                                desc = stbl[descGUID];
+                                stbl.Remove(descGUID);
+                            }
+                            stbl.Add(oldToNew[descGUID], desc);
                             dirty = true;
                         }
                     }
-                    if (dirty) tgiToItem[rcolTgi].Commit();
+                    else
+                    {
+                        dirty = UpdateTGIsFromField((AResource)item.Resource);
+                    }
+
+                    if (dirty) item.Commit();
+
                 }
 
                 foreach (Item item in tgiToItem.Values)
@@ -1009,6 +1023,49 @@ namespace ObjectCloner
 
         int numNewInstances = 0;
         ulong CreateInstance() { numNewInstances++; return FNV64.GetHash(numNewInstances.ToString("X8") + "_" + uniqueObject + "_" + DateTime.UtcNow.ToBinary().ToString("X16")); }
+
+        private bool UpdateTGIsFromField(AApiVersionedFields field)
+        {
+            bool dirty = false;
+
+            Type t = field.GetType();
+            if (typeof(AResource.TGIBlock).IsAssignableFrom(t))
+            {
+                AResource.TGIBlock tgib = (AResource.TGIBlock)field;
+                if (tgiToItem.ContainsKey(tgib) && oldToNew.ContainsKey(tgib.Instance)) { tgib.Instance = oldToNew[tgib.Instance]; dirty = true; }
+            }
+            else
+            {
+                if (typeof(IList).IsAssignableFrom(field.GetType()))
+                    foreach (object o in (IEnumerable)field)
+                        if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
+                            dirty = UpdateTGIsFromField((AApiVersionedFields)o) || dirty;
+
+                dirty = UpdateTGIsFromAApiVersionedFields(field) || dirty;
+            }
+
+            return dirty;
+        }
+        private bool UpdateTGIsFromAApiVersionedFields(AApiVersionedFields field)
+        {
+            bool dirty = false;
+
+            List<string> fields = field.ContentFields;
+            foreach (string f in fields)
+            {
+                Type t = AApiVersionedFields.GetContentFieldTypes(0, field.GetType())[f];
+
+                if (typeof(IList).IsAssignableFrom(t) && field[f].Value != null) // because of the object state, which we don't understand
+                    foreach (object o in (IEnumerable)field[f].Value)
+                        if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
+                            dirty = UpdateTGIsFromField((AApiVersionedFields)o) || dirty;
+
+                if (typeof(AApiVersionedFields).IsAssignableFrom(t))
+                    dirty = UpdateTGIsFromField((AApiVersionedFields)field[f].Value) || dirty;
+            }
+
+            return dirty;
+        }
 
         #endregion
 
@@ -1683,8 +1740,8 @@ namespace ObjectCloner
 
             ulong nameGUID = (ulong)((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["NameGUID"].Value;
             ulong descGUID = (ulong)((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["DescGUID"].Value;
-            oldToNew.Add(nameGUID, FNV64.GetHash("CatalogObjects/Name:" + uniqueObject));
-            oldToNew.Add(descGUID, FNV64.GetHash("CatalogObjects/Description:" + uniqueObject));
+            if (nameGUID != FNV64.GetHash("CatalogObjects/Name:" + uniqueObject)) oldToNew.Add(nameGUID, FNV64.GetHash("CatalogObjects/Name:" + uniqueObject));
+            if (descGUID != FNV64.GetHash("CatalogObjects/Description:" + uniqueObject)) oldToNew.Add(descGUID, FNV64.GetHash("CatalogObjects/Description:" + uniqueObject));
 
 
             resourceList.Clear();
