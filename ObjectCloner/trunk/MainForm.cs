@@ -1611,7 +1611,9 @@ namespace ObjectCloner
         void Step3()
         {
             uint index = (uint)objdItem.Resource["OBJKIndex"].Value;
-            TGI objk = tgiLookup["clone[TGIBlock][" + index + "]"];
+            if (!tgiLookup.ContainsKey("clone.TGIBlocks[" + index + "]")) { subPage = SubPage.Step7; return; }//can't do steps 5-7 without OBJK but don't crash
+
+            TGI objk = tgiLookup["clone.TGIBlocks[" + index + "]"];
             SlurpTGIsFromTGI("clone_objk", objk);
             resObjk = new Item(pkg, objk);
         }
