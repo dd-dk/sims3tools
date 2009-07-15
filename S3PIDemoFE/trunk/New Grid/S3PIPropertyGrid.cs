@@ -134,11 +134,11 @@ namespace S3PIDemoFE
                         }
                         catch { }
                     if (t.IsValueType) return t; // It's a struct
-                    if (t.Name.StartsWith("IList`") && typeof(AApiVersionedFields).IsAssignableFrom(t.GetGenericArguments()[0]))
+                    if (typeof(Boolset).IsAssignableFrom(t)) return typeof(BoolsetConverterCTD); // before lists
+                    if (typeof(IEnumerable).IsAssignableFrom(t) && t.GetGenericArguments().Length == 1 && typeof(AApiVersionedFields).IsAssignableFrom(t.GetGenericArguments()[0]))
                         return typeof(IListCTD);
                     if (typeof(AApiVersionedFields).IsAssignableFrom(t)) return typeof(AApiVersionedFieldsCTD);
                     if (typeof(TextReader).IsAssignableFrom(t) || typeof(BinaryReader).IsAssignableFrom(t)) return typeof(ReaderCTD);
-                    //if (typeof(Boolset).IsAssignableFrom(t)) return t; Hmm...
                     return t;
                 }
             }
@@ -147,6 +147,7 @@ namespace S3PIDemoFE
             {
                 Type t = PropertyType;
                 if (t.Equals(typeof(AsHexConverterCTD))) return new AsHexConverterCTD(owner, field, component);
+                if (t.Equals(typeof(BoolsetConverterCTD))) return new BoolsetConverterCTD(owner, field, component);
                 if (t.Equals(typeof(IListCTD))) return new IListCTD(owner, field, component);
                 if (t.Equals(typeof(AApiVersionedFieldsCTD))) return new AApiVersionedFieldsCTD((AApiVersionedFields)owner[field].Value);
                 if (t.Equals(typeof(ReaderCTD))) return new ReaderCTD(owner, field, component);
@@ -294,6 +295,126 @@ namespace S3PIDemoFE
                         int i = System.Runtime.InteropServices.Marshal.SizeOf(owner[field].Type) * 2;
                         string format = "0x{0:X" + i + "}";
                         return String.Format(format, Convert.ToUInt64(owner[field].Value));
+                    }
+                    catch { }
+                }
+                return base.ConvertTo(context, culture, value, destinationType);
+            }
+        }
+    }
+
+    [TypeConverter(typeof(BoolsetConverter))]
+    [Category("Fields")]
+    public class BoolsetConverterCTD : ICustomTypeDescriptor
+    {
+        AApiVersionedFields owner;
+        string field;
+        object component;
+        public BoolsetConverterCTD(AApiVersionedFields owner, string field, object component) { this.owner = owner; this.field = field; this.component = component; }
+
+        #region ICustomTypeDescriptor Members
+
+        public AttributeCollection GetAttributes() { return TypeDescriptor.GetAttributes(this, true); }
+
+        public string GetClassName() { return TypeDescriptor.GetClassName(this, true); }
+
+        public string GetComponentName() { return TypeDescriptor.GetComponentName(this, true); }
+
+        public TypeConverter GetConverter() { return TypeDescriptor.GetConverter(this, true); }
+
+        public EventDescriptor GetDefaultEvent() { return TypeDescriptor.GetDefaultEvent(this, true); }
+
+        public System.ComponentModel.PropertyDescriptor GetDefaultProperty() { return TypeDescriptor.GetDefaultProperty(this, true); }
+
+        public object GetEditor(Type editorBaseType) { return TypeDescriptor.GetEditor(this, editorBaseType, true); }
+
+        public EventDescriptorCollection GetEvents(Attribute[] attributes) { return TypeDescriptor.GetEvents(this, attributes, true); }
+
+        public EventDescriptorCollection GetEvents() { return TypeDescriptor.GetEvents(this, true); }
+
+        public PropertyDescriptorCollection GetProperties(Attribute[] attributes) { return GetProperties(); }
+
+        public PropertyDescriptorCollection GetProperties()
+        {
+            PropertyDescriptorCollection pc = new PropertyDescriptorCollection(null);
+            pc.Add(new PropertyDescriptor(owner, field, component, null));
+            return pc;
+        }
+
+        public object GetPropertyOwner(System.ComponentModel.PropertyDescriptor pd) { return this; }
+
+        #endregion
+
+        public class PropertyDescriptor : System.ComponentModel.PropertyDescriptor
+        {
+            AApiVersionedFields owner;
+            string field;
+            object component;
+            public PropertyDescriptor(AApiVersionedFields owner, string field, object component, Attribute[] attr)
+                : base(field, attr) { this.owner = owner; this.field = field; this.component = component; }
+
+            public override string Name { get { return field; } }
+
+            public override bool CanResetValue(object component) { return false; }
+
+            public override void ResetValue(object component) { throw new InvalidOperationException(); }
+
+            public override Type PropertyType { get { return typeof(BoolsetConverter); } }
+
+            public override object GetValue(object component) { return new BoolsetConverter(); }
+
+            public override bool IsReadOnly { get { return true; } }
+
+            public override void SetValue(object component, object value) { throw new InvalidOperationException(); }
+
+            public override Type ComponentType { get { return null; } }
+
+            public override bool ShouldSerializeValue(object component) { return true; }
+        }
+
+        public class BoolsetConverter : TypeConverter
+        {
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
+                if (sourceType.Equals(typeof(string))) return true;
+                return base.CanConvertTo(context, sourceType);
+            }
+
+            public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+            {
+                if (value.GetType().Equals(typeof(string)))
+                {
+                    try
+                    {
+                        AApiVersionedFields owner = ((AApiVersionedFieldsCTD)context.Instance).Value;
+                        string field = context.PropertyDescriptor.Name;
+                        string asString = (string)value;
+                        ulong asUlong = Convert.ToUInt64(asString, (asString.StartsWith("0x")) ? 16 : 10);
+                        Boolset res = new Boolset(asUlong);
+                        return (Boolset)((string)res).Substring(64 - ((string)owner[field]).Length);
+                    }
+                    catch { }
+                }
+                return base.ConvertFrom(context, culture, value);
+            }
+
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (destinationType.Equals(typeof(string))) return true;
+                return base.CanConvertTo(context, destinationType);
+            }
+
+            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+            {
+                if (value as BoolsetConverterCTD != null && destinationType.Equals(typeof(string)))
+                {
+                    try
+                    {
+                        AApiVersionedFields owner = ((AApiVersionedFieldsCTD)context.Instance).Value;
+                        string field = ((BoolsetConverterCTD)value).field;
+                        int i = ((string)owner[field]).Length / 4;
+                        string format = "0x{0:X" + i + "}";
+                        return String.Format(format, (ulong)(Boolset)owner[field].Value);
                     }
                     catch { }
                 }
