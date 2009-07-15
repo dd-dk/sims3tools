@@ -283,9 +283,8 @@ namespace S3PIDemoFE
 
         private void fileOpen()
         {
-            openFileDialog1.FileName = Filename;
+            openFileDialog1.FileName = "*.package";
             openFileDialog1.FilterIndex = 1;
-            openFileDialog1.ReadOnlyChecked = !ReadWrite;
             DialogResult dr = openFileDialog1.ShowDialog();
             if (dr != DialogResult.OK) return;
 
