@@ -156,7 +156,7 @@ namespace ObjectCloner
             AbortLoading();
             AbortFetching();
             AbortSaving();
-            if (pkg != null) { s3pi.Package.Package.ClosePackage(0, pkg); pkg = null; }
+            if (pkg != null) { s3pi.Package.Package.ClosePackage(0, pkg); pkg = null; haveLoaded = false; loadedPackage = ""; }
             if (thumbpkg != null) { s3pi.Package.Package.ClosePackage(0, thumbpkg); thumbpkg = null; }
 
             objectChooser.ObjectChooser_SaveSettings();
@@ -475,7 +475,7 @@ namespace ObjectCloner
             }
             else
             {
-                if (pkg != null) { s3pi.Package.Package.ClosePackage(0, pkg); pkg = null; }
+                if (pkg != null) { s3pi.Package.Package.ClosePackage(0, pkg); pkg = null; haveLoaded = false; loadedPackage = ""; }
             }
         }
 
@@ -947,8 +947,10 @@ namespace ObjectCloner
                     if (item.ResourceIndexEntry.ResourceType == 0x319E4F1D)
                     {
                         AHandlerElement commonBlock = ((AHandlerElement)item.Resource["CommonBlock"].Value);
-                        commonBlock["NameGUID"] = new TypedValue(typeof(ulong), oldToNew[nameGUID]);
-                        commonBlock["DescGUID"] = new TypedValue(typeof(ulong), oldToNew[descGUID]);
+                        if (oldToNew.ContainsKey(nameGUID))
+                            commonBlock["NameGUID"] = new TypedValue(typeof(ulong), oldToNew[nameGUID]);
+                        if (oldToNew.ContainsKey(descGUID))
+                            commonBlock["DescGUID"] = new TypedValue(typeof(ulong), oldToNew[descGUID]);
 
                         commonBlock["Name"] = new TypedValue(typeof(string), "CatalogObjects/Name:" + uniqueObject);
                         commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + uniqueObject);
@@ -1017,6 +1019,8 @@ namespace ObjectCloner
                 ClearTabs();
                 s3pi.Package.Package.ClosePackage(0, pkg);
                 pkg = null;
+                haveLoaded = false;
+                loadedPackage = "";
                 subPage = SubPage.None;
                 setButtons(Page.None, SubPage.None);
             }
@@ -1706,6 +1710,10 @@ namespace ObjectCloner
 
             oldToNew = new Dictionary<ulong, ulong>();
 
+            // Prevent OBJD and related resources getting renumbered
+            if (ckbNoOBJD.Checked)
+                oldToNew.Add(objdItem.tgi.i, objdItem.tgi.i);
+
             ulong langInst = FNV64.GetHash("StringTable:" + uniqueObject) >> 8;
             foreach(TGI tgi in tgiLookup.Values)
             {
@@ -1724,6 +1732,7 @@ namespace ObjectCloner
 
             foreach (var kvp in tgiLookup)
             {
+                if (kvp.Value == new TGI(0, 0, 0)) continue;
                 Item item = new Item(pkg, kvp.Value);
                 if (item.ResourceIndexEntry == null) continue; // Not a packed resource
                 if (tgiToItem.ContainsKey(kvp.Value)) continue; // seen this TGI before
@@ -1758,8 +1767,10 @@ namespace ObjectCloner
                 resourceList.Add(s);
             }
 
-            resourceList.Add("Old NameGUID: 0x" + nameGUID.ToString("X16") + " --> New NameGUID: 0x" + oldToNew[nameGUID].ToString("X16"));
-            resourceList.Add("Old DescGUID: 0x" + descGUID.ToString("X16") + " --> New DescGUID: 0x" + oldToNew[descGUID].ToString("X16"));
+            if (oldToNew.ContainsKey(nameGUID))
+                resourceList.Add("Old NameGUID: 0x" + nameGUID.ToString("X16") + " --> New NameGUID: 0x" + oldToNew[nameGUID].ToString("X16"));
+            if (oldToNew.ContainsKey(descGUID))
+                resourceList.Add("Old DescGUID: 0x" + descGUID.ToString("X16") + " --> New DescGUID: 0x" + oldToNew[descGUID].ToString("X16"));
             resourceList.Add("Old Name: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Name"] + "\" --> New Name: \"CatalogObjects/Name:" + uniqueObject + "\"");
             resourceList.Add("Old Desc: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Desc"] + "\" --> New Desc: \"CatalogObjects/Description:" + uniqueObject + "\"");
         }
@@ -1790,7 +1801,7 @@ namespace ObjectCloner
                     StartFixing();
                 }
             }
-            finally { this.Enabled = true; }
+            finally { ckbNoOBJD.Checked = false; this.Enabled = true; }
         }
         #endregion
     }

@@ -45,6 +45,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
+            this.ckbNoOBJD = new System.Windows.Forms.CheckBox();
             this.tpDetail = new System.Windows.Forms.TabPage();
             this.menuBarWidget1 = new ObjectCloner.MenuBarWidget();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
@@ -77,11 +78,11 @@
             // toolStripContainer1.ContentPanel
             // 
             this.toolStripContainer1.ContentPanel.Controls.Add(this.splitContainer1);
-            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(904, 672);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(904, 518);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer1.Name = "toolStripContainer1";
-            this.toolStripContainer1.Size = new System.Drawing.Size(904, 696);
+            this.toolStripContainer1.Size = new System.Drawing.Size(904, 542);
             this.toolStripContainer1.TabIndex = 3;
             this.toolStripContainer1.Text = "toolStripContainer1";
             // 
@@ -100,7 +101,7 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.tlpButtons);
             this.splitContainer1.Panel2.Controls.Add(this.tabControl1);
-            this.splitContainer1.Size = new System.Drawing.Size(904, 672);
+            this.splitContainer1.Size = new System.Drawing.Size(904, 518);
             this.splitContainer1.SplitterDistance = 450;
             this.splitContainer1.TabIndex = 0;
             this.splitContainer1.TabStop = false;
@@ -117,7 +118,7 @@
             this.tlpButtons.Controls.Add(this.btnCommit, 1, 7);
             this.tlpButtons.Controls.Add(this.btnList, 1, 1);
             this.tlpButtons.Controls.Add(this.btnStart, 1, 3);
-            this.tlpButtons.Location = new System.Drawing.Point(0, 557);
+            this.tlpButtons.Location = new System.Drawing.Point(0, 403);
             this.tlpButtons.Name = "tlpButtons";
             this.tlpButtons.RowCount = 9;
             this.tlpButtons.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
@@ -202,7 +203,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(448, 551);
+            this.tabControl1.Size = new System.Drawing.Size(448, 397);
             this.tabControl1.TabIndex = 1;
             // 
             // tpMain
@@ -212,7 +213,7 @@
             this.tpMain.Location = new System.Drawing.Point(4, 22);
             this.tpMain.Name = "tpMain";
             this.tpMain.Padding = new System.Windows.Forms.Padding(3);
-            this.tpMain.Size = new System.Drawing.Size(440, 525);
+            this.tpMain.Size = new System.Drawing.Size(440, 371);
             this.tpMain.TabIndex = 0;
             this.tpMain.Text = "Overview";
             this.tpMain.UseVisualStyleBackColor = true;
@@ -227,12 +228,14 @@
             this.tlpOverviewAll.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tlpOverviewAll.Controls.Add(this.tlpOverviewMain, 0, 0);
             this.tlpOverviewAll.Controls.Add(this.tlpOverviewCommon, 0, 1);
+            this.tlpOverviewAll.Controls.Add(this.ckbNoOBJD, 0, 2);
             this.tlpOverviewAll.Location = new System.Drawing.Point(3, 3);
             this.tlpOverviewAll.Name = "tlpOverviewAll";
-            this.tlpOverviewAll.RowCount = 2;
-            this.tlpOverviewAll.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpOverviewAll.RowCount = 3;
             this.tlpOverviewAll.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpOverviewAll.Size = new System.Drawing.Size(432, 87);
+            this.tlpOverviewAll.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpOverviewAll.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpOverviewAll.Size = new System.Drawing.Size(432, 131);
             this.tlpOverviewAll.TabIndex = 1;
             // 
             // tlpOverviewMain
@@ -332,12 +335,24 @@
             this.label7.TabIndex = 0;
             this.label7.Text = "Common Block";
             // 
+            // ckbNoOBJD
+            // 
+            this.ckbNoOBJD.AutoSize = true;
+            this.ckbNoOBJD.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.ckbNoOBJD.Location = new System.Drawing.Point(3, 111);
+            this.ckbNoOBJD.Margin = new System.Windows.Forms.Padding(3, 24, 3, 3);
+            this.ckbNoOBJD.Name = "ckbNoOBJD";
+            this.ckbNoOBJD.Size = new System.Drawing.Size(183, 17);
+            this.ckbNoOBJD.TabIndex = 1;
+            this.ckbNoOBJD.Text = "Preserve existing OBJD instance:";
+            this.ckbNoOBJD.UseVisualStyleBackColor = false;
+            // 
             // tpDetail
             // 
             this.tpDetail.Location = new System.Drawing.Point(4, 22);
             this.tpDetail.Name = "tpDetail";
             this.tpDetail.Padding = new System.Windows.Forms.Padding(3);
-            this.tpDetail.Size = new System.Drawing.Size(440, 525);
+            this.tpDetail.Size = new System.Drawing.Size(440, 371);
             this.tpDetail.TabIndex = 1;
             this.tpDetail.Text = "Details";
             this.tpDetail.UseVisualStyleBackColor = true;
@@ -368,7 +383,7 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripProgressBar1,
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 696);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 542);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(904, 22);
             this.statusStrip1.TabIndex = 2;
@@ -443,7 +458,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(904, 718);
+            this.ClientSize = new System.Drawing.Size(904, 564);
             this.Controls.Add(this.toolStripContainer1);
             this.Controls.Add(this.statusStrip1);
             this.MainMenuStrip = this.menuBarWidget1;
@@ -509,6 +524,7 @@
         private System.Windows.Forms.OpenFileDialog openPackageDialog;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         private System.Windows.Forms.Button btnStart;
+        private System.Windows.Forms.CheckBox ckbNoOBJD;
     }
 }
 
