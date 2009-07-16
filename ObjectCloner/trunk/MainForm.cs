@@ -921,37 +921,27 @@ namespace ObjectCloner
         #region Make Unique bits
 
         Dictionary<TGI, Item> tgiToItem;
-        List<TGI> rcols;
         Dictionary<ulong, ulong> oldToNew;
         string uniqueObject;
+        ulong nameGUID;
+        ulong descGUID;
+
         void StartFixing()
         {
+            //oldToNew = new Dictionary<ulong, ulong>();
+            //tgiToItem - TGIs we're interested in and the Item they refer to
             try
             {
-                //loadedPackage - filename
-                //pkg - IPackage
-                //tgiToItem - TGIs we're interested in and the Item they refer to
-                //rcols - those items which are RCOLs
-                //oldToNew = new Dictionary<ulong, ulong>();
-
-
-                Item objd = new Item(pkg, clone);
-
-                ulong nameGUID = (ulong)((AHandlerElement)objd.Resource["CommonBlock"].Value)["NameGUID"].Value;
-                ulong descGUID = (ulong)((AHandlerElement)objd.Resource["CommonBlock"].Value)["DescGUID"].Value;
-
                 foreach (Item item in tgiToItem.Values)
                 {
                     bool dirty = false;
 
-                    if (item.ResourceIndexEntry.ResourceType == 0x319E4F1D)
+                    if (item.ResourceIndexEntry.ResourceType == 0x319E4F1D) //OBJD needs more than just the TGIs done
                     {
                         AHandlerElement commonBlock = ((AHandlerElement)item.Resource["CommonBlock"].Value);
-                        if (oldToNew.ContainsKey(nameGUID))
-                            commonBlock["NameGUID"] = new TypedValue(typeof(ulong), oldToNew[nameGUID]);
-                        if (oldToNew.ContainsKey(descGUID))
-                            commonBlock["DescGUID"] = new TypedValue(typeof(ulong), oldToNew[descGUID]);
 
+                        commonBlock["NameGUID"] = new TypedValue(typeof(ulong), oldToNew[nameGUID]);
+                        commonBlock["DescGUID"] = new TypedValue(typeof(ulong), oldToNew[descGUID]);
                         commonBlock["Name"] = new TypedValue(typeof(string), "CatalogObjects/Name:" + uniqueObject);
                         commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + uniqueObject);
 
@@ -1715,7 +1705,7 @@ namespace ObjectCloner
                 oldToNew.Add(objdItem.tgi.i, objdItem.tgi.i);
 
             ulong langInst = FNV64.GetHash("StringTable:" + uniqueObject) >> 8;
-            foreach(TGI tgi in tgiLookup.Values)
+            foreach (TGI tgi in tgiLookup.Values)
             {
                 if (!oldToNew.ContainsKey(tgi.i))
                 {
@@ -1728,7 +1718,6 @@ namespace ObjectCloner
 
 
             tgiToItem = new Dictionary<TGI, Item>();
-            rcols = new List<TGI>();
 
             foreach (var kvp in tgiLookup)
             {
@@ -1740,7 +1729,6 @@ namespace ObjectCloner
 
                 if (typeof(GenericRCOLResource).IsAssignableFrom(item.Resource.GetType()))
                 {
-                    rcols.Add(kvp.Value);
                     // Add chunks we've identified an interest in and can find in the tgiLookup lookup
                     foreach (var chunk in (GenericRCOLResource.ChunkEntryList)item.Resource["ChunkEntries"].Value)
                     {
@@ -1754,10 +1742,11 @@ namespace ObjectCloner
             //rcols -- those tgiToItem values that refer to an RCOL resource
 
 
-            ulong nameGUID = (ulong)((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["NameGUID"].Value;
-            ulong descGUID = (ulong)((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["DescGUID"].Value;
-            if (nameGUID != FNV64.GetHash("CatalogObjects/Name:" + uniqueObject)) oldToNew.Add(nameGUID, FNV64.GetHash("CatalogObjects/Name:" + uniqueObject));
-            if (descGUID != FNV64.GetHash("CatalogObjects/Description:" + uniqueObject)) oldToNew.Add(descGUID, FNV64.GetHash("CatalogObjects/Description:" + uniqueObject));
+            nameGUID = (ulong)((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["NameGUID"].Value;
+            descGUID = (ulong)((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["DescGUID"].Value;
+
+            oldToNew.Add(nameGUID, FNV64.GetHash("CatalogObjects/Name:" + uniqueObject));
+            oldToNew.Add(descGUID, FNV64.GetHash("CatalogObjects/Description:" + uniqueObject));
 
 
             resourceList.Clear();
@@ -1767,10 +1756,8 @@ namespace ObjectCloner
                 resourceList.Add(s);
             }
 
-            if (oldToNew.ContainsKey(nameGUID))
-                resourceList.Add("Old NameGUID: 0x" + nameGUID.ToString("X16") + " --> New NameGUID: 0x" + oldToNew[nameGUID].ToString("X16"));
-            if (oldToNew.ContainsKey(descGUID))
-                resourceList.Add("Old DescGUID: 0x" + descGUID.ToString("X16") + " --> New DescGUID: 0x" + oldToNew[descGUID].ToString("X16"));
+            resourceList.Add("Old NameGUID: 0x" + nameGUID.ToString("X16") + " --> New NameGUID: 0x" + oldToNew[nameGUID].ToString("X16"));
+            resourceList.Add("Old DescGUID: 0x" + descGUID.ToString("X16") + " --> New DescGUID: 0x" + oldToNew[descGUID].ToString("X16"));
             resourceList.Add("Old Name: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Name"] + "\" --> New Name: \"CatalogObjects/Name:" + uniqueObject + "\"");
             resourceList.Add("Old Desc: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Desc"] + "\" --> New Desc: \"CatalogObjects/Description:" + uniqueObject + "\"");
         }
