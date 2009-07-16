@@ -232,6 +232,10 @@ namespace ObjectCloner.TopPanelComponents
             get { return listView1.SelectedItems; }
         }
 
+        public ListViewItem SelectedItem { get { return listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0] : null; } set { listView1.SelectedItems.Clear(); if (listView1.Items.Contains(value)) value.Selected = true; } }
+
+        public int SelectedIndex { get { return listView1.SelectedIndices.Count == 1 ? listView1.SelectedIndices[0] : -1; } set { listView1.SelectedIndices.Clear(); if (value >= 0 && value < listView1.Items.Count)listView1.SelectedIndices.Add(value); } }
+
         public event EventHandler ItemActivate;
         protected void OnItemActivate(object sender, EventArgs e) { if (ItemActivate != null)ItemActivate(sender, e); }
         private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(sender, e); }
