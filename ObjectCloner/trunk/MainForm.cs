@@ -223,6 +223,7 @@ namespace ObjectCloner
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(objectChooser);
             objectChooser.Dock = DockStyle.Fill;
+            objectChooser.Focus();
         }
 
         bool waitingToDisplayResources;
@@ -466,6 +467,8 @@ namespace ObjectCloner
                         waitingForImages = true;
                         StartFetching();
                     }
+
+                    if (objectChooser.Items.Count > 0) objectChooser.SelectedIndex = 0;
 
                     DisplayObjectChooser();
                 }
@@ -1005,8 +1008,6 @@ namespace ObjectCloner
                         item.ResourceIndexEntry.Instance = oldToNew[item.ResourceIndexEntry.Instance];
 
                 pkg.SavePackage();
-
-                CopyableMessageBox.Show("OK");
             }
             finally
             {
@@ -1019,6 +1020,8 @@ namespace ObjectCloner
                 subPage = SubPage.None;
                 setButtons(Page.None, SubPage.None);
             }
+
+            CopyableMessageBox.Show("OK", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
         }
 
         int numNewInstances = 0;
@@ -1036,7 +1039,7 @@ namespace ObjectCloner
             }
             else
             {
-                if (typeof(IList).IsAssignableFrom(field.GetType()))
+                if (typeof(IEnumerable).IsAssignableFrom(field.GetType()))
                     foreach (object o in (IEnumerable)field)
                         if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
                             dirty = UpdateTGIsFromField((AApiVersionedFields)o) || dirty;
@@ -1054,8 +1057,10 @@ namespace ObjectCloner
             foreach (string f in fields)
             {
                 Type t = AApiVersionedFields.GetContentFieldTypes(0, field.GetType())[f];
+                if (!t.IsClass || t.Equals(typeof(string)) || t.Equals(typeof(Boolset))) continue;
+                if (t.IsArray && (!t.GetElementType().IsClass || t.GetElementType().Equals(typeof(string)))) continue;
 
-                if (typeof(IList).IsAssignableFrom(t) && field[f].Value != null) // because of the object state, which we don't understand
+                if (typeof(IEnumerable).IsAssignableFrom(t) && field[f].Value != null) // because of the object state, which we don't understand
                     foreach (object o in (IEnumerable)field[f].Value)
                         if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
                             dirty = UpdateTGIsFromField((AApiVersionedFields)o) || dirty;
@@ -1159,7 +1164,7 @@ namespace ObjectCloner
         //Relative path to ALLThumbnails is:
         // .\..\..\..\Thumbnails\ALLThumbnails.package
         private void SlurpThumbnails(ulong instance) { setThumbPackage(); SlurpKindred("thumb", mode == Mode.Clone ? thumbpkg : pkg, instance); }
-        private void SlurpVPXYKin(ulong instance) { setThumbPackage(); SlurpKindred("vpxykin", pkg, instance); }
+        private void SlurpVPXYKin(ulong instance) { SlurpKindred("vpxykin", pkg, instance); }
 
         private void SlurpKindred(string key, IPackage pkg, ulong inst)
         {
@@ -1701,7 +1706,7 @@ namespace ObjectCloner
 
             oldToNew = new Dictionary<ulong, ulong>();
 
-            ulong langInst = FNV64.GetHash("StringTable:" + uniqueObject + "_" + DateTime.UtcNow.ToBinary().ToString("X16")) >> 8;
+            ulong langInst = FNV64.GetHash("StringTable:" + uniqueObject) >> 8;
             foreach(TGI tgi in tgiLookup.Values)
             {
                 if (!oldToNew.ContainsKey(tgi.i))
