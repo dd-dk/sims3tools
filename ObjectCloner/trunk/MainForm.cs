@@ -50,7 +50,7 @@ namespace ObjectCloner
             "Step 5: Preset XML (same instance as VPXY)",
             "Step 6: MODL-referenced resources",
             "Step 7: MLOD-referenced resources",
-            "Step 7: TXTC-referenced resources",
+            "Step 8: TXTC-referenced resources",
             "Step 9: Thumbnails for OBJD",
             "Step 10: Fix integrity step",
             "You should never see this",
