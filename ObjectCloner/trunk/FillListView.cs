@@ -106,7 +106,7 @@ namespace ObjectCloner
     }
 
 
-    public struct TGI
+    public struct TGI : IEquatable<TGI>, IEqualityComparer<TGI>
     {
         public uint t;
         public uint g;
@@ -142,6 +142,23 @@ namespace ObjectCloner
             res.i = Convert.ToUInt64(v[2], v[2].StartsWith("0x") ? 16 : 10);
             return res;
         }
+
+        public static bool operator ==(TGI a, TGI b) { return a.Equals(b); }
+        public static bool operator !=(TGI a, TGI b) { return !a.Equals(b); }
+
+        #region IEquatable<TGI> Members
+
+        public bool Equals(TGI other) { return t.Equals(other.t) && g.Equals(other.g) && i.Equals(other.i); }
+
+        #endregion
+
+        #region IEqualityComparer<TGI> Members
+
+        public bool Equals(TGI x, TGI y) { return x.Equals(y); }
+
+        public int GetHashCode(TGI obj) { return obj.t.GetHashCode() ^ obj.g.GetHashCode() ^ obj.i.GetHashCode(); }
+
+        #endregion
     }
 
     public struct RIE
