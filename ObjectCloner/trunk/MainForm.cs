@@ -1446,8 +1446,8 @@ namespace ObjectCloner
                 "Front-end Distribution: {1}\n" +
                 "Library Distribution: {2}"
                 , copyright
-                , getVersion(typeof(MainForm), "ObjectCloner")
-                , getVersion(typeof(s3pi.Interfaces.AApiVersionedFields), "ObjectCloner")
+                , getVersion(typeof(MainForm), "s3oc")
+                , getVersion(typeof(s3pi.Interfaces.AApiVersionedFields), "s3oc")
                 ), this.Text);
         }
 
