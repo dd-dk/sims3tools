@@ -20,7 +20,7 @@ Var delSettings
 
 Name "${PROGRAM_NAME}"
 InstallDir $PROGRAMFILES\s3pe
-
+!define EXE s3pe.exe
 
 ; Request application privileges for Windows Vista
 RequestExecutionLevel admin
@@ -64,12 +64,12 @@ gotAll:
   WriteUninstaller uninst-${tla}.exe
   
   !include ${INSTFILES}
-;  File /a *.dll *.txt s3pe.exe gpl-3.0.txt ${tla}-Version.txt
+;  File /a *.dll *.txt ${EXE} gpl-3.0.txt ${tla}-Version.txt
 
   StrCmp "Y" $wantSM wantSM noWantSM
 wantSM:
   CreateDirectory "$SMPROGRAMS\${tla}"
-  CreateShortCut "$SMPROGRAMS\${tla}\${tla}.lnk" "$INSTDIR\s3pe.exe" "" "" "" SW_SHOWNORMAL "" "${PROGRAM_NAME}"
+  CreateShortCut "$SMPROGRAMS\${tla}\${tla}.lnk" "$INSTDIR\${EXE}" "" "" "" SW_SHOWNORMAL "" "${PROGRAM_NAME}"
   CreateShortCut "$SMPROGRAMS\${tla}\Uninstall.lnk" "$INSTDIR\uninst-${tla}.exe" "" "" "" SW_SHOWNORMAL "" "Uninstall"
   CreateShortCut "$SMPROGRAMS\${tla}\${tla}-Version.lnk" "$INSTDIR\${tla}-Version.txt" "" "" "" SW_SHOWNORMAL "" "Show version"
 noWantSM:
@@ -98,11 +98,11 @@ FunctionEnd
 Function CheckInUse
   StrCpy $wasInUse 0
 
-  IfFileExists "$INSTDIR\s3pe.exe" Exists
+  IfFileExists "$INSTDIR\${EXE}" Exists
   Return
 Exists:
   ClearErrors
-  FileOpen $0 "$INSTDIR\s3pe.exe" a
+  FileOpen $0 "$INSTDIR\${EXE}" a
   IfErrors InUse
   FileClose $0
   Return
@@ -110,10 +110,10 @@ InUse:
   StrCpy $wasInUse 1
 
   MessageBox MB_RETRYCANCEL|MB_ICONQUESTION \
-    "s3pe.exe is running.$\r$\nPlease close it and retry.$\r$\n$INSTDIR\s3pe.exe" \
+    "${EXE} is running.$\r$\nPlease close it and retry.$\r$\n$INSTDIR\${EXE}" \
     IDRETRY Exists
 
-  MessageBox MB_OK|MB_ICONSTOP "Cannot continue to install if s3pe.exe is running."
+  MessageBox MB_OK|MB_ICONSTOP "Cannot continue to install if ${EXE} is running."
   Quit
 FunctionEnd
 
@@ -173,7 +173,7 @@ UninstallDone:
 SectionEnd
 
 Function un.InstallUserSettings
-  Push "s3pe.exe_Url_*"
+  Push "${EXE}_Url_*"
   Push "$LOCALAPPDATA"
 
   Push $0
