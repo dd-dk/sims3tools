@@ -32,9 +32,12 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tlpButtons = new System.Windows.Forms.TableLayoutPanel();
             this.btnNext = new System.Windows.Forms.Button();
-            this.btnCommit = new System.Windows.Forms.Button();
+            this.btnSave = new System.Windows.Forms.Button();
             this.btnList = new System.Windows.Forms.Button();
             this.btnStart = new System.Windows.Forms.Button();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.ckbDefault = new System.Windows.Forms.CheckBox();
+            this.ckbNoOBJD = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tpMain = new System.Windows.Forms.TabPage();
             this.tlpOverviewAll = new System.Windows.Forms.TableLayoutPanel();
@@ -45,7 +48,6 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
-            this.ckbNoOBJD = new System.Windows.Forms.CheckBox();
             this.tpDetail = new System.Windows.Forms.TabPage();
             this.menuBarWidget1 = new ObjectCloner.MenuBarWidget();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
@@ -63,6 +65,7 @@
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.tlpButtons.SuspendLayout();
+            this.flowLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tpMain.SuspendLayout();
             this.tlpOverviewAll.SuspendLayout();
@@ -110,14 +113,17 @@
             // 
             this.tlpButtons.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.tlpButtons.ColumnCount = 3;
+            this.tlpButtons.ColumnCount = 5;
             this.tlpButtons.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tlpButtons.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpButtons.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
-            this.tlpButtons.Controls.Add(this.btnNext, 1, 5);
-            this.tlpButtons.Controls.Add(this.btnCommit, 1, 7);
-            this.tlpButtons.Controls.Add(this.btnList, 1, 1);
-            this.tlpButtons.Controls.Add(this.btnStart, 1, 3);
+            this.tlpButtons.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpButtons.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            this.tlpButtons.Controls.Add(this.btnNext, 3, 5);
+            this.tlpButtons.Controls.Add(this.btnSave, 3, 7);
+            this.tlpButtons.Controls.Add(this.btnList, 3, 1);
+            this.tlpButtons.Controls.Add(this.btnStart, 3, 3);
+            this.tlpButtons.Controls.Add(this.flowLayoutPanel1, 1, 1);
             this.tlpButtons.Location = new System.Drawing.Point(0, 403);
             this.tlpButtons.Name = "tlpButtons";
             this.tlpButtons.RowCount = 9;
@@ -148,20 +154,20 @@
             this.btnNext.UseVisualStyleBackColor = true;
             this.btnNext.Click += new System.EventHandler(this.btnNext_Click);
             // 
-            // btnCommit
+            // btnSave
             // 
-            this.btnCommit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCommit.AutoSize = true;
-            this.btnCommit.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnCommit.Enabled = false;
-            this.btnCommit.Location = new System.Drawing.Point(340, 81);
-            this.btnCommit.Margin = new System.Windows.Forms.Padding(0);
-            this.btnCommit.Name = "btnCommit";
-            this.btnCommit.Size = new System.Drawing.Size(81, 23);
-            this.btnCommit.TabIndex = 4;
-            this.btnCommit.Text = "&Commit";
-            this.btnCommit.UseVisualStyleBackColor = true;
-            this.btnCommit.Click += new System.EventHandler(this.btnCommit_Click);
+            this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSave.AutoSize = true;
+            this.btnSave.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnSave.Enabled = false;
+            this.btnSave.Location = new System.Drawing.Point(340, 81);
+            this.btnSave.Margin = new System.Windows.Forms.Padding(0);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(81, 23);
+            this.btnSave.TabIndex = 4;
+            this.btnSave.Text = "Sa&ve";
+            this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
             // btnList
             // 
@@ -192,6 +198,45 @@
             this.btnStart.Text = "&Start";
             this.btnStart.UseVisualStyleBackColor = true;
             this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
+            // 
+            // flowLayoutPanel1
+            // 
+            this.flowLayoutPanel1.AutoSize = true;
+            this.flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.flowLayoutPanel1.Controls.Add(this.ckbDefault);
+            this.flowLayoutPanel1.Controls.Add(this.ckbNoOBJD);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(136, 3);
+            this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.tlpButtons.SetRowSpan(this.flowLayoutPanel1, 7);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(180, 46);
+            this.flowLayoutPanel1.TabIndex = 8;
+            // 
+            // ckbDefault
+            // 
+            this.ckbDefault.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbDefault.AutoSize = true;
+            this.ckbDefault.Checked = true;
+            this.ckbDefault.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.ckbDefault.Location = new System.Drawing.Point(0, 3);
+            this.ckbDefault.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
+            this.ckbDefault.Name = "ckbDefault";
+            this.ckbDefault.Size = new System.Drawing.Size(122, 17);
+            this.ckbDefault.TabIndex = 2;
+            this.ckbDefault.Text = "Default textures only";
+            this.ckbDefault.UseVisualStyleBackColor = true;
+            // 
+            // ckbNoOBJD
+            // 
+            this.ckbNoOBJD.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbNoOBJD.AutoSize = true;
+            this.ckbNoOBJD.Location = new System.Drawing.Point(0, 26);
+            this.ckbNoOBJD.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
+            this.ckbNoOBJD.Name = "ckbNoOBJD";
+            this.ckbNoOBJD.Size = new System.Drawing.Size(180, 17);
+            this.ckbNoOBJD.TabIndex = 1;
+            this.ckbNoOBJD.Text = "Preserve existing OBJD instance";
+            this.ckbNoOBJD.UseVisualStyleBackColor = false;
             // 
             // tabControl1
             // 
@@ -228,14 +273,13 @@
             this.tlpOverviewAll.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tlpOverviewAll.Controls.Add(this.tlpOverviewMain, 0, 0);
             this.tlpOverviewAll.Controls.Add(this.tlpOverviewCommon, 0, 1);
-            this.tlpOverviewAll.Controls.Add(this.ckbNoOBJD, 0, 2);
             this.tlpOverviewAll.Location = new System.Drawing.Point(3, 3);
             this.tlpOverviewAll.Name = "tlpOverviewAll";
-            this.tlpOverviewAll.RowCount = 3;
+            this.tlpOverviewAll.RowCount = 2;
             this.tlpOverviewAll.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverviewAll.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpOverviewAll.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpOverviewAll.Size = new System.Drawing.Size(432, 131);
+            this.tlpOverviewAll.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tlpOverviewAll.Size = new System.Drawing.Size(432, 87);
             this.tlpOverviewAll.TabIndex = 1;
             // 
             // tlpOverviewMain
@@ -334,18 +378,6 @@
             this.label7.Size = new System.Drawing.Size(90, 13);
             this.label7.TabIndex = 0;
             this.label7.Text = "Common Block";
-            // 
-            // ckbNoOBJD
-            // 
-            this.ckbNoOBJD.AutoSize = true;
-            this.ckbNoOBJD.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.ckbNoOBJD.Location = new System.Drawing.Point(3, 111);
-            this.ckbNoOBJD.Margin = new System.Windows.Forms.Padding(3, 24, 3, 3);
-            this.ckbNoOBJD.Name = "ckbNoOBJD";
-            this.ckbNoOBJD.Size = new System.Drawing.Size(183, 17);
-            this.ckbNoOBJD.TabIndex = 1;
-            this.ckbNoOBJD.Text = "Preserve existing OBJD instance:";
-            this.ckbNoOBJD.UseVisualStyleBackColor = false;
             // 
             // tpDetail
             // 
@@ -476,6 +508,8 @@
             this.splitContainer1.ResumeLayout(false);
             this.tlpButtons.ResumeLayout(false);
             this.tlpButtons.PerformLayout();
+            this.flowLayoutPanel1.ResumeLayout(false);
+            this.flowLayoutPanel1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tpMain.ResumeLayout(false);
             this.tpMain.PerformLayout();
@@ -516,7 +550,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Label label6;
         private MenuBarWidget menuBarWidget1;
-        private System.Windows.Forms.Button btnCommit;
+        private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Button btnNext;
         private System.Windows.Forms.Button btnList;
         private System.Windows.Forms.TableLayoutPanel tlpButtons;
@@ -525,6 +559,8 @@
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         private System.Windows.Forms.Button btnStart;
         private System.Windows.Forms.CheckBox ckbNoOBJD;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.CheckBox ckbDefault;
     }
 }
 

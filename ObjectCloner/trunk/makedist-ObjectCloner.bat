@@ -1,5 +1,5 @@
 @echo off
-set TargetName=ObjectCloner
+set TargetName=s3oc
 set ConfigurationName=Release
 set base=%TargetName%
 rem -%ConfigurationName%

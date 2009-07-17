@@ -1,7 +1,7 @@
 ;!include "MUI.nsh"
 
-!define PROGRAM_NAME "s3pi Object Cloner"
-!define tla "ObjectCloner"
+!define PROGRAM_NAME "Sims3 Object Cloner"
+!define tla "s3oc"
 !ifndef INSTFILES
   !error "Caller didn't define INSTFILES"
 !endif

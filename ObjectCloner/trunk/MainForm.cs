@@ -36,7 +36,7 @@ namespace ObjectCloner
     public partial class MainForm : Form
     {
         #region Static bits
-        static string myName = "s3pi Object Cloner";
+        static string myName = "s3oc";
         static Dictionary<View, MenuBarWidget.MB> viewMap;
         static List<View> viewMapKeys;
         static List<MenuBarWidget.MB> viewMapValues;
@@ -47,11 +47,12 @@ namespace ObjectCloner
             "Step 2: OBJD-referenced resources",
             "Step 3: VPXY",
             "Step 4: VPXY-referenced resources",
-            "Step 5: VPXY kindred resources (same instance)",
+            "Step 5: Preset XML (same instance as VPXY)",
             "Step 6: MODL-referenced resources",
             "Step 7: MLOD-referenced resources",
-            "Step 8: All thumbnails for OBJD",
-            "Step 9: Fix integrity step",
+            "Step 7: TXTC-referenced resources",
+            "Step 9: Thumbnails for OBJD",
+            "Step 10: Fix integrity step",
             "You should never see this",
         };
 
@@ -78,14 +79,16 @@ namespace ObjectCloner
         {
             None = 0,
             Step1,//Bring in the OBJD the user selected
-            Step2,//Bring in all the resources in all the TGI blocks of the OBJD
+            Step2,//Bring in all the OBJK (or, on request, all resources in all the TGI blocks of the OBJD)
             Step3,//Bring in the VPXY pointed to by the OBJK
             Step4,//Try to get everything referenced from the VPXY (some may be not found but that's OK)
-            Step5,//Bring in any resources with the same instance as the VPXY
+            Step5,//Bring in Preset XML (same instance as VPXY)
             Step6,//Bring in all the resources in the TGI blocks of the MODL
             Step7,//Bring in all the resources in the TGI blocks of each MLOD (disregard duplicates)
-            Step8,//Bring in all resources from ...\The Sims 3\Thumbnails\ALLThumbnails.package that match the instance number of the OBJD
-            Step9,//Fix integrity step
+            Step8,//Bring in all the resources in the TGI blocks of each TXTC (disregard duplicates)
+            LastInChain = Step8,
+            Step9,//Bring in all resources from ...\The Sims 3\Thumbnails\ALLThumbnails.package that match the instance number of the OBJD
+            Step10,//Fix integrity step
         }
         enum Mode
         {
@@ -101,7 +104,7 @@ namespace ObjectCloner
         IPackage pkg = null;
         TGI clone;//0x319E4F1D
         Item objdItem;
-        Item resObjk;
+        Item objkItem;
         TGI vpxy;
 
         Dictionary<string, TGI> tgiLookup = new Dictionary<string,TGI>();
@@ -226,11 +229,8 @@ namespace ObjectCloner
             objectChooser.Focus();
         }
 
-        bool waitingToDisplayResources;
         private void DisplayResources()
         {
-            waitingToDisplayResources = false;
-
             setButtons(Page.Resources, subPage);
 
             resourceList.Page = subPageText[(int)subPage];
@@ -790,8 +790,11 @@ namespace ObjectCloner
 
                 bool complete = false;
                 Item fb0nmap = new Item(pkgfb0, pkgfb0.Find(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C), }));
+                Item fb2nmap = new Item(pkgfb2, pkgfb2.Find(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C), }));
                 Item newnmap = NewResource(target, fb0nmap.tgi);
                 IDictionary<ulong, string> fb0namemap = (IDictionary<ulong, string>)fb0nmap.Resource;
+                IDictionary<ulong, string> fb2namemap = (IDictionary<ulong, string>)fb2nmap.Resource;
+                IDictionary<ulong, string> thumbnamemap = new Dictionary<ulong, string>();//There isn't one
                 IDictionary<ulong, string> newnamemap = (IDictionary<ulong, string>)newnmap.Resource;
                 try
                 {
@@ -804,13 +807,15 @@ namespace ObjectCloner
                         if (stopSaving) return;
 
                         IPackage pkg = kvp.Value.t == 0x00B2D882 ? pkgfb2 : kvp.Key.StartsWith("thumb[") ? thumbpkg : pkgfb0;
+                        IDictionary<ulong, string> nm = kvp.Value.t == 0x00B2D882 ? fb2namemap : kvp.Key.StartsWith("thumb[") ? thumbnamemap : fb0namemap;
+
                         Item item = new Item(pkg, kvp.Value, true); // use default wrapper
                         if (item.ResourceIndexEntry != null)
                         {
                             if (!stopSaving) target.AddResource(kvp.Value.t, kvp.Value.g, kvp.Value.i, item.Resource.Stream, true);
                             lastSaved = kvp.Key;
-                            if (fb0namemap.ContainsKey(kvp.Value.i) && !newnamemap.ContainsKey(kvp.Value.i))
-                                if (!stopSaving) newnamemap.Add(kvp.Value.i, fb0namemap[kvp.Value.i]);
+                            if (nm.ContainsKey(kvp.Value.i) && !newnamemap.ContainsKey(kvp.Value.i))
+                                if (!stopSaving) newnamemap.Add(kvp.Value.i, nm[kvp.Value.i]);
                         }
 
                         if (++i % freq == 0)
@@ -1034,10 +1039,7 @@ namespace ObjectCloner
             else
             {
                 if (typeof(IEnumerable).IsAssignableFrom(field.GetType()))
-                    foreach (object o in (IEnumerable)field)
-                        if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
-                            dirty = UpdateTGIsFromField((AApiVersionedFields)o) || dirty;
-
+                    dirty = UpdateTGIsFromIEnumerable((IEnumerable)field) || dirty;
                 dirty = UpdateTGIsFromAApiVersionedFields(field) || dirty;
             }
 
@@ -1050,18 +1052,30 @@ namespace ObjectCloner
             List<string> fields = field.ContentFields;
             foreach (string f in fields)
             {
+                if ((new List<string>(new string[] { "Stream", "AsBytes", "Value", })).Contains(f)) continue;
+
                 Type t = AApiVersionedFields.GetContentFieldTypes(0, field.GetType())[f];
                 if (!t.IsClass || t.Equals(typeof(string)) || t.Equals(typeof(Boolset))) continue;
                 if (t.IsArray && (!t.GetElementType().IsClass || t.GetElementType().Equals(typeof(string)))) continue;
 
-                if (typeof(IEnumerable).IsAssignableFrom(t) && field[f].Value != null) // because of the object state, which we don't understand
-                    foreach (object o in (IEnumerable)field[f].Value)
-                        if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
-                            dirty = UpdateTGIsFromField((AApiVersionedFields)o) || dirty;
-
-                if (typeof(AApiVersionedFields).IsAssignableFrom(t))
+                if (typeof(IEnumerable).IsAssignableFrom(t))
+                    dirty = UpdateTGIsFromIEnumerable((IEnumerable)field[f].Value) || dirty;
+                else if (typeof(AApiVersionedFields).IsAssignableFrom(t))
                     dirty = UpdateTGIsFromField((AApiVersionedFields)field[f].Value) || dirty;
             }
+
+            return dirty;
+        }
+        private bool UpdateTGIsFromIEnumerable(IEnumerable list)
+        {
+            bool dirty = false;
+
+            if (list != null)
+                foreach (object o in list)
+                    if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
+                        dirty = UpdateTGIsFromField((AApiVersionedFields)o) || dirty;
+                    else if (typeof(IEnumerable).IsAssignableFrom(o.GetType()))
+                        dirty = UpdateTGIsFromIEnumerable((IEnumerable)o) || dirty;
 
             return dirty;
         }
@@ -1093,19 +1107,8 @@ namespace ObjectCloner
             }
             else
             {
-                if (typeof(System.Collections.IEnumerable).IsAssignableFrom(t))
-                {
-                    System.Collections.IEnumerable ienum = (System.Collections.IEnumerable)field;
-                    int i = 0;
-                    foreach (object o in ienum)
-                    {
-                        if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
-                        {
-                            SlurpTGIsFromField(key + "[" + o.GetType().Name + "][" + i + "]", (AApiVersionedFields)o);
-                            i++;
-                        }
-                    }
-                }
+                if (typeof(IEnumerable).IsAssignableFrom(t))
+                    SlurpTGIsFromIEnumerable(key, (IEnumerable)field);
                 SlurpTGIsFromAApiVersionedFields(key, field);
             }
         }
@@ -1117,39 +1120,31 @@ namespace ObjectCloner
                 if ((new List<string>(new string[] { "Stream", "AsBytes", "Value", })).Contains(f)) continue;
 
                 Type t = AApiVersionedFields.GetContentFieldTypes(0, field.GetType())[f];
-                if (typeof(AResource.TGIBlockList).IsAssignableFrom(t))
-                {
-                    AResource.TGIBlockList list = (AResource.TGIBlockList)field[f].Value;
-                    int i = 0;
-                    foreach (AResource.TGIBlock value in list)
-                    {
-                        Add(key + "." + f + "[" + i + "]", "" + value);
-                        i++;
-                    }
-                }
-                else if (typeof(AResource.CountedTGIBlockList).IsAssignableFrom(t))
-                {
-                    AResource.CountedTGIBlockList list = (AResource.CountedTGIBlockList)field[f].Value;
-                    int i = 0;
-                    foreach (AResource.TGIBlock value in list)
-                    {
-                        Add(key + "." + f + "[" + i + "]", "" + value);
-                        i++;
-                    }
-                }
-                else if (typeof(GenericRCOLResource.ChunkEntryList).IsAssignableFrom(t))
-                {
-                    GenericRCOLResource.ChunkEntryList list = (GenericRCOLResource.ChunkEntryList)field[f].Value;
-                    int i = 0;
-                    foreach (var chunk in list)
-                    {
-                        Add(key + "." + f + "[" + i + "].TGIBlock", "" + chunk.TGIBlock);
-                        SlurpTGIsFromField(key + "." + f + "[" + i + "].RCOLBlock", chunk.RCOLBlock);
-                        i++;
-                    }
-                }
+                if (!t.IsClass || t.Equals(typeof(string)) || t.Equals(typeof(Boolset))) continue;
+                if (t.IsArray && (!t.GetElementType().IsClass || t.GetElementType().Equals(typeof(string)))) continue;
+
+                if (typeof(IEnumerable).IsAssignableFrom(t))
+                    SlurpTGIsFromIEnumerable(key + "." + f, (IEnumerable)field[f].Value);
                 else if (typeof(AApiVersionedFields).IsAssignableFrom(t))
                     SlurpTGIsFromField(key + "." + f, (AApiVersionedFields)field[f].Value);
+            }
+        }
+        private void SlurpTGIsFromIEnumerable(string key, IEnumerable list)
+        {
+            if (list == null) return;
+            int i = 0;
+            foreach (object o in list)
+            {
+                if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
+                {
+                    SlurpTGIsFromField(key + "[" + i + "]", (AApiVersionedFields)o);
+                    i++;
+                }
+                else if (typeof(IEnumerable).IsAssignableFrom(o.GetType()))
+                {
+                    SlurpTGIsFromIEnumerable(key + "[" + i + "]", (IEnumerable)o);
+                    i++;
+                }
             }
         }
 
@@ -1157,12 +1152,31 @@ namespace ObjectCloner
         //  ...\Gamedata\Shared\Packages\FullBuild0.package
         //Relative path to ALLThumbnails is:
         // .\..\..\..\Thumbnails\ALLThumbnails.package
-        private void SlurpThumbnails(ulong instance) { setThumbPackage(); SlurpKindred("thumb", mode == Mode.Clone ? thumbpkg : pkg, instance); }
-        private void SlurpVPXYKin(ulong instance) { SlurpKindred("vpxykin", pkg, instance); }
-
-        private void SlurpKindred(string key, IPackage pkg, ulong inst)
+        private void SlurpThumbnails(ulong instance)
         {
-            IList<IResourceIndexEntry> lrie = pkg.FindAll(new string[] { "Instance" }, new TypedValue[] { new TypedValue(typeof(ulong), inst), });
+            string[] fields = new string[ckbDefault.Checked ? 2 : 1];
+            TypedValue[] values = new TypedValue[ckbDefault.Checked ? 2 : 1];
+            fields[0] = "Instance";
+            values[0] = new TypedValue(typeof(ulong), instance);
+            if (ckbDefault.Checked)
+            {
+                fields[1] = "ResourceGroup";
+                values[1] = new TypedValue(typeof(uint), (uint)0);
+            }
+
+            if (mode == Mode.Clone) setThumbPackage();
+            SlurpKindred("thumb", mode == Mode.Clone ? thumbpkg : pkg, fields, values);
+        }
+
+        private void SlurpVPXYKin(ulong instance)
+        {
+            SlurpKindred("vpxykin", pkg, new string[] { "ResourceType", "Instance" },
+                new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0333406C), new TypedValue(typeof(ulong), instance) });
+        }
+
+        private void SlurpKindred(string key, IPackage pkg, string[] fields, TypedValue[] values)
+        {
+            IList<IResourceIndexEntry> lrie = pkg.FindAll(fields, values);
             int i = 0;
             foreach (IResourceIndexEntry rie in lrie)
             {
@@ -1207,7 +1221,7 @@ namespace ObjectCloner
         {
             if (FullBuild0Path == null) return;
             mode = Mode.Clone;
-            lastSubPage = SubPage.Step8;
+            lastSubPage = SubPage.Step9;
             fileNewOpen(FullBuild0Path);
         }
 
@@ -1239,7 +1253,7 @@ namespace ObjectCloner
             uniqueObject = ond.Value;
 
             mode = Mode.Fix;
-            lastSubPage = SubPage.Step9;
+            lastSubPage = SubPage.Step10;
 
             fileNewOpen(openPackageDialog.FileName);
         }
@@ -1256,6 +1270,10 @@ namespace ObjectCloner
 
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, false);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, false);
+            ckbDefault.Enabled = mode == Mode.Clone;
+            ckbDefault.Checked = mode == Mode.Clone;
+            ckbNoOBJD.Enabled = mode == Mode.Fix;
+            ckbNoOBJD.Checked = false;
 
             DoWait("Please wait, loading object catalog...");
             Application.DoEvents();
@@ -1502,7 +1520,7 @@ namespace ObjectCloner
             Color btnNextBackColor = Color.FromKnownColor(KnownColor.Control);
             Color btnCommitBackColor = Color.FromKnownColor(KnownColor.Control);
 
-            btnCommit.Enabled = p == Page.Resources;
+            btnSave.Enabled = p == Page.Resources;
             switch (p)
             {
                 case Page.None:
@@ -1538,7 +1556,7 @@ namespace ObjectCloner
                     else
                     {
                         btnNext.Enabled = false;
-                        this.AcceptButton = btnCommit;
+                        this.AcceptButton = btnSave;
                         btnCommitBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
                     }
                 }
@@ -1552,7 +1570,7 @@ namespace ObjectCloner
             btnList.BackColor = btnListBackColor;
             btnStart.BackColor = btnStartBackColor;
             btnNext.BackColor = btnNextBackColor;
-            btnCommit.BackColor = btnCommitBackColor;
+            btnSave.BackColor = btnCommitBackColor;
 
             tlpButtons.Enabled = pkg != null;
         }
@@ -1565,7 +1583,6 @@ namespace ObjectCloner
         private void btnStart_Click(object sender, EventArgs e)
         {
             tlpButtons.Enabled = false;
-            waitingToDisplayResources = true;
             resourceList.Clear();
             tgiLookup.Clear();
 
@@ -1587,6 +1604,9 @@ namespace ObjectCloner
             tlpButtons.Enabled = false;
 
             subPage = (SubPage)((int)subPage) + 1;
+
+            if (ckbDefault.Checked && subPage == SubPage.Step5) subPage = SubPage.Step6;//Skip it
+
             DoWait("Coming next: " + subPageText[(int)subPage]);
             switch (subPage)
             {
@@ -1598,48 +1618,49 @@ namespace ObjectCloner
                 case SubPage.Step7: Step7(); break;
                 case SubPage.Step8: Step8(); break;
                 case SubPage.Step9: Step9(); break;
+                case SubPage.Step10: Step10(); break;
             }
             DisplayResources();
         }
-        //Bring in all the resources in all the TGI blocks of the OBJD
+        //Bring in all the OBJK (or, on request, all resources in all the TGI blocks of the OBJD)
         void Step2()
         {
-            SlurpTGIsFromField("clone", (AResource)objdItem.Resource);
+            uint index = (uint)objdItem.Resource["OBJKIndex"].Value;
+            IList<AResource.TGIBlock> ltgi = (IList<AResource.TGIBlock>)objdItem.Resource["TGIBlocks"].Value;
+            AResource.TGIBlock objkTGI = ltgi[(int)index];
+            objkItem = new Item(pkg, objkTGI);
+
+            if (ckbDefault.Checked)
+                Add("clone_objk", objkTGI);
+            else
+                SlurpTGIsFromField("clone", (AResource)objdItem.Resource);
         }
-        //Bring in the VPXY pointed to by the OBJK
+        //Bring in the VPXY pointed to by the OBJK -- actually brings in all referenced resources
         void Step3()
         {
-            uint index = (uint)objdItem.Resource["OBJKIndex"].Value;
-            if (!tgiLookup.ContainsKey("clone.TGIBlocks[" + index + "]")) { subPage = SubPage.Step7; return; }//can't do steps 5-7 without OBJK but don't crash
-
-            TGI objk = tgiLookup["clone.TGIBlocks[" + index + "]"];
-            SlurpTGIsFromTGI("clone_objk", objk);
-            resObjk = new Item(pkg, objk);
+            if (objkItem.Resource == null) subPage = SubPage.LastInChain;//Skip past the chain
+            else SlurpTGIsFromField("clone_objk", (AResource)objkItem.Resource);
         }
-        //Try to get everything referenced from the VPXY (some may be not found but that's OK), including 
+        //Try to get everything referenced from the VPXY (some may be not found but that's OK)
         void Step4()
         {
             int index = -1;
-            TypedValue tv = resObjk.Resource["Keys"];
-            foreach (AHandlerElement element in (System.Collections.IEnumerable)tv.Value)
-            {
-                if (((string)element["EntryName"].Value).Equals("modelKey") && ((byte)element["ControlCode"].Value).Equals(2))
-                {
-                    index = (int)element["CcIndex"].Value;
-                    break;
-                }
-            }
+            IEnumerable keys = (IEnumerable)objkItem.Resource["Keys"].Value;
+            foreach (AHandlerElement element in keys)
+                if (((string)element["EntryName"].Value).Equals("modelKey")) { index = (int)element["CcIndex"].Value; break; }
+
             if (index == -1)
             {
-                subPage = SubPage.Step7;//can't do steps 5-7 without vpxy but don't crash
+                subPage = SubPage.LastInChain;//Skip past the chain
                 return;
             }
+
             vpxy = tgiLookup["clone_objk.TGIBlocks[" + index + "]"];
             SlurpTGIsFromTGI("clone_vpxy", vpxy);
         }
-        //Bring in any resources with the same instance as the VPXY
+        //Bring in Preset XML (same instance as VPXY)
         void Step5() { SlurpVPXYKin(vpxy.i); }
-        //Bring in all the resources in the TGI blocks of the MODL
+        //Bring in all the resources in the TGI blocks of each MODL (ref'd from VPXY)
         void Step6()
         {
             int i = 0;
@@ -1656,7 +1677,7 @@ namespace ObjectCloner
                     }
                 }
         }
-        //Bring in all the resources in the TGI blocks of each MLOD (disregard duplicates)
+        //Bring in all the resources in the TGI blocks of each MLOD (ref'd from MODL)
         void Step7()
         {
             int i = 0;
@@ -1673,12 +1694,29 @@ namespace ObjectCloner
                     }
                 }
         }
+        //Bring in all the resources in the TGI blocks of each TXTC (ref'd from MODL)
+        void Step8()
+        {
+            int i = 0;
+            List<string> keys = new List<string>(tgiLookup.Keys);
+            foreach (string key in keys)
+                if (key.StartsWith("clone_modl[") && (key.Contains("].Resources[") || key.Contains("].TGIBlocks[")))
+                {
+                    RIE rie = new RIE(pkg, tgiLookup[key]);
+                    if (rie.rie != null)
+                    {
+                        if (rie.rie.ResourceType != 0x033A1435) continue;
+                        SlurpTGIsFromTGI("clone_txtc[" + i + "]", tgiLookup[key]);
+                        i++;
+                    }
+                }
+        }
 
         //Bring in all resources from ...\The Sims 3\Thumbnails\ALLThumbnails.package that match the instance number of the OBJD
-        void Step8() { SlurpThumbnails(clone.i); }
+        void Step9() { SlurpThumbnails(clone.i); }
 
         //Fix integrity step
-        void Step9()
+        void Step10()
         {
             //tgiLookup -- List of resources for cloned object, excludes name map and stbls
 
@@ -1762,14 +1800,13 @@ namespace ObjectCloner
             resourceList.Add("Old Desc: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Desc"] + "\" --> New Desc: \"CatalogObjects/Description:" + uniqueObject + "\"");
         }
 
-        private void btnCommit_Click(object sender, EventArgs e)
+        private void btnSave_Click(object sender, EventArgs e)
         {
             this.Enabled = false;
             try
             {
                 if (mode == Mode.Clone)
                 {
-                    waitingForSavePackage = true;
                     if (ObjectCloner.Properties.Settings.Default.LastSaveFolder != null)
                         saveFileDialog1.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder;
                     saveFileDialog1.FileName = objectChooser.SelectedItems.Count > 0 ? objectChooser.SelectedItems[0].Text : "";
@@ -1779,6 +1816,7 @@ namespace ObjectCloner
 
                     tlpButtons.Enabled = false;
                     DoWait("Please wait, saving package...");
+                    waitingForSavePackage = true;
                     StartSaving();
                 }
                 else
