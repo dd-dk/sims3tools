@@ -178,9 +178,11 @@ namespace ObjectCloner
             {
                 if (fullBuild0Path == null)
                 {
-                    if (ObjectCloner.Properties.Settings.Default.Sims3Folder == null || ObjectCloner.Properties.Settings.Default.Sims3Folder.Length == 0)
+                    if (ObjectCloner.Properties.Settings.Default.Sims3Folder == null || ObjectCloner.Properties.Settings.Default.Sims3Folder.Length == 0
+                        || !Directory.Exists(ObjectCloner.Properties.Settings.Default.Sims3Folder))
                         settingsSims3Folder();
-                    if (ObjectCloner.Properties.Settings.Default.Sims3Folder == null || ObjectCloner.Properties.Settings.Default.Sims3Folder.Length == 0)
+                    if (ObjectCloner.Properties.Settings.Default.Sims3Folder == null || ObjectCloner.Properties.Settings.Default.Sims3Folder.Length == 0
+                        || !Directory.Exists(ObjectCloner.Properties.Settings.Default.Sims3Folder))
                         return null;
                 }
                 fullBuild0Path = Path.Combine(ObjectCloner.Properties.Settings.Default.Sims3Folder, @"GameData\Shared\Packages\FullBuild0.package");
@@ -196,7 +198,7 @@ namespace ObjectCloner
                 if (creatorName == null)
                 {
                     if (ObjectCloner.Properties.Settings.Default.CreatorName == null || ObjectCloner.Properties.Settings.Default.CreatorName.Length == 0)
-                        settingsSims3Folder();
+                        settingsUserName();
                 }
                 if (ObjectCloner.Properties.Settings.Default.CreatorName == null || ObjectCloner.Properties.Settings.Default.CreatorName.Length == 0)
                     creatorName = "";
@@ -1001,7 +1003,7 @@ namespace ObjectCloner
                 }
 
                 foreach (Item item in tgiToItem.Values)
-                    if (oldToNew.ContainsKey(item.ResourceIndexEntry.Instance))
+                    if (item.tgi != new TGI(0, 0, 0) && oldToNew.ContainsKey(item.ResourceIndexEntry.Instance))
                         item.ResourceIndexEntry.Instance = oldToNew[item.ResourceIndexEntry.Instance];
 
                 pkg.SavePackage();
@@ -1034,7 +1036,7 @@ namespace ObjectCloner
             if (typeof(AResource.TGIBlock).IsAssignableFrom(t))
             {
                 AResource.TGIBlock tgib = (AResource.TGIBlock)field;
-                if (tgiToItem.ContainsKey(tgib) && oldToNew.ContainsKey(tgib.Instance)) { tgib.Instance = oldToNew[tgib.Instance]; dirty = true; }
+                if (tgib != new TGI(0, 0, 0) && tgiToItem.ContainsKey(tgib) && oldToNew.ContainsKey(tgib.Instance)) { tgib.Instance = oldToNew[tgib.Instance]; dirty = true; }
             }
             else
             {
@@ -1261,7 +1263,8 @@ namespace ObjectCloner
         void fileNewOpen(string pkgName)
         {
             if (pkg != null) { s3pi.Package.Package.ClosePackage(0, pkg); pkg = null; }
-            pkg = s3pi.Package.Package.OpenPackage(0, pkgName, mode == Mode.Fix);
+            try { pkg = s3pi.Package.Package.OpenPackage(0, pkgName, mode == Mode.Fix); }
+            catch { pkg = null; }
             if (pkg == null)
             {
                 CopyableMessageBox.Show(@"Failed to open """ + pkgName + @"""", "File open error", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
