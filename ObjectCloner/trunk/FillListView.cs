@@ -129,10 +129,7 @@ namespace ObjectCloner
         public TGI(AResource.TGIBlock tgib) { t = tgib.ResourceType; g = tgib.ResourceGroup; i = tgib.Instance; }
         public static implicit operator TGI(AResource.TGIBlock tgib) { return new TGI(tgib); }
 
-        public static implicit operator String(TGI value)
-        {
-            return String.Format("0x{0:X8}-0x{1:X8}-0x{2:X16}", value.t, value.g, value.i);
-        }
+        public static implicit operator String(TGI value) { return value.ToString(); }
         public static implicit operator TGI(String value)
         {
             TGI res = new TGI();
@@ -145,6 +142,9 @@ namespace ObjectCloner
 
         public static bool operator ==(TGI a, TGI b) { return a.Equals(b); }
         public static bool operator !=(TGI a, TGI b) { return !a.Equals(b); }
+        //public override bool Equals(object obj) { return this.Equals((TGI)obj); } -- no, do not want invalid cast exception
+        public override int GetHashCode() { return GetHashCode(this); }
+        public override string ToString() { return String.Format("0x{0:X8}-0x{1:X8}-0x{2:X16}", t, g, i); }
 
         #region IEquatable<TGI> Members
 
