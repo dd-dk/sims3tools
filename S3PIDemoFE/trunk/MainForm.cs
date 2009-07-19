@@ -480,7 +480,7 @@ namespace S3PIDemoFE
             bool replace = false;
             try
             {
-                target = Package.OpenPackage(0, exportToPackageDialog.FileName);
+                target = Package.OpenPackage(0, exportToPackageDialog.FileName, true);
 
                 if (!isNew)
                 {
