@@ -159,7 +159,7 @@ namespace ObjectCloner
             AbortLoading(e.CloseReason == CloseReason.ApplicationExitCall);
             AbortFetching(e.CloseReason == CloseReason.ApplicationExitCall);
             AbortSaving(e.CloseReason == CloseReason.ApplicationExitCall);
-            if (pkg != null) { s3pi.Package.Package.ClosePackage(0, pkg); pkg = null; haveLoaded = false; loadedPackage = ""; }
+            ClosePkg();
             if (thumbpkg != null) { s3pi.Package.Package.ClosePackage(0, thumbpkg); thumbpkg = null; }
 
             objectChooser.ObjectChooser_SaveSettings();
@@ -237,6 +237,16 @@ namespace ObjectCloner
                 }
                 return english;
             }
+        }
+
+        void ClosePkg()
+        {
+            if (pkg == null) return;
+            s3pi.Package.Package.ClosePackage(0, pkg);
+            pkg = null;
+            haveLoaded = false;
+            loadedPackage = "";
+            english = null;
         }
 
         #region TopPanelComponents
@@ -563,7 +573,7 @@ namespace ObjectCloner
             }
             else
             {
-                if (pkg != null) { s3pi.Package.Package.ClosePackage(0, pkg); pkg = null; haveLoaded = false; loadedPackage = ""; }
+                ClosePkg();
             }
         }
 
@@ -1093,10 +1103,7 @@ namespace ObjectCloner
                 tlpButtons.Enabled = true;
                 objectChooser.Items.Clear();
                 ClearTabs();
-                s3pi.Package.Package.ClosePackage(0, pkg);
-                pkg = null;
-                haveLoaded = false;
-                loadedPackage = "";
+                ClosePkg();
                 subPage = SubPage.None;
                 setButtons(Page.None, SubPage.None);
             }
@@ -1340,7 +1347,7 @@ namespace ObjectCloner
 
         void fileNewOpen(string pkgName)
         {
-            if (pkg != null) { s3pi.Package.Package.ClosePackage(0, pkg); pkg = null; }
+            ClosePkg();
             try { pkg = s3pi.Package.Package.OpenPackage(0, pkgName, mode == Mode.Fix); }
             catch { pkg = null; }
             if (pkg == null)
