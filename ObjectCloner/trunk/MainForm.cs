@@ -156,9 +156,9 @@ namespace ObjectCloner
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            AbortLoading();
-            AbortFetching();
-            AbortSaving();
+            AbortLoading(e.CloseReason == CloseReason.ApplicationExitCall);
+            AbortFetching(e.CloseReason == CloseReason.ApplicationExitCall);
+            AbortSaving(e.CloseReason == CloseReason.ApplicationExitCall);
             if (pkg != null) { s3pi.Package.Package.ClosePackage(0, pkg); pkg = null; haveLoaded = false; loadedPackage = ""; }
             if (thumbpkg != null) { s3pi.Package.Package.ClosePackage(0, thumbpkg); thumbpkg = null; }
 
@@ -209,10 +209,34 @@ namespace ObjectCloner
         }
 
         IPackage thumbpkg = null;
-        void setThumbPackage()
+        IPackage ThumbPkg
         {
-            if (thumbpkg == null)
-                thumbpkg = s3pi.Package.Package.OpenPackage(0, Path.Combine(ObjectCloner.Properties.Settings.Default.Sims3Folder, @"Thumbnails/ALLThumbnails.package"));
+            get
+            {
+                if (thumbpkg == null)
+                    thumbpkg = s3pi.Package.Package.OpenPackage(0, Path.Combine(ObjectCloner.Properties.Settings.Default.Sims3Folder, @"Thumbnails/ALLThumbnails.package"));
+                return thumbpkg;
+            }
+        }
+
+        IDictionary<ulong, string> english = null;
+        IDictionary<ulong, string> English
+        {
+            get
+            {
+                if (pkg == null) return null;
+                if (english == null)
+                {
+                    IList<IResourceIndexEntry> lrie = pkg.FindAll(new String[] { "ResourceType", }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x220557DA), });
+                    foreach (IResourceIndexEntry rie in lrie)
+                        if (rie.Instance >> 56 == 0x00)
+                        {
+                            english = new Item(pkg, rie).Resource as IDictionary<ulong, string>;
+                            break;
+                        }
+                }
+                return english;
+            }
         }
 
         #region TopPanelComponents
@@ -270,9 +294,9 @@ namespace ObjectCloner
         }
         #endregion
 
-        #region Details view
-        List<string> overviewTabFields = new List<string>();
-        List<string> overviewTabCommonFields = new List<string>();
+        #region Tabs
+        List<string> detailsTabFields = new List<string>();
+        List<string> detailsTabCommonFields = new List<string>();
         List<string> flagsTabFields = new List<string>();
         void InitialiseTabs()
         {
@@ -292,26 +316,30 @@ namespace ObjectCloner
                     foreach (string commonfield in commonfields)
                     {
                         if (commonfield.StartsWith("Unknown")) continue;
-                        if (!commonfield.Equals("Value")) overviewTabCommonFields.Add(commonfield);
+                        if (!commonfield.Equals("Value")) detailsTabCommonFields.Add(commonfield);
                     }
                 }
                 else if (!field.Equals("AsBytes") && !field.Equals("Stream") && !field.Equals("Value") &&
-                    !field.Equals("Count") && !field.Equals("IsReadOnly") && !field.EndsWith("Reader")) overviewTabFields.Add(field);
+                    !field.Equals("Count") && !field.Equals("IsReadOnly") && !field.EndsWith("Reader")) detailsTabFields.Add(field);
             }
-            InitialiseOverviewTab(res);
+            pictureBox1.Image = null;
+            tbObjName.Text = "";
+            tbCatlgName.Text = "";
+            tbObjDesc.Text = "";
+            tbCatlgDesc.Text = "";
+            InitialiseDetailsTab(res);
         }
-
-        void InitialiseOverviewTab(IResource objd)
+        void InitialiseDetailsTab(IResource objd)
         {
             Dictionary<string, Type> types = AApiVersionedFields.GetContentFieldTypes(0, objd.GetType());
-            foreach (string field in overviewTabFields)
+            foreach (string field in detailsTabFields)
             {
                 CreateField(tlpOverviewMain, types[field], objd as AResource, field);
             }
 
             AApiVersionedFields common = objd["CommonBlock"].Value as AApiVersionedFields;
             types = AApiVersionedFields.GetContentFieldTypes(0, objd["CommonBlock"].Type);
-            foreach (string field in overviewTabCommonFields)
+            foreach (string field in detailsTabCommonFields)
             {
                 CreateField(tlpOverviewCommon, types[field], common, field);
             }
@@ -390,6 +418,16 @@ namespace ObjectCloner
 
         void ClearTabs()
         {
+            pictureBox1.Image = null;
+            tbObjName.Text = "";
+            tbCatlgName.Text = "";
+            tbObjDesc.Text = "";
+            tbCatlgDesc.Text = "";
+            tbPrice.Text = "";
+            tbCatlgName.ReadOnly = true;
+            tbCatlgDesc.ReadOnly = true;
+            ckbCopyToAll.Enabled = false;
+            tbPrice.ReadOnly = true;
             foreach (Control c in tlpOverviewMain.Controls)
                 if (c is TextBox) ((TextBox)c).Text = "";
             foreach (Control c in tlpOverviewCommon.Controls)
@@ -397,6 +435,18 @@ namespace ObjectCloner
         }
         void FillTabs(Item objd)
         {
+            pictureBox1.Image = GetLargeThumb(objd);
+            AApiVersionedFields common = objd.Resource["CommonBlock"].Value as AApiVersionedFields;
+            tbObjName.Text = common["Name"].Value + "";
+            tbObjDesc.Text = common["Desc"].Value + "";
+            tbCatlgName.Text = GetSTBLValue((ulong)common["NameGUID"].Value);
+            tbCatlgDesc.Text = GetSTBLValue((ulong)common["DescGUID"].Value);
+            tbPrice.Text = common["Price"].Value + "";
+            tbCatlgName.ReadOnly = mode == Mode.Clone;
+            tbCatlgDesc.ReadOnly = mode == Mode.Clone;
+            ckbCopyToAll.Enabled = mode == Mode.Fix;
+            tbPrice.ReadOnly = mode == Mode.Clone;
+
             for (int i = 1; i < tlpOverviewMain.RowCount - 1; i++)
             {
                 Label lb = (Label)tlpOverviewMain.GetControlFromPosition(0, i);
@@ -414,6 +464,36 @@ namespace ObjectCloner
                 tb.Text = tv;
             }
         }
+
+        public Image GetLargeThumb(Item objd)
+        {
+            Image res = getImage(0x2e75c766, objd);
+            if (res == null)
+            {
+                TGI img = objd.tgi; img.t = 0x0580A2B6; Item pngItem = new Item(mode == Mode.Clone ? ThumbPkg : objd.Package, img);
+                if (pngItem.ResourceIndexEntry != null) res = getImage(pngItem);
+            }
+            return res;
+        }
+
+        public static Image getImage(Item pngItem) { return Image.FromStream(pngItem.Resource.Stream); }
+
+        public static Image getImage(uint type, Item objd)
+        {
+            ulong png = (ulong)((AHandlerElement)objd.Resource["CommonBlock"].Value)["PngInstance"].Value;
+            if (png != 0)
+            {
+                Item pngItem = new Item(objd.Package, new TGI(type, 0, png));
+                if (pngItem.ResourceIndexEntry != null) return getImage(pngItem);
+            }
+            return null;
+        }
+
+        string GetSTBLValue(ulong guid)
+        {
+            if (English != null && English.ContainsKey(guid)) return English[guid];
+            return "";
+        }
         #endregion
 
 
@@ -425,7 +505,7 @@ namespace ObjectCloner
         void StartLoading(string path)
         {
             if (haveLoaded && loadedPackage == path) return;
-            if (loading) { AbortLoading(); }
+            if (loading) { AbortLoading(false); }
 
             waitingToDisplayObjects = true;
             haveLoaded = false;
@@ -441,11 +521,19 @@ namespace ObjectCloner
             loadThread.Start();
         }
 
-        void AbortLoading()
+        void AbortLoading(bool abort)
         {
             waitingToDisplayObjects = false;
-            if (!loading) MainForm_LoadingComplete(null, new BoolEventArgs(false));
-            else loading = false;
+            if (abort)
+            {
+                loading = false;
+                if (loadThread != null) loadThread.Abort();
+            }
+            else
+            {
+                if (!loading) MainForm_LoadingComplete(null, new BoolEventArgs(false));
+                else loading = false;
+            }
         }
 
         void MainForm_LoadingComplete(object sender, BoolEventArgs e)
@@ -521,8 +609,7 @@ namespace ObjectCloner
 
             this.FetchingComplete += new EventHandler<BoolEventArgs>(MainForm_FetchingComplete);
 
-            setThumbPackage();
-            FetchImages fi = new FetchImages(this, objectChooser.Items.Count, thumbpkg,
+            FetchImages fi = new FetchImages(this, objectChooser.Items.Count, ThumbPkg,
                 getItem, setImage, updateProgress, stopFetching, OnFetchingComplete);
 
             fetchThread = new Thread(new ThreadStart(fi.Fetch));
@@ -530,10 +617,18 @@ namespace ObjectCloner
             fetchThread.Start();
         }
 
-        void AbortFetching()
+        void AbortFetching(bool abort)
         {
-            if (!fetching) MainForm_FetchingComplete(null, new BoolEventArgs(false));
-            else fetching = false;
+            if (abort)
+            {
+                fetching = false;
+                if (fetchThread != null) fetchThread.Abort();
+            }
+            else
+            {
+                if (!fetching) MainForm_FetchingComplete(null, new BoolEventArgs(false));
+                else fetching = false;
+            }
         }
 
         bool waitingForImages;
@@ -665,19 +760,6 @@ namespace ObjectCloner
                 }
             }
 
-            Image getImage(Item pngItem) { return Image.FromStream(pngItem.Resource.Stream); }
-
-            Image getImage(uint type, Item objd)
-            {
-                ulong png = (ulong)((AHandlerElement)objd.Resource["CommonBlock"].Value)["PngInstance"].Value;
-                if (png != 0)
-                {
-                    Item pngItem = new Item(objd.Package, new TGI(type, 0, png));
-                    if (pngItem.ResourceIndexEntry != null) return getImage(pngItem);
-                }
-                return null;
-            }
-
             Item getItem(int i) { Thread.Sleep(0); return (Item)(!mainForm.IsHandleCreated ? null : mainForm.Invoke(getItemCB, new object[] { i, })); }
 
             void setImage(bool flag, int i, Image image) { imgcnt++; Thread.Sleep(0); if (mainForm.IsHandleCreated) mainForm.Invoke(setImageCB, new object[] { flag, i, image, }); }
@@ -701,8 +783,7 @@ namespace ObjectCloner
         {
             this.SavingComplete += new EventHandler<BoolEventArgs>(MainForm_SavingComplete);
 
-            setThumbPackage();
-            SaveList sl = new SaveList(this, objectChooser.SelectedItems[0].Tag as Item, tgiLookup, FullBuild0Path, pkg, thumbpkg, saveFileDialog1.FileName,
+            SaveList sl = new SaveList(this, objectChooser.SelectedItems[0].Tag as Item, tgiLookup, FullBuild0Path, pkg, ThumbPkg, saveFileDialog1.FileName,
                 updateProgress, stopSaving, OnSavingComplete);
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
@@ -710,10 +791,18 @@ namespace ObjectCloner
             saveThread.Start();
         }
 
-        void AbortSaving()
+        void AbortSaving(bool abort)
         {
-            if (!saving) MainForm_SavingComplete(null, new BoolEventArgs(false));
-            else saving = false;
+            if (abort)
+            {
+                saving = false;
+                if (saveThread != null) saveThread.Abort();
+            }
+            else
+            {
+                if (!saving) MainForm_SavingComplete(null, new BoolEventArgs(false));
+                else saving = false;
+            }
         }
 
         bool waitingForSavePackage;
@@ -951,8 +1040,10 @@ namespace ObjectCloner
                         commonBlock["DescGUID"] = new TypedValue(typeof(ulong), oldToNew[descGUID]);
                         commonBlock["Name"] = new TypedValue(typeof(string), "CatalogObjects/Name:" + uniqueObject);
                         commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + uniqueObject);
+                        commonBlock["Price"] = new TypedValue(typeof(float), float.Parse(tbPrice.Text));
 
-                        UpdateTGIsFromField((AResource)item.Resource);
+                        if (!ckbCatlgDetails.Checked)
+                            UpdateTGIsFromField((AResource)item.Resource);
 
                         dirty = true;
                     }
@@ -970,28 +1061,18 @@ namespace ObjectCloner
                     else if (item.ResourceIndexEntry.ResourceType == 0x220557DA)
                     {
                         IDictionary<ulong, string> stbl = (IDictionary<ulong, string>)item.Resource;
-                        if (oldToNew.ContainsKey(nameGUID))
-                        {
-                            string name = "";
-                            if (stbl.ContainsKey(nameGUID))
-                            {
-                                name = stbl[nameGUID];
-                                stbl.Remove(nameGUID);
-                            }
-                            stbl.Add(oldToNew[nameGUID], name);
-                            dirty = true;
-                        }
-                        if (oldToNew.ContainsKey(descGUID))
-                        {
-                            string desc = "";
-                            if (stbl.ContainsKey(descGUID))
-                            {
-                                desc = stbl[descGUID];
-                                stbl.Remove(descGUID);
-                            }
-                            stbl.Add(oldToNew[descGUID], desc);
-                            dirty = true;
-                        }
+
+                        string name = "";
+                        if (stbl.ContainsKey(nameGUID)) { name = stbl[nameGUID]; stbl.Remove(nameGUID); }
+                        if (ckbCopyToAll.Checked || item.tgi.i >> 56 == 0x00) name = tbCatlgName.Text;
+                        stbl.Add(oldToNew.ContainsKey(nameGUID) ? oldToNew[nameGUID] : nameGUID, name);
+
+                        string desc = "";
+                        if (stbl.ContainsKey(descGUID)) { desc = stbl[descGUID]; stbl.Remove(descGUID); }
+                        if (ckbCopyToAll.Checked || item.tgi.i >> 56 == 0x00) desc = tbCatlgDesc.Text;
+                        stbl.Add(oldToNew.ContainsKey(descGUID) ? oldToNew[descGUID] : descGUID, desc);
+
+                        dirty = true;
                     }
                     else
                     {
@@ -1166,8 +1247,7 @@ namespace ObjectCloner
                 values[1] = new TypedValue(typeof(uint), (uint)0);
             }
 
-            if (mode == Mode.Clone) setThumbPackage();
-            SlurpKindred("thumb", mode == Mode.Clone ? thumbpkg : pkg, fields, values);
+            SlurpKindred("thumb", mode == Mode.Clone ? ThumbPkg : pkg, fields, values);
         }
 
         private void SlurpVPXYKin(ulong instance)
@@ -1277,6 +1357,8 @@ namespace ObjectCloner
             ckbDefault.Checked = mode == Mode.Clone;
             ckbNoOBJD.Enabled = mode == Mode.Fix;
             ckbNoOBJD.Checked = false;
+            ckbCatlgDetails.Enabled = mode == Mode.Fix;
+            ckbCatlgDetails.Checked = false;
 
             DoWait("Please wait, loading object catalog...");
             Application.DoEvents();
@@ -1354,7 +1436,7 @@ namespace ObjectCloner
                 }
                 else
                 {
-                    AbortFetching();
+                    AbortFetching(false);
                     for (int i = 0; i < objectChooser.Items.Count; i++)
                         objectChooser.Items[i].ImageIndex = -1;
                 }
@@ -1518,12 +1600,18 @@ namespace ObjectCloner
         {
             Application.DoEvents();
 
+            bool flag = p != Page.Resources || subPage < SubPage.Step2;
+            ckbDefault.Enabled = mode == Mode.Clone && flag;
+            ckbNoOBJD.Enabled = mode == Mode.Fix && !ckbCatlgDetails.Checked && flag;
+            ckbCatlgDetails.Enabled = mode == Mode.Fix && flag;
+
             Color btnListBackColor = Color.FromKnownColor(KnownColor.Control);
             Color btnStartBackColor = Color.FromKnownColor(KnownColor.Control);
             Color btnNextBackColor = Color.FromKnownColor(KnownColor.Control);
             Color btnCommitBackColor = Color.FromKnownColor(KnownColor.Control);
 
-            btnSave.Enabled = p == Page.Resources;
+            float price;
+            btnSave.Enabled = p == Page.Resources && float.TryParse(tbPrice.Text, out price);
             switch (p)
             {
                 case Page.None:
@@ -1608,6 +1696,7 @@ namespace ObjectCloner
 
             subPage = (SubPage)((int)subPage) + 1;
 
+            if (ckbCatlgDetails.Checked) subPage = lastSubPage;//Skip to end
             if (ckbDefault.Checked && subPage == SubPage.Step5) subPage = SubPage.Step6;//Skip it
 
             DoWait("Coming next: " + subPageText[(int)subPage]);
@@ -1723,11 +1812,14 @@ namespace ObjectCloner
         {
             //tgiLookup -- List of resources for cloned object, excludes name map and stbls
 
-            IList<IResourceIndexEntry> lnmaprie = pkg.FindAll(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C), });
-            foreach (IResourceIndexEntry rie in lnmaprie)
+            if (!ckbCatlgDetails.Checked)//No point adding NMAP
             {
-                TGI tgi = new TGI(rie);
-                tgiLookup.Add("namemap", tgi);
+                IList<IResourceIndexEntry> lnmaprie = pkg.FindAll(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C), });
+                foreach (IResourceIndexEntry rie in lnmaprie)
+                {
+                    TGI tgi = new TGI(rie);
+                    tgiLookup.Add("namemap", tgi);
+                }
             }
 
             IList<IResourceIndexEntry> lstblrie = pkg.FindAll(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x220557DA), });
@@ -1742,18 +1834,22 @@ namespace ObjectCloner
             oldToNew = new Dictionary<ulong, ulong>();
 
             // Prevent OBJD and related resources getting renumbered
-            if (ckbNoOBJD.Checked)
+            if (ckbNoOBJD.Checked || ckbCatlgDetails.Checked)
                 oldToNew.Add(objdItem.tgi.i, objdItem.tgi.i);
 
-            ulong langInst = FNV64.GetHash("StringTable:" + uniqueObject) >> 8;
-            foreach (TGI tgi in tgiLookup.Values)
+            //Prevent anything getting renumbered
+            if (!ckbCatlgDetails.Checked)
             {
-                if (!oldToNew.ContainsKey(tgi.i))
+                ulong langInst = FNV64.GetHash("StringTable:" + uniqueObject) >> 8;
+                foreach (TGI tgi in tgiLookup.Values)
                 {
-                    if (tgi.t == 0x220557DA)//STBL
-                        oldToNew.Add(tgi.i, tgi.i & 0xFF00000000000000 | langInst);
-                    else
-                        oldToNew.Add(tgi.i, CreateInstance());
+                    if (!oldToNew.ContainsKey(tgi.i))
+                    {
+                        if (tgi.t == 0x220557DA)//STBL
+                            oldToNew.Add(tgi.i, tgi.i & 0xFF00000000000000 | langInst);
+                        else
+                            oldToNew.Add(tgi.i, CreateInstance());
+                    }
                 }
             }
 
@@ -1791,16 +1887,19 @@ namespace ObjectCloner
 
 
             resourceList.Clear();
-            foreach (var kvp in tgiToItem)
-            {
-                string s = String.Format("Old: {0} --> New: {1}", "" + (TGIN)kvp.Key, "" + (TGIN)new TGI(kvp.Key.t, kvp.Key.g, oldToNew[kvp.Key.i]));
-                resourceList.Add(s);
-            }
+            if (!ckbCatlgDetails.Checked) foreach (var kvp in tgiToItem)
+                {
+                    string s = String.Format("Old: {0} --> New: {1}", "" + (TGIN)kvp.Key, "" + (TGIN)new TGI(kvp.Key.t, kvp.Key.g, oldToNew[kvp.Key.i]));
+                    resourceList.Add(s);
+                }
 
             resourceList.Add("Old NameGUID: 0x" + nameGUID.ToString("X16") + " --> New NameGUID: 0x" + oldToNew[nameGUID].ToString("X16"));
             resourceList.Add("Old DescGUID: 0x" + descGUID.ToString("X16") + " --> New DescGUID: 0x" + oldToNew[descGUID].ToString("X16"));
-            resourceList.Add("Old Name: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Name"] + "\" --> New Name: \"CatalogObjects/Name:" + uniqueObject + "\"");
-            resourceList.Add("Old Desc: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Desc"] + "\" --> New Desc: \"CatalogObjects/Description:" + uniqueObject + "\"");
+            resourceList.Add("Old ObjName: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Name"] + "\" --> New Name: \"CatalogObjects/Name:" + uniqueObject + "\"");
+            resourceList.Add("Old ObjDesc: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Desc"] + "\" --> New Desc: \"CatalogObjects/Description:" + uniqueObject + "\"");
+            resourceList.Add("Old CatlgName: \"" + GetSTBLValue(nameGUID) + "\" --> New CatlgName: \"" + tbCatlgName.Text + "\"");
+            resourceList.Add("Old CatlgDesc: \"" + GetSTBLValue(descGUID) + "\" --> New CatlgDesc: \"" + tbCatlgDesc.Text + "\"");
+            resourceList.Add("Old Price: " + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Price"] + " --> New Price: " + float.Parse(tbPrice.Text));
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -1818,19 +1917,25 @@ namespace ObjectCloner
                     ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(saveFileDialog1.FileName);
 
                     tlpButtons.Enabled = false;
-                    DoWait("Please wait, saving package...");
+                    DoWait("Please wait, creating your new package...");
                     waitingForSavePackage = true;
                     StartSaving();
                 }
                 else
                 {
                     tlpButtons.Enabled = false;
-                    DoWait("Please wait, applying new resource keys...");
+                    DoWait("Please wait, updating your package...");
                     StartFixing();
                 }
             }
             finally { ckbNoOBJD.Checked = false; this.Enabled = true; }
         }
         #endregion
+
+        private void ckbCatlgDetails_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!ckbCatlgDetails.Enabled) return;
+            ckbNoOBJD.Enabled = !ckbCatlgDetails.Checked;
+        }
     }
 }

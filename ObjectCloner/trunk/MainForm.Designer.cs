@@ -38,8 +38,23 @@
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.ckbDefault = new System.Windows.Forms.CheckBox();
             this.ckbNoOBJD = new System.Windows.Forms.CheckBox();
+            this.ckbCatlgDetails = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tpMain = new System.Windows.Forms.TabPage();
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.label8 = new System.Windows.Forms.Label();
+            this.tbObjName = new System.Windows.Forms.TextBox();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.tbPrice = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.tbObjDesc = new System.Windows.Forms.TextBox();
+            this.tbCatlgName = new System.Windows.Forms.TextBox();
+            this.tbCatlgDesc = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.ckbCopyToAll = new System.Windows.Forms.CheckBox();
+            this.tpDetail = new System.Windows.Forms.TabPage();
             this.tlpOverviewAll = new System.Windows.Forms.TableLayoutPanel();
             this.tlpOverviewMain = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
@@ -48,7 +63,6 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
-            this.tpDetail = new System.Windows.Forms.TabPage();
             this.menuBarWidget1 = new ObjectCloner.MenuBarWidget();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -68,6 +82,9 @@
             this.flowLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tpMain.SuspendLayout();
+            this.tableLayoutPanel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.tpDetail.SuspendLayout();
             this.tlpOverviewAll.SuspendLayout();
             this.tlpOverviewMain.SuspendLayout();
             this.tlpOverviewCommon.SuspendLayout();
@@ -149,7 +166,7 @@
             this.btnNext.Margin = new System.Windows.Forms.Padding(0);
             this.btnNext.Name = "btnNext";
             this.btnNext.Size = new System.Drawing.Size(81, 23);
-            this.btnNext.TabIndex = 3;
+            this.btnNext.TabIndex = 4;
             this.btnNext.Text = ">>> &Next >>>";
             this.btnNext.UseVisualStyleBackColor = true;
             this.btnNext.Click += new System.EventHandler(this.btnNext_Click);
@@ -164,7 +181,7 @@
             this.btnSave.Margin = new System.Windows.Forms.Padding(0);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(81, 23);
-            this.btnSave.TabIndex = 4;
+            this.btnSave.TabIndex = 5;
             this.btnSave.Text = "Sa&ve";
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
@@ -179,7 +196,7 @@
             this.btnList.Margin = new System.Windows.Forms.Padding(0);
             this.btnList.Name = "btnList";
             this.btnList.Size = new System.Drawing.Size(81, 23);
-            this.btnList.TabIndex = 1;
+            this.btnList.TabIndex = 2;
             this.btnList.Text = "&List Objects";
             this.btnList.UseVisualStyleBackColor = false;
             this.btnList.Click += new System.EventHandler(this.btnList_Click);
@@ -194,7 +211,7 @@
             this.btnStart.Margin = new System.Windows.Forms.Padding(0);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(81, 23);
-            this.btnStart.TabIndex = 7;
+            this.btnStart.TabIndex = 3;
             this.btnStart.Text = "&Start";
             this.btnStart.UseVisualStyleBackColor = true;
             this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
@@ -205,12 +222,13 @@
             this.flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flowLayoutPanel1.Controls.Add(this.ckbDefault);
             this.flowLayoutPanel1.Controls.Add(this.ckbNoOBJD);
+            this.flowLayoutPanel1.Controls.Add(this.ckbCatlgDetails);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(136, 3);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.tlpButtons.SetRowSpan(this.flowLayoutPanel1, 7);
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(180, 46);
-            this.flowLayoutPanel1.TabIndex = 8;
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(180, 69);
+            this.flowLayoutPanel1.TabIndex = 1;
             // 
             // ckbDefault
             // 
@@ -222,7 +240,7 @@
             this.ckbDefault.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.ckbDefault.Name = "ckbDefault";
             this.ckbDefault.Size = new System.Drawing.Size(122, 17);
-            this.ckbDefault.TabIndex = 2;
+            this.ckbDefault.TabIndex = 1;
             this.ckbDefault.Text = "Default textures only";
             this.ckbDefault.UseVisualStyleBackColor = true;
             // 
@@ -234,9 +252,22 @@
             this.ckbNoOBJD.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.ckbNoOBJD.Name = "ckbNoOBJD";
             this.ckbNoOBJD.Size = new System.Drawing.Size(180, 17);
-            this.ckbNoOBJD.TabIndex = 1;
+            this.ckbNoOBJD.TabIndex = 2;
             this.ckbNoOBJD.Text = "Preserve existing OBJD instance";
             this.ckbNoOBJD.UseVisualStyleBackColor = false;
+            // 
+            // ckbCatlgDetails
+            // 
+            this.ckbCatlgDetails.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbCatlgDetails.AutoSize = true;
+            this.ckbCatlgDetails.Location = new System.Drawing.Point(0, 49);
+            this.ckbCatlgDetails.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
+            this.ckbCatlgDetails.Name = "ckbCatlgDetails";
+            this.ckbCatlgDetails.Size = new System.Drawing.Size(156, 17);
+            this.ckbCatlgDetails.TabIndex = 3;
+            this.ckbCatlgDetails.Text = "Change catalog details only";
+            this.ckbCatlgDetails.UseVisualStyleBackColor = false;
+            this.ckbCatlgDetails.CheckedChanged += new System.EventHandler(this.ckbCatlgDetails_CheckedChanged);
             // 
             // tabControl1
             // 
@@ -254,7 +285,7 @@
             // tpMain
             // 
             this.tpMain.AutoScroll = true;
-            this.tpMain.Controls.Add(this.tlpOverviewAll);
+            this.tpMain.Controls.Add(this.tableLayoutPanel2);
             this.tpMain.Location = new System.Drawing.Point(4, 22);
             this.tpMain.Name = "tpMain";
             this.tpMain.Padding = new System.Windows.Forms.Padding(3);
@@ -262,6 +293,168 @@
             this.tpMain.TabIndex = 0;
             this.tpMain.Text = "Overview";
             this.tpMain.UseVisualStyleBackColor = true;
+            // 
+            // tableLayoutPanel2
+            // 
+            this.tableLayoutPanel2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel2.AutoSize = true;
+            this.tableLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tableLayoutPanel2.ColumnCount = 2;
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.Controls.Add(this.label8, 0, 1);
+            this.tableLayoutPanel2.Controls.Add(this.tbObjName, 1, 1);
+            this.tableLayoutPanel2.Controls.Add(this.pictureBox1, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.tbPrice, 1, 6);
+            this.tableLayoutPanel2.Controls.Add(this.label10, 0, 2);
+            this.tableLayoutPanel2.Controls.Add(this.tbObjDesc, 1, 2);
+            this.tableLayoutPanel2.Controls.Add(this.tbCatlgName, 1, 3);
+            this.tableLayoutPanel2.Controls.Add(this.tbCatlgDesc, 1, 4);
+            this.tableLayoutPanel2.Controls.Add(this.label12, 0, 6);
+            this.tableLayoutPanel2.Controls.Add(this.label9, 0, 3);
+            this.tableLayoutPanel2.Controls.Add(this.label11, 0, 4);
+            this.tableLayoutPanel2.Controls.Add(this.ckbCopyToAll, 1, 5);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(1, 6);
+            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            this.tableLayoutPanel2.RowCount = 8;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(436, 287);
+            this.tableLayoutPanel2.TabIndex = 0;
+            // 
+            // label8
+            // 
+            this.label8.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(8, 140);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(69, 13);
+            this.label8.TabIndex = 1;
+            this.label8.Text = "Object Name";
+            // 
+            // tbObjName
+            // 
+            this.tbObjName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbObjName.Location = new System.Drawing.Point(83, 137);
+            this.tbObjName.Name = "tbObjName";
+            this.tbObjName.ReadOnly = true;
+            this.tbObjName.Size = new System.Drawing.Size(350, 20);
+            this.tbObjName.TabIndex = 2;
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.tableLayoutPanel2.SetColumnSpan(this.pictureBox1, 2);
+            this.pictureBox1.Location = new System.Drawing.Point(3, 3);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(128, 128);
+            this.pictureBox1.TabIndex = 0;
+            this.pictureBox1.TabStop = false;
+            // 
+            // tbPrice
+            // 
+            this.tbPrice.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.tbPrice.Location = new System.Drawing.Point(83, 264);
+            this.tbPrice.Name = "tbPrice";
+            this.tbPrice.ReadOnly = true;
+            this.tbPrice.Size = new System.Drawing.Size(100, 20);
+            this.tbPrice.TabIndex = 11;
+            // 
+            // label10
+            // 
+            this.label10.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(11, 166);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(66, 13);
+            this.label10.TabIndex = 3;
+            this.label10.Text = "Object Desc";
+            // 
+            // tbObjDesc
+            // 
+            this.tbObjDesc.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbObjDesc.Location = new System.Drawing.Point(83, 163);
+            this.tbObjDesc.Name = "tbObjDesc";
+            this.tbObjDesc.ReadOnly = true;
+            this.tbObjDesc.Size = new System.Drawing.Size(350, 20);
+            this.tbObjDesc.TabIndex = 4;
+            // 
+            // tbCatlgName
+            // 
+            this.tbCatlgName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbCatlgName.Location = new System.Drawing.Point(83, 189);
+            this.tbCatlgName.Name = "tbCatlgName";
+            this.tbCatlgName.ReadOnly = true;
+            this.tbCatlgName.Size = new System.Drawing.Size(350, 20);
+            this.tbCatlgName.TabIndex = 6;
+            // 
+            // tbCatlgDesc
+            // 
+            this.tbCatlgDesc.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbCatlgDesc.Location = new System.Drawing.Point(83, 215);
+            this.tbCatlgDesc.Name = "tbCatlgDesc";
+            this.tbCatlgDesc.ReadOnly = true;
+            this.tbCatlgDesc.Size = new System.Drawing.Size(350, 20);
+            this.tbCatlgDesc.TabIndex = 8;
+            // 
+            // label12
+            // 
+            this.label12.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(46, 267);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(31, 13);
+            this.label12.TabIndex = 10;
+            this.label12.Text = "Price";
+            // 
+            // label9
+            // 
+            this.label9.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(3, 192);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(74, 13);
+            this.label9.TabIndex = 5;
+            this.label9.Text = "Catalog Name";
+            // 
+            // label11
+            // 
+            this.label11.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(6, 218);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(71, 13);
+            this.label11.TabIndex = 7;
+            this.label11.Text = "Catalog Desc";
+            // 
+            // ckbCopyToAll
+            // 
+            this.ckbCopyToAll.AutoSize = true;
+            this.ckbCopyToAll.Enabled = false;
+            this.ckbCopyToAll.Location = new System.Drawing.Point(83, 241);
+            this.ckbCopyToAll.Name = "ckbCopyToAll";
+            this.ckbCopyToAll.Size = new System.Drawing.Size(164, 17);
+            this.ckbCopyToAll.TabIndex = 9;
+            this.ckbCopyToAll.Text = "Copy English to all languages";
+            this.ckbCopyToAll.UseVisualStyleBackColor = true;
+            // 
+            // tpDetail
+            // 
+            this.tpDetail.Controls.Add(this.tlpOverviewAll);
+            this.tpDetail.Location = new System.Drawing.Point(4, 22);
+            this.tpDetail.Name = "tpDetail";
+            this.tpDetail.Padding = new System.Windows.Forms.Padding(3);
+            this.tpDetail.Size = new System.Drawing.Size(440, 371);
+            this.tpDetail.TabIndex = 1;
+            this.tpDetail.Text = "Details";
+            this.tpDetail.UseVisualStyleBackColor = true;
             // 
             // tlpOverviewAll
             // 
@@ -273,7 +466,7 @@
             this.tlpOverviewAll.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tlpOverviewAll.Controls.Add(this.tlpOverviewMain, 0, 0);
             this.tlpOverviewAll.Controls.Add(this.tlpOverviewCommon, 0, 1);
-            this.tlpOverviewAll.Location = new System.Drawing.Point(3, 3);
+            this.tlpOverviewAll.Location = new System.Drawing.Point(2, 3);
             this.tlpOverviewAll.Name = "tlpOverviewAll";
             this.tlpOverviewAll.RowCount = 2;
             this.tlpOverviewAll.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -378,16 +571,6 @@
             this.label7.Size = new System.Drawing.Size(90, 13);
             this.label7.TabIndex = 0;
             this.label7.Text = "Common Block";
-            // 
-            // tpDetail
-            // 
-            this.tpDetail.Location = new System.Drawing.Point(4, 22);
-            this.tpDetail.Name = "tpDetail";
-            this.tpDetail.Padding = new System.Windows.Forms.Padding(3);
-            this.tpDetail.Size = new System.Drawing.Size(440, 371);
-            this.tpDetail.TabIndex = 1;
-            this.tpDetail.Text = "Details";
-            this.tpDetail.UseVisualStyleBackColor = true;
             // 
             // menuBarWidget1
             // 
@@ -513,6 +696,11 @@
             this.tabControl1.ResumeLayout(false);
             this.tpMain.ResumeLayout(false);
             this.tpMain.PerformLayout();
+            this.tableLayoutPanel2.ResumeLayout(false);
+            this.tableLayoutPanel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.tpDetail.ResumeLayout(false);
+            this.tpDetail.PerformLayout();
             this.tlpOverviewAll.ResumeLayout(false);
             this.tlpOverviewAll.PerformLayout();
             this.tlpOverviewMain.ResumeLayout(false);
@@ -561,6 +749,20 @@
         private System.Windows.Forms.CheckBox ckbNoOBJD;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.CheckBox ckbDefault;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.TextBox tbObjName;
+        private System.Windows.Forms.TextBox tbCatlgName;
+        private System.Windows.Forms.TextBox tbObjDesc;
+        private System.Windows.Forms.TextBox tbCatlgDesc;
+        private System.Windows.Forms.TextBox tbPrice;
+        private System.Windows.Forms.CheckBox ckbCatlgDetails;
+        private System.Windows.Forms.CheckBox ckbCopyToAll;
     }
 }
 
