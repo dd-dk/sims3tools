@@ -25,17 +25,6 @@ namespace ObjectCloner.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection Packages_PATH {
-            get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["Packages_PATH"]));
-            }
-            set {
-                this["Packages_PATH"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("-1")]
         public int View {
             get {
