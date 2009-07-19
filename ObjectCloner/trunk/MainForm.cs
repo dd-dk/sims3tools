@@ -424,8 +424,8 @@ namespace ObjectCloner
             tbObjDesc.Text = "";
             tbCatlgDesc.Text = "";
             tbPrice.Text = "";
-            tbCatlgName.ReadOnly = true;
-            tbCatlgDesc.ReadOnly = true;
+            tbCatlgName.Enabled = false;
+            tbCatlgDesc.Enabled = false;
             ckbCopyToAll.Enabled = false;
             tbPrice.ReadOnly = true;
             foreach (Control c in tlpOverviewMain.Controls)
@@ -442,9 +442,7 @@ namespace ObjectCloner
             tbCatlgName.Text = GetSTBLValue((ulong)common["NameGUID"].Value);
             tbCatlgDesc.Text = GetSTBLValue((ulong)common["DescGUID"].Value);
             tbPrice.Text = common["Price"].Value + "";
-            tbCatlgName.ReadOnly = mode == Mode.Clone;
-            tbCatlgDesc.ReadOnly = mode == Mode.Clone;
-            ckbCopyToAll.Enabled = mode == Mode.Fix;
+            tbCatlgName.Enabled = tbCatlgDesc.Enabled = ckbCopyToAll.Enabled = mode == Mode.Fix;
             tbPrice.ReadOnly = mode == Mode.Clone;
 
             for (int i = 1; i < tlpOverviewMain.RowCount - 1; i++)

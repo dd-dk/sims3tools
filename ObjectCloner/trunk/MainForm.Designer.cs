@@ -48,12 +48,12 @@
             this.tbPrice = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.tbObjDesc = new System.Windows.Forms.TextBox();
-            this.tbCatlgName = new System.Windows.Forms.TextBox();
-            this.tbCatlgDesc = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.ckbCopyToAll = new System.Windows.Forms.CheckBox();
+            this.tbCatlgName = new System.Windows.Forms.RichTextBox();
+            this.tbCatlgDesc = new System.Windows.Forms.RichTextBox();
             this.tpDetail = new System.Windows.Forms.TabPage();
             this.tlpOverviewAll = new System.Windows.Forms.TableLayoutPanel();
             this.tlpOverviewMain = new System.Windows.Forms.TableLayoutPanel();
@@ -212,7 +212,7 @@
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(81, 23);
             this.btnStart.TabIndex = 3;
-            this.btnStart.Text = "&Start";
+            this.btnStart.Text = "Sta&rt";
             this.btnStart.UseVisualStyleBackColor = true;
             this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
             // 
@@ -309,12 +309,12 @@
             this.tableLayoutPanel2.Controls.Add(this.tbPrice, 1, 6);
             this.tableLayoutPanel2.Controls.Add(this.label10, 0, 2);
             this.tableLayoutPanel2.Controls.Add(this.tbObjDesc, 1, 2);
-            this.tableLayoutPanel2.Controls.Add(this.tbCatlgName, 1, 3);
-            this.tableLayoutPanel2.Controls.Add(this.tbCatlgDesc, 1, 4);
             this.tableLayoutPanel2.Controls.Add(this.label12, 0, 6);
             this.tableLayoutPanel2.Controls.Add(this.label9, 0, 3);
             this.tableLayoutPanel2.Controls.Add(this.label11, 0, 4);
             this.tableLayoutPanel2.Controls.Add(this.ckbCopyToAll, 1, 5);
+            this.tableLayoutPanel2.Controls.Add(this.tbCatlgName, 1, 3);
+            this.tableLayoutPanel2.Controls.Add(this.tbCatlgDesc, 1, 4);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(1, 6);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 8;
@@ -326,7 +326,7 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(436, 287);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(436, 332);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // label8
@@ -361,7 +361,7 @@
             // tbPrice
             // 
             this.tbPrice.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tbPrice.Location = new System.Drawing.Point(83, 264);
+            this.tbPrice.Location = new System.Drawing.Point(83, 309);
             this.tbPrice.Name = "tbPrice";
             this.tbPrice.ReadOnly = true;
             this.tbPrice.Size = new System.Drawing.Size(100, 20);
@@ -386,29 +386,11 @@
             this.tbObjDesc.Size = new System.Drawing.Size(350, 20);
             this.tbObjDesc.TabIndex = 4;
             // 
-            // tbCatlgName
-            // 
-            this.tbCatlgName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbCatlgName.Location = new System.Drawing.Point(83, 189);
-            this.tbCatlgName.Name = "tbCatlgName";
-            this.tbCatlgName.ReadOnly = true;
-            this.tbCatlgName.Size = new System.Drawing.Size(350, 20);
-            this.tbCatlgName.TabIndex = 6;
-            // 
-            // tbCatlgDesc
-            // 
-            this.tbCatlgDesc.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbCatlgDesc.Location = new System.Drawing.Point(83, 215);
-            this.tbCatlgDesc.Name = "tbCatlgDesc";
-            this.tbCatlgDesc.ReadOnly = true;
-            this.tbCatlgDesc.Size = new System.Drawing.Size(350, 20);
-            this.tbCatlgDesc.TabIndex = 8;
-            // 
             // label12
             // 
             this.label12.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(46, 267);
+            this.label12.Location = new System.Drawing.Point(46, 312);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(31, 13);
             this.label12.TabIndex = 10;
@@ -428,7 +410,7 @@
             // 
             this.label11.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(6, 218);
+            this.label11.Location = new System.Drawing.Point(6, 241);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(71, 13);
             this.label11.TabIndex = 7;
@@ -438,12 +420,33 @@
             // 
             this.ckbCopyToAll.AutoSize = true;
             this.ckbCopyToAll.Enabled = false;
-            this.ckbCopyToAll.Location = new System.Drawing.Point(83, 241);
+            this.ckbCopyToAll.Location = new System.Drawing.Point(83, 286);
             this.ckbCopyToAll.Name = "ckbCopyToAll";
             this.ckbCopyToAll.Size = new System.Drawing.Size(164, 17);
             this.ckbCopyToAll.TabIndex = 9;
             this.ckbCopyToAll.Text = "Copy English to all languages";
             this.ckbCopyToAll.UseVisualStyleBackColor = true;
+            // 
+            // tbCatlgName
+            // 
+            this.tbCatlgName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbCatlgName.Enabled = false;
+            this.tbCatlgName.Location = new System.Drawing.Point(83, 189);
+            this.tbCatlgName.Multiline = false;
+            this.tbCatlgName.Name = "tbCatlgName";
+            this.tbCatlgName.Size = new System.Drawing.Size(350, 20);
+            this.tbCatlgName.TabIndex = 12;
+            this.tbCatlgName.Text = "";
+            // 
+            // tbCatlgDesc
+            // 
+            this.tbCatlgDesc.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbCatlgDesc.Enabled = false;
+            this.tbCatlgDesc.Location = new System.Drawing.Point(83, 215);
+            this.tbCatlgDesc.Name = "tbCatlgDesc";
+            this.tbCatlgDesc.Size = new System.Drawing.Size(350, 65);
+            this.tbCatlgDesc.TabIndex = 12;
+            this.tbCatlgDesc.Text = "";
             // 
             // tpDetail
             // 
@@ -757,12 +760,12 @@
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.TextBox tbObjName;
-        private System.Windows.Forms.TextBox tbCatlgName;
         private System.Windows.Forms.TextBox tbObjDesc;
-        private System.Windows.Forms.TextBox tbCatlgDesc;
         private System.Windows.Forms.TextBox tbPrice;
         private System.Windows.Forms.CheckBox ckbCatlgDetails;
         private System.Windows.Forms.CheckBox ckbCopyToAll;
+        private System.Windows.Forms.RichTextBox tbCatlgName;
+        private System.Windows.Forms.RichTextBox tbCatlgDesc;
     }
 }
 
