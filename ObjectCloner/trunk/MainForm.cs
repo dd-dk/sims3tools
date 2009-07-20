@@ -1026,7 +1026,24 @@ namespace ObjectCloner
 
         Dictionary<TGI, Item> tgiToItem;
         Dictionary<ulong, ulong> oldToNew;
-        string uniqueObject;
+        string uniqueObject = null;
+        string UniqueObject
+        {
+            get
+            {
+                if (uniqueObject == null)
+                {
+                    StringInputDialog ond = new StringInputDialog();
+                    ond.Caption = "Make Object Unique";
+                    ond.Prompt = "Enter unique object identifier";
+                    ond.Value = Path.GetFileNameWithoutExtension(openPackageDialog.FileName);
+                    DialogResult dr = ond.ShowDialog();
+                    if (dr == DialogResult.OK) uniqueObject = ond.Value;
+                }
+                return uniqueObject;
+            }
+        }
+
         ulong nameGUID;
         ulong descGUID;
 
@@ -1046,8 +1063,8 @@ namespace ObjectCloner
 
                         commonBlock["NameGUID"] = new TypedValue(typeof(ulong), oldToNew[nameGUID]);
                         commonBlock["DescGUID"] = new TypedValue(typeof(ulong), oldToNew[descGUID]);
-                        commonBlock["Name"] = new TypedValue(typeof(string), "CatalogObjects/Name:" + uniqueObject);
-                        commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + uniqueObject);
+                        commonBlock["Name"] = new TypedValue(typeof(string), "CatalogObjects/Name:" + UniqueObject);
+                        commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + UniqueObject);
                         commonBlock["Price"] = new TypedValue(typeof(float), float.Parse(tbPrice.Text));
 
                         if (!ckbCatlgDetails.Checked)
@@ -1112,7 +1129,7 @@ namespace ObjectCloner
         }
 
         int numNewInstances = 0;
-        ulong CreateInstance() { numNewInstances++; return FNV64.GetHash(numNewInstances.ToString("X8") + "_" + uniqueObject + "_" + DateTime.UtcNow.ToBinary().ToString("X16")); }
+        ulong CreateInstance() { numNewInstances++; return FNV64.GetHash(numNewInstances.ToString("X8") + "_" + UniqueObject + "_" + DateTime.UtcNow.ToBinary().ToString("X16")); }
 
         private bool UpdateTGIsFromField(AApiVersionedFields field)
         {
@@ -1316,6 +1333,7 @@ namespace ObjectCloner
         {
             openPackageDialog.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder == null || ObjectCloner.Properties.Settings.Default.LastSaveFolder.Length == 0
                 ? "" : ObjectCloner.Properties.Settings.Default.LastSaveFolder;
+            openPackageDialog.FileName = "*.package";
             DialogResult dr = openPackageDialog.ShowDialog();
             if (dr != DialogResult.OK) return;
             ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(openPackageDialog.FileName);
@@ -1330,14 +1348,6 @@ namespace ObjectCloner
                 for (Exception inex = ex.InnerException; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
                 CopyableMessageBox.Show("Could not open package " + openPackageDialog.FileName + "\n\n" + s, "File Open", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
             }
-
-            StringInputDialog ond = new StringInputDialog();
-            ond.Caption = "Make Object Unique";
-            ond.Prompt = "Enter unique object identifier";
-            ond.Value = CreatorName + "_" + Path.GetFileNameWithoutExtension(openPackageDialog.FileName);
-            dr = ond.ShowDialog();
-            if (dr != DialogResult.OK) return;
-            uniqueObject = ond.Value;
 
             mode = Mode.Fix;
             lastSubPage = SubPage.Step10;
@@ -1681,9 +1691,25 @@ namespace ObjectCloner
             tlpButtons.Enabled = false;
             resourceList.Clear();
             tgiLookup.Clear();
+            if (mode == Mode.Fix)
+            {
+                uniqueObject = null;
+                if (UniqueObject == null)
+                {
+                    splitContainer1.Panel1.Controls.Clear();
+                    tlpButtons.Enabled = true;
+                    objectChooser.Items.Clear();
+                    ClearTabs();
+                    ClosePkg();
+                    subPage = SubPage.None;
+                    setButtons(Page.None, SubPage.None);
+                    return;
+                }
+            }
 
             subPage = SubPage.Step1;
-            DoWait("Please wait, retrieving Object...");
+            //DoWait("Please wait, retrieving Object...");
+            DoWait("Please wait, performing operations...");
             Step1();
             DisplayResources();
         }
@@ -1693,18 +1719,28 @@ namespace ObjectCloner
             clone = objectChooser.SelectedItems[0].SubItems[1].Text;
             Add("clone", clone);
             objdItem = new Item(pkg, clone);
+
+            while (subPage != lastSubPage)
+            {
+                updateProgress(true, subPageText[(int)subPage], true, (int)lastSubPage, true, (int)subPage);
+                Application.DoEvents();
+                btnNext_Click(null, null);
+            }
+
+            this.toolStripProgressBar1.Visible = false;
+            this.toolStripStatusLabel1.Visible = false;
         }
 
         private void btnNext_Click(object sender, EventArgs e)
         {
-            tlpButtons.Enabled = false;
+            //tlpButtons.Enabled = false;
 
             subPage = (SubPage)((int)subPage) + 1;
 
             if (ckbCatlgDetails.Checked) subPage = lastSubPage;//Skip to end
             if (ckbDefault.Checked && subPage == SubPage.Step5) subPage = SubPage.Step6;//Skip it
 
-            DoWait("Coming next: " + subPageText[(int)subPage]);
+            //DoWait("Coming next: " + subPageText[(int)subPage]);
             switch (subPage)
             {
                 case SubPage.Step2: Step2(); break;
@@ -1717,7 +1753,7 @@ namespace ObjectCloner
                 case SubPage.Step9: Step9(); break;
                 case SubPage.Step10: Step10(); break;
             }
-            DisplayResources();
+            //DisplayResources();
         }
         //Bring in all the OBJK (or, on request, all resources in all the TGI blocks of the OBJD)
         void Step2()
@@ -1845,7 +1881,7 @@ namespace ObjectCloner
             //Prevent anything getting renumbered
             if (!ckbCatlgDetails.Checked)
             {
-                ulong langInst = FNV64.GetHash("StringTable:" + uniqueObject) >> 8;
+                ulong langInst = FNV64.GetHash("StringTable:" + UniqueObject) >> 8;
                 foreach (TGI tgi in tgiLookup.Values)
                 {
                     if (!oldToNew.ContainsKey(tgi.i))
@@ -1887,8 +1923,8 @@ namespace ObjectCloner
             nameGUID = (ulong)((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["NameGUID"].Value;
             descGUID = (ulong)((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["DescGUID"].Value;
 
-            oldToNew.Add(nameGUID, FNV64.GetHash("CatalogObjects/Name:" + uniqueObject));
-            oldToNew.Add(descGUID, FNV64.GetHash("CatalogObjects/Description:" + uniqueObject));
+            oldToNew.Add(nameGUID, FNV64.GetHash("CatalogObjects/Name:" + UniqueObject));
+            oldToNew.Add(descGUID, FNV64.GetHash("CatalogObjects/Description:" + UniqueObject));
 
 
             resourceList.Clear();
@@ -1900,8 +1936,8 @@ namespace ObjectCloner
 
             resourceList.Add("Old NameGUID: 0x" + nameGUID.ToString("X16") + " --> New NameGUID: 0x" + oldToNew[nameGUID].ToString("X16"));
             resourceList.Add("Old DescGUID: 0x" + descGUID.ToString("X16") + " --> New DescGUID: 0x" + oldToNew[descGUID].ToString("X16"));
-            resourceList.Add("Old ObjName: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Name"] + "\" --> New Name: \"CatalogObjects/Name:" + uniqueObject + "\"");
-            resourceList.Add("Old ObjDesc: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Desc"] + "\" --> New Desc: \"CatalogObjects/Description:" + uniqueObject + "\"");
+            resourceList.Add("Old ObjName: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Name"] + "\" --> New Name: \"CatalogObjects/Name:" + UniqueObject + "\"");
+            resourceList.Add("Old ObjDesc: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Desc"] + "\" --> New Desc: \"CatalogObjects/Description:" + UniqueObject + "\"");
             resourceList.Add("Old CatlgName: \"" + GetSTBLValue(nameGUID) + "\" --> New CatlgName: \"" + tbCatlgName.Text + "\"");
             resourceList.Add("Old CatlgDesc: \"" + GetSTBLValue(descGUID) + "\" --> New CatlgDesc: \"" + tbCatlgDesc.Text + "\"");
             resourceList.Add("Old Price: " + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Price"] + " --> New Price: " + float.Parse(tbPrice.Text));
@@ -1914,9 +1950,11 @@ namespace ObjectCloner
             {
                 if (mode == Mode.Clone)
                 {
+                    string prefix = CreatorName;
+                    prefix = (prefix != null) ? prefix + "_" : "";
                     if (ObjectCloner.Properties.Settings.Default.LastSaveFolder != null)
                         saveFileDialog1.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder;
-                    saveFileDialog1.FileName = objectChooser.SelectedItems.Count > 0 ? objectChooser.SelectedItems[0].Text : "";
+                    saveFileDialog1.FileName = objectChooser.SelectedItems.Count > 0 ? prefix + objectChooser.SelectedItems[0].Text : "";
                     DialogResult dr = saveFileDialog1.ShowDialog();
                     if (dr != DialogResult.OK) return;
                     ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(saveFileDialog1.FileName);
