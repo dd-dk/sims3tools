@@ -154,17 +154,5 @@ namespace ObjectCloner.Properties {
                 this["Sims3Folder"] = value;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string CreatorName {
-            get {
-                return ((string)(this["CreatorName"]));
-            }
-            set {
-                this["CreatorName"] = value;
-            }
-        }
     }
 }
