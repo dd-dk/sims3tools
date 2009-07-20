@@ -42,7 +42,7 @@ namespace ObjectCloner
                 tilesToolStripMenuItem, largeIconsToolStripMenuItem, smallIconsToolStripMenuItem, listToolStripMenuItem, detailedListToolStripMenuItem,
                 iconsToolStripMenuItem,
                 //Settings
-                sims3FolderToolStripMenuItem,
+                sims3FolderToolStripMenuItem, userNameToopStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
@@ -61,7 +61,7 @@ namespace ObjectCloner
             MBF_new = 0, MBF_open, MBF_exit,
             MBV_tiles, MBV_largeIcons, MBV_smallIcons, MBV_list, MBV_detailedList,
             MBV_icons,
-            MBS_sims3Folder,
+            MBS_sims3Folder, MBS_userName,
             MBH_contents, MBH_about, MBH_warranty, MBH_licence,
         }
 
