@@ -32,7 +32,7 @@ rem there shouldn't be any to delete...
 del /q /f %out%%TargetName%*%suffix%.*
 
 pushd ..
-7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" S3PIDemoFE
+7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" "s3pi ObjectCloner"
 popd
 
 pushd bin\%ConfigurationName%
