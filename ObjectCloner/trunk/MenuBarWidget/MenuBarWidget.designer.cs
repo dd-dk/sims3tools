@@ -43,7 +43,6 @@
             this.iconsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sims3FolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.userNameToopStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
@@ -158,8 +157,7 @@
             // settingsToolStripMenuItem
             // 
             this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.sims3FolderToolStripMenuItem,
-            this.userNameToopStripMenuItem});
+            this.sims3FolderToolStripMenuItem});
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
             this.settingsToolStripMenuItem.Size = new System.Drawing.Size(58, 20);
             this.settingsToolStripMenuItem.Text = "&Settings";
@@ -171,13 +169,6 @@
             this.sims3FolderToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
             this.sims3FolderToolStripMenuItem.Text = "Sims3 Installation &Folder...";
             this.sims3FolderToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
-            // 
-            // userNameToopStripMenuItem
-            // 
-            this.userNameToopStripMenuItem.Name = "userNameToopStripMenuItem";
-            this.userNameToopStripMenuItem.Size = new System.Drawing.Size(213, 22);
-            this.userNameToopStripMenuItem.Text = "Creator &Name...";
-            this.userNameToopStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -261,7 +252,6 @@
         private System.Windows.Forms.ToolStripMenuItem iconsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sims3FolderToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem userNameToopStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
     }
 }
