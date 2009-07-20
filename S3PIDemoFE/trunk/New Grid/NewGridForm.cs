@@ -31,12 +31,42 @@ namespace S3PIDemoFE
         public NewGridForm()
         {
             InitializeComponent();
+            splitContainer1.Panel1Collapsed = true;
+            listBox1.Visible = false;
         }
 
-        public NewGridForm(IResource resource)
-            : this()
+        public NewGridForm(AApiVersionedFields field) : this() { s3PIPropertyGrid1.s3piObject = field; }
+
+        public NewGridForm(IList<AApiVersionedFields> list) : this() { FieldList = list; }
+
+        IList<AApiVersionedFields> fieldList;
+        public IList<AApiVersionedFields> FieldList
         {
-            s3PIPropertyGrid1.s3piObject = resource as AResource;
+            get { return fieldList; }
+            set
+            {
+                this.fieldList = value;
+                if (value == null)
+                {
+                    splitContainer1.Panel1Collapsed = true;
+                    listBox1.Visible = false;
+                    s3PIPropertyGrid1.s3piObject = null;
+                }
+                else
+                {
+                    splitContainer1.Panel1Collapsed = false;
+                    listBox1.Items.Clear();
+                    for (int i = 0; i < fieldList.Count; i++)
+                        listBox1.Items.Add("[" + i + "] " + fieldList[i].GetType().Name);
+                    listBox1.Visible = true;
+                    listBox1.SelectedIndex = fieldList.Count > 0 ? 0 : -1;
+                }
+            }
+        }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            s3PIPropertyGrid1.s3piObject = listBox1.SelectedIndex >= 0 ? fieldList[listBox1.SelectedIndex] : null;
         }
     }
 }

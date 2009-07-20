@@ -46,6 +46,8 @@ namespace S3PIDemoFE
                 throw new InvalidCastException();
             this.owner = owner;
             this.field = field;
+            btnImport.Enabled = owner.GetType().GetProperty(field).CanWrite;
+            btnExport.Enabled = owner.GetType().GetProperty(field).CanRead;
         }
 
         IWindowsFormsEditorService edSvc;

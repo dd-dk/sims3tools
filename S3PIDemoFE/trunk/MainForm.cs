@@ -1118,11 +1118,7 @@ namespace S3PIDemoFE
             try
             {
                 this.Enabled = false;
-#if true//DEBUG
-                (new NewGridForm(resource)).ShowDialog();
-#else
-                (new GridForm(resource)).ShowDialog();
-#endif
+                (new NewGridForm(resource as AApiVersionedFields)).ShowDialog();
             }
             finally { this.Enabled = true; }
         }
