@@ -657,10 +657,23 @@ namespace S3PIDemoFE
 
                 IDictionaryCTD field = (IDictionaryCTD)value;
                 List<AApiVersionedFields> list = new List<AApiVersionedFields>();
-                foreach (var k in field.Value.Keys) list.Add(new AsKVP(new DictionaryEntry(k, field.Value[k])));
+                List<object> oldKeys = new List<object>();
+                foreach (var k in field.Value.Keys) { list.Add(new AsKVP(new DictionaryEntry(k, field.Value[k]))); oldKeys.Add(k); }
 
                 NewGridForm ui = new NewGridForm(list);
                 edSvc.ShowDialog(ui);
+
+                List<object> newKeys = new List<object>();
+                foreach (AsKVP kvp in list)
+                    newKeys.Add(kvp["Key"].Value);
+
+                List<object> delete = new List<object>();
+                foreach (var k in field.Value.Keys) if (!newKeys.Contains(k)) delete.Add(k);
+                foreach (object k in delete) field.Value.Remove(k);
+
+                foreach (AsKVP kvp in list)
+                    if (oldKeys.Contains(kvp["Key"].Value)) field.Value[kvp["Key"].Value] = kvp["Val"].Value;
+                    else field.Value.Add(kvp["Key"].Value, kvp["Val"].Value);
 
                 return value;
             }
@@ -671,7 +684,7 @@ namespace S3PIDemoFE
     {
         DictionaryEntry entry;
         List<string> contentFields;
-        public AsKVP(DictionaryEntry entry) { this.entry = entry; contentFields = new List<string>(new string[] { entry.Key.GetType().Name, entry.Value.GetType().Name, }); }
+        public AsKVP(DictionaryEntry entry) { this.entry = entry; contentFields = new List<string>(new string[] { "Key", "Val", }); }
 
         public override List<string> ContentFields { get { return contentFields; } }
         public override int RecommendedApiVersion { get { return 0; } }
