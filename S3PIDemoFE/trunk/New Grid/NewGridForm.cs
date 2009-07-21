@@ -35,9 +35,24 @@ namespace S3PIDemoFE
             listBox1.Visible = false;
         }
 
-        public NewGridForm(AApiVersionedFields field) : this() { s3PIPropertyGrid1.s3piObject = field; }
+        private NewGridForm(bool main)
+            : this()
+        {
+            flpMainButtons.Visible = main;
+            btnClose.Visible = !main;
+            if (main)
+            {
+                this.AcceptButton = btnOK;
+                this.CancelButton = btnCancel;
+            }
+            else
+                this.AcceptButton = this.CancelButton = btnClose;
+        }
 
-        public NewGridForm(IList<AApiVersionedFields> list) : this() { FieldList = list; }
+        public NewGridForm(AApiVersionedFields field, bool main) : this(main) { s3PIPropertyGrid1.s3piObject = field; }
+        public NewGridForm(AApiVersionedFields field) : this(false) { s3PIPropertyGrid1.s3piObject = field; }
+
+        public NewGridForm(IList<AApiVersionedFields> list) : this(false) { FieldList = list; }
 
         IList<AApiVersionedFields> fieldList;
         public IList<AApiVersionedFields> FieldList

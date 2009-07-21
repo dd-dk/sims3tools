@@ -1118,7 +1118,18 @@ namespace S3PIDemoFE
             try
             {
                 this.Enabled = false;
-                (new NewGridForm(resource as AApiVersionedFields)).ShowDialog();
+                DialogResult dr = (new NewGridForm(resource as AApiVersionedFields, true)).ShowDialog();
+                if (dr != DialogResult.OK)
+                {
+                    resourceIsDirty = false;
+                    IResourceIndexEntry rie = browserWidget1.SelectedResource;
+                    browserWidget1.SelectedResource = null;
+                    browserWidget1.SelectedResource = rie;
+                }
+                else
+                {
+                    controlPanel1_CommitClick(null, null);
+                }
             }
             finally { this.Enabled = true; }
         }
