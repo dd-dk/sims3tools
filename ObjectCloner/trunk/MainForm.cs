@@ -106,6 +106,7 @@ namespace ObjectCloner
         Item objdItem;
         Item objkItem;
         TGI vpxy;
+        Image replacementForThumbs;
 
         Dictionary<string, TGI> tgiLookup = new Dictionary<string,TGI>();
 
@@ -293,6 +294,7 @@ namespace ObjectCloner
             subPage = SubPage.None;
             resourceList.Clear();
             tgiLookup.Clear();
+            replacementForThumbs = null;
             if (objectChooser.SelectedItems.Count == 0) ClearTabs();
             else FillTabs(objectChooser.SelectedItems[0].Tag as Item);
             setButtons(Page.ObjectChooser, subPage);
@@ -446,6 +448,7 @@ namespace ObjectCloner
         void FillTabs(Item objd)
         {
             pictureBox1.Image = GetLargeThumb(objd);
+            btnReplThumb.Enabled = mode == Mode.Fix;
             AApiVersionedFields common = objd.Resource["CommonBlock"].Value as AApiVersionedFields;
             tbObjName.Text = common["Name"].Value + "";
             tbObjDesc.Text = common["Desc"].Value + "";
@@ -1044,8 +1047,8 @@ namespace ObjectCloner
             }
         }
 
-        ulong nameGUID;
-        ulong descGUID;
+        ulong nameGUID, newNameGUID;
+        ulong descGUID, newDescGUID;
 
         void StartFixing()
         {
@@ -1061,8 +1064,8 @@ namespace ObjectCloner
                     {
                         AHandlerElement commonBlock = ((AHandlerElement)item.Resource["CommonBlock"].Value);
 
-                        commonBlock["NameGUID"] = new TypedValue(typeof(ulong), oldToNew[nameGUID]);
-                        commonBlock["DescGUID"] = new TypedValue(typeof(ulong), oldToNew[descGUID]);
+                        commonBlock["NameGUID"] = new TypedValue(typeof(ulong), newNameGUID);
+                        commonBlock["DescGUID"] = new TypedValue(typeof(ulong), newDescGUID);
                         commonBlock["Name"] = new TypedValue(typeof(string), "CatalogObjects/Name:" + UniqueObject);
                         commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + UniqueObject);
                         commonBlock["Price"] = new TypedValue(typeof(float), float.Parse(tbPrice.Text));
@@ -1108,6 +1111,30 @@ namespace ObjectCloner
 
                 }
 
+                if (replacementForThumbs != null)
+                {
+                    IList<IResourceIndexEntry> lrie = pkg.FindAll(new string[] { "Instance", }, new TypedValue[] { new TypedValue(typeof(ulong), objdItem.tgi.i), });
+                    foreach (IResourceIndexEntry rie in lrie)
+                    {
+                        switch (rie.ResourceType)
+                        {
+                            case 0x2E75C766:
+                            case 0x0580A2B6:
+                                setThumb(replacementForThumbs, rie, 128);
+                                break;
+                            case 0x2E75C765:
+                            case 0x0580A2B5:
+                                setThumb(replacementForThumbs, rie, 64);
+                                break;
+                            case 0x2E75C764:
+                            case 0x0580A2B4:
+                                setThumb(replacementForThumbs, rie, 32);
+                                break;
+                            default: break;
+                        }
+                    }
+                }
+
                 foreach (Item item in tgiToItem.Values)
                     if (item.tgi != new TGI(0, 0, 0) && oldToNew.ContainsKey(item.ResourceIndexEntry.Instance))
                         item.ResourceIndexEntry.Instance = oldToNew[item.ResourceIndexEntry.Instance];
@@ -1126,6 +1153,16 @@ namespace ObjectCloner
             }
 
             CopyableMessageBox.Show("OK", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
+        }
+
+        bool gtAbort() { return false; }
+        void setThumb(Image src, IResourceIndexEntry rie, int size)
+        {
+            Item item = new Item(pkg, rie);
+            Image thumb;
+            thumb = replacementForThumbs.GetThumbnailImage(size, size, gtAbort, System.IntPtr.Zero);
+            thumb.Save(item.Resource.Stream, System.Drawing.Imaging.ImageFormat.Png);
+            pkg.ReplaceResource(rie, item.Resource);
         }
 
         int numNewInstances = 0;
@@ -1917,8 +1954,8 @@ namespace ObjectCloner
             nameGUID = (ulong)((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["NameGUID"].Value;
             descGUID = (ulong)((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["DescGUID"].Value;
 
-            oldToNew.Add(nameGUID, FNV64.GetHash("CatalogObjects/Name:" + UniqueObject));
-            oldToNew.Add(descGUID, FNV64.GetHash("CatalogObjects/Description:" + UniqueObject));
+            newNameGUID = FNV64.GetHash("CatalogObjects/Name:" + UniqueObject);
+            newDescGUID = FNV64.GetHash("CatalogObjects/Description:" + UniqueObject);
 
 
             resourceList.Clear();
@@ -1928,8 +1965,8 @@ namespace ObjectCloner
                     resourceList.Add(s);
                 }
 
-            resourceList.Add("Old NameGUID: 0x" + nameGUID.ToString("X16") + " --> New NameGUID: 0x" + oldToNew[nameGUID].ToString("X16"));
-            resourceList.Add("Old DescGUID: 0x" + descGUID.ToString("X16") + " --> New DescGUID: 0x" + oldToNew[descGUID].ToString("X16"));
+            resourceList.Add("Old NameGUID: 0x" + nameGUID.ToString("X16") + " --> New NameGUID: 0x" + newNameGUID.ToString("X16"));
+            resourceList.Add("Old DescGUID: 0x" + descGUID.ToString("X16") + " --> New DescGUID: 0x" + newDescGUID.ToString("X16"));
             resourceList.Add("Old ObjName: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Name"] + "\" --> New Name: \"CatalogObjects/Name:" + UniqueObject + "\"");
             resourceList.Add("Old ObjDesc: \"" + ((AApiVersionedFields)objdItem.Resource["CommonBlock"].Value)["Desc"] + "\" --> New Desc: \"CatalogObjects/Description:" + UniqueObject + "\"");
             resourceList.Add("Old CatlgName: \"" + GetSTBLValue(nameGUID) + "\" --> New CatlgName: \"" + tbCatlgName.Text + "\"");
@@ -1973,6 +2010,25 @@ namespace ObjectCloner
         {
             if (!ckbCatlgDetails.Enabled) return;
             ckbNoOBJD.Enabled = !ckbCatlgDetails.Checked;
+        }
+
+        private void btnReplThumb_Click(object sender, EventArgs e)
+        {
+            openThumbnailDialog.FilterIndex = 1;
+            openThumbnailDialog.FileName = "*.PNG";
+            DialogResult dr = openThumbnailDialog.ShowDialog();
+            if (dr != DialogResult.OK) return;
+            try
+            {
+                replacementForThumbs = Image.FromFile(openThumbnailDialog.FileName, true);
+                pictureBox1.Image = replacementForThumbs.GetThumbnailImage(128, 128, gtAbort, System.IntPtr.Zero);
+            }
+            catch (Exception ex)
+            {
+                CopyableMessageBox.Show("Could not read " + openThumbnailDialog.FileName + ":\n" + ex.Message, openThumbnailDialog.Title,
+                    CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                replacementForThumbs = null;
+            }
         }
     }
 }

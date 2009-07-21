@@ -44,7 +44,6 @@
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.label8 = new System.Windows.Forms.Label();
             this.tbObjName = new System.Windows.Forms.TextBox();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tbPrice = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.tbObjDesc = new System.Windows.Forms.TextBox();
@@ -54,6 +53,9 @@
             this.ckbCopyToAll = new System.Windows.Forms.CheckBox();
             this.tbCatlgName = new System.Windows.Forms.RichTextBox();
             this.tbCatlgDesc = new System.Windows.Forms.RichTextBox();
+            this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.btnReplThumb = new System.Windows.Forms.Button();
             this.tpDetail = new System.Windows.Forms.TabPage();
             this.tlpOverviewAll = new System.Windows.Forms.TableLayoutPanel();
             this.tlpOverviewMain = new System.Windows.Forms.TableLayoutPanel();
@@ -73,6 +75,7 @@
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openPackageDialog = new System.Windows.Forms.OpenFileDialog();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
+            this.openThumbnailDialog = new System.Windows.Forms.OpenFileDialog();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
@@ -83,6 +86,7 @@
             this.tabControl1.SuspendLayout();
             this.tpMain.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
+            this.flowLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tpDetail.SuspendLayout();
             this.tlpOverviewAll.SuspendLayout();
@@ -305,7 +309,6 @@
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel2.Controls.Add(this.label8, 0, 1);
             this.tableLayoutPanel2.Controls.Add(this.tbObjName, 1, 1);
-            this.tableLayoutPanel2.Controls.Add(this.pictureBox1, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.tbPrice, 1, 6);
             this.tableLayoutPanel2.Controls.Add(this.label10, 0, 2);
             this.tableLayoutPanel2.Controls.Add(this.tbObjDesc, 1, 2);
@@ -315,6 +318,7 @@
             this.tableLayoutPanel2.Controls.Add(this.ckbCopyToAll, 1, 5);
             this.tableLayoutPanel2.Controls.Add(this.tbCatlgName, 1, 3);
             this.tableLayoutPanel2.Controls.Add(this.tbCatlgDesc, 1, 4);
+            this.tableLayoutPanel2.Controls.Add(this.flowLayoutPanel2, 0, 0);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(1, 6);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 8;
@@ -326,14 +330,14 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(436, 332);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(436, 326);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // label8
             // 
             this.label8.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(8, 140);
+            this.label8.Location = new System.Drawing.Point(8, 134);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(69, 13);
             this.label8.TabIndex = 1;
@@ -342,26 +346,16 @@
             // tbObjName
             // 
             this.tbObjName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbObjName.Location = new System.Drawing.Point(83, 137);
+            this.tbObjName.Location = new System.Drawing.Point(83, 131);
             this.tbObjName.Name = "tbObjName";
             this.tbObjName.ReadOnly = true;
             this.tbObjName.Size = new System.Drawing.Size(350, 20);
             this.tbObjName.TabIndex = 2;
             // 
-            // pictureBox1
-            // 
-            this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.tableLayoutPanel2.SetColumnSpan(this.pictureBox1, 2);
-            this.pictureBox1.Location = new System.Drawing.Point(3, 3);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(128, 128);
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
-            // 
             // tbPrice
             // 
             this.tbPrice.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tbPrice.Location = new System.Drawing.Point(83, 309);
+            this.tbPrice.Location = new System.Drawing.Point(83, 303);
             this.tbPrice.Name = "tbPrice";
             this.tbPrice.ReadOnly = true;
             this.tbPrice.Size = new System.Drawing.Size(100, 20);
@@ -371,7 +365,7 @@
             // 
             this.label10.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(11, 166);
+            this.label10.Location = new System.Drawing.Point(11, 160);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(66, 13);
             this.label10.TabIndex = 3;
@@ -380,7 +374,7 @@
             // tbObjDesc
             // 
             this.tbObjDesc.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbObjDesc.Location = new System.Drawing.Point(83, 163);
+            this.tbObjDesc.Location = new System.Drawing.Point(83, 157);
             this.tbObjDesc.Name = "tbObjDesc";
             this.tbObjDesc.ReadOnly = true;
             this.tbObjDesc.Size = new System.Drawing.Size(350, 20);
@@ -390,7 +384,7 @@
             // 
             this.label12.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(46, 312);
+            this.label12.Location = new System.Drawing.Point(46, 306);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(31, 13);
             this.label12.TabIndex = 10;
@@ -400,7 +394,7 @@
             // 
             this.label9.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(3, 192);
+            this.label9.Location = new System.Drawing.Point(3, 186);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(74, 13);
             this.label9.TabIndex = 5;
@@ -410,7 +404,7 @@
             // 
             this.label11.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(6, 241);
+            this.label11.Location = new System.Drawing.Point(6, 235);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(71, 13);
             this.label11.TabIndex = 7;
@@ -420,7 +414,7 @@
             // 
             this.ckbCopyToAll.AutoSize = true;
             this.ckbCopyToAll.Enabled = false;
-            this.ckbCopyToAll.Location = new System.Drawing.Point(83, 286);
+            this.ckbCopyToAll.Location = new System.Drawing.Point(83, 280);
             this.ckbCopyToAll.Name = "ckbCopyToAll";
             this.ckbCopyToAll.Size = new System.Drawing.Size(164, 17);
             this.ckbCopyToAll.TabIndex = 9;
@@ -431,7 +425,7 @@
             // 
             this.tbCatlgName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tbCatlgName.Enabled = false;
-            this.tbCatlgName.Location = new System.Drawing.Point(83, 189);
+            this.tbCatlgName.Location = new System.Drawing.Point(83, 183);
             this.tbCatlgName.Multiline = false;
             this.tbCatlgName.Name = "tbCatlgName";
             this.tbCatlgName.Size = new System.Drawing.Size(350, 20);
@@ -442,11 +436,47 @@
             // 
             this.tbCatlgDesc.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tbCatlgDesc.Enabled = false;
-            this.tbCatlgDesc.Location = new System.Drawing.Point(83, 215);
+            this.tbCatlgDesc.Location = new System.Drawing.Point(83, 209);
             this.tbCatlgDesc.Name = "tbCatlgDesc";
             this.tbCatlgDesc.Size = new System.Drawing.Size(350, 65);
             this.tbCatlgDesc.TabIndex = 12;
             this.tbCatlgDesc.Text = "";
+            // 
+            // flowLayoutPanel2
+            // 
+            this.flowLayoutPanel2.AutoSize = true;
+            this.flowLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tableLayoutPanel2.SetColumnSpan(this.flowLayoutPanel2, 2);
+            this.flowLayoutPanel2.Controls.Add(this.pictureBox1);
+            this.flowLayoutPanel2.Controls.Add(this.btnReplThumb);
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(0, 0);
+            this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
+            this.flowLayoutPanel2.Name = "flowLayoutPanel2";
+            this.flowLayoutPanel2.Size = new System.Drawing.Size(209, 128);
+            this.flowLayoutPanel2.TabIndex = 13;
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.pictureBox1.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(0);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(128, 128);
+            this.pictureBox1.TabIndex = 0;
+            this.pictureBox1.TabStop = false;
+            // 
+            // btnReplThumb
+            // 
+            this.btnReplThumb.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnReplThumb.Enabled = false;
+            this.btnReplThumb.Location = new System.Drawing.Point(131, 52);
+            this.btnReplThumb.Name = "btnReplThumb";
+            this.btnReplThumb.Size = new System.Drawing.Size(75, 23);
+            this.btnReplThumb.TabIndex = 1;
+            this.btnReplThumb.Text = "Replace...";
+            this.btnReplThumb.UseVisualStyleBackColor = true;
+            this.btnReplThumb.Click += new System.EventHandler(this.btnReplThumb_Click);
             // 
             // tpDetail
             // 
@@ -672,6 +702,12 @@
             this.folderBrowserDialog1.Description = "Select the folder where your Sims3 game is installed.";
             this.folderBrowserDialog1.ShowNewFolderButton = false;
             // 
+            // openThumbnailDialog
+            // 
+            this.openThumbnailDialog.FileName = "*.PNG";
+            this.openThumbnailDialog.Filter = "Thumbnails|*.PNG|All files|*.*";
+            this.openThumbnailDialog.Title = "Select thumbnail";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -701,6 +737,7 @@
             this.tpMain.PerformLayout();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
+            this.flowLayoutPanel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.tpDetail.ResumeLayout(false);
             this.tpDetail.PerformLayout();
@@ -766,6 +803,9 @@
         private System.Windows.Forms.CheckBox ckbCopyToAll;
         private System.Windows.Forms.RichTextBox tbCatlgName;
         private System.Windows.Forms.RichTextBox tbCatlgDesc;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
+        private System.Windows.Forms.Button btnReplThumb;
+        private System.Windows.Forms.OpenFileDialog openThumbnailDialog;
     }
 }
 
