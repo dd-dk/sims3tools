@@ -1696,13 +1696,7 @@ namespace ObjectCloner
                 uniqueObject = null;
                 if (UniqueObject == null)
                 {
-                    splitContainer1.Panel1.Controls.Clear();
-                    tlpButtons.Enabled = true;
-                    objectChooser.Items.Clear();
-                    ClearTabs();
-                    ClosePkg();
-                    subPage = SubPage.None;
-                    setButtons(Page.None, SubPage.None);
+                    DisplayObjectChooser();
                     return;
                 }
             }
