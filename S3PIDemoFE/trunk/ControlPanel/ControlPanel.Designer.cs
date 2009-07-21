@@ -145,6 +145,7 @@ namespace S3PIDemoFE
             this.btnCommit.TabIndex = 9;
             this.btnCommit.Text = "&Commit";
             this.btnCommit.UseVisualStyleBackColor = true;
+            this.btnCommit.Visible = false;
             this.btnCommit.Click += new System.EventHandler(this.btnCommit_Click);
             // 
             // tableLayoutPanel1
