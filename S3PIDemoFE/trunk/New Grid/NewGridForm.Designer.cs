@@ -54,7 +54,6 @@
             this.s3PIPropertyGrid1.HelpVisible = false;
             this.s3PIPropertyGrid1.Location = new System.Drawing.Point(0, 0);
             this.s3PIPropertyGrid1.Name = "s3PIPropertyGrid1";
-            this.s3PIPropertyGrid1.PropertySort = System.Windows.Forms.PropertySort.NoSort;
             this.s3PIPropertyGrid1.Size = new System.Drawing.Size(360, 283);
             this.s3PIPropertyGrid1.TabIndex = 1;
             this.s3PIPropertyGrid1.ToolbarVisible = false;

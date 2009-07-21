@@ -33,7 +33,7 @@ namespace S3PIDemoFE
     public class S3PIPropertyGrid : PropertyGrid
     {
         AApiVersionedFieldsCTD target;
-        public S3PIPropertyGrid() : base() { PropertySort = PropertySort.NoSort; HelpVisible = false; ToolbarVisible = false; }
+        public S3PIPropertyGrid() : base() { PropertySort = PropertySort.Alphabetical; HelpVisible = false; ToolbarVisible = false; }
 
         public AApiVersionedFields s3piObject { set { if (value != null) target = new AApiVersionedFieldsCTD(value); SelectedObject = target; } }
     }
@@ -142,7 +142,7 @@ namespace S3PIDemoFE
             {
                 Type t = PropertyType;
                 if (t.Equals(typeof(AsHexCTD))) return new AsHexCTD(owner, Name, component);
-                if (t.Equals(typeof(ICollectionAsHexCTD))) return new ICollectionAsHexCTD(owner, Name, component);
+                if (t.Equals(typeof(IListAsHexCTD))) return new IListAsHexCTD(owner, Name, component);
                 if (t.Equals(typeof(AApiVersionedFieldsCTD))) return new AApiVersionedFieldsCTD(owner, Name, component);
                 if (t.Equals(typeof(ICollectionAApiVersionedFieldsCTD))) return new ICollectionAApiVersionedFieldsCTD(owner, Name, component);
                 if (t.Equals(typeof(IDictionaryCTD))) return new IDictionaryCTD(owner, Name, component);
@@ -193,8 +193,9 @@ namespace S3PIDemoFE
                         return fieldType;
 
                     if (typeof(IConvertible).IsAssignableFrom(fieldType) || typeof(Boolset).Equals(fieldType)) return typeof(AsHexCTD);
-                    if (isCollection(new List<Type>(new Type[] { typeof(Boolset), }), fieldType, false, true, false))
-                        return typeof(ICollectionAsHexCTD);
+                    if (isCollection(new List<Type>(new Type[] { typeof(Boolset), }), fieldType, false, true, false)
+                        && typeof(IList).IsAssignableFrom(fieldType)) // need "object this[int index] { get; set; }" interface
+                        return typeof(IListAsHexCTD);
 
                     if (typeof(AApiVersionedFields).IsAssignableFrom(fieldType)) return typeof(AApiVersionedFieldsCTD);
                     if (isCollection(new List<Type>(), fieldType, false, false, true))
@@ -233,7 +234,7 @@ namespace S3PIDemoFE
         }
     }
 
-    [Category("Fields")]
+    //[Category("Fields")]
     [TypeConverter(typeof(AsHexConverter))]
     public class AsHexCTD : ICustomTypeDescriptor
     {
@@ -317,16 +318,16 @@ namespace S3PIDemoFE
             {
                 if (value.GetType().Equals(typeof(string)))
                 {
+                    string str = (string)value;
                     try
                     {
                         AApiVersionedFieldsCTD.TypedValuePropertyDescriptor pd = (AApiVersionedFieldsCTD.TypedValuePropertyDescriptor)context.PropertyDescriptor;
-                        string str = (string)value;
                         if (typeof(Boolset).Equals(pd.FieldType))
                             return new Boolset(str);
                         ulong num = Convert.ToUInt64(str, str.StartsWith("0x", StringComparison.InvariantCultureIgnoreCase) ? 16 : 10);
                         return Convert.ChangeType(num, pd.FieldType);
                     }
-                    catch (Exception ex) { CopyableMessageBox.Show(ex.Message); }
+                    catch (Exception ex) { throw new NotSupportedException("Invalid data: " + str, ex); }
                 }
                 return base.ConvertFrom(context, culture, value);
             }
@@ -448,13 +449,13 @@ namespace S3PIDemoFE
 
     [Category("Lists")]
     [TypeConverter(typeof(ICollectionConverter))]
-    [Editor(typeof(ICollectionAsHexEditor), typeof(UITypeEditor))]
-    public class ICollectionAsHexCTD : ICustomTypeDescriptor
+    [Editor(typeof(IListAsHexEditor), typeof(UITypeEditor))]
+    public class IListAsHexCTD : ICustomTypeDescriptor
     {
         protected AApiVersionedFields owner;
         protected string field;
         protected object component;
-        public ICollectionAsHexCTD(AApiVersionedFields owner, string field, object component) { this.owner = owner; this.field = field; this.component = component; }
+        public IListAsHexCTD(AApiVersionedFields owner, string field, object component) { this.owner = owner; this.field = field; this.component = component; }
 
         #region ICustomTypeDescriptor Members
 
@@ -478,7 +479,7 @@ namespace S3PIDemoFE
 
         public PropertyDescriptorCollection GetProperties(Attribute[] attributes)
         {
-            return new PropertyDescriptorCollection(new PropertyDescriptor[] { new ICollectionAsHexPropertyDescriptor(owner, field, component, null), });
+            return new PropertyDescriptorCollection(new PropertyDescriptor[] { new IListAsHexPropertyDescriptor(owner, field, component, null), });
         }
 
         public PropertyDescriptorCollection GetProperties() { return GetProperties(null); }
@@ -487,12 +488,12 @@ namespace S3PIDemoFE
 
         #endregion
 
-        public class ICollectionAsHexPropertyDescriptor : PropertyDescriptor
+        public class IListAsHexPropertyDescriptor : PropertyDescriptor
         {
             AApiVersionedFields owner;
             string field;
             object component;
-            public ICollectionAsHexPropertyDescriptor(AApiVersionedFields owner, string field, object component, Attribute[] attr)
+            public IListAsHexPropertyDescriptor(AApiVersionedFields owner, string field, object component, Attribute[] attr)
                 : base(field, attr) { this.owner = owner; this.field = field; this.component = component; }
 
             public override string Name { get { return field; } }
@@ -514,20 +515,16 @@ namespace S3PIDemoFE
             public override bool ShouldSerializeValue(object component) { throw new InvalidOperationException(); }
         }
 
-        public class ICollectionAsHexEditor : UITypeEditor
+        public class IListAsHexEditor : UITypeEditor
         {
             public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) { return UITypeEditorEditStyle.Modal; }
             public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
             {
                 IWindowsFormsEditorService edSvc = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
 
-                ICollectionAsHexCTD field = (ICollectionAsHexCTD)value;
-                ICollection coll = (ICollection)field.owner[field.field].Value;
-                List<object> list = new List<object>();
-                foreach (object f in coll) list.Add(f);
-                AsHex ah = new AsHex(field.field, list);
-
-                NewGridForm ui = new NewGridForm(ah);
+                IListAsHexCTD field = (IListAsHexCTD)value;
+                object list = field.owner[field.field].Value;
+                NewGridForm ui = new NewGridForm(new AsHex(field.field, (IList)list));
                 edSvc.ShowDialog(ui);
 
                 return value;
@@ -538,10 +535,10 @@ namespace S3PIDemoFE
     public class AsHex : AApiVersionedFields
     {
         string name;
-        IList<object> value;
-        public AsHex(string name, IList<object> value) { this.name = name; this.value = value; }
+        IList list;
+        public AsHex(string name, IList list) { this.name = name; this.list = list; }
 
-        public Type ElementType { get { return value.Count == 0 ? typeof(object) : value[0].GetType(); } }
+        public Type ElementType { get { return list.Count == 0 ? typeof(object) : list[0].GetType(); } }
 
         static System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"^\[(\d+)\].*$");
         public override TypedValue this[string index]
@@ -551,14 +548,16 @@ namespace S3PIDemoFE
                 if (!regex.IsMatch(index))
                     throw new ArgumentOutOfRangeException();
                 int i = Convert.ToInt32(regex.Match(index).Groups[1].Value);
-                return new TypedValue(value[i].GetType(), value[i], "X");
+                return new TypedValue(list[i].GetType(), list[i], "X");
             }
             set
             {
                 if (!regex.IsMatch(index))
                     throw new ArgumentOutOfRangeException();
-                int i = Convert.ToInt32(regex.Match(index).Captures[0].Value);
-                this.value[i] = value.Value;
+                int i = Convert.ToInt32(regex.Match(index).Groups[1].Value);
+
+                list.GetType().GetProperty("Item").SetValue(list, value.Value, new object[] { i, });
+                //list[i] = value.Value; <-- BYPASSES "new" set method in AHandlerList<T>
             }
         }
 
@@ -567,7 +566,7 @@ namespace S3PIDemoFE
             get
             {
                 List<string> res = new List<string>();
-                for (int i = 0; i < value.Count; i++)
+                for (int i = 0; i < list.Count; i++)
                     res.Add("[" + i + "] " + name);
                 return res;
             }
