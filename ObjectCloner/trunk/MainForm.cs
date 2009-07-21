@@ -1094,12 +1094,12 @@ namespace ObjectCloner
                         string name = "";
                         if (stbl.ContainsKey(nameGUID)) { name = stbl[nameGUID]; stbl.Remove(nameGUID); }
                         if (ckbCopyToAll.Checked || item.tgi.i >> 56 == 0x00) name = tbCatlgName.Text;
-                        stbl.Add(oldToNew.ContainsKey(nameGUID) ? oldToNew[nameGUID] : nameGUID, name);
+                        stbl.Add(newNameGUID, name);
 
                         string desc = "";
                         if (stbl.ContainsKey(descGUID)) { desc = stbl[descGUID]; stbl.Remove(descGUID); }
                         if (ckbCopyToAll.Checked || item.tgi.i >> 56 == 0x00) desc = tbCatlgDesc.Text;
-                        stbl.Add(oldToNew.ContainsKey(descGUID) ? oldToNew[descGUID] : descGUID, desc);
+                        stbl.Add(newDescGUID, desc);
 
                         dirty = true;
                     }
@@ -1163,7 +1163,7 @@ namespace ObjectCloner
             Image thumb;
             thumb = replacementForThumbs.GetThumbnailImage(size, size, gtAbort, System.IntPtr.Zero);
             thumb.Save(item.Resource.Stream, System.Drawing.Imaging.ImageFormat.Png);
-            pkg.ReplaceResource(rie, item.Resource);
+            item.Commit();
         }
 
         int numNewInstances = 0;
