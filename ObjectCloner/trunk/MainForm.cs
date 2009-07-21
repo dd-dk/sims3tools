@@ -431,6 +431,7 @@ namespace ObjectCloner
         void ClearTabs()
         {
             pictureBox1.Image = null;
+            btnReplThumb.Enabled = false;
             tbObjName.Text = "";
             tbCatlgName.Text = "";
             tbObjDesc.Text = "";
