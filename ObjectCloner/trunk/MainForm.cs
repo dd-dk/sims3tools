@@ -307,101 +307,141 @@ namespace ObjectCloner
         #endregion
 
         #region Tabs
-        List<string> detailsTabFields = new List<string>();
-        List<string> detailsTabCommonFields = new List<string>();
-        List<string> flagsTabFields = new List<string>();
         void InitialiseTabs()
         {
             IResource res = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x319E4F1D");
-            List<string> fields = AApiVersionedFields.GetContentFields(0, res.GetType());
+            InitialiseDetailsTab(res);
+            InitialiseFlagTabs(res);
+            InitialiseOtherTab(res);
+        }
+        void InitialiseDetailsTab(IResource objd)
+        {
+            List<string> detailsTabFields = new List<string>();
+            List<string> detailsTabCommonFields = new List<string>();
+            List<string> fields = AApiVersionedFields.GetContentFields(0, objd.GetType());
+
             foreach (string field in fields)
             {
-                if (field.StartsWith("Unknown")) continue;
-                if (field.EndsWith("Flags")) flagsTabFields.Add(field);
-                else if (field.EndsWith("Index")) { }//ignore
+                if (field.StartsWith("Unknown")) { }
+                else if (field.EndsWith("Flags")) { }
+                else if (field.EndsWith("Index")) { }
                 else if (field.Equals("Materials")) { }
                 else if (field.Equals("MTDoors")) { }
                 else if (field.Equals("TGIBlocks")) { }
                 else if (field.Equals("CommonBlock"))
                 {
-                    List<string> commonfields = AApiVersionedFields.GetContentFields(0, res["CommonBlock"].Type);
+                    List<string> commonfields = AApiVersionedFields.GetContentFields(0, objd["CommonBlock"].Type);
                     foreach (string commonfield in commonfields)
                     {
                         if (commonfield.StartsWith("Unknown")) continue;
-                        if (!commonfield.Equals("Value")) detailsTabCommonFields.Add(commonfield);
+                        else if (commonfield.EndsWith("Flags")) { }
+                        else if (!commonfield.Equals("Value")) detailsTabCommonFields.Add(commonfield);
                     }
                 }
                 else if (!field.Equals("AsBytes") && !field.Equals("Stream") && !field.Equals("Value") &&
                     !field.Equals("Count") && !field.Equals("IsReadOnly") && !field.EndsWith("Reader")) detailsTabFields.Add(field);
             }
-            pictureBox1.Image = null;
-            tbObjName.Text = "";
-            tbCatlgName.Text = "";
-            tbObjDesc.Text = "";
-            tbCatlgDesc.Text = "";
-            InitialiseDetailsTab(res);
-        }
-        void InitialiseDetailsTab(IResource objd)
-        {
+
             Dictionary<string, Type> types = AApiVersionedFields.GetContentFieldTypes(0, objd.GetType());
             foreach (string field in detailsTabFields)
             {
-                CreateField(tlpOverviewMain, types[field], objd as AResource, field);
+                CreateField(tlpObjectDetail, types[field], field);
             }
 
             AApiVersionedFields common = objd["CommonBlock"].Value as AApiVersionedFields;
             types = AApiVersionedFields.GetContentFieldTypes(0, objd["CommonBlock"].Type);
             foreach (string field in detailsTabCommonFields)
             {
-                CreateField(tlpOverviewCommon, types[field], common, field);
+                CreateField(tlpObjectCommon, types[field], field);
             }
         }
-
-        void CreateField(TableLayoutPanel target, Type t, AApiVersionedFields obj, string field)
+        struct flagField
         {
-            if (typeof(IConvertible).IsAssignableFrom(t))
+            public TableLayoutPanel tlp;
+            public string field;
+            public int length;
+            public int offset;
+            public flagField(TableLayoutPanel tlp, string field, int length, int offset) { this.tlp = tlp; this.field = field; this.length = length; this.offset = offset; }
+        }
+        List<flagField> flagFields;
+        void InitialiseFlagTabs(IResource objd)
+        {
+            flagFields = new List<flagField>(new flagField[] {
+                new flagField(tlpRoomSort, "RoomCategoryFlags", 32, 0),
+                new flagField(tlpRoomSubLow, "RoomSubCategoryFlags", 32, 0),
+                new flagField(tlpRoomSubHigh, "RoomSubCategoryFlags", 64, 32),
+                new flagField(tlpFuncSort, "FunctionCategoryFlags", 32, 0),
+                new flagField(tlpFuncSubLow, "FunctionSubCategoryFlags", 32, 0),
+                new flagField(tlpFuncSubHigh, "FunctionSubCategoryFlags", 64, 32),
+                new flagField(tlpBuildSort, "BuildCategoryFlags", 32, 0),
+            });
+            foreach (flagField ff in flagFields)
             {
-                switch (((IConvertible)obj[field].Value).GetTypeCode())
+                Application.DoEvents();
+                Type t = objd[ff.field].Type;
+                CheckBox[] ackb = new CheckBox[ff.length - ff.offset];
+                for (int i = 0; i < ackb.Length; i++) ackb[i] = new CheckBox();
+                ff.tlp.RowCount = 2 + ackb.Length;
+
+                for (int i = ff.offset; i < ff.length; i++)
                 {
-                    case TypeCode.SByte:
-                    case TypeCode.Byte:
-                        CreateField(target, field, 2 + 2);
-                        break;
-                    case TypeCode.Boolean:
-                    case TypeCode.Char:
-                    case TypeCode.Int16:
-                    case TypeCode.UInt16:
-                        CreateField(target, field, 2 + 4);
-                        break;
-                    case TypeCode.Single:
-                    case TypeCode.DBNull:
-                    case TypeCode.Empty:
-                        CreateField(target, field, 8);
-                        break;
-                    case TypeCode.Int32:
-                    case TypeCode.UInt32:
-                        CreateField(target, field, 2 + 8);
-                        break;
-                    case TypeCode.Double:
-                        CreateField(target, field, 16);
-                        break;
-                    case TypeCode.Int64:
-                    case TypeCode.UInt64:
-                        CreateField(target, field, 2 + 16);
-                        break;
-                    case TypeCode.Decimal:
-                    case TypeCode.DateTime:
-                    case TypeCode.String:
-                    case TypeCode.Object:
-                        CreateField(target, field, 30);
-                        break;
+                    ulong value = (ulong)Math.Pow(2, i);
+                    string s = (Enum)Enum.ToObject(t, value) + "";
+                    if (s.Equals(value.ToString())) s = "-";
+                    CreateField(ff, s, ackb, i - ff.offset);
                 }
+
+                ff.tlp.Controls.AddRange(ackb);
             }
-            else
-                CreateField(target, field, 30);
+        }
+        Dictionary<string, string> otherFieldMap;
+        void InitialiseOtherTab(IResource objd)
+        {
+            otherFieldMap = new Dictionary<string, string>();
+            otherFieldMap.Add("Unknown8", "Unknown8");
+            otherFieldMap.Add("Unknown9", "Unknown9");
+            otherFieldMap.Add("Unknown10", "Unknown10");
+            otherFieldMap.Add("Slot Placement", "SlotPlacementFlags");
+            otherFieldMap.Add("Product Status", "CommonBlock.BuildBuyProductStatusFlags");
+            Dictionary<string, Type> types = AApiVersionedFields.GetContentFieldTypes(0, objd.GetType());
+            foreach (string field in otherFieldMap.Keys)
+                if (otherFieldMap[field].Contains("."))
+                    CreateField(tlpOther, objd[otherFieldMap[field]].Type, field, true);
+                else
+                    CreateField(tlpOther, types[otherFieldMap[field]], field, true);
         }
 
-        void CreateField(TableLayoutPanel tlp, string name, int len)
+        static Dictionary<List<Type>, int> typeToLen = null;
+        static void setTypeToLen()
+        {
+            typeToLen = new Dictionary<List<Type>, int>();
+            typeToLen.Add(new List<Type>(new Type[] { typeof(sbyte), typeof(byte), }), 2 + 2);
+            typeToLen.Add(new List<Type>(new Type[] { typeof(bool), typeof(char), typeof(short), typeof(ushort), }), 2 + 4);
+            typeToLen.Add(new List<Type>(new Type[] { typeof(float), }), 8);
+            typeToLen.Add(new List<Type>(new Type[] { typeof(int), typeof(uint), }), 2 + 8);
+            typeToLen.Add(new List<Type>(new Type[] { typeof(double), }), 16);
+            typeToLen.Add(new List<Type>(new Type[] { typeof(long), typeof(ulong), }), 2 + 8);
+            typeToLen.Add(new List<Type>(new Type[] { typeof(decimal), typeof(DateTime), typeof(string), typeof(object), }), 2 + 4);
+        }
+        void CreateField(TableLayoutPanel target, Type t, string field) { CreateField(target, t, field, false); }
+        void CreateField(TableLayoutPanel target, Type t, string field, bool validate)
+        {
+            if (typeof(Enum).IsAssignableFrom(t))
+                t = Enum.GetUnderlyingType(t);
+
+            if (typeToLen == null) setTypeToLen();
+
+            foreach (List<Type> tt in typeToLen.Keys)
+                if (tt.Contains(t))
+                {
+                    CreateField(target, field, typeToLen[tt], validate);
+                    return;
+                }
+
+            CreateField(target, field, 30, validate);
+        }
+
+        void CreateField(TableLayoutPanel tlp, string name, int len, bool validate)
         {
             tlp.RowCount++;
             tlp.RowStyles.Insert(tlp.RowCount - 2, new RowStyle(SizeType.AutoSize));
@@ -410,7 +450,7 @@ namespace ObjectCloner
             lb.Anchor = AnchorStyles.Right;
             lb.AutoSize = true;
             lb.Name = "lb" + name;
-            lb.TabIndex = 1;
+            lb.TabIndex = tlp.RowCount * 2;
             lb.Text = name;
             tlp.Controls.Add(lb, 0, tlp.RowCount - 2);
 
@@ -423,12 +463,52 @@ namespace ObjectCloner
             tb.Name = "tb" + name;
             tb.ReadOnly = true;
             tb.Size = new Size(x.PreferredWidth + 6, x.PreferredHeight + 6);
-            tb.TabIndex = 2;
-            //tb.Text = x.Text;
+            tb.TabIndex = tlp.RowCount * 2 + 1;
+            if (validate)
+            {
+                tb.Validating += new CancelEventHandler(tb_Validating);
+            }
             tlp.Controls.Add(tb, 1, tlp.RowCount - 2);
         }
 
+        void tb_Validating(object sender, CancelEventArgs e)
+        {
+            TextBox tb = sender as TextBox;
+            if (tb.Name == "tbPrice")
+            {
+                float res;
+                e.Cancel = !Single.TryParse(tb.Text, out res);
+            }
+            else
+                try
+                {
+                    ulong res = Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
+                }
+                catch { e.Cancel = true; }
+            if (e.Cancel) tb.SelectAll();
+        }
+
+        void CreateField(flagField ff, string name, CheckBox[] acbk, int i)
+        {
+            ff.tlp.RowStyles.Insert(i + 1, new RowStyle(SizeType.AutoSize));
+            ff.tlp.SetCellPosition(acbk[i], new TableLayoutPanelCellPosition(0, i + 1));
+
+            acbk[i].Anchor = AnchorStyles.Left;
+            acbk[i].AutoSize = true;
+            acbk[i].Enabled = false;
+            acbk[i].Name = "cb" + name;
+            acbk[i].Text = name;
+            acbk[i].TabIndex = ff.tlp.RowCount;
+        }
+
         void ClearTabs()
+        {
+            clearOverview();
+            clearDetails();
+            clearFlags();
+            clearOther();
+        }
+        void clearOverview()
         {
             pictureBox1.Image = null;
             btnReplThumb.Enabled = false;
@@ -436,17 +516,40 @@ namespace ObjectCloner
             tbCatlgName.Text = "";
             tbObjDesc.Text = "";
             tbCatlgDesc.Text = "";
-            tbPrice.Text = "";
             tbCatlgName.Enabled = false;
             tbCatlgDesc.Enabled = false;
+            ckbCopyToAll.Checked = false;
             ckbCopyToAll.Enabled = false;
+            tbPrice.Text = "";
             tbPrice.ReadOnly = true;
-            foreach (Control c in tlpOverviewMain.Controls)
+        }
+        void clearDetails()
+        {
+            foreach (Control c in tlpObjectDetail.Controls)
                 if (c is TextBox) ((TextBox)c).Text = "";
-            foreach (Control c in tlpOverviewCommon.Controls)
+            foreach (Control c in tlpObjectCommon.Controls)
                 if (c is TextBox) ((TextBox)c).Text = "";
         }
+        void clearFlags()
+        {
+            foreach (flagField ff in flagFields)
+                foreach (Control c in ff.tlp.Controls)
+                    if (c is CheckBox) ((CheckBox)c).Checked = ((CheckBox)c).Enabled = false;
+        }
+        void clearOther()
+        {
+            foreach (Control c in tlpOther.Controls)
+                if (c is TextBox) { ((TextBox)c).Text = ""; ((TextBox)c).ReadOnly = true; }
+        }
+
         void FillTabs(Item objd)
+        {
+            fillOverview(objd);
+            fillDetails(objd);
+            fillFlags(objd);
+            fillOther(objd);
+        }
+        void fillOverview(Item objd)
         {
             pictureBox1.Image = GetLargeThumb(objd);
             btnReplThumb.Enabled = mode == Mode.Fix;
@@ -456,24 +559,65 @@ namespace ObjectCloner
             tbCatlgName.Text = GetSTBLValue((ulong)common["NameGUID"].Value);
             tbCatlgDesc.Text = GetSTBLValue((ulong)common["DescGUID"].Value);
             tbPrice.Text = common["Price"].Value + "";
-            tbCatlgName.Enabled = tbCatlgDesc.Enabled = ckbCopyToAll.Enabled = mode == Mode.Fix;
             tbPrice.ReadOnly = mode == Mode.Clone;
-
-            for (int i = 1; i < tlpOverviewMain.RowCount - 1; i++)
+            tbCatlgName.Enabled = tbCatlgDesc.Enabled = ckbCopyToAll.Enabled = mode == Mode.Fix;
+        }
+        void fillDetails(Item objd)
+        {
+            for (int i = 1; i < tlpObjectDetail.RowCount - 1; i++)
             {
-                Label lb = (Label)tlpOverviewMain.GetControlFromPosition(0, i);
-                TextBox tb = (TextBox)tlpOverviewMain.GetControlFromPosition(1, i);
+                Label lb = (Label)tlpObjectDetail.GetControlFromPosition(0, i);
+                TextBox tb = (TextBox)tlpObjectDetail.GetControlFromPosition(1, i);
 
                 TypedValue tv = objd.Resource[lb.Text];
-                tb.Text = tv;
+                if (typeof(Enum).IsAssignableFrom(tv.Type))
+                {
+                    string[] s = ("" + tv).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    tb.Text = s[0];
+                }
+                else
+                    tb.Text = tv;
             }
-            for (int i = 2; i < tlpOverviewCommon.RowCount - 1; i++)
+            for (int i = 2; i < tlpObjectCommon.RowCount - 1; i++)
             {
-                Label lb = (Label)tlpOverviewCommon.GetControlFromPosition(0, i);
-                TextBox tb = (TextBox)tlpOverviewCommon.GetControlFromPosition(1, i);
+                Label lb = (Label)tlpObjectCommon.GetControlFromPosition(0, i);
+                TextBox tb = (TextBox)tlpObjectCommon.GetControlFromPosition(1, i);
 
                 TypedValue tv = ((AApiVersionedFields)objd.Resource["CommonBlock"].Value)[lb.Text];
                 tb.Text = tv;
+            }
+        }
+        void fillFlags(Item objd)
+        {
+            foreach (flagField ff in flagFields)
+            {
+                ulong field = getFlags(objd.Resource as AResource, ff.field);
+                for (int i = 1; i < ff.tlp.RowCount - 1; i++)
+                {
+                    ulong value = (ulong)Math.Pow(2, ff.offset + i - 1);
+                    CheckBox cb = (CheckBox)ff.tlp.GetControlFromPosition(0, i);
+                    cb.Checked = (field & value) != 0;
+                    cb.Enabled = mode == Mode.Fix;
+                }
+            }
+        }
+        void fillOther(Item objd)
+        {
+            for (int i = 1; i < tlpOther.RowCount - 1; i++)
+            {
+                Label lb = (Label)tlpOther.GetControlFromPosition(0, i);
+                TextBox tb = (TextBox)tlpOther.GetControlFromPosition(1, i);
+
+                TypedValue tv = objd.Resource[otherFieldMap[lb.Text]];
+                if (typeof(Enum).IsAssignableFrom(tv.Type))
+                {
+                    string[] s = ("" + tv).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    tb.Text = s[0];
+                }
+                else
+                    tb.Text = tv;
+
+                tb.ReadOnly = mode != Mode.Fix;
             }
         }
 
@@ -505,6 +649,32 @@ namespace ObjectCloner
         {
             if (English != null && English.ContainsKey(guid)) return English[guid];
             return "";
+        }
+
+        ulong getFlags(AApiVersionedFields owner, string field)
+        {
+            TypedValue tv = owner[field];
+            object o = Convert.ChangeType(tv.Value, Enum.GetUnderlyingType(tv.Type));
+            if (o.GetType().Equals(typeof(byte))) return (byte)o;
+            if (o.GetType().Equals(typeof(ushort))) return (ushort)o;
+            if (o.GetType().Equals(typeof(uint))) return (uint)o;
+            return (ulong)o;
+        }
+        ulong getFlags(flagField ff)
+        {
+            ulong res = 0;
+            for (int i = ff.offset; i < ff.length; i++)
+            {
+                CheckBox cb = (CheckBox)ff.tlp.GetControlFromPosition(0, i - ff.offset + 1);
+                if (cb.Checked) res += ((ulong)1 << i);
+            }
+            return res;
+        }
+        void setFlags(AApiVersionedFields owner, string field, ulong value)
+        {
+            Type t = AApiVersionedFields.GetContentFieldTypes(0, owner.GetType())[field];
+            TypedValue tv = new TypedValue(t, Enum.ToObject(t, value));
+            owner[field] = tv;
         }
         #endregion
 
@@ -1070,6 +1240,32 @@ namespace ObjectCloner
                         commonBlock["Name"] = new TypedValue(typeof(string), "CatalogObjects/Name:" + UniqueObject);
                         commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + UniqueObject);
                         commonBlock["Price"] = new TypedValue(typeof(float), float.Parse(tbPrice.Text));
+
+                        foreach (flagField ff in flagFields)
+                        {
+                            ulong old = getFlags(item.Resource as AResource, ff.field);
+                            ulong mask = (ulong)0xFFFFFFFF << ff.offset;
+                            ulong res = getFlags(ff);
+                            res |= (ulong)(old & ~mask);
+                            setFlags(item.Resource as AResource, ff.field, res);
+                        }
+
+                        for (int i = 1; i < tlpOther.RowCount - 1; i++)
+                        {
+                            Label lb = (Label)tlpOther.GetControlFromPosition(0, i);
+                            TextBox tb = (TextBox)tlpOther.GetControlFromPosition(1, i);
+
+                            TypedValue tvOld = item.Resource[otherFieldMap[lb.Text]];
+
+                            ulong u = Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
+                            object val;
+                            if (typeof(Enum).IsAssignableFrom(tvOld.Type))
+                                val = Enum.ToObject(tvOld.Type, u);
+                            else
+                                val = Convert.ChangeType(u, tvOld.Type);
+
+                            item.Resource[otherFieldMap[lb.Text]] = new TypedValue(tvOld.Type, val);
+                        }
 
                         if (!ckbCatlgDetails.Checked)
                             UpdateTGIsFromField((AResource)item.Resource);
