@@ -141,6 +141,8 @@ namespace S3PIDemoFE
             public override object GetValue(object component)
             {
                 Type t = PropertyType;
+                if (t.Equals(typeof(EnumChooserCTD))) return new EnumChooserCTD(owner, Name, component);
+                if (t.Equals(typeof(EnumFlagsCTD))) return new EnumFlagsCTD(owner, Name, component);
                 if (t.Equals(typeof(AsHexCTD))) return new AsHexCTD(owner, Name, component);
                 if (t.Equals(typeof(IListAsHexCTD))) return new IListAsHexCTD(owner, Name, component);
                 if (t.Equals(typeof(AApiVersionedFieldsCTD))) return new AApiVersionedFieldsCTD(owner, Name, component);
@@ -187,10 +189,14 @@ namespace S3PIDemoFE
                 get
                 {
                     List<Type> simpleTypes = new List<Type>(new Type[] { typeof(bool), typeof(DateTime), typeof(decimal), typeof(double), typeof(float), typeof(string), });
-                    if (simpleTypes.Contains(fieldType) || typeof(Enum).IsAssignableFrom(fieldType)) return fieldType;
+                    if (simpleTypes.Contains(fieldType)) return fieldType;
                     simpleTypes.Add(typeof(byte));
-                    if (isCollection(simpleTypes, fieldType, true, false, false))
+                    if (isCollection(simpleTypes, fieldType, true, false, false)) // simpleTypes, byte, Enum
                         return fieldType;
+
+                    // Must test enum before IConvertible
+                    if (typeof(Enum).IsAssignableFrom(fieldType) && fieldType.GetCustomAttributes(typeof(FlagsAttribute), true).Length == 0) return typeof(EnumChooserCTD);
+                    if (typeof(Enum).IsAssignableFrom(fieldType) && fieldType.GetCustomAttributes(typeof(FlagsAttribute), true).Length == 1) return typeof(EnumFlagsCTD);
 
                     if (typeof(IConvertible).IsAssignableFrom(fieldType) || typeof(Boolset).Equals(fieldType)) return typeof(AsHexCTD);
                     if (isCollection(new List<Type>(new Type[] { typeof(Boolset), }), fieldType, false, true, false)
@@ -234,16 +240,14 @@ namespace S3PIDemoFE
         }
     }
 
-    //[Category("Fields")]
+    [Category("Fields")]
     [TypeConverter(typeof(AsHexConverter))]
     public class AsHexCTD : ICustomTypeDescriptor
     {
         protected AApiVersionedFields owner;
         protected string field;
         protected object component;
-        protected int index;
-        public AsHexCTD(AApiVersionedFields owner, string field, object component) { this.owner = owner; this.field = field; this.index = -1; this.component = component; }
-        public AsHexCTD(AApiVersionedFields owner, string field, int index, object component) { this.owner = owner; this.field = field; this.index = index; this.component = component; }
+        public AsHexCTD(AApiVersionedFields owner, string field, object component) { this.owner = owner; this.field = field; this.component = component; }
 
         #region ICustomTypeDescriptor Members
 
@@ -265,13 +269,7 @@ namespace S3PIDemoFE
 
         public EventDescriptorCollection GetEvents() { return TypeDescriptor.GetEvents(this, true); }
 
-        public PropertyDescriptorCollection GetProperties(Attribute[] attributes)
-        {
-            if (index == -1)
-                return new PropertyDescriptorCollection(new PropertyDescriptor[] { new AsHexPropertyDescriptor(owner, field, component, null), });
-            else
-                return new PropertyDescriptorCollection(new PropertyDescriptor[] { new AsHexPropertyDescriptor(owner, field + "[" + index + "]", component, null), });
-        }
+        public PropertyDescriptorCollection GetProperties(Attribute[] attributes) { return new PropertyDescriptorCollection(new PropertyDescriptor[] { new AsHexPropertyDescriptor(owner, field, component, null), }); }
 
         public PropertyDescriptorCollection GetProperties() { return GetProperties(null); }
 
@@ -354,9 +352,345 @@ namespace S3PIDemoFE
         }
     }
 
+    [Category("Fields")]
+    [Editor(typeof(EnumChooserEditor), typeof(UITypeEditor))]
+    [TypeConverter(typeof(EnumChooserConverter))]
+    public class EnumChooserCTD : ICustomTypeDescriptor
+    {
+        protected AApiVersionedFields owner;
+        protected string field;
+        protected object component;
+        public EnumChooserCTD(AApiVersionedFields owner, string field, object component) { this.owner = owner; this.field = field; this.component = component; }
+
+        #region ICustomTypeDescriptor Members
+
+        public AttributeCollection GetAttributes() { return TypeDescriptor.GetAttributes(this, true); }
+
+        public string GetClassName() { return TypeDescriptor.GetClassName(this, true); }
+
+        public string GetComponentName() { return TypeDescriptor.GetComponentName(this, true); }
+
+        public TypeConverter GetConverter() { return TypeDescriptor.GetConverter(this, true); }
+
+        public EventDescriptor GetDefaultEvent() { return TypeDescriptor.GetDefaultEvent(this, true); }
+
+        public System.ComponentModel.PropertyDescriptor GetDefaultProperty() { return TypeDescriptor.GetDefaultProperty(this, true); }
+
+        public object GetEditor(Type editorBaseType) { return TypeDescriptor.GetEditor(this, editorBaseType, true); }
+
+        public EventDescriptorCollection GetEvents(Attribute[] attributes) { return TypeDescriptor.GetEvents(this, attributes, true); }
+
+        public EventDescriptorCollection GetEvents() { return TypeDescriptor.GetEvents(this, true); }
+
+        public PropertyDescriptorCollection GetProperties(Attribute[] attributes) { return new PropertyDescriptorCollection(new PropertyDescriptor[] { new EnumChooserPropertyDescriptor(owner, field, component, null), }); }
+
+        public PropertyDescriptorCollection GetProperties() { return GetProperties(null); }
+
+        public object GetPropertyOwner(System.ComponentModel.PropertyDescriptor pd) { return this; }
+
+        #endregion
+
+        public class EnumChooserPropertyDescriptor : System.ComponentModel.PropertyDescriptor
+        {
+            AApiVersionedFields owner;
+            string field;
+            object component;
+            public EnumChooserPropertyDescriptor(AApiVersionedFields owner, string field, object component, Attribute[] attr)
+                : base(field, attr) { this.owner = owner; this.field = field; this.component = component; }
+
+            public override string Name { get { return field; } }
+
+            public override bool CanResetValue(object component) { throw new InvalidOperationException(); }
+
+            public override void ResetValue(object component) { throw new InvalidOperationException(); }
+
+            public override Type PropertyType { get { throw new InvalidOperationException(); } }
+
+            public override object GetValue(object component) { throw new InvalidOperationException(); }
+
+            public override bool IsReadOnly { get { throw new InvalidOperationException(); } }
+
+            public override void SetValue(object component, object value) { throw new InvalidOperationException(); }
+
+            public override Type ComponentType { get { throw new InvalidOperationException(); } }
+
+            public override bool ShouldSerializeValue(object component) { throw new InvalidOperationException(); }
+        }
+
+        public class EnumChooserConverter : TypeConverter
+        {
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
+                if (sourceType.Equals(typeof(string))) return true;
+                return base.CanConvertFrom(context, sourceType);
+            }
+            public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+            {
+                if (value.GetType().Equals(typeof(string)))
+                {
+                    string[] content = ((string)value).Split(new char[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
+                    string str = content[0];
+                    try
+                    {
+                        AApiVersionedFieldsCTD.TypedValuePropertyDescriptor pd = (AApiVersionedFieldsCTD.TypedValuePropertyDescriptor)context.PropertyDescriptor;
+                        ulong num = Convert.ToUInt64(str, str.StartsWith("0x", StringComparison.InvariantCultureIgnoreCase) ? 16 : 10);
+                        return Enum.ToObject(pd.FieldType, num);
+                    }
+                    catch (Exception ex) { throw new NotSupportedException("Invalid data: " + str, ex); }
+                }
+                return base.ConvertFrom(context, culture, value);
+            }
+
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (destinationType.Equals(typeof(string))) return true;
+                return base.CanConvertTo(context, destinationType);
+            }
+            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+            {
+                if (value as EnumChooserCTD != null && destinationType.Equals(typeof(string)))
+                {
+                    try
+                    {
+                        EnumChooserCTD ctd = (EnumChooserCTD)value;
+                        return "" + ctd.owner[ctd.field];
+                    }
+                    catch { }
+                }
+                return base.ConvertTo(context, culture, value, destinationType);
+            }
+        }
+
+        public class EnumChooserEditor : UITypeEditor
+        {
+            public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) { return UITypeEditorEditStyle.DropDown; }
+
+            public override bool IsDropDownResizable { get { return true; } }
+
+            public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
+            {
+                IWindowsFormsEditorService edSvc = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
+
+                EnumChooserCTD ctd = (EnumChooserCTD)value;
+                TypedValue tv = ctd.owner[ctd.field];
+
+                List<string> enumValues = new List<string>();
+                int index = -1;
+                int i = 0;
+                foreach (Enum e in Enum.GetValues(tv.Type))
+                {
+                    if (e.Equals((Enum)tv.Value)) index = i;
+                    enumValues.Add(new TypedValue(e.GetType(), e, "X"));
+                    i++;
+                }
+
+                ListBox lb = new ListBox();
+                lb.Items.AddRange(enumValues.ToArray());
+                if (index >= 0) { lb.SelectedIndices.Add(index); }
+                lb.SelectedIndexChanged += new EventHandler(lb_SelectedIndexChanged);
+                lb.Tag = edSvc;
+                lb.Height = lb.Items.Count * lb.ItemHeight;
+                lb.IntegralHeight = false;
+                edSvc.DropDownControl(lb);
+
+                ctd.owner[ctd.field] = new TypedValue(tv.Type,
+                    (Enum)new EnumChooserConverter().ConvertFrom(context, System.Globalization.CultureInfo.CurrentCulture, lb.SelectedItem));
+
+                return value;
+            }
+
+            void lb_SelectedIndexChanged(object sender, EventArgs e) { ((sender as ListBox).Tag as IWindowsFormsEditorService).CloseDropDown(); }
+        }
+    }
+
+    [Category("Fields")]
+    [TypeConverter(typeof(EnumFlagsConverter))]
+    public class EnumFlagsCTD : ICustomTypeDescriptor
+    {
+        protected AApiVersionedFields owner;
+        protected string field;
+        protected object component;
+        public EnumFlagsCTD(AApiVersionedFields owner, string field, object component) { this.owner = owner; this.field = field; this.component = component; }
+
+        #region ICustomTypeDescriptor Members
+
+        public AttributeCollection GetAttributes() { return TypeDescriptor.GetAttributes(this, true); }
+
+        public string GetClassName() { return TypeDescriptor.GetClassName(this, true); }
+
+        public string GetComponentName() { return TypeDescriptor.GetComponentName(this, true); }
+
+        public TypeConverter GetConverter() { return TypeDescriptor.GetConverter(this, true); }
+
+        public EventDescriptor GetDefaultEvent() { return TypeDescriptor.GetDefaultEvent(this, true); }
+
+        public System.ComponentModel.PropertyDescriptor GetDefaultProperty() { return TypeDescriptor.GetDefaultProperty(this, true); }
+
+        public object GetEditor(Type editorBaseType) { return TypeDescriptor.GetEditor(this, editorBaseType, true); }
+
+        public EventDescriptorCollection GetEvents(Attribute[] attributes) { return TypeDescriptor.GetEvents(this, attributes, true); }
+
+        public EventDescriptorCollection GetEvents() { return TypeDescriptor.GetEvents(this, true); }
+
+        public PropertyDescriptorCollection GetProperties(Attribute[] attributes) { return new PropertyDescriptorCollection(new PropertyDescriptor[] { new EnumFlagsPropertyDescriptor(owner, field, component, null), }); }
+
+        public PropertyDescriptorCollection GetProperties() { return GetProperties(null); }
+
+        public object GetPropertyOwner(System.ComponentModel.PropertyDescriptor pd) { return this; }
+
+        #endregion
+
+        public class EnumFlagsPropertyDescriptor : System.ComponentModel.PropertyDescriptor
+        {
+            AApiVersionedFields owner;
+            string field;
+            object component;
+            public EnumFlagsPropertyDescriptor(AApiVersionedFields owner, string field, object component, Attribute[] attr)
+                : base(field, attr) { this.owner = owner; this.field = field; this.component = component; }
+
+            public override string Name { get { return field; } }
+
+            public override bool CanResetValue(object component) { throw new InvalidOperationException(); }
+
+            public override void ResetValue(object component) { throw new InvalidOperationException(); }
+
+            public override Type PropertyType { get { throw new InvalidOperationException(); } }
+
+            public override object GetValue(object component) { throw new InvalidOperationException(); }
+
+            public override bool IsReadOnly { get { throw new InvalidOperationException(); } }
+
+            public override void SetValue(object component, object value) { throw new InvalidOperationException(); }
+
+            public override Type ComponentType { get { throw new InvalidOperationException(); } }
+
+            public override bool ShouldSerializeValue(object component) { throw new InvalidOperationException(); }
+        }
+
+        public class EnumFlagsConverter : ExpandableObjectConverter
+        {
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
+                if (sourceType.Equals(typeof(string))) return true;
+                return base.CanConvertTo(context, sourceType);
+            }
+
+            public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+            {
+                if (value.GetType().Equals(typeof(string)))
+                {
+                    string[] content = ((string)value).Split(new char[] {' '}, 2, StringSplitOptions.RemoveEmptyEntries);
+                    string str = content[0];
+                    try
+                    {
+                        AApiVersionedFieldsCTD.TypedValuePropertyDescriptor pd = (AApiVersionedFieldsCTD.TypedValuePropertyDescriptor)context.PropertyDescriptor;
+                        ulong num = Convert.ToUInt64(str, str.StartsWith("0x", StringComparison.InvariantCultureIgnoreCase) ? 16 : 10);
+                        return Enum.ToObject(pd.FieldType, num);
+                    }
+                    catch (Exception ex) { throw new NotSupportedException("Invalid data: " + str, ex); }
+                }
+                return base.ConvertFrom(context, culture, value);
+            }
+
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (destinationType.Equals(typeof(string))) return true;
+                return base.CanConvertTo(context, destinationType);
+            }
+
+            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+            {
+                if (value as EnumFlagsCTD != null && destinationType.Equals(typeof(string)))
+                {
+                    try
+                    {
+                        EnumFlagsCTD ctd = (EnumFlagsCTD)value;
+                        return "" + ctd.owner[ctd.field];
+                    }
+                    catch { }
+                }
+                return base.ConvertTo(context, culture, value, destinationType);
+            }
+
+            static int underlyingTypeToBits(Type t)
+            {
+                if (t.Equals(typeof(byte))) return 8;
+                if (t.Equals(typeof(ushort))) return 16;
+                if (t.Equals(typeof(uint))) return 32;
+                if (t.Equals(typeof(ulong))) return 64;
+                return -1;
+            }
+            public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
+            {
+                EnumFlagsCTD ctd = (EnumFlagsCTD)value;
+                Type enumType = AApiVersionedFields.GetContentFieldTypes(0, ctd.owner.GetType())[ctd.field];
+                int bits = underlyingTypeToBits(Enum.GetUnderlyingType(enumType));
+                EnumFlagPropertyDescriptor[] enumFlags = new EnumFlagPropertyDescriptor[bits];
+                string fmt = "[{0:X" + bits.ToString("X").Length + "}] ";
+                for (int i = 0; i < bits; i++)
+                {
+                    ulong u = (ulong)1 << i;
+                    string s = (Enum)Enum.ToObject(enumType, u) + "";
+                    if (s == u.ToString()) s = "-";
+                    s = String.Format(fmt, i) + s;
+                    enumFlags[i] = new EnumFlagPropertyDescriptor(ctd.owner, ctd.field, u, s);
+                }
+                return new PropertyDescriptorCollection(enumFlags);
+            }
+
+            public class EnumFlagPropertyDescriptor : PropertyDescriptor
+            {
+                AApiVersionedFields owner;
+                string field;
+                ulong mask;
+                public EnumFlagPropertyDescriptor(AApiVersionedFields owner, string field, ulong mask, string value) : base(value, null) { this.owner = owner; this.field = field; this.mask = mask; }
+                public override bool CanResetValue(object component) { return true; }
+
+                public override Type ComponentType { get { throw new NotImplementedException(); } }
+
+                ulong getFlags(AApiVersionedFields owner, string field)
+                {
+                    TypedValue tv = owner[field];
+                    object o = Convert.ChangeType(tv.Value, Enum.GetUnderlyingType(tv.Type));
+                    if (o.GetType().Equals(typeof(byte))) return (byte)o;
+                    if (o.GetType().Equals(typeof(ushort))) return (ushort)o;
+                    if (o.GetType().Equals(typeof(uint))) return (uint)o;
+                    return (ulong)o;
+                }
+                public override object GetValue(object component)
+                {
+                    ulong old = getFlags(owner, field);
+                    return (old & mask) != 0;
+                }
+
+                public override bool IsReadOnly { get { return !owner.GetType().GetProperty(field).CanWrite; } }
+
+                public override Type PropertyType { get { return typeof(Boolean); } }
+
+                public override void ResetValue(object component) { SetValue(component, false); }
+
+                void setFlags(AApiVersionedFields owner, string field, ulong mask, bool value)
+                {
+                    ulong old = getFlags(owner, field);
+                    ulong res = old & ~mask;
+                    if (value) res |= mask;
+                    Type t = AApiVersionedFields.GetContentFieldTypes(0, owner.GetType())[field];
+                    TypedValue tv = new TypedValue(t, Enum.ToObject(t, res));
+                    owner[field] = tv;
+                }
+                public override void SetValue(object component, object value)
+                {
+                    setFlags(owner, field, mask, (bool)value);
+                }
+
+                public override bool ShouldSerializeValue(object component) { return false; }
+            }
+        }
+    }
+
     [Category("Lists")]
-    [TypeConverter(typeof(ICollectionConverter))]
     [Editor(typeof(ICollectionAApiVersionedFieldsEditor), typeof(UITypeEditor))]
+    [TypeConverter(typeof(ICollectionConverter))]
     public class ICollectionAApiVersionedFieldsCTD : ICustomTypeDescriptor
     {
         protected AApiVersionedFields owner;
@@ -384,10 +718,7 @@ namespace S3PIDemoFE
 
         public EventDescriptorCollection GetEvents() { return TypeDescriptor.GetEvents(this, true); }
 
-        public PropertyDescriptorCollection GetProperties(Attribute[] attributes)
-        {
-            return new PropertyDescriptorCollection(new PropertyDescriptor[] { new ICollectionAApiVersionedFieldsPropertyDescriptor(owner, field, component, null), });
-        }
+        public PropertyDescriptorCollection GetProperties(Attribute[] attributes) { return new PropertyDescriptorCollection(new PropertyDescriptor[] { new ICollectionAApiVersionedFieldsPropertyDescriptor(owner, field, component, null), }); }
 
         public PropertyDescriptorCollection GetProperties() { return GetProperties(null); }
 
@@ -395,7 +726,7 @@ namespace S3PIDemoFE
 
         #endregion
 
-        public class ICollectionAApiVersionedFieldsPropertyDescriptor : System.ComponentModel.PropertyDescriptor
+        public class ICollectionAApiVersionedFieldsPropertyDescriptor : PropertyDescriptor
         {
             AApiVersionedFields owner;
             string field;
@@ -403,22 +734,15 @@ namespace S3PIDemoFE
             public ICollectionAApiVersionedFieldsPropertyDescriptor(AApiVersionedFields owner, string field, object component, Attribute[] attr)
                 : base(field, attr) { this.owner = owner; this.field = field; this.component = component; }
 
-            //public override string Name { get { return field; } }
-
-            public override bool CanResetValue(object component) { return false; }
+            public override bool CanResetValue(object component) { throw new InvalidOperationException(); }
 
             public override void ResetValue(object component) { throw new InvalidOperationException(); }
 
-            public override Type PropertyType { get { return typeof(IList<AApiVersionedFieldsCTD>); } }
+            public override Type PropertyType { get { throw new InvalidOperationException(); } }
 
-            public override object GetValue(object component)
-            {
-                List<AApiVersionedFieldsCTD> list = new List<AApiVersionedFieldsCTD>();
-                foreach (AApiVersionedFields o in (ICollection)owner[field].Value) list.Add(new AApiVersionedFieldsCTD(o));
-                return list;
-            }
+            public override object GetValue(object component) { throw new InvalidOperationException(); }
 
-            public override bool IsReadOnly { get { return false; /*!owner.GetType().GetProperty(field).CanWrite;/**/ } }
+            public override bool IsReadOnly { get { throw new InvalidOperationException(); } }
 
             public override void SetValue(object component, object value) { throw new InvalidOperationException(); }
 
@@ -448,8 +772,8 @@ namespace S3PIDemoFE
     }
 
     [Category("Lists")]
-    [TypeConverter(typeof(ICollectionConverter))]
     [Editor(typeof(IListAsHexEditor), typeof(UITypeEditor))]
+    [TypeConverter(typeof(ICollectionConverter))]
     public class IListAsHexCTD : ICustomTypeDescriptor
     {
         protected AApiVersionedFields owner;
@@ -576,8 +900,8 @@ namespace S3PIDemoFE
     }
 
     [Category("Lists")]
-    [TypeConverter(typeof(ICollectionConverter))]
     [Editor(typeof(IDictionaryEditor), typeof(UITypeEditor))]
+    [TypeConverter(typeof(ICollectionConverter))]
     public class IDictionaryCTD : ICustomTypeDescriptor
     {
         protected AApiVersionedFields owner;
@@ -721,7 +1045,6 @@ namespace S3PIDemoFE
         }
     }
 
-
     public class ICollectionConverter : TypeConverter
     {
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
@@ -736,9 +1059,9 @@ namespace S3PIDemoFE
         }
     }
 
-    [Editor(typeof(ReaderEditor),typeof(UITypeEditor))]
-    [TypeConverter(typeof(ReaderConverter))]
     [Category("Data")]
+    [Editor(typeof(ReaderEditor), typeof(UITypeEditor))]
+    [TypeConverter(typeof(ReaderConverter))]
     public class ReaderCTD : ICustomTypeDescriptor
     {
         protected AApiVersionedFields owner;
