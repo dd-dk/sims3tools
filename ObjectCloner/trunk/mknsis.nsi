@@ -17,10 +17,13 @@ Var wantAll
 Var wantSM
 Var delSettings
 
-
 Name "${PROGRAM_NAME}"
 InstallDir $PROGRAMFILES\s3oc
 !define EXE s3oc.exe
+
+AddBrandingImage top 0
+Icon Resources\s3oc.ico
+UninstallIcon Resources\s3oc.ico
 
 ; Request application privileges for Windows Vista
 RequestExecutionLevel admin
@@ -64,7 +67,6 @@ gotAll:
   WriteUninstaller uninst-${tla}.exe
   
   !include ${INSTFILES}
-;  File /a *.dll *.txt ${EXE} gpl-3.0.txt ${tla}-Version.txt
 
   StrCmp "Y" $wantSM wantSM noWantSM
 wantSM:
@@ -73,9 +75,13 @@ wantSM:
   CreateShortCut "$SMPROGRAMS\${tla}\Uninstall.lnk" "$INSTDIR\uninst-${tla}.exe" "" "" "" SW_SHOWNORMAL "" "Uninstall"
   CreateShortCut "$SMPROGRAMS\${tla}\${tla}-Version.lnk" "$INSTDIR\${tla}-Version.txt" "" "" "" SW_SHOWNORMAL "" "Show version"
 noWantSM:
+   Delete $TEMP\s3oc.ico
 SectionEnd
 
 Function .onGUIInit
+  SetOutPath $TEMP
+  File ..\Resources\s3oc.ico
+  SetBrandingImage $TEMP\s3oc.ico
   Call GetInstDir
   Call CheckInUse
   Call CheckOldVersion

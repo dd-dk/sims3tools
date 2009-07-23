@@ -12,6 +12,8 @@
     <AssemblyName>s3oc</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <ApplicationIcon>
+    </ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -75,6 +77,11 @@
     <Compile Include="MenuBarWidget\MenuBarWidget.designer.cs">
       <DependentUpon>MenuBarWidget.cs</DependentUpon>
     </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="StringInputDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -125,6 +132,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MenuBarWidget\MenuBarWidget.resx">
       <DependentUpon>MenuBarWidget.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="StringInputDialog.resx">
       <DependentUpon>StringInputDialog.cs</DependentUpon>
@@ -187,6 +198,7 @@
     <Content Include="gpl-3.0.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Resources\s3oc.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
