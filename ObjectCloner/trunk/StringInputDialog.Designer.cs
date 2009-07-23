@@ -106,6 +106,7 @@
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Name = "StringInputDialog";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "String Input Caption";
