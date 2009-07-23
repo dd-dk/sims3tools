@@ -99,6 +99,7 @@
             this.CancelButton = this.button2;
             this.ClientSize = new System.Drawing.Size(188, 82);
             this.Controls.Add(this.flowLayoutPanel1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Name = "GetNumberDialog";
             this.Text = "GetNumberDialog";
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();

@@ -17,10 +17,13 @@ Var wantAll
 Var wantSM
 Var delSettings
 
-
 Name "${PROGRAM_NAME}"
-InstallDir $PROGRAMFILES\s3pe
-!define EXE s3pe.exe
+InstallDir $PROGRAMFILES\${tla}
+!define EXE ${tla}.exe
+
+AddBrandingImage top 0
+Icon Resources\${tla}.ico
+UninstallIcon Resources\${tla}.ico
 
 ; Request application privileges for Windows Vista
 RequestExecutionLevel admin
@@ -64,7 +67,6 @@ gotAll:
   WriteUninstaller uninst-${tla}.exe
   
   !include ${INSTFILES}
-;  File /a *.dll *.txt ${EXE} gpl-3.0.txt ${tla}-Version.txt
 
   StrCmp "Y" $wantSM wantSM noWantSM
 wantSM:
@@ -76,6 +78,10 @@ noWantSM:
 SectionEnd
 
 Function .onGUIInit
+  SetOutPath $TEMP
+  File ..\Resources\${tla}.ico
+  SetBrandingImage $TEMP\${tla}.ico
+  Delete $TEMP\${tla}.ico
   Call GetInstDir
   Call CheckInUse
   Call CheckOldVersion
