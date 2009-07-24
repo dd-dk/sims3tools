@@ -130,7 +130,6 @@
             this.tlpFlagsBuildEtc.SuspendLayout();
             this.tlpOther.SuspendLayout();
             this.tlpBuildSort.SuspendLayout();
-            this.statusStrip1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -1153,8 +1152,6 @@
             this.tlpOther.PerformLayout();
             this.tlpBuildSort.ResumeLayout(false);
             this.tlpBuildSort.PerformLayout();
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
