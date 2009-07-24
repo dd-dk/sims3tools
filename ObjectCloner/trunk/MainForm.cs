@@ -41,6 +41,17 @@ namespace ObjectCloner
         static List<View> viewMapKeys;
         static List<MenuBarWidget.MB> viewMapValues;
 
+        static string language_fmt = "Strings_{0}_{1:X2}{2:X62}";
+        static string[] languages = new string[] {
+            "ENG_US", "CHI_CN", "CHI_TW", "CZE_CZ",
+            "DAN_DK", "DUT_NL", "FIN_FI", "FRE_FR",
+            "GER_DE", "GRE_GR", "HUN_HU", "ITA_IT",
+            "JAP_JP", "KOR_KR", "NOR_NO", "POL_PL",
+
+            "POR_PT", "POR_BR", "RUS_RU", "SPA_ES",
+            "SPA_MX", "SWE_SE", "THA_TH",
+        };
+
         static string[] subPageText = new string[] {
             "You should never see this",
             "Step 1: Selected OBJD",
@@ -421,7 +432,7 @@ namespace ObjectCloner
             typeToLen.Add(new List<Type>(new Type[] { typeof(int), typeof(uint), }), 2 + 8);
             typeToLen.Add(new List<Type>(new Type[] { typeof(double), }), 16);
             typeToLen.Add(new List<Type>(new Type[] { typeof(long), typeof(ulong), }), 2 + 8);
-            typeToLen.Add(new List<Type>(new Type[] { typeof(decimal), typeof(DateTime), typeof(string), typeof(object), }), 2 + 4);
+            typeToLen.Add(new List<Type>(new Type[] { typeof(decimal), typeof(DateTime), typeof(string), typeof(object), }), 30);
         }
         void CreateField(TableLayoutPanel target, Type t, string field) { CreateField(target, t, field, false); }
         void CreateField(TableLayoutPanel target, Type t, string field, bool validate)
@@ -965,7 +976,7 @@ namespace ObjectCloner
         {
             this.SavingComplete += new EventHandler<BoolEventArgs>(MainForm_SavingComplete);
 
-            SaveList sl = new SaveList(this, objectChooser.SelectedItems[0].Tag as Item, tgiLookup, FullBuild0Path, pkg, ThumbPkg, saveFileDialog1.FileName,
+            SaveList sl = new SaveList(this, objectChooser.SelectedItems[0].Tag as Item, tgiLookup, FullBuild0Path, pkg, ThumbPkg, saveFileDialog1.FileName, ckbPadSTBLs.Checked,
                 updateProgress, stopSaving, OnSavingComplete);
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
@@ -1026,19 +1037,21 @@ namespace ObjectCloner
             IPackage pkgfb0;
             IPackage thumbpkg;
             string outputPackage;
+            bool padSTBLs;
             updateProgressCallback updateProgressCB;
             stopSavingCallback stopSavingCB;
             savingCompleteCallback savingCompleteCB;
-            public SaveList(MainForm form, Item objd, Dictionary<string, TGI> tgiList, string fullBuild0, IPackage pkgfb0, IPackage thumbpkg, string outputPackage,
+            public SaveList(MainForm form, Item objd, Dictionary<string, TGI> tgiList, string fullBuild0, IPackage pkgfb0, IPackage thumbpkg, string outputPackage, bool padSTBLs,
                 updateProgressCallback updateProgressCB, stopSavingCallback stopSavingCB, savingCompleteCallback savingCompleteCB)
             {
                 this.mainForm = form;
                 this.objd = objd;
                 this.tgiList = tgiList;
                 this.fullBuild0 = fullBuild0;
-                this.outputPackage = outputPackage;
                 this.pkgfb0 = pkgfb0;
                 this.thumbpkg = thumbpkg;
+                this.outputPackage = outputPackage;
+                this.padSTBLs = padSTBLs;
                 this.updateProgressCB = updateProgressCB;
                 this.stopSavingCB = stopSavingCB;
                 this.savingCompleteCB = savingCompleteCB;
@@ -1104,6 +1117,8 @@ namespace ObjectCloner
                     freq = 1;// Math.Max(1, lrie.Count / 10);
 
                     updateProgress(true, "Creating string tables extracts... 0%", true, lrie.Count, true, i);
+                    List<byte> langsSeen = new List<byte>();
+                    Item english = null;
                     foreach (IResourceIndexEntry rie in lrie)
                     {
                         if (stopSaving) return;
@@ -1119,10 +1134,36 @@ namespace ObjectCloner
                         if (instbl.ContainsKey(nameGUID)) outstbl.Add(nameGUID, instbl[nameGUID]);
                         if (instbl.ContainsKey(descGUID)) outstbl.Add(descGUID, instbl[descGUID]);
                         if (!stopSaving) newstbl.Commit();
+                        langsSeen.Add((byte)(rie.Instance >> 56));
+                        if ((rie.Instance >> 56) == 0x00) english = newstbl;
 
                         if (++i % freq == 0)
                             updateProgress(true, "Creating string tables extracts... " + i * 100 / lrie.Count + "%", true, lrie.Count, true, i);
                     }
+
+                    if (padSTBLs && english != null)
+                    {
+                        freq = 1;
+                        updateProgress(true, "Creating absent string tables... 0%", true, languages.Length, true, 0);
+                        for (byte b = 0; b < languages.Length; b++)
+                        {
+                            if (stopSaving) return;
+                            if (langsSeen.Contains(b)) continue;
+                            TGI tgi = new TGI(english.tgi.t, english.tgi.g, english.tgi.i | ((ulong)b << 56));
+                            Item newstbl = NewResource(target, tgi);
+                            foreach (var kvp in (IDictionary<ulong, string>)english.Resource) ((IDictionary<ulong, string>)newstbl.Resource).Add(kvp.Key, kvp.Value);
+                            newstbl.Commit();
+
+                            if (!newnamemap.ContainsKey(tgi.i))
+                            {
+                                if (fb0namemap.ContainsKey(tgi.i)) { if (!stopSaving) newnamemap.Add(tgi.i, fb0namemap[tgi.i]); }
+                                else { if (!stopSaving) newnamemap.Add(tgi.i, String.Format(language_fmt, languages[b], b, english.tgi.i)); }
+                            }
+
+                            updateProgress(true, "Creating absent string tables... " + b * 100 / languages.Length + "%", true, languages.Length, true, b);
+                        }
+                    }
+
                     updateProgress(true, "Committing new name map... ", true, 0, true, 0);
                     if (!stopSaving) newnmap.Commit();
 
@@ -1604,6 +1645,8 @@ namespace ObjectCloner
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, false);
             ckbDefault.Enabled = mode == Mode.Clone;
             ckbDefault.Checked = mode == Mode.Clone;
+            ckbPadSTBLs.Enabled = mode == Mode.Clone;
+            ckbPadSTBLs.Checked = false;
             ckbNoOBJD.Enabled = mode == Mode.Fix;
             ckbNoOBJD.Checked = false;
             ckbCatlgDetails.Enabled = mode == Mode.Fix;
@@ -1850,7 +1893,7 @@ namespace ObjectCloner
             Application.DoEvents();
 
             bool flag = p != Page.Resources || subPage < SubPage.Step2;
-            ckbDefault.Enabled = mode == Mode.Clone && flag;
+            ckbPadSTBLs.Enabled = ckbDefault.Enabled = mode == Mode.Clone && flag;
             ckbNoOBJD.Enabled = mode == Mode.Fix && !ckbCatlgDetails.Checked && flag;
             ckbCatlgDetails.Enabled = mode == Mode.Fix && flag;
 

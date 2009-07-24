@@ -38,6 +38,7 @@
             this.btnStart = new System.Windows.Forms.Button();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.ckbDefault = new System.Windows.Forms.CheckBox();
+            this.ckbPadSTBLs = new System.Windows.Forms.CheckBox();
             this.ckbNoOBJD = new System.Windows.Forms.CheckBox();
             this.ckbCatlgDetails = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
@@ -130,6 +131,7 @@
             this.tlpFlagsBuildEtc.SuspendLayout();
             this.tlpOther.SuspendLayout();
             this.tlpBuildSort.SuspendLayout();
+            this.statusStrip1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -262,13 +264,14 @@
             this.flowLayoutPanel1.AutoSize = true;
             this.flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flowLayoutPanel1.Controls.Add(this.ckbDefault);
+            this.flowLayoutPanel1.Controls.Add(this.ckbPadSTBLs);
             this.flowLayoutPanel1.Controls.Add(this.ckbNoOBJD);
             this.flowLayoutPanel1.Controls.Add(this.ckbCatlgDetails);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(136, 3);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.tlpButtons.SetRowSpan(this.flowLayoutPanel1, 7);
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(180, 69);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(180, 92);
             this.flowLayoutPanel1.TabIndex = 1;
             // 
             // ckbDefault
@@ -285,11 +288,23 @@
             this.ckbDefault.Text = "Default textures only";
             this.ckbDefault.UseVisualStyleBackColor = true;
             // 
+            // ckbPadSTBLs
+            // 
+            this.ckbPadSTBLs.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbPadSTBLs.AutoSize = true;
+            this.ckbPadSTBLs.Location = new System.Drawing.Point(0, 26);
+            this.ckbPadSTBLs.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
+            this.ckbPadSTBLs.Name = "ckbPadSTBLs";
+            this.ckbPadSTBLs.Size = new System.Drawing.Size(153, 17);
+            this.ckbPadSTBLs.TabIndex = 4;
+            this.ckbPadSTBLs.Text = "Create missing string tables";
+            this.ckbPadSTBLs.UseVisualStyleBackColor = true;
+            // 
             // ckbNoOBJD
             // 
             this.ckbNoOBJD.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ckbNoOBJD.AutoSize = true;
-            this.ckbNoOBJD.Location = new System.Drawing.Point(0, 26);
+            this.ckbNoOBJD.Location = new System.Drawing.Point(0, 49);
             this.ckbNoOBJD.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.ckbNoOBJD.Name = "ckbNoOBJD";
             this.ckbNoOBJD.Size = new System.Drawing.Size(180, 17);
@@ -301,7 +316,7 @@
             // 
             this.ckbCatlgDetails.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ckbCatlgDetails.AutoSize = true;
-            this.ckbCatlgDetails.Location = new System.Drawing.Point(0, 49);
+            this.ckbCatlgDetails.Location = new System.Drawing.Point(0, 72);
             this.ckbCatlgDetails.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.ckbCatlgDetails.Name = "ckbCatlgDetails";
             this.ckbCatlgDetails.Size = new System.Drawing.Size(156, 17);
@@ -1007,6 +1022,9 @@
             // 
             // statusStrip1
             // 
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripProgressBar1,
+            this.toolStripStatusLabel1});
             this.statusStrip1.Location = new System.Drawing.Point(0, 542);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(904, 22);
@@ -1152,6 +1170,8 @@
             this.tlpOther.PerformLayout();
             this.tlpBuildSort.ResumeLayout(false);
             this.tlpBuildSort.PerformLayout();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
@@ -1232,6 +1252,7 @@
         private System.Windows.Forms.TableLayoutPanel tlpOther;
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.CheckBox ckbPadSTBLs;
     }
 }
 
