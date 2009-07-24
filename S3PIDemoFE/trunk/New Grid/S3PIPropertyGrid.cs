@@ -605,7 +605,8 @@ namespace S3PIDemoFE
                     try
                     {
                         EnumFlagsCTD ctd = (EnumFlagsCTD)value;
-                        return "" + ctd.owner[ctd.field];
+                        TypedValue tv = ctd.owner[ctd.field];
+                        return "0x" + Enum.Format(tv.Type, tv.Value, "X");
                     }
                     catch { }
                 }
