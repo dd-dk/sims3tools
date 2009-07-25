@@ -101,6 +101,7 @@
             this.Controls.Add(this.flowLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Name = "GetNumberDialog";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "GetNumberDialog";
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.flowLayoutPanel1.ResumeLayout(false);
