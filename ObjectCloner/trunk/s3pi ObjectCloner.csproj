@@ -34,9 +34,9 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="s3pi.CopyableMessageBox, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="s3pi.CustomForms, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\s3pi\build\bin\Release\s3pi.CopyableMessageBox.dll</HintPath>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
     </Reference>
     <Reference Include="s3pi.Extensions, Version=907.4.11.19808, Culture=neutral, PublicKeyToken=80159b679e88de38, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
