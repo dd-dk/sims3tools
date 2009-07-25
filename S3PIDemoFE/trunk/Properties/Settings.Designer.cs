@@ -61,58 +61,24 @@ namespace S3PIDemoFE.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string DemoPluginsConfig {
+        public string UserHelpersTxt {
             get {
-                return ((string)(this["DemoPluginsConfig"]));
+                return ((string)(this["UserHelpersTxt"]));
             }
             set {
-                this["DemoPluginsConfig"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool OverrideExtensions {
-            get {
-                return ((bool)(this["OverrideExtensions"]));
-            }
-            set {
-                this["OverrideExtensions"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection ExtensionsConfig {
-            get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["ExtensionsConfig"]));
-            }
-            set {
-                this["ExtensionsConfig"] = value;
+                this["UserHelpersTxt"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string CurrentProfile {
+        public string UserExtensionsTxt {
             get {
-                return ((string)(this["CurrentProfile"]));
+                return ((string)(this["UserExtensionsTxt"]));
             }
             set {
-                this["CurrentProfile"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection ProfileList {
-            get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["ProfileList"]));
-            }
-            set {
-                this["ProfileList"] = value;
+                this["UserExtensionsTxt"] = value;
             }
         }
         
@@ -280,6 +246,30 @@ namespace S3PIDemoFE.Properties {
             }
             set {
                 this["BookmarkSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string HexEditorCmd {
+            get {
+                return ((string)(this["HexEditorCmd"]));
+            }
+            set {
+                this["HexEditorCmd"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool HexEditorIgnoreTS {
+            get {
+                return ((bool)(this["HexEditorIgnoreTS"]));
+            }
+            set {
+                this["HexEditorIgnoreTS"] = value;
             }
         }
     }
