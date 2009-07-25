@@ -31,10 +31,15 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.browserWidget1 = new S3PIDemoFE.BrowserWidget();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.lbProgress = new System.Windows.Forms.Label();
+            this.packageInfoWidget1 = new S3PIDemoFE.PackageInfo.PackageInfoWidget();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.hexWidget1 = new S3PIDemoFE.HexWidget();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.controlPanel1 = new S3PIDemoFE.ControlPanel();
+            this.resourceFilterWidget1 = new S3PIDemoFE.Filter.ResourceFilterWidget();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveAsFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.exportFileDialog = new System.Windows.Forms.SaveFileDialog();
@@ -42,11 +47,6 @@
             this.importResourcesDialog = new System.Windows.Forms.OpenFileDialog();
             this.importPackagesDialog = new System.Windows.Forms.OpenFileDialog();
             this.exportToPackageDialog = new System.Windows.Forms.OpenFileDialog();
-            this.browserWidget1 = new S3PIDemoFE.BrowserWidget();
-            this.packageInfoWidget1 = new S3PIDemoFE.PackageInfo.PackageInfoWidget();
-            this.hexWidget1 = new S3PIDemoFE.HexWidget();
-            this.controlPanel1 = new S3PIDemoFE.ControlPanel();
-            this.resourceFilterWidget1 = new S3PIDemoFE.Filter.ResourceFilterWidget();
             this.menuBarWidget1 = new S3PIDemoFE.MenuBarWidget();
             this.packageInfoFields1 = new S3PIDemoFE.PackageInfo.PackageInfoFields();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -98,6 +98,27 @@
             this.splitContainer2.SplitterDistance = 607;
             this.splitContainer2.TabIndex = 0;
             // 
+            // browserWidget1
+            // 
+            this.browserWidget1.AllowDrop = true;
+            this.browserWidget1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.browserWidget1.Fields = null;
+            this.browserWidget1.Filter = null;
+            this.browserWidget1.Location = new System.Drawing.Point(0, 0);
+            this.browserWidget1.Name = "browserWidget1";
+            this.browserWidget1.Package = null;
+            this.browserWidget1.ProgressBar = this.progressBar1;
+            this.browserWidget1.ProgressLabel = this.lbProgress;
+            this.browserWidget1.SelectedResource = null;
+            this.browserWidget1.Size = new System.Drawing.Size(603, 269);
+            this.browserWidget1.Sortable = false;
+            this.browserWidget1.TabIndex = 0;
+            this.browserWidget1.DragOver += new System.Windows.Forms.DragEventHandler(this.browserWidget1_DragOver);
+            this.browserWidget1.DragDrop += new System.Windows.Forms.DragEventHandler(this.browserWidget1_DragDrop);
+            this.browserWidget1.ItemActivate += new System.EventHandler(this.browserWidget1_ItemActivate);
+            this.browserWidget1.SelectedResourceChanging += new System.EventHandler<S3PIDemoFE.BrowserWidget.ResourceChangingEventArgs>(this.browserWidget1_SelectedResourceChanging);
+            this.browserWidget1.SelectedResourceChanged += new System.EventHandler<S3PIDemoFE.BrowserWidget.ResourceChangedEventArgs>(this.browserWidget1_SelectedResourceChanged);
+            // 
             // progressBar1
             // 
             this.progressBar1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -118,6 +139,16 @@
             this.lbProgress.TabIndex = 3;
             this.lbProgress.Text = "Progress text";
             // 
+            // packageInfoWidget1
+            // 
+            this.packageInfoWidget1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.packageInfoWidget1.Fields = null;
+            this.packageInfoWidget1.Location = new System.Drawing.Point(0, 0);
+            this.packageInfoWidget1.Name = "packageInfoWidget1";
+            this.packageInfoWidget1.Package = null;
+            this.packageInfoWidget1.Size = new System.Drawing.Size(265, 269);
+            this.packageInfoWidget1.TabIndex = 0;
+            // 
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.ColumnCount = 2;
@@ -133,6 +164,20 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(876, 27);
             this.tableLayoutPanel1.TabIndex = 3;
             // 
+            // hexWidget1
+            // 
+            this.hexWidget1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.hexWidget1.Enabled = false;
+            this.hexWidget1.Location = new System.Drawing.Point(0, 103);
+            this.hexWidget1.Margin = new System.Windows.Forms.Padding(0);
+            this.hexWidget1.Name = "hexWidget1";
+            this.hexWidget1.Padding = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.hexWidget1.Resource = null;
+            this.hexWidget1.Size = new System.Drawing.Size(876, 242);
+            this.hexWidget1.TabIndex = 1;
+            // 
             // panel1
             // 
             this.panel1.Controls.Add(this.controlPanel1);
@@ -142,6 +187,40 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(876, 103);
             this.panel1.TabIndex = 0;
+            // 
+            // controlPanel1
+            // 
+            this.controlPanel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.controlPanel1.Location = new System.Drawing.Point(0, 74);
+            this.controlPanel1.Margin = new System.Windows.Forms.Padding(0);
+            this.controlPanel1.Name = "controlPanel1";
+            this.controlPanel1.Padding = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.controlPanel1.Size = new System.Drawing.Size(876, 29);
+            this.controlPanel1.TabIndex = 1;
+            this.controlPanel1.CommitClick += new System.EventHandler(this.controlPanel1_CommitClick);
+            this.controlPanel1.ViewerClick += new System.EventHandler(this.controlPanel1_ViewerClick);
+            this.controlPanel1.UseTagsChanged += new System.EventHandler(this.controlPanel1_UseTagsChanged);
+            this.controlPanel1.HexClick += new System.EventHandler(this.controlPanel1_HexClick);
+            this.controlPanel1.HexEditClick += new System.EventHandler(this.controlPanel1_HexEditClick);
+            this.controlPanel1.UseNamesChanged += new System.EventHandler(this.controlPanel1_UseNamesChanged);
+            this.controlPanel1.GridClick += new System.EventHandler(this.controlPanel1_GridClick);
+            this.controlPanel1.SortChanged += new System.EventHandler(this.controlPanel1_SortChanged);
+            this.controlPanel1.ValueClick += new System.EventHandler(this.controlPanel1_ValueClick);
+            this.controlPanel1.HexOnlyChanged += new System.EventHandler(this.controlPanel1_HexOnlyChanged);
+            this.controlPanel1.EditorClick += new System.EventHandler(this.controlPanel1_EditorClick);
+            // 
+            // resourceFilterWidget1
+            // 
+            this.resourceFilterWidget1.BrowserWidget = null;
+            this.resourceFilterWidget1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.resourceFilterWidget1.Fields = null;
+            this.resourceFilterWidget1.Filter = ((System.Collections.Generic.IList<System.Collections.Generic.KeyValuePair<string, s3pi.Interfaces.TypedValue>>)(resources.GetObject("resourceFilterWidget1.Filter")));
+            this.resourceFilterWidget1.IndexEntry = null;
+            this.resourceFilterWidget1.Location = new System.Drawing.Point(0, 0);
+            this.resourceFilterWidget1.Name = "resourceFilterWidget1";
+            this.resourceFilterWidget1.Size = new System.Drawing.Size(876, 103);
+            this.resourceFilterWidget1.TabIndex = 0;
+            this.resourceFilterWidget1.FilterChanged += new System.EventHandler(this.resourceFilterWidget1_FilterChanged);
             // 
             // openFileDialog1
             // 
@@ -186,84 +265,6 @@
             this.exportToPackageDialog.Filter = "DBPF Packages|*.package;*.world|All Files|*.*";
             this.exportToPackageDialog.Title = "Export to package";
             // 
-            // browserWidget1
-            // 
-            this.browserWidget1.AllowDrop = true;
-            this.browserWidget1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.browserWidget1.Fields = null;
-            this.browserWidget1.Filter = null;
-            this.browserWidget1.Location = new System.Drawing.Point(0, 0);
-            this.browserWidget1.Name = "browserWidget1";
-            this.browserWidget1.Package = null;
-            this.browserWidget1.ProgressBar = this.progressBar1;
-            this.browserWidget1.ProgressLabel = this.lbProgress;
-            this.browserWidget1.SelectedResource = null;
-            this.browserWidget1.Size = new System.Drawing.Size(603, 269);
-            this.browserWidget1.Sortable = false;
-            this.browserWidget1.TabIndex = 0;
-            this.browserWidget1.DragOver += new System.Windows.Forms.DragEventHandler(this.browserWidget1_DragOver);
-            this.browserWidget1.DragDrop += new System.Windows.Forms.DragEventHandler(this.browserWidget1_DragDrop);
-            this.browserWidget1.ItemActivate += new System.EventHandler(this.browserWidget1_ItemActivate);
-            this.browserWidget1.SelectedResourceChanging += new System.EventHandler<S3PIDemoFE.BrowserWidget.ResourceChangingEventArgs>(this.browserWidget1_SelectedResourceChanging);
-            this.browserWidget1.SelectedResourceChanged += new System.EventHandler<S3PIDemoFE.BrowserWidget.ResourceChangedEventArgs>(this.browserWidget1_SelectedResourceChanged);
-            // 
-            // packageInfoWidget1
-            // 
-            this.packageInfoWidget1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.packageInfoWidget1.Fields = null;
-            this.packageInfoWidget1.Location = new System.Drawing.Point(0, 0);
-            this.packageInfoWidget1.Name = "packageInfoWidget1";
-            this.packageInfoWidget1.Package = null;
-            this.packageInfoWidget1.Size = new System.Drawing.Size(265, 269);
-            this.packageInfoWidget1.TabIndex = 0;
-            // 
-            // hexWidget1
-            // 
-            this.hexWidget1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.hexWidget1.Enabled = false;
-            this.hexWidget1.Location = new System.Drawing.Point(0, 103);
-            this.hexWidget1.Margin = new System.Windows.Forms.Padding(0);
-            this.hexWidget1.Name = "hexWidget1";
-            this.hexWidget1.Padding = new System.Windows.Forms.Padding(3, 0, 3, 0);
-            this.hexWidget1.Resource = null;
-            this.hexWidget1.Size = new System.Drawing.Size(876, 242);
-            this.hexWidget1.TabIndex = 1;
-            // 
-            // controlPanel1
-            // 
-            this.controlPanel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.controlPanel1.Location = new System.Drawing.Point(0, 74);
-            this.controlPanel1.Margin = new System.Windows.Forms.Padding(0);
-            this.controlPanel1.Name = "controlPanel1";
-            this.controlPanel1.Padding = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.controlPanel1.Size = new System.Drawing.Size(876, 29);
-            this.controlPanel1.TabIndex = 1;
-            this.controlPanel1.CommitClick += new System.EventHandler(this.controlPanel1_CommitClick);
-            this.controlPanel1.ViewerClick += new System.EventHandler(this.controlPanel1_ViewerClick);
-            this.controlPanel1.UseTagsChanged += new System.EventHandler(this.controlPanel1_UseTagsChanged);
-            this.controlPanel1.HexClick += new System.EventHandler(this.controlPanel1_HexClick);
-            this.controlPanel1.UseNamesChanged += new System.EventHandler(this.controlPanel1_UseNamesChanged);
-            this.controlPanel1.GridClick += new System.EventHandler(this.controlPanel1_GridClick);
-            this.controlPanel1.SortChanged += new System.EventHandler(this.controlPanel1_SortChanged);
-            this.controlPanel1.ValueClick += new System.EventHandler(this.controlPanel1_ValueClick);
-            this.controlPanel1.HexOnlyChanged += new System.EventHandler(this.controlPanel1_HexOnlyChanged);
-            this.controlPanel1.EditorClick += new System.EventHandler(this.controlPanel1_EditorClick);
-            // 
-            // resourceFilterWidget1
-            // 
-            this.resourceFilterWidget1.BrowserWidget = null;
-            this.resourceFilterWidget1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.resourceFilterWidget1.Fields = null;
-            this.resourceFilterWidget1.Filter = ((System.Collections.Generic.IList<System.Collections.Generic.KeyValuePair<string, s3pi.Interfaces.TypedValue>>)(resources.GetObject("resourceFilterWidget1.Filter")));
-            this.resourceFilterWidget1.IndexEntry = null;
-            this.resourceFilterWidget1.Location = new System.Drawing.Point(0, 0);
-            this.resourceFilterWidget1.Name = "resourceFilterWidget1";
-            this.resourceFilterWidget1.Size = new System.Drawing.Size(876, 103);
-            this.resourceFilterWidget1.TabIndex = 0;
-            this.resourceFilterWidget1.FilterChanged += new System.EventHandler(this.resourceFilterWidget1_FilterChanged);
-            // 
             // menuBarWidget1
             // 
             this.menuBarWidget1.Dock = System.Windows.Forms.DockStyle.Top;
@@ -279,6 +280,7 @@
             this.menuBarWidget1.MBFile_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBFile_Click);
             this.menuBarWidget1.MBDropDownOpening += new S3PIDemoFE.MenuBarWidget.MBDropDownOpeningEventHandler(this.menuBarWidget1_MBDropDownOpening);
             this.menuBarWidget1.MBTools_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBTools_Click);
+            this.menuBarWidget1.MBSettings_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBSettings_Click);
             this.menuBarWidget1.MRUClick += new S3PIDemoFE.MenuBarWidget.MRUClickEventHandler(this.menuBarWidget1_MRUClick);
             // 
             // MainForm

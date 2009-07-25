@@ -846,6 +846,79 @@ namespace S3PIDemoFE
         }
         #endregion
 
+        #region Tools menu
+        private void menuBarWidget1_MBSettings_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
+        {
+            try
+            {
+                this.Enabled = false;
+                Application.DoEvents();
+                switch (mn.mn)
+                {
+                    case MenuBarWidget.MB.MBS_externals: settingsExternalprograms(); break;
+                }
+            }
+            finally { this.Enabled = true; }
+        }
+
+        private void settingsExternalprograms()
+        {
+            Settings.ExternalProgramsDialog epd = new S3PIDemoFE.Settings.ExternalProgramsDialog();
+            if (S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt != null && S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt.Length > 0)
+            {
+                epd.HasUserHelpersTxt = true;
+                epd.UserHelpersTxt = S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt;
+            }
+            else
+            {
+                epd.HasUserHelpersTxt = false;
+                epd.UserHelpersTxt = "";
+            }
+            if (S3PIDemoFE.Properties.Settings.Default.HexEditorCmd != null && S3PIDemoFE.Properties.Settings.Default.HexEditorCmd.Length > 0)
+            {
+                epd.HasUserHexEditor = true;
+                epd.UserHexEditor = S3PIDemoFE.Properties.Settings.Default.HexEditorCmd;
+                epd.HexEditorIgnoreTS = S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS;
+            }
+            else
+            {
+                epd.HasUserHexEditor = false;
+                epd.UserHexEditor = "";
+                epd.HexEditorIgnoreTS = false;
+            }
+            DialogResult dr = epd.ShowDialog();
+            if (dr != DialogResult.OK) return;
+            if (epd.HasUserHelpersTxt && epd.UserHelpersTxt.Length > 0 && File.Exists(epd.UserHelpersTxt))
+            {
+                S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt = epd.UserHelpersTxt;
+            }
+            else
+            {
+                S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt = null;
+            }
+            if (epd.HasUserHexEditor && epd.UserHexEditor.Length > 0 && File.Exists(epd.UserHexEditor))
+            {
+                S3PIDemoFE.Properties.Settings.Default.HexEditorCmd = epd.UserHexEditor;
+                S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS = epd.HexEditorIgnoreTS;
+            }
+            else
+            {
+                S3PIDemoFE.Properties.Settings.Default.HexEditorCmd = null;
+                S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS = false;
+            }
+
+            if (browserWidget1.SelectedResource != null)
+            {
+                s3pi.DemoPlugins.DemoPlugins.Config = S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt;
+                plug = new s3pi.DemoPlugins.DemoPlugins(browserWidget1.SelectedResource, resource);
+                controlPanel1.ViewerEnabled = plug.HasViewer;
+                controlPanel1.EditorEnabled = plug.HasEditor;
+                controlPanel1.HexEditEnabled = S3PIDemoFE.Properties.Settings.Default.HexEditorCmd != null
+                    && S3PIDemoFE.Properties.Settings.Default.HexEditorCmd.Length > 0;
+            }
+        }
+        #endregion
+
         #region Help menu
         private void menuBarWidget1_MBHelp_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
         {
@@ -986,15 +1059,19 @@ namespace S3PIDemoFE
                     if (lf.Contains(f)) lf.Remove(f);
                 controlPanel1.GridEnabled = lf.Count > 0;
 
-                s3pi.DemoPlugins.DemoPlugins.Config = S3PIDemoFE.Properties.Settings.Default.DemoPluginsConfig;
+                s3pi.DemoPlugins.DemoPlugins.Config = S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt;
                 plug = new s3pi.DemoPlugins.DemoPlugins(browserWidget1.SelectedResource, resource);
                 controlPanel1.ViewerEnabled = plug.HasViewer;
                 controlPanel1.EditorEnabled = plug.HasEditor;
+
+                controlPanel1.HexEditEnabled = S3PIDemoFE.Properties.Settings.Default.HexEditorCmd != null
+                    && S3PIDemoFE.Properties.Settings.Default.HexEditorCmd.Length > 0;
             }
             else
             {
                 plug = null;
-                controlPanel1.ValueEnabled = controlPanel1.GridEnabled = controlPanel1.ViewerEnabled = controlPanel1.EditorEnabled = false;
+                controlPanel1.ValueEnabled = controlPanel1.GridEnabled =
+                    controlPanel1.ViewerEnabled = controlPanel1.EditorEnabled = controlPanel1.HexEditEnabled = false;
             }
 
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_exportResources, resource != null || browserWidget1.SelectedResources.Count > 0);
@@ -1191,24 +1268,45 @@ namespace S3PIDemoFE
 
                 bool res = plug.Edit(resource);
 
-                this.Activate();
-                Application.DoEvents();
-
-                if (res && Clipboard.ContainsData(DataFormats.Serializable))
-                {
-                    int dr = CopyableMessageBox.Show("Resource has been updated.  Commit changes?", "Commit changes?",
-                        CopyableMessageBoxButtons.YesNo, CopyableMessageBoxIcon.Question, 0);
-
-                    if (dr != 0) return;
-
-                    MemoryStream ms = Clipboard.GetData(DataFormats.Serializable) as MemoryStream;
-                    IResourceIndexEntry rie = NewResource(
-                        browserWidget1.SelectedResource.ResourceType, browserWidget1.SelectedResource.ResourceGroup, browserWidget1.SelectedResource.Instance,
-                        ms, true, browserWidget1.SelectedResource.Compressed != 0);
-                    if (rie != null) browserWidget1.Add(rie);
-                }
+                afterEdit(res);
             }
             finally { this.Enabled = true; }
+        }
+
+        private void controlPanel1_HexEditClick(object sender, EventArgs e)
+        {
+            try
+            {
+                this.Enabled = false;
+                Application.DoEvents();
+
+                bool res = s3pi.DemoPlugins.DemoPlugins.Edit(browserWidget1.SelectedResource, resource,
+                    S3PIDemoFE.Properties.Settings.Default.HexEditorCmd,
+                    S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS);
+
+                afterEdit(res);
+            }
+            finally { this.Enabled = true; }
+        }
+
+        void afterEdit(bool res)
+        {
+            this.Activate();
+            Application.DoEvents();
+
+            if (res && Clipboard.ContainsData(DataFormats.Serializable))
+            {
+                int dr = CopyableMessageBox.Show("Resource has been updated.  Commit changes?", "Commit changes?",
+                    CopyableMessageBoxButtons.YesNo, CopyableMessageBoxIcon.Question, 0);
+
+                if (dr != 0) return;
+
+                MemoryStream ms = Clipboard.GetData(DataFormats.Serializable) as MemoryStream;
+                IResourceIndexEntry rie = NewResource(
+                    browserWidget1.SelectedResource.ResourceType, browserWidget1.SelectedResource.ResourceGroup, browserWidget1.SelectedResource.Instance,
+                    ms, true, browserWidget1.SelectedResource.Compressed != 0);
+                if (rie != null) browserWidget1.Add(rie);
+            }
         }
         #endregion
     }

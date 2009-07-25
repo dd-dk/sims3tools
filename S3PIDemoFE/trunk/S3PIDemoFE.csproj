@@ -35,9 +35,9 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="s3pi.CopyableMessageBox, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="s3pi.CustomForms, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\s3pi\build\bin\Release\s3pi.CopyableMessageBox.dll</HintPath>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
     </Reference>
     <Reference Include="s3pi.DemoPlugins, Version=906.19.14.24845, Culture=neutral, PublicKeyToken=95792da617faeee1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -207,6 +207,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="Settings\ExternalProgramsDialog.resx">
+      <DependentUpon>ExternalProgramsDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Settings\GetNumberDialog.resx">
       <DependentUpon>GetNumberDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -230,6 +233,12 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Settings.cs" />
+    <Compile Include="Settings\ExternalProgramsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Settings\ExternalProgramsDialog.Designer.cs">
+      <DependentUpon>ExternalProgramsDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Settings\GetNumberDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -327,7 +336,6 @@
     <None Include="Resources\s3pe.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
