@@ -40,6 +40,7 @@ namespace S3PIDemoFE.Filter
         }
 
         [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public IList<string> Fields
         {
             get { return fields; }
@@ -91,6 +92,7 @@ namespace S3PIDemoFE.Filter
         public bool FilterEnabled { get { return ckbFilter.Checked; } set { ckbFilter.Checked = value; } }
 
         [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public IResourceIndexEntry IndexEntry
         {
             get { return ie; }
@@ -102,6 +104,7 @@ namespace S3PIDemoFE.Filter
         }
 
         [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public IList<KeyValuePair<string, TypedValue>> Filter
         {
             get
@@ -130,6 +133,7 @@ namespace S3PIDemoFE.Filter
         }
 
         [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public BrowserWidget BrowserWidget
         {
             get { return bw; }
