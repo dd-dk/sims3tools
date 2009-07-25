@@ -272,5 +272,17 @@ namespace S3PIDemoFE.Properties {
                 this["HexEditorIgnoreTS"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool HexEditorWantsQuotes {
+            get {
+                return ((bool)(this["HexEditorWantsQuotes"]));
+            }
+            set {
+                this["HexEditorWantsQuotes"] = value;
+            }
+        }
     }
 }

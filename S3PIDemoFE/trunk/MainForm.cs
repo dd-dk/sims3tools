@@ -846,7 +846,7 @@ namespace S3PIDemoFE
         }
         #endregion
 
-        #region Tools menu
+        #region Settings menu
         private void menuBarWidget1_MBSettings_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
         {
             try
@@ -879,6 +879,7 @@ namespace S3PIDemoFE
                 epd.HasUserHexEditor = true;
                 epd.UserHexEditor = S3PIDemoFE.Properties.Settings.Default.HexEditorCmd;
                 epd.HexEditorIgnoreTS = S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS;
+                epd.HexEditorWantsQuotes = S3PIDemoFE.Properties.Settings.Default.HexEditorWantsQuotes;
             }
             else
             {
@@ -900,11 +901,13 @@ namespace S3PIDemoFE
             {
                 S3PIDemoFE.Properties.Settings.Default.HexEditorCmd = epd.UserHexEditor;
                 S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS = epd.HexEditorIgnoreTS;
+                S3PIDemoFE.Properties.Settings.Default.HexEditorWantsQuotes = epd.HexEditorWantsQuotes;
             }
             else
             {
                 S3PIDemoFE.Properties.Settings.Default.HexEditorCmd = null;
                 S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS = false;
+                S3PIDemoFE.Properties.Settings.Default.HexEditorWantsQuotes = false;
             }
 
             if (browserWidget1.SelectedResource != null)
@@ -1282,6 +1285,7 @@ namespace S3PIDemoFE
 
                 bool res = s3pi.DemoPlugins.DemoPlugins.Edit(browserWidget1.SelectedResource, resource,
                     S3PIDemoFE.Properties.Settings.Default.HexEditorCmd,
+                    S3PIDemoFE.Properties.Settings.Default.HexEditorWantsQuotes,
                     S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS);
 
                 afterEdit(res);

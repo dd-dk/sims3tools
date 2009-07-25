@@ -49,8 +49,10 @@ namespace S3PIDemoFE.Settings
         public string UserHexEditor { get { return tbUserHexEditor.Text; } set { tbUserHexEditor.Text = value; } }
 
         public bool HexEditorIgnoreTS { get { return ckbHexEditorTS.Checked; } set { ckbHexEditorTS.Checked = value; } }
+        
+        public bool HexEditorWantsQuotes { get { return ckbQuotes.Checked; } set { ckbQuotes.Checked = value; } }
 
-        private void ckbUserHexEditor_CheckedChanged(object sender, EventArgs e) { ckbHexEditorTS.Enabled = btnHexEditorBrowse.Enabled = ckbUserHexEditor.Checked; }
+        private void ckbUserHexEditor_CheckedChanged(object sender, EventArgs e) { ckbQuotes.Enabled = ckbHexEditorTS.Enabled = btnHexEditorBrowse.Enabled = ckbUserHexEditor.Checked; }
 
         private void btnHexEditorBrowse_Click(object sender, EventArgs e)
         {

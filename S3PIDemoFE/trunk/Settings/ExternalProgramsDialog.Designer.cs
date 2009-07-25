@@ -41,6 +41,7 @@
             this.btnHexEditorBrowse = new System.Windows.Forms.Button();
             this.ckbHexEditorTS = new System.Windows.Forms.CheckBox();
             this.ofdUserHexEditor = new System.Windows.Forms.OpenFileDialog();
+            this.ckbQuotes = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
@@ -49,7 +50,7 @@
             // 
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOK.Location = new System.Drawing.Point(377, 157);
+            this.btnOK.Location = new System.Drawing.Point(377, 187);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 4;
@@ -60,7 +61,7 @@
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(296, 157);
+            this.btnCancel.Location = new System.Drawing.Point(296, 187);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 3;
@@ -138,14 +139,16 @@
             this.tableLayoutPanel2.Controls.Add(this.ckbUserHexEditor, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.btnHexEditorBrowse, 1, 1);
             this.tableLayoutPanel2.Controls.Add(this.ckbHexEditorTS, 0, 2);
+            this.tableLayoutPanel2.Controls.Add(this.ckbQuotes, 0, 3);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(12, 70);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 4;
+            this.tableLayoutPanel2.RowCount = 5;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(440, 78);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(440, 102);
             this.tableLayoutPanel2.TabIndex = 2;
             // 
             // tbUserHexEditor
@@ -202,13 +205,27 @@
             this.ofdUserHexEditor.Filter = "Program files|*.exe";
             this.ofdUserHexEditor.Title = "Choose your hex editor";
             // 
+            // ckbQuotes
+            // 
+            this.ckbQuotes.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ckbQuotes.AutoSize = true;
+            this.ckbQuotes.Enabled = false;
+            this.ckbQuotes.Location = new System.Drawing.Point(24, 78);
+            this.ckbQuotes.Margin = new System.Windows.Forms.Padding(24, 3, 3, 3);
+            this.ckbQuotes.Name = "ckbQuotes";
+            this.ckbQuotes.Size = new System.Drawing.Size(170, 17);
+            this.ckbQuotes.TabIndex = 4;
+            this.ckbQuotes.Text = "Needs quotes around filename";
+            this.ckbQuotes.UseVisualStyleBackColor = true;
+            this.ckbQuotes.CheckedChanged += new System.EventHandler(this.ckbUserHexEditor_CheckedChanged);
+            // 
             // ExternalProgramsDialog
             // 
             this.AcceptButton = this.btnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(464, 192);
+            this.ClientSize = new System.Drawing.Size(464, 222);
             this.Controls.Add(this.tableLayoutPanel2);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.btnCancel);
@@ -241,5 +258,6 @@
         private System.Windows.Forms.Button btnHexEditorBrowse;
         private System.Windows.Forms.OpenFileDialog ofdUserHexEditor;
         private System.Windows.Forms.CheckBox ckbHexEditorTS;
+        private System.Windows.Forms.CheckBox ckbQuotes;
     }
 }
