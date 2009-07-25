@@ -1048,19 +1048,22 @@ namespace S3PIDemoFE
             resourceIsDirty = controlPanel1.CommitEnabled = false;
 
             controlPanel1.HexEnabled = (resource != null);
-            if (resource != null && !controlPanel1.HexOnly)
+            if (resource != null)
             {
-                if (resource.ContentFields.Contains("Value"))
+                if (!controlPanel1.HexOnly)
                 {
-                    Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
-                    controlPanel1.ValueEnabled = typeof(String).IsAssignableFrom(t) || typeof(Image).IsAssignableFrom(t);
-                }
-                else controlPanel1.ValueEnabled = false;
+                    if (resource.ContentFields.Contains("Value"))
+                    {
+                        Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
+                        controlPanel1.ValueEnabled = typeof(String).IsAssignableFrom(t) || typeof(Image).IsAssignableFrom(t);
+                    }
+                    else controlPanel1.ValueEnabled = false;
 
-                List<string> lf = resource.ContentFields;
-                foreach (string f in (new string[] { "Stream", "AsBytes", "Value" }))
-                    if (lf.Contains(f)) lf.Remove(f);
-                controlPanel1.GridEnabled = lf.Count > 0;
+                    List<string> lf = resource.ContentFields;
+                    foreach (string f in (new string[] { "Stream", "AsBytes", "Value" }))
+                        if (lf.Contains(f)) lf.Remove(f);
+                    controlPanel1.GridEnabled = lf.Count > 0;
+                }
 
                 s3pi.DemoPlugins.DemoPlugins.Config = S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt;
                 plug = new s3pi.DemoPlugins.DemoPlugins(browserWidget1.SelectedResource, resource);
