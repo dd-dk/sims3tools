@@ -44,6 +44,7 @@ namespace S3PIDemoFE
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.label2 = new System.Windows.Forms.Label();
             this.ckbUseTags = new System.Windows.Forms.CheckBox();
+            this.btnHexEdit = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -202,20 +203,23 @@ namespace S3PIDemoFE
             this.tableLayoutPanel2.AutoSize = true;
             this.tableLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tableLayoutPanel2.CellBorderStyle = System.Windows.Forms.TableLayoutPanelCellBorderStyle.Single;
-            this.tableLayoutPanel2.ColumnCount = 4;
+            this.tableLayoutPanel2.ColumnCount = 6;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 6F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 6F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel2.Controls.Add(this.btnViewer, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.btnEditor, 3, 0);
             this.tableLayoutPanel2.Controls.Add(this.label1, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.btnHexEdit, 5, 0);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(541, 1);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(165, 25);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(239, 25);
             this.tableLayoutPanel2.TabIndex = 8;
             // 
             // btnViewer
@@ -300,6 +304,20 @@ namespace S3PIDemoFE
             this.ckbUseTags.UseVisualStyleBackColor = true;
             this.ckbUseTags.CheckedChanged += new System.EventHandler(this.ckbUseTags_CheckedChanged);
             // 
+            // btnHexEdit
+            // 
+            this.btnHexEdit.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnHexEdit.AutoSize = true;
+            this.btnHexEdit.Enabled = false;
+            this.btnHexEdit.Location = new System.Drawing.Point(172, 1);
+            this.btnHexEdit.Margin = new System.Windows.Forms.Padding(0);
+            this.btnHexEdit.Name = "btnHexEdit";
+            this.btnHexEdit.Size = new System.Drawing.Size(66, 23);
+            this.btnHexEdit.TabIndex = 2;
+            this.btnHexEdit.Text = "Hex Editor";
+            this.btnHexEdit.UseVisualStyleBackColor = true;
+            this.btnHexEdit.Click += new System.EventHandler(this.btnHexEdit_Click);
+            // 
             // ControlPanel
             // 
             this.Controls.Add(this.tableLayoutPanel1);
@@ -334,6 +352,7 @@ namespace S3PIDemoFE
         private System.Windows.Forms.CheckBox ckbUseTags;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
+        private System.Windows.Forms.Button btnHexEdit;
     }
 }
 

@@ -203,6 +203,21 @@ namespace S3PIDemoFE
         private void btnEditor_Click(object sender, EventArgs e) { OnEditorClick(sender, e); }
         #endregion
 
+        #region HexEdit button
+        [Browsable(true)]
+        [Category("Behavior")]
+        [DefaultValue(false)]
+        [Description("The state of the HexEdit button")]
+        public bool HexEditEnabled { get { return btnHexEdit.Enabled; } set { btnHexEdit.Enabled = value; } }
+
+        [Browsable(true)]
+        [Category("Action")]
+        [Description("Occurs when the HexEdit button is clicked")]
+        public event EventHandler HexEditClick;
+        protected virtual void OnHexEditClick(object sender, EventArgs e) { if (HexEditClick != null) HexEditClick(sender, e); }
+        private void btnHexEdit_Click(object sender, EventArgs e) { OnHexEditClick(sender, e); }
+        #endregion
+
         #region Commit button
         [Browsable(true)]
         [Category("Behavior")]
