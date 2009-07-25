@@ -73,6 +73,8 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.externalprogramsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -83,6 +85,7 @@
             this.editToolStripMenuItem,
             this.resourceToolStripMenuItem,
             this.toolsToolStripMenuItem,
+            this.settingsToolStripMenuItem,
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -467,6 +470,21 @@
             this.licenceToolStripMenuItem.Text = "&Licence...";
             this.licenceToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
             // 
+            // settingsToolStripMenuItem
+            // 
+            this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.externalprogramsToolStripMenuItem});
+            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(58, 20);
+            this.settingsToolStripMenuItem.Text = "&Settings";
+            this.settingsToolStripMenuItem.DropDownOpening += new System.EventHandler(this.tsMD_DropDownOpening);
+            // 
+            // externalprogramsToolStripMenuItem
+            // 
+            this.externalprogramsToolStripMenuItem.Name = "externalprogramsToolStripMenuItem";
+            this.externalprogramsToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.externalprogramsToolStripMenuItem.Text = "External &programs...";
+            // 
             // MenuBarWidget
             // 
             this.Controls.Add(this.menuStrip1);
@@ -526,5 +544,7 @@
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fNVHashToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem externalprogramsToolStripMenuItem;
     }
 }

@@ -49,6 +49,8 @@ namespace S3PIDemoFE
                 compressedToolStripMenuItem, deletedToolStripMenuItem, detailsToolStripMenuItem,
                 //Tools
                 fNVHashToolStripMenuItem, searchToolStripMenuItem,
+                //Settings
+                externalprogramsToolStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
@@ -61,6 +63,7 @@ namespace S3PIDemoFE
             MBF,
             MBE,
             MBR,
+            MBS,
             MBH,
         }
 
@@ -74,6 +77,7 @@ namespace S3PIDemoFE
             MBR_add, MBR_copy, MBR_paste, MBR_duplicate,
             MBR_compressed, MBR_isdeleted, MBR_details,
             MBT_fnvHash, MBT_search,
+            MBS_externals,
             MBH_contents, MBH_about, MBH_warranty, MBH_licence,
         }
 
@@ -108,9 +112,17 @@ namespace S3PIDemoFE
         protected void OnMBTools_Click(object sender, MB mn) { if (MBTools_Click != null) MBTools_Click(sender, new MBClickEventArgs(mn)); }
         private void tsMBT_Click(object sender, EventArgs e) { OnMBTools_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
 
+        public event MBClickEventHandler MBSettings_Click;
+        protected void OnMBSettings_Click(object sender, MB mn) { if (MBSettings_Click != null) MBSettings_Click(sender, new MBClickEventArgs(mn)); }
+        private void tsMBS_Click(object sender, EventArgs e) { OnMBSettings_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
+
         public event MBClickEventHandler MBHelp_Click;
         protected void OnMBHelp_Click(object sender, MB mn) { if (MBHelp_Click != null) MBHelp_Click(sender, new MBClickEventArgs(mn)); }
         private void tsMBH_Click(object sender, EventArgs e) { OnMBHelp_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
+
+
+
+
 
         public void AddRecentFile(string value)
         {
