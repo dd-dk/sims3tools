@@ -67,14 +67,14 @@
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fNVHashToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.externalprogramsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.externalprogramsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -423,6 +423,22 @@
             this.searchToolStripMenuItem.Text = "&Search...";
             this.searchToolStripMenuItem.Click += new System.EventHandler(this.tsMBT_Click);
             // 
+            // settingsToolStripMenuItem
+            // 
+            this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.externalprogramsToolStripMenuItem});
+            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(58, 20);
+            this.settingsToolStripMenuItem.Text = "&Settings";
+            this.settingsToolStripMenuItem.DropDownOpening += new System.EventHandler(this.tsMD_DropDownOpening);
+            // 
+            // externalprogramsToolStripMenuItem
+            // 
+            this.externalprogramsToolStripMenuItem.Name = "externalprogramsToolStripMenuItem";
+            this.externalprogramsToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+            this.externalprogramsToolStripMenuItem.Text = "External &programs...";
+            this.externalprogramsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -469,21 +485,6 @@
             this.licenceToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.licenceToolStripMenuItem.Text = "&Licence...";
             this.licenceToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
-            // 
-            // settingsToolStripMenuItem
-            // 
-            this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.externalprogramsToolStripMenuItem});
-            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(58, 20);
-            this.settingsToolStripMenuItem.Text = "&Settings";
-            this.settingsToolStripMenuItem.DropDownOpening += new System.EventHandler(this.tsMD_DropDownOpening);
-            // 
-            // externalprogramsToolStripMenuItem
-            // 
-            this.externalprogramsToolStripMenuItem.Name = "externalprogramsToolStripMenuItem";
-            this.externalprogramsToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
-            this.externalprogramsToolStripMenuItem.Text = "External &programs...";
             // 
             // MenuBarWidget
             // 
