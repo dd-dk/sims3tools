@@ -855,13 +855,14 @@ namespace S3PIDemoFE
                 Application.DoEvents();
                 switch (mn.mn)
                 {
-                    case MenuBarWidget.MB.MBS_externals: settingsExternalprograms(); break;
+                    case MenuBarWidget.MB.MBS_externals: settingsExternalPrograms(); break;
+                    case MenuBarWidget.MB.MBS_bookmarks: settingsOrganiseBookmarks(); break;
                 }
             }
             finally { this.Enabled = true; }
         }
 
-        private void settingsExternalprograms()
+        private void settingsExternalPrograms()
         {
             Settings.ExternalProgramsDialog epd = new S3PIDemoFE.Settings.ExternalProgramsDialog();
             if (S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt != null && S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt.Length > 0)
@@ -919,6 +920,13 @@ namespace S3PIDemoFE
                 controlPanel1.HexEditEnabled = S3PIDemoFE.Properties.Settings.Default.HexEditorCmd != null
                     && S3PIDemoFE.Properties.Settings.Default.HexEditorCmd.Length > 0;
             }
+        }
+
+        private void settingsOrganiseBookmarks()
+        {
+            Settings.OrganiseBookmarksDialog obd = new S3PIDemoFE.Settings.OrganiseBookmarksDialog();
+            obd.ShowDialog();
+            menuBarWidget1.UpdateBookmarks();
         }
         #endregion
 

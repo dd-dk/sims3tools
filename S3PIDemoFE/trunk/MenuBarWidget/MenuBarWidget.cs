@@ -50,7 +50,7 @@ namespace S3PIDemoFE
                 //Tools
                 fNVHashToolStripMenuItem, searchToolStripMenuItem,
                 //Settings
-                externalprogramsToolStripMenuItem,
+                externalProgramsToolStripMenuItem, organiseBookmarksToolStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
@@ -77,7 +77,7 @@ namespace S3PIDemoFE
             MBR_add, MBR_copy, MBR_paste, MBR_duplicate,
             MBR_compressed, MBR_isdeleted, MBR_details,
             MBT_fnvHash, MBT_search,
-            MBS_externals,
+            MBS_externals, MBS_bookmarks,
             MBH_contents, MBH_about, MBH_warranty, MBH_licence,
         }
 
@@ -174,7 +174,7 @@ namespace S3PIDemoFE
                 S3PIDemoFE.Properties.Settings.Default.Bookmarks.RemoveAt(S3PIDemoFE.Properties.Settings.Default.Bookmarks.Count - 1);
             UpdateBookmarks();
         }
-        void UpdateBookmarks()
+        public void UpdateBookmarks()
         {
             this.bookmarkedPackagesToolStripMenuItem.DropDownItems.Clear();
             this.bookmarkedPackagesToolStripMenuItem.DropDownItems.Add(toolStripSeparator7);

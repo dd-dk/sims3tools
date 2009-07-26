@@ -68,13 +68,14 @@
             this.fNVHashToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.externalprogramsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.externalProgramsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.organiseBookmarksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -426,18 +427,19 @@
             // settingsToolStripMenuItem
             // 
             this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.externalprogramsToolStripMenuItem});
+            this.externalProgramsToolStripMenuItem,
+            this.organiseBookmarksToolStripMenuItem});
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
             this.settingsToolStripMenuItem.Size = new System.Drawing.Size(58, 20);
             this.settingsToolStripMenuItem.Text = "&Settings";
             this.settingsToolStripMenuItem.DropDownOpening += new System.EventHandler(this.tsMD_DropDownOpening);
             // 
-            // externalprogramsToolStripMenuItem
+            // externalProgramsToolStripMenuItem
             // 
-            this.externalprogramsToolStripMenuItem.Name = "externalprogramsToolStripMenuItem";
-            this.externalprogramsToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
-            this.externalprogramsToolStripMenuItem.Text = "External &programs...";
-            this.externalprogramsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            this.externalProgramsToolStripMenuItem.Name = "externalProgramsToolStripMenuItem";
+            this.externalProgramsToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.externalProgramsToolStripMenuItem.Text = "External &Programs...";
+            this.externalProgramsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -485,6 +487,13 @@
             this.licenceToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.licenceToolStripMenuItem.Text = "&Licence...";
             this.licenceToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
+            // 
+            // organiseBookmarksToolStripMenuItem
+            // 
+            this.organiseBookmarksToolStripMenuItem.Name = "organiseBookmarksToolStripMenuItem";
+            this.organiseBookmarksToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.organiseBookmarksToolStripMenuItem.Text = "Organise Boo&kmarks...";
+            this.organiseBookmarksToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // MenuBarWidget
             // 
@@ -546,6 +555,7 @@
         private System.Windows.Forms.ToolStripMenuItem fNVHashToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem externalprogramsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem externalProgramsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem organiseBookmarksToolStripMenuItem;
     }
 }
