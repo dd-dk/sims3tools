@@ -1803,8 +1803,16 @@ namespace ObjectCloner
 
         private void helpContents()
         {
-            if (File.Exists(Path.Combine(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "HelpFiles"), "Contents.htm")))
-                Help.ShowHelp(this, "file:///" + Path.Combine(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "HelpFiles"), "Contents.htm"));
+            string locale = System.Globalization.CultureInfo.CurrentUICulture.Name;
+
+            string baseFolder = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "HelpFiles");
+            if (Directory.Exists(Path.Combine(baseFolder, locale)))
+                baseFolder = Path.Combine(baseFolder, locale);
+            else if (Directory.Exists(Path.Combine(baseFolder, locale.Substring(0, 2))))
+                baseFolder = Path.Combine(baseFolder, locale.Substring(0, 2));
+
+            if (File.Exists(Path.Combine(baseFolder, "Contents.htm")))
+                Help.ShowHelp(this, "file:///" + Path.Combine(baseFolder, "Contents.htm"));
             else
                 helpAbout();
         }
