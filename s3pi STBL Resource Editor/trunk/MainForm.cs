@@ -108,7 +108,9 @@ namespace s3pi_STBL_Resource_Editor
 
         private void tbGUID_Validating(object sender, CancelEventArgs e)
         {
-            try { Convert.ToUInt64(tbGUID.Text, tbGUID.Text.StartsWith("0x") ? 16 : 10); }
+            string val = tbGUID.Text.Trim();
+            if (val.Length == 0) return;
+            try { Convert.ToUInt64(val, val.StartsWith("0x") ? 16 : 10); }
             catch { e.Cancel = true; tbGUID.SelectAll(); }
         }
 
