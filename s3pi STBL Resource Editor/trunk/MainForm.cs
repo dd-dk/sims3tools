@@ -49,14 +49,28 @@ namespace s3pi_STBL_Resource_Editor
         }
 
         StblResource.StblResource stbl;
+        List<ulong> stblKeys;
         IDictionary<ulong, string> map;
         void loadStbl(Stream data)
         {
             stbl = new StblResource.StblResource(0, data);
             map = (IDictionary<ulong, string>)stbl;
+            stblKeys = new List<ulong>(map.Keys);
             foreach (ulong key in map.Keys)
-                lbStrings.Items.Add("0x" + key.ToString("X16"));
+                lbStrings.Items.Add("0x" + key.ToString("X16") + ": " + partValue(map[key]));
             Clipboard.Clear();
+        }
+        string partValue(string value)
+        {
+            string res = "";
+
+            foreach (char c in value)
+            {
+                if (Char.IsLetterOrDigit(c) || Char.IsPunctuation(c) || c == ' ') res += c;
+                //if (res.Length > 20) break;
+            }
+
+            return res;
         }
 
         void saveStbl()
@@ -70,7 +84,7 @@ namespace s3pi_STBL_Resource_Editor
         {
             if (currentIndex >= 0)
             {
-                map[Convert.ToUInt64(lbStrings.Items[currentIndex] + "", 16)] = rtbValue.Text;
+                map[stblKeys[currentIndex]] = rtbValue.Text;
             }
             rtbValue.Enabled = lbStrings.SelectedIndices.Count > 0;
             if (lbStrings.SelectedIndices.Count == 0)
@@ -81,8 +95,9 @@ namespace s3pi_STBL_Resource_Editor
             }
             else
             {
-                rtbValue.Text = map[Convert.ToUInt64(lbStrings.SelectedItem + "", 16)];
                 currentIndex = lbStrings.SelectedIndex;
+                rtbValue.Text = map[stblKeys[currentIndex]];
+                tbGUID.Text = "0x" + stblKeys[currentIndex].ToString("X16");
                 btnDelete.Enabled = true;
             }
         }
@@ -104,21 +119,54 @@ namespace s3pi_STBL_Resource_Editor
         private void tbGUID_TextChanged(object sender, EventArgs e)
         {
             btnAdd.Enabled = tbGUID.Text.Length > 0;
-        }
-
-        private void tbGUID_Validating(object sender, CancelEventArgs e)
-        {
-            string val = tbGUID.Text.Trim();
-            if (val.Length == 0) return;
-            try { Convert.ToUInt64(val, val.StartsWith("0x") ? 16 : 10); }
-            catch { e.Cancel = true; tbGUID.SelectAll(); }
+            btnChange.Enabled = lbStrings.SelectedIndices.Count >= 0 && tbGUID.Text.Length > 0;
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            ulong newGUID = Convert.ToUInt64(tbGUID.Text, tbGUID.Text.StartsWith("0x") ? 16 : 10);
-            if (map.ContainsKey(newGUID)) { tbGUID.Focus(); tbGUID.SelectAll(); }
-            else { map.Add(newGUID, ""); lbStrings.Items.Add("0x" + newGUID.ToString("X16")); lbStrings.SelectedIndex = lbStrings.Items.Count - 1; }
+            ulong newGUID = getGUID();
+            if (map.ContainsKey(newGUID)) { tbGUID.Focus(); tbGUID.SelectAll(); return; }
+            
+            map.Add(newGUID, "");
+            lbStrings.Items.Add("0x" + newGUID.ToString("X16"));
+            lbStrings.SelectedIndex = lbStrings.Items.Count - 1;
+        }
+
+        private void btnChange_Click(object sender, EventArgs e)
+        {
+            ulong newGUID = getGUID();
+            ulong oldGUID = stblKeys[currentIndex];
+            if (newGUID == oldGUID || map.ContainsKey(newGUID)) { tbGUID.Focus(); tbGUID.SelectAll(); return; }
+
+            int i = currentIndex;
+            lbStrings.SelectedIndices.Clear();
+
+            string value = map[oldGUID];
+            map.Remove(oldGUID);
+            stblKeys.Remove(oldGUID);
+            lbStrings.Items.RemoveAt(i);
+
+            map.Add(newGUID, value);
+            stblKeys.Add(newGUID);
+            lbStrings.Items.Add("0x" + newGUID.ToString("X16") + ": " + partValue(value));
+
+            lbStrings.SelectedIndex = lbStrings.Items.Count - 1;
+        }
+
+        ulong getGUID()
+        {
+            ulong newGUID;
+            bool res = false;
+            if (tbGUID.Text.StartsWith("0x"))
+                res = ulong.TryParse(tbGUID.Text.Substring(2), System.Globalization.NumberStyles.HexNumber, null, out newGUID);
+            else
+                res = ulong.TryParse(tbGUID.Text, System.Globalization.NumberStyles.Integer, null, out newGUID);
+
+            if (!res)
+            {
+                newGUID = System.Security.Cryptography.FNV64.GetHash(tbGUID.Text);
+            }
+            return newGUID;
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
@@ -129,13 +177,6 @@ namespace s3pi_STBL_Resource_Editor
                 map.Remove(oldGUID);
                 lbStrings.Items.RemoveAt(currentIndex);
             }
-        }
-
-        private void btnHash_Click(object sender, EventArgs e)
-        {
-            ulong newGUID = System.Security.Cryptography.FNV64.GetHash(rtbValue.Text);
-            if (map.ContainsKey(newGUID)) { tbGUID.Text = "0x" + newGUID.ToString("X16"); tbGUID.Focus(); tbGUID.SelectAll(); }
-            else { map.Add(newGUID, rtbValue.Text); lbStrings.Items.Add("0x" + newGUID.ToString("X16")); lbStrings.SelectedIndex = lbStrings.Items.Count - 1; }
         }
     }
 }
