@@ -711,6 +711,7 @@ namespace S3PIDemoFE
                 {
                     myDataFormat d = new myDataFormat();
                     d.tgin = browserWidget1.SelectedResource as AResourceIndexEntry;
+                    d.tgin.ResName = resourceName;
                     d.data = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, browserWidget1.SelectedResource, false).AsBytes;
 
                     IFormatter formatter = new BinaryFormatter();
@@ -726,6 +727,7 @@ namespace S3PIDemoFE
                     {
                         myDataFormat d = new myDataFormat();
                         d.tgin = rie as AResourceIndexEntry;
+                        d.tgin.ResName = browserWidget1.ResourceName(rie);
                         d.data = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, false).AsBytes;
                         l.Add(d);
                     }
