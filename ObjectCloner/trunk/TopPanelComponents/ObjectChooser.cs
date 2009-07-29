@@ -201,7 +201,7 @@ namespace ObjectCloner.TopPanelComponents
         #endregion
 
         public event EventHandler SelectedIndexChanged;
-        protected void OnSelectedIndexChanged(object sender, EventArgs e) { if (SelectedIndexChanged != null)SelectedIndexChanged(sender, e); }
+        protected void OnSelectedIndexChanged(object sender, EventArgs e) { if (SelectedIndexChanged != null) SelectedIndexChanged(sender, e); }
         private void listView1_SelectedIndexChanged(object sender, EventArgs e) { OnSelectedIndexChanged(sender, e); }
 
         public View View
