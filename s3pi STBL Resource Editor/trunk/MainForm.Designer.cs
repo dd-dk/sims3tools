@@ -38,6 +38,7 @@
             this.tbGUID = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.btnDelete = new System.Windows.Forms.Button();
+            this.btnHash = new System.Windows.Forms.Button();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -47,7 +48,7 @@
             // btnOK
             // 
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnOK.Location = new System.Drawing.Point(520, 238);
+            this.btnOK.Location = new System.Drawing.Point(600, 238);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 4;
@@ -58,7 +59,7 @@
             // btnCancel
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCancel.Location = new System.Drawing.Point(439, 238);
+            this.btnCancel.Location = new System.Drawing.Point(519, 238);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 3;
@@ -81,8 +82,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.rtbValue);
-            this.splitContainer1.Size = new System.Drawing.Size(583, 220);
-            this.splitContainer1.SplitterDistance = 88;
+            this.splitContainer1.Size = new System.Drawing.Size(663, 220);
+            this.splitContainer1.SplitterDistance = 178;
             this.splitContainer1.TabIndex = 1;
             // 
             // lbStrings
@@ -92,7 +93,7 @@
             this.lbStrings.IntegralHeight = false;
             this.lbStrings.Location = new System.Drawing.Point(0, 0);
             this.lbStrings.Name = "lbStrings";
-            this.lbStrings.Size = new System.Drawing.Size(88, 220);
+            this.lbStrings.Size = new System.Drawing.Size(178, 220);
             this.lbStrings.TabIndex = 1;
             this.lbStrings.SelectedIndexChanged += new System.EventHandler(this.lbStrings_SelectedIndexChanged);
             // 
@@ -102,7 +103,7 @@
             this.rtbValue.Enabled = false;
             this.rtbValue.Location = new System.Drawing.Point(0, 0);
             this.rtbValue.Name = "rtbValue";
-            this.rtbValue.Size = new System.Drawing.Size(491, 220);
+            this.rtbValue.Size = new System.Drawing.Size(481, 220);
             this.rtbValue.TabIndex = 2;
             this.rtbValue.Text = "";
             // 
@@ -110,29 +111,34 @@
             // 
             this.tableLayoutPanel1.AutoSize = true;
             this.tableLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel1.ColumnCount = 4;
+            this.tableLayoutPanel1.ColumnCount = 8;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 6F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 6F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.Controls.Add(this.btnAdd, 2, 0);
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 12F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.Controls.Add(this.btnAdd, 3, 0);
             this.tableLayoutPanel1.Controls.Add(this.tbGUID, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.label1, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.btnDelete, 3, 0);
+            this.tableLayoutPanel1.Controls.Add(this.btnDelete, 5, 0);
+            this.tableLayoutPanel1.Controls.Add(this.btnHash, 7, 0);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 238);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(415, 23);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(490, 23);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
             // btnAdd
             // 
             this.btnAdd.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnAdd.Enabled = false;
-            this.btnAdd.Location = new System.Drawing.Point(256, 0);
-            this.btnAdd.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.btnAdd.Location = new System.Drawing.Point(247, 0);
+            this.btnAdd.Margin = new System.Windows.Forms.Padding(0);
             this.btnAdd.Name = "btnAdd";
             this.btnAdd.Size = new System.Drawing.Size(75, 23);
             this.btnAdd.TabIndex = 3;
@@ -143,8 +149,8 @@
             // tbGUID
             // 
             this.tbGUID.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tbGUID.Location = new System.Drawing.Point(97, 1);
-            this.tbGUID.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.tbGUID.Location = new System.Drawing.Point(88, 1);
+            this.tbGUID.Margin = new System.Windows.Forms.Padding(0);
             this.tbGUID.Name = "tbGUID";
             this.tbGUID.Size = new System.Drawing.Size(153, 20);
             this.tbGUID.TabIndex = 2;
@@ -155,7 +161,8 @@
             // 
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 5);
+            this.label1.Location = new System.Drawing.Point(0, 5);
+            this.label1.Margin = new System.Windows.Forms.Padding(0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(88, 13);
             this.label1.TabIndex = 1;
@@ -165,8 +172,8 @@
             // 
             this.btnDelete.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnDelete.Enabled = false;
-            this.btnDelete.Location = new System.Drawing.Point(337, 0);
-            this.btnDelete.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.btnDelete.Location = new System.Drawing.Point(328, 0);
+            this.btnDelete.Margin = new System.Windows.Forms.Padding(0);
             this.btnDelete.Name = "btnDelete";
             this.btnDelete.Size = new System.Drawing.Size(75, 23);
             this.btnDelete.TabIndex = 4;
@@ -174,11 +181,23 @@
             this.btnDelete.UseVisualStyleBackColor = true;
             this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
             // 
+            // btnHash
+            // 
+            this.btnHash.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnHash.Location = new System.Drawing.Point(415, 0);
+            this.btnHash.Margin = new System.Windows.Forms.Padding(0);
+            this.btnHash.Name = "btnHash";
+            this.btnHash.Size = new System.Drawing.Size(75, 23);
+            this.btnHash.TabIndex = 5;
+            this.btnHash.Text = "Add Hashed";
+            this.btnHash.UseVisualStyleBackColor = true;
+            this.btnHash.Click += new System.EventHandler(this.btnHash_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(607, 273);
+            this.ClientSize = new System.Drawing.Size(687, 273);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.btnCancel);
@@ -207,6 +226,7 @@
         private System.Windows.Forms.TextBox tbGUID;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnDelete;
+        private System.Windows.Forms.Button btnHash;
     }
 }
 

@@ -130,5 +130,12 @@ namespace s3pi_STBL_Resource_Editor
                 lbStrings.Items.RemoveAt(currentIndex);
             }
         }
+
+        private void btnHash_Click(object sender, EventArgs e)
+        {
+            ulong newGUID = System.Security.Cryptography.FNV64.GetHash(rtbValue.Text);
+            if (map.ContainsKey(newGUID)) { tbGUID.Text = "0x" + newGUID.ToString("X16"); tbGUID.Focus(); tbGUID.SelectAll(); }
+            else { map.Add(newGUID, rtbValue.Text); lbStrings.Items.Add("0x" + newGUID.ToString("X16")); lbStrings.SelectedIndex = lbStrings.Items.Count - 1; }
+        }
     }
 }

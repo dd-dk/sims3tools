@@ -41,6 +41,10 @@
       <HintPath>..\s3pi\build\bin\Release\s3pi.StblResource.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Custom, Version=907.28.20.34879, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\System.Custom.dll</HintPath>
+    </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
