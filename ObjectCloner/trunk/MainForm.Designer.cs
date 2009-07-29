@@ -101,6 +101,7 @@
             this.openPackageDialog = new System.Windows.Forms.OpenFileDialog();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.openThumbnailDialog = new System.Windows.Forms.OpenFileDialog();
+            this.ckbNoComp = new System.Windows.Forms.CheckBox();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
@@ -141,11 +142,11 @@
             // toolStripContainer1.ContentPanel
             // 
             this.toolStripContainer1.ContentPanel.Controls.Add(this.splitContainer1);
-            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(904, 518);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(826, 545);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer1.Name = "toolStripContainer1";
-            this.toolStripContainer1.Size = new System.Drawing.Size(904, 542);
+            this.toolStripContainer1.Size = new System.Drawing.Size(826, 569);
             this.toolStripContainer1.TabIndex = 3;
             this.toolStripContainer1.Text = "toolStripContainer1";
             // 
@@ -164,8 +165,8 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.tlpButtons);
             this.splitContainer1.Panel2.Controls.Add(this.tabControl1);
-            this.splitContainer1.Size = new System.Drawing.Size(904, 518);
-            this.splitContainer1.SplitterDistance = 450;
+            this.splitContainer1.Size = new System.Drawing.Size(826, 545);
+            this.splitContainer1.SplitterDistance = 421;
             this.splitContainer1.TabIndex = 0;
             this.splitContainer1.TabStop = false;
             // 
@@ -184,7 +185,7 @@
             this.tlpButtons.Controls.Add(this.btnList, 3, 1);
             this.tlpButtons.Controls.Add(this.btnStart, 3, 3);
             this.tlpButtons.Controls.Add(this.flowLayoutPanel1, 1, 1);
-            this.tlpButtons.Location = new System.Drawing.Point(0, 403);
+            this.tlpButtons.Location = new System.Drawing.Point(0, 407);
             this.tlpButtons.Name = "tlpButtons";
             this.tlpButtons.RowCount = 9;
             this.tlpButtons.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
@@ -196,7 +197,7 @@
             this.tlpButtons.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tlpButtons.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpButtons.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tlpButtons.Size = new System.Drawing.Size(445, 110);
+            this.tlpButtons.Size = new System.Drawing.Size(396, 133);
             this.tlpButtons.TabIndex = 0;
             // 
             // btnNext
@@ -205,7 +206,7 @@
             this.btnNext.AutoSize = true;
             this.btnNext.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnNext.Enabled = false;
-            this.btnNext.Location = new System.Drawing.Point(340, 55);
+            this.btnNext.Location = new System.Drawing.Point(291, 70);
             this.btnNext.Margin = new System.Windows.Forms.Padding(0);
             this.btnNext.Name = "btnNext";
             this.btnNext.Size = new System.Drawing.Size(81, 23);
@@ -220,7 +221,7 @@
             this.btnSave.AutoSize = true;
             this.btnSave.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnSave.Enabled = false;
-            this.btnSave.Location = new System.Drawing.Point(340, 81);
+            this.btnSave.Location = new System.Drawing.Point(291, 101);
             this.btnSave.Margin = new System.Windows.Forms.Padding(0);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(81, 23);
@@ -235,7 +236,7 @@
             this.btnList.AutoSize = true;
             this.btnList.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnList.Enabled = false;
-            this.btnList.Location = new System.Drawing.Point(340, 3);
+            this.btnList.Location = new System.Drawing.Point(291, 8);
             this.btnList.Margin = new System.Windows.Forms.Padding(0);
             this.btnList.Name = "btnList";
             this.btnList.Size = new System.Drawing.Size(81, 23);
@@ -250,7 +251,7 @@
             this.btnStart.AutoSize = true;
             this.btnStart.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnStart.Enabled = false;
-            this.btnStart.Location = new System.Drawing.Point(340, 29);
+            this.btnStart.Location = new System.Drawing.Point(291, 39);
             this.btnStart.Margin = new System.Windows.Forms.Padding(0);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(81, 23);
@@ -267,11 +268,12 @@
             this.flowLayoutPanel1.Controls.Add(this.ckbPadSTBLs);
             this.flowLayoutPanel1.Controls.Add(this.ckbNoOBJD);
             this.flowLayoutPanel1.Controls.Add(this.ckbCatlgDetails);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(136, 3);
+            this.flowLayoutPanel1.Controls.Add(this.ckbNoComp);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(87, 8);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.tlpButtons.SetRowSpan(this.flowLayoutPanel1, 7);
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(180, 92);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(180, 115);
             this.flowLayoutPanel1.TabIndex = 1;
             // 
             // ckbDefault
@@ -338,7 +340,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(448, 397);
+            this.tabControl1.Size = new System.Drawing.Size(399, 401);
             this.tabControl1.TabIndex = 1;
             // 
             // tpMain
@@ -348,7 +350,7 @@
             this.tpMain.Location = new System.Drawing.Point(4, 22);
             this.tpMain.Name = "tpMain";
             this.tpMain.Padding = new System.Windows.Forms.Padding(3);
-            this.tpMain.Size = new System.Drawing.Size(440, 371);
+            this.tpMain.Size = new System.Drawing.Size(391, 375);
             this.tpMain.TabIndex = 0;
             this.tpMain.Text = "Overview";
             this.tpMain.UseVisualStyleBackColor = true;
@@ -386,7 +388,7 @@
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tlpOverview.Size = new System.Drawing.Size(436, 326);
+            this.tlpOverview.Size = new System.Drawing.Size(387, 326);
             this.tlpOverview.TabIndex = 0;
             // 
             // label8
@@ -405,7 +407,7 @@
             this.tbObjName.Location = new System.Drawing.Point(83, 131);
             this.tbObjName.Name = "tbObjName";
             this.tbObjName.ReadOnly = true;
-            this.tbObjName.Size = new System.Drawing.Size(350, 20);
+            this.tbObjName.Size = new System.Drawing.Size(301, 20);
             this.tbObjName.TabIndex = 2;
             // 
             // tbPrice
@@ -434,7 +436,7 @@
             this.tbObjDesc.Location = new System.Drawing.Point(83, 157);
             this.tbObjDesc.Name = "tbObjDesc";
             this.tbObjDesc.ReadOnly = true;
-            this.tbObjDesc.Size = new System.Drawing.Size(350, 20);
+            this.tbObjDesc.Size = new System.Drawing.Size(301, 20);
             this.tbObjDesc.TabIndex = 4;
             // 
             // label12
@@ -485,7 +487,7 @@
             this.tbCatlgName.Location = new System.Drawing.Point(83, 183);
             this.tbCatlgName.Multiline = false;
             this.tbCatlgName.Name = "tbCatlgName";
-            this.tbCatlgName.Size = new System.Drawing.Size(350, 20);
+            this.tbCatlgName.Size = new System.Drawing.Size(301, 20);
             this.tbCatlgName.TabIndex = 12;
             this.tbCatlgName.Text = "";
             // 
@@ -495,7 +497,7 @@
             this.tbCatlgDesc.Enabled = false;
             this.tbCatlgDesc.Location = new System.Drawing.Point(83, 209);
             this.tbCatlgDesc.Name = "tbCatlgDesc";
-            this.tbCatlgDesc.Size = new System.Drawing.Size(350, 65);
+            this.tbCatlgDesc.Size = new System.Drawing.Size(301, 65);
             this.tbCatlgDesc.TabIndex = 12;
             this.tbCatlgDesc.Text = "";
             // 
@@ -1004,7 +1006,7 @@
             this.menuBarWidget1.Dock = System.Windows.Forms.DockStyle.None;
             this.menuBarWidget1.Location = new System.Drawing.Point(0, 0);
             this.menuBarWidget1.Name = "menuBarWidget1";
-            this.menuBarWidget1.Size = new System.Drawing.Size(904, 24);
+            this.menuBarWidget1.Size = new System.Drawing.Size(826, 24);
             this.menuBarWidget1.TabIndex = 0;
             this.menuBarWidget1.Text = "menuBarWidget1";
             this.menuBarWidget1.MBHelp_Click += new ObjectCloner.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBHelp_Click);
@@ -1025,9 +1027,9 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripProgressBar1,
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 542);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 569);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(904, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(826, 22);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -1102,11 +1104,24 @@
             this.openThumbnailDialog.Filter = "Thumbnails|*.PNG|All files|*.*";
             this.openThumbnailDialog.Title = "Select thumbnail";
             // 
+            // ckbNoComp
+            // 
+            this.ckbNoComp.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbNoComp.AutoSize = true;
+            this.ckbNoComp.Location = new System.Drawing.Point(0, 95);
+            this.ckbNoComp.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
+            this.ckbNoComp.Name = "ckbNoComp";
+            this.ckbNoComp.Size = new System.Drawing.Size(123, 17);
+            this.ckbNoComp.TabIndex = 5;
+            this.ckbNoComp.Text = "Disable compression";
+            this.ckbNoComp.UseVisualStyleBackColor = false;
+            this.ckbNoComp.CheckedChanged += new System.EventHandler(this.ckbNoComp_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(904, 564);
+            this.ClientSize = new System.Drawing.Size(826, 591);
             this.Controls.Add(this.toolStripContainer1);
             this.Controls.Add(this.statusStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -1253,6 +1268,7 @@
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.CheckBox ckbPadSTBLs;
+        private System.Windows.Forms.CheckBox ckbNoComp;
     }
 }
 

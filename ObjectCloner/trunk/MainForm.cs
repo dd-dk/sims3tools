@@ -37,6 +37,7 @@ namespace ObjectCloner
     {
         #region Static bits
         static string myName = "s3oc";
+        static bool disableCompression;
         static Dictionary<View, MenuBarWidget.MB> viewMap;
         static List<View> viewMapKeys;
         static List<MenuBarWidget.MB> viewMapValues;
@@ -159,6 +160,7 @@ namespace ObjectCloner
 
             this.Text = myName;
             MainForm_LoadFormSettings();
+            disableCompression = ckbNoComp.Checked;
 
             InitialiseTabs();
             setButtons(Page.None, SubPage.None);
@@ -1238,8 +1240,7 @@ namespace ObjectCloner
                         Item newstbl;
                         if (name == null && desc == null)
                         {
-                            if (!padSTBLs || english == null)
-                                continue;
+                            if (!padSTBLs || english == null) goto skip;
                             TGI newTGI = new TGI(english.tgi.t, english.tgi.g, english.tgi.i | ((ulong)i << 56));
                             newstbl = NewResource(target, newTGI);
                             name = english[nameGUID];
@@ -1262,6 +1263,7 @@ namespace ObjectCloner
                             else { if (!stopSaving) newnamemap.Add(lang.tgi.i, String.Format(language_fmt, languages[i], i, english.tgi.i)); }
                         }
 
+                    skip:
                         if (++i % freq == 0)
                             updateProgress(true, "Creating string tables extracts... " + i * 100 / 0x17 + "%", true, 0x17, true, i);
                     }
@@ -1275,6 +1277,8 @@ namespace ObjectCloner
                 catch (ThreadInterruptedException) { }
                 finally
                 {
+                    if (!disableCompression)
+                        foreach (IResourceIndexEntry ie in target.GetResourceList) ie.Compressed = 0xffff;
                     target.SaveAs(outputPackage);
                     savingComplete(complete);
                 }
@@ -1461,6 +1465,9 @@ namespace ObjectCloner
                 foreach (Item item in tgiToItem.Values)
                     if (item.tgi != new TGI(0, 0, 0) && oldToNew.ContainsKey(item.ResourceIndexEntry.Instance))
                         item.ResourceIndexEntry.Instance = oldToNew[item.ResourceIndexEntry.Instance];
+
+                if (!disableCompression)
+                    foreach (IResourceIndexEntry ie in objPkgs[0].GetResourceList) ie.Compressed = 0xffff;
 
                 objPkgs[0].SavePackage();
             }
@@ -2353,6 +2360,11 @@ namespace ObjectCloner
         {
             if (!ckbCatlgDetails.Enabled) return;
             ckbNoOBJD.Enabled = !ckbCatlgDetails.Checked;
+        }
+
+        private void ckbNoComp_CheckedChanged(object sender, EventArgs e)
+        {
+            disableCompression = ckbNoComp.Checked;
         }
 
         private void btnReplThumb_Click(object sender, EventArgs e)
