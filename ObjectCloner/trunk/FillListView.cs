@@ -30,14 +30,15 @@ namespace ObjectCloner
     class FillListView
     {
         Form mainForm;
-        string packageFile;
-        IPackage pkg;
+        List<IPackage> objPkgs;
+        List<IPackage> ddsPkgs;
+        List<IPackage> tmbPkgs;
         MainForm.createListViewItemCallback createListViewItemCB;
         MainForm.updateProgressCallback updateProgressCB;
         MainForm.stopLoadingCallback stopLoadingCB;
         MainForm.loadingCompleteCallback loadingCompleteCB;
 
-        public FillListView(Form mainForm, string packageFile, IPackage pkg
+        public FillListView(Form mainForm, List<IPackage> objPkgs, List<IPackage> ddsPkgs, List<IPackage> tmbPkgs
             , MainForm.createListViewItemCallback createListViewItemCB
             , MainForm.updateProgressCallback updateProgressCB
             , MainForm.stopLoadingCallback stopLoadingCB
@@ -45,8 +46,9 @@ namespace ObjectCloner
             )
         {
             this.mainForm = mainForm;
-            this.packageFile = packageFile;
-            this.pkg = pkg;
+            this.objPkgs = objPkgs;
+            this.ddsPkgs = ddsPkgs;
+            this.tmbPkgs = tmbPkgs;
             this.createListViewItemCB = createListViewItemCB;
             this.updateProgressCB = updateProgressCB;
             this.stopLoadingCB = stopLoadingCB;
@@ -77,20 +79,32 @@ namespace ObjectCloner
             try
             {
                 updateProgress(true, "Please wait, searching for objects...", true, -1, false, 0);
-                IList<IResourceIndexEntry> lrie = pkg.FindAll(new string[] { "ResourceType", },
-                    new TypedValue[] {
+                List<RIE> lrie = new List<RIE>();
+                List<TGI> seen = new List<TGI>();
+                foreach (IPackage pkg in objPkgs)
+                {
+                    IList<IResourceIndexEntry> objds = pkg.FindAll(new string[] { "ResourceType", },
+                        new TypedValue[] {
                         new TypedValue(typeof(uint), (uint)0x319E4F1D, "X"),
                     });
+                    foreach (IResourceIndexEntry objd in objds)
+                    {
+                        TGI tgi = new TGI(objd);
+                        if (seen.Contains(tgi)) continue;
+                        seen.Add(tgi);
+                        lrie.Add(new RIE(pkg, objd));
+                    }
+                }
 
 
                 int i = 0;
                 int freq = Math.Max(1, lrie.Count / 50);
                 updateProgress(true, "Please wait, loading objects... 0%", true, lrie.Count, true, i);
-                foreach (IResourceIndexEntry rie in lrie)
+                foreach (RIE rie in lrie)
                 {
                     if (stopLoading) return;
 
-                    createListViewItem(new Item(pkg, rie));
+                    createListViewItem(new Item(rie));
 
                     if (++i % freq == 0)
                         updateProgress(true, "Please wait, loading objects... " + i * 100 / lrie.Count + "%", true, lrie.Count, true, i);
@@ -163,27 +177,43 @@ namespace ObjectCloner
 
     public struct RIE
     {
-        IPackage package;
+        List<IPackage> posspkgs;
         TGI mytgi;
 
+        IPackage package;
         AResourceIndexEntry irie;
 
-        public RIE(IPackage pkg, TGI tgi) : this() { this.package = pkg; this.mytgi = tgi; }
-        public RIE(IPackage pkg, IResourceIndexEntry rie) : this(pkg, new TGI(rie)) { if (pkg.GetResourceList.Contains(rie)) irie = rie as AResourceIndexEntry; }
+        public RIE(List<IPackage> posspkgs, TGI tgi) : this() { this.posspkgs = posspkgs; this.mytgi = tgi; }
+        public RIE(IPackage pkg, IResourceIndexEntry rie) : this(null, new TGI(rie)) { if (pkg.GetResourceList.Contains(rie)) { this.package = pkg; irie = rie as AResourceIndexEntry; } }
 
         public IPackage pkg { get { return package; } }
-        public AResourceIndexEntry rie { get { if (irie == null) irie = (AResourceIndexEntry)this; return irie; } }
+        public AResourceIndexEntry rie { get { if (pkg == null || irie == null) irie = findIRIE(); return irie; } }
         public TGI tgi { get { return mytgi; } }
-        public static implicit operator AResourceIndexEntry(RIE rie)
+        public static implicit operator AResourceIndexEntry(RIE rie) { return rie.findIRIE(); }
+
+        AResourceIndexEntry findIRIE()
         {
-            return rie.package.Find(new string[] { "ResourceType", "ResourceGroup", "Instance", },
-                new TypedValue[] {
-                    new TypedValue(typeof(uint), rie.mytgi.t),
-                    new TypedValue(typeof(uint), rie.mytgi.g),
-                    new TypedValue(typeof(ulong), rie.mytgi.i),
-                    }
-                ) as AResourceIndexEntry;
+            AResourceIndexEntry arie = null;
+            if (package != null)
+                arie = findIRIEinPkg(package);
+            else for (int i = 0; arie == null && i < posspkgs.Count; i++)
+                {
+                    arie = findIRIEinPkg(posspkgs[i]);
+                    if (arie != null) package = posspkgs[i];
+                }
+            return arie;
         }
+        AResourceIndexEntry findIRIEinPkg(IPackage pkg)
+        {
+            return pkg.Find(new string[] { "ResourceType", "ResourceGroup", "Instance", },
+                new TypedValue[] {
+                    new TypedValue(typeof(uint), mytgi.t),
+                    new TypedValue(typeof(uint), mytgi.g),
+                    new TypedValue(typeof(ulong), mytgi.i),
+                    }
+            ) as AResourceIndexEntry;
+        }
+
     }
 
     public class Item
@@ -193,10 +223,10 @@ namespace ObjectCloner
 
         IResource my_ires = null;
 
-        public Item(IPackage pkg, IResourceIndexEntry rie) : this(pkg, rie, false) { }
-        public Item(IPackage pkg, IResourceIndexEntry rie, bool defaultWrapper) : this(new RIE(pkg, rie), defaultWrapper) { }
-        public Item(IPackage pkg, TGI tgi) : this(pkg, tgi, false) { }
-        public Item(IPackage pkg, TGI tgi, bool defaultWrapper) : this(new RIE(pkg, tgi), defaultWrapper) { }
+        //public Item(List<IPackage> posspkgs, IResourceIndexEntry rie) : this(posspkgs, rie, false) { }
+        //public Item(List<IPackage> posspkgs, IResourceIndexEntry rie, bool defaultWrapper) : this(new RIE(pkg, rie), defaultWrapper) { }
+        public Item(List<IPackage> posspkgs, TGI tgi) : this(posspkgs, tgi, false) { }
+        Item(List<IPackage> posspkgs, TGI tgi, bool defaultWrapper) : this(new RIE(posspkgs, tgi), defaultWrapper) { }
         public Item(RIE rie) : this(rie, false) { }
         public Item(RIE rie, bool defaultWrapper) { this.defaultWrapper = defaultWrapper; this.myrie = rie; }
 
