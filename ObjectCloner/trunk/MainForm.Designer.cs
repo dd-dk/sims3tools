@@ -41,6 +41,7 @@
             this.ckbPadSTBLs = new System.Windows.Forms.CheckBox();
             this.ckbNoOBJD = new System.Windows.Forms.CheckBox();
             this.ckbCatlgDetails = new System.Windows.Forms.CheckBox();
+            this.ckbCompress = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tpMain = new System.Windows.Forms.TabPage();
             this.tlpOverview = new System.Windows.Forms.TableLayoutPanel();
@@ -101,7 +102,6 @@
             this.openPackageDialog = new System.Windows.Forms.OpenFileDialog();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.openThumbnailDialog = new System.Windows.Forms.OpenFileDialog();
-            this.ckbNoComp = new System.Windows.Forms.CheckBox();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
@@ -268,7 +268,7 @@
             this.flowLayoutPanel1.Controls.Add(this.ckbPadSTBLs);
             this.flowLayoutPanel1.Controls.Add(this.ckbNoOBJD);
             this.flowLayoutPanel1.Controls.Add(this.ckbCatlgDetails);
-            this.flowLayoutPanel1.Controls.Add(this.ckbNoComp);
+            this.flowLayoutPanel1.Controls.Add(this.ckbCompress);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(87, 8);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
@@ -326,6 +326,21 @@
             this.ckbCatlgDetails.Text = "Change catalog details only";
             this.ckbCatlgDetails.UseVisualStyleBackColor = false;
             this.ckbCatlgDetails.CheckedChanged += new System.EventHandler(this.ckbCatlgDetails_CheckedChanged);
+            // 
+            // ckbCompress
+            // 
+            this.ckbCompress.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbCompress.AutoSize = true;
+            this.ckbCompress.Checked = true;
+            this.ckbCompress.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.ckbCompress.Location = new System.Drawing.Point(0, 95);
+            this.ckbCompress.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
+            this.ckbCompress.Name = "ckbCompress";
+            this.ckbCompress.Size = new System.Drawing.Size(121, 17);
+            this.ckbCompress.TabIndex = 5;
+            this.ckbCompress.Text = "Enable compression";
+            this.ckbCompress.UseVisualStyleBackColor = false;
+            this.ckbCompress.CheckedChanged += new System.EventHandler(this.ckbNoComp_CheckedChanged);
             // 
             // tabControl1
             // 
@@ -544,7 +559,7 @@
             this.tpDetail.Location = new System.Drawing.Point(4, 22);
             this.tpDetail.Name = "tpDetail";
             this.tpDetail.Padding = new System.Windows.Forms.Padding(3);
-            this.tpDetail.Size = new System.Drawing.Size(440, 371);
+            this.tpDetail.Size = new System.Drawing.Size(391, 375);
             this.tpDetail.TabIndex = 1;
             this.tpDetail.Text = "Details";
             this.tpDetail.UseVisualStyleBackColor = true;
@@ -565,7 +580,7 @@
             this.tlpCatalog.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpCatalog.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpCatalog.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tlpCatalog.Size = new System.Drawing.Size(432, 87);
+            this.tlpCatalog.Size = new System.Drawing.Size(383, 87);
             this.tlpCatalog.TabIndex = 1;
             // 
             // tlpObjectDetail
@@ -583,7 +598,7 @@
             this.tlpObjectDetail.RowCount = 2;
             this.tlpObjectDetail.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpObjectDetail.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpObjectDetail.Size = new System.Drawing.Size(426, 25);
+            this.tlpObjectDetail.Size = new System.Drawing.Size(377, 25);
             this.tlpObjectDetail.TabIndex = 0;
             // 
             // label1
@@ -626,7 +641,7 @@
             this.tlpObjectCommon.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpObjectCommon.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpObjectCommon.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpObjectCommon.Size = new System.Drawing.Size(426, 50);
+            this.tlpObjectCommon.Size = new System.Drawing.Size(377, 50);
             this.tlpObjectCommon.TabIndex = 0;
             // 
             // label3
@@ -671,7 +686,7 @@
             this.tpFlagsRoom.Controls.Add(this.tlpFlagsRoom);
             this.tpFlagsRoom.Location = new System.Drawing.Point(4, 22);
             this.tpFlagsRoom.Name = "tpFlagsRoom";
-            this.tpFlagsRoom.Size = new System.Drawing.Size(440, 371);
+            this.tpFlagsRoom.Size = new System.Drawing.Size(391, 375);
             this.tpFlagsRoom.TabIndex = 2;
             this.tpFlagsRoom.Text = "Room Flags";
             this.tpFlagsRoom.UseVisualStyleBackColor = true;
@@ -693,7 +708,7 @@
             this.tlpFlagsRoom.Name = "tlpFlagsRoom";
             this.tlpFlagsRoom.RowCount = 1;
             this.tlpFlagsRoom.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpFlagsRoom.Size = new System.Drawing.Size(438, 31);
+            this.tlpFlagsRoom.Size = new System.Drawing.Size(387, 31);
             this.tlpFlagsRoom.TabIndex = 0;
             // 
             // tlpRoomSort
@@ -710,7 +725,7 @@
             this.tlpRoomSort.RowCount = 2;
             this.tlpRoomSort.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpRoomSort.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpRoomSort.Size = new System.Drawing.Size(140, 25);
+            this.tlpRoomSort.Size = new System.Drawing.Size(123, 25);
             this.tlpRoomSort.TabIndex = 1;
             // 
             // label14
@@ -734,12 +749,12 @@
             this.tlpRoomSubLow.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpRoomSubLow.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlpRoomSubLow.Controls.Add(this.label13, 0, 0);
-            this.tlpRoomSubLow.Location = new System.Drawing.Point(149, 3);
+            this.tlpRoomSubLow.Location = new System.Drawing.Point(132, 3);
             this.tlpRoomSubLow.Name = "tlpRoomSubLow";
             this.tlpRoomSubLow.RowCount = 2;
             this.tlpRoomSubLow.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpRoomSubLow.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpRoomSubLow.Size = new System.Drawing.Size(140, 25);
+            this.tlpRoomSubLow.Size = new System.Drawing.Size(123, 25);
             this.tlpRoomSubLow.TabIndex = 2;
             // 
             // label13
@@ -763,12 +778,12 @@
             this.tlpRoomSubHigh.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpRoomSubHigh.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlpRoomSubHigh.Controls.Add(this.label15, 0, 0);
-            this.tlpRoomSubHigh.Location = new System.Drawing.Point(295, 3);
+            this.tlpRoomSubHigh.Location = new System.Drawing.Point(261, 3);
             this.tlpRoomSubHigh.Name = "tlpRoomSubHigh";
             this.tlpRoomSubHigh.RowCount = 2;
             this.tlpRoomSubHigh.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpRoomSubHigh.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpRoomSubHigh.Size = new System.Drawing.Size(140, 25);
+            this.tlpRoomSubHigh.Size = new System.Drawing.Size(123, 25);
             this.tlpRoomSubHigh.TabIndex = 3;
             // 
             // label15
@@ -789,7 +804,7 @@
             this.tpFlagsFunc.Controls.Add(this.tlpFlagsFunc);
             this.tpFlagsFunc.Location = new System.Drawing.Point(4, 22);
             this.tpFlagsFunc.Name = "tpFlagsFunc";
-            this.tpFlagsFunc.Size = new System.Drawing.Size(440, 371);
+            this.tpFlagsFunc.Size = new System.Drawing.Size(391, 375);
             this.tpFlagsFunc.TabIndex = 3;
             this.tpFlagsFunc.Text = "Function Flags";
             this.tpFlagsFunc.UseVisualStyleBackColor = true;
@@ -811,7 +826,7 @@
             this.tlpFlagsFunc.Name = "tlpFlagsFunc";
             this.tlpFlagsFunc.RowCount = 1;
             this.tlpFlagsFunc.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpFlagsFunc.Size = new System.Drawing.Size(438, 31);
+            this.tlpFlagsFunc.Size = new System.Drawing.Size(387, 31);
             this.tlpFlagsFunc.TabIndex = 0;
             // 
             // tlpFuncSort
@@ -828,7 +843,7 @@
             this.tlpFuncSort.RowCount = 2;
             this.tlpFuncSort.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpFuncSort.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpFuncSort.Size = new System.Drawing.Size(140, 25);
+            this.tlpFuncSort.Size = new System.Drawing.Size(123, 25);
             this.tlpFuncSort.TabIndex = 1;
             // 
             // label16
@@ -852,12 +867,12 @@
             this.tlpFuncSubLow.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpFuncSubLow.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlpFuncSubLow.Controls.Add(this.label17, 0, 0);
-            this.tlpFuncSubLow.Location = new System.Drawing.Point(149, 3);
+            this.tlpFuncSubLow.Location = new System.Drawing.Point(132, 3);
             this.tlpFuncSubLow.Name = "tlpFuncSubLow";
             this.tlpFuncSubLow.RowCount = 2;
             this.tlpFuncSubLow.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpFuncSubLow.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpFuncSubLow.Size = new System.Drawing.Size(140, 25);
+            this.tlpFuncSubLow.Size = new System.Drawing.Size(123, 25);
             this.tlpFuncSubLow.TabIndex = 2;
             // 
             // label17
@@ -881,12 +896,12 @@
             this.tlpFuncSubHigh.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpFuncSubHigh.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlpFuncSubHigh.Controls.Add(this.label18, 0, 0);
-            this.tlpFuncSubHigh.Location = new System.Drawing.Point(295, 3);
+            this.tlpFuncSubHigh.Location = new System.Drawing.Point(261, 3);
             this.tlpFuncSubHigh.Name = "tlpFuncSubHigh";
             this.tlpFuncSubHigh.RowCount = 2;
             this.tlpFuncSubHigh.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpFuncSubHigh.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpFuncSubHigh.Size = new System.Drawing.Size(140, 25);
+            this.tlpFuncSubHigh.Size = new System.Drawing.Size(123, 25);
             this.tlpFuncSubHigh.TabIndex = 3;
             // 
             // label18
@@ -907,7 +922,7 @@
             this.tpFlagsBuildEtc.Controls.Add(this.tlpFlagsBuildEtc);
             this.tpFlagsBuildEtc.Location = new System.Drawing.Point(4, 22);
             this.tpFlagsBuildEtc.Name = "tpFlagsBuildEtc";
-            this.tpFlagsBuildEtc.Size = new System.Drawing.Size(440, 371);
+            this.tpFlagsBuildEtc.Size = new System.Drawing.Size(391, 375);
             this.tpFlagsBuildEtc.TabIndex = 4;
             this.tpFlagsBuildEtc.Text = "Build Flags && more...";
             this.tpFlagsBuildEtc.UseVisualStyleBackColor = true;
@@ -928,7 +943,7 @@
             this.tlpFlagsBuildEtc.RowCount = 1;
             this.tlpFlagsBuildEtc.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tlpFlagsBuildEtc.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 31F));
-            this.tlpFlagsBuildEtc.Size = new System.Drawing.Size(438, 31);
+            this.tlpFlagsBuildEtc.Size = new System.Drawing.Size(388, 31);
             this.tlpFlagsBuildEtc.TabIndex = 1;
             // 
             // tlpOther
@@ -941,12 +956,12 @@
             this.tlpOther.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpOther.Controls.Add(this.label20, 0, 0);
             this.tlpOther.Controls.Add(this.label21, 1, 0);
-            this.tlpOther.Location = new System.Drawing.Point(222, 3);
+            this.tlpOther.Location = new System.Drawing.Point(197, 3);
             this.tlpOther.Name = "tlpOther";
             this.tlpOther.RowCount = 2;
             this.tlpOther.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOther.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpOther.Size = new System.Drawing.Size(213, 25);
+            this.tlpOther.Size = new System.Drawing.Size(188, 25);
             this.tlpOther.TabIndex = 3;
             // 
             // label20
@@ -986,7 +1001,7 @@
             this.tlpBuildSort.RowCount = 2;
             this.tlpBuildSort.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpBuildSort.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpBuildSort.Size = new System.Drawing.Size(213, 25);
+            this.tlpBuildSort.Size = new System.Drawing.Size(188, 25);
             this.tlpBuildSort.TabIndex = 2;
             // 
             // label19
@@ -1103,19 +1118,6 @@
             this.openThumbnailDialog.FileName = "*.PNG";
             this.openThumbnailDialog.Filter = "Thumbnails|*.PNG|All files|*.*";
             this.openThumbnailDialog.Title = "Select thumbnail";
-            // 
-            // ckbNoComp
-            // 
-            this.ckbNoComp.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.ckbNoComp.AutoSize = true;
-            this.ckbNoComp.Location = new System.Drawing.Point(0, 95);
-            this.ckbNoComp.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
-            this.ckbNoComp.Name = "ckbNoComp";
-            this.ckbNoComp.Size = new System.Drawing.Size(123, 17);
-            this.ckbNoComp.TabIndex = 5;
-            this.ckbNoComp.Text = "Disable compression";
-            this.ckbNoComp.UseVisualStyleBackColor = false;
-            this.ckbNoComp.CheckedChanged += new System.EventHandler(this.ckbNoComp_CheckedChanged);
             // 
             // MainForm
             // 
@@ -1268,7 +1270,7 @@
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.CheckBox ckbPadSTBLs;
-        private System.Windows.Forms.CheckBox ckbNoComp;
+        private System.Windows.Forms.CheckBox ckbCompress;
     }
 }
 

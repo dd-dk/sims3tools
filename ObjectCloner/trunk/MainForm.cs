@@ -160,7 +160,7 @@ namespace ObjectCloner
 
             this.Text = myName;
             MainForm_LoadFormSettings();
-            disableCompression = ckbNoComp.Checked;
+            disableCompression = !ckbCompress.Checked;
 
             InitialiseTabs();
             setButtons(Page.None, SubPage.None);
@@ -2364,7 +2364,7 @@ namespace ObjectCloner
 
         private void ckbNoComp_CheckedChanged(object sender, EventArgs e)
         {
-            disableCompression = ckbNoComp.Checked;
+            disableCompression = !ckbCompress.Checked;
         }
 
         private void btnReplThumb_Click(object sender, EventArgs e)
