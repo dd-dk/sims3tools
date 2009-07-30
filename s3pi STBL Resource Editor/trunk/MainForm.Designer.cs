@@ -105,7 +105,7 @@
             this.rtbValue.Location = new System.Drawing.Point(0, 0);
             this.rtbValue.Name = "rtbValue";
             this.rtbValue.Size = new System.Drawing.Size(294, 192);
-            this.rtbValue.TabIndex = 2;
+            this.rtbValue.TabIndex = 1;
             this.rtbValue.Text = "";
             // 
             // tableLayoutPanel1
@@ -132,7 +132,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(359, 49);
-            this.tableLayoutPanel1.TabIndex = 2;
+            this.tableLayoutPanel1.TabIndex = 1;
             // 
             // tbGUID
             // 
@@ -142,7 +142,7 @@
             this.tbGUID.Margin = new System.Windows.Forms.Padding(0);
             this.tbGUID.Name = "tbGUID";
             this.tbGUID.Size = new System.Drawing.Size(359, 20);
-            this.tbGUID.TabIndex = 2;
+            this.tbGUID.TabIndex = 1;
             this.tbGUID.TextChanged += new System.EventHandler(this.tbGUID_TextChanged);
             // 
             // btnDelete
@@ -166,7 +166,7 @@
             this.btnAdd.Margin = new System.Windows.Forms.Padding(0);
             this.btnAdd.Name = "btnAdd";
             this.btnAdd.Size = new System.Drawing.Size(75, 23);
-            this.btnAdd.TabIndex = 3;
+            this.btnAdd.TabIndex = 2;
             this.btnAdd.Text = "Add";
             this.btnAdd.UseVisualStyleBackColor = true;
             this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
@@ -179,7 +179,7 @@
             this.btnChange.Margin = new System.Windows.Forms.Padding(0);
             this.btnChange.Name = "btnChange";
             this.btnChange.Size = new System.Drawing.Size(75, 23);
-            this.btnChange.TabIndex = 5;
+            this.btnChange.TabIndex = 3;
             this.btnChange.Text = "Change";
             this.btnChange.UseVisualStyleBackColor = true;
             this.btnChange.Click += new System.EventHandler(this.btnChange_Click);
@@ -194,7 +194,7 @@
             this.panel1.Location = new System.Drawing.Point(12, 210);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(361, 51);
-            this.panel1.TabIndex = 5;
+            this.panel1.TabIndex = 2;
             // 
             // MainForm
             // 
