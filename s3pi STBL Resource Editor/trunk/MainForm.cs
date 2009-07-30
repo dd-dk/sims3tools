@@ -92,6 +92,7 @@ namespace s3pi_STBL_Resource_Editor
                 rtbValue.Text = "";
                 currentIndex = -1;
                 btnDelete.Enabled = false;
+                btnChange.Enabled = false;
             }
             else
             {
@@ -99,6 +100,7 @@ namespace s3pi_STBL_Resource_Editor
                 rtbValue.Text = map[stblKeys[currentIndex]];
                 tbGUID.Text = "0x" + stblKeys[currentIndex].ToString("X16");
                 btnDelete.Enabled = true;
+                btnChange.Enabled = tbGUID.Text.Length > 0;
             }
         }
 
@@ -126,9 +128,11 @@ namespace s3pi_STBL_Resource_Editor
         {
             ulong newGUID = getGUID();
             if (map.ContainsKey(newGUID)) { tbGUID.Focus(); tbGUID.SelectAll(); return; }
-            
-            map.Add(newGUID, "");
+
             lbStrings.Items.Add("0x" + newGUID.ToString("X16"));
+            map.Add(newGUID, "");
+            stblKeys.Add(newGUID);
+
             lbStrings.SelectedIndex = lbStrings.Items.Count - 1;
         }
 
@@ -138,17 +142,17 @@ namespace s3pi_STBL_Resource_Editor
             ulong oldGUID = stblKeys[currentIndex];
             if (newGUID == oldGUID || map.ContainsKey(newGUID)) { tbGUID.Focus(); tbGUID.SelectAll(); return; }
 
+            string value = map[oldGUID];
             int i = currentIndex;
             lbStrings.SelectedIndices.Clear();
 
-            string value = map[oldGUID];
+            lbStrings.Items.RemoveAt(i);
             map.Remove(oldGUID);
             stblKeys.Remove(oldGUID);
-            lbStrings.Items.RemoveAt(i);
 
+            lbStrings.Items.Add("0x" + newGUID.ToString("X16") + ": " + partValue(value));
             map.Add(newGUID, value);
             stblKeys.Add(newGUID);
-            lbStrings.Items.Add("0x" + newGUID.ToString("X16") + ": " + partValue(value));
 
             lbStrings.SelectedIndex = lbStrings.Items.Count - 1;
         }
@@ -171,11 +175,22 @@ namespace s3pi_STBL_Resource_Editor
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            ulong oldGUID = Convert.ToUInt64(lbStrings.Items[currentIndex] + "", 16);
+            ulong oldGUID = stblKeys[currentIndex];
             if (map.ContainsKey(oldGUID))
             {
+                int i = currentIndex;
+                lbStrings.SelectedIndices.Clear();
+
+                lbStrings.Items.RemoveAt(i);
                 map.Remove(oldGUID);
-                lbStrings.Items.RemoveAt(currentIndex);
+                stblKeys.Remove(oldGUID);
+
+                if (lbStrings.Items.Count == 0)
+                    return;
+                if (i >= lbStrings.Items.Count)
+                    lbStrings.SelectedIndex = lbStrings.Items.Count - 1;
+                else
+                    lbStrings.SelectedIndex = i;
             }
         }
     }
