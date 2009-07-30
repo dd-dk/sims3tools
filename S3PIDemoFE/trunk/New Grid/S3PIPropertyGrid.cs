@@ -43,7 +43,6 @@ namespace S3PIDemoFE
     // http://msdn.microsoft.com/en-us/library/aa302334.aspx
     // http://www.codeproject.com/KB/tabs/customizingcollectiondata.aspx?display=Print
 
-    [Category("Fields")]
     [TypeConverter(typeof(AApiVersionedFieldsCTDConverter))]
     public class AApiVersionedFieldsCTD : ICustomTypeDescriptor
     {
@@ -81,13 +80,26 @@ namespace S3PIDemoFE
             List<string> filter = new List<string>(new string[] { "Stream", "AsBytes", "Value", });
             List<string> contentFields = value.ContentFields;
             PropertyDescriptorCollection pdc = new PropertyDescriptorCollection(null);
-            if (typeof(IDictionary).IsAssignableFrom(value.GetType())) { pdc.Add(new IDictionaryPropertyDescriptor((IDictionary)value, "(this)", null)); }
+            if (typeof(IDictionary).IsAssignableFrom(value.GetType())) { pdc.Add(new IDictionaryPropertyDescriptor((IDictionary)value, "(this)", new Attribute[] { new CategoryAttribute("Lists") })); }
             foreach (string f in contentFields)
             {
                 if (filter.Contains(f)) continue;
-                pdc.Add(new TypedValuePropertyDescriptor(value, f, null));
+                TypedValuePropertyDescriptor tvpd = new TypedValuePropertyDescriptor(value, f, null);
+                pdc.Add(new TypedValuePropertyDescriptor(value, f, new Attribute[] { new CategoryAttribute(tvpdToCategory(tvpd.PropertyType)) }));
             }
             return pdc;
+        }
+        string tvpdToCategory(Type t)
+        {
+            if (t.Equals(typeof(EnumChooserCTD))) return "Values";
+            if (t.Equals(typeof(EnumFlagsCTD))) return "Fields";
+            if (t.Equals(typeof(AsHexCTD))) return "Values";
+            if (t.Equals(typeof(IListAsHexCTD))) return "Lists";
+            if (t.Equals(typeof(AApiVersionedFieldsCTD))) return "Fields";
+            if (t.Equals(typeof(ICollectionAApiVersionedFieldsCTD))) return "Lists";
+            if (t.Equals(typeof(IDictionaryCTD))) return "Lists";
+            if (t.Equals(typeof(ReaderCTD))) return "Readers";
+            return "Values";
         }
 
         public PropertyDescriptorCollection GetProperties() { return GetProperties(new Attribute[] { }); }
@@ -190,7 +202,7 @@ namespace S3PIDemoFE
                 {
                     List<Type> simpleTypes = new List<Type>(new Type[] { typeof(bool), typeof(DateTime), typeof(decimal), typeof(double), typeof(float), typeof(string), });
                     if (simpleTypes.Contains(fieldType)) return fieldType;
-                    simpleTypes.Add(typeof(byte));
+                    //simpleTypes.Add(typeof(byte));
                     if (isCollection(simpleTypes, fieldType, true, false, false)) // simpleTypes, byte, Enum
                         return fieldType;
 
@@ -240,7 +252,6 @@ namespace S3PIDemoFE
         }
     }
 
-    [Category("Fields")]
     [TypeConverter(typeof(AsHexConverter))]
     public class AsHexCTD : ICustomTypeDescriptor
     {
@@ -352,7 +363,6 @@ namespace S3PIDemoFE
         }
     }
 
-    [Category("Fields")]
     [Editor(typeof(EnumChooserEditor), typeof(UITypeEditor))]
     [TypeConverter(typeof(EnumChooserConverter))]
     public class EnumChooserCTD : ICustomTypeDescriptor
@@ -503,7 +513,6 @@ namespace S3PIDemoFE
         }
     }
 
-    [Category("Fields")]
     [TypeConverter(typeof(EnumFlagsConverter))]
     public class EnumFlagsCTD : ICustomTypeDescriptor
     {
@@ -540,7 +549,7 @@ namespace S3PIDemoFE
 
         #endregion
 
-        public class EnumFlagsPropertyDescriptor : System.ComponentModel.PropertyDescriptor
+        public class EnumFlagsPropertyDescriptor : PropertyDescriptor
         {
             AApiVersionedFields owner;
             string field;
@@ -689,7 +698,6 @@ namespace S3PIDemoFE
         }
     }
 
-    [Category("Lists")]
     [Editor(typeof(ICollectionAApiVersionedFieldsEditor), typeof(UITypeEditor))]
     [TypeConverter(typeof(ICollectionConverter))]
     public class ICollectionAApiVersionedFieldsCTD : ICustomTypeDescriptor
@@ -772,7 +780,6 @@ namespace S3PIDemoFE
         }
     }
 
-    [Category("Lists")]
     [Editor(typeof(IListAsHexEditor), typeof(UITypeEditor))]
     [TypeConverter(typeof(ICollectionConverter))]
     public class IListAsHexCTD : ICustomTypeDescriptor
@@ -848,8 +855,7 @@ namespace S3PIDemoFE
                 IWindowsFormsEditorService edSvc = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
 
                 IListAsHexCTD field = (IListAsHexCTD)value;
-                object list = field.owner[field.field].Value;
-                NewGridForm ui = new NewGridForm(new AsHex(field.field, (IList)list));
+                NewGridForm ui = new NewGridForm(new AsHex(field.owner, field.field));
                 edSvc.ShowDialog(ui);
 
                 return value;
@@ -859,30 +865,44 @@ namespace S3PIDemoFE
 
     public class AsHex : AApiVersionedFields
     {
-        string name;
+        AApiVersionedFields owner;
+        string field;
+        TypedValue tv;
         IList list;
-        public AsHex(string name, IList list) { this.name = name; this.list = list; }
+        public AsHex(AApiVersionedFields owner, string field) { this.owner = owner; this.field = field; tv = owner[field]; list = (IList)tv.Value; }
 
-        public Type ElementType { get { return list.Count == 0 ? typeof(object) : list[0].GetType(); } }
+        public Type ElementType { get { return tv.Type.HasElementType ? tv.Type.GetElementType() : list.Count > 0 ? list[0].GetType() : typeof(object); } }
 
-        static System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"^\[(\d+)\].*$");
+        static System.Text.RegularExpressions.Regex regex = new System.Text.RegularExpressions.Regex(@"^\[([\dA-F]+)\].*$");
         public override TypedValue this[string index]
         {
             get
             {
                 if (!regex.IsMatch(index))
                     throw new ArgumentOutOfRangeException();
-                int i = Convert.ToInt32(regex.Match(index).Groups[1].Value);
-                return new TypedValue(list[i].GetType(), list[i], "X");
+                int i = Convert.ToInt32("0x" + regex.Match(index).Groups[1].Value, 16);
+
+                return new TypedValue(ElementType, ((IList)tv.Value)[i], "X");
             }
             set
             {
                 if (!regex.IsMatch(index))
                     throw new ArgumentOutOfRangeException();
-                int i = Convert.ToInt32(regex.Match(index).Groups[1].Value);
+                int i = Convert.ToInt32("0x" + regex.Match(index).Groups[1].Value, 16);
 
-                list.GetType().GetProperty("Item").SetValue(list, value.Value, new object[] { i, });
                 //list[i] = value.Value; <-- BYPASSES "new" set method in AHandlerList<T>
+                //Lists
+                PropertyInfo p = list.GetType().GetProperty("Item");
+                if (p != null)
+                    p.SetValue(list, value.Value, new object[] { i, });
+                else
+                {
+                    //Arrays
+                    MethodInfo m = list.GetType().GetMethod("Set");
+                    if (m != null)
+                        m.Invoke(list, new object[] { i, value.Value });
+                    owner[field] = new TypedValue(tv.Type, list);
+                }
             }
         }
 
@@ -891,8 +911,9 @@ namespace S3PIDemoFE
             get
             {
                 List<string> res = new List<string>();
+                string fmt = "[{0:X" + list.Count.ToString("X").Length + "}] {1}";
                 for (int i = 0; i < list.Count; i++)
-                    res.Add("[" + i + "] " + name);
+                    res.Add(String.Format(fmt, i, field));
                 return res;
             }
         }
@@ -900,7 +921,6 @@ namespace S3PIDemoFE
         public override int RecommendedApiVersion { get { return 0; } }
     }
 
-    [Category("Lists")]
     [Editor(typeof(IDictionaryEditor), typeof(UITypeEditor))]
     [TypeConverter(typeof(ICollectionConverter))]
     public class IDictionaryCTD : ICustomTypeDescriptor
@@ -1060,7 +1080,6 @@ namespace S3PIDemoFE
         }
     }
 
-    [Category("Data")]
     [Editor(typeof(ReaderEditor), typeof(UITypeEditor))]
     [TypeConverter(typeof(ReaderConverter))]
     public class ReaderCTD : ICustomTypeDescriptor
