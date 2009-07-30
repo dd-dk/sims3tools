@@ -156,9 +156,9 @@ namespace s3pi_STBL_Resource_Editor
             ulong oldGUID = stblKeys[currentIndex];
             if (newGUID == oldGUID || map.ContainsKey(newGUID)) { tbGUID.Focus(); tbGUID.SelectAll(); return; }
 
-            string value = map[oldGUID];
             int i = currentIndex;
             lbStrings.SelectedIndices.Clear();
+            string value = map[oldGUID];
 
             lbStrings.Items.RemoveAt(i);
             map.Remove(oldGUID);
