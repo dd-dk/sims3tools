@@ -35,7 +35,11 @@ namespace s3pi_STBL_Resource_Editor
 
             MemoryStream ms = Clipboard.GetData(DataFormats.Serializable) as MemoryStream;
             if (ms == null)
+#if DEBUG
+                { loadStbl(new StblResource.StblResource(0, null).Stream); return; }
+#else
                 throw new Exception("Clipboard data not a MemoryStream");
+#endif
 
             try
             {
@@ -80,8 +84,11 @@ namespace s3pi_STBL_Resource_Editor
         }
 
         int currentIndex = -1;
+        bool internalchg = false;
         private void lbStrings_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (internalchg) return;
+
             if (currentIndex >= 0)
             {
                 map[stblKeys[currentIndex]] = rtbValue.Text;
@@ -96,6 +103,13 @@ namespace s3pi_STBL_Resource_Editor
             }
             else
             {
+                if (currentIndex >= 0)
+                {
+                    internalchg = true;
+                    lbStrings.Items[currentIndex] = "0x" + stblKeys[currentIndex].ToString("X16") + ": " + partValue(rtbValue.Text);
+                    internalchg = false;
+                }
+
                 currentIndex = lbStrings.SelectedIndex;
                 rtbValue.Text = map[stblKeys[currentIndex]];
                 tbGUID.Text = "0x" + stblKeys[currentIndex].ToString("X16");
@@ -121,7 +135,7 @@ namespace s3pi_STBL_Resource_Editor
         private void tbGUID_TextChanged(object sender, EventArgs e)
         {
             btnAdd.Enabled = tbGUID.Text.Length > 0;
-            btnChange.Enabled = lbStrings.SelectedIndices.Count >= 0 && tbGUID.Text.Length > 0;
+            btnChange.Enabled = lbStrings.SelectedIndices.Count > 0 && tbGUID.Text.Length > 0;
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
@@ -150,11 +164,11 @@ namespace s3pi_STBL_Resource_Editor
             map.Remove(oldGUID);
             stblKeys.Remove(oldGUID);
 
-            lbStrings.Items.Add("0x" + newGUID.ToString("X16") + ": " + partValue(value));
+            lbStrings.Items.Insert(i, "0x" + newGUID.ToString("X16") + ": " + partValue(value));
             map.Add(newGUID, value);
-            stblKeys.Add(newGUID);
+            stblKeys.Insert(i, newGUID);
 
-            lbStrings.SelectedIndex = lbStrings.Items.Count - 1;
+            lbStrings.SelectedIndex = i;
         }
 
         ulong getGUID()
