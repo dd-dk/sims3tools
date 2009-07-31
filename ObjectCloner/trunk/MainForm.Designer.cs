@@ -46,9 +46,10 @@
             this.tpMain = new System.Windows.Forms.TabPage();
             this.tlpOverview = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.btnReplThumb = new System.Windows.Forms.Button();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.lbThumbTGI = new System.Windows.Forms.Label();
+            this.btnReplThumb = new System.Windows.Forms.Button();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.label8 = new System.Windows.Forms.Label();
             this.tbObjName = new System.Windows.Forms.TextBox();
             this.tbPrice = new System.Windows.Forms.TextBox();
@@ -114,6 +115,7 @@
             this.tpMain.SuspendLayout();
             this.tlpOverview.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
+            this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tpDetail.SuspendLayout();
             this.tlpCatalog.SuspendLayout();
@@ -403,7 +405,7 @@
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpOverview.Size = new System.Drawing.Size(387, 326);
+            this.tlpOverview.Size = new System.Drawing.Size(355, 326);
             this.tlpOverview.TabIndex = 0;
             // 
             // tableLayoutPanel2
@@ -414,17 +416,46 @@
             this.tlpOverview.SetColumnSpan(this.tableLayoutPanel2, 2);
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel2.Controls.Add(this.panel1, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.pictureBox1, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.btnReplThumb, 1, 0);
-            this.tableLayoutPanel2.Controls.Add(this.lbThumbTGI, 1, 1);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 2;
+            this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(209, 128);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(215, 128);
             this.tableLayoutPanel2.TabIndex = 0;
+            // 
+            // panel1
+            // 
+            this.panel1.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.panel1.AutoSize = true;
+            this.panel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.panel1.Controls.Add(this.lbThumbTGI);
+            this.panel1.Controls.Add(this.btnReplThumb);
+            this.panel1.Location = new System.Drawing.Point(131, 43);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(81, 42);
+            this.panel1.TabIndex = 0;
+            // 
+            // lbThumbTGI
+            // 
+            this.lbThumbTGI.AutoSize = true;
+            this.lbThumbTGI.Location = new System.Drawing.Point(3, 29);
+            this.lbThumbTGI.Name = "lbThumbTGI";
+            this.lbThumbTGI.Size = new System.Drawing.Size(0, 13);
+            this.lbThumbTGI.TabIndex = 2;
+            // 
+            // btnReplThumb
+            // 
+            this.btnReplThumb.Enabled = false;
+            this.btnReplThumb.Location = new System.Drawing.Point(3, 3);
+            this.btnReplThumb.Name = "btnReplThumb";
+            this.btnReplThumb.Size = new System.Drawing.Size(75, 23);
+            this.btnReplThumb.TabIndex = 1;
+            this.btnReplThumb.Text = "Replace...";
+            this.btnReplThumb.UseVisualStyleBackColor = true;
+            this.btnReplThumb.Click += new System.EventHandler(this.btnReplThumb_Click);
             // 
             // pictureBox1
             // 
@@ -433,31 +464,9 @@
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox1.Name = "pictureBox1";
-            this.tableLayoutPanel2.SetRowSpan(this.pictureBox1, 2);
             this.pictureBox1.Size = new System.Drawing.Size(128, 128);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
-            // 
-            // btnReplThumb
-            // 
-            this.btnReplThumb.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.btnReplThumb.Enabled = false;
-            this.btnReplThumb.Location = new System.Drawing.Point(131, 3);
-            this.btnReplThumb.Name = "btnReplThumb";
-            this.btnReplThumb.Size = new System.Drawing.Size(75, 23);
-            this.btnReplThumb.TabIndex = 1;
-            this.btnReplThumb.Text = "Replace...";
-            this.btnReplThumb.UseVisualStyleBackColor = true;
-            this.btnReplThumb.Click += new System.EventHandler(this.btnReplThumb_Click);
-            // 
-            // lbThumbTGI
-            // 
-            this.lbThumbTGI.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.lbThumbTGI.AutoSize = true;
-            this.lbThumbTGI.Location = new System.Drawing.Point(131, 72);
-            this.lbThumbTGI.Name = "lbThumbTGI";
-            this.lbThumbTGI.Size = new System.Drawing.Size(0, 13);
-            this.lbThumbTGI.TabIndex = 2;
             // 
             // label8
             // 
@@ -475,7 +484,7 @@
             this.tbObjName.Location = new System.Drawing.Point(83, 131);
             this.tbObjName.Name = "tbObjName";
             this.tbObjName.ReadOnly = true;
-            this.tbObjName.Size = new System.Drawing.Size(301, 20);
+            this.tbObjName.Size = new System.Drawing.Size(269, 20);
             this.tbObjName.TabIndex = 2;
             // 
             // tbPrice
@@ -504,7 +513,7 @@
             this.tbObjDesc.Location = new System.Drawing.Point(83, 157);
             this.tbObjDesc.Name = "tbObjDesc";
             this.tbObjDesc.ReadOnly = true;
-            this.tbObjDesc.Size = new System.Drawing.Size(301, 20);
+            this.tbObjDesc.Size = new System.Drawing.Size(269, 20);
             this.tbObjDesc.TabIndex = 4;
             // 
             // label12
@@ -555,7 +564,7 @@
             this.tbCatlgName.Location = new System.Drawing.Point(83, 183);
             this.tbCatlgName.Multiline = false;
             this.tbCatlgName.Name = "tbCatlgName";
-            this.tbCatlgName.Size = new System.Drawing.Size(301, 20);
+            this.tbCatlgName.Size = new System.Drawing.Size(269, 20);
             this.tbCatlgName.TabIndex = 12;
             this.tbCatlgName.Text = "";
             // 
@@ -565,7 +574,7 @@
             this.tbCatlgDesc.Enabled = false;
             this.tbCatlgDesc.Location = new System.Drawing.Point(83, 209);
             this.tbCatlgDesc.Name = "tbCatlgDesc";
-            this.tbCatlgDesc.Size = new System.Drawing.Size(301, 65);
+            this.tbCatlgDesc.Size = new System.Drawing.Size(269, 65);
             this.tbCatlgDesc.TabIndex = 12;
             this.tbCatlgDesc.Text = "";
             // 
@@ -1169,6 +1178,8 @@
             this.tlpOverview.PerformLayout();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.tpDetail.ResumeLayout(false);
             this.tpDetail.PerformLayout();
@@ -1291,6 +1302,7 @@
         private System.Windows.Forms.CheckBox ckbCompress;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.Label lbThumbTGI;
+        private System.Windows.Forms.Panel panel1;
     }
 }
 

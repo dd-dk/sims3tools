@@ -39,9 +39,9 @@ namespace ObjectCloner
                 //File
                 newToolStripMenuItem, openToolStripMenuItem, exitToolStripMenuItem,
                 //Cloning
-                objdToolStripMenuItem, cfenToolStripMenuItem, cstrToolStripMenuItem, cprxToolStripMenuItem, ctgmToolStripMenuItem,
-                cralToolStripMenuItem, ctpbToolStripMenuItem, cfirToolStripMenuItem, ctwpToolStripMenuItem, cfndToolStripMenuItem,
-                cwalToolStripMenuItem, cwtpToolStripMenuItem, crstToolStripMenuItem, crmtToolStripMenuItem,
+                objdToolStripMenuItem, mdlrToolStripMenuItem, cfenToolStripMenuItem, cstrToolStripMenuItem, cprxToolStripMenuItem,
+                ctgmToolStripMenuItem, cralToolStripMenuItem, ctpbToolStripMenuItem, cfirToolStripMenuItem, ctwpToolStripMenuItem,
+                cfndToolStripMenuItem, cwalToolStripMenuItem, cwtpToolStripMenuItem, crstToolStripMenuItem, crmtToolStripMenuItem,
                 //View
                 tilesToolStripMenuItem, largeIconsToolStripMenuItem, smallIconsToolStripMenuItem, listToolStripMenuItem, detailedListToolStripMenuItem,
                 iconsToolStripMenuItem,
@@ -64,9 +64,9 @@ namespace ObjectCloner
         public enum MB
         {
             MBF_new = 0, MBF_open, MBF_exit,
-            MBC_objd, MBC_cfen, MBC_cstr, MBC_cprx, MBC_ctgm,
-            MBC_cral, MBC_ctpb, MBC_cfir, MBC_ctwp, MBC_cfnd,
-            MBC_cwal, MBC_cwtp, MBC_crst, MBC_crmt,
+            MBC_objd, MBC_mdlr, MBC_cfen, MBC_cstr, MBC_cprx,
+            MBC_ctgm, MBC_cral, MBC_ctpb, MBC_cfir, MBC_ctwp,
+            MBC_cfnd, MBC_cwal, MBC_cwtp, MBC_crst, MBC_crmt,
             MBV_tiles, MBV_largeIcons, MBV_smallIcons, MBV_list, MBV_detailedList,
             MBV_icons,
             MBS_sims3Folder, MBS_userName,

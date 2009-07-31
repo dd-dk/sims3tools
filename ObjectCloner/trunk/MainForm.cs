@@ -162,7 +162,7 @@ namespace ObjectCloner
             MainForm_LoadFormSettings();
             disableCompression = !ckbCompress.Checked;
 
-            InitialiseTabs(catalogTypes[1]);
+            InitialiseTabs(catalogTypes[4]);//Use the Proxy Product as it has pretty much nothing on it
             setButtons(Page.None, SubPage.None);
         }
 
@@ -250,6 +250,7 @@ namespace ObjectCloner
             {
                 thumTypes=new Dictionary<uint,uint[]>();
                 thumTypes.Add(0x319E4F1D, new uint[] { 0x0580A2B4, 0x0580A2B5, 0x0580A2B6, }); //Catalog Object
+                thumTypes.Add(0xCF9A4ACE, new uint[] { 0x00000000, 0x00000000, 0x00000000, }); //Modular Resource
                 thumTypes.Add(0x0418FE2A, new uint[] { 0x2653E3C8, 0x2653E3C9, 0x2653E3CA, }); //Catalog Fence
                 thumTypes.Add(0x049CA4CD, new uint[] { 0x5DE9DBA0, 0x5DE9DBA1, 0x5DE9DBA2, }); //Catalog Stairs
                 thumTypes.Add(0x04AC5D93, thumTypes[0x319E4F1D]); //Catalog Proxy Product
@@ -260,7 +261,7 @@ namespace ObjectCloner
                 thumTypes.Add(0x060B390C, thumTypes[0x319E4F1D]); //Catalog Terrain Water Brush
                 thumTypes.Add(0x316C78F2, thumTypes[0x319E4F1D]); //Catalog Foundation
                 thumTypes.Add(0x515CA4CD, new uint[] { 0x0589DC44, 0x0589DC45, 0x0589DC46, }); //Catalog Wall/Floor Pattern
-                thumTypes.Add(0x9151E6BC, thumTypes[0x319E4F1D]); //Catalog Wall
+                thumTypes.Add(0x9151E6BC, new uint[] { 0x00000000, 0x00000000, 0x00000000, }); //Catalog Wall -- doesn't have any
                 thumTypes.Add(0x91EDBD3E, thumTypes[0x319E4F1D]); //Catalog Roof Style
                 thumTypes.Add(0xF1EDBD86, thumTypes[0x319E4F1D]); //Catalog Roof Pattern
 
@@ -288,14 +289,14 @@ namespace ObjectCloner
                 get
                 {
                     Item item = getItem(isPNGInstance ? fb0Pkgs : tmbPkgs, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
-                    if (item.Resource != null)
+                    if (item != null && item.Resource != null)
                         return Image.FromStream(item.Resource.Stream);
                     return null;
                 }
                 set
                 {
                     Item item = getItem(isPNGInstance ? fb0Pkgs : tmbPkgs, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
-                    if (item == null)
+                    if (item == null || item.Resource == null)
                         throw new ArgumentException();
 
                     Image thumb;
@@ -309,11 +310,12 @@ namespace ObjectCloner
             public TGI getTGI(uint type, ulong instance, THUMSize size, bool isPNGInstance)
             {
                 Item item = getItem(isPNGInstance ? fb0Pkgs : tmbPkgs, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
-                return item.tgi;
+                return item == null ? new TGI() : item.tgi;
             }
 
             static Item getItem(List<IPackage> pkgs, ulong instance, uint type)
             {
+                if (type == 0x00000000) return null;
                 if (new List<uint>(thumTypes[0x515CA4CD]).Contains(type))
                 {
                     foreach(IPackage pkg in pkgs)
@@ -351,7 +353,6 @@ namespace ObjectCloner
         }
         TGI getImageTGI(THUM.THUMSize size, Item catlg)
         {
-            TGI res = new TGI();
             ulong png = 0;
             if (catlg.Resource != null) png = (ulong)((AHandlerElement)catlg.Resource["CommonBlock"].Value)["PngInstance"].Value;
             if (png != 0 && Thumb[png, size, true] != null)
@@ -523,6 +524,8 @@ namespace ObjectCloner
         #region Tabs
         void InitialiseTabs(uint resourceType)
         {
+            if (resourceType == catalogTypes[1]) return;//Modular Resources - no support
+
             IResource res = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x" + resourceType.ToString("X8"));
             InitialiseDetailsTab(resourceType, res);
             this.tabControl1.Controls.Remove(this.tpFlagsRoom);
@@ -823,7 +826,8 @@ namespace ObjectCloner
 
         void FillTabs(Item objd)
         {
-            if (objd.Resource == null)
+            if (objd.Resource == null
+                || objd.tgi.t == catalogTypes[1])//Modular Resources - no support
             {
                 ClearTabs();
                 return;
@@ -1014,7 +1018,11 @@ namespace ObjectCloner
         void createListViewItem(Item objd)
         {
             ListViewItem lvi = new ListViewItem();
-            if (objd.Resource != null)
+            if (currentCatalogType == catalogTypes[1])
+            {
+                lvi.Text = "";
+            }
+            else if (objd.Resource != null)
             {
                 string objdtag = ((AApiVersionedFields)objd.Resource["CommonBlock"].Value)["Name"];
                 lvi.Text = (objdtag.IndexOf(':') < 0) ? objdtag : objdtag.Substring(objdtag.LastIndexOf(':') + 1);
@@ -1173,6 +1181,7 @@ namespace ObjectCloner
                         if (stopFetching) return;
 
                         Item objd = getItem(i);
+                        if (objd.tgi.t == mainForm.catalogTypes[1]) goto skipModular;
 
                         if (stopFetching) return;
 
@@ -1186,6 +1195,7 @@ namespace ObjectCloner
 
                         if (stopFetching) return;
 
+                    skipModular:
                         if (i % freq == 0)
                             updateProgress(true, String.Format("Please wait, loading thumbnails... {0}%", i * 100 / count), true, count, true, i);
                     }
@@ -1894,10 +1904,9 @@ namespace ObjectCloner
         #endregion
 
         #region Cloning menu
-        /*
-        **/
         uint[] catalogTypes = new uint[] {
             0x319E4F1D, //Catalog Object
+            0xCF9A4ACE, //Modular Resource
             0x0418FE2A, //Catalog Fence
             0x049CA4CD, //Catalog Stairs
             0x04AC5D93, //Catalog Proxy Product
