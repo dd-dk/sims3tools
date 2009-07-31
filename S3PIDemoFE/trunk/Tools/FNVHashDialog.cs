@@ -30,6 +30,7 @@ namespace S3PIDemoFE.Tools
         public FNVHashDialog()
         {
             InitializeComponent();
+            this.Icon = ((System.Drawing.Icon)(new ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
         }
 
         private void btnCalc_Click(object sender, EventArgs e)

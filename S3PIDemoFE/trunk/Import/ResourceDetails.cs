@@ -33,6 +33,7 @@ namespace S3PIDemoFE
         public ResourceDetails(bool useName, bool displayFilename)
         {
             InitializeComponent();
+            this.Icon = ((System.Drawing.Icon)(new ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
             tbName.Enabled = UseName = useName;
             lbFilename.Visible = tbFilename.Visible = displayFilename;
         }

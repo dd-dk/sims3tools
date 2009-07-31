@@ -31,6 +31,7 @@ namespace S3PIDemoFE
         public NewGridForm()
         {
             InitializeComponent();
+            this.Icon = ((System.Drawing.Icon)(new ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
             splitContainer1.Panel1Collapsed = true;
             listBox1.Visible = false;
         }

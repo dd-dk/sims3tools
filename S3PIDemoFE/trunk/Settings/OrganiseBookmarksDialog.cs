@@ -30,6 +30,7 @@ namespace S3PIDemoFE.Settings
         public OrganiseBookmarksDialog()
         {
             InitializeComponent();
+            this.Icon = ((System.Drawing.Icon)(new ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
 
             if (S3PIDemoFE.Properties.Settings.Default.Bookmarks == null)
             {

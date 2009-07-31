@@ -83,6 +83,14 @@ namespace S3PIDemoFE
                 ? (FormWindowState)S3PIDemoFE.Properties.Settings.Default.FormWindowState
                 : FormWindowState.Normal;
             this.WindowState = s;
+
+            int s1 = S3PIDemoFE.Properties.Settings.Default.Splitter1Position;
+            if (s1 >= splitContainer1.Panel1MinSize)
+                splitContainer1.SplitterDistance = s1;
+
+            int s2 = S3PIDemoFE.Properties.Settings.Default.Splitter2Position;
+            if (s2 > splitContainer2.Panel1MinSize)
+                splitContainer2.SplitterDistance = s2;
         }
 
         void MainForm_SaveSettings(object sender, EventArgs e)
@@ -98,6 +106,8 @@ namespace S3PIDemoFE
                 S3PIDemoFE.Properties.Settings.Default.PersistentWidth = -1;
             }
             S3PIDemoFE.Properties.Settings.Default.FormWindowState = (int)this.WindowState;
+            S3PIDemoFE.Properties.Settings.Default.Splitter1Position = splitContainer1.SplitterDistance;
+            S3PIDemoFE.Properties.Settings.Default.Splitter2Position = splitContainer2.SplitterDistance;
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -1063,21 +1073,19 @@ namespace S3PIDemoFE
                 try
                 {
                     resource = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, browserWidget1.SelectedResource, controlPanel1.HexOnly);
-                    if (!splitContainer2.Panel2.Contains(packageInfoWidget1))
-                    {
-                        splitContainer2.Panel2.Controls.Clear();
-                        splitContainer2.Panel2.Controls.Add(packageInfoWidget1);
-                    }
+                    controlPanel1_AutoChanged(null, null);
                 }
                 catch(Exception ex)
                 {
                     string s = ex.Message;
                     for (ex = ex.InnerException; ex != null; ex = ex.InnerException) s += "  " + ex.Message;
-                    Label lb = new Label();
-                    lb.Dock= DockStyle.Fill;
-                    lb.Text = s;
-                    splitContainer2.Panel2.Controls.Clear();
-                    splitContainer2.Panel2.Controls.Add(lb);
+                    TextBox tb = new TextBox();
+                    tb.Dock = DockStyle.Fill;
+                    tb.Multiline = true;
+                    tb.ReadOnly = true;
+                    tb.Text = s;
+                    pnAuto.Controls.Clear();
+                    pnAuto.Controls.Add(tb);
                 }
             }
 
@@ -1117,7 +1125,6 @@ namespace S3PIDemoFE
                 controlPanel1.ValueEnabled = controlPanel1.GridEnabled =
                     controlPanel1.ViewerEnabled = controlPanel1.EditorEnabled = controlPanel1.HexEditEnabled = false;
             }
-            controlPanel1_AutoChanged(null, null);
 
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_exportResources, resource != null || browserWidget1.SelectedResources.Count > 0);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_exportToPackage, resource != null || browserWidget1.SelectedResources.Count > 0);
@@ -1225,6 +1232,7 @@ namespace S3PIDemoFE
 
                 f.SuspendLayout();
                 f.Controls.Add(hw);
+                f.Icon = this.Icon;
 
                 hw.Dock = DockStyle.Fill;
                 hw.Resource = resource == null ? null : resource;
@@ -1252,6 +1260,7 @@ namespace S3PIDemoFE
                 Form f = new Form();
                 f.SuspendLayout();
                 f.Controls.Add(c);
+                f.Icon = this.Icon;
 
                 f.Text = this.Text + ((resourceName != null && resourceName.Length > 0) ? " - " + resourceName : "");
 

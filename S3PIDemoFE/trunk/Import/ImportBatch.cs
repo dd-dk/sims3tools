@@ -40,6 +40,7 @@ namespace S3PIDemoFE
         {
             InitializeComponent();
             this.Width = (int)(Application.OpenForms[0].Width * 0.8);
+            this.Icon = ((System.Drawing.Icon)(new ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
         }
 
         private ImportBatch(Mode mode) : this()

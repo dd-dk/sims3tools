@@ -30,6 +30,7 @@ namespace S3PIDemoFE
         public GetNumberDialog()
         {
             InitializeComponent();
+            this.Icon = ((System.Drawing.Icon)(new ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
         }
 
         public GetNumberDialog(string message, decimal min, decimal max) : this(message, "", min, max, min) { }

@@ -284,5 +284,29 @@ namespace S3PIDemoFE.Properties {
                 this["AutoChoice"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int Splitter1Position {
+            get {
+                return ((int)(this["Splitter1Position"]));
+            }
+            set {
+                this["Splitter1Position"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int Splitter2Position {
+            get {
+                return ((int)(this["Splitter2Position"]));
+            }
+            set {
+                this["Splitter2Position"] = value;
+            }
+        }
     }
 }

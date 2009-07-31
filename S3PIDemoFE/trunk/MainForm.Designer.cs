@@ -34,8 +34,8 @@
             this.browserWidget1 = new S3PIDemoFE.BrowserWidget();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.lbProgress = new System.Windows.Forms.Label();
-            this.packageInfoWidget1 = new S3PIDemoFE.PackageInfo.PackageInfoWidget();
             this.pnAuto = new System.Windows.Forms.Panel();
+            this.packageInfoWidget1 = new S3PIDemoFE.PackageInfo.PackageInfoWidget();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.controlPanel1 = new S3PIDemoFE.ControlPanel();
@@ -73,11 +73,12 @@
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.pnAuto);
+            this.splitContainer1.Panel2.Controls.Add(this.packageInfoWidget1);
             this.splitContainer1.Panel2.Controls.Add(this.tableLayoutPanel1);
             this.splitContainer1.Panel2.Controls.Add(this.panel1);
+            this.splitContainer1.Panel2MinSize = 131;
             this.splitContainer1.Size = new System.Drawing.Size(913, 654);
-            this.splitContainer1.SplitterDistance = 273;
+            this.splitContainer1.SplitterDistance = 509;
             this.splitContainer1.TabIndex = 1;
             // 
             // splitContainer2
@@ -93,8 +94,8 @@
             // 
             // splitContainer2.Panel2
             // 
-            this.splitContainer2.Panel2.Controls.Add(this.packageInfoWidget1);
-            this.splitContainer2.Size = new System.Drawing.Size(913, 273);
+            this.splitContainer2.Panel2.Controls.Add(this.pnAuto);
+            this.splitContainer2.Size = new System.Drawing.Size(913, 509);
             this.splitContainer2.SplitterDistance = 629;
             this.splitContainer2.TabIndex = 0;
             // 
@@ -110,7 +111,7 @@
             this.browserWidget1.ProgressBar = this.progressBar1;
             this.browserWidget1.ProgressLabel = this.lbProgress;
             this.browserWidget1.SelectedResource = null;
-            this.browserWidget1.Size = new System.Drawing.Size(625, 269);
+            this.browserWidget1.Size = new System.Drawing.Size(625, 505);
             this.browserWidget1.Sortable = false;
             this.browserWidget1.TabIndex = 0;
             this.browserWidget1.DragOver += new System.Windows.Forms.DragEventHandler(this.browserWidget1_DragOver);
@@ -139,25 +140,25 @@
             this.lbProgress.TabIndex = 3;
             this.lbProgress.Text = "Progress text";
             // 
-            // packageInfoWidget1
-            // 
-            this.packageInfoWidget1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.packageInfoWidget1.Fields = null;
-            this.packageInfoWidget1.Location = new System.Drawing.Point(0, 0);
-            this.packageInfoWidget1.Name = "packageInfoWidget1";
-            this.packageInfoWidget1.Package = null;
-            this.packageInfoWidget1.Size = new System.Drawing.Size(276, 269);
-            this.packageInfoWidget1.TabIndex = 0;
-            // 
             // pnAuto
             // 
             this.pnAuto.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnAuto.Location = new System.Drawing.Point(0, 106);
+            this.pnAuto.Location = new System.Drawing.Point(-2, 0);
             this.pnAuto.Name = "pnAuto";
-            this.pnAuto.Size = new System.Drawing.Size(911, 237);
+            this.pnAuto.Size = new System.Drawing.Size(280, 507);
             this.pnAuto.TabIndex = 4;
+            // 
+            // packageInfoWidget1
+            // 
+            this.packageInfoWidget1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.packageInfoWidget1.Fields = null;
+            this.packageInfoWidget1.Location = new System.Drawing.Point(0, 103);
+            this.packageInfoWidget1.Name = "packageInfoWidget1";
+            this.packageInfoWidget1.Package = null;
+            this.packageInfoWidget1.Size = new System.Drawing.Size(909, 7);
+            this.packageInfoWidget1.TabIndex = 0;
             // 
             // tableLayoutPanel1
             // 
@@ -167,7 +168,7 @@
             this.tableLayoutPanel1.Controls.Add(this.progressBar1, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.lbProgress, 0, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 346);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 110);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));

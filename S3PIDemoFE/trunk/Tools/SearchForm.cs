@@ -33,6 +33,7 @@ namespace S3PIDemoFE.Tools
         public SearchForm()
         {
             InitializeComponent();
+            this.Icon = ((System.Drawing.Icon)(new ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
             lbxHits.Items.Clear();
             lbxHits.Font = new Font(FontFamily.GenericMonospace, lbxHits.Font.Size);
             comboBox1.SelectedIndex = 0;

@@ -29,6 +29,7 @@ namespace S3PIDemoFE.Settings
         public ExternalProgramsDialog()
         {
             InitializeComponent();
+            this.Icon = ((System.Drawing.Icon)(new ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
         }
 
         public bool HasUserHelpersTxt { get { return ckbOverrideHelpers.Checked; } set { ckbOverrideHelpers.Checked = value; } }
