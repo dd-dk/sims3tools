@@ -235,6 +235,7 @@ namespace S3PIDemoFE
         string resourceName = "";
         s3pi.DemoPlugins.DemoPlugins plug = null;
 
+        Exception resException = null;
         IResource resource = null;
         bool resourceIsDirty = false;
         void resource_ResourceChanged(object sender, EventArgs e)
@@ -1068,24 +1069,16 @@ namespace S3PIDemoFE
         {
             resourceName = e.name;
             resource = null;
+            resException = null;
             if (browserWidget1.SelectedResource != null)
             {
                 try
                 {
                     resource = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, browserWidget1.SelectedResource, controlPanel1.HexOnly);
-                    controlPanel1_AutoChanged(null, null);
                 }
                 catch(Exception ex)
                 {
-                    string s = ex.Message;
-                    for (ex = ex.InnerException; ex != null; ex = ex.InnerException) s += "  " + ex.Message;
-                    TextBox tb = new TextBox();
-                    tb.Dock = DockStyle.Fill;
-                    tb.Multiline = true;
-                    tb.ReadOnly = true;
-                    tb.Text = s;
-                    pnAuto.Controls.Clear();
-                    pnAuto.Controls.Add(tb);
+                    resException = ex;
                 }
             }
 
@@ -1094,6 +1087,7 @@ namespace S3PIDemoFE
             resourceIsDirty = controlPanel1.CommitEnabled = false;
 
             controlPanel1.HexEnabled = (resource != null);
+            controlPanel1_AutoChanged(null, null);
             if (resource != null)
             {
                 if (!controlPanel1.HexOnly)
@@ -1191,7 +1185,18 @@ namespace S3PIDemoFE
         {
             pnAuto.SuspendLayout();
             pnAuto.Controls.Clear();
-            if (resource != null)
+            if (resException != null)
+            {
+                string s = resException.Message;
+                for (Exception ex = resException.InnerException; ex != null; ex = ex.InnerException) s += "  " + ex.Message;
+                TextBox tb = new TextBox();
+                tb.Dock = DockStyle.Fill;
+                tb.Multiline = true;
+                tb.ReadOnly = true;
+                tb.Text = s;
+                pnAuto.Controls.Add(tb);
+            }
+            else if (resource != null)
             {
                 if (controlPanel1.AutoOff) { }
                 else if (controlPanel1.AutoHex)
