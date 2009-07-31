@@ -34,15 +34,20 @@ namespace S3PIDemoFE
         void ControlPanel_LoadSettings()
         {
             Sort = S3PIDemoFE.Properties.Settings.Default.Sort;
-            AutoHex = S3PIDemoFE.Properties.Settings.Default.AutoHex;
             HexOnly = S3PIDemoFE.Properties.Settings.Default.HexOnly;
+            switch (S3PIDemoFE.Properties.Settings.Default.AutoChoice)
+            {
+                case 0: AutoOff = true; break;
+                case 1: AutoHex = true; break;
+                case 2: AutoValue = true; break;
+            }
             UseNames = S3PIDemoFE.Properties.Settings.Default.UseNames;
             UseTags = S3PIDemoFE.Properties.Settings.Default.UseTags;
         }
         public void ControlPanel_SaveSettings(object sender, EventArgs e)
         {
             S3PIDemoFE.Properties.Settings.Default.Sort = Sort;
-            S3PIDemoFE.Properties.Settings.Default.AutoHex = AutoHex;
+            S3PIDemoFE.Properties.Settings.Default.AutoChoice = (short)(AutoHex ? 1 : AutoValue ? 2 : 0);
             S3PIDemoFE.Properties.Settings.Default.HexOnly = HexOnly;
             S3PIDemoFE.Properties.Settings.Default.UseNames = UseNames;
             S3PIDemoFE.Properties.Settings.Default.UseTags = UseTags;
@@ -83,19 +88,34 @@ namespace S3PIDemoFE
         private void btnHex_Click(object sender, EventArgs e) { OnHexClick(sender, e); }
         #endregion
 
-        #region AutoHex checkbox
-        [Browsable(true)]
-        [Category("Appearance")]
-        [DefaultValue(false)]
-        [Description("The state of the AutoHex checkbox")]
-        public bool AutoHex { get { return ckbAutoHex.Checked; } set { ckbAutoHex.Checked = value; } }
+        #region Auto radio buttons
 
         [Browsable(true)]
         [Category("Property Changed")]
-        [Description("Occurs when the AutoHex checkbox changes")]
-        public event EventHandler AutoHexChanged;
-        protected virtual void OnAutoHexChanged(object sender, EventArgs e) { if (AutoHexChanged != null) AutoHexChanged(sender, e); }
-        private void ckbAutoHex_CheckedChanged(object sender, EventArgs e) { OnAutoHexChanged(sender, e); }
+        [Description("Occurs when the Auto radio button selection changes")]
+        public event EventHandler AutoChanged;
+        protected virtual void OnAutoChanged(object sender, EventArgs e) { if (AutoChanged != null) AutoChanged(sender, e); }
+        private void rb1Off_CheckedChanged(object sender, EventArgs e) { OnAutoChanged(sender, e); }
+        private void rb1Hex_CheckedChanged(object sender, EventArgs e) { OnAutoChanged(sender, e); }
+        private void rb1Value_CheckedChanged(object sender, EventArgs e) { OnAutoChanged(sender, e); }
+
+        [Browsable(true)]
+        [Category("Appearance")]
+        [DefaultValue(true)]
+        [Description("The state of the Auto Off radio button")]
+        public bool AutoOff { get { return rb1Off.Checked; } set { rb1Off.Checked = value; } }
+
+        [Browsable(true)]
+        [Category("Appearance")]
+        [DefaultValue(false)]
+        [Description("The state of the Auto Hex radio button")]
+        public bool AutoHex { get { return rb1Hex.Checked; } set { rb1Hex.Checked = value; } }
+
+        [Browsable(true)]
+        [Category("Appearance")]
+        [DefaultValue(false)]
+        [Description("The state of the Auto Value radio button")]
+        public bool AutoValue { get { return rb1Value.Checked; } set { rb1Value.Checked = value; } }
         #endregion
 
         #region HexOnly checkbox

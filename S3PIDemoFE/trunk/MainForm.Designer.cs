@@ -35,8 +35,8 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.lbProgress = new System.Windows.Forms.Label();
             this.packageInfoWidget1 = new S3PIDemoFE.PackageInfo.PackageInfoWidget();
+            this.pnAuto = new System.Windows.Forms.Panel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.hexWidget1 = new S3PIDemoFE.HexWidget();
             this.panel1 = new System.Windows.Forms.Panel();
             this.controlPanel1 = new S3PIDemoFE.ControlPanel();
             this.resourceFilterWidget1 = new S3PIDemoFE.Filter.ResourceFilterWidget();
@@ -73,10 +73,10 @@
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.pnAuto);
             this.splitContainer1.Panel2.Controls.Add(this.tableLayoutPanel1);
-            this.splitContainer1.Panel2.Controls.Add(this.hexWidget1);
             this.splitContainer1.Panel2.Controls.Add(this.panel1);
-            this.splitContainer1.Size = new System.Drawing.Size(880, 654);
+            this.splitContainer1.Size = new System.Drawing.Size(913, 654);
             this.splitContainer1.SplitterDistance = 273;
             this.splitContainer1.TabIndex = 1;
             // 
@@ -94,8 +94,8 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.packageInfoWidget1);
-            this.splitContainer2.Size = new System.Drawing.Size(880, 273);
-            this.splitContainer2.SplitterDistance = 607;
+            this.splitContainer2.Size = new System.Drawing.Size(913, 273);
+            this.splitContainer2.SplitterDistance = 629;
             this.splitContainer2.TabIndex = 0;
             // 
             // browserWidget1
@@ -110,7 +110,7 @@
             this.browserWidget1.ProgressBar = this.progressBar1;
             this.browserWidget1.ProgressLabel = this.lbProgress;
             this.browserWidget1.SelectedResource = null;
-            this.browserWidget1.Size = new System.Drawing.Size(603, 269);
+            this.browserWidget1.Size = new System.Drawing.Size(625, 269);
             this.browserWidget1.Sortable = false;
             this.browserWidget1.TabIndex = 0;
             this.browserWidget1.DragOver += new System.Windows.Forms.DragEventHandler(this.browserWidget1_DragOver);
@@ -125,7 +125,7 @@
             this.progressBar1.Location = new System.Drawing.Point(68, 0);
             this.progressBar1.Margin = new System.Windows.Forms.Padding(0);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(808, 27);
+            this.progressBar1.Size = new System.Drawing.Size(841, 27);
             this.progressBar1.TabIndex = 2;
             // 
             // lbProgress
@@ -146,8 +146,18 @@
             this.packageInfoWidget1.Location = new System.Drawing.Point(0, 0);
             this.packageInfoWidget1.Name = "packageInfoWidget1";
             this.packageInfoWidget1.Package = null;
-            this.packageInfoWidget1.Size = new System.Drawing.Size(265, 269);
+            this.packageInfoWidget1.Size = new System.Drawing.Size(276, 269);
             this.packageInfoWidget1.TabIndex = 0;
+            // 
+            // pnAuto
+            // 
+            this.pnAuto.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnAuto.Location = new System.Drawing.Point(0, 106);
+            this.pnAuto.Name = "pnAuto";
+            this.pnAuto.Size = new System.Drawing.Size(911, 237);
+            this.pnAuto.TabIndex = 4;
             // 
             // tableLayoutPanel1
             // 
@@ -161,22 +171,8 @@
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(876, 27);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(909, 27);
             this.tableLayoutPanel1.TabIndex = 3;
-            // 
-            // hexWidget1
-            // 
-            this.hexWidget1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.hexWidget1.Enabled = false;
-            this.hexWidget1.Location = new System.Drawing.Point(0, 103);
-            this.hexWidget1.Margin = new System.Windows.Forms.Padding(0);
-            this.hexWidget1.Name = "hexWidget1";
-            this.hexWidget1.Padding = new System.Windows.Forms.Padding(3, 0, 3, 0);
-            this.hexWidget1.Resource = null;
-            this.hexWidget1.Size = new System.Drawing.Size(876, 242);
-            this.hexWidget1.TabIndex = 1;
             // 
             // panel1
             // 
@@ -185,7 +181,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(876, 103);
+            this.panel1.Size = new System.Drawing.Size(909, 103);
             this.panel1.TabIndex = 0;
             // 
             // controlPanel1
@@ -195,10 +191,11 @@
             this.controlPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.controlPanel1.Name = "controlPanel1";
             this.controlPanel1.Padding = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.controlPanel1.Size = new System.Drawing.Size(876, 29);
+            this.controlPanel1.Size = new System.Drawing.Size(909, 29);
             this.controlPanel1.TabIndex = 1;
             this.controlPanel1.CommitClick += new System.EventHandler(this.controlPanel1_CommitClick);
             this.controlPanel1.ViewerClick += new System.EventHandler(this.controlPanel1_ViewerClick);
+            this.controlPanel1.AutoChanged += new System.EventHandler(this.controlPanel1_AutoChanged);
             this.controlPanel1.UseTagsChanged += new System.EventHandler(this.controlPanel1_UseTagsChanged);
             this.controlPanel1.HexClick += new System.EventHandler(this.controlPanel1_HexClick);
             this.controlPanel1.HexEditClick += new System.EventHandler(this.controlPanel1_HexEditClick);
@@ -211,14 +208,10 @@
             // 
             // resourceFilterWidget1
             // 
-            this.resourceFilterWidget1.BrowserWidget = null;
             this.resourceFilterWidget1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.resourceFilterWidget1.Fields = null;
-            this.resourceFilterWidget1.Filter = ((System.Collections.Generic.IList<System.Collections.Generic.KeyValuePair<string, s3pi.Interfaces.TypedValue>>)(resources.GetObject("resourceFilterWidget1.Filter")));
-            this.resourceFilterWidget1.IndexEntry = null;
             this.resourceFilterWidget1.Location = new System.Drawing.Point(0, 0);
             this.resourceFilterWidget1.Name = "resourceFilterWidget1";
-            this.resourceFilterWidget1.Size = new System.Drawing.Size(876, 103);
+            this.resourceFilterWidget1.Size = new System.Drawing.Size(909, 103);
             this.resourceFilterWidget1.TabIndex = 0;
             this.resourceFilterWidget1.FilterChanged += new System.EventHandler(this.resourceFilterWidget1_FilterChanged);
             // 
@@ -271,7 +264,7 @@
             this.menuBarWidget1.Location = new System.Drawing.Point(0, 0);
             this.menuBarWidget1.Margin = new System.Windows.Forms.Padding(0);
             this.menuBarWidget1.Name = "menuBarWidget1";
-            this.menuBarWidget1.Size = new System.Drawing.Size(880, 23);
+            this.menuBarWidget1.Size = new System.Drawing.Size(913, 23);
             this.menuBarWidget1.TabIndex = 0;
             this.menuBarWidget1.BookmarkClick += new S3PIDemoFE.MenuBarWidget.BookmarkClickEventHandler(this.menuBarWidget1_BookmarkClick);
             this.menuBarWidget1.MBHelp_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBHelp_Click);
@@ -287,7 +280,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(880, 677);
+            this.ClientSize = new System.Drawing.Size(913, 677);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.menuBarWidget1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -320,7 +313,6 @@
         private PackageInfo.PackageInfoWidget packageInfoWidget1;
         private System.Windows.Forms.ProgressBar progressBar1;
         private PackageInfo.PackageInfoFields packageInfoFields1;
-        private HexWidget hexWidget1;
         private System.Windows.Forms.Panel panel1;
         private Filter.ResourceFilterWidget resourceFilterWidget1;
         private ControlPanel controlPanel1;
@@ -330,5 +322,6 @@
         private System.Windows.Forms.Label lbProgress;
         private System.Windows.Forms.OpenFileDialog importPackagesDialog;
         private System.Windows.Forms.OpenFileDialog exportToPackageDialog;
+        private System.Windows.Forms.Panel pnAuto;
     }
 }

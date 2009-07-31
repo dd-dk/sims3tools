@@ -30,7 +30,6 @@ namespace S3PIDemoFE
         {
             this.ckbSortable = new System.Windows.Forms.CheckBox();
             this.btnHex = new System.Windows.Forms.Button();
-            this.ckbAutoHex = new System.Windows.Forms.CheckBox();
             this.btnValue = new System.Windows.Forms.Button();
             this.ckbNoUnWrap = new System.Windows.Forms.CheckBox();
             this.ckbUseNames = new System.Windows.Forms.CheckBox();
@@ -41,10 +40,14 @@ namespace S3PIDemoFE
             this.btnViewer = new System.Windows.Forms.Button();
             this.btnEditor = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.btnHexEdit = new System.Windows.Forms.Button();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.label2 = new System.Windows.Forms.Label();
             this.ckbUseTags = new System.Windows.Forms.CheckBox();
-            this.btnHexEdit = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.rb1Off = new System.Windows.Forms.RadioButton();
+            this.rb1Hex = new System.Windows.Forms.RadioButton();
+            this.rb1Value = new System.Windows.Forms.RadioButton();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -69,39 +72,25 @@ namespace S3PIDemoFE
             this.btnHex.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnHex.Enabled = false;
             this.btnHex.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnHex.Location = new System.Drawing.Point(57, 2);
+            this.btnHex.Location = new System.Drawing.Point(320, 2);
             this.btnHex.Margin = new System.Windows.Forms.Padding(0);
             this.btnHex.Name = "btnHex";
             this.btnHex.Size = new System.Drawing.Size(50, 23);
-            this.btnHex.TabIndex = 2;
+            this.btnHex.TabIndex = 7;
             this.btnHex.Text = "&Hex";
             this.btnHex.UseVisualStyleBackColor = true;
             this.btnHex.Click += new System.EventHandler(this.btnHex_Click);
-            // 
-            // ckbAutoHex
-            // 
-            this.ckbAutoHex.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.ckbAutoHex.AutoSize = true;
-            this.ckbAutoHex.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.ckbAutoHex.Location = new System.Drawing.Point(110, 5);
-            this.ckbAutoHex.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
-            this.ckbAutoHex.Name = "ckbAutoHex";
-            this.ckbAutoHex.Size = new System.Drawing.Size(70, 17);
-            this.ckbAutoHex.TabIndex = 3;
-            this.ckbAutoHex.Text = "Auto Hex";
-            this.ckbAutoHex.UseVisualStyleBackColor = true;
-            this.ckbAutoHex.CheckedChanged += new System.EventHandler(this.ckbAutoHex_CheckedChanged);
             // 
             // btnValue
             // 
             this.btnValue.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnValue.Enabled = false;
             this.btnValue.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnValue.Location = new System.Drawing.Point(264, 2);
+            this.btnValue.Location = new System.Drawing.Point(376, 2);
             this.btnValue.Margin = new System.Windows.Forms.Padding(0);
             this.btnValue.Name = "btnValue";
             this.btnValue.Size = new System.Drawing.Size(50, 23);
-            this.btnValue.TabIndex = 5;
+            this.btnValue.TabIndex = 8;
             this.btnValue.Text = "Value";
             this.btnValue.UseVisualStyleBackColor = true;
             this.btnValue.Click += new System.EventHandler(this.btnValue_Click);
@@ -111,11 +100,11 @@ namespace S3PIDemoFE
             this.ckbNoUnWrap.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ckbNoUnWrap.AutoSize = true;
             this.ckbNoUnWrap.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.ckbNoUnWrap.Location = new System.Drawing.Point(183, 5);
+            this.ckbNoUnWrap.Location = new System.Drawing.Point(60, 5);
             this.ckbNoUnWrap.Margin = new System.Windows.Forms.Padding(3, 0, 12, 0);
             this.ckbNoUnWrap.Name = "ckbNoUnWrap";
             this.ckbNoUnWrap.Size = new System.Drawing.Size(69, 17);
-            this.ckbNoUnWrap.TabIndex = 4;
+            this.ckbNoUnWrap.TabIndex = 2;
             this.ckbNoUnWrap.Text = "Hex Only";
             this.ckbNoUnWrap.UseVisualStyleBackColor = true;
             this.ckbNoUnWrap.CheckedChanged += new System.EventHandler(this.ckbNoUnWrap_CheckedChanged);
@@ -129,7 +118,7 @@ namespace S3PIDemoFE
             this.ckbUseNames.Margin = new System.Windows.Forms.Padding(0);
             this.ckbUseNames.Name = "ckbUseNames";
             this.ckbUseNames.Size = new System.Drawing.Size(59, 17);
-            this.ckbUseNames.TabIndex = 7;
+            this.ckbUseNames.TabIndex = 11;
             this.ckbUseNames.Text = "Names";
             this.ckbUseNames.UseVisualStyleBackColor = true;
             this.ckbUseNames.CheckedChanged += new System.EventHandler(this.ckbUseNames_CheckedChanged);
@@ -143,7 +132,7 @@ namespace S3PIDemoFE
             this.btnCommit.Margin = new System.Windows.Forms.Padding(0);
             this.btnCommit.Name = "btnCommit";
             this.btnCommit.Size = new System.Drawing.Size(75, 23);
-            this.btnCommit.TabIndex = 9;
+            this.btnCommit.TabIndex = 14;
             this.btnCommit.Text = "&Commit";
             this.btnCommit.UseVisualStyleBackColor = true;
             this.btnCommit.Visible = false;
@@ -151,12 +140,16 @@ namespace S3PIDemoFE
             // 
             // tableLayoutPanel1
             // 
-            this.tableLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel1.ColumnCount = 13;
+            this.tableLayoutPanel1.ColumnCount = 18;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 12F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 6F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 6F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
@@ -167,14 +160,17 @@ namespace S3PIDemoFE
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.Controls.Add(this.ckbSortable, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.btnCommit, 12, 0);
-            this.tableLayoutPanel1.Controls.Add(this.btnValue, 4, 0);
-            this.tableLayoutPanel1.Controls.Add(this.ckbAutoHex, 2, 0);
-            this.tableLayoutPanel1.Controls.Add(this.btnHex, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.ckbNoUnWrap, 3, 0);
-            this.tableLayoutPanel1.Controls.Add(this.btnGrid, 6, 0);
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 10, 0);
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 8, 0);
+            this.tableLayoutPanel1.Controls.Add(this.btnCommit, 17, 0);
+            this.tableLayoutPanel1.Controls.Add(this.btnValue, 9, 0);
+            this.tableLayoutPanel1.Controls.Add(this.btnGrid, 11, 0);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 15, 0);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 13, 0);
+            this.tableLayoutPanel1.Controls.Add(this.ckbNoUnWrap, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.btnHex, 7, 0);
+            this.tableLayoutPanel1.Controls.Add(this.label3, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.rb1Off, 3, 0);
+            this.tableLayoutPanel1.Controls.Add(this.rb1Hex, 4, 0);
+            this.tableLayoutPanel1.Controls.Add(this.rb1Value, 5, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
@@ -188,11 +184,11 @@ namespace S3PIDemoFE
             // 
             this.btnGrid.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnGrid.Enabled = false;
-            this.btnGrid.Location = new System.Drawing.Point(320, 2);
+            this.btnGrid.Location = new System.Drawing.Point(432, 2);
             this.btnGrid.Margin = new System.Windows.Forms.Padding(0);
             this.btnGrid.Name = "btnGrid";
             this.btnGrid.Size = new System.Drawing.Size(50, 23);
-            this.btnGrid.TabIndex = 6;
+            this.btnGrid.TabIndex = 9;
             this.btnGrid.Text = "Grid";
             this.btnGrid.UseVisualStyleBackColor = true;
             this.btnGrid.Click += new System.EventHandler(this.btnGrid_Click);
@@ -214,13 +210,13 @@ namespace S3PIDemoFE
             this.tableLayoutPanel2.Controls.Add(this.btnEditor, 3, 0);
             this.tableLayoutPanel2.Controls.Add(this.label1, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.btnHexEdit, 5, 0);
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(541, 1);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(653, 1);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.Size = new System.Drawing.Size(239, 25);
-            this.tableLayoutPanel2.TabIndex = 8;
+            this.tableLayoutPanel2.TabIndex = 13;
             // 
             // btnViewer
             // 
@@ -230,7 +226,7 @@ namespace S3PIDemoFE
             this.btnViewer.Margin = new System.Windows.Forms.Padding(0);
             this.btnViewer.Name = "btnViewer";
             this.btnViewer.Size = new System.Drawing.Size(50, 23);
-            this.btnViewer.TabIndex = 1;
+            this.btnViewer.TabIndex = 2;
             this.btnViewer.Text = "Viewer";
             this.btnViewer.UseVisualStyleBackColor = true;
             this.btnViewer.Click += new System.EventHandler(this.btnViewer_Click);
@@ -243,7 +239,7 @@ namespace S3PIDemoFE
             this.btnEditor.Margin = new System.Windows.Forms.Padding(0);
             this.btnEditor.Name = "btnEditor";
             this.btnEditor.Size = new System.Drawing.Size(50, 23);
-            this.btnEditor.TabIndex = 2;
+            this.btnEditor.TabIndex = 3;
             this.btnEditor.Text = "Editor";
             this.btnEditor.UseVisualStyleBackColor = true;
             this.btnEditor.Click += new System.EventHandler(this.btnEditor_Click);
@@ -255,8 +251,22 @@ namespace S3PIDemoFE
             this.label1.Location = new System.Drawing.Point(4, 6);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(48, 13);
-            this.label1.TabIndex = 0;
+            this.label1.TabIndex = 1;
             this.label1.Text = "External:";
+            // 
+            // btnHexEdit
+            // 
+            this.btnHexEdit.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnHexEdit.AutoSize = true;
+            this.btnHexEdit.Enabled = false;
+            this.btnHexEdit.Location = new System.Drawing.Point(172, 1);
+            this.btnHexEdit.Margin = new System.Windows.Forms.Padding(0);
+            this.btnHexEdit.Name = "btnHexEdit";
+            this.btnHexEdit.Size = new System.Drawing.Size(66, 23);
+            this.btnHexEdit.TabIndex = 4;
+            this.btnHexEdit.Text = "Hex Editor";
+            this.btnHexEdit.UseVisualStyleBackColor = true;
+            this.btnHexEdit.Click += new System.EventHandler(this.btnHexEdit_Click);
             // 
             // tableLayoutPanel3
             // 
@@ -271,7 +281,7 @@ namespace S3PIDemoFE
             this.tableLayoutPanel3.Controls.Add(this.label2, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.ckbUseNames, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.ckbUseTags, 2, 0);
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(382, 5);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(494, 5);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
@@ -299,24 +309,62 @@ namespace S3PIDemoFE
             this.ckbUseTags.Margin = new System.Windows.Forms.Padding(0);
             this.ckbUseTags.Name = "ckbUseTags";
             this.ckbUseTags.Size = new System.Drawing.Size(50, 17);
-            this.ckbUseTags.TabIndex = 7;
+            this.ckbUseTags.TabIndex = 12;
             this.ckbUseTags.Text = "Tags";
             this.ckbUseTags.UseVisualStyleBackColor = true;
             this.ckbUseTags.CheckedChanged += new System.EventHandler(this.ckbUseTags_CheckedChanged);
             // 
-            // btnHexEdit
+            // label3
             // 
-            this.btnHexEdit.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnHexEdit.AutoSize = true;
-            this.btnHexEdit.Enabled = false;
-            this.btnHexEdit.Location = new System.Drawing.Point(172, 1);
-            this.btnHexEdit.Margin = new System.Windows.Forms.Padding(0);
-            this.btnHexEdit.Name = "btnHexEdit";
-            this.btnHexEdit.Size = new System.Drawing.Size(66, 23);
-            this.btnHexEdit.TabIndex = 2;
-            this.btnHexEdit.Text = "Hex Editor";
-            this.btnHexEdit.UseVisualStyleBackColor = true;
-            this.btnHexEdit.Click += new System.EventHandler(this.btnHexEdit_Click);
+            this.label3.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(141, 7);
+            this.label3.Margin = new System.Windows.Forms.Padding(0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(32, 13);
+            this.label3.TabIndex = 3;
+            this.label3.Text = "Preview:";
+            // 
+            // rb1Off
+            // 
+            this.rb1Off.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.rb1Off.AutoSize = true;
+            this.rb1Off.Checked = true;
+            this.rb1Off.Location = new System.Drawing.Point(173, 5);
+            this.rb1Off.Margin = new System.Windows.Forms.Padding(0);
+            this.rb1Off.Name = "rb1Off";
+            this.rb1Off.Size = new System.Drawing.Size(39, 17);
+            this.rb1Off.TabIndex = 4;
+            this.rb1Off.TabStop = true;
+            this.rb1Off.Text = "Off";
+            this.rb1Off.UseVisualStyleBackColor = true;
+            this.rb1Off.CheckedChanged += new System.EventHandler(this.rb1Off_CheckedChanged);
+            // 
+            // rb1Hex
+            // 
+            this.rb1Hex.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.rb1Hex.AutoSize = true;
+            this.rb1Hex.Location = new System.Drawing.Point(212, 5);
+            this.rb1Hex.Margin = new System.Windows.Forms.Padding(0);
+            this.rb1Hex.Name = "rb1Hex";
+            this.rb1Hex.Size = new System.Drawing.Size(44, 17);
+            this.rb1Hex.TabIndex = 5;
+            this.rb1Hex.Text = "Hex";
+            this.rb1Hex.UseVisualStyleBackColor = true;
+            this.rb1Hex.CheckedChanged += new System.EventHandler(this.rb1Hex_CheckedChanged);
+            // 
+            // rb1Value
+            // 
+            this.rb1Value.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.rb1Value.AutoSize = true;
+            this.rb1Value.Location = new System.Drawing.Point(256, 5);
+            this.rb1Value.Margin = new System.Windows.Forms.Padding(0);
+            this.rb1Value.Name = "rb1Value";
+            this.rb1Value.Size = new System.Drawing.Size(52, 17);
+            this.rb1Value.TabIndex = 6;
+            this.rb1Value.Text = "Value";
+            this.rb1Value.UseVisualStyleBackColor = true;
+            this.rb1Value.CheckedChanged += new System.EventHandler(this.rb1Value_CheckedChanged);
             // 
             // ControlPanel
             // 
@@ -338,7 +386,6 @@ namespace S3PIDemoFE
 
         private System.Windows.Forms.CheckBox ckbSortable;
         private System.Windows.Forms.Button btnHex;
-        private System.Windows.Forms.CheckBox ckbAutoHex;
         private System.Windows.Forms.Button btnValue;
         private System.Windows.Forms.CheckBox ckbNoUnWrap;
         private System.Windows.Forms.CheckBox ckbUseNames;
@@ -353,6 +400,10 @@ namespace S3PIDemoFE
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.Button btnHexEdit;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.RadioButton rb1Off;
+        private System.Windows.Forms.RadioButton rb1Hex;
+        private System.Windows.Forms.RadioButton rb1Value;
     }
 }
 

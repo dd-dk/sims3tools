@@ -65,7 +65,7 @@ namespace S3PIDemoFE
             this.SaveSettings += new EventHandler(MainForm_SaveSettings);
             this.SaveSettings += new EventHandler(browserWidget1.BrowserWidget_SaveSettings);
             this.SaveSettings += new EventHandler(controlPanel1.ControlPanel_SaveSettings);
-            this.SaveSettings += new EventHandler(hexWidget1.HexWidget_SaveSettings);
+            //this.SaveSettings += new EventHandler(hexWidget1.HexWidget_SaveSettings);
         }
 
         void MainForm_LoadFormSettings()
@@ -134,7 +134,7 @@ namespace S3PIDemoFE
         private void MainForm_PackageChanged(object sender, EventArgs e)
         {
             browserWidget1.Package = packageInfoWidget1.Package = CurrentPackage;
-            hexWidget1.Resource = null;
+            pnAuto.Controls.Clear();
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_saveAs, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_saveCopyAs, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_importResources, CurrentPackage != null);
@@ -1057,9 +1057,29 @@ namespace S3PIDemoFE
         private void browserWidget1_SelectedResourceChanged(object sender, BrowserWidget.ResourceChangedEventArgs e)
         {
             resourceName = e.name;
-            resource = browserWidget1.SelectedResource == null
-                ? null
-                : s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, browserWidget1.SelectedResource, controlPanel1.HexOnly);
+            resource = null;
+            if (browserWidget1.SelectedResource != null)
+            {
+                try
+                {
+                    resource = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, browserWidget1.SelectedResource, controlPanel1.HexOnly);
+                    if (!splitContainer2.Panel2.Contains(packageInfoWidget1))
+                    {
+                        splitContainer2.Panel2.Controls.Clear();
+                        splitContainer2.Panel2.Controls.Add(packageInfoWidget1);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    string s = ex.Message;
+                    for (ex = ex.InnerException; ex != null; ex = ex.InnerException) s += "  " + ex.Message;
+                    Label lb = new Label();
+                    lb.Dock= DockStyle.Fill;
+                    lb.Text = s;
+                    splitContainer2.Panel2.Controls.Clear();
+                    splitContainer2.Panel2.Controls.Add(lb);
+                }
+            }
 
             if (resource != null) resource.ResourceChanged += new EventHandler(resource_ResourceChanged);
 
@@ -1097,6 +1117,7 @@ namespace S3PIDemoFE
                 controlPanel1.ValueEnabled = controlPanel1.GridEnabled =
                     controlPanel1.ViewerEnabled = controlPanel1.EditorEnabled = controlPanel1.HexEditEnabled = false;
             }
+            controlPanel1_AutoChanged(null, null);
 
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_exportResources, resource != null || browserWidget1.SelectedResources.Count > 0);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_exportToPackage, resource != null || browserWidget1.SelectedResources.Count > 0);
@@ -1108,7 +1129,6 @@ namespace S3PIDemoFE
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_details, resource != null);
 
             resourceFilterWidget1.IndexEntry = browserWidget1.SelectedResource;
-            hexWidget1.Resource = (controlPanel1.HexEnabled && controlPanel1.AutoHex && resource != null) ? resource : null;
         }
 
         private void browserWidget1_DragOver(object sender, DragEventArgs e)
@@ -1149,16 +1169,6 @@ namespace S3PIDemoFE
             finally { this.Enabled = true; }
         }
 
-        private void controlPanel1_HexClick(object sender, EventArgs e)
-        {
-            try
-            {
-                this.Enabled = false;
-                hexWidget1.Resource = resource == null ? null : resource;
-            }
-            finally { this.Enabled = true; }
-        }
-
         private void controlPanel1_HexOnlyChanged(object sender, EventArgs e)
         {
             Application.DoEvents();
@@ -1170,6 +1180,65 @@ namespace S3PIDemoFE
             }
         }
 
+        private void controlPanel1_AutoChanged(object sender, EventArgs e)
+        {
+            pnAuto.SuspendLayout();
+            pnAuto.Controls.Clear();
+            if (resource != null)
+            {
+                if (controlPanel1.AutoOff) { }
+                else if (controlPanel1.AutoHex)
+                {
+                    HexWidget hw = new HexWidget();
+                    hw.Dock = DockStyle.Fill;
+                    hw.Resource = resource;
+                    pnAuto.Controls.Add(hw);
+                }
+                else if (!controlPanel1.HexOnly && controlPanel1.AutoValue)
+                {
+                    Control c = getValueControl();
+                    if (c != null)
+                    {
+                        if (c.GetType().Equals(typeof(RichTextBox)))
+                        {
+                            c.Dock = DockStyle.Fill;
+                        }
+                        else if (c.GetType().Equals(typeof(PictureBox)))
+                        {
+                        }
+                        pnAuto.Controls.Add(c);
+                    }
+                }
+            }
+            pnAuto.ResumeLayout();
+        }
+
+        private void controlPanel1_HexClick(object sender, EventArgs e)
+        {
+            try
+            {
+                this.Enabled = false;
+                Application.DoEvents();
+
+                Form f = new Form();
+                HexWidget hw = new HexWidget();
+
+                f.SuspendLayout();
+                f.Controls.Add(hw);
+
+                hw.Dock = DockStyle.Fill;
+                hw.Resource = resource == null ? null : resource;
+
+                f.ClientSize = new Size(this.ClientSize.Width - (this.ClientSize.Width / 5), this.ClientSize.Height - (this.ClientSize.Height / 5));
+                f.Text = this.Text + ((resourceName != null && resourceName.Length > 0) ? " - " + resourceName : "");
+                f.StartPosition = FormStartPosition.CenterParent;
+
+                f.ResumeLayout();
+                f.Show(this);
+            }
+            finally { this.Enabled = true; }
+        }
+
         private void controlPanel1_ValueClick(object sender, EventArgs e)
         {
             try
@@ -1177,41 +1246,55 @@ namespace S3PIDemoFE
                 this.Enabled = false;
                 Application.DoEvents();
 
-                string title = this.Text;
-                if (resourceName != null && resourceName.Length > 0) title += " - " + resourceName;
+                Control c = getValueControl();
+                if (c == null) return;
 
-                Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
-                if (typeof(String).IsAssignableFrom(t))
+                Form f = new Form();
+                f.SuspendLayout();
+                f.Controls.Add(c);
+
+                f.Text = this.Text + ((resourceName != null && resourceName.Length > 0) ? " - " + resourceName : "");
+
+                if (c.GetType().Equals(typeof(RichTextBox)))
                 {
-                    Form f = new Form();
-                    RichTextBox rtf = new RichTextBox();
-                    rtf.Text = "" + resource["Value"];
-                    rtf.Font = new Font("DejaVu Sans Mono", 8);
-                    rtf.Size = new Size(this.Width - (this.Width / 5), this.Height - (this.Height / 5));
-                    rtf.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
-                    rtf.ReadOnly = true;
-                    f.Size = new Size(rtf.Width + 12, rtf.Height + 36);
-                    f.Text = title;
-                    f.StartPosition = FormStartPosition.CenterParent;
-                    f.Controls.Add(rtf);
-                    f.Show();
+                    c.Dock = DockStyle.Fill;
+                    f.ClientSize = new Size(this.ClientSize.Width - (this.ClientSize.Width / 5), this.ClientSize.Height - (this.ClientSize.Height / 5));
                 }
-                else if (typeof(Image).IsAssignableFrom(t))
+                else if (c.GetType().Equals(typeof(PictureBox)))
                 {
-                    Form f = new Form();
-                    PictureBox pb = new PictureBox();
-                    pb.Image = (Image)resource["Value"].Value;
-                    pb.Size = pb.Image.Size;
                     f.AutoSize = true;
                     f.AutoSizeMode = AutoSizeMode.GrowAndShrink;
                     f.SizeGripStyle = SizeGripStyle.Hide;
-                    f.Text = title;
-                    f.StartPosition = FormStartPosition.CenterParent;
-                    f.Controls.Add(pb);
-                    f.Show();
                 }
+
+                f.StartPosition = FormStartPosition.CenterParent;
+                f.ResumeLayout();
+                f.Show(this);
             }
             finally { this.Enabled = true; }
+        }
+        Control getValueControl()
+        {
+            if (!AApiVersionedFields.GetContentFields(0, resource.GetType()).Contains("Value")) return null;
+            Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
+            if (typeof(String).IsAssignableFrom(t))
+            {
+                RichTextBox rtb = new RichTextBox();
+                rtb.Text = "" + resource["Value"];
+                rtb.Font = new Font("DejaVu Sans Mono", 8);
+                rtb.Size = new Size(this.Width - (this.Width / 5), this.Height - (this.Height / 5));
+                rtb.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+                rtb.ReadOnly = true;
+                return rtb;
+            }
+            else if (typeof(Image).IsAssignableFrom(t))
+            {
+                PictureBox pb = new PictureBox();
+                pb.Image = (Image)resource["Value"].Value;
+                pb.Size = pb.Image.Size;
+                return pb;
+            }
+            return null;
         }
 
         private void controlPanel1_GridClick(object sender, EventArgs e)

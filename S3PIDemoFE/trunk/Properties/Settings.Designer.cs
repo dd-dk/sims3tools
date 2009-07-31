@@ -157,18 +157,6 @@ namespace S3PIDemoFE.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool AutoHex {
-            get {
-                return ((bool)(this["AutoHex"]));
-            }
-            set {
-                this["AutoHex"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool HexOnly {
             get {
                 return ((bool)(this["HexOnly"]));
@@ -282,6 +270,18 @@ namespace S3PIDemoFE.Properties {
             }
             set {
                 this["HexEditorWantsQuotes"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public short AutoChoice {
+            get {
+                return ((short)(this["AutoChoice"]));
+            }
+            set {
+                this["AutoChoice"] = value;
             }
         }
     }
