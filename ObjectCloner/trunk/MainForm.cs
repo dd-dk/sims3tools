@@ -343,21 +343,33 @@ namespace ObjectCloner
                 return thumb;
             }
         }
-        Image getImage(THUM.THUMSize size, Item catlg)
+        Image getImage(THUM.THUMSize size, Item item)
         {
-            ulong png = 0;
-            if (catlg.Resource != null) png = (ulong)((AHandlerElement)catlg.Resource["CommonBlock"].Value)["PngInstance"].Value;
-            Image res = png == 0 ? null : Thumb[png, size, true];
-            if (res != null) return res;
-            return Thumb[catlg.tgi.t, catlg.tgi.i, size];
+            if (item.tgi.t == catalogTypes[1])
+                return getImage(size, CatlgForMdlr(item));
+            else
+            {
+                ulong png = 0;
+                if (item.Resource != null) png = (ulong)((AHandlerElement)item.Resource["CommonBlock"].Value)["PngInstance"].Value;
+                Image res = png == 0 ? null : Thumb[png, size, true];
+                if (res != null) return res;
+                return Thumb[item.tgi.t, item.tgi.i, size];
+            }
         }
-        TGI getImageTGI(THUM.THUMSize size, Item catlg)
+        TGI getImageTGI(THUM.THUMSize size, Item item)
         {
-            ulong png = 0;
-            if (catlg.Resource != null) png = (ulong)((AHandlerElement)catlg.Resource["CommonBlock"].Value)["PngInstance"].Value;
-            if (png != 0 && Thumb[png, size, true] != null)
-                return Thumb.getTGI(0, png, size, true);
-            return Thumb.getTGI(catlg.tgi.t, catlg.tgi.i, size, false);
+            if (item.tgi.t == catalogTypes[1])
+            {
+                return new TGI();
+            }
+            else
+            {
+                ulong png = 0;
+                if (item.Resource != null) png = (ulong)((AHandlerElement)item.Resource["CommonBlock"].Value)["PngInstance"].Value;
+                if (png != 0 && Thumb[png, size, true] != null)
+                    return Thumb.getTGI(0, png, size, true);
+                return Thumb.getTGI(item.tgi.t, item.tgi.i, size, false);
+            }
         }
 
         class STBL
@@ -445,6 +457,12 @@ namespace ObjectCloner
             }
         }
 
+        Item CatlgForMdlr(Item mdlr)
+        {
+            AResource.TGIBlock tgib = ((AResource.TGIBlockList)mdlr.Resource["TGIBlocks"].Value)[0];
+            return new Item(objPkgs, new TGI(tgib));
+        }
+
         void ClosePkg()
         {
             haveLoaded = false;
@@ -465,7 +483,7 @@ namespace ObjectCloner
         }
 
 
-        #region TopPanelComponents
+        #region LeftPanelComponents
         bool waitingToDisplayObjects;
         private void DisplayObjectChooser()
         {
@@ -524,7 +542,7 @@ namespace ObjectCloner
         #region Tabs
         void InitialiseTabs(uint resourceType)
         {
-            if (resourceType == catalogTypes[1]) return;//Modular Resources - no support
+            if (resourceType == catalogTypes[1]) resourceType = catalogTypes[0];//Modular Resources - display OBJD0
 
             IResource res = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x" + resourceType.ToString("X8"));
             InitialiseDetailsTab(resourceType, res);
@@ -824,20 +842,22 @@ namespace ObjectCloner
                 if (c is TextBox) { ((TextBox)c).Text = ""; ((TextBox)c).ReadOnly = true; }
         }
 
-        void FillTabs(Item objd)
+        void FillTabs(Item item)
         {
-            if (objd.Resource == null
-                || objd.tgi.t == catalogTypes[1])//Modular Resources - no support
+            if (item.Resource == null)
             {
                 ClearTabs();
                 return;
             }
-            fillOverview(objd);
-            fillDetails(objd);
-            if (objd.tgi.t == catalogTypes[0])
+
+            Item catlg = (item.tgi.t == catalogTypes[1]) ? CatlgForMdlr(item) : item;
+
+            fillOverview(catlg);
+            fillDetails(catlg);
+            if (catlg.tgi.t == catalogTypes[0])
             {
-                fillFlags(objd);
-                fillOther(objd);
+                fillFlags(catlg);
+                fillOther(catlg);
             }
         }
         void fillOverview(Item objd)
@@ -1015,26 +1035,24 @@ namespace ObjectCloner
         Dictionary<int, int> LItoIMG64 = new Dictionary<int, int>();
 
         public delegate void createListViewItemCallback(Item objd);
-        void createListViewItem(Item objd)
+        void createListViewItem(Item item)
         {
             ListViewItem lvi = new ListViewItem();
-            if (currentCatalogType == catalogTypes[1])
+            if (item.Resource != null)
             {
-                lvi.Text = "";
-            }
-            else if (objd.Resource != null)
-            {
-                string objdtag = ((AApiVersionedFields)objd.Resource["CommonBlock"].Value)["Name"];
+                string objdtag;
+                if (item.tgi.t == catalogTypes[1]) objdtag = ((AApiVersionedFields)CatlgForMdlr(item).Resource["CommonBlock"].Value)["Name"];
+                else objdtag = ((AApiVersionedFields)item.Resource["CommonBlock"].Value)["Name"];
                 lvi.Text = (objdtag.IndexOf(':') < 0) ? objdtag : objdtag.Substring(objdtag.LastIndexOf(':') + 1);
             }
             else
             {
-                string s = objd.Exception.Message;
-                for (Exception ex = objd.Exception.InnerException; ex != null; ex = ex.InnerException) s += "  " + ex.Message;
+                string s = item.Exception.Message;
+                for (Exception ex = item.Exception.InnerException; ex != null; ex = ex.InnerException) s += "  " + ex.Message;
                 lvi.Text = s;
             }
-            lvi.SubItems.AddRange(new string[] { objd.tgi, });
-            lvi.Tag = objd;
+            lvi.SubItems.AddRange(new string[] { item.tgi, });
+            lvi.Tag = item;
             objectChooser.Items.Add(lvi);
         }
 
@@ -1180,22 +1198,20 @@ namespace ObjectCloner
                     {
                         if (stopFetching) return;
 
-                        Item objd = getItem(i);
-                        if (objd.tgi.t == mainForm.catalogTypes[1]) goto skipModular;
+                        Item item = getItem(i);
 
                         if (stopFetching) return;
 
-                        Image img = getImage(THUM.THUMSize.small, objd);
+                        Image img = getImage(THUM.THUMSize.small, item);
                         if (img != null) setImage(true, i, img);
 
                         if (stopFetching) return;
 
-                        img = getImage(THUM.THUMSize.medium, objd);
+                        img = getImage(THUM.THUMSize.medium, item);
                         if (img != null) setImage(false, i, img);
 
                         if (stopFetching) return;
 
-                    skipModular:
                         if (i % freq == 0)
                             updateProgress(true, String.Format("Please wait, loading thumbnails... {0}%", i * 100 / count), true, count, true, i);
                     }
