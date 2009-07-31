@@ -33,12 +33,13 @@ namespace ObjectCloner
         List<IPackage> objPkgs;
         List<IPackage> ddsPkgs;
         List<IPackage> tmbPkgs;
+        uint resourceType;
         MainForm.createListViewItemCallback createListViewItemCB;
         MainForm.updateProgressCallback updateProgressCB;
         MainForm.stopLoadingCallback stopLoadingCB;
         MainForm.loadingCompleteCallback loadingCompleteCB;
 
-        public FillListView(Form mainForm, List<IPackage> objPkgs, List<IPackage> ddsPkgs, List<IPackage> tmbPkgs
+        public FillListView(Form mainForm, List<IPackage> objPkgs, List<IPackage> ddsPkgs, List<IPackage> tmbPkgs, uint resourceType
             , MainForm.createListViewItemCallback createListViewItemCB
             , MainForm.updateProgressCallback updateProgressCB
             , MainForm.stopLoadingCallback stopLoadingCB
@@ -49,6 +50,7 @@ namespace ObjectCloner
             this.objPkgs = objPkgs;
             this.ddsPkgs = ddsPkgs;
             this.tmbPkgs = tmbPkgs;
+            this.resourceType = resourceType;
             this.createListViewItemCB = createListViewItemCB;
             this.updateProgressCB = updateProgressCB;
             this.stopLoadingCB = stopLoadingCB;
@@ -85,7 +87,7 @@ namespace ObjectCloner
                 {
                     IList<IResourceIndexEntry> objds = pkg.FindAll(new string[] { "ResourceType", },
                         new TypedValue[] {
-                        new TypedValue(typeof(uint), (uint)0x319E4F1D, "X"),
+                        new TypedValue(typeof(uint), resourceType, "X"),
                     });
                     foreach (IResourceIndexEntry objd in objds)
                     {
@@ -222,6 +224,7 @@ namespace ObjectCloner
         bool defaultWrapper;
 
         IResource my_ires = null;
+        Exception ex = null;
 
         //public Item(List<IPackage> posspkgs, IResourceIndexEntry rie) : this(posspkgs, rie, false) { }
         //public Item(List<IPackage> posspkgs, IResourceIndexEntry rie, bool defaultWrapper) : this(new RIE(pkg, rie), defaultWrapper) { }
@@ -234,7 +237,15 @@ namespace ObjectCloner
         {
             get
             {
-                if (my_ires == null && myrie.rie != null) my_ires = s3pi.WrapperDealer.WrapperDealer.GetResource(0, myrie.pkg, myrie.rie, defaultWrapper);
+                try
+                {
+                    if (my_ires == null && myrie.rie != null) my_ires = s3pi.WrapperDealer.WrapperDealer.GetResource(0, myrie.pkg, myrie.rie, defaultWrapper);
+                }
+                catch (Exception ex)
+                {
+                    this.ex = ex;
+                    return null;
+                }
                 return my_ires;
             }
         }
@@ -244,6 +255,8 @@ namespace ObjectCloner
         public IPackage Package { get { return myrie.pkg; } }
 
         public TGI tgi { get { return myrie.tgi; } }
+
+        public Exception Exception { get { return ex; } }
 
         public void Commit() { myrie.pkg.ReplaceResource(myrie.rie, Resource); }
     }

@@ -38,6 +38,10 @@ namespace ObjectCloner
             tsMB = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //File
                 newToolStripMenuItem, openToolStripMenuItem, exitToolStripMenuItem,
+                //Cloning
+                objdToolStripMenuItem, cfenToolStripMenuItem, cstrToolStripMenuItem, cprxToolStripMenuItem, ctgmToolStripMenuItem,
+                cralToolStripMenuItem, ctpbToolStripMenuItem, cfirToolStripMenuItem, ctwpToolStripMenuItem, cfndToolStripMenuItem,
+                cwalToolStripMenuItem, cwtpToolStripMenuItem, crstToolStripMenuItem, crmtToolStripMenuItem,
                 //View
                 tilesToolStripMenuItem, largeIconsToolStripMenuItem, smallIconsToolStripMenuItem, listToolStripMenuItem, detailedListToolStripMenuItem,
                 iconsToolStripMenuItem,
@@ -51,6 +55,7 @@ namespace ObjectCloner
         public enum MD
         {
             MBF,
+            MBC,
             MBV,
             MBS,
             MBH,
@@ -59,6 +64,9 @@ namespace ObjectCloner
         public enum MB
         {
             MBF_new = 0, MBF_open, MBF_exit,
+            MBC_objd, MBC_cfen, MBC_cstr, MBC_cprx, MBC_ctgm,
+            MBC_cral, MBC_ctpb, MBC_cfir, MBC_ctwp, MBC_cfnd,
+            MBC_cwal, MBC_cwtp, MBC_crst, MBC_crmt,
             MBV_tiles, MBV_largeIcons, MBV_smallIcons, MBV_list, MBV_detailedList,
             MBV_icons,
             MBS_sims3Folder, MBS_userName,
@@ -84,6 +92,11 @@ namespace ObjectCloner
         public event MBClickEventHandler MBFile_Click;
         protected void OnMBFile_Click(object sender, MB mn) { if (MBFile_Click != null) MBFile_Click(sender, new MBClickEventArgs(mn)); }
         private void tsMBF_Click(object sender, EventArgs e) { OnMBFile_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
+
+        [Category("Action")]
+        public event MBClickEventHandler MBCloning_Click;
+        protected void OnMBCloning_Click(object sender, MB mn) { if (MBCloning_Click != null) MBCloning_Click(sender, new MBClickEventArgs(mn)); }
+        private void tsMBC_Click(object sender, EventArgs e) { OnMBCloning_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
 
         [Category("Action")]
         public event MBClickEventHandler MBView_Click;

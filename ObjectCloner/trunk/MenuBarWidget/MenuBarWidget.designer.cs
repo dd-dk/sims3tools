@@ -50,6 +50,21 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cloningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.objdToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cfenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cralToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cstrToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ctpbToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cfirToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cfndToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cwalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cwtpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cprxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ctgmToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ctwpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.crstToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.crmtToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SuspendLayout();
             // 
             // fileToolStripMenuItem
@@ -92,6 +107,128 @@
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
+            // 
+            // cloningToolStripMenuItem
+            // 
+            this.cloningToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.objdToolStripMenuItem,
+            this.cfenToolStripMenuItem,
+            this.cstrToolStripMenuItem,
+//            this.cprxToolStripMenuItem,
+//            this.ctgmToolStripMenuItem,
+            this.cralToolStripMenuItem,
+            this.ctpbToolStripMenuItem,
+            this.cfirToolStripMenuItem,
+//            this.ctwpToolStripMenuItem,
+            this.cfndToolStripMenuItem,
+            this.cwalToolStripMenuItem,
+            this.cwtpToolStripMenuItem,
+            this.crstToolStripMenuItem,
+            this.crmtToolStripMenuItem});
+            this.cloningToolStripMenuItem.Name = "cloningToolStripMenuItem";
+            this.cloningToolStripMenuItem.Size = new System.Drawing.Size(127, 20);
+            this.cloningToolStripMenuItem.Text = "&Cloning (experimental)";
+            this.cloningToolStripMenuItem.DropDownOpening += new System.EventHandler(this.tsMD_DropDownOpening);
+            // 
+            // objdToolStripMenuItem
+            // 
+            this.objdToolStripMenuItem.Name = "objdToolStripMenuItem";
+            this.objdToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.objdToolStripMenuItem.Text = "Normal objects";
+            this.objdToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
+            // cfenToolStripMenuItem
+            // 
+            this.cfenToolStripMenuItem.Name = "cfenToolStripMenuItem";
+            this.cfenToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.cfenToolStripMenuItem.Text = "Fences";
+            this.cfenToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
+            // cstrToolStripMenuItem
+            // 
+            this.cstrToolStripMenuItem.Name = "cstrToolStripMenuItem";
+            this.cstrToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.cstrToolStripMenuItem.Text = "Stairs";
+            this.cstrToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
+            // cprxToolStripMenuItem
+            // 
+            this.cprxToolStripMenuItem.Name = "cprxToolStripMenuItem";
+            this.cprxToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.cprxToolStripMenuItem.Text = "Proxy product";
+            this.cprxToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
+            // ctgmToolStripMenuItem
+            // 
+            this.ctgmToolStripMenuItem.Name = "ctgmToolStripMenuItem";
+            this.ctgmToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.ctgmToolStripMenuItem.Text = "Terrain geometry brush";
+            this.ctgmToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
+            // cralToolStripMenuItem
+            // 
+            this.cralToolStripMenuItem.Name = "cralToolStripMenuItem";
+            this.cralToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.cralToolStripMenuItem.Text = "Stair railings";
+            this.cralToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
+            // ctpbToolStripMenuItem
+            // 
+            this.ctpbToolStripMenuItem.Name = "ctpbToolStripMenuItem";
+            this.ctpbToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.ctpbToolStripMenuItem.Text = "Terrain Paintbrushes";
+            this.ctpbToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
+            // cfirToolStripMenuItem
+            // 
+            this.cfirToolStripMenuItem.Name = "cfirToolStripMenuItem";
+            this.cfirToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.cfirToolStripMenuItem.Text = "Fireplaces";
+            this.cfirToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
+            // ctwpToolStripMenuItem
+            // 
+            this.ctwpToolStripMenuItem.Name = "ctwpToolStripMenuItem";
+            this.ctwpToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.ctwpToolStripMenuItem.Text = "Terrain water brush";
+            this.ctwpToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
+            // cfndToolStripMenuItem
+            // 
+            this.cfndToolStripMenuItem.Enabled = false;
+            this.cfndToolStripMenuItem.Name = "cfndToolStripMenuItem";
+            this.cfndToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.cfndToolStripMenuItem.Text = "Foundations";
+            this.cfndToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
+            // cwalToolStripMenuItem
+            // 
+            this.cwalToolStripMenuItem.Name = "cwalToolStripMenuItem";
+            this.cwalToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.cwalToolStripMenuItem.Text = "Wall/floor patterns";
+            this.cwalToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
+            // cwtpToolStripMenuItem
+            // 
+            this.cwtpToolStripMenuItem.Name = "cwtpToolStripMenuItem";
+            this.cwtpToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.cwtpToolStripMenuItem.Text = "Wall types";
+            this.cwtpToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
+            // crstToolStripMenuItem
+            // 
+            this.crstToolStripMenuItem.Name = "crstToolStripMenuItem";
+            this.crstToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.crstToolStripMenuItem.Text = "Roof Style";
+            this.crstToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
+            // crmtToolStripMenuItem
+            // 
+            this.crmtToolStripMenuItem.Name = "crmtToolStripMenuItem";
+            this.crmtToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.crmtToolStripMenuItem.Text = "Roof pattern";
+            this.crmtToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
             // 
             // viewToolStripMenuItem
             // 
@@ -225,11 +362,11 @@
             this.licenceToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.licenceToolStripMenuItem.Text = "&Licence...";
             this.licenceToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
-            // 
             // MenuBarWidget
             // 
             this.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
+            this.cloningToolStripMenuItem,
             this.viewToolStripMenuItem,
             this.settingsToolStripMenuItem,
             this.helpToolStripMenuItem});
@@ -263,5 +400,20 @@
         private System.Windows.Forms.ToolStripMenuItem sims3FolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem userNameToopStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem cloningToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem objdToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cfenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cstrToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cprxToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ctgmToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cralToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ctpbToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cfirToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ctwpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cfndToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cwalToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cwtpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem crstToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem crmtToolStripMenuItem;
     }
 }

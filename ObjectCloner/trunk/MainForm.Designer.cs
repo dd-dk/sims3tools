@@ -45,6 +45,10 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tpMain = new System.Windows.Forms.TabPage();
             this.tlpOverview = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.btnReplThumb = new System.Windows.Forms.Button();
+            this.lbThumbTGI = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.tbObjName = new System.Windows.Forms.TextBox();
             this.tbPrice = new System.Windows.Forms.TextBox();
@@ -56,9 +60,6 @@
             this.ckbCopyToAll = new System.Windows.Forms.CheckBox();
             this.tbCatlgName = new System.Windows.Forms.RichTextBox();
             this.tbCatlgDesc = new System.Windows.Forms.RichTextBox();
-            this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.btnReplThumb = new System.Windows.Forms.Button();
             this.tpDetail = new System.Windows.Forms.TabPage();
             this.tlpCatalog = new System.Windows.Forms.TableLayoutPanel();
             this.tlpObjectDetail = new System.Windows.Forms.TableLayoutPanel();
@@ -112,7 +113,7 @@
             this.tabControl1.SuspendLayout();
             this.tpMain.SuspendLayout();
             this.tlpOverview.SuspendLayout();
-            this.flowLayoutPanel2.SuspendLayout();
+            this.tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tpDetail.SuspendLayout();
             this.tlpCatalog.SuspendLayout();
@@ -379,6 +380,7 @@
             this.tlpOverview.ColumnCount = 2;
             this.tlpOverview.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpOverview.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpOverview.Controls.Add(this.tableLayoutPanel2, 0, 0);
             this.tlpOverview.Controls.Add(this.label8, 0, 1);
             this.tlpOverview.Controls.Add(this.tbObjName, 1, 1);
             this.tlpOverview.Controls.Add(this.tbPrice, 1, 6);
@@ -390,7 +392,6 @@
             this.tlpOverview.Controls.Add(this.ckbCopyToAll, 1, 5);
             this.tlpOverview.Controls.Add(this.tbCatlgName, 1, 3);
             this.tlpOverview.Controls.Add(this.tbCatlgDesc, 1, 4);
-            this.tlpOverview.Controls.Add(this.flowLayoutPanel2, 0, 0);
             this.tlpOverview.Location = new System.Drawing.Point(1, 6);
             this.tlpOverview.Name = "tlpOverview";
             this.tlpOverview.RowCount = 8;
@@ -402,9 +403,61 @@
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlpOverview.Size = new System.Drawing.Size(387, 326);
             this.tlpOverview.TabIndex = 0;
+            // 
+            // tableLayoutPanel2
+            // 
+            this.tableLayoutPanel2.AutoSize = true;
+            this.tableLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tableLayoutPanel2.ColumnCount = 2;
+            this.tlpOverview.SetColumnSpan(this.tableLayoutPanel2, 2);
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel2.Controls.Add(this.pictureBox1, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.btnReplThumb, 1, 0);
+            this.tableLayoutPanel2.Controls.Add(this.lbThumbTGI, 1, 1);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            this.tableLayoutPanel2.RowCount = 2;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(209, 128);
+            this.tableLayoutPanel2.TabIndex = 0;
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.pictureBox1.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(0);
+            this.pictureBox1.Name = "pictureBox1";
+            this.tableLayoutPanel2.SetRowSpan(this.pictureBox1, 2);
+            this.pictureBox1.Size = new System.Drawing.Size(128, 128);
+            this.pictureBox1.TabIndex = 0;
+            this.pictureBox1.TabStop = false;
+            // 
+            // btnReplThumb
+            // 
+            this.btnReplThumb.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnReplThumb.Enabled = false;
+            this.btnReplThumb.Location = new System.Drawing.Point(131, 3);
+            this.btnReplThumb.Name = "btnReplThumb";
+            this.btnReplThumb.Size = new System.Drawing.Size(75, 23);
+            this.btnReplThumb.TabIndex = 1;
+            this.btnReplThumb.Text = "Replace...";
+            this.btnReplThumb.UseVisualStyleBackColor = true;
+            this.btnReplThumb.Click += new System.EventHandler(this.btnReplThumb_Click);
+            // 
+            // lbThumbTGI
+            // 
+            this.lbThumbTGI.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lbThumbTGI.AutoSize = true;
+            this.lbThumbTGI.Location = new System.Drawing.Point(131, 72);
+            this.lbThumbTGI.Name = "lbThumbTGI";
+            this.lbThumbTGI.Size = new System.Drawing.Size(0, 13);
+            this.lbThumbTGI.TabIndex = 2;
             // 
             // label8
             // 
@@ -515,42 +568,6 @@
             this.tbCatlgDesc.Size = new System.Drawing.Size(301, 65);
             this.tbCatlgDesc.TabIndex = 12;
             this.tbCatlgDesc.Text = "";
-            // 
-            // flowLayoutPanel2
-            // 
-            this.flowLayoutPanel2.AutoSize = true;
-            this.flowLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tlpOverview.SetColumnSpan(this.flowLayoutPanel2, 2);
-            this.flowLayoutPanel2.Controls.Add(this.pictureBox1);
-            this.flowLayoutPanel2.Controls.Add(this.btnReplThumb);
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(0, 0);
-            this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
-            this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-            this.flowLayoutPanel2.Size = new System.Drawing.Size(209, 128);
-            this.flowLayoutPanel2.TabIndex = 13;
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pictureBox1.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(0);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(128, 128);
-            this.pictureBox1.TabIndex = 0;
-            this.pictureBox1.TabStop = false;
-            // 
-            // btnReplThumb
-            // 
-            this.btnReplThumb.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.btnReplThumb.Enabled = false;
-            this.btnReplThumb.Location = new System.Drawing.Point(131, 52);
-            this.btnReplThumb.Name = "btnReplThumb";
-            this.btnReplThumb.Size = new System.Drawing.Size(75, 23);
-            this.btnReplThumb.TabIndex = 1;
-            this.btnReplThumb.Text = "Replace...";
-            this.btnReplThumb.UseVisualStyleBackColor = true;
-            this.btnReplThumb.Click += new System.EventHandler(this.btnReplThumb_Click);
             // 
             // tpDetail
             // 
@@ -1028,6 +1045,7 @@
             this.menuBarWidget1.MBFile_Click += new ObjectCloner.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBFile_Click);
             this.menuBarWidget1.MBDropDownOpening += new ObjectCloner.MenuBarWidget.MBDropDownOpeningEventHandler(this.menuBarWidget1_MBDropDownOpening);
             this.menuBarWidget1.MBSettings_Click += new ObjectCloner.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBSettings_Click);
+            this.menuBarWidget1.MBCloning_Click += new ObjectCloner.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBCloning_Click);
             this.menuBarWidget1.MBView_Click += new ObjectCloner.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBView_Click);
             // 
             // toolStripProgressBar1
@@ -1149,7 +1167,8 @@
             this.tpMain.PerformLayout();
             this.tlpOverview.ResumeLayout(false);
             this.tlpOverview.PerformLayout();
-            this.flowLayoutPanel2.ResumeLayout(false);
+            this.tableLayoutPanel2.ResumeLayout(false);
+            this.tableLayoutPanel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.tpDetail.ResumeLayout(false);
             this.tpDetail.PerformLayout();
@@ -1243,7 +1262,6 @@
         private System.Windows.Forms.CheckBox ckbCopyToAll;
         private System.Windows.Forms.RichTextBox tbCatlgName;
         private System.Windows.Forms.RichTextBox tbCatlgDesc;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
         private System.Windows.Forms.Button btnReplThumb;
         private System.Windows.Forms.OpenFileDialog openThumbnailDialog;
         private System.Windows.Forms.TabPage tpFlagsRoom;
@@ -1271,6 +1289,8 @@
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.CheckBox ckbPadSTBLs;
         private System.Windows.Forms.CheckBox ckbCompress;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
+        private System.Windows.Forms.Label lbThumbTGI;
     }
 }
 

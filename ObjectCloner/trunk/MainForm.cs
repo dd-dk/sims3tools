@@ -138,7 +138,7 @@ namespace ObjectCloner
         List<IPackage> ddsPkgs;
         List<IPackage> tmbPkgs;
 
-        TGI clone;//0x319E4F1D
+        TGI clone;
         Item objdItem;
         Item objkItem;
         TGI vpxy;
@@ -162,7 +162,7 @@ namespace ObjectCloner
             MainForm_LoadFormSettings();
             disableCompression = !ckbCompress.Checked;
 
-            InitialiseTabs();
+            InitialiseTabs(catalogTypes[1]);
             setButtons(Page.None, SubPage.None);
         }
 
@@ -242,11 +242,28 @@ namespace ObjectCloner
 
         public class THUM
         {
-            static uint[] thumTypes, PNGTypes;
+            static Dictionary<uint, uint[]> thumTypes;
+            static uint[] PNGTypes;
             static ushort[] thumSizes;
+            static uint defType = 0x319E4F1D;
             static THUM()
             {
-                thumTypes = new uint[] { 0x0580A2B4, 0x0580A2B5, 0x0580A2B6, };
+                thumTypes=new Dictionary<uint,uint[]>();
+                thumTypes.Add(0x319E4F1D, new uint[] { 0x0580A2B4, 0x0580A2B5, 0x0580A2B6, }); //Catalog Object
+                thumTypes.Add(0x0418FE2A, new uint[] { 0x2653E3C8, 0x2653E3C9, 0x2653E3CA, }); //Catalog Fence
+                thumTypes.Add(0x049CA4CD, new uint[] { 0x5DE9DBA0, 0x5DE9DBA1, 0x5DE9DBA2, }); //Catalog Stairs
+                thumTypes.Add(0x04AC5D93, thumTypes[0x319E4F1D]); //Catalog Proxy Product
+                thumTypes.Add(0x04B30669, thumTypes[0x319E4F1D]); //Catalog Terrain Geometry Brush
+                thumTypes.Add(0x04C58103, new uint[] { 0x2D4284F0, 0x2D4284F1, 0x2D4284F2, }); //Catalog Railing
+                thumTypes.Add(0x04ED4BB2, new uint[] { 0x05B1B524, 0x05B1B525, 0x05B1B526, }); //Catalog Terrain Paint Brush
+                thumTypes.Add(0x04F3CC01, new uint[] { 0x05B17698, 0x05B17699, 0x05B1769A, }); //Catalog Fireplace
+                thumTypes.Add(0x060B390C, thumTypes[0x319E4F1D]); //Catalog Terrain Water Brush
+                thumTypes.Add(0x316C78F2, thumTypes[0x319E4F1D]); //Catalog Foundation
+                thumTypes.Add(0x515CA4CD, new uint[] { 0x0589DC44, 0x0589DC45, 0x0589DC46, }); //Catalog Wall/Floor Pattern
+                thumTypes.Add(0x9151E6BC, thumTypes[0x319E4F1D]); //Catalog Wall
+                thumTypes.Add(0x91EDBD3E, thumTypes[0x319E4F1D]); //Catalog Roof Style
+                thumTypes.Add(0xF1EDBD86, thumTypes[0x319E4F1D]); //Catalog Roof Pattern
+
                 PNGTypes = new uint[] { 0x2E75C764, 0x2E75C765, 0x2E75C766, };
                 thumSizes = new ushort[] { 32, 64, 128, };
             }
@@ -263,18 +280,21 @@ namespace ObjectCloner
             public Image this[ulong instance] { get { return this[instance, THUMSize.defSize, false]; } }
             public Image this[ulong instance, THUMSize size] { get { return this[instance, size, false]; } set { this[instance, size, false] = value; } }
             public Image this[ulong instance, bool isPNGInstance] { get { return this[instance, THUMSize.defSize, isPNGInstance]; } }
-            public Image this[ulong instance, THUMSize size, bool isPNGInstance]
+            public Image this[ulong instance, THUMSize size, bool isPNGInstance] { get { return this[defType, instance, size, isPNGInstance]; } set { this[defType, instance, size, isPNGInstance] = value; } }
+            public Image this[uint type, ulong instance] { get { return this[type, instance, THUMSize.defSize, false]; } }
+            public Image this[uint type, ulong instance, THUMSize size] { get { return this[type, instance, size, false]; } set { this[type, instance, size, false] = value; } }
+            public Image this[uint type, ulong instance, THUMSize size, bool isPNGInstance]
             {
                 get
                 {
-                    Item item = getItem(isPNGInstance ? fb0Pkgs : tmbPkgs, instance, (isPNGInstance ? PNGTypes : thumTypes)[(int)size]);
+                    Item item = getItem(isPNGInstance ? fb0Pkgs : tmbPkgs, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
                     if (item.Resource != null)
                         return Image.FromStream(item.Resource.Stream);
                     return null;
                 }
                 set
                 {
-                    Item item = getItem(isPNGInstance ? fb0Pkgs : tmbPkgs, instance, (isPNGInstance ? PNGTypes : thumTypes)[(int)size]);
+                    Item item = getItem(isPNGInstance ? fb0Pkgs : tmbPkgs, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
                     if (item == null)
                         throw new ArgumentException();
 
@@ -286,7 +306,29 @@ namespace ObjectCloner
             }
             bool gtAbort() { return false; }
 
-            static Item getItem(List<IPackage> pkgs, ulong instance, uint type) { return new Item(pkgs, new TGI(type, 0, instance)); }
+            public TGI getTGI(uint type, ulong instance, THUMSize size, bool isPNGInstance)
+            {
+                Item item = getItem(isPNGInstance ? fb0Pkgs : tmbPkgs, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
+                return item.tgi;
+            }
+
+            static Item getItem(List<IPackage> pkgs, ulong instance, uint type)
+            {
+                if (new List<uint>(thumTypes[0x515CA4CD]).Contains(type))
+                {
+                    foreach(IPackage pkg in pkgs)
+                    {
+                        IList<IResourceIndexEntry> lrie = pkg.FindAll(new string[] { "ResourceType", "Instance" }, new TypedValue[] {
+                            new TypedValue(typeof(uint), type),
+                            new TypedValue(typeof(ulong), instance),
+                        });
+                        foreach (IResourceIndexEntry rie in lrie)
+                            if (rie.ResourceGroup > 0)
+                                return new Item(new RIE(pkg, rie));
+                    }
+                }
+                return new Item(pkgs, new TGI(type, 0, instance));
+            }
         }
         THUM thumb;
         THUM Thumb
@@ -299,12 +341,22 @@ namespace ObjectCloner
                 return thumb;
             }
         }
-        Image getImage(THUM.THUMSize size, Item objd)
+        Image getImage(THUM.THUMSize size, Item catlg)
         {
-            ulong png = (ulong)((AHandlerElement)objd.Resource["CommonBlock"].Value)["PngInstance"].Value;
+            ulong png = 0;
+            if (catlg.Resource != null) png = (ulong)((AHandlerElement)catlg.Resource["CommonBlock"].Value)["PngInstance"].Value;
             Image res = png == 0 ? null : Thumb[png, size, true];
             if (res != null) return res;
-            return Thumb[objd.tgi.i, size];
+            return Thumb[catlg.tgi.t, catlg.tgi.i, size];
+        }
+        TGI getImageTGI(THUM.THUMSize size, Item catlg)
+        {
+            TGI res = new TGI();
+            ulong png = 0;
+            if (catlg.Resource != null) png = (ulong)((AHandlerElement)catlg.Resource["CommonBlock"].Value)["PngInstance"].Value;
+            if (png != 0 && Thumb[png, size, true] != null)
+                return Thumb.getTGI(0, png, size, true);
+            return Thumb.getTGI(catlg.tgi.t, catlg.tgi.i, size, false);
         }
 
         class STBL
@@ -469,22 +521,56 @@ namespace ObjectCloner
         #endregion
 
         #region Tabs
-        void InitialiseTabs()
+        void InitialiseTabs(uint resourceType)
         {
-            IResource res = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x319E4F1D");
-            InitialiseDetailsTab(res);
-            InitialiseFlagTabs(res);
-            InitialiseOtherTab(res);
+            IResource res = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x" + resourceType.ToString("X8"));
+            InitialiseDetailsTab(resourceType, res);
+            this.tabControl1.Controls.Remove(this.tpFlagsRoom);
+            this.tabControl1.Controls.Remove(this.tpFlagsFunc);
+            this.tabControl1.Controls.Remove(this.tpFlagsBuildEtc);
+            if (resourceType == catalogTypes[0])
+            {
+                this.tabControl1.Controls.Add(this.tpFlagsRoom);
+                this.tabControl1.Controls.Add(this.tpFlagsFunc);
+                this.tabControl1.Controls.Add(this.tpFlagsBuildEtc);
+                InitialiseFlagTabs(res);
+                InitialiseOtherTab(res);
+            }
         }
-        void InitialiseDetailsTab(IResource objd)
+        void InitialiseDetailsTab(uint resourceType, IResource catlg)
         {
             List<string> detailsTabFields = new List<string>();
             List<string> detailsTabCommonFields = new List<string>();
-            List<string> fields = AApiVersionedFields.GetContentFields(0, objd.GetType());
+            List<string> fields = AApiVersionedFields.GetContentFields(0, catlg.GetType());
+
+            while (tlpObjectDetail.RowCount > 2)
+            {
+                Control c = tlpObjectDetail.GetControlFromPosition(0, tlpObjectDetail.RowCount - 2);
+                tlpObjectDetail.Controls.Remove(c);
+                c = tlpObjectDetail.GetControlFromPosition(1, tlpObjectDetail.RowCount - 2);
+                tlpObjectDetail.Controls.Remove(c);
+                tlpObjectDetail.RowCount--;
+            }
+
+            while (tlpObjectCommon.RowCount > 3)
+            {
+                Control c = tlpObjectCommon.GetControlFromPosition(0, tlpObjectCommon.RowCount - 2);
+                tlpObjectCommon.Controls.Remove(c);
+                c = tlpObjectCommon.GetControlFromPosition(1, tlpObjectCommon.RowCount - 2);
+                tlpObjectCommon.Controls.Remove(c);
+                tlpObjectCommon.RowCount--;
+            }
 
             foreach (string field in fields)
             {
-                if (field.StartsWith("Unknown")) { }
+                if (field.StartsWith("Unknown"))
+                {
+                    if (resourceType == catalogTypes[1])
+                    {
+                        if (field == "Unknown8" || field == "Unknown9" || field == "Unknown10")
+                            detailsTabFields.Add(field);
+                    }
+                }
                 else if (field.EndsWith("Flags")) { }
                 else if (field.EndsWith("Index")) { }
                 else if (field.Equals("Materials")) { }
@@ -492,11 +578,18 @@ namespace ObjectCloner
                 else if (field.Equals("TGIBlocks")) { }
                 else if (field.Equals("CommonBlock"))
                 {
-                    List<string> commonfields = AApiVersionedFields.GetContentFields(0, objd["CommonBlock"].Type);
+                    List<string> commonfields = AApiVersionedFields.GetContentFields(0, catlg["CommonBlock"].Type);
                     foreach (string commonfield in commonfields)
                     {
                         if (commonfield.StartsWith("Unknown")) continue;
-                        else if (commonfield.EndsWith("Flags")) { }
+                        else if (commonfield.EndsWith("Flags"))
+                        {
+                            if (resourceType == catalogTypes[1])
+                            {
+                                if (commonfield == "BuildBuyProductStatusFlags")
+                                    detailsTabCommonFields.Add(commonfield);
+                            }
+                        }
                         else if (!commonfield.Equals("Value")) detailsTabCommonFields.Add(commonfield);
                     }
                 }
@@ -504,14 +597,14 @@ namespace ObjectCloner
                     !field.Equals("Count") && !field.Equals("IsReadOnly") && !field.EndsWith("Reader")) detailsTabFields.Add(field);
             }
 
-            Dictionary<string, Type> types = AApiVersionedFields.GetContentFieldTypes(0, objd.GetType());
+            Dictionary<string, Type> types = AApiVersionedFields.GetContentFieldTypes(0, catlg.GetType());
             foreach (string field in detailsTabFields)
             {
                 CreateField(tlpObjectDetail, types[field], field);
             }
 
-            AApiVersionedFields common = objd["CommonBlock"].Value as AApiVersionedFields;
-            types = AApiVersionedFields.GetContentFieldTypes(0, objd["CommonBlock"].Type);
+            AApiVersionedFields common = catlg["CommonBlock"].Value as AApiVersionedFields;
+            types = AApiVersionedFields.GetContentFieldTypes(0, catlg["CommonBlock"].Type);
             foreach (string field in detailsTabCommonFields)
             {
                 CreateField(tlpObjectCommon, types[field], field);
@@ -539,6 +632,18 @@ namespace ObjectCloner
             });
             foreach (flagField ff in flagFields)
             {
+                while (ff.tlp.RowCount > 2)
+                {
+                    for (int i = 0; i < ff.tlp.ColumnCount; i++)
+                    {
+                        Control c = ff.tlp.GetControlFromPosition(i, ff.tlp.RowCount - 2);
+                        ff.tlp.Controls.Remove(c);
+                    }
+                    ff.tlp.RowCount--;
+                }
+            }
+            foreach (flagField ff in flagFields)
+            {
                 Application.DoEvents();
                 Type t = objd[ff.field].Type;
                 CheckBox[] ackb = new CheckBox[ff.length - ff.offset];
@@ -559,6 +664,15 @@ namespace ObjectCloner
         Dictionary<string, string> otherFieldMap;
         void InitialiseOtherTab(IResource objd)
         {
+            while (tlpOther.RowCount > 2)
+            {
+                Control c = tlpOther.GetControlFromPosition(0, tlpOther.RowCount - 2);
+                tlpOther.Controls.Remove(c);
+                c = tlpOther.GetControlFromPosition(1, tlpOther.RowCount - 2);
+                tlpOther.Controls.Remove(c);
+                tlpOther.RowCount--;
+            }
+
             otherFieldMap = new Dictionary<string, string>();
             otherFieldMap.Add("Unknown8", "Unknown8");
             otherFieldMap.Add("Unknown9", "Unknown9");
@@ -582,7 +696,7 @@ namespace ObjectCloner
             typeToLen.Add(new List<Type>(new Type[] { typeof(float), }), 8);
             typeToLen.Add(new List<Type>(new Type[] { typeof(int), typeof(uint), }), 2 + 8);
             typeToLen.Add(new List<Type>(new Type[] { typeof(double), }), 16);
-            typeToLen.Add(new List<Type>(new Type[] { typeof(long), typeof(ulong), }), 2 + 8);
+            typeToLen.Add(new List<Type>(new Type[] { typeof(long), typeof(ulong), }), 2 + 16);
             typeToLen.Add(new List<Type>(new Type[] { typeof(decimal), typeof(DateTime), typeof(string), typeof(object), }), 30);
         }
         void CreateField(TableLayoutPanel target, Type t, string field) { CreateField(target, t, field, false); }
@@ -667,8 +781,11 @@ namespace ObjectCloner
         {
             clearOverview();
             clearDetails();
-            clearFlags();
-            clearOther();
+            if (tabControl1.Contains(tpFlagsRoom))
+            {
+                clearFlags();
+                clearOther();
+            }
         }
         void clearOverview()
         {
@@ -706,14 +823,23 @@ namespace ObjectCloner
 
         void FillTabs(Item objd)
         {
+            if (objd.Resource == null)
+            {
+                ClearTabs();
+                return;
+            }
             fillOverview(objd);
             fillDetails(objd);
-            fillFlags(objd);
-            fillOther(objd);
+            if (objd.tgi.t == catalogTypes[0])
+            {
+                fillFlags(objd);
+                fillOther(objd);
+            }
         }
         void fillOverview(Item objd)
         {
             pictureBox1.Image = getImage(THUM.THUMSize.large, objd);
+            lbThumbTGI.Text = getImageTGI(THUM.THUMSize.large, objd);
             btnReplThumb.Enabled = mode == Mode.Fix;
             AApiVersionedFields common = objd.Resource["CommonBlock"].Value as AApiVersionedFields;
             tbObjName.Text = common["Name"].Value + "";
@@ -815,7 +941,7 @@ namespace ObjectCloner
         Thread loadThread;
         bool haveLoaded = false;
         bool loading = false;
-        void StartLoading()
+        void StartLoading(uint resourceType)
         {
             if (haveLoaded) return;
             if (loading) { AbortLoading(false); }
@@ -825,7 +951,8 @@ namespace ObjectCloner
 
             this.LoadingComplete += new EventHandler<BoolEventArgs>(MainForm_LoadingComplete);
 
-            FillListView flv = new FillListView(this, objPkgs, ddsPkgs, tmbPkgs, createListViewItem, updateProgress, stopLoading, OnLoadingComplete);
+            FillListView flv = new FillListView(this, objPkgs, ddsPkgs, tmbPkgs, resourceType
+                , createListViewItem, updateProgress, stopLoading, OnLoadingComplete);
 
             loadThread = new Thread(new ThreadStart(flv.LoadPackage));
             loading = true;
@@ -887,8 +1014,17 @@ namespace ObjectCloner
         void createListViewItem(Item objd)
         {
             ListViewItem lvi = new ListViewItem();
-            string objdtag = ((AApiVersionedFields)objd.Resource["CommonBlock"].Value)["Name"];
-            lvi.Text = (objdtag.IndexOf(':') < 0) ? objdtag : objdtag.Substring(objdtag.LastIndexOf(':') + 1);
+            if (objd.Resource != null)
+            {
+                string objdtag = ((AApiVersionedFields)objd.Resource["CommonBlock"].Value)["Name"];
+                lvi.Text = (objdtag.IndexOf(':') < 0) ? objdtag : objdtag.Substring(objdtag.LastIndexOf(':') + 1);
+            }
+            else
+            {
+                string s = objd.Exception.Message;
+                for (Exception ex = objd.Exception.InnerException; ex != null; ex = ex.InnerException) s += "  " + ex.Message;
+                lvi.Text = s;
+            }
             lvi.SubItems.AddRange(new string[] { objd.tgi, });
             lvi.Tag = objd;
             objectChooser.Items.Add(lvi);
@@ -1031,7 +1167,7 @@ namespace ObjectCloner
                 try
                 {
                     updateProgress(false, "", true, count, true, 0);
-                    int freq = count / 100;
+                    int freq = Math.Max(1, count / 100);
                     for (int i = 0; i < count; i++)
                     {
                         if (stopFetching) return;
@@ -1457,8 +1593,8 @@ namespace ObjectCloner
                     {
                         if (Thumb[objdItem.tgi.i, size, true] != null)
                             Thumb[objdItem.tgi.i, size, true] = replacementForThumbs;
-                        else if (Thumb[objdItem.tgi.i, size] != null)
-                            Thumb[objdItem.tgi.i, size] = replacementForThumbs;
+                        else if (Thumb[objdItem.tgi.t, objdItem.tgi.i, size] != null)
+                            Thumb[objdItem.tgi.t, objdItem.tgi.i, size] = replacementForThumbs;
                     }
                 }
 
@@ -1662,6 +1798,7 @@ namespace ObjectCloner
             switch (mn.mn)
             {
                 case MenuBarWidget.MD.MBF: break;
+                case MenuBarWidget.MD.MBC: break;
                 case MenuBarWidget.MD.MBV: break;
                 case MenuBarWidget.MD.MBS: break;
                 case MenuBarWidget.MD.MBH: break;
@@ -1688,25 +1825,7 @@ namespace ObjectCloner
 
         private void fileNew()
         {
-            if (Sims3Folder == null) return;
-            haveLoaded = false;
-            currentPackage = "";
-
-            setList(@"Gamedata\Shared\Packages\", s3ocIni.ContainsKey("fb0") ? s3ocIni["fb0"] : new List<string>(new string[] { "FullBuild0", }), out objPkgs);
-            setList(@"Gamedata\Shared\Packages\", s3ocIni.ContainsKey("fb2") ? s3ocIni["fb2"] : new List<string>(new string[] { "FullBuild2", }), out ddsPkgs);
-            setList(@"Thumbnails\", s3ocIni.ContainsKey("tmb") ? s3ocIni["tmb"] : new List<string>(new string[] { "ALLThumbnails", }), out tmbPkgs);
-
-            mode = Mode.Clone;
-            lastSubPage = SubPage.Step9;
-            fileNewOpen();
-        }
-        void setList(string path, IList<string> files, out List<IPackage> pkgs)
-        {
-            path = Path.Combine(Sims3Folder, path);
-            pkgs = new List<IPackage>();
-            foreach (string file in files)
-                try { pkgs.Add(s3pi.Package.Package.OpenPackage(0, Path.Combine(path, file + ".package"))); }
-                catch { }
+            cloneType(0x319E4F1D);
         }
 
         string currentPackage = "";
@@ -1737,10 +1856,11 @@ namespace ObjectCloner
 
             mode = Mode.Fix;
             lastSubPage = SubPage.Step10;
-            fileNewOpen();
+            fileNewOpen(0x319E4F1D);
         }
 
-        void fileNewOpen()
+        uint currentCatalogType = 0;
+        void fileNewOpen(uint resourceType)
         {
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, false);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, false);
@@ -1755,9 +1875,14 @@ namespace ObjectCloner
 
             DoWait("Please wait, loading object catalog...");
             Application.DoEvents();
+            if (resourceType != currentCatalogType)
+            {
+                currentCatalogType = resourceType;
+                InitialiseTabs(resourceType);
+            }
 
             if (!haveLoaded)
-                StartLoading();
+                StartLoading(resourceType);
             else
                 DisplayObjectChooser();
         }
@@ -1765,6 +1890,67 @@ namespace ObjectCloner
         private void fileExit()
         {
             Application.Exit();
+        }
+        #endregion
+
+        #region Cloning menu
+        /*
+        **/
+        uint[] catalogTypes = new uint[] {
+            0x319E4F1D, //Catalog Object
+            0x0418FE2A, //Catalog Fence
+            0x049CA4CD, //Catalog Stairs
+            0x04AC5D93, //Catalog Proxy Product
+            0x04B30669, //Catalog Terrain Geometry Brush
+            0x04C58103, //Catalog Railing
+            0x04ED4BB2, //Catalog Terrain Paint Brush
+            0x04F3CC01, //Catalog Fireplace
+            0x060B390C, //Catalog Terrain Water Brush
+            0x316C78F2, //Catalog Foundation
+            0x515CA4CD, //Catalog Wall/Floor Pattern
+            0x9151E6BC, //Catalog Wall
+            0x91EDBD3E, //Catalog Roof Style
+            0xF1EDBD86, //Catalog Roof Pattern
+        };
+        private void menuBarWidget1_MBCloning_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
+        {
+            try
+            {
+                this.Enabled = false;
+                Application.DoEvents();
+                int i = ((int)mn.mn) - ((int)MenuBarWidget.MB.MBC_objd);
+                int j = new List<uint>(catalogTypes).IndexOf(currentCatalogType);
+                if (i != j)
+                {
+                    if (j >= 0) menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + j), false);
+                    menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + i), true);
+                }
+                if (i >= 0 && i < catalogTypes.Length)
+                    cloneType(catalogTypes[i]);
+            }
+            finally { this.Enabled = true; }
+        }
+
+        private void cloneType(uint resourceType)
+        {
+            if (Sims3Folder == null) return;
+            ClosePkg();
+
+            setList(@"Gamedata\Shared\Packages\", s3ocIni.ContainsKey("fb0") ? s3ocIni["fb0"] : new List<string>(new string[] { "FullBuild0", }), out objPkgs);
+            setList(@"Gamedata\Shared\Packages\", s3ocIni.ContainsKey("fb2") ? s3ocIni["fb2"] : new List<string>(new string[] { "FullBuild2", }), out ddsPkgs);
+            setList(@"Thumbnails\", s3ocIni.ContainsKey("tmb") ? s3ocIni["tmb"] : new List<string>(new string[] { "ALLThumbnails", }), out tmbPkgs);
+
+            mode = Mode.Clone;
+            lastSubPage = SubPage.Step9;
+            fileNewOpen(resourceType);
+        }
+        void setList(string path, IList<string> files, out List<IPackage> pkgs)
+        {
+            path = Path.Combine(Sims3Folder, path);
+            pkgs = new List<IPackage>();
+            foreach (string file in files)
+                try { pkgs.Add(s3pi.Package.Package.OpenPackage(0, Path.Combine(path, file + ".package"))); }
+                catch { }
         }
         #endregion
 
@@ -2031,7 +2217,7 @@ namespace ObjectCloner
 
             if (objectChooser.SelectedItems.Count > 0)
             {
-                btnStart.Enabled = true;
+                btnStart.Enabled = (objectChooser.SelectedItem.Tag as Item).tgi.t == catalogTypes[0] && (objectChooser.SelectedItem.Tag as Item).Resource != null;
                 if (s == SubPage.None)
                 {
                     btnStartBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
