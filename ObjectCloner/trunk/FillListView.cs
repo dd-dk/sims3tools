@@ -81,20 +81,28 @@ namespace ObjectCloner
             try
             {
                 updateProgress(true, "Please wait, searching for objects...", true, -1, false, 0);
+                List<uint> validTypes = new List<uint>(MainForm.catalogTypes);
                 List<RIE> lrie = new List<RIE>();
                 List<TGI> seen = new List<TGI>();
+                List<IPackage> seenPkgs = new List<IPackage>();
                 foreach (IPackage pkg in objPkgs)
                 {
-                    IList<IResourceIndexEntry> objds = pkg.FindAll(new string[] { "ResourceType", },
-                        new TypedValue[] {
-                        new TypedValue(typeof(uint), resourceType, "X"),
-                    });
-                    foreach (IResourceIndexEntry objd in objds)
+                    if (seenPkgs.Contains(pkg)) continue;
+                    seenPkgs.Add(pkg);
+
+                    IList<IResourceIndexEntry> matches;
+                    if (resourceType != 0)
+                        matches = pkg.FindAll(new string[] { "ResourceType", }, new TypedValue[] { new TypedValue(typeof(uint), resourceType, "X"), });
+                    else
+                        matches = pkg.GetResourceList;
+
+                    foreach (IResourceIndexEntry match in matches)
                     {
-                        TGI tgi = new TGI(objd);
+                        if (!validTypes.Contains(match.ResourceType)) continue;
+                        TGI tgi = new TGI(match);
                         if (seen.Contains(tgi)) continue;
                         seen.Add(tgi);
-                        lrie.Add(new RIE(pkg, objd));
+                        lrie.Add(new RIE(pkg, match));
                     }
                 }
 
