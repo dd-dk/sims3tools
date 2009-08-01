@@ -1523,7 +1523,7 @@ namespace ObjectCloner
                 {
                     bool dirty = false;
 
-                    if (item.ResourceIndexEntry.ResourceType == 0x319E4F1D) //OBJD needs more than just the TGIs done
+                    if (item.tgi == selectedItem.tgi) // .ResourceIndexEntry.ResourceType == 0x319E4F1D) //OBJD needs more than just the TGIs done
                     {
                         AHandlerElement commonBlock = ((AHandlerElement)item.Resource["CommonBlock"].Value);
 
@@ -1533,30 +1533,33 @@ namespace ObjectCloner
                         commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + UniqueObject);
                         commonBlock["Price"] = new TypedValue(typeof(float), float.Parse(tbPrice.Text));
 
-                        foreach (flagField ff in flagFields)
+                        if (item.tgi.t == catalogTypes[0])
                         {
-                            ulong old = getFlags(item.Resource as AResource, ff.field);
-                            ulong mask = (ulong)0xFFFFFFFF << ff.offset;
-                            ulong res = getFlags(ff);
-                            res |= (ulong)(old & ~mask);
-                            setFlags(item.Resource as AResource, ff.field, res);
-                        }
+                            foreach (flagField ff in flagFields)
+                            {
+                                ulong old = getFlags(item.Resource as AResource, ff.field);
+                                ulong mask = (ulong)0xFFFFFFFF << ff.offset;
+                                ulong res = getFlags(ff);
+                                res |= (ulong)(old & ~mask);
+                                setFlags(item.Resource as AResource, ff.field, res);
+                            }
 
-                        for (int i = 1; i < tlpOther.RowCount - 1; i++)
-                        {
-                            Label lb = (Label)tlpOther.GetControlFromPosition(0, i);
-                            TextBox tb = (TextBox)tlpOther.GetControlFromPosition(1, i);
+                            for (int i = 1; i < tlpOther.RowCount - 1; i++)
+                            {
+                                Label lb = (Label)tlpOther.GetControlFromPosition(0, i);
+                                TextBox tb = (TextBox)tlpOther.GetControlFromPosition(1, i);
 
-                            TypedValue tvOld = item.Resource[otherFieldMap[lb.Text]];
+                                TypedValue tvOld = item.Resource[otherFieldMap[lb.Text]];
 
-                            ulong u = Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
-                            object val;
-                            if (typeof(Enum).IsAssignableFrom(tvOld.Type))
-                                val = Enum.ToObject(tvOld.Type, u);
-                            else
-                                val = Convert.ChangeType(u, tvOld.Type);
+                                ulong u = Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
+                                object val;
+                                if (typeof(Enum).IsAssignableFrom(tvOld.Type))
+                                    val = Enum.ToObject(tvOld.Type, u);
+                                else
+                                    val = Convert.ChangeType(u, tvOld.Type);
 
-                            item.Resource[otherFieldMap[lb.Text]] = new TypedValue(tvOld.Type, val);
+                                item.Resource[otherFieldMap[lb.Text]] = new TypedValue(tvOld.Type, val);
+                            }
                         }
 
                         if (!ckbCatlgDetails.Checked)
