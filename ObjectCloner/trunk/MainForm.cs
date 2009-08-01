@@ -461,8 +461,9 @@ namespace ObjectCloner
         {
             waitingToDisplayObjects = false;
 
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, mode == Mode.Fix); // don't need to re-do FB0
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true); // do need to allow changing other packages
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, currentCatalogType != catalogTypes[0]);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBC, true);
             setButtons(Page.ObjectChooser, step);
 
             splitContainer1.Panel1.Controls.Clear();
@@ -521,8 +522,12 @@ namespace ObjectCloner
         #endregion
 
         #region Tabs
+        uint tabType = 0;
         void InitialiseTabs(uint resourceType)
         {
+            if (tabType == resourceType) return;
+            tabType = resourceType;
+
             if (resourceType == catalogTypes[1]) resourceType = catalogTypes[0];//Modular Resources - display OBJD0
 
             IResource res = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x" + resourceType.ToString("X8"));
@@ -824,13 +829,9 @@ namespace ObjectCloner
                 return;
             }
 
-            if (item.tgi.t != currentCatalogType)
-            {
-                currentCatalogType = item.tgi.t;
-                InitialiseTabs(currentCatalogType);
-            }
-
             Item catlg = (item.tgi.t == catalogTypes[1]) ? CatlgForMdlr(item) : item;
+
+            InitialiseTabs(catlg.tgi.t);
 
             fillOverview(catlg);
             fillDetails(catlg);
@@ -970,6 +971,7 @@ namespace ObjectCloner
         {
             if (haveLoaded) return;
             if (loading) { AbortLoading(false); }
+            if (fetching) { AbortFetching(false); }
 
             waitingToDisplayObjects = true;
             objectChooser.Items.Clear();
@@ -1852,22 +1854,20 @@ namespace ObjectCloner
 
         private void fileNew()
         {
-            cloneType(0x319E4F1D);
+            menuBarWidget1_MBCloning_Click(null, new MenuBarWidget.MBClickEventArgs(MenuBarWidget.MB.MBC_objd));
         }
 
         string currentPackage = "";
         private void fileOpen()
         {
-            ClosePkg();
             openPackageDialog.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder == null || ObjectCloner.Properties.Settings.Default.LastSaveFolder.Length == 0
                 ? "" : ObjectCloner.Properties.Settings.Default.LastSaveFolder;
             openPackageDialog.FileName = "*.package";
             DialogResult dr = openPackageDialog.ShowDialog();
             if (dr != DialogResult.OK) return;
-            haveLoaded = currentPackage == openPackageDialog.FileName;
-            currentPackage = openPackageDialog.FileName;
             ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(openPackageDialog.FileName);
 
+            ClosePkg();
             IPackage pkg;
             try
             {
@@ -1880,17 +1880,21 @@ namespace ObjectCloner
                 CopyableMessageBox.Show("Could not open package " + openPackageDialog.FileName + "\n\n" + s, "File Open", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
                 return;
             }
+
+            menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + new List<uint>(catalogTypes).IndexOf(currentCatalogType)), false);
+            currentCatalogType = 0;
+            currentPackage = openPackageDialog.FileName;
             tmbPkgs = ddsPkgs = objPkgs = new List<IPackage>(new IPackage[] { pkg, });
 
             mode = Mode.Fix;
             fileNewOpen(0);
         }
 
-        uint currentCatalogType = 0;
         void fileNewOpen(uint resourceType)
         {
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, false);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, false);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBC, false);
             ckbDefault.Enabled = mode == Mode.Clone;
             ckbDefault.Checked = mode == Mode.Clone;
             ckbPadSTBLs.Enabled = mode == Mode.Clone;
@@ -1933,6 +1937,7 @@ namespace ObjectCloner
             0x91EDBD3E, //13: Catalog Roof Style
             0xF1EDBD86, //14: Catalog Roof Pattern
         };
+        uint currentCatalogType = 0;
         private void menuBarWidget1_MBCloning_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
         {
             try
@@ -1955,11 +1960,15 @@ namespace ObjectCloner
         private void cloneType(uint resourceType)
         {
             if (Sims3Folder == null) return;
-            ClosePkg();
 
-            setList(@"Gamedata\Shared\Packages\", s3ocIni.ContainsKey("fb0") ? s3ocIni["fb0"] : new List<string>(new string[] { "FullBuild0", }), out objPkgs);
-            setList(@"Gamedata\Shared\Packages\", s3ocIni.ContainsKey("fb2") ? s3ocIni["fb2"] : new List<string>(new string[] { "FullBuild2", }), out ddsPkgs);
-            setList(@"Thumbnails\", s3ocIni.ContainsKey("tmb") ? s3ocIni["tmb"] : new List<string>(new string[] { "ALLThumbnails", }), out tmbPkgs);
+            if (currentCatalogType != resourceType)
+            {
+                ClosePkg();
+                setList(@"Gamedata\Shared\Packages\", s3ocIni.ContainsKey("fb0") ? s3ocIni["fb0"] : new List<string>(new string[] { "FullBuild0", }), out objPkgs);
+                setList(@"Gamedata\Shared\Packages\", s3ocIni.ContainsKey("fb2") ? s3ocIni["fb2"] : new List<string>(new string[] { "FullBuild2", }), out ddsPkgs);
+                setList(@"Thumbnails\", s3ocIni.ContainsKey("tmb") ? s3ocIni["tmb"] : new List<string>(new string[] { "ALLThumbnails", }), out tmbPkgs);
+                currentCatalogType = resourceType;
+            }
 
             mode = Mode.Clone;
             fileNewOpen(resourceType);
