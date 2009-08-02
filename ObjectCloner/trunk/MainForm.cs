@@ -1551,56 +1551,32 @@ namespace ObjectCloner
                 {
                     bool dirty = false;
 
-                    if (item.tgi == catlgItem.tgi)
+                    if ((item.tgi == selectedItem.tgi && item.tgi.t != catalogTypes[1]) || item.tgi.t == catalogTypes[0])//Selected CatlgItem; all OBJD (i.e. from MDLR or CFIR)
                     {
                         AHandlerElement commonBlock = ((AHandlerElement)item.Resource["CommonBlock"].Value);
 
-                        commonBlock["NameGUID"] = new TypedValue(typeof(ulong), newNameGUID);
-                        commonBlock["DescGUID"] = new TypedValue(typeof(ulong), newDescGUID);
-                        commonBlock["Name"] = new TypedValue(typeof(string), "CatalogObjects/Name:" + UniqueObject);
-                        commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + UniqueObject);
-                        commonBlock["Price"] = new TypedValue(typeof(float), float.Parse(tbPrice.Text));
-
-                        ulong PngInstance = (ulong)commonBlock["PngInstance"].Value;
-                        if (PngInstance != 0 && oldToNew.ContainsKey(PngInstance))
-                            commonBlock["PngInstance"] = new TypedValue(typeof(ulong), oldToNew[PngInstance]);
-
-                        for (int i = 2; i < tlpObjectCommon.RowCount - 1; i++)
+                        if (item.tgi == selectedItem.tgi || selectedItem.tgi.t == catalogTypes[1] || item.tgi == catlgItem.tgi)//Selected CatlgItem; all MDLR OBJDs; 0th CFIR OBJD
                         {
-                            Label lb = (Label)tlpObjectCommon.GetControlFromPosition(0, i);
-                            TextBox tb = (TextBox)tlpObjectCommon.GetControlFromPosition(1, i);
-                            if (tb.Tag == null) continue;
-
-                            TypedValue tvOld = item.Resource[detailsFieldMap[lb.Text]];
-
-                            ulong u = Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
-                            object val;
-                            if (typeof(Enum).IsAssignableFrom(tvOld.Type))
-                                val = Enum.ToObject(tvOld.Type, u);
-                            else
-                                val = Convert.ChangeType(u, tvOld.Type);
-
-                            item.Resource[detailsFieldMap[lb.Text]] = new TypedValue(tvOld.Type, val);
+                            commonBlock["NameGUID"] = new TypedValue(typeof(ulong), newNameGUID);
+                            commonBlock["DescGUID"] = new TypedValue(typeof(ulong), newDescGUID);
+                            commonBlock["Name"] = new TypedValue(typeof(string), "CatalogObjects/Name:" + UniqueObject);
+                            commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + UniqueObject);
+                            commonBlock["Price"] = new TypedValue(typeof(float), float.Parse(tbPrice.Text));
                         }
 
-                        if (selectedItem.tgi.t == catalogTypes[0])
+                        if (item.tgi == selectedItem.tgi || item.tgi == catlgItem.tgi)//Selected CatlgItem; 0th OBJD from MDLR or CFIR
                         {
-                            foreach (flagField ff in flagFields)
-                            {
-                                ulong old = getFlags(item.Resource as AResource, ff.field);
-                                ulong mask = (ulong)0xFFFFFFFF << ff.offset;
-                                ulong res = getFlags(ff);
-                                res |= (ulong)(old & ~mask);
-                                setFlags(item.Resource as AResource, ff.field, res);
-                            }
+                            ulong PngInstance = (ulong)commonBlock["PngInstance"].Value;
+                            if (PngInstance != 0 && oldToNew.ContainsKey(PngInstance))
+                                commonBlock["PngInstance"] = new TypedValue(typeof(ulong), oldToNew[PngInstance]);
 
-                            for (int i = 1; i < tlpOther.RowCount - 1; i++)
+                            for (int i = 2; i < tlpObjectCommon.RowCount - 1; i++)
                             {
-                                Label lb = (Label)tlpOther.GetControlFromPosition(0, i);
-                                TextBox tb = (TextBox)tlpOther.GetControlFromPosition(1, i);
+                                Label lb = (Label)tlpObjectCommon.GetControlFromPosition(0, i);
+                                TextBox tb = (TextBox)tlpObjectCommon.GetControlFromPosition(1, i);
                                 if (tb.Tag == null) continue;
 
-                                TypedValue tvOld = item.Resource[otherFieldMap[lb.Text]];
+                                TypedValue tvOld = item.Resource[detailsFieldMap[lb.Text]];
 
                                 ulong u = Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
                                 object val;
@@ -1609,7 +1585,37 @@ namespace ObjectCloner
                                 else
                                     val = Convert.ChangeType(u, tvOld.Type);
 
-                                item.Resource[otherFieldMap[lb.Text]] = new TypedValue(tvOld.Type, val);
+                                item.Resource[detailsFieldMap[lb.Text]] = new TypedValue(tvOld.Type, val);
+                            }
+
+                            if (selectedItem.tgi.t == catalogTypes[0])//Selected OBJD only
+                            {
+                                foreach (flagField ff in flagFields)
+                                {
+                                    ulong old = getFlags(item.Resource as AResource, ff.field);
+                                    ulong mask = (ulong)0xFFFFFFFF << ff.offset;
+                                    ulong res = getFlags(ff);
+                                    res |= (ulong)(old & ~mask);
+                                    setFlags(item.Resource as AResource, ff.field, res);
+                                }
+
+                                for (int i = 1; i < tlpOther.RowCount - 1; i++)
+                                {
+                                    Label lb = (Label)tlpOther.GetControlFromPosition(0, i);
+                                    TextBox tb = (TextBox)tlpOther.GetControlFromPosition(1, i);
+                                    if (tb.Tag == null) continue;
+
+                                    TypedValue tvOld = item.Resource[otherFieldMap[lb.Text]];
+
+                                    ulong u = Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
+                                    object val;
+                                    if (typeof(Enum).IsAssignableFrom(tvOld.Type))
+                                        val = Enum.ToObject(tvOld.Type, u);
+                                    else
+                                        val = Convert.ChangeType(u, tvOld.Type);
+
+                                    item.Resource[otherFieldMap[lb.Text]] = new TypedValue(tvOld.Type, val);
+                                }
                             }
                         }
 
@@ -2796,6 +2802,8 @@ namespace ObjectCloner
             // Prevent OBJD and related resources getting renumbered
             if (ckbNoOBJD.Checked || ckbCatlgDetails.Checked)
                 oldToNew.Add(selectedItem.tgi.i, selectedItem.tgi.i);
+            else if (selectedItem.tgi.t == catalogTypes[1])
+                oldToNew.Add(selectedItem.tgi.i, FNV64.GetHash(UniqueObject));
 
             ulong PngInstance = 0;
             if (selectedItem.tgi.t != catalogTypes[1])
@@ -2850,7 +2858,9 @@ namespace ObjectCloner
 
             Item catlgItem = selectedItem;
             if (selectedItem.tgi.t == catalogTypes[1])
+            {
                 catlgItem = CatlgForMdlr(catlgItem);
+            }
 
             nameGUID = (ulong)((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["NameGUID"].Value;
             descGUID = (ulong)((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["DescGUID"].Value;
