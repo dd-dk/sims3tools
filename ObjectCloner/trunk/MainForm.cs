@@ -1549,7 +1549,7 @@ namespace ObjectCloner
                         commonBlock["Price"] = new TypedValue(typeof(float), float.Parse(tbPrice.Text));
 
                         ulong PngInstance = (ulong)commonBlock["PngInstance"].Value;
-                        if (oldToNew.ContainsKey(PngInstance))
+                        if (PngInstance != 0 && oldToNew.ContainsKey(PngInstance))
                             commonBlock["PngInstance"] = new TypedValue(typeof(ulong), oldToNew[PngInstance]);
 
                         for (int i = 2; i < tlpObjectCommon.RowCount - 1; i++)
