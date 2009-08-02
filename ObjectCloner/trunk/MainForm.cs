@@ -2384,17 +2384,18 @@ namespace ObjectCloner
             {
                 case 0:
                     OBJD_Steps(); break;
-                case 2:
-                case 3:
-                case 6:
-                case 11:
-                case 14:
-                    Common_Steps(); break;
                 case 1:
                 case 8:
                     Modular_Steps(); break;
+                case 2:
+                case 3:
+                case 6:
+                case 14:
+                    Common_Steps(); break;
                 case 7:
                     CTPT_Steps(); break;
+                case 11:
+                    CWAL_Steps(); break;
             }
             lastInChain = stepList == null ? -1 : stepList.IndexOf(lastStepInChain);
         }
@@ -2428,7 +2429,7 @@ namespace ObjectCloner
                 }
                 else
                 {
-                    stepList.Insert(stepList.IndexOf(OBJK_SlurpTGIs), OBJD_SlurpTGIs);
+                    stepList.Insert(stepList.IndexOf(OBJK_SlurpTGIs), Catlg_SlurpTGIs);
                     stepList.Insert(stepList.IndexOf(VPXYs_getMODLs), VPXYs_getKinXML);
                 }
                 if (mode == Mode.Fix) stepList.Add(FixIntegrity);
@@ -2479,6 +2480,40 @@ namespace ObjectCloner
             lastStepInChain = None;
         }
 
+        void CWAL_Steps()
+        {
+            if (ckbCatlgDetails.Checked) // Implies we're Fixing
+                stepList = new List<Step>(new Step[] { Catlg_addSelf, FixIntegrity });
+            else
+            {
+                stepList = new List<Step>(new Step[] {
+                    Catlg_addSelf,
+
+                    // OBJD_SlurpTGIs if NOT default textures only
+                    Catlg_getVPXY,
+
+                    VPXYs_SlurpTGIs,
+                    // VPXYs_getKinXML if NOT default textures only
+                    VPXYs_getMODLs,
+                    MODLs_SlurpTGIs,
+                    MODLs_SlurpMLODs,
+                    MODLs_SlurpTXTCs,
+                    CWAL_SlurpThumbnails,
+                    // FixIntegrity if fixing
+                });
+                if (ckbDefault.Checked)
+                {
+                }
+                else
+                {
+                    stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpTGIs);
+                    stepList.Insert(stepList.IndexOf(VPXYs_getMODLs), VPXYs_getKinXML);
+                }
+                if (mode == Mode.Fix) stepList.Add(FixIntegrity);
+            }
+            lastStepInChain = MODLs_SlurpTXTCs;
+        }
+
         void Modular_Steps() { }
 
         Dictionary<Step, string> StepText;
@@ -2489,7 +2524,7 @@ namespace ObjectCloner
 
             StepText.Add(OBJD_getOBKJ, "Find OBJK");
             StepText.Add(OBJD_addOBJKref, "Add OBJK");
-            StepText.Add(OBJD_SlurpTGIs, "OBJD-referenced resources");
+            StepText.Add(Catlg_SlurpTGIs, "OBJD-referenced resources");
             StepText.Add(OBJK_SlurpTGIs, "OBJK-referenced resources");
             StepText.Add(OBJK_getVPXY, "Find OBJK-referenced VPXY");
 
@@ -2505,6 +2540,7 @@ namespace ObjectCloner
             StepText.Add(MODLs_SlurpMLODs, "MLOD-referenced resources");
             StepText.Add(MODLs_SlurpTXTCs, "TXTC-referenced resources");
             StepText.Add(SlurpThumbnails, "Add thumbnails");
+            StepText.Add(CWAL_SlurpThumbnails, "Add thumbnails");
             StepText.Add(FixIntegrity, "Fix integrity step");
         }
 
@@ -2520,7 +2556,6 @@ namespace ObjectCloner
             if (ckbDefault.Checked && objkItem == null) stepNum = lastInChain;
         }
         void OBJD_addOBJKref() { Add("objk", objkItem.tgi); }
-        void OBJD_SlurpTGIs() { SlurpTGIsFromField("clone", (AResource)selectedItem.Resource); }
         void OBJK_SlurpTGIs() { SlurpTGIsFromField("objk", (AResource)objkItem.Resource); }
         void OBJK_getVPXY()
         {
@@ -2545,6 +2580,7 @@ namespace ObjectCloner
         }
         #endregion
 
+        void Catlg_SlurpTGIs() { SlurpTGIsFromField("clone", (AResource)selectedItem.Resource); }
         void Catlg_getVPXY()
         {
             vpxyItems = new List<Item>();
@@ -2622,35 +2658,41 @@ namespace ObjectCloner
         // .\..\..\..\Thumbnails\ALLThumbnails.package
         void SlurpThumbnails()
         {
-            //0x515CA4CD is very different
-                foreach (THUM.THUMSize size in new THUM.THUMSize[] { THUM.THUMSize.small, THUM.THUMSize.medium, THUM.THUMSize.large, })
+            foreach (THUM.THUMSize size in new THUM.THUMSize[] { THUM.THUMSize.small, THUM.THUMSize.medium, THUM.THUMSize.large, })
+            {
+                TGI tgi = getImageTGI(size, selectedItem);
+                if (selectedItem.tgi.t == catalogTypes[14])
+                    Add(size + "Icon", tgi);
+                else
+                    Add(size + "Thumb", tgi);
+            }
+        }
+        //0x515CA4CD is very different
+        void CWAL_SlurpThumbnails()
+        {
+            Dictionary<THUM.THUMSize, uint> CWALThumbTypes = new Dictionary<THUM.THUMSize, uint>();
+            CWALThumbTypes.Add(THUM.THUMSize.small, 0x0589DC44);
+            CWALThumbTypes.Add(THUM.THUMSize.medium, 0x0589DC45);
+            CWALThumbTypes.Add(THUM.THUMSize.large, 0x0589DC46);
+            List<TGI> seen = new List<TGI>();
+            foreach (THUM.THUMSize size in new THUM.THUMSize[] { THUM.THUMSize.small, THUM.THUMSize.medium, THUM.THUMSize.large, })
+            {
+                int i = 0;
+                uint type = CWALThumbTypes[size];
+                foreach (IPackage pkg in tmbPkgs)
                 {
-                    if (selectedItem.tgi.t == catalogTypes[11])
+                    IList<IResourceIndexEntry> lrie = pkg.FindAll(new string[] { "ResourceType", "Instance" }, new TypedValue[] {
+                            new TypedValue(typeof(uint), type),
+                            new TypedValue(typeof(ulong), selectedItem.tgi.i),
+                        });
+                    foreach (IResourceIndexEntry rie in lrie)
                     {
-                    }
-                    else
-                    {
-                        TGI tgi = getImageTGI(size, selectedItem);
-                        if (selectedItem.tgi.t == catalogTypes[14])
-                            Add(size + "Icon", tgi);
-                        else
-                            Add(size + "Thumb", tgi);
+                        RIE Rie = new RIE(pkg, rie);
+                        if (seen.Contains(Rie.tgi)) continue;
+                        Add(size + "[" + i++ + "]Thumb", Rie.tgi);
                     }
                 }
-#if UNDEF
-            ulong instance = selectedItem.tgi.i;
-            string[] fields = new string[ckbDefault.Checked ? 2 : 1];
-            TypedValue[] values = new TypedValue[ckbDefault.Checked ? 2 : 1];
-            fields[0] = "Instance";
-            values[0] = new TypedValue(typeof(ulong), instance);
-            if (ckbDefault.Checked)
-            {
-                fields[1] = "ResourceGroup";
-                values[1] = new TypedValue(typeof(uint), (uint)0);
             }
-
-            SlurpKindred("thumb", mode == Mode.Clone ? tmbPkgs : objPkgs, fields, values);
-#endif
         }
 
         //Fix integrity step
