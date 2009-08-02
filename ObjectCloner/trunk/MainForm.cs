@@ -1280,7 +1280,7 @@ namespace ObjectCloner
         void MainForm_SavingComplete(object sender, BoolEventArgs e)
         {
             saving = false;
-            tlpButtons.Enabled = true;
+            this.Enabled = true;
             while (saveThread != null && saveThread.IsAlive)
                 saveThread.Join(100);
             saveThread = null;
@@ -1664,7 +1664,7 @@ namespace ObjectCloner
             finally
             {
                 splitContainer1.Panel1.Controls.Clear();
-                tlpButtons.Enabled = true;
+                this.Enabled = true;
                 objectChooser.Items.Clear();
                 ClearTabs();
                 ClosePkg();
@@ -2219,6 +2219,7 @@ namespace ObjectCloner
 
             bool flag = p != Page.Resources;
             ckbPadSTBLs.Enabled = ckbDefault.Enabled = mode == Mode.Clone && flag;
+            if (s == None) ckbNoOBJD.Checked = false;
             ckbNoOBJD.Enabled = mode == Mode.Fix && !ckbCatlgDetails.Checked && flag;
             ckbCatlgDetails.Enabled = mode == Mode.Fix && flag;
 
@@ -2331,32 +2332,28 @@ namespace ObjectCloner
         private void btnSave_Click(object sender, EventArgs e)
         {
             this.Enabled = false;
-            try
+            if (mode == Mode.Clone)
             {
-                if (mode == Mode.Clone)
-                {
-                    string prefix = CreatorName;
-                    prefix = (prefix != null) ? prefix + "_" : "";
-                    if (ObjectCloner.Properties.Settings.Default.LastSaveFolder != null)
-                        saveFileDialog1.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder;
-                    saveFileDialog1.FileName = objectChooser.SelectedItems.Count > 0 ? prefix + objectChooser.SelectedItems[0].Text : "";
-                    DialogResult dr = saveFileDialog1.ShowDialog();
-                    if (dr != DialogResult.OK) return;
-                    ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(saveFileDialog1.FileName);
+                string prefix = CreatorName;
+                prefix = (prefix != null) ? prefix + "_" : "";
+                if (ObjectCloner.Properties.Settings.Default.LastSaveFolder != null)
+                    saveFileDialog1.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder;
+                saveFileDialog1.FileName = objectChooser.SelectedItems.Count > 0 ? prefix + objectChooser.SelectedItems[0].Text : "";
+                DialogResult dr = saveFileDialog1.ShowDialog();
+                if (dr != DialogResult.OK) return;
+                ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(saveFileDialog1.FileName);
 
-                    tlpButtons.Enabled = false;
-                    DoWait("Please wait, creating your new package...");
-                    waitingForSavePackage = true;
-                    StartSaving();
-                }
-                else
-                {
-                    tlpButtons.Enabled = false;
-                    DoWait("Please wait, updating your package...");
-                    StartFixing();
-                }
+                tlpButtons.Enabled = false;
+                DoWait("Please wait, creating your new package...");
+                waitingForSavePackage = true;
+                StartSaving();
             }
-            finally { ckbNoOBJD.Checked = false; this.Enabled = true; }
+            else
+            {
+                tlpButtons.Enabled = false;
+                DoWait("Please wait, updating your package...");
+                StartFixing();
+            }
         }
         #endregion
 
