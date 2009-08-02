@@ -119,7 +119,6 @@
             this.cralToolStripMenuItem,
             this.ctptToolStripMenuItem,
             this.cfirToolStripMenuItem,
-            this.cfndToolStripMenuItem,
             this.cwalToolStripMenuItem,
             this.crmtToolStripMenuItem});
             this.cloningToolStripMenuItem.Name = "cloningToolStripMenuItem";
@@ -178,7 +177,6 @@
             // 
             // cfndToolStripMenuItem
             // 
-            this.cfndToolStripMenuItem.Enabled = false;
             this.cfndToolStripMenuItem.Name = "cfndToolStripMenuItem";
             this.cfndToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
             this.cfndToolStripMenuItem.Text = "Foundations";
