@@ -40,7 +40,7 @@ namespace ObjectCloner
                 newToolStripMenuItem, openToolStripMenuItem, exitToolStripMenuItem,
                 //Cloning
                 objdToolStripMenuItem, mdlrToolStripMenuItem, cfenToolStripMenuItem, cstrToolStripMenuItem, cprxToolStripMenuItem,
-                ctgmToolStripMenuItem, cralToolStripMenuItem, ctpbToolStripMenuItem, cfirToolStripMenuItem, ctwpToolStripMenuItem,
+                ctgmToolStripMenuItem, cralToolStripMenuItem, ctptToolStripMenuItem, cfirToolStripMenuItem, ctwpToolStripMenuItem,
                 cfndToolStripMenuItem, cwalToolStripMenuItem, cwtpToolStripMenuItem, crstToolStripMenuItem, crmtToolStripMenuItem,
                 //View
                 tilesToolStripMenuItem, largeIconsToolStripMenuItem, smallIconsToolStripMenuItem, listToolStripMenuItem, detailedListToolStripMenuItem,
@@ -65,7 +65,7 @@ namespace ObjectCloner
         {
             MBF_new = 0, MBF_open, MBF_exit,
             MBC_objd, MBC_mdlr, MBC_cfen, MBC_cstr, MBC_cprx,
-            MBC_ctgm, MBC_cral, MBC_ctpb, MBC_cfir, MBC_ctwp,
+            MBC_ctgm, MBC_cral, MBC_ctpt, MBC_cfir, MBC_ctwp,
             MBC_cfnd, MBC_cwal, MBC_cwtp, MBC_crst, MBC_crmt,
             MBV_tiles, MBV_largeIcons, MBV_smallIcons, MBV_list, MBV_detailedList,
             MBV_icons,

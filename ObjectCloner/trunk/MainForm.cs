@@ -1309,7 +1309,7 @@ namespace ObjectCloner
         class SaveList
         {
             MainForm mainForm;
-            Item objd;
+            Item catlgItem;
             Dictionary<string, TGI> tgiList;
             List<IPackage> objPkgs;
             List<IPackage> ddsPkgs;
@@ -1319,12 +1319,12 @@ namespace ObjectCloner
             updateProgressCallback updateProgressCB;
             stopSavingCallback stopSavingCB;
             savingCompleteCallback savingCompleteCB;
-            public SaveList(MainForm form, Item objd, Dictionary<string, TGI> tgiList, List<IPackage> objPkgs, List<IPackage> ddsPkgs, List<IPackage> tmbPkgs,
+            public SaveList(MainForm form, Item catlgItem, Dictionary<string, TGI> tgiList, List<IPackage> objPkgs, List<IPackage> ddsPkgs, List<IPackage> tmbPkgs,
                 string outputPackage, bool padSTBLs,
                 updateProgressCallback updateProgressCB, stopSavingCallback stopSavingCB, savingCompleteCallback savingCompleteCB)
             {
                 this.mainForm = form;
-                this.objd = objd;
+                this.catlgItem = catlgItem;
                 this.tgiList = tgiList;
                 this.objPkgs = objPkgs;
                 this.ddsPkgs = ddsPkgs;
@@ -1357,13 +1357,13 @@ namespace ObjectCloner
                 {
                     int i = 0;
                     int freq = Math.Max(1, tgiList.Count / 50);
-                    updateProgress(true, "Saving... 0%", true, tgiList.Count, true, i);
+                    updateProgress(true, "Cloning... 0%", true, tgiList.Count, true, i);
                     string lastSaved = "nothing yet";
                     foreach (var kvp in tgiList)
                     {
                         if (stopSaving) return;
 
-                        List<IPackage> lpkg = kvp.Value.t == 0x00B2D882 ? ddsPkgs : kvp.Key.EndsWith("Thumb") ? tmbPkgs : objPkgs;
+                        List<IPackage> lpkg = (catlgItem.tgi.t != 0x04ED4BB2 && kvp.Value.t == 0x00B2D882) ? ddsPkgs : kvp.Key.EndsWith("Thumb") ? tmbPkgs : objPkgs;
                         NameMap nm = kvp.Value.t == 0x00B2D882 ? fb2nm : fb0nm;
 
                         Item item = new Item(new RIE(lpkg, kvp.Value), true); // use default wrapper
@@ -1380,13 +1380,13 @@ namespace ObjectCloner
                         }
 
                         if (++i % freq == 0)
-                            updateProgress(true, "Saved " + lastSaved + "... " + i * 100 / tgiList.Count + "%", true, tgiList.Count, true, i);
+                            updateProgress(true, "Cloned " + lastSaved + "... " + i * 100 / tgiList.Count + "%", true, tgiList.Count, true, i);
                     }
                     updateProgress(true, "", true, tgiList.Count, true, tgiList.Count);
 
                     updateProgress(true, "Finding string tables...", true, 0, true, 0);
-                    ulong nameGUID = (ulong)((AHandlerElement)objd.Resource["CommonBlock"].Value)["NameGUID"].Value;
-                    ulong descGUID = (ulong)((AHandlerElement)objd.Resource["CommonBlock"].Value)["DescGUID"].Value;
+                    ulong nameGUID = (ulong)((AHandlerElement)catlgItem.Resource["CommonBlock"].Value)["NameGUID"].Value;
+                    ulong descGUID = (ulong)((AHandlerElement)catlgItem.Resource["CommonBlock"].Value)["DescGUID"].Value;
 
                     i = 0;
                     freq = 1;// Math.Max(1, lrie.Count / 10);
@@ -1435,7 +1435,7 @@ namespace ObjectCloner
                     updateProgress(true, "Committing new name map... ", true, 0, true, 0);
                     if (!stopSaving) newnmap.Commit();
 
-                    updateProgress(true, "", true, 0, true, 0);
+                    updateProgress(true, "Saving package...", true, 0, true, 0);
                     complete = true;
                 }
                 catch (ThreadInterruptedException) { }
@@ -2382,7 +2382,8 @@ namespace ObjectCloner
 
             switch (new List<uint>(catalogTypes).IndexOf(item.tgi.t))
             {
-                case 0: OBJDSteps(); break;
+                case 0:
+                    OBJD_Steps(); break;
                 case 2:
                 case 3:
                 case 6:
@@ -2392,11 +2393,13 @@ namespace ObjectCloner
                 case 1:
                 case 8:
                     Modular_Steps(); break;
+                case 7:
+                    CTPT_Steps(); break;
             }
             lastInChain = stepList == null ? -1 : stepList.IndexOf(lastStepInChain);
         }
 
-        void OBJDSteps()
+        void OBJD_Steps()
         {
             if (ckbCatlgDetails.Checked) // Implies we're Fixing
                 stepList = new List<Step>(new Step[] { Catlg_addSelf, FixIntegrity });
@@ -2457,6 +2460,25 @@ namespace ObjectCloner
             lastStepInChain = MODLs_SlurpTXTCs;
         }
 
+        void CTPT_Steps()
+        {
+            if (ckbCatlgDetails.Checked) // Implies we're Fixing
+                stepList = new List<Step>(new Step[] { Catlg_addSelf, FixIntegrity });
+            else
+            {
+                stepList = new List<Step>(new Step[] {
+                    Catlg_addSelf,
+
+                    CTPT_addBrushTexture,
+                    CTPT_addBrushShape,
+                    SlurpThumbnails,
+                    // FixIntegrity if fixing
+                });
+                if (mode == Mode.Fix) stepList.Add(FixIntegrity);
+            }
+            lastStepInChain = None;
+        }
+
         void Modular_Steps() { }
 
         Dictionary<Step, string> StepText;
@@ -2472,6 +2494,9 @@ namespace ObjectCloner
             StepText.Add(OBJK_getVPXY, "Find OBJK-referenced VPXY");
 
             StepText.Add(Catlg_getVPXY, "Find VPXYs in the Catalog Resource TGIBlockList");
+
+            StepText.Add(CTPT_addBrushTexture, "Add Brush Texture");
+            StepText.Add(CTPT_addBrushShape, "Add Brush Shape");
 
             StepText.Add(VPXYs_SlurpTGIs, "VPXY-referenced resources");
             StepText.Add(VPXYs_getKinXML, "Preset XML (same instance as VPXY)");
@@ -2531,6 +2556,9 @@ namespace ObjectCloner
                     vpxyItems.Add(vpxy);
             }
         }
+
+        void CTPT_addBrushTexture() { Add("ctpt_BrushTexture", (AResource.TGIBlock)selectedItem.Resource["BrushTexture"].Value); }
+        void CTPT_addBrushShape() { Add("ctpt_BrushShape", (AResource.TGIBlock)selectedItem.Resource["BrushShape"].Value); }
 
         void VPXYs_SlurpTGIs() { for (int i = 0; i < vpxyItems.Count; i++) SlurpTGIsFromField("vpxy[" + i + "]", (AResource)vpxyItems[i].Resource); }
         void VPXYs_getKinXML()

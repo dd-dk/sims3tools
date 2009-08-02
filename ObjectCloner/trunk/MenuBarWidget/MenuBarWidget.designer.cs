@@ -39,7 +39,7 @@
             this.cfenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cstrToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cralToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ctpbToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ctptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cfirToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cfndToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cwalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -117,7 +117,7 @@
             this.cfenToolStripMenuItem,
             this.cstrToolStripMenuItem,
             this.cralToolStripMenuItem,
-            this.ctpbToolStripMenuItem,
+            this.ctptToolStripMenuItem,
             this.cfirToolStripMenuItem,
             this.cfndToolStripMenuItem,
             this.cwalToolStripMenuItem,
@@ -164,12 +164,12 @@
             this.cralToolStripMenuItem.Text = "Stair railings";
             this.cralToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
             // 
-            // ctpbToolStripMenuItem
+            // ctptToolStripMenuItem
             // 
-            this.ctpbToolStripMenuItem.Name = "ctpbToolStripMenuItem";
-            this.ctpbToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
-            this.ctpbToolStripMenuItem.Text = "Terrain Paintbrushes";
-            this.ctpbToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            this.ctptToolStripMenuItem.Name = "ctptToolStripMenuItem";
+            this.ctptToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.ctptToolStripMenuItem.Text = "Terrain Paintbrushes";
+            this.ctptToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
             // 
             // cfirToolStripMenuItem
             // 
@@ -396,7 +396,7 @@
         private System.Windows.Forms.ToolStripMenuItem cprxToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ctgmToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cralToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem ctpbToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ctptToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cfirToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ctwpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cfndToolStripMenuItem;
