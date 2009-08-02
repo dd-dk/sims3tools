@@ -512,7 +512,7 @@ namespace ObjectCloner
             }
             stepList = null;
             step = None;
-            setButtons(Page.ObjectChooser, step);
+            setButtons(Page.ObjectChooser, None);
         }
 
         void objectChooser_ItemActivate(object sender, EventArgs e)
@@ -535,7 +535,7 @@ namespace ObjectCloner
             this.tabControl1.Controls.Remove(this.tpFlagsRoom);
             this.tabControl1.Controls.Remove(this.tpFlagsFunc);
             this.tabControl1.Controls.Remove(this.tpFlagsBuildEtc);
-            if (resourceType == catalogTypes[0])
+            if (tabType == catalogTypes[0])
             {
                 this.tabControl1.Controls.Add(this.tpFlagsRoom);
                 this.tabControl1.Controls.Add(this.tpFlagsFunc);
@@ -544,6 +544,7 @@ namespace ObjectCloner
                 InitialiseOtherTab(res);
             }
         }
+
         Dictionary<string, string> detailsFieldMap;
         Dictionary<string, string> detailsFieldMapReverse;
         void InitialiseDetailsTab(uint resourceType, IResource catlg)
@@ -612,6 +613,7 @@ namespace ObjectCloner
                     CreateField(tlpObjectCommon, types[field], field);
             }
         }
+
         struct flagField
         {
             public TableLayoutPanel tlp;
@@ -663,6 +665,7 @@ namespace ObjectCloner
                 ff.tlp.Controls.AddRange(ackb);
             }
         }
+
         Dictionary<string, string> otherFieldMap;
         void InitialiseOtherTab(IResource objd)
         {
@@ -776,6 +779,7 @@ namespace ObjectCloner
             acbk[i].TabIndex = ff.tlp.RowCount;
         }
 
+
         void ClearTabs()
         {
             clearOverview();
@@ -829,13 +833,13 @@ namespace ObjectCloner
                 return;
             }
 
-            Item catlg = (item.tgi.t == catalogTypes[1]) ? CatlgForMdlr(item) : item;
+            InitialiseTabs(item.tgi.t);
 
-            InitialiseTabs(catlg.tgi.t);
+            Item catlg = (item.tgi.t == catalogTypes[1]) ? CatlgForMdlr(item) : item;
 
             fillOverview(catlg);
             fillDetails(catlg);
-            if (catlg.tgi.t == catalogTypes[0])
+            if (item.tgi.t == catalogTypes[0])
             {
                 fillFlags(catlg);
                 fillOther(catlg);
@@ -1309,7 +1313,7 @@ namespace ObjectCloner
         class SaveList
         {
             MainForm mainForm;
-            Item catlgItem;
+            Item selectedItem;
             Dictionary<string, TGI> tgiList;
             List<IPackage> objPkgs;
             List<IPackage> ddsPkgs;
@@ -1324,7 +1328,7 @@ namespace ObjectCloner
                 updateProgressCallback updateProgressCB, stopSavingCallback stopSavingCB, savingCompleteCallback savingCompleteCB)
             {
                 this.mainForm = form;
-                this.catlgItem = catlgItem;
+                this.selectedItem = catlgItem;
                 this.tgiList = tgiList;
                 this.objPkgs = objPkgs;
                 this.ddsPkgs = ddsPkgs;
@@ -1363,7 +1367,7 @@ namespace ObjectCloner
                     {
                         if (stopSaving) return;
 
-                        List<IPackage> lpkg = (catlgItem.tgi.t != 0x04ED4BB2 && kvp.Value.t == 0x00B2D882) ? ddsPkgs : kvp.Key.EndsWith("Thumb") ? tmbPkgs : objPkgs;
+                        List<IPackage> lpkg = (selectedItem.tgi.t != 0x04ED4BB2 && kvp.Value.t == 0x00B2D882) ? ddsPkgs : kvp.Key.EndsWith("Thumb") ? tmbPkgs : objPkgs;
                         NameMap nm = kvp.Value.t == 0x00B2D882 ? fb2nm : fb0nm;
 
                         Item item = new Item(new RIE(lpkg, kvp.Value), true); // use default wrapper
@@ -1385,6 +1389,14 @@ namespace ObjectCloner
                     updateProgress(true, "", true, tgiList.Count, true, tgiList.Count);
 
                     updateProgress(true, "Finding string tables...", true, 0, true, 0);
+
+                    Item catlgItem = selectedItem;
+                    if (catlgItem.tgi.t == catalogTypes[1] || catlgItem.tgi.t == catalogTypes[8])
+                    {
+                        AResource.TGIBlock tgib = ((AResource.TGIBlockList)catlgItem.Resource["TGIBlocks"].Value)[0];
+                        catlgItem = new Item(objPkgs, tgib);
+                    }
+
                     ulong nameGUID = (ulong)((AHandlerElement)catlgItem.Resource["CommonBlock"].Value)["NameGUID"].Value;
                     ulong descGUID = (ulong)((AHandlerElement)catlgItem.Resource["CommonBlock"].Value)["DescGUID"].Value;
 
@@ -1530,6 +1542,7 @@ namespace ObjectCloner
 
         void StartFixing()
         {
+            Item catlgItem = selectedItem.tgi.t == catalogTypes[1] ? CatlgForMdlr(selectedItem) : selectedItem;
             //oldToNew = new Dictionary<ulong, ulong>();
             //tgiToItem - TGIs we're interested in and the Item they refer to
             try
@@ -1538,7 +1551,7 @@ namespace ObjectCloner
                 {
                     bool dirty = false;
 
-                    if (item.tgi == selectedItem.tgi) // .ResourceIndexEntry.ResourceType == 0x319E4F1D) //OBJD needs more than just the TGIs done
+                    if (item.tgi == catlgItem.tgi)
                     {
                         AHandlerElement commonBlock = ((AHandlerElement)item.Resource["CommonBlock"].Value);
 
@@ -1570,7 +1583,7 @@ namespace ObjectCloner
                             item.Resource[detailsFieldMap[lb.Text]] = new TypedValue(tvOld.Type, val);
                         }
 
-                        if (item.tgi.t == catalogTypes[0])
+                        if (selectedItem.tgi.t == catalogTypes[0])
                         {
                             foreach (flagField ff in flagFields)
                             {
@@ -2305,7 +2318,7 @@ namespace ObjectCloner
                 }
             }
 
-            SetStepList(selectedItem);
+            SetStepList(selectedItem, out stepList);
             if (stepList == null)
             {
                 DisplayObjectChooser();
@@ -2336,6 +2349,7 @@ namespace ObjectCloner
             {
                 string prefix = CreatorName;
                 prefix = (prefix != null) ? prefix + "_" : "";
+                if (selectedItem.tgi.t == catalogTypes[1]) prefix += "MDLR_";
                 if (ObjectCloner.Properties.Settings.Default.LastSaveFolder != null)
                     saveFileDialog1.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder;
                 saveFileDialog1.FileName = objectChooser.SelectedItems.Count > 0 ? prefix + objectChooser.SelectedItems[0].Text : "";
@@ -2366,45 +2380,46 @@ namespace ObjectCloner
         void None() { }
         List<Step> stepList;
         Step step;
-        Step lastStepInChain;
         int stepNum;
         int lastInChain;
-        void SetStepList(Item item)
+        void SetStepList(Item item, out List<Step> stepList)
         {
-            lastStepInChain = None;
             stepList = null;
 
             if (item == null)
                 return;
 
+            Step lastStepInChain = None;
+
             switch (new List<uint>(catalogTypes).IndexOf(item.tgi.t))
             {
                 case 0:
-                    OBJD_Steps(); break;
+                    OBJD_Steps(out stepList, out lastStepInChain); break;
                 case 1:
-                case 8:
-                    Modular_Steps(); break;
+                    MDLR_Steps(out stepList, out lastStepInChain); break;
                 case 2:
                 case 3:
                 case 6:
                 case 14:
-                    Common_Steps(); break;
+                    Common_Steps(out stepList, out lastStepInChain); break;
                 case 7:
-                    CTPT_Steps(); break;
+                    CTPT_Steps(out stepList, out lastStepInChain); break;
+                case 8:
+                    CFIR_Steps(out stepList, out lastStepInChain); break;
                 case 11:
-                    CWAL_Steps(); break;
+                    CWAL_Steps(out stepList, out lastStepInChain); break;
             }
             lastInChain = stepList == null ? -1 : stepList.IndexOf(lastStepInChain);
         }
 
-        void OBJD_Steps()
+        void OBJD_Steps(out List<Step> stepList, out Step lastStepInChain)
         {
             if (ckbCatlgDetails.Checked) // Implies we're Fixing
-                stepList = new List<Step>(new Step[] { Catlg_addSelf, FixIntegrity });
+                stepList = new List<Step>(new Step[] { Item_addSelf, FixIntegrity });
             else
             {
                 stepList = new List<Step>(new Step[] {
-                    Catlg_addSelf,
+                    Item_addSelf,
 
                     OBJD_getOBKJ,
                     // OBJD_addOBJKref or OBJD_SlurpTGIs
@@ -2434,14 +2449,21 @@ namespace ObjectCloner
             lastStepInChain = MODLs_SlurpTXTCs;
         }
 
-        void Common_Steps()
+        void MDLR_Steps(out List<Step> stepList, out Step lastStepInChain)
+        {
+            stepList = new List<Step>(new Step[] { Item_addSelf, Item_findObjds, setupObjdStepList, Modular_Main, });
+            if (mode == Mode.Fix) stepList.Add(FixIntegrity);
+            lastStepInChain = None;
+        }
+
+        void Common_Steps(out List<Step> stepList, out Step lastStepInChain)
         {
             if (ckbCatlgDetails.Checked) // Implies we're Fixing
-                stepList = new List<Step>(new Step[] { Catlg_addSelf, FixIntegrity });
+                stepList = new List<Step>(new Step[] { Item_addSelf, FixIntegrity });
             else
             {
                 stepList = new List<Step>(new Step[] {
-                    Catlg_addSelf,
+                    Item_addSelf,
 
                     Catlg_getVPXY,
 
@@ -2458,14 +2480,14 @@ namespace ObjectCloner
             lastStepInChain = MODLs_SlurpTXTCs;
         }
 
-        void CTPT_Steps()
+        void CTPT_Steps(out List<Step> stepList, out Step lastStepInChain)
         {
             if (ckbCatlgDetails.Checked) // Implies we're Fixing
-                stepList = new List<Step>(new Step[] { Catlg_addSelf, FixIntegrity });
+                stepList = new List<Step>(new Step[] { Item_addSelf, FixIntegrity });
             else
             {
                 stepList = new List<Step>(new Step[] {
-                    Catlg_addSelf,
+                    Item_addSelf,
 
                     CTPT_addBrushTexture,
                     CTPT_addBrushShape,
@@ -2477,14 +2499,21 @@ namespace ObjectCloner
             lastStepInChain = None;
         }
 
-        void CWAL_Steps()
+        void CFIR_Steps(out List<Step> stepList, out Step lastStepInChain)
+        {
+            stepList = new List<Step>(new Step[] { Item_addSelf, Item_findObjds, setupObjdStepList, Modular_Main, SlurpThumbnails, });
+            if (mode == Mode.Fix) stepList.Add(FixIntegrity);
+            lastStepInChain = None;
+        }
+
+        void CWAL_Steps(out List<Step> stepList, out Step lastStepInChain)
         {
             if (ckbCatlgDetails.Checked) // Implies we're Fixing
-                stepList = new List<Step>(new Step[] { Catlg_addSelf, FixIntegrity });
+                stepList = new List<Step>(new Step[] { Item_addSelf, FixIntegrity });
             else
             {
                 stepList = new List<Step>(new Step[] {
-                    Catlg_addSelf,
+                    Item_addSelf,
 
                     // OBJD_SlurpTGIs if NOT default textures only
                     Catlg_getVPXY,
@@ -2511,13 +2540,11 @@ namespace ObjectCloner
             lastStepInChain = MODLs_SlurpTXTCs;
         }
 
-        void Modular_Steps() { }
-
         Dictionary<Step, string> StepText;
         void SetStepText()
         {
             StepText = new Dictionary<Step, string>();
-            StepText.Add(Catlg_addSelf, "Add selected item");
+            StepText.Add(Item_addSelf, "Add selected item");
 
             StepText.Add(OBJD_getOBKJ, "Find OBJK");
             StepText.Add(OBJD_addOBJKref, "Add OBJK");
@@ -2539,9 +2566,25 @@ namespace ObjectCloner
             StepText.Add(SlurpThumbnails, "Add thumbnails");
             StepText.Add(CWAL_SlurpThumbnails, "Add thumbnails");
             StepText.Add(FixIntegrity, "Fix integrity step");
+
+            StepText.Add(Item_findObjds, "Find OBJDs from MDLR/CFIR");
+            StepText.Add(setupObjdStepList, "Get the OBJD step list");
+            StepText.Add(Modular_Main, "Drive the modular process");
         }
 
-        void Catlg_addSelf() { Add("clone", selectedItem.tgi); }
+        void Item_addSelf() { Add("clone", selectedItem.tgi); }
+        void Catlg_SlurpTGIs() { SlurpTGIsFromField("clone", (AResource)selectedItem.Resource); }
+        void Catlg_getVPXY()
+        {
+            vpxyItems = new List<Item>();
+            foreach (TGI tgi in (AResource.TGIBlockList)selectedItem.Resource["TGIBlocks"].Value)
+            {
+                if (tgi.t != 0x736884F1) continue;
+                Item vpxy = new Item(new RIE(objPkgs, tgi));
+                if (vpxy.Resource != null)
+                    vpxyItems.Add(vpxy);
+            }
+        }
 
         #region OBJD Steps
         void OBJD_getOBKJ()
@@ -2576,19 +2619,6 @@ namespace ObjectCloner
             }
         }
         #endregion
-
-        void Catlg_SlurpTGIs() { SlurpTGIsFromField("clone", (AResource)selectedItem.Resource); }
-        void Catlg_getVPXY()
-        {
-            vpxyItems = new List<Item>();
-            foreach (TGI tgi in (AResource.TGIBlockList)selectedItem.Resource["TGIBlocks"].Value)
-            {
-                if (tgi.t != 0x736884F1) continue;
-                Item vpxy = new Item(new RIE(objPkgs, tgi));
-                if (vpxy.Resource != null)
-                    vpxyItems.Add(vpxy);
-            }
-        }
 
         void CTPT_addBrushTexture() { Add("ctpt_BrushTexture", (AResource.TGIBlock)selectedItem.Resource["BrushTexture"].Value); }
         void CTPT_addBrushShape() { Add("ctpt_BrushShape", (AResource.TGIBlock)selectedItem.Resource["BrushShape"].Value); }
@@ -2646,6 +2676,51 @@ namespace ObjectCloner
                     SlurpTGIsFromTGI("modl[" + i + "]" + ".txtc[" + j + "]", tgib);
                 }
             }
+        }
+
+        List<Item> objdList;
+        void Item_findObjds()
+        {
+            objdList = new List<Item>();
+            foreach (TGI tgi in (AResource.TGIBlockList)selectedItem.Resource["TGIBlocks"].Value)
+            {
+                if (tgi.t != 0x319E4F1D) continue;
+                Item objd = new Item(new RIE(objPkgs, tgi));
+                if (objd.Resource != null)
+                    objdList.Add(objd);
+            }
+        }
+
+        List<Step> objdSteps;
+        void setupObjdStepList() { SetStepList(objdList[0], out objdSteps); while (objdSteps.Contains(FixIntegrity)) objdSteps.Remove(FixIntegrity); }
+
+        void Modular_Main()
+        {
+            Item realSelectedItem = selectedItem;
+            int realStepNum = stepNum;
+            Step mdlrStep;
+            Dictionary<string, TGI> MDLRtgiLookup = new Dictionary<string, TGI>();
+            foreach (var kvp in tgiLookup) MDLRtgiLookup.Add(kvp.Key, kvp.Value);
+
+            for (int i = 0; i < objdList.Count; i++)
+            {
+                tgiLookup = new Dictionary<string, TGI>();
+                selectedItem = objdList[i];
+                stepNum = 0;
+                while (stepNum < objdSteps.Count)
+                {
+                    mdlrStep = objdSteps[stepNum];
+                    updateProgress(true, StepText[mdlrStep], true, objdSteps.Count - 1, true, stepNum);
+                    Application.DoEvents();
+                    stepNum++;
+                    mdlrStep();
+                }
+                foreach (var kvp in tgiLookup) MDLRtgiLookup.Add("objd[" + i + "]." + kvp.Key, kvp.Value);
+            }
+
+            selectedItem = realSelectedItem;
+            stepNum = realStepNum;
+            tgiLookup = MDLRtgiLookup;
         }
 
         //Bring in all resources from ...\The Sims 3\Thumbnails\ALLThumbnails.package that match the instance number of the OBJD
@@ -2722,10 +2797,14 @@ namespace ObjectCloner
             if (ckbNoOBJD.Checked || ckbCatlgDetails.Checked)
                 oldToNew.Add(selectedItem.tgi.i, selectedItem.tgi.i);
 
-            // Renumber the PNGInstance we're referencing
-            ulong PngInstance = (ulong)((AApiVersionedFields)selectedItem.Resource["CommonBlock"].Value)["PngInstance"].Value;
-            if (PngInstance != 0)
-                oldToNew.Add(PngInstance, CreateInstance());
+            ulong PngInstance = 0;
+            if (selectedItem.tgi.t != catalogTypes[1])
+            {
+                // Renumber the PNGInstance we're referencing
+                PngInstance = (ulong)((AApiVersionedFields)selectedItem.Resource["CommonBlock"].Value)["PngInstance"].Value;
+                if (PngInstance != 0)
+                    oldToNew.Add(PngInstance, CreateInstance());
+            }
 
 
             //Prevent anything getting renumbered
@@ -2769,9 +2848,12 @@ namespace ObjectCloner
             //tgiToItem -- List of tgis for cloned object, *includes* name map and stbls now -- should only include references to things in package
             //rcols -- those tgiToItem values that refer to an RCOL resource
 
+            Item catlgItem = selectedItem;
+            if (selectedItem.tgi.t == catalogTypes[1])
+                catlgItem = CatlgForMdlr(catlgItem);
 
-            nameGUID = (ulong)((AApiVersionedFields)selectedItem.Resource["CommonBlock"].Value)["NameGUID"].Value;
-            descGUID = (ulong)((AApiVersionedFields)selectedItem.Resource["CommonBlock"].Value)["DescGUID"].Value;
+            nameGUID = (ulong)((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["NameGUID"].Value;
+            descGUID = (ulong)((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["DescGUID"].Value;
 
             newNameGUID = FNV64.GetHash("CatalogObjects/Name:" + UniqueObject);
             newDescGUID = FNV64.GetHash("CatalogObjects/Description:" + UniqueObject);
@@ -2786,13 +2868,13 @@ namespace ObjectCloner
 
             resourceList.Add("Old NameGUID: 0x" + nameGUID.ToString("X16") + " --> New NameGUID: 0x" + newNameGUID.ToString("X16"));
             resourceList.Add("Old DescGUID: 0x" + descGUID.ToString("X16") + " --> New DescGUID: 0x" + newDescGUID.ToString("X16"));
-            resourceList.Add("Old ObjName: \"" + ((AApiVersionedFields)selectedItem.Resource["CommonBlock"].Value)["Name"] + "\" --> New Name: \"CatalogObjects/Name:" + UniqueObject + "\"");
-            resourceList.Add("Old ObjDesc: \"" + ((AApiVersionedFields)selectedItem.Resource["CommonBlock"].Value)["Desc"] + "\" --> New Desc: \"CatalogObjects/Description:" + UniqueObject + "\"");
+            resourceList.Add("Old ObjName: \"" + ((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["Name"] + "\" --> New Name: \"CatalogObjects/Name:" + UniqueObject + "\"");
+            resourceList.Add("Old ObjDesc: \"" + ((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["Desc"] + "\" --> New Desc: \"CatalogObjects/Description:" + UniqueObject + "\"");
             
 
             resourceList.Add("Old CatlgName: \"" + English[nameGUID] + "\" --> New CatlgName: \"" + tbCatlgName.Text + "\"");
             resourceList.Add("Old CatlgDesc: \"" + English[descGUID] + "\" --> New CatlgDesc: \"" + tbCatlgDesc.Text + "\"");
-            resourceList.Add("Old Price: " + ((AApiVersionedFields)selectedItem.Resource["CommonBlock"].Value)["Price"] + " --> New Price: " + float.Parse(tbPrice.Text));
+            resourceList.Add("Old Price: " + ((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["Price"] + " --> New Price: " + float.Parse(tbPrice.Text));
             if (PngInstance != 0)
                 resourceList.Add("Old PngInstance: " + ((AApiVersionedFields)selectedItem.Resource["CommonBlock"].Value)["PngInstance"] + " --> New PngInstance: 0x" + oldToNew[PngInstance].ToString("X16"));
         }
