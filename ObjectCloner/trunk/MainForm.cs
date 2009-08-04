@@ -180,6 +180,7 @@ namespace ObjectCloner
             haveLoaded = false;
             thumb = null;
             english = null;
+            step = None;
             if (currentPackage != "")
             {
                 if (objPkgs.Count > 0) s3pi.Package.Package.ClosePackage(0, objPkgs[0]);
@@ -1924,14 +1925,10 @@ namespace ObjectCloner
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, false);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, false);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBC, false);
-            ckbDefault.Enabled = mode == Mode.Clone;
+
+            tlpButtons.Enabled = false;
             ckbDefault.Checked = mode == Mode.Clone;
-            ckbPadSTBLs.Enabled = mode == Mode.Clone;
-            ckbPadSTBLs.Checked = false;
-            ckbNoOBJD.Enabled = mode == Mode.Fix;
-            ckbNoOBJD.Checked = false;
-            ckbCatlgDetails.Enabled = mode == Mode.Fix;
-            ckbCatlgDetails.Checked = false;
+            ckbPadSTBLs.Checked = ckbNoOBJD.Checked = ckbCatlgDetails.Checked = false;
 
             DoWait("Please wait, loading object catalog...");
             Application.DoEvents();
@@ -1950,6 +1947,7 @@ namespace ObjectCloner
 
         #region Cloning menu
         public static uint[] catalogTypes = new uint[] {
+            //NOTE: the order of these is IMPORTANT - the index numbers are used to identfy the types
             0x319E4F1D, //0: Catalog Object
             0xCF9A4ACE, //1: Modular Resource
             0x0418FE2A, //2: Catalog Fence
@@ -1974,14 +1972,16 @@ namespace ObjectCloner
                 this.Enabled = false;
                 Application.DoEvents();
                 int i = ((int)mn.mn) - ((int)MenuBarWidget.MB.MBC_objd);
-                int j = new List<uint>(catalogTypes).IndexOf(currentCatalogType);
-                if (i != j)
-                {
-                    if (j >= 0) menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + j), false);
-                    menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + i), true);
-                }
                 if (i >= 0 && i < catalogTypes.Length)
+                {
+                    int j = new List<uint>(catalogTypes).IndexOf(currentCatalogType);
+                    if (i != j)
+                    {
+                        if (j >= 0) menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + j), false);
+                        menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + i), true);
+                    }
                     cloneType(catalogTypes[i]);
+                }
             }
             finally { this.Enabled = true; }
         }
@@ -2245,6 +2245,7 @@ namespace ObjectCloner
         void setButtons(Page p, Step s)
         {
             Application.DoEvents();
+            tlpButtons.Enabled = true;
 
             bool flag = p != Page.Resources;
             ckbPadSTBLs.Enabled = ckbDefault.Enabled = mode == Mode.Clone && flag;
@@ -2430,26 +2431,24 @@ namespace ObjectCloner
 
         void OBJD_Steps(out List<Step> stepList, out Step lastStepInChain)
         {
-            if (ckbCatlgDetails.Checked) // Implies we're Fixing
-                stepList = new List<Step>(new Step[] { Item_addSelf, FixIntegrity });
-            else
+            stepList = new List<Step>(new Step[] { Item_addSelf, });
+            if (!ckbCatlgDetails.Checked)
             {
-                stepList = new List<Step>(new Step[] {
-                    Item_addSelf,
-
+                stepList.AddRange(new Step[] {
                     OBJD_getOBKJ,
-                    // OBJD_addOBJKref or OBJD_SlurpTGIs
                     OBJK_SlurpTGIs,
                     OBJK_getVPXY,
+                    Catlg_addVPXYs,
 
                     VPXYs_SlurpTGIs,
-                    // VPXYs_getKinXML if NOT default textures only
+                    // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default textures only
                     VPXYs_getMODLs,
+
                     MODLs_SlurpTGIs,
                     MODLs_SlurpMLODs,
                     MODLs_SlurpTXTCs,
+
                     SlurpThumbnails,
-                    // FixIntegrity if fixing
                 });
                 if (ckbDefault.Checked)
                 {
@@ -2457,11 +2456,12 @@ namespace ObjectCloner
                 }
                 else
                 {
-                    stepList.Insert(stepList.IndexOf(OBJK_SlurpTGIs), Catlg_SlurpTGIs);
-                    stepList.Insert(stepList.IndexOf(VPXYs_getMODLs), VPXYs_getKinXML);
+                    stepList.Insert(stepList.IndexOf(OBJD_getOBKJ), Catlg_SlurpTGIs);
+                    stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinXML);
+                    stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinMTST);
                 }
-                if (mode == Mode.Fix) stepList.Add(FixIntegrity);
             }
+            if (mode == Mode.Fix) stepList.Add(FixIntegrity);
             lastStepInChain = MODLs_SlurpTXTCs;
         }
 
@@ -2474,25 +2474,34 @@ namespace ObjectCloner
 
         void Common_Steps(out List<Step> stepList, out Step lastStepInChain)
         {
-            if (ckbCatlgDetails.Checked) // Implies we're Fixing
-                stepList = new List<Step>(new Step[] { Item_addSelf, FixIntegrity });
-            else
+            stepList = new List<Step>(new Step[] { Item_addSelf, });
+            if (!ckbCatlgDetails.Checked)
             {
-                stepList = new List<Step>(new Step[] {
-                    Item_addSelf,
-
+                stepList.AddRange(new Step[] {
                     Catlg_getVPXY,
+                    Catlg_addVPXYs,
 
                     VPXYs_SlurpTGIs,
+                    // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default textures only
                     VPXYs_getMODLs,
+
                     MODLs_SlurpTGIs,
                     MODLs_SlurpMLODs,
                     MODLs_SlurpTXTCs,
+
                     SlurpThumbnails,
-                    // FixIntegrity if fixing
                 });
-                if (mode == Mode.Fix) stepList.Add(FixIntegrity);
+                if (ckbDefault.Checked)
+                {
+                }
+                else
+                {
+                    //stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpTGIs);// Causes problems for CSTR and doesn't help for others
+                    stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinXML);
+                    stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinMTST);
+                }
             }
+            if (mode == Mode.Fix) stepList.Add(FixIntegrity);
             lastStepInChain = MODLs_SlurpTXTCs;
         }
 
@@ -2524,24 +2533,22 @@ namespace ObjectCloner
 
         void CWAL_Steps(out List<Step> stepList, out Step lastStepInChain)
         {
-            if (ckbCatlgDetails.Checked) // Implies we're Fixing
-                stepList = new List<Step>(new Step[] { Item_addSelf, FixIntegrity });
-            else
+            stepList = new List<Step>(new Step[] { Item_addSelf, });
+            if (!ckbCatlgDetails.Checked)
             {
-                stepList = new List<Step>(new Step[] {
-                    Item_addSelf,
-
-                    // OBJD_SlurpTGIs if NOT default textures only
+                stepList.AddRange(new Step[] {
                     Catlg_getVPXY,
+                    Catlg_addVPXYs,
 
                     VPXYs_SlurpTGIs,
-                    // VPXYs_getKinXML if NOT default textures only
+                    // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default textures only
                     VPXYs_getMODLs,
+
                     MODLs_SlurpTGIs,
                     MODLs_SlurpMLODs,
                     MODLs_SlurpTXTCs,
+
                     CWAL_SlurpThumbnails,
-                    // FixIntegrity if fixing
                 });
                 if (ckbDefault.Checked)
                 {
@@ -2549,10 +2556,11 @@ namespace ObjectCloner
                 else
                 {
                     stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpTGIs);
-                    stepList.Insert(stepList.IndexOf(VPXYs_getMODLs), VPXYs_getKinXML);
+                    stepList.Insert(stepList.IndexOf(CWAL_SlurpThumbnails), VPXYs_getKinXML);
+                    stepList.Insert(stepList.IndexOf(CWAL_SlurpThumbnails), VPXYs_getKinMTST);
                 }
-                if (mode == Mode.Fix) stepList.Add(FixIntegrity);
             }
+            if (mode == Mode.Fix) stepList.Add(FixIntegrity);
             lastStepInChain = MODLs_SlurpTXTCs;
         }
 
@@ -2564,7 +2572,7 @@ namespace ObjectCloner
 
             StepText.Add(OBJD_getOBKJ, "Find OBJK");
             StepText.Add(OBJD_addOBJKref, "Add OBJK");
-            StepText.Add(Catlg_SlurpTGIs, "OBJD-referenced resources");
+            StepText.Add(Catlg_SlurpTGIs, "Catalog object-referenced resources");
             StepText.Add(OBJK_SlurpTGIs, "OBJK-referenced resources");
             StepText.Add(OBJK_getVPXY, "Find OBJK-referenced VPXY");
 
@@ -2573,8 +2581,10 @@ namespace ObjectCloner
             StepText.Add(CTPT_addBrushTexture, "Add Brush Texture");
             StepText.Add(CTPT_addBrushShape, "Add Brush Shape");
 
+            StepText.Add(Catlg_addVPXYs, "Add VPXY resources");
             StepText.Add(VPXYs_SlurpTGIs, "VPXY-referenced resources");
             StepText.Add(VPXYs_getKinXML, "Preset XML (same instance as VPXY)");
+            StepText.Add(VPXYs_getKinMTST, "MTST (same instance as VPXY)");
             StepText.Add(VPXYs_getMODLs, "Find VPXY-referenced MODLs");
             StepText.Add(MODLs_SlurpTGIs, "MODL-referenced resources");
             StepText.Add(MODLs_SlurpMLODs, "MLOD-referenced resources");
@@ -2600,7 +2610,9 @@ namespace ObjectCloner
                 if (vpxy.Resource != null)
                     vpxyItems.Add(vpxy);
             }
+            if (vpxyItems.Count == 0) stepNum = lastInChain;
         }
+        void Catlg_addVPXYs() { for (int i = 0; i < vpxyItems.Count; i++) Add("vpxy[" + i + "]", vpxyItems[i].tgi); }
 
         #region OBJD Steps
         void OBJD_getOBKJ()
@@ -2609,7 +2621,7 @@ namespace ObjectCloner
             IList<AResource.TGIBlock> ltgi = (IList<AResource.TGIBlock>)selectedItem.Resource["TGIBlocks"].Value;
             AResource.TGIBlock objkTGI = ltgi[(int)index];
             objkItem = new Item(objPkgs, objkTGI);
-            if (ckbDefault.Checked && objkItem == null) stepNum = lastInChain;
+            if (objkItem == null) stepNum = lastInChain;
         }
         void OBJD_addOBJKref() { Add("objk", objkItem.tgi); }
         void OBJK_SlurpTGIs() { SlurpTGIsFromField("objk", (AResource)objkItem.Resource); }
@@ -2633,6 +2645,7 @@ namespace ObjectCloner
                 if (vpxy.ResourceIndexEntry != null && vpxy.Resource != null)
                     vpxyItems.Add(vpxy);
             }
+            if (vpxyItems.Count == 0) stepNum = lastInChain;
         }
         #endregion
 
@@ -2652,6 +2665,12 @@ namespace ObjectCloner
             for (int i = 0; i < vpxyItems.Count; i++)
                 SlurpKindred("vpxy[" + i + "].PresetXML", objPkgs, new string[] { "ResourceType", "Instance" },
                     new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0333406C), new TypedValue(typeof(ulong), vpxyItems[i].tgi.i) });
+        }
+        void VPXYs_getKinMTST()
+        {
+            for (int i = 0; i < vpxyItems.Count; i++)
+                SlurpKindred("vpxy[" + i + "].mtst", objPkgs, new string[] { "ResourceType", "Instance" },
+                    new TypedValue[] { new TypedValue(typeof(uint), (uint)0x02019972), new TypedValue(typeof(ulong), vpxyItems[i].tgi.i) });
         }
         void VPXYs_getMODLs()
         {
