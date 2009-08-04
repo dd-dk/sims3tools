@@ -1781,7 +1781,8 @@ namespace ObjectCloner
         private void SlurpTGIsFromField(string key, AApiVersionedFields field)
         {
             Type t = field.GetType();
-            if (typeof(AResource.TGIBlock).IsAssignableFrom(t))
+            if (typeof(GenericRCOLResource.ChunkEntry).IsAssignableFrom(t)) { }
+            else if (typeof(AResource.TGIBlock).IsAssignableFrom(t))
             {
                 Add(key, "" + (AResource.TGIBlock)field);
             }
@@ -2626,10 +2627,10 @@ namespace ObjectCloner
             }
 
             vpxyItems = new List<Item>();
-            foreach (TGI tgi in (AResource.TGIBlockList)objkItem.Resource["TGIBlocks"].Value)
+            foreach (TGI tgi in (IList<AResource.TGIBlock>)objkItem.Resource["TGIBlocks"].Value)
             {
                 Item vpxy = new Item(new RIE(objPkgs, tgi));
-                if (vpxy.Resource != null)
+                if (vpxy.ResourceIndexEntry != null && vpxy.Resource != null)
                     vpxyItems.Add(vpxy);
             }
         }
@@ -2638,7 +2639,14 @@ namespace ObjectCloner
         void CTPT_addBrushTexture() { Add("ctpt_BrushTexture", (AResource.TGIBlock)selectedItem.Resource["BrushTexture"].Value); }
         void CTPT_addBrushShape() { Add("ctpt_BrushShape", (AResource.TGIBlock)selectedItem.Resource["BrushShape"].Value); }
 
-        void VPXYs_SlurpTGIs() { for (int i = 0; i < vpxyItems.Count; i++) SlurpTGIsFromField("vpxy[" + i + "]", (AResource)vpxyItems[i].Resource); }
+        void VPXYs_SlurpTGIs()
+        {
+            for (int i = 0; i < vpxyItems.Count; i++)
+            {
+                VPXY vpxyChunk = ((GenericRCOLResource)vpxyItems[i].Resource).ChunkEntries[0].RCOLBlock as VPXY;
+                SlurpTGIsFromField("vpxy[" + i + "]", vpxyChunk);
+            }
+        }
         void VPXYs_getKinXML()
         {
             for (int i = 0; i < vpxyItems.Count; i++)
@@ -2668,6 +2676,7 @@ namespace ObjectCloner
         void MODLs_SlurpTGIs() { for (int i = 0; i < modlItems.Count; i++) SlurpTGIsFromField("modl[" + i + "]", (AResource)modlItems[i].Resource); }
         void MODLs_SlurpMLODs()
         {
+            int k = 0;
             for (int i = 0; i < modlItems.Count; i++)
             {
                 GenericRCOLResource rcol = (modlItems[i].Resource as GenericRCOLResource);
@@ -2675,12 +2684,14 @@ namespace ObjectCloner
                 {
                     AResource.TGIBlock tgib = rcol.Resources[j];
                     if (tgib.ResourceType != 0x01D10F34) continue;
-                    SlurpTGIsFromTGI("modl[" + i + "]" + ".mlod[" + j + "]", tgib);
+                    SlurpTGIsFromTGI("modl[" + i + "].mlod[" + k + "]", tgib);
+                    k++;
                 }
             }
         }
         void MODLs_SlurpTXTCs()
         {
+            int k = 0;
             for (int i = 0; i < modlItems.Count; i++)
             {
                 GenericRCOLResource rcol = (modlItems[i].Resource as GenericRCOLResource);
@@ -2688,7 +2699,8 @@ namespace ObjectCloner
                 {
                     AResource.TGIBlock tgib = rcol.Resources[j];
                     if (tgib.ResourceType != 0x033A1435) continue;
-                    SlurpTGIsFromTGI("modl[" + i + "]" + ".txtc[" + j + "]", tgib);
+                    SlurpTGIsFromTGI("modl[" + i + "].txtc[" + k + "]", tgib);
+                    k++;
                 }
             }
         }
@@ -2785,34 +2797,64 @@ namespace ObjectCloner
         //Fix integrity step
         void FixIntegrity()
         {
-            //tgiLookup -- List of resources for cloned object, excludes name map and stbls
+            // A list of the TGIs we are going to renumber and the resource that "owns" them
+            tgiToItem = new Dictionary<TGI, Item>();
 
-            if (!ckbCatlgDetails.Checked)//No point adding NMAP
+            // We need to process anything we found in the previous steps
+            foreach (var kvp in tgiLookup)
             {
-                IList<IResourceIndexEntry> lnmaprie = objPkgs[0].FindAll(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C), });
-                foreach (IResourceIndexEntry rie in lnmaprie)
-                {
-                    TGI tgi = new TGI(rie);
-                    tgiLookup.Add("namemap", tgi);
-                }
+                if (kvp.Value == new TGI(0, 0, 0)) continue;
+                if (tgiToItem.ContainsKey(kvp.Value)) continue; // seen this TGI before
+                Item item = new Item(objPkgs, kvp.Value);
+                if (item.ResourceIndexEntry == null) continue; // TGI is not a packed resource
+                tgiToItem.Add(kvp.Value, item);
             }
 
+            // We need to process STBLs
             IList<IResourceIndexEntry> lstblrie = objPkgs[0].FindAll(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x220557DA), });
             foreach (IResourceIndexEntry rie in lstblrie)
             {
                 TGI tgi = new TGI(rie);
-                tgiLookup.Add("lang_" + (tgi.i >> 56).ToString("X2"), tgi);
+                if (!tgiToItem.ContainsKey(tgi))
+                    tgiToItem.Add(tgi, new Item(new RIE(objPkgs[0], rie)));
             }
 
-            //tgiLookup -- List of resources for cloned object, *includes* name map and stbls now -- may include references to things not in package
+            // We may also need to process RCOL internal chunks and NameMaps but only if we're renumbering
+            if (!ckbCatlgDetails.Checked)
+            {
+                //If there are internal chunk references not covered by the above, we also need to add them
+                Dictionary<TGI, Item> rcolChunks = new Dictionary<TGI, Item>();
+                foreach (var kvp in tgiToItem)
+                {
+                    if (!typeof(GenericRCOLResource).IsAssignableFrom(kvp.Value.Resource.GetType())) continue;
 
+                    foreach (GenericRCOLResource.ChunkEntry chunk in (kvp.Value.Resource as GenericRCOLResource).ChunkEntries)
+                    {
+                        if (chunk.TGIBlock == new TGI(0, 0, 0)) continue;
+                        if (tgiToItem.ContainsKey(chunk.TGIBlock)) continue; // External reference and we've seen it
+                        if (rcolChunks.ContainsKey(chunk.TGIBlock)) continue; // Internal reference and we've seen it
+                        rcolChunks.Add(chunk.TGIBlock, kvp.Value);
+                    }
+                }
+                foreach (var kvp in rcolChunks) tgiToItem.Add(kvp.Key, kvp.Value);
+
+                // Add newest namemap
+                IList<IResourceIndexEntry> lnmaprie = objPkgs[0].FindAll(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C), });
+                foreach (IResourceIndexEntry rie in lnmaprie)
+                {
+                    TGI tgi = new TGI(rie);
+                    if (!tgiToItem.ContainsKey(tgi))
+                        tgiToItem.Add(tgi, new Item(new RIE(objPkgs[0], rie)));
+                }
+            }
+
+            // A list to hold the new numbers
             oldToNew = new Dictionary<ulong, ulong>();
 
-            // Prevent OBJD and related resources getting renumbered
             if (ckbNoOBJD.Checked || ckbCatlgDetails.Checked)
-                oldToNew.Add(selectedItem.tgi.i, selectedItem.tgi.i);
+                oldToNew.Add(selectedItem.tgi.i, selectedItem.tgi.i);//Prevent selected item getting renumbered
             else if (selectedItem.tgi.t == catalogTypes[1])
-                oldToNew.Add(selectedItem.tgi.i, FNV64.GetHash(UniqueObject));
+                oldToNew.Add(selectedItem.tgi.i, FNV64.GetHash(UniqueObject));//MDLR needs its IID as a specific hash value
 
             ulong PngInstance = 0;
             if (selectedItem.tgi.t != catalogTypes[1])
@@ -2823,12 +2865,11 @@ namespace ObjectCloner
                     oldToNew.Add(PngInstance, CreateInstance());
             }
 
-
-            //Prevent anything getting renumbered
             if (!ckbCatlgDetails.Checked)
             {
+                // Generate new numbers for everything we've decided to renumber
                 ulong langInst = FNV64.GetHash("StringTable:" + UniqueObject) >> 8;
-                foreach (TGI tgi in tgiLookup.Values)
+                foreach (TGI tgi in tgiToItem.Keys)
                 {
                     if (!oldToNew.ContainsKey(tgi.i))
                     {
@@ -2840,42 +2881,9 @@ namespace ObjectCloner
                 }
             }
 
-
-            tgiToItem = new Dictionary<TGI, Item>();
-
-            // Find the resource for each TGI we've identified
-            foreach (var kvp in tgiLookup)
-            {
-                if (kvp.Value == new TGI(0, 0, 0)) continue;
-                if (tgiToItem.ContainsKey(kvp.Value)) continue; // seen this TGI before
-                Item item = new Item(objPkgs, kvp.Value);
-                if (item.ResourceIndexEntry == null) continue; // TGI is not a packed resource
-                tgiToItem.Add(kvp.Value, item);
-            }
-
-            //Now, if there are internal chunk references not covered by the above, we also need to add them
-            Dictionary<TGI, Item> rcolChunks = new Dictionary<TGI, Item>();
-            foreach (var kvp in tgiToItem)
-            {
-                if (!typeof(GenericRCOLResource).IsAssignableFrom(kvp.Value.Resource.GetType())) continue;
-
-                foreach (GenericRCOLResource.ChunkEntry chunk in (kvp.Value.Resource as GenericRCOLResource).ChunkEntries)
-                {
-                    if (!tgiLookup.ContainsValue(chunk.TGIBlock)) continue; // We don't want this one
-                    if (tgiToItem.ContainsKey(chunk.TGIBlock)) continue; // External reference and we've seen it
-                    if (rcolChunks.ContainsKey(chunk.TGIBlock)) continue; // Internal reference and we've seen it
-                    rcolChunks.Add(chunk.TGIBlock, kvp.Value);
-                }
-            }
-            foreach (var kvp in rcolChunks) tgiToItem.Add(kvp.Key, kvp.Value);
-
-            //tgiToItem -- List of tgis for cloned object, *includes* name map and stbls now -- should only include references to things in package
-
             Item catlgItem = selectedItem;
             if (selectedItem.tgi.t == catalogTypes[1])
-            {
                 catlgItem = CatlgForMdlr(catlgItem);
-            }
 
             nameGUID = (ulong)((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["NameGUID"].Value;
             descGUID = (ulong)((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["DescGUID"].Value;
