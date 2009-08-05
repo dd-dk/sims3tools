@@ -116,8 +116,7 @@ namespace S3PIDemoFE
             Filename = "";
             if (CurrentPackage != null) { e.Cancel = true; this.Enabled = true; return; }
 
-            OnSaveSettings(this, new EventArgs());
-            S3PIDemoFE.Properties.Settings.Default.Save();
+            saveSettings();
         }
 
         private void MainForm_PackageFilenameChanged(object sender, EventArgs e)
@@ -870,6 +869,7 @@ namespace S3PIDemoFE
                 {
                     case MenuBarWidget.MB.MBS_externals: settingsExternalPrograms(); break;
                     case MenuBarWidget.MB.MBS_bookmarks: settingsOrganiseBookmarks(); break;
+                    case MenuBarWidget.MB.MBS_saveSettings: saveSettings(); break;
                 }
             }
             finally { this.Enabled = true; }
@@ -940,6 +940,12 @@ namespace S3PIDemoFE
             Settings.OrganiseBookmarksDialog obd = new S3PIDemoFE.Settings.OrganiseBookmarksDialog();
             obd.ShowDialog();
             menuBarWidget1.UpdateBookmarks();
+        }
+
+        private void saveSettings()
+        {
+            OnSaveSettings(this, new EventArgs());
+            S3PIDemoFE.Properties.Settings.Default.Save();
         }
         #endregion
 

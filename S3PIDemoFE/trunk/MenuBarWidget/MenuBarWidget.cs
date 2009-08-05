@@ -51,6 +51,7 @@ namespace S3PIDemoFE
                 fNVHashToolStripMenuItem, searchToolStripMenuItem,
                 //Settings
                 externalProgramsToolStripMenuItem, organiseBookmarksToolStripMenuItem,
+                saveSettingsToolStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
@@ -78,6 +79,7 @@ namespace S3PIDemoFE
             MBR_compressed, MBR_isdeleted, MBR_details,
             MBT_fnvHash, MBT_search,
             MBS_externals, MBS_bookmarks,
+            MBS_saveSettings,
             MBH_contents, MBH_about, MBH_warranty, MBH_licence,
         }
 

@@ -69,13 +69,15 @@
             this.searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.externalProgramsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.organiseBookmarksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.organiseBookmarksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
+            this.saveSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -428,7 +430,9 @@
             // 
             this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.externalProgramsToolStripMenuItem,
-            this.organiseBookmarksToolStripMenuItem});
+            this.organiseBookmarksToolStripMenuItem,
+            this.toolStripSeparator8,
+            this.saveSettingsToolStripMenuItem});
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
             this.settingsToolStripMenuItem.Size = new System.Drawing.Size(58, 20);
             this.settingsToolStripMenuItem.Text = "&Settings";
@@ -440,6 +444,13 @@
             this.externalProgramsToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
             this.externalProgramsToolStripMenuItem.Text = "External &Programs...";
             this.externalProgramsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
+            // organiseBookmarksToolStripMenuItem
+            // 
+            this.organiseBookmarksToolStripMenuItem.Name = "organiseBookmarksToolStripMenuItem";
+            this.organiseBookmarksToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.organiseBookmarksToolStripMenuItem.Text = "Organise Boo&kmarks...";
+            this.organiseBookmarksToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -488,12 +499,17 @@
             this.licenceToolStripMenuItem.Text = "&Licence...";
             this.licenceToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
             // 
-            // organiseBookmarksToolStripMenuItem
+            // toolStripSeparator8
             // 
-            this.organiseBookmarksToolStripMenuItem.Name = "organiseBookmarksToolStripMenuItem";
-            this.organiseBookmarksToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
-            this.organiseBookmarksToolStripMenuItem.Text = "Organise Boo&kmarks...";
-            this.organiseBookmarksToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            this.toolStripSeparator8.Name = "toolStripSeparator8";
+            this.toolStripSeparator8.Size = new System.Drawing.Size(191, 6);
+            // 
+            // saveSettingsToolStripMenuItem
+            // 
+            this.saveSettingsToolStripMenuItem.Name = "saveSettingsToolStripMenuItem";
+            this.saveSettingsToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.saveSettingsToolStripMenuItem.Text = "&Save settings";
+            this.saveSettingsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // MenuBarWidget
             // 
@@ -557,5 +573,7 @@
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem externalProgramsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem organiseBookmarksToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
+        private System.Windows.Forms.ToolStripMenuItem saveSettingsToolStripMenuItem;
     }
 }
