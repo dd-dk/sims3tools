@@ -1845,7 +1845,6 @@ namespace ObjectCloner
                     seen.Add(tgi);
                     i++;
                 }
-                break;
             }
         }
         #endregion
