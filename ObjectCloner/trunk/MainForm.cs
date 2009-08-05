@@ -1299,7 +1299,12 @@ namespace ObjectCloner
                 if (e.arg)
                     CopyableMessageBox.Show("OK", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
                 else
-                    CopyableMessageBox.Show("Save not complete", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
+                {
+                    if (File.Exists(saveFileDialog1.FileName))
+                        CopyableMessageBox.Show("\nSave not complete.\nPlease ensure package is not in use.\n", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
+                    else
+                        CopyableMessageBox.Show("\nSave not complete.\n", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
+                }
                 DisplayResources();
             }
         }
@@ -1415,17 +1420,19 @@ namespace ObjectCloner
                         string desc = lang[descGUID];
 
                         Item newstbl;
+                        TGI newTGI;
                         if (name == null && desc == null)
                         {
                             if (!padSTBLs || english == null) goto skip;
-                            TGI newTGI = new TGI(english.tgi.t, english.tgi.g, english.tgi.i | ((ulong)i << 56));
+                            newTGI = new TGI(english.tgi.t, english.tgi.g, (english.tgi.i & 0xFFFFFFFFFFFF0000) | ((ulong)i << 56));
                             newstbl = NewResource(target, newTGI);
                             name = english[nameGUID];
                             desc = english[descGUID];
                         }
                         else
                         {
-                            newstbl = NewResource(target, lang.tgi);
+                            newTGI = new TGI(lang.tgi.t, lang.tgi.g, lang.tgi.i & 0xFFFFFFFFFFFF0000);
+                            newstbl = NewResource(target, newTGI);
                         }
 
                         IDictionary<ulong, string> outstbl = (IDictionary<ulong, string>)newstbl.Resource;
@@ -1433,11 +1440,11 @@ namespace ObjectCloner
                         if (desc != null) outstbl.Add(descGUID, desc);
                         if (!stopSaving) newstbl.Commit();
 
-                        if (!newnamemap.ContainsKey(lang.tgi.i))
+                        if (!newnamemap.ContainsKey(newTGI.i))
                         {
                             string nmname = fb0nm[lang.tgi.i];
-                            if (nmname != null) { if (!stopSaving) newnamemap.Add(lang.tgi.i, nmname); }
-                            else { if (!stopSaving) newnamemap.Add(lang.tgi.i, String.Format(language_fmt, languages[i], i, english.tgi.i)); }
+                            if (nmname != null) { if (!stopSaving) newnamemap.Add(newTGI.i, nmname); }
+                            else { if (!stopSaving) newnamemap.Add(newTGI.i, String.Format(language_fmt, languages[i], i, english.tgi.i)); }
                         }
 
                     skip:
@@ -1449,14 +1456,18 @@ namespace ObjectCloner
                     if (!stopSaving) newnmap.Commit();
 
                     updateProgress(true, "Saving package...", true, 0, true, 0);
-                    complete = true;
+                    if (!disableCompression)
+                        foreach (IResourceIndexEntry ie in target.GetResourceList) ie.Compressed = 0xffff;
+                    try
+                    {
+                        target.SaveAs(outputPackage);
+                        complete = true;
+                    }
+                    catch { }
                 }
                 catch (ThreadInterruptedException) { }
                 finally
                 {
-                    if (!disableCompression)
-                        foreach (IResourceIndexEntry ie in target.GetResourceList) ie.Compressed = 0xffff;
-                    target.SaveAs(outputPackage);
                     savingComplete(complete);
                 }
             }
@@ -1656,6 +1667,41 @@ namespace ObjectCloner
                         stbl.Add(newDescGUID, desc);
 
                         dirty = true;
+                        #endregion
+                    }
+                    else if (item.ResourceIndexEntry.ResourceType == 0x0333406C)
+                    {
+                        #region XML
+                        StreamReader sr = new StreamReader(item.Resource.Stream, true);
+                        MemoryStream ms = new MemoryStream();
+                        StreamWriter sw = new StreamWriter(ms, sr.CurrentEncoding);
+                        while (!sr.EndOfStream)
+                        {
+                            string line = sr.ReadLine();
+                            int i = line.IndexOf("key:");
+                            while (i >= 0 && i + 22 + 16 < line.Length)
+                            {
+                                string iid = line.Substring(i + 22, 16);
+                                ulong IID;
+                                if (ulong.TryParse(iid, System.Globalization.NumberStyles.HexNumber, null, out IID))
+                                {
+                                    if (oldToNew.ContainsKey(IID))
+                                    {
+                                        string newiid = oldToNew[IID].ToString("X16");
+                                        line = line.Replace(iid, newiid);
+                                        dirty = true;
+                                    }
+                                }
+                                i = line.IndexOf("key:", i + 22 + 16);
+                            }
+                            sw.WriteLine(line);
+                            sw.Flush();
+                            if (dirty)
+                            {
+                                item.Resource.Stream.SetLength(0);
+                                item.Resource.Stream.Write(ms.ToArray(), 0, (int)ms.Length);
+                            }
+                        }
                         #endregion
                     }
                     else
