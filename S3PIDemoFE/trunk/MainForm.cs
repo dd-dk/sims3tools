@@ -135,16 +135,29 @@ namespace S3PIDemoFE
         {
             if (Filename.Length > 0 && File.Exists(Filename))
             {
-                menuBarWidget1.AddRecentFile((ReadWrite ? "1:" : "0:") + Filename);
-                string s = Filename;
-                if (s.Length > 128)
+                try
                 {
-                    s = System.IO.Path.GetDirectoryName(s);
-                    s = s.Substring(Math.Max(0, s.Length - 40));
-                    s = "..." + System.IO.Path.Combine(s, System.IO.Path.GetFileName(Filename));
+                    CurrentPackage = Package.OpenPackage(0, Filename, ReadWrite);
+                    menuBarWidget1.AddRecentFile((ReadWrite ? "1:" : "0:") + Filename);
+                    string s = Filename;
+                    if (s.Length > 128)
+                    {
+                        s = System.IO.Path.GetDirectoryName(s);
+                        s = s.Substring(Math.Max(0, s.Length - 40));
+                        s = "..." + System.IO.Path.Combine(s, System.IO.Path.GetFileName(Filename));
+                    }
+                    this.Text = String.Format("{0}: [{1}] {2}", myName, ReadWrite ? "RW" : "RO", s);
                 }
-                this.Text = String.Format("{0}: [{1}] {2}", myName, ReadWrite ? "RW" : "RO", s);
-                CurrentPackage = Package.OpenPackage(0, Filename, ReadWrite);
+                catch (Exception ex)
+                {
+                    string s = "Could not open package:\n" + Filename + "\n";
+                    for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
+                    for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
+
+                    CopyableMessageBox.Show(this, s,
+                        myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
+                    Filename = "";
+                }
             }
             else
             {
@@ -231,19 +244,7 @@ namespace S3PIDemoFE
                         myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
                     Environment.Exit(1);
                 }
-                try
-                {
-                    Filename = pkg;
-                }
-                catch (Exception ex)
-                {
-                    string s = ex.ToString();
-                    if (ex.InnerException != null)
-                        s += "\n\n-- Inner Exception --\n" + ex.InnerException.ToString();
-                    CopyableMessageBox.Show(this, s,
-                        myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
-                    Environment.Exit(1);
-                }
+                Filename = pkg;
             }
         }
         bool cmdlineTest = false;
@@ -513,10 +514,11 @@ namespace S3PIDemoFE
             }
             catch (Exception ex)
             {
-                string s = String.Format("Error reading _KEY {0:X8}:{1:X8}:{2:X16}", rie.ResourceType, rie.ResourceGroup, rie.Instance);
+                string s = "Resource names cannot be added.  Other than that, you should be fine.  Carry on.";
+                s += String.Format("\n\nError reading _KEY {0:X8}:{1:X8}:{2:X16}", rie.ResourceType, rie.ResourceGroup, rie.Instance);
                 for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
                 for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
-                CopyableMessageBox.Show(s, "s3pe", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                CopyableMessageBox.Show(s, "s3pe", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
                 return false;
             }
             return true;
@@ -537,22 +539,11 @@ namespace S3PIDemoFE
 
             rie.Compressed = (ushort)(compress ? 0xffff : 0);
 
-            try
-            {
-                IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, controlPanel1.HexOnly);
-                package.ReplaceResource(rie, res); // Commit new resource to package
-                IsPackageDirty = true;
+            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, true);//Fail later, if at all
+            package.ReplaceResource(rie, res); // Commit new resource to package
+            IsPackageDirty = true;
 
-                return rie;
-            }
-            catch (Exception ex)
-            {
-                string s = String.Format("Error reading resource {0:X8}:{1:X8}:{2:X16}", rie.ResourceType, rie.ResourceGroup, rie.Instance);
-                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
-                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
-                CopyableMessageBox.Show(s, "s3pe", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
-                return null;
-            }
+            return rie;
         }
 
         private void fileExport()
@@ -629,7 +620,10 @@ namespace S3PIDemoFE
                 }
                 catch (Exception ex)
                 {
-                    CopyableMessageBox.Show("Could not create package:\n" + ex.Message, "Export to package", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                    string s = "Export cannot begin.  Could not create target package:\n" + exportToPackageDialog.FileName + "\n";
+                    for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
+                    for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
+                    CopyableMessageBox.Show(s, "Export to package", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
                     return;
                 }
             }
@@ -651,7 +645,10 @@ namespace S3PIDemoFE
             }
             catch (Exception ex)
             {
-                CopyableMessageBox.Show("Could not open package:\n" + ex.Message, "Export to package", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                string s = "Export cannot begin.  Could not open target package:\n" + exportToPackageDialog.FileName + "\n";
+                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
+                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
+                CopyableMessageBox.Show(s, "Export to package", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
                 return;
             }
 
