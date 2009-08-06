@@ -183,6 +183,7 @@ namespace S3PIDemoFE
         {
             Options = new Dictionary<string, CmdInfo>();
             Options.Add("test", new CmdInfo(CmdLineTest, "Enable facilities still undergoing initial testing"));
+            Options.Add("import", new CmdInfo(CmdLineImport, "Import a batch of files into a new package"));
             Options.Add("help", new CmdInfo(CmdLineHelp, "Display this help"));
         }
         void CmdLine(params string[] args)
@@ -192,9 +193,11 @@ namespace S3PIDemoFE
             List<string> cmdline = new List<string>(args);
             while (cmdline.Count > 0)
             {
-                if (cmdline[0].StartsWith("/") || cmdline[0].StartsWith("-"))
+                string option = cmdline[0];
+                cmdline.RemoveAt(0);
+                if (option.StartsWith("/") || option.StartsWith("-"))
                 {
-                    string option = cmdline[0].Substring(1);
+                    option = option.Substring(1);
                     if (Options.ContainsKey(option.ToLower()))
                     {
                         if (Options[option.ToLower()].cmd(ref cmdline))
@@ -210,7 +213,7 @@ namespace S3PIDemoFE
                 else
                 {
                     if (pkgs.Count == 0)
-                        pkgs.Add(cmdline[0]);
+                        pkgs.Add(option);
                     else
                     {
                         CopyableMessageBox.Show(this, "Can only accept one package on command line",
@@ -218,8 +221,8 @@ namespace S3PIDemoFE
                         Environment.Exit(1);
                     }
                 }
-                cmdline.RemoveAt(0);
             }
+
             foreach (string pkg in pkgs)
             {
                 if (!File.Exists(pkg))
@@ -245,6 +248,26 @@ namespace S3PIDemoFE
         }
         bool cmdlineTest = false;
         bool CmdLineTest(ref List<string> cmdline) { cmdlineTest = true; return false; }
+        bool CmdLineImport(ref List<string> cmdline)
+        {
+            if (cmdline.Count < 1)
+            {
+                CopyableMessageBox.Show(this, "-import requires one or more files",
+                    myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
+                Environment.Exit(1);
+            }
+            List<string> batch = new List<string>();
+            while (cmdline.Count > 0 && cmdline[0][0] != '/' && cmdline[0][0] != '-')
+            {
+                batch.Add(cmdline[0]);
+                cmdline.RemoveAt(0);
+            }
+
+            fileNew();
+            this.Show();
+            importBatch(batch.ToArray());
+            return false;
+        }
         bool CmdLineHelp(ref List<string> cmdline)
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
