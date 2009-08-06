@@ -45,10 +45,9 @@ namespace S3PIDemoFE
         public MainForm()
         {
             InitializeComponent();
-            MainForm_LoadFormSettings();
+            this.Text = myName;
             
             this.lbProgress.Text = "";
-            this.Text = myName;
 
             browserWidget1.Fields = new List<string>(fields.ToArray());
             List<string> filterFields = new List<string>(fields.ToArray());
@@ -66,6 +65,19 @@ namespace S3PIDemoFE
             this.SaveSettings += new EventHandler(browserWidget1.BrowserWidget_SaveSettings);
             this.SaveSettings += new EventHandler(controlPanel1.ControlPanel_SaveSettings);
             //this.SaveSettings += new EventHandler(hexWidget1.HexWidget_SaveSettings);
+        }
+
+        public MainForm(params string[] args)
+            :this()
+        {
+            MainForm_LoadFormSettings();
+            CmdLine(args);//In case of conflict, command line overrides settings
+
+            // Settings for test mode
+            if (cmdlineTest)
+            {
+            }
+
         }
 
         void MainForm_LoadFormSettings()
@@ -157,6 +169,95 @@ namespace S3PIDemoFE
 
         public event EventHandler SaveSettings;
         protected virtual void OnSaveSettings(object sender, EventArgs e) { if (SaveSettings != null) SaveSettings(sender, e); }
+
+        #region Command Line
+        delegate bool CmdLineCmd(ref List<string> cmdline);
+        struct CmdInfo
+        {
+            public CmdLineCmd cmd;
+            public string help;
+            public CmdInfo(CmdLineCmd cmd, string help) : this() { this.cmd = cmd; this.help = help; }
+        }
+        Dictionary<string, CmdInfo> Options;
+        void SetOptions()
+        {
+            Options = new Dictionary<string, CmdInfo>();
+            Options.Add("test", new CmdInfo(CmdLineTest, "Enable facilities still undergoing initial testing"));
+            Options.Add("help", new CmdInfo(CmdLineHelp, "Display this help"));
+        }
+        void CmdLine(params string[] args)
+        {
+            SetOptions();
+            List<string> pkgs = new List<string>();
+            List<string> cmdline = new List<string>(args);
+            while (cmdline.Count > 0)
+            {
+                if (cmdline[0].StartsWith("/") || cmdline[0].StartsWith("-"))
+                {
+                    string option = cmdline[0].Substring(1);
+                    if (Options.ContainsKey(option.ToLower()))
+                    {
+                        if (Options[option.ToLower()].cmd(ref cmdline))
+                            Environment.Exit(0);
+                    }
+                    else
+                    {
+                        CopyableMessageBox.Show(this, "Invalid command line option: '" + option + "'",
+                            myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
+                        Environment.Exit(1);
+                    }
+                }
+                else
+                {
+                    if (pkgs.Count == 0)
+                        pkgs.Add(cmdline[0]);
+                    else
+                    {
+                        CopyableMessageBox.Show(this, "Can only accept one package on command line",
+                            myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
+                        Environment.Exit(1);
+                    }
+                }
+                cmdline.RemoveAt(0);
+            }
+            foreach (string pkg in pkgs)
+            {
+                if (!File.Exists(pkg))
+                {
+                    CopyableMessageBox.Show(this, "File not found:\n" + pkg,
+                        myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
+                    Environment.Exit(1);
+                }
+                try
+                {
+                    Filename = pkg;
+                }
+                catch (Exception ex)
+                {
+                    string s = ex.ToString();
+                    if (ex.InnerException != null)
+                        s += "\n\n-- Inner Exception --\n" + ex.InnerException.ToString();
+                    CopyableMessageBox.Show(this, s,
+                        myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
+                    Environment.Exit(1);
+                }
+            }
+        }
+        bool cmdlineTest = false;
+        bool CmdLineTest(ref List<string> cmdline) { cmdlineTest = true; return false; }
+        bool CmdLineHelp(ref List<string> cmdline)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.AppendLine("The following command line options are available:\n");
+            foreach (var kvp in Options)
+                sb.AppendFormat("{0}  --  {1}\n", kvp.Key, kvp.Value.help);
+            sb.AppendLine("\nOptions must be prefixed with '/' or '-'\n\n");
+            sb.AppendLine("A fully-qualified package name can also be supplied on the command line.");
+
+            CopyableMessageBox.Show(this, sb.ToString(), "Command line options", CopyableMessageBoxIcon.Information, new List<string>(new string[] { "OK" }), 0, 0);
+            return true;
+        }
+        #endregion
 
 
         #region Package Filename

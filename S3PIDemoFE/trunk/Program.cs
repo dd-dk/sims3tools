@@ -29,36 +29,24 @@ namespace S3PIDemoFE
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static int Main()
+        static int Main(params string[] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Settings();
 #if DEBUG
-            Application.Run(new MainForm());
+            Application.Run(new MainForm(args));
 #else
             try
             {
-                Application.Run(new MainForm());
+                Application.Run(new MainForm(args));
             }
             catch (Exception ex)
             {
-                Form f = new Form();
-                RichTextBox rtf = new RichTextBox();
-                rtf.Font = new System.Drawing.Font("DejaVu Sans Mono", 8);
-                rtf.Size = new System.Drawing.Size(640 - (640 / 5), 480 - (480 / 5));
-                rtf.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
-                rtf.ReadOnly = true;
-                f.Size = new System.Drawing.Size(rtf.Width + 12, rtf.Height + 36);
-                //f.SizeGripStyle = SizeGripStyle.Hide;
-                f.Text = "S3PIDemoFE";
-                f.StartPosition = FormStartPosition.CenterParent;
-                f.Controls.Add(rtf);
                 string s = ex.ToString();
                 if (ex.InnerException != null)
                     s += "\n\n-- Inner Exception --\n" + ex.InnerException.ToString();
-                rtf.Text = s;
-                f.ShowDialog();
+                CopyableMessageBox.Show(s, "s3pe", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
                 return 1;
             }
 #endif
