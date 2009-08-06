@@ -116,19 +116,33 @@ namespace ObjectCloner
         private ObjectCloner.TopPanelComponents.ObjectChooser objectChooser;
         private ObjectCloner.TopPanelComponents.ResourceList resourceList;
         private ObjectCloner.TopPanelComponents.PleaseWait pleaseWait;
+
         public MainForm()
         {
             InitializeComponent();
+            this.Text = myName;
             objectChooser = new ObjectChooser();
             objectChooser.SelectedIndexChanged += new EventHandler(objectChooser_SelectedIndexChanged);
             objectChooser.ItemActivate += new EventHandler(objectChooser_ItemActivate);
             resourceList = new ResourceList();
             pleaseWait = new PleaseWait();
-            SetStepText();
+        }
 
-            this.Text = myName;
+        public MainForm(params string[] args)
+            : this()
+        {
             MainForm_LoadFormSettings();
+            CmdLine(args);//In case of conflict, command line overrides settings
+
+            // Settings for test mode
+            if (cmdlineTest)
+            {
+                ckbDefault.Visible = true;
+            }
+
             disableCompression = !ckbCompress.Checked;
+
+            SetStepText();
 
             InitialiseTabs(catalogTypes[4]);//Use the Proxy Product as it has pretty much nothing on it
             setButtons(Page.None, None);
@@ -194,6 +208,63 @@ namespace ObjectCloner
                 ddsPkgs = tmbPkgs = objPkgs = null;
             }
         }
+
+        #region Command Line
+        delegate bool CmdLineCmd(ref List<string> cmdline);
+        struct CmdInfo
+        {
+            public CmdLineCmd cmd;
+            public string help;
+            public CmdInfo(CmdLineCmd cmd, string help) : this() { this.cmd = cmd; this.help = help; }
+        }
+        Dictionary<string, CmdInfo> Options;
+        void SetOptions()
+        {
+            Options = new Dictionary<string, CmdInfo>();
+            Options.Add("test", new CmdInfo(CmdLineTest, "Enable facilities still undergoing initial testing"));
+            Options.Add("help", new CmdInfo(CmdLineHelp, "Display this help"));
+        }
+        void CmdLine(params string[] args)
+        {
+            SetOptions();
+            List<string> pkgs = new List<string>();
+            List<string> cmdline = new List<string>(args);
+            while (cmdline.Count > 0)
+            {
+                if (cmdline[0].StartsWith("/") || cmdline[0].StartsWith("-"))
+                {
+                    string option = cmdline[0].Substring(1);
+                    if (Options.ContainsKey(option.ToLower()))
+                    {
+                        if (Options[option.ToLower()].cmd(ref cmdline))
+                            Environment.Exit(0);
+                    }
+                    else
+                    {
+                        CopyableMessageBox.Show(this, "Invalid command line option: '" + option + "'",
+                            myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
+                        Environment.Exit(1);
+                    }
+                }
+                else
+                    pkgs.Add(cmdline[0]);
+                cmdline.RemoveAt(0);
+            }
+        }
+        bool cmdlineTest = false;
+        bool CmdLineTest(ref List<string> cmdline) { cmdlineTest = true; return false; }
+        bool CmdLineHelp(ref List<string> cmdline)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.AppendLine("The following command line options are available:\n");
+            foreach (var kvp in Options)
+                sb.AppendFormat("{0}  --  {1}\n", kvp.Key, kvp.Value.help);
+            sb.AppendLine("\nOptions must be prefixed with '/' or '-'");
+
+            CopyableMessageBox.Show(this, sb.ToString(), "Command line options", CopyableMessageBoxIcon.Information, new List<string>(new string[] { "OK" }), 0, 0);
+            return true;
+        }
+        #endregion
 
 
         string Sims3Folder

@@ -34,7 +34,7 @@ namespace ObjectCloner
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Settings();
-            Application.Run(new MainForm());
+            Application.Run(new MainForm(args));
             return 0;
         }
 
