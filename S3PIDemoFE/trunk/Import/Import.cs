@@ -208,9 +208,10 @@ namespace S3PIDemoFE
             try
             {
                 this.Enabled = false;
+                bool nmOK = true;
                 foreach (string filename in batch)
                 {
-                    importFile(filename, filename, ib.UseNames, ib.Rename, ib.Compress, ib.Replace);
+                    nmOK = importFile(filename, filename, nmOK && ib.UseNames, ib.Rename, ib.Compress, ib.Replace);
                     Application.DoEvents();
                 }
             }
@@ -246,11 +247,9 @@ namespace S3PIDemoFE
             finally { this.Enabled = true; }
         }
 
-        void importFile(string filename, TGIN tgin, bool useName, bool rename, bool compress, bool replace)
+        bool importFile(string filename, TGIN tgin, bool useName, bool rename, bool compress, bool replace)
         {
-            if (useName && tgin.ResName != null && tgin.ResName.Length > 0)
-                UpdateNameMap(tgin.ResInstance, tgin.ResName, true, rename);
-
+            bool nmOK = true;
             MemoryStream ms = new MemoryStream();
             BinaryWriter w = new BinaryWriter(ms);
             BinaryReader r = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read));
@@ -258,8 +257,12 @@ namespace S3PIDemoFE
             r.Close();
             w.Flush();
 
+            if (useName && tgin.ResName != null && tgin.ResName.Length > 0)
+                nmOK = UpdateNameMap(tgin.ResInstance, tgin.ResName, true, rename);
+
             IResourceIndexEntry rie = NewResource(tgin.ResType, tgin.ResGroup, tgin.ResInstance, ms, replace, compress);
             if (rie != null) browserWidget1.Add(rie);
+            return nmOK;
         }
 
         void importStream(myDataFormat data, bool useName, bool rename, bool compress, bool replace)

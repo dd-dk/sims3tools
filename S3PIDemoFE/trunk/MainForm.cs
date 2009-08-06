@@ -464,7 +464,7 @@ namespace S3PIDemoFE
         // For "fileImport()", see Import/Import.cs
         // For "fileImportPackages()", see Import/Import.cs
 
-        private void UpdateNameMap(ulong instance, string resourceName, bool create, bool replace)
+        private bool UpdateNameMap(ulong instance, string resourceName, bool create, bool replace)
         {
             IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) });
             if (rie == null && create)
@@ -472,19 +472,31 @@ namespace S3PIDemoFE
                 rie = CurrentPackage.AddResource(0x0166038C, 0, 0, null, false);
                 if (rie != null) browserWidget1.Add(rie);
             }
-            if (rie == null) return;
+            if (rie == null) return false;
 
-            IDictionary<ulong, string> nmap = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, false) as IDictionary<ulong, string>;
-            if (nmap == null) return;
-
-            if (nmap.ContainsKey(instance))
+            try
             {
-                if (replace) nmap[instance] = resourceName;
+                IDictionary<ulong, string> nmap = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, false) as IDictionary<ulong, string>;
+                if (nmap == null) return false;
+
+                if (nmap.ContainsKey(instance))
+                {
+                    if (replace) nmap[instance] = resourceName;
+                }
+                else
+                    nmap.Add(instance, resourceName);
+                CurrentPackage.ReplaceResource(rie, (IResource)nmap);
+                IsPackageDirty = true;
             }
-            else
-                nmap.Add(instance, resourceName);
-            CurrentPackage.ReplaceResource(rie, (IResource)nmap);
-            IsPackageDirty = true;
+            catch (Exception ex)
+            {
+                string s = String.Format("Error reading _KEY {0:X8}:{1:X8}:{2:X16}", rie.ResourceType, rie.ResourceGroup, rie.Instance);
+                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
+                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
+                CopyableMessageBox.Show(s, "s3pe", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                return false;
+            }
+            return true;
         }
 
         private IResourceIndexEntry NewResource(uint type, uint group, ulong instance, MemoryStream ms, bool replace, bool compress)
@@ -502,11 +514,22 @@ namespace S3PIDemoFE
 
             rie.Compressed = (ushort)(compress ? 0xffff : 0);
 
-            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, controlPanel1.HexOnly);
-            package.ReplaceResource(rie, res); // Commit new resource to package
-            IsPackageDirty = true;
+            try
+            {
+                IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, controlPanel1.HexOnly);
+                package.ReplaceResource(rie, res); // Commit new resource to package
+                IsPackageDirty = true;
 
-            return rie;
+                return rie;
+            }
+            catch (Exception ex)
+            {
+                string s = String.Format("Error reading resource {0:X8}:{1:X8}:{2:X16}", rie.ResourceType, rie.ResourceGroup, rie.Instance);
+                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
+                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
+                CopyableMessageBox.Show(s, "s3pe", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                return null;
+            }
         }
 
         private void fileExport()
@@ -550,7 +573,7 @@ namespace S3PIDemoFE
 
         private void exportFile(IResourceIndexEntry rie, string filename)
         {
-            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, controlPanel1.HexOnly);
+            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, true);//Don't need wrapper
             Stream s = res.Stream;
             s.Position = 0;
             if (s.Length != rie.Memsize) CopyableMessageBox.Show(String.Format("Resource stream has {0} bytes; index entry says {1}.", s.Length, rie.Memsize));
@@ -653,7 +676,7 @@ namespace S3PIDemoFE
             if (rie == null) return;
             rie.Compressed = srcrie.Compressed;
 
-            IResource srcres = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, srcrie, true);
+            IResource srcres = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, srcrie, true);//Don't need wrapper
             tgtpkg.ReplaceResource(rie, srcres);
         }
 
@@ -823,7 +846,7 @@ namespace S3PIDemoFE
                     myDataFormat d = new myDataFormat();
                     d.tgin = browserWidget1.SelectedResource as AResourceIndexEntry;
                     d.tgin.ResName = resourceName;
-                    d.data = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, browserWidget1.SelectedResource, false).AsBytes;
+                    d.data = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, browserWidget1.SelectedResource, true).AsBytes;//Don't need wrapper
 
                     IFormatter formatter = new BinaryFormatter();
                     MemoryStream ms = new MemoryStream();
@@ -839,7 +862,7 @@ namespace S3PIDemoFE
                         myDataFormat d = new myDataFormat();
                         d.tgin = rie as AResourceIndexEntry;
                         d.tgin.ResName = browserWidget1.ResourceName(rie);
-                        d.data = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, false).AsBytes;
+                        d.data = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, true).AsBytes;//Don't need wrapper
                         l.Add(d);
                     }
 
@@ -867,7 +890,7 @@ namespace S3PIDemoFE
                 ms, false);
             rie.Compressed = browserWidget1.SelectedResource.Compressed;
 
-            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, false);
+            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, true);//Don't need wrapper
             package.ReplaceResource(rie, res); // Commit new resource to package
             IsPackageDirty = true;
 
@@ -1294,8 +1317,11 @@ namespace S3PIDemoFE
             pnAuto.Controls.Clear();
             if (resException != null)
             {
-                string s = resException.Message;
-                for (Exception ex = resException.InnerException; ex != null; ex = ex.InnerException) s += "  " + ex.Message;
+                IResourceIndexEntry rie = browserWidget1.SelectedResource;
+                string s = "";
+                if (rie != null) s += String.Format("Error reading resource {0:X8}:{1:X8}:{2:X16}", rie.ResourceType, rie.ResourceGroup, rie.Instance);
+                for (Exception inex = resException; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
+                for (Exception inex = resException; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
                 TextBox tb = new TextBox();
                 tb.Dock = DockStyle.Fill;
                 tb.Multiline = true;
