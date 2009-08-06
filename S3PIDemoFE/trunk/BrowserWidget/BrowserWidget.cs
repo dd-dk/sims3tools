@@ -501,10 +501,11 @@ namespace S3PIDemoFE
                 }
                 catch (Exception ex)
                 {
-                    string s = String.Format("Error reading _KEY {0:X8}:{1:X8}:{2:X16}", rie.ResourceType, rie.ResourceGroup, rie.Instance);
+                    string s = "Some resource names may not be displayed.";
+                    s += String.Format("\n\nError reading _KEY {0:X8}:{1:X8}:{2:X16}", rie.ResourceType, rie.ResourceGroup, rie.Instance);
                     for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
                     for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
-                    CopyableMessageBox.Show(s, "s3pe", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                    CopyableMessageBox.Show(s, "s3pe", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
                 }
             }
 
