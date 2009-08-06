@@ -2293,7 +2293,7 @@ namespace ObjectCloner
             tlpButtons.Enabled = true;
 
             bool flag = p != Page.Resources;
-            ckbPadSTBLs.Enabled = ckbDefault.Enabled = mode == Mode.Clone && flag;
+            ckbPadSTBLs.Enabled = ckbDefault.Enabled = mode == Mode.Clone && flag;//note: ckbDefault is not visible pending investigations
             if (s == None) ckbNoOBJD.Checked = false;
             ckbNoOBJD.Enabled = mode == Mode.Fix && !ckbCatlgDetails.Checked && flag;
             ckbCatlgDetails.Enabled = mode == Mode.Fix && flag;

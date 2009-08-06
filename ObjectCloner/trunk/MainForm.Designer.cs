@@ -291,6 +291,7 @@
             this.ckbDefault.TabIndex = 1;
             this.ckbDefault.Text = "Default textures only";
             this.ckbDefault.UseVisualStyleBackColor = true;
+            this.ckbDefault.Visible = false;
             // 
             // ckbPadSTBLs
             // 
