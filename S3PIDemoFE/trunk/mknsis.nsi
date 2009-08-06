@@ -1,4 +1,5 @@
 ;!include "MUI.nsh"
+!include "FileAssociation.nsh"
 
 !define PROGRAM_NAME "Sims3 Package Editor"
 !define tla "s3pe"
@@ -15,6 +16,8 @@ SetCompressor /SOLID LZMA
 Var wasInUse
 Var wantAll
 Var wantSM
+Var wantAssoc
+Var wantSendTo
 Var delSettings
 
 Name "${PROGRAM_NAME}"
@@ -48,6 +51,15 @@ Section "Create Start Menu entry"
   StrCpy $wantSM "Y"
 SectionEnd
 
+Section /o "Associate *.package with s3pe?"
+  StrCpy $wantAssoc "Y"
+SectionEnd
+
+Section /o "Create SendTo for Import? (current user only)"
+  StrCpy $wantSendTo "Y"
+SectionEnd
+
+
 Section
   SetShellVarContext all
   StrCmp "Y" $wantAll gotAll
@@ -75,6 +87,17 @@ wantSM:
   CreateShortCut "$SMPROGRAMS\${tla}\Uninstall.lnk" "$INSTDIR\uninst-${tla}.exe" "" "" "" SW_SHOWNORMAL "" "Uninstall"
   CreateShortCut "$SMPROGRAMS\${tla}\${tla}-Version.lnk" "$INSTDIR\${tla}-Version.txt" "" "" "" SW_SHOWNORMAL "" "Show version"
 noWantSM:
+
+  StrCmp "Y" $wantAssoc wantAssoc noWantAssoc
+wantAssoc:
+  ${registerExtension} "$INSTDIR\${EXE}" ".package" "Sims3 package"
+noWantAssoc:
+
+  StrCmp "Y" $wantSendTo wantSendTo noWantSendTo
+wantSendTo:
+  CreateShortCut "$SENDTO\Import to Sims3 package.lnk" "$INSTDIR\${EXE}" "-import" "" "" SW_SHOWNORMAL "" "Import files to a new Sims3 package"
+noWantSendTo:
+
 SectionEnd
 
 Function .onGUIInit
@@ -167,6 +190,8 @@ notCU:
   DeleteRegKey SHCTX Software\s3pi\${tla}
 
   RMDir /r "$SMPROGRAMS\${tla}"
+  Delete "$SENDTO\Import to Sims3 package.lnk"
+  ${unregisterExtension} ".package" "Sims3 package"
 
   !include ${UNINSTFILES}
   Delete $INSTDIR\uninst-${tla}.exe
