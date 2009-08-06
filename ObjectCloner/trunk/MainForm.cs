@@ -133,6 +133,9 @@ namespace ObjectCloner
         {
             MainForm_LoadFormSettings();
             CmdLine(args);//In case of conflict, command line overrides settings
+#if DEBUG
+            cmdlineTest = true;
+#endif
 
             // Settings for test mode
             if (cmdlineTest)
@@ -1766,12 +1769,12 @@ namespace ObjectCloner
                                 i = line.IndexOf("key:", i + 22 + 16);
                             }
                             sw.WriteLine(line);
-                            sw.Flush();
-                            if (dirty)
-                            {
-                                item.Resource.Stream.SetLength(0);
-                                item.Resource.Stream.Write(ms.ToArray(), 0, (int)ms.Length);
-                            }
+                        }
+                        sw.Flush();
+                        if (dirty)
+                        {
+                            item.Resource.Stream.SetLength(0);
+                            item.Resource.Stream.Write(ms.ToArray(), 0, (int)ms.Length);
                         }
                         #endregion
                     }
