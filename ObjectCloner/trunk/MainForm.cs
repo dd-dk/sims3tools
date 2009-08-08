@@ -2554,13 +2554,15 @@ namespace ObjectCloner
             if (!ckbCatlgDetails.Checked)
             {
                 stepList.AddRange(new Step[] {
+                    // either OBJD_SlurpDDSes or Catlg_SlurpTGIs
                     OBJD_getOBKJ,
+                    // OBJD_addOBJKref if default resources only
                     OBJK_SlurpTGIs,
                     OBJK_getVPXY,
                     Catlg_addVPXYs,
 
                     VPXYs_SlurpTGIs,
-                    // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default textures only
+                    // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default resources only
                     VPXYs_getMODLs,
 
                     MODLs_SlurpTGIs,
@@ -2571,6 +2573,7 @@ namespace ObjectCloner
                 });
                 if (ckbDefault.Checked)
                 {
+                    stepList.Insert(stepList.IndexOf(OBJD_getOBKJ), OBJD_SlurpDDSes);
                     stepList.Insert(stepList.IndexOf(OBJK_SlurpTGIs), OBJD_addOBJKref);
                 }
                 else
@@ -2691,6 +2694,7 @@ namespace ObjectCloner
 
             StepText.Add(OBJD_getOBKJ, "Find OBJK");
             StepText.Add(OBJD_addOBJKref, "Add OBJK");
+            StepText.Add(OBJD_SlurpDDSes, "OBJD-referenced resources");
             StepText.Add(Catlg_SlurpTGIs, "Catalog object-referenced resources");
             StepText.Add(OBJK_SlurpTGIs, "OBJK-referenced resources");
             StepText.Add(OBJK_getVPXY, "Find OBJK-referenced VPXY");
@@ -2743,6 +2747,18 @@ namespace ObjectCloner
             if (objkItem == null) stepNum = lastInChain;
         }
         void OBJD_addOBJKref() { Add("objk", objkItem.tgi); }
+        void OBJD_SlurpDDSes()
+        {
+            List<TGI> objdDDSes = new List<TGI>();
+            IList<AResource.TGIBlock> ltgi = (IList<AResource.TGIBlock>)selectedItem.Resource["TGIBlocks"].Value;
+            int i = 0;
+            foreach (AApiVersionedFields mtdoor in (IList)selectedItem.Resource["MTDoors"].Value)
+            {
+                Add("clone.wallmask[" + i + "]", ltgi[(int)(uint)mtdoor["WallMaskIndex"].Value]);
+                i++;
+            }
+            Add("clone.sinkmask", ltgi[(int)(uint)selectedItem.Resource["SinkDDSIndex"].Value]);
+        }
         void OBJK_SlurpTGIs() { SlurpTGIsFromField("objk", (AResource)objkItem.Resource); }
         void OBJK_getVPXY()
         {
