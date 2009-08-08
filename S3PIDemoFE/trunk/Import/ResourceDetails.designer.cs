@@ -34,7 +34,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.tbType = new System.Windows.Forms.TextBox();
+            this.cbType = new System.Windows.Forms.ComboBox();
             this.tbGroup = new System.Windows.Forms.TextBox();
             this.tbInstance = new System.Windows.Forms.TextBox();
             this.lbFilename = new System.Windows.Forms.Label();
@@ -81,7 +81,7 @@
             this.tableLayoutPanel1.Controls.Add(this.label3, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.label2, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.label1, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.tbType, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.cbType, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.tbGroup, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.tbInstance, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.lbFilename, 0, 5);
@@ -106,7 +106,7 @@
             // 
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(4, 58);
+            this.label3.Location = new System.Drawing.Point(4, 59);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(48, 13);
             this.label3.TabIndex = 5;
@@ -116,7 +116,7 @@
             // 
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(16, 32);
+            this.label2.Location = new System.Drawing.Point(16, 33);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(36, 13);
             this.label2.TabIndex = 3;
@@ -126,26 +126,30 @@
             // 
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(21, 6);
+            this.label1.Location = new System.Drawing.Point(21, 7);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(31, 13);
             this.label1.TabIndex = 1;
             this.label1.Text = "Type";
             // 
-            // tbType
+            // cbType
             // 
-            this.tbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbType.Location = new System.Drawing.Point(58, 3);
-            this.tbType.Name = "tbType";
-            this.tbType.Size = new System.Drawing.Size(320, 20);
-            this.tbType.TabIndex = 2;
-            this.tbType.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.tbType.TextChanged += new System.EventHandler(this.tbTGI_TextChanged);
+            this.cbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbType.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.cbType.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.cbType.FormattingEnabled = true;
+            this.cbType.Location = new System.Drawing.Point(58, 3);
+            this.cbType.Name = "cbType";
+            this.cbType.Size = new System.Drawing.Size(320, 21);
+            this.cbType.Sorted = true;
+            this.cbType.TabIndex = 4;
+            this.cbType.SelectedValueChanged += new System.EventHandler(this.cbType_SelectedValueChanged);
+            this.cbType.TextUpdate += new System.EventHandler(this.cbType_TextUpdate);
             // 
             // tbGroup
             // 
             this.tbGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbGroup.Location = new System.Drawing.Point(58, 29);
+            this.tbGroup.Location = new System.Drawing.Point(58, 30);
             this.tbGroup.Name = "tbGroup";
             this.tbGroup.Size = new System.Drawing.Size(320, 20);
             this.tbGroup.TabIndex = 4;
@@ -155,7 +159,7 @@
             // tbInstance
             // 
             this.tbInstance.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbInstance.Location = new System.Drawing.Point(58, 55);
+            this.tbInstance.Location = new System.Drawing.Point(58, 56);
             this.tbInstance.Name = "tbInstance";
             this.tbInstance.Size = new System.Drawing.Size(320, 20);
             this.tbInstance.TabIndex = 6;
@@ -166,7 +170,7 @@
             // 
             this.lbFilename.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.lbFilename.AutoSize = true;
-            this.lbFilename.Location = new System.Drawing.Point(3, 165);
+            this.lbFilename.Location = new System.Drawing.Point(3, 166);
             this.lbFilename.Name = "lbFilename";
             this.lbFilename.Size = new System.Drawing.Size(49, 13);
             this.lbFilename.TabIndex = 10;
@@ -177,7 +181,7 @@
             this.tbFilename.AllowDrop = true;
             this.tbFilename.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tbFilename.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tbFilename.Location = new System.Drawing.Point(58, 165);
+            this.tbFilename.Location = new System.Drawing.Point(58, 166);
             this.tbFilename.Name = "tbFilename";
             this.tbFilename.ReadOnly = true;
             this.tbFilename.Size = new System.Drawing.Size(320, 13);
@@ -190,7 +194,7 @@
             // 
             this.label4.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(17, 142);
+            this.label4.Location = new System.Drawing.Point(17, 143);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(35, 13);
             this.label4.TabIndex = 8;
@@ -200,7 +204,7 @@
             // 
             this.tbName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tbName.Enabled = false;
-            this.tbName.Location = new System.Drawing.Point(58, 139);
+            this.tbName.Location = new System.Drawing.Point(58, 140);
             this.tbName.Name = "tbName";
             this.tbName.Size = new System.Drawing.Size(320, 20);
             this.tbName.TabIndex = 9;
@@ -210,7 +214,7 @@
             this.importSettings1.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.importSettings1.AutoSize = true;
             this.importSettings1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.importSettings1.Location = new System.Drawing.Point(58, 81);
+            this.importSettings1.Location = new System.Drawing.Point(58, 82);
             this.importSettings1.Name = "importSettings1";
             this.importSettings1.Size = new System.Drawing.Size(320, 52);
             this.importSettings1.TabIndex = 12;
@@ -244,7 +248,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox tbType;
         private System.Windows.Forms.TextBox tbGroup;
         private System.Windows.Forms.TextBox tbInstance;
         private System.Windows.Forms.Label lbFilename;
@@ -252,5 +255,6 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox tbName;
         private S3PIDemoFE.Import.ImportSettings importSettings1;
+        private System.Windows.Forms.ComboBox cbType;
     }
 }

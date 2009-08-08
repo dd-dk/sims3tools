@@ -29,6 +29,14 @@ namespace S3PIDemoFE
 {
     public partial class ResourceDetails : Form
     {
+        static string[] tagDropDown;
+        static ResourceDetails()
+        {
+            List<string> tagList = new List<string>();
+            foreach (var kvp in ExtList.Ext)
+                if (kvp.Key.StartsWith("0x")) tagList.Add(kvp.Value[0] + " " + kvp.Key);
+            tagDropDown = tagList.ToArray();
+        }
         public ResourceDetails() : this(true, true) { }
         public ResourceDetails(bool useName, bool displayFilename)
         {
@@ -36,14 +44,27 @@ namespace S3PIDemoFE
             this.Icon = ((System.Drawing.Icon)(new ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
             tbName.Enabled = UseName = useName;
             lbFilename.Visible = tbFilename.Visible = displayFilename;
+            cbType.Items.Clear();
+            cbType.Items.AddRange(tagDropDown);
         }
 
         public string Filename { get { return tbFilename.Text; } set { this.tbFilename.Text = value; } }
         public TGIN TGIN { get { return this.tbFilename.Text; } }
         public uint ResourceType
         {
-            get { return Convert.ToUInt32(tbType.Text, tbType.Text.StartsWith("0x") ? 16 : 10); }
-            set { tbType.Text = "0x" + value.ToString("X8"); }
+            get {
+                string txtToConvert = cbType.Text.Trim();
+                int startIndex = txtToConvert.LastIndexOf(" ");
+                if (startIndex > -1)
+                    txtToConvert = txtToConvert.Substring(startIndex + 1);
+                return Convert.ToUInt32(txtToConvert, txtToConvert.StartsWith("0x") ? 16 : 10);
+            }
+            set
+            {
+                string key = "0x" + value.ToString("X8");
+                if (ExtList.Ext.ContainsKey(key)) cbType.Text = ExtList.Ext[key][0] + " " + key;
+                else cbType.Text = key;
+            }
         }
         public uint ResourceGroup
         {
@@ -65,7 +86,7 @@ namespace S3PIDemoFE
         private void FillPanel()
         {
             TGIN details = this.tbFilename.Text;
-            tbType.Text = "0x" + details.ResType.ToString("X8");
+            cbType.Text = "0x" + details.ResType.ToString("X8");
             tbGroup.Text = "0x" + details.ResGroup.ToString("X8");
             tbInstance.Text = "0x" + details.ResInstance.ToString("X16");
             tbName.Text = details.ResName;
@@ -79,15 +100,18 @@ namespace S3PIDemoFE
         private void tbTGI_TextChanged(object sender, EventArgs e)
         {
             TextBox tb = sender as TextBox;
-            try
-            {
-                if (tbInstance.Equals(sender))
-                    Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
-                else
-                    Convert.ToUInt32(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
-                btnOK.Enabled = tbType.Text.Length * tbGroup.Text.Length * tbInstance.Text.Length > 0;
-            }
-            catch { btnOK.Enabled = false; }
+            if (tb.Text.Length > 0)
+                try
+                {
+                    if (tbInstance.Equals(sender))
+                        Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
+                    else
+                        Convert.ToUInt32(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
+                    btnOK.Enabled = cbType.Text.Length * tbGroup.Text.Length * tbInstance.Text.Length > 0;
+                }
+                catch { btnOK.Enabled = false; }
+            else
+                btnOK.Enabled = false;
         }
 
         private void ckbUseName_CheckedChanged(object sender, EventArgs e)
@@ -111,6 +135,31 @@ namespace S3PIDemoFE
         private void tbFilename_TextChanged(object sender, EventArgs e)
         {
             FillPanel();
+        }
+
+        private void cbType_TextUpdate(object sender, EventArgs e)
+        {
+            ComboBox cb = sender as ComboBox;
+
+            if (cb.Items.IndexOf(cb.Text) < 0)
+            {
+                try
+                {
+                    if (cb.Text.Length > 0)
+                        Convert.ToUInt32(cb.Text, cb.Text.StartsWith("0x") ? 16 : 10);
+                    btnOK.Enabled = cb.Text.Length * tbGroup.Text.Length * tbInstance.Text.Length > 0;
+                }
+                catch { btnOK.Enabled = false; }
+            }
+            else
+            {
+                btnOK.Enabled = cb.Text.Length * tbGroup.Text.Length * tbInstance.Text.Length > 0;
+            }
+        }
+
+        private void cbType_SelectedValueChanged(object sender, EventArgs e)
+        {
+            cbType_TextUpdate(sender, e);
         }
     }
 }
