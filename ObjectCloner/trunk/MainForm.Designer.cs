@@ -287,9 +287,9 @@
             this.ckbDefault.Location = new System.Drawing.Point(0, 3);
             this.ckbDefault.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.ckbDefault.Name = "ckbDefault";
-            this.ckbDefault.Size = new System.Drawing.Size(122, 17);
+            this.ckbDefault.Size = new System.Drawing.Size(131, 17);
             this.ckbDefault.TabIndex = 1;
-            this.ckbDefault.Text = "Default textures only";
+            this.ckbDefault.Text = "Default resources only";
             this.ckbDefault.UseVisualStyleBackColor = true;
             // 
             // ckbPadSTBLs
