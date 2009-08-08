@@ -572,8 +572,6 @@ namespace ObjectCloner
         #region ObjectChooser
         private void objectChooser_SelectedIndexChanged(object sender, EventArgs e)
         {
-            resourceList.Clear();
-            tgiLookup.Clear();
             replacementForThumbs = null;
             if (objectChooser.SelectedItems.Count == 0)
             {
@@ -585,9 +583,7 @@ namespace ObjectCloner
                 selectedItem = objectChooser.SelectedItems[0].Tag as Item;
                 FillTabs(selectedItem);
             }
-            stepList = null;
-            step = None;
-            setButtons(Page.ObjectChooser, None);
+            ckbDefault_CheckedChanged(sender, e);
         }
 
         void objectChooser_ItemActivate(object sender, EventArgs e)
@@ -1327,6 +1323,7 @@ namespace ObjectCloner
 
         #region Saving thread
         Thread saveThread;
+        bool haveSaved = false;//Have we successfully saved *this* object?
         bool saving = false;
         void StartSaving()
         {
@@ -1338,6 +1335,7 @@ namespace ObjectCloner
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
             saving = true;
+            haveSaved = false;//Clear now as we're about to overwrite it
             saveThread.Start();
         }
 
@@ -1371,15 +1369,19 @@ namespace ObjectCloner
             {
                 waitingForSavePackage = false;
                 if (e.arg)
+                {
                     CopyableMessageBox.Show("OK", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
+                    haveSaved = true;//Success!
+                    btnList_Click(null, null);
+                }
                 else
                 {
                     if (File.Exists(saveFileDialog1.FileName))
                         CopyableMessageBox.Show("\nSave not complete.\nPlease ensure package is not in use.\n", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
                     else
                         CopyableMessageBox.Show("\nSave not complete.\n", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
+                    DisplayResources();
                 }
-                DisplayResources();
             }
         }
 
@@ -2375,10 +2377,8 @@ namespace ObjectCloner
             Color btnListBackColor = Color.FromKnownColor(KnownColor.Control);
             Color btnStartBackColor = Color.FromKnownColor(KnownColor.Control);
             Color btnNextBackColor = Color.FromKnownColor(KnownColor.Control);
-            Color btnCommitBackColor = Color.FromKnownColor(KnownColor.Control);
+            Color btnSaveBackColor = Color.FromKnownColor(KnownColor.Control);
 
-            float price;
-            btnSave.Enabled = p == Page.Resources && float.TryParse(tbPrice.Text, out price);
             switch (p)
             {
                 case Page.None:
@@ -2413,9 +2413,9 @@ namespace ObjectCloner
                     }
                     else
                     {
-                        btnNext.Enabled = false;
+                        btnSaveBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
                         this.AcceptButton = btnSave;
-                        btnCommitBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
+                        btnNext.Enabled = false;
                     }
                 }
             }
@@ -2425,10 +2425,13 @@ namespace ObjectCloner
                 btnNext.Enabled = false;
             }
 
+            float price;
+            btnSave.Enabled = stepList != null && float.TryParse(tbPrice.Text, out price);//Start has populated the stepList and price is valid
+
             btnList.BackColor = btnListBackColor;
             btnStart.BackColor = btnStartBackColor;
             btnNext.BackColor = btnNextBackColor;
-            btnSave.BackColor = btnCommitBackColor;
+            btnSave.BackColor = btnSaveBackColor;
 
             tlpButtons.Enabled = haveLoaded;
         }
@@ -2480,7 +2483,7 @@ namespace ObjectCloner
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            this.Enabled = false;
+            tlpButtons.Enabled = false;
             if (mode == Mode.Clone)
             {
                 string prefix = CreatorName;
@@ -2490,17 +2493,16 @@ namespace ObjectCloner
                     saveFileDialog1.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder;
                 saveFileDialog1.FileName = objectChooser.SelectedItems.Count > 0 ? prefix + objectChooser.SelectedItems[0].Text : "";
                 DialogResult dr = saveFileDialog1.ShowDialog();
-                if (dr != DialogResult.OK) return;
+                if (dr != DialogResult.OK) { if (haveSaved) btnList_Click(null, null); else DisplayResources(); return; }
                 ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(saveFileDialog1.FileName);
 
-                tlpButtons.Enabled = false;
+                this.Enabled = false;
                 DoWait("Please wait, creating your new package...");
                 waitingForSavePackage = true;
                 StartSaving();
             }
             else
             {
-                tlpButtons.Enabled = false;
                 DoWait("Please wait, updating your package...");
                 StartFixing();
             }
@@ -3097,5 +3099,15 @@ namespace ObjectCloner
             }
         }
         bool gtAbort() { return false; }
+
+        private void ckbDefault_CheckedChanged(object sender, EventArgs e)
+        {
+            resourceList.Clear();
+            tgiLookup.Clear();
+            haveSaved = false;//Clear now as settings changed
+            stepList = null;
+            step = None;
+            setButtons(Page.ObjectChooser, None);
+        }
     }
 }

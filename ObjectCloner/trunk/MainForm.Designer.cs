@@ -291,6 +291,7 @@
             this.ckbDefault.TabIndex = 1;
             this.ckbDefault.Text = "Default resources only";
             this.ckbDefault.UseVisualStyleBackColor = true;
+            this.ckbDefault.CheckedChanged += new System.EventHandler(this.ckbDefault_CheckedChanged);
             // 
             // ckbPadSTBLs
             // 
