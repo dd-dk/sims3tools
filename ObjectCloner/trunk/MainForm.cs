@@ -1042,6 +1042,7 @@ namespace ObjectCloner
         Thread loadThread;
         bool haveLoaded = false;
         bool loading = false;
+        Dictionary<uint, Item> CTPTUnknown8ToPair;
         void StartLoading(uint resourceType)
         {
             if (haveLoaded) return;
@@ -1050,6 +1051,7 @@ namespace ObjectCloner
 
             waitingToDisplayObjects = true;
             objectChooser.Items.Clear();
+            CTPTUnknown8ToPair = new Dictionary<uint, Item>();
 
             this.LoadingComplete += new EventHandler<BoolEventArgs>(MainForm_LoadingComplete);
 
@@ -1115,6 +1117,16 @@ namespace ObjectCloner
         public delegate void createListViewItemCallback(Item objd);
         void createListViewItem(Item item)
         {
+            if (item.tgi.t == catalogTypes[7])
+            {
+                byte status = (byte)((AApiVersionedFields)item.Resource["CommonBlock"].Value)["BuildBuyProductStatusFlags"].Value;
+                if ((status & 0x01) == 0) // do not list
+                {
+                    uint unknown8 = (uint)item.Resource["Unknown8"].Value;
+                    CTPTUnknown8ToPair.Add(unknown8 - 1, item);
+                    return;
+                }
+            }
             ListViewItem lvi = new ListViewItem();
             if (item.Resource != null)
             {
@@ -1639,12 +1651,19 @@ namespace ObjectCloner
                 {
                     bool dirty = false;
 
-                    if ((item.tgi == selectedItem.tgi && item.tgi.t != catalogTypes[1]) || item.tgi.t == catalogTypes[0])//Selected CatlgItem; all OBJD (i.e. from MDLR or CFIR)
+                    if ((item.tgi == selectedItem.tgi && item.tgi.t != catalogTypes[1])//Selected CatlgItem
+                        || item.tgi.t == catalogTypes[0]//all OBJDs (i.e. from MDLR or CFIR)
+                        || item.tgi.t == catalogTypes[7]//all CTPTs (i.e. pair of selectedItem)
+                        )
                     {
                         #region Selected CatlgItem; all OBJD (i.e. from MDLR or CFIR)
                         AHandlerElement commonBlock = ((AHandlerElement)item.Resource["CommonBlock"].Value);
 
-                        if (item.tgi == selectedItem.tgi || selectedItem.tgi.t == catalogTypes[1] || item.tgi == catlgItem.tgi)//Selected CatlgItem; all MDLR OBJDs; 0th CFIR OBJD
+                        if (item.tgi == selectedItem.tgi//Selected CatlgItem
+                            || selectedItem.tgi.t == catalogTypes[1]//all MDLR OBJDs
+                            || selectedItem.tgi.t == catalogTypes[7]//both CTPTs
+                            || item.tgi == catlgItem.tgi//0th CFIR OBJD
+                            )
                         {
                             commonBlock["NameGUID"] = new TypedValue(typeof(ulong), newNameGUID);
                             commonBlock["DescGUID"] = new TypedValue(typeof(ulong), newDescGUID);
@@ -1706,6 +1725,16 @@ namespace ObjectCloner
                                     item.Resource[otherFieldMap[lb.Text]] = new TypedValue(tvOld.Type, val);
                                 }
                             }
+                        }
+
+                        if (item.tgi.t == catalogTypes[7])//Both CTPTs
+                        {
+                            byte status = (byte)commonBlock["BuildBuyProductStatusFlags"].Value;
+                            uint unknown8 = FNV32.GetHash(UniqueObject) << 1;
+                            if ((status & 0x01) == 0)
+                                item.Resource["Unknown8"] = new TypedValue(typeof(uint), unknown8);
+                            else
+                                item.Resource["Unknown8"] = new TypedValue(typeof(uint), unknown8 + 1);
                         }
 
                         if (!ckbCatlgDetails.Checked)
@@ -2606,7 +2635,7 @@ namespace ObjectCloner
                     Catlg_addVPXYs,
 
                     VPXYs_SlurpTGIs,
-                    // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default textures only
+                    // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default resources only
                     VPXYs_getMODLs,
 
                     MODLs_SlurpTGIs,
@@ -2631,20 +2660,27 @@ namespace ObjectCloner
 
         void CTPT_Steps(out List<Step> stepList, out Step lastStepInChain)
         {
-            if (ckbCatlgDetails.Checked) // Implies we're Fixing
-                stepList = new List<Step>(new Step[] { Item_addSelf, FixIntegrity });
-            else
+            stepList = new List<Step>(new Step[] { Item_addSelf, });
+            if (!ckbCatlgDetails.Checked)
             {
-                stepList = new List<Step>(new Step[] {
-                    Item_addSelf,
-
+                stepList.AddRange(new Step[] {
+                    CTPT_addPair,
                     CTPT_addBrushTexture,
-                    CTPT_addBrushShape,
+                    //CTPT_addBrushShape is NOT default resources only
                     SlurpThumbnails,
-                    // FixIntegrity if fixing
                 });
-                if (mode == Mode.Fix) stepList.Add(FixIntegrity);
+                if (ckbDefault.Checked)
+                {
+                }
+                else
+                {
+                    //stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpTGIs);// Causes problems for CSTR and doesn't help for others
+                    stepList.Insert(stepList.IndexOf(SlurpThumbnails), CTPT_addBrushShape);
+                    //stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinXML);//No VPXYs in here
+                    //stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinMTST);//No VPXYs in here
+                }
             }
+            if (mode == Mode.Fix) stepList.Add(FixIntegrity);
             lastStepInChain = None;
         }
 
@@ -2703,6 +2739,7 @@ namespace ObjectCloner
 
             StepText.Add(Catlg_getVPXY, "Find VPXYs in the Catalog Resource TGIBlockList");
 
+            StepText.Add(CTPT_addPair, "Add the other brush in pair");
             StepText.Add(CTPT_addBrushTexture, "Add Brush Texture");
             StepText.Add(CTPT_addBrushShape, "Add Brush Shape");
 
@@ -2786,6 +2823,12 @@ namespace ObjectCloner
         }
         #endregion
 
+        void CTPT_addPair()
+        {
+            uint unknown8 = (uint)selectedItem.Resource["Unknown8"].Value;
+            if (CTPTUnknown8ToPair.ContainsKey(unknown8))
+                Add("ctpt_pair", CTPTUnknown8ToPair[unknown8].tgi);
+        }
         void CTPT_addBrushTexture() { Add("ctpt_BrushTexture", (AResource.TGIBlock)selectedItem.Resource["BrushTexture"].Value); }
         void CTPT_addBrushShape() { Add("ctpt_BrushShape", (AResource.TGIBlock)selectedItem.Resource["BrushShape"].Value); }
 
