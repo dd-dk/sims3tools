@@ -45,7 +45,7 @@ namespace S3PIDemoFE
                 //Edit
                 editCutToolStripMenuItem, editCopyToolStripMenuItem, editPasteToolStripMenuItem,
                 //Resource
-                addToolStripMenuItem, resCopyToolStripMenuItem1, resPasteToolStripMenuItem1, duplicateToolStripMenuItem,
+                addToolStripMenuItem, resCopyToolStripMenuItem1, resPasteToolStripMenuItem1, duplicateToolStripMenuItem, replaceToolStripMenuItem,
                 compressedToolStripMenuItem, deletedToolStripMenuItem, detailsToolStripMenuItem,
                 //Tools
                 fNVHashToolStripMenuItem, searchToolStripMenuItem,
@@ -75,7 +75,7 @@ namespace S3PIDemoFE
             MBF_setMaxRecent, MBF_bookmarkCurrent, MBF_setMaxBookmarks,
             MBF_exit,
             MBE_cut, MBE_copy, MBE_paste,
-            MBR_add, MBR_copy, MBR_paste, MBR_duplicate,
+            MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_replace,
             MBR_compressed, MBR_isdeleted, MBR_details,
             MBT_fnvHash, MBT_search,
             MBS_externals, MBS_bookmarks,

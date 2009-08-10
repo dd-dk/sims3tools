@@ -49,6 +49,7 @@
             this.exportToPackageDialog = new System.Windows.Forms.OpenFileDialog();
             this.menuBarWidget1 = new S3PIDemoFE.MenuBarWidget();
             this.packageInfoFields1 = new S3PIDemoFE.PackageInfo.PackageInfoFields();
+            this.replaceResourceDialog = new System.Windows.Forms.OpenFileDialog();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -279,6 +280,11 @@
             this.menuBarWidget1.MBSettings_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBSettings_Click);
             this.menuBarWidget1.MRUClick += new S3PIDemoFE.MenuBarWidget.MRUClickEventHandler(this.menuBarWidget1_MRUClick);
             // 
+            // replaceResourceDialog
+            // 
+            this.replaceResourceDialog.AddExtension = false;
+            this.replaceResourceDialog.Title = "Replace Resource";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -326,5 +332,6 @@
         private System.Windows.Forms.OpenFileDialog importPackagesDialog;
         private System.Windows.Forms.OpenFileDialog exportToPackageDialog;
         private System.Windows.Forms.Panel pnAuto;
+        private System.Windows.Forms.OpenFileDialog replaceResourceDialog;
     }
 }

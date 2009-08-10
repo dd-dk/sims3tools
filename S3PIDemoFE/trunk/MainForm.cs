@@ -780,6 +780,7 @@ namespace S3PIDemoFE
                     case MenuBarWidget.MB.MBR_compressed: resourceCompressed(); break;
                     case MenuBarWidget.MB.MBR_isdeleted: resourceIsDeleted(); break;
                     case MenuBarWidget.MB.MBR_details: resourceDetails(); break;
+                    case MenuBarWidget.MB.MBR_replace: resourceReplace(); break;
                 }
             }
             finally { /*this.Enabled = true;/**/ }
@@ -959,6 +960,50 @@ namespace S3PIDemoFE
             browserWidget1.SelectedResource.ResourceGroup = ir.ResourceGroup;
             browserWidget1.SelectedResource.Instance = ir.Instance;
             browserWidget1.SelectedResource.Compressed = (ushort)(ir.Compress ? 0xffff : 0);
+            IsPackageDirty = true;
+        }
+
+        private void resourceReplace()
+        {
+            if (browserWidget1.SelectedResource as AResourceIndexEntry == null) return;
+
+            TGIN tgin = browserWidget1.SelectedResource as AResourceIndexEntry;
+
+            List<string> ext;
+            string resType = "0x" + tgin.ResType.ToString("X8");
+            if (s3pi.Extensions.ExtList.Ext.ContainsKey(resType)) ext = s3pi.Extensions.ExtList.Ext[resType];
+            else ext = s3pi.Extensions.ExtList.Ext["*"];
+
+            replaceResourceDialog.Filter = ext[0] + " by type|S3_" + tgin.ResType.ToString("X8") + "*.*" +
+                "|" + ext[0] + " by ext|*" + ext[ext.Count - 1] +
+                "|All files|*.*";
+            replaceResourceDialog.FileName = "S3_" + tgin.ResType.ToString("X8") + "*.*";
+            DialogResult dr = replaceResourceDialog.ShowDialog();
+            if (dr != DialogResult.OK) return;
+
+            BinaryReader br;
+            try
+            {
+                br = new BinaryReader(new FileStream(replaceResourceDialog.FileName, FileMode.Open));
+            }
+            catch (Exception ex)
+            {
+                string s = "Could not open file:\n" + replaceResourceDialog.FileName + ".  No changes made.\n";
+                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
+                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
+
+                CopyableMessageBox.Show(this, s,
+                    myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
+
+                return;
+            }
+
+            resource.Stream.Position = 0;
+            resource.Stream.SetLength(br.BaseStream.Length);
+            resource.Stream.Write(br.ReadBytes((int)br.BaseStream.Length), 0, (int)br.BaseStream.Length);
+
+            package.ReplaceResource(browserWidget1.SelectedResource, resource);
+            resourceIsDirty = controlPanel1.CommitEnabled = false;
             IsPackageDirty = true;
         }
         #endregion
@@ -1274,6 +1319,7 @@ namespace S3PIDemoFE
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBE_cut, resource != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copy, resource != null || browserWidget1.SelectedResources.Count > 0);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_duplicate, resource != null);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_replace, resource != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_compressed, resource != null || browserWidget1.SelectedResources.Count > 0);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_isdeleted, resource != null || browserWidget1.SelectedResources.Count > 0);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_details, resource != null);

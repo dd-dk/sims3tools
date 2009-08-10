@@ -60,6 +60,7 @@
             this.resCopyToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.resPasteToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.duplicateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.replaceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.compressedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deletedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -70,14 +71,14 @@
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.externalProgramsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.organiseBookmarksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
+            this.saveSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
-            this.saveSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -321,6 +322,7 @@
             this.resCopyToolStripMenuItem1,
             this.resPasteToolStripMenuItem1,
             this.duplicateToolStripMenuItem,
+            this.replaceToolStripMenuItem,
             this.toolStripSeparator5,
             this.compressedToolStripMenuItem,
             this.deletedToolStripMenuItem,
@@ -366,6 +368,14 @@
             this.duplicateToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
             this.duplicateToolStripMenuItem.Text = "D&uplicate";
             this.duplicateToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
+            // 
+            // replaceToolStripMenuItem
+            // 
+            this.replaceToolStripMenuItem.Enabled = false;
+            this.replaceToolStripMenuItem.Name = "replaceToolStripMenuItem";
+            this.replaceToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.replaceToolStripMenuItem.Text = "&Replace...";
+            this.replaceToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
             // 
             // toolStripSeparator5
             // 
@@ -452,6 +462,18 @@
             this.organiseBookmarksToolStripMenuItem.Text = "Organise Boo&kmarks...";
             this.organiseBookmarksToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
+            // toolStripSeparator8
+            // 
+            this.toolStripSeparator8.Name = "toolStripSeparator8";
+            this.toolStripSeparator8.Size = new System.Drawing.Size(191, 6);
+            // 
+            // saveSettingsToolStripMenuItem
+            // 
+            this.saveSettingsToolStripMenuItem.Name = "saveSettingsToolStripMenuItem";
+            this.saveSettingsToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
+            this.saveSettingsToolStripMenuItem.Text = "&Save settings";
+            this.saveSettingsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -498,18 +520,6 @@
             this.licenceToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.licenceToolStripMenuItem.Text = "&Licence...";
             this.licenceToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
-            // 
-            // toolStripSeparator8
-            // 
-            this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(191, 6);
-            // 
-            // saveSettingsToolStripMenuItem
-            // 
-            this.saveSettingsToolStripMenuItem.Name = "saveSettingsToolStripMenuItem";
-            this.saveSettingsToolStripMenuItem.Size = new System.Drawing.Size(194, 22);
-            this.saveSettingsToolStripMenuItem.Text = "&Save settings";
-            this.saveSettingsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // MenuBarWidget
             // 
@@ -575,5 +585,6 @@
         private System.Windows.Forms.ToolStripMenuItem organiseBookmarksToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
         private System.Windows.Forms.ToolStripMenuItem saveSettingsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem replaceToolStripMenuItem;
     }
 }
