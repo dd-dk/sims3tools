@@ -51,7 +51,7 @@ namespace ObjectCloner.TopPanelComponents
         public bool IsClone { get { return ckbClone.Checked; } set { ckbClone.Checked = value; } }
         public bool IsDefaultOnly { get { return ckbDefault.Checked; } }
         public bool IsIncludeThumbnails { get { return ckbThumbs.Checked; } }
-        public bool IsPadSTBLs { get { return ckbPadSTBLs.Checked; } }
+        public bool IsPadSTBLs { get { return ckbPadSTBLs.Checked; } set { ckbPadSTBLs.Checked = value; } }
         public bool IsFix { get { return ckbFix.Checked; } }
         public bool IsExcludeCatalogResources { get { return ckbExcludeCatalogResources.Checked; } }
         public bool IsCompress { get { return ckbCompress.Checked; } }

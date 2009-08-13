@@ -523,6 +523,8 @@ namespace ObjectCloner
                 }
             }
             public TGI tgi { get { return latest == null ? new TGI() : latest.tgi; } }
+            public IDictionary<ulong, string> map { get { return (IDictionary<ulong, string>)latest; } }
+            public void Commit() { latest.Commit(); }
         }
         NameMap nmap;
         NameMap NMap
@@ -1517,6 +1519,7 @@ namespace ObjectCloner
                 waitingForSavePackage = false;
                 if (e.arg)
                 {
+                    cloneFixOptions.IsPadSTBLs = false;
                     cloneFixOptions.IsClone = false;
                     if (cloneFixOptions.IsFix)
                         fileReOpenToFix(saveFileDialog1.FileName, selectedItem.tgi.t);
@@ -1972,6 +1975,34 @@ namespace ObjectCloner
                         else if (Thumb[selectedItem.tgi.t, selectedItem.tgi.i, size] != null)
                             Thumb[selectedItem.tgi.t, selectedItem.tgi.i, size] = replacementForThumbs;
                     }
+                }
+
+                english = null;//reload
+                if (cloneFixOptions.IsPadSTBLs && English != null)
+                {
+                    for (int i = 0; i < 0x17; i++)
+                    {
+                        STBL lang = new STBL(objPkgs, (byte)i);
+                        if (lang.tgi != new TGI()) continue;
+
+                        string name = English[nameGUID];
+                        string desc = English[descGUID];
+                        if (name == null) name = tbCatlgName.Text;
+                        if (desc == null) desc = tbCatlgDesc.Text;
+
+                        TGI newTGI = new TGI(English.tgi.t, English.tgi.g, (English.tgi.i & 0xFFFFFFFFFFFF0000) | ((ulong)i << 56));
+                        RIE rie = new RIE(objPkgs[0], objPkgs[0].AddResource(newTGI.t, newTGI.g, newTGI.i, null, true));
+                        Item newstbl = new Item(rie);
+                        IDictionary<ulong, string> outstbl = (IDictionary<ulong, string>)newstbl.Resource;
+
+                        outstbl.Add(newNameGUID, name);
+                        outstbl.Add(newDescGUID, desc);
+                        newstbl.Commit();
+
+                        if (NMap != null && NMap.map != null && !NMap.map.ContainsKey(newTGI.i))
+                            NMap.map.Add(newTGI.i, String.Format(language_fmt, languages[i], i, English.tgi.i));
+                    }
+                    NMap.Commit();
                 }
 
                 foreach (Item item in tgiToItem.Values)
@@ -2532,31 +2563,33 @@ namespace ObjectCloner
                 return;
 
             Step lastStepInChain = None;
+            stepList = new List<Step>(new Step[] { Item_addSelf, });
 
             switch (new List<uint>(catalogTypes).IndexOf(item.tgi.t))
             {
                 case 0:
-                    OBJD_Steps(out stepList, out lastStepInChain); break;
+                    OBJD_Steps(stepList, out lastStepInChain); break;
                 case 1:
-                    MDLR_Steps(out stepList, out lastStepInChain); break;
+                    MDLR_Steps(stepList, out lastStepInChain); break;
                 case 2:
                 case 3:
                 case 6:
                 case 14:
-                    Common_Steps(out stepList, out lastStepInChain); break;
+                    Common_Steps(stepList, out lastStepInChain); break;
                 case 7:
-                    CTPT_Steps(out stepList, out lastStepInChain); break;
+                    CTPT_Steps(stepList, out lastStepInChain); break;
                 case 8:
-                    CFIR_Steps(out stepList, out lastStepInChain); break;
+                    CFIR_Steps(stepList, out lastStepInChain); break;
                 case 11:
-                    CWAL_Steps(out stepList, out lastStepInChain); break;
+                    CWAL_Steps(stepList, out lastStepInChain); break;
             }
             lastInChain = stepList == null ? -1 : stepList.IndexOf(lastStepInChain);
+            if (mode == Mode.Fix)
+                stepList.Add(FixIntegrity);
         }
 
-        void OBJD_Steps(out List<Step> stepList, out Step lastStepInChain)
+        void OBJD_Steps(List<Step> stepList, out Step lastStepInChain)
         {
-            stepList = new List<Step>(new Step[] { Item_addSelf, });
             lastStepInChain = None;
             if (cloneFixOptions.IsClone || cloneFixOptions.IsFix)
             {
@@ -2575,8 +2608,6 @@ namespace ObjectCloner
                     MODLs_SlurpTGIs,
                     MODLs_SlurpMLODs,
                     MODLs_SlurpTXTCs,
-
-                    SlurpThumbnails,
                 });
                 if (cloneFixOptions.IsDefaultOnly)
                 {
@@ -2587,25 +2618,24 @@ namespace ObjectCloner
                 else
                 {
                     stepList.Insert(stepList.IndexOf(OBJD_getOBKJ), Catlg_SlurpTGIs);
-                    stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinXML);
-                    stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinMTST);
+                    stepList.Add(VPXYs_getKinXML);
+                    stepList.Add(VPXYs_getKinMTST);
                     lastStepInChain = VPXYs_getKinMTST;
                 }
+                if (cloneFixOptions.IsIncludeThumbnails)
+                    stepList.Add(SlurpThumbnails);
             }
-            if (mode == Mode.Fix) stepList.Add(FixIntegrity);
             lastStepInChain = MODLs_SlurpTXTCs;
         }
 
-        void MDLR_Steps(out List<Step> stepList, out Step lastStepInChain)
+        void MDLR_Steps(List<Step> stepList, out Step lastStepInChain)
         {
-            stepList = new List<Step>(new Step[] { Item_addSelf, Item_findObjds, setupObjdStepList, Modular_Main, });
-            if (mode == Mode.Fix) stepList.Add(FixIntegrity);
+            stepList.AddRange(new Step[] { Item_findObjds, setupObjdStepList, Modular_Main, });
             lastStepInChain = None;
         }
 
-        void Common_Steps(out List<Step> stepList, out Step lastStepInChain)
+        void Common_Steps(List<Step> stepList, out Step lastStepInChain)
         {
-            stepList = new List<Step>(new Step[] { Item_addSelf, });
             lastStepInChain = None;
             if (cloneFixOptions.IsClone || cloneFixOptions.IsFix)
             {
@@ -2620,8 +2650,6 @@ namespace ObjectCloner
                     MODLs_SlurpTGIs,
                     MODLs_SlurpMLODs,
                     MODLs_SlurpTXTCs,
-
-                    SlurpThumbnails,
                 });
                 if (cloneFixOptions.IsDefaultOnly)
                 {
@@ -2630,26 +2658,24 @@ namespace ObjectCloner
                 else
                 {
                     //stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpTGIs);// Causes problems for CSTR and doesn't help for others
-                    stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinXML);
-                    stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinMTST);
+                    stepList.Add(VPXYs_getKinXML);
+                    stepList.Add(VPXYs_getKinMTST);
                     lastStepInChain = VPXYs_getKinMTST;
                 }
+                if (cloneFixOptions.IsIncludeThumbnails)
+                    stepList.Add(SlurpThumbnails);
             }
-            if (mode == Mode.Fix) stepList.Add(FixIntegrity);
-
         }
 
-        void CTPT_Steps(out List<Step> stepList, out Step lastStepInChain)
+        void CTPT_Steps(List<Step> stepList, out Step lastStepInChain)
         {
-            stepList = new List<Step>(new Step[] { Item_addSelf, });
             lastStepInChain = None;
             if (cloneFixOptions.IsClone || cloneFixOptions.IsFix)
             {
                 stepList.AddRange(new Step[] {
                     CTPT_addPair,
                     CTPT_addBrushTexture,
-                    //CTPT_addBrushShape is NOT default resources only
-                    SlurpThumbnails,
+                    //CTPT_addBrushShape if NOT default resources only
                 });
                 if (cloneFixOptions.IsDefaultOnly)
                 {
@@ -2661,20 +2687,21 @@ namespace ObjectCloner
                     //stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinXML);//No VPXYs in here
                     //stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinMTST);//No VPXYs in here
                 }
+                if (cloneFixOptions.IsIncludeThumbnails)
+                    stepList.Add(SlurpThumbnails);
             }
-            if (mode == Mode.Fix) stepList.Add(FixIntegrity);
         }
 
-        void CFIR_Steps(out List<Step> stepList, out Step lastStepInChain)
+        void CFIR_Steps(List<Step> stepList, out Step lastStepInChain)
         {
-            stepList = new List<Step>(new Step[] { Item_addSelf, Item_findObjds, setupObjdStepList, Modular_Main, SlurpThumbnails, });
-            if (mode == Mode.Fix) stepList.Add(FixIntegrity);
+            stepList.AddRange(new Step[] { Item_findObjds, setupObjdStepList, Modular_Main, });
+            if (cloneFixOptions.IsIncludeThumbnails)
+                stepList.Add(SlurpThumbnails);
             lastStepInChain = None;
         }
 
-        void CWAL_Steps(out List<Step> stepList, out Step lastStepInChain)
+        void CWAL_Steps(List<Step> stepList, out Step lastStepInChain)
         {
-            stepList = new List<Step>(new Step[] { Item_addSelf, });
             lastStepInChain = None;
             if (cloneFixOptions.IsClone || cloneFixOptions.IsFix)
             {
@@ -2689,8 +2716,6 @@ namespace ObjectCloner
                     MODLs_SlurpTGIs,
                     MODLs_SlurpMLODs,
                     MODLs_SlurpTXTCs,
-
-                    CWAL_SlurpThumbnails,
                 });
                 if (cloneFixOptions.IsDefaultOnly)
                 {
@@ -2699,12 +2724,13 @@ namespace ObjectCloner
                 else
                 {
                     stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpTGIs);
-                    stepList.Insert(stepList.IndexOf(CWAL_SlurpThumbnails), VPXYs_getKinXML);
-                    stepList.Insert(stepList.IndexOf(CWAL_SlurpThumbnails), VPXYs_getKinMTST);
+                    stepList.Add(VPXYs_getKinXML);
+                    stepList.Add(VPXYs_getKinMTST);
                     lastStepInChain = VPXYs_getKinMTST;
                 }
+                if (cloneFixOptions.IsIncludeThumbnails)
+                    stepList.Add(CWAL_SlurpThumbnails);
             }
-            if (mode == Mode.Fix) stepList.Add(FixIntegrity);
         }
 
         Dictionary<Step, string> StepText;
