@@ -106,6 +106,12 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="Settings.cs" />
+    <Compile Include="TopPanelComponents\CloneFixOptions.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TopPanelComponents\CloneFixOptions.Designer.cs">
+      <DependentUpon>CloneFixOptions.cs</DependentUpon>
+    </Compile>
     <Compile Include="TopPanelComponents\ObjectChooser.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -138,6 +144,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="StringInputDialog.resx">
       <DependentUpon>StringInputDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TopPanelComponents\CloneFixOptions.resx">
+      <DependentUpon>CloneFixOptions.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TopPanelComponents\ObjectChooser.resx">
       <DependentUpon>ObjectChooser.cs</DependentUpon>

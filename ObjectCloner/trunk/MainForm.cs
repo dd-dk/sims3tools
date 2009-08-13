@@ -53,9 +53,31 @@ namespace ObjectCloner
             "SPA_MX", "SWE_SE", "THA_TH",
         };
 
+        public static uint[] catalogTypes = new uint[] {
+            //NOTE: the order of these is IMPORTANT - the index numbers are used to identfy the types
+            0x319E4F1D, //0: Catalog Object
+            0xCF9A4ACE, //1: Modular Resource
+            0x0418FE2A, //2: Catalog Fence
+            0x049CA4CD, //3: Catalog Stairs
+            0x04AC5D93, //4: Catalog Proxy Product
+            0x04B30669, //5: Catalog Terrain Geometry Brush
+            0x04C58103, //6: Catalog Railing
+            0x04ED4BB2, //7: Catalog Terrain Paint Brush
+            0x04F3CC01, //8: Catalog Fireplace
+            0x060B390C, //9: Catalog Terrain Water Brush
+            0x316C78F2, //10: Catalog Foundation
+            0x515CA4CD, //11: Catalog Wall/Floor Pattern
+            0x9151E6BC, //12: Catalog Wall
+            0x91EDBD3E, //13: Catalog Roof Style
+            0xF1EDBD86, //14: Catalog Roof Pattern
+        };
+        static List<uint> ctList;
+
         static Dictionary<string, List<string>> s3ocIni;
         static MainForm()
         {
+            ctList = new List<uint>(catalogTypes);
+
             viewMap = new Dictionary<View, MenuBarWidget.MB>();
             viewMap.Add(View.Tile, MenuBarWidget.MB.MBV_tiles);
             viewMap.Add(View.LargeIcon, MenuBarWidget.MB.MBV_largeIcons);
@@ -87,13 +109,6 @@ namespace ObjectCloner
         }
         #endregion
 
-        enum Page
-        {
-            None = 0,
-            ObjectChooser,
-            Resources,
-        }
-
         enum Mode
         {
             None = 0,
@@ -116,6 +131,7 @@ namespace ObjectCloner
         private ObjectCloner.TopPanelComponents.ObjectChooser objectChooser;
         private ObjectCloner.TopPanelComponents.ResourceList resourceList;
         private ObjectCloner.TopPanelComponents.PleaseWait pleaseWait;
+        private ObjectCloner.TopPanelComponents.CloneFixOptions cloneFixOptions;
 
         public MainForm()
         {
@@ -140,15 +156,13 @@ namespace ObjectCloner
             // Settings for test mode
             if (cmdlineTest)
             {
-                ckbDefault.Visible = true;
             }
 
-            disableCompression = !ckbCompress.Checked;
+            disableCompression = false;
 
             SetStepText();
 
             InitialiseTabs(catalogTypes[4]);//Use the Proxy Product as it has pretty much nothing on it
-            setButtons(Page.None, None);
         }
 
         private void MainForm_LoadFormSettings()
@@ -194,10 +208,9 @@ namespace ObjectCloner
 
         void ClosePkg()
         {
-            haveLoaded = false;
             thumb = null;
             english = null;
-            step = None;
+            haveLoaded = false;
             if (currentPackage != "")
             {
                 if (objPkgs.Count > 0) s3pi.Package.Package.ClosePackage(0, objPkgs[0]);
@@ -410,7 +423,7 @@ namespace ObjectCloner
         Image getImage(THUM.THUMSize size, Item item)
         {
             if (item.tgi.t == catalogTypes[1])
-                return getImage(size, CatlgForMdlr(item));
+                return getImage(size, ItemForTGIBlock0(item));
             else
             {
                 ulong png = 0;
@@ -523,9 +536,9 @@ namespace ObjectCloner
             }
         }
 
-        Item CatlgForMdlr(Item mdlr)
+        Item ItemForTGIBlock0(Item item)
         {
-            AResource.TGIBlock tgib = ((AResource.TGIBlockList)mdlr.Resource["TGIBlocks"].Value)[0];
+            AResource.TGIBlock tgib = ((AResource.TGIBlockList)item.Resource["TGIBlocks"].Value)[0];
             return new Item(objPkgs, new TGI(tgib));
         }
 
@@ -535,11 +548,17 @@ namespace ObjectCloner
         private void DisplayObjectChooser()
         {
             waitingToDisplayObjects = false;
+            this.AcceptButton = btnStart;
 
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, currentCatalogType != catalogTypes[0]);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBC, true);
-            setButtons(Page.ObjectChooser, step);
+
+            lbUseMenu.Visible = false;
+            lbSelectOptions.Visible = false;
+            btnStart.Visible = true;
+            tlpTask.Enabled = true;
+            tabControl1.Enabled = false;
 
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(objectChooser);
@@ -547,15 +566,53 @@ namespace ObjectCloner
             objectChooser.Focus();
         }
 
-        private void DisplayResources()
+        private void DisplayOptions()
         {
-            setButtons(Page.Resources, step);
+            btnStart.Visible = false;
+            lbSelectOptions.Visible = true;
+            tabControl1.Enabled = true;
 
-            resourceList.Page = StepText[step];
+            cloneFixOptions = new CloneFixOptions(this, mode == Mode.Clone);
+            cloneFixOptions.CancelClicked += new EventHandler(cloneFixOptions_CancelClicked);
+            cloneFixOptions.StartClicked += new EventHandler(cloneFixOptions_StartClicked);
+
+            if (mode == Mode.Clone)
+            {
+                string prefix = CreatorName;
+                prefix = (prefix != null) ? prefix + "_" : "";
+                List<string> exts;
+                if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + selectedItem.tgi.t.ToString("X8"), out exts)) prefix += exts[0] + "_";
+                else prefix += "UNKN_";
+                cloneFixOptions.UniqueName = prefix + objectChooser.SelectedItems[0].Text;
+            }
+            else
+            {
+                cloneFixOptions.UniqueName = Path.GetFileNameWithoutExtension(openPackageDialog.FileName);
+            }
+
             splitContainer1.Panel1.Controls.Clear();
-            splitContainer1.Panel1.Controls.Add(resourceList);
-            resourceList.Dock = DockStyle.Fill;
-            resourceList.Focus();
+            splitContainer1.Panel1.Controls.Add(cloneFixOptions);
+            cloneFixOptions.Dock = DockStyle.Fill;
+            cloneFixOptions.Focus();
+        }
+
+        private void DisplayNothing()
+        {
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, true);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBC, true);
+
+            this.Enabled = true;
+            this.AcceptButton = null;
+            tlpTask.Enabled = true;
+            tabControl1.Enabled = false;
+            ClearTabs();
+
+            lbUseMenu.Visible = true;
+            btnStart.Visible = false;
+            lbSelectOptions.Visible = false;
+
+            splitContainer1.Panel1.Controls.Clear();
         }
 
         private void DoWait() { DoWait("Please wait..."); }
@@ -572,23 +629,93 @@ namespace ObjectCloner
         #region ObjectChooser
         private void objectChooser_SelectedIndexChanged(object sender, EventArgs e)
         {
-            replacementForThumbs = null;
+            replacementForThumbs = null;// might as well be here; needed after FillTabs, really.
             if (objectChooser.SelectedItems.Count == 0)
             {
                 selectedItem = null;
                 ClearTabs();
+                btnStart.Enabled = false;
             }
             else
             {
                 selectedItem = objectChooser.SelectedItems[0].Tag as Item;
                 FillTabs(selectedItem);
+                btnStart.Enabled = true;
             }
-            ckbDefault_CheckedChanged(sender, e);
         }
 
         void objectChooser_ItemActivate(object sender, EventArgs e)
         {
             btnStart_Click(sender, e);
+        }
+        #endregion
+
+        #region CloneFixOptions
+        void cloneFixOptions_StartClicked(object sender, EventArgs e)
+        {
+            this.AcceptButton = null;
+            tlpTask.Enabled = false;
+            tabControl1.Enabled = false;
+
+            uniqueObject = null;
+            if (UniqueObject == null)
+            {
+                DisplayObjectChooser();
+                return;
+            }
+
+            if (cloneFixOptions.IsClone)
+            {
+                saveFileDialog1.FileName = UniqueObject;
+                if (ObjectCloner.Properties.Settings.Default.LastSaveFolder != null)
+                    saveFileDialog1.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder;
+                DialogResult dr = saveFileDialog1.ShowDialog();
+                if (dr != DialogResult.OK) { DisplayObjectChooser(); return; }
+                ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(saveFileDialog1.FileName);
+            }
+
+            disableCompression = !cloneFixOptions.IsCompress;
+
+            stepList = null;
+            SetStepList(selectedItem, out stepList);
+            if (stepList == null)
+            {
+                DisplayObjectChooser();
+                return;
+            }
+
+            DoWait("Please wait, performing operations...");
+
+            stepNum = 0;
+            resourceList.Clear();
+            tgiLookup.Clear();
+            while (stepNum < stepList.Count)
+            {
+                step = stepList[stepNum];
+                updateProgress(true, StepText[step], true, stepList.Count - 1, true, stepNum);
+                Application.DoEvents();
+                stepNum++;
+                step();
+            }
+
+            isFix = false;
+            if (cloneFixOptions.IsClone)
+            {
+                this.Enabled = false;
+                DoWait("Please wait, creating your new package...");
+                waitingForSavePackage = true;
+                StartSaving();
+            }
+            else if (cloneFixOptions.IsFix)
+            {
+                DoWait("Please wait, updating your package...");
+                StartFixing();
+            }
+        }
+
+        void cloneFixOptions_CancelClicked(object sender, EventArgs e)
+        {
+            DisplayObjectChooser();
         }
         #endregion
 
@@ -906,7 +1033,7 @@ namespace ObjectCloner
 
             InitialiseTabs(item.tgi.t);
 
-            Item catlg = (item.tgi.t == catalogTypes[1]) ? CatlgForMdlr(item) : item;
+            Item catlg = (item.tgi.t == catalogTypes[1]) ? ItemForTGIBlock0(item) : item;
 
             fillOverview(catlg);
             fillDetails(catlg);
@@ -920,15 +1047,17 @@ namespace ObjectCloner
         {
             pictureBox1.Image = getImage(THUM.THUMSize.large, objd);
             lbThumbTGI.Text = getImageTGI(THUM.THUMSize.large, objd);
-            btnReplThumb.Enabled = mode == Mode.Fix;
+            btnReplThumb.Enabled = true;
             AApiVersionedFields common = objd.Resource["CommonBlock"].Value as AApiVersionedFields;
             tbObjName.Text = common["Name"].Value + "";
             tbObjDesc.Text = common["Desc"].Value + "";
             tbCatlgName.Text = English[(ulong)common["NameGUID"].Value];
             tbCatlgDesc.Text = English[(ulong)common["DescGUID"].Value];
+            tbCatlgName.Enabled = true;
+            tbCatlgDesc.Enabled = true;
+            ckbCopyToAll.Enabled = true;
             tbPrice.Text = common["Price"].Value + "";
-            tbPrice.ReadOnly = mode == Mode.Clone;
-            tbCatlgName.Enabled = tbCatlgDesc.Enabled = ckbCopyToAll.Enabled = mode == Mode.Fix;
+            tbPrice.ReadOnly = false;
         }
         void fillDetails(Item objd)
         {
@@ -952,7 +1081,7 @@ namespace ObjectCloner
                 else
                     tb.Text = tv;
 
-                tb.ReadOnly = !(mode == Mode.Fix && tb.Tag != null);
+                tb.ReadOnly = tb.Tag == null;
             }
             for (int i = 2; i < tlpObjectCommon.RowCount - 1; i++)
             {
@@ -973,7 +1102,7 @@ namespace ObjectCloner
                 else
                     tb.Text = tv;
 
-                tb.ReadOnly = !(mode == Mode.Fix && tb.Tag != null);
+                tb.ReadOnly = tb.Tag == null;
             }
         }
         void fillFlags(Item objd)
@@ -986,7 +1115,6 @@ namespace ObjectCloner
                     ulong value = (ulong)Math.Pow(2, ff.offset + i - 1);
                     CheckBox cb = (CheckBox)ff.tlp.GetControlFromPosition(0, i);
                     cb.Checked = (field & value) != 0;
-                    cb.Enabled = mode == Mode.Fix;
                 }
             }
         }
@@ -1006,7 +1134,7 @@ namespace ObjectCloner
                 else
                     tb.Text = tv;
 
-                tb.ReadOnly = !(mode == Mode.Fix && tb.Tag != null);
+                tb.ReadOnly = tb.Tag == null;
             }
         }
 
@@ -1042,17 +1170,21 @@ namespace ObjectCloner
         Thread loadThread;
         bool haveLoaded = false;
         bool loading = false;
+        bool isFix = false;
         Dictionary<uint, Item> CTPTUnknown8ToPair;
-        void StartLoading(uint resourceType)
+        void StartLoading(uint resourceType, bool setIsFix)
         {
             if (haveLoaded) return;
             if (loading) { AbortLoading(false); }
             if (fetching) { AbortFetching(false); }
 
+            isFix = setIsFix;
+
             waitingToDisplayObjects = true;
             objectChooser.Items.Clear();
             CTPTUnknown8ToPair = new Dictionary<uint, Item>();
 
+            this.LoadingComplete -= new EventHandler<BoolEventArgs>(MainForm_LoadingComplete);
             this.LoadingComplete += new EventHandler<BoolEventArgs>(MainForm_LoadingComplete);
 
             FillListView flv = new FillListView(this, objPkgs, ddsPkgs, tmbPkgs, resourceType
@@ -1094,20 +1226,25 @@ namespace ObjectCloner
 
                 if (waitingToDisplayObjects)
                 {
-                    if (mode == Mode.Clone && menuBarWidget1.IsChecked(MenuBarWidget.MB.MBV_icons))
+                    if (!isFix || objectChooser.Items.Count != 1)
                     {
-                        waitingForImages = true;
-                        StartFetching();
+                        if (mode == Mode.Clone && menuBarWidget1.IsChecked(MenuBarWidget.MB.MBV_icons))
+                        {
+                            waitingForImages = true;
+                            StartFetching();
+                        }
+
+                        if (objectChooser.Items.Count > 0) objectChooser.SelectedIndex = 0;
+                        DisplayObjectChooser();
                     }
-
-                    if (objectChooser.Items.Count > 0) objectChooser.SelectedIndex = 0;
-
-                    DisplayObjectChooser();
+                    else
+                        cloneFixOptions_StartClicked(null, null);
                 }
             }
             else
             {
                 ClosePkg();
+                DisplayNothing();
             }
         }
 
@@ -1131,7 +1268,7 @@ namespace ObjectCloner
             if (item.Resource != null)
             {
                 string objdtag;
-                if (item.tgi.t == catalogTypes[1]) objdtag = ((AApiVersionedFields)CatlgForMdlr(item).Resource["CommonBlock"].Value)["Name"];
+                if (item.tgi.t == catalogTypes[1]) objdtag = ((AApiVersionedFields)ItemForTGIBlock0(item).Resource["CommonBlock"].Value)["Name"];
                 else objdtag = ((AApiVersionedFields)item.Resource["CommonBlock"].Value)["Name"];
                 lvi.Text = (objdtag.IndexOf(':') < 0) ? objdtag : objdtag.Substring(objdtag.LastIndexOf(':') + 1);
             }
@@ -1335,19 +1472,17 @@ namespace ObjectCloner
 
         #region Saving thread
         Thread saveThread;
-        bool haveSaved = false;//Have we successfully saved *this* object?
         bool saving = false;
         void StartSaving()
         {
             this.SavingComplete += new EventHandler<BoolEventArgs>(MainForm_SavingComplete);
 
             SaveList sl = new SaveList(this, objectChooser.SelectedItems[0].Tag as Item, tgiLookup, objPkgs, ddsPkgs, tmbPkgs,
-                saveFileDialog1.FileName, ckbPadSTBLs.Checked,
+                saveFileDialog1.FileName, cloneFixOptions.IsPadSTBLs,
                 updateProgress, stopSaving, OnSavingComplete);
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
             saving = true;
-            haveSaved = false;//Clear now as we're about to overwrite it
             saveThread.Start();
         }
 
@@ -1382,9 +1517,15 @@ namespace ObjectCloner
                 waitingForSavePackage = false;
                 if (e.arg)
                 {
-                    CopyableMessageBox.Show("OK", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
-                    haveSaved = true;//Success!
-                    btnList_Click(null, null);
+                    cloneFixOptions.IsClone = false;
+                    if (cloneFixOptions.IsFix)
+                        fileReOpenToFix(saveFileDialog1.FileName, selectedItem.tgi.t);
+                    else
+                    {
+                        CopyableMessageBox.Show("OK", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
+                        ClosePkg();
+                        DisplayNothing();
+                    }
                 }
                 else
                 {
@@ -1392,7 +1533,7 @@ namespace ObjectCloner
                         CopyableMessageBox.Show("\nSave not complete.\nPlease ensure package is not in use.\n", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
                     else
                         CopyableMessageBox.Show("\nSave not complete.\n", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
-                    DisplayResources();
+                    DisplayOptions();
                 }
             }
         }
@@ -1626,12 +1767,16 @@ namespace ObjectCloner
             {
                 if (uniqueObject == null)
                 {
-                    StringInputDialog ond = new StringInputDialog();
-                    ond.Caption = "Make Object Unique";
-                    ond.Prompt = "Enter unique object identifier";
-                    ond.Value = Path.GetFileNameWithoutExtension(openPackageDialog.FileName);
-                    DialogResult dr = ond.ShowDialog();
-                    if (dr == DialogResult.OK) uniqueObject = ond.Value;
+                    if (cloneFixOptions.UniqueName == null || cloneFixOptions.UniqueName.Length == 0)
+                    {
+                        StringInputDialog ond = new StringInputDialog();
+                        ond.Caption = "Unique Resource Name";
+                        ond.Prompt = "Enter unique identifier";
+                        ond.Value = cloneFixOptions.UniqueName;
+                        DialogResult dr = ond.ShowDialog();
+                        if (dr == DialogResult.OK) uniqueObject = ond.Value;
+                    }
+                    else uniqueObject = cloneFixOptions.UniqueName;
                 }
                 return uniqueObject;
             }
@@ -1642,7 +1787,7 @@ namespace ObjectCloner
 
         void StartFixing()
         {
-            Item catlgItem = selectedItem.tgi.t == catalogTypes[1] ? CatlgForMdlr(selectedItem) : selectedItem;
+            Item catlgItem = (selectedItem.tgi.t == catalogTypes[1] || selectedItem.tgi.t == catalogTypes[8]) ? ItemForTGIBlock0(selectedItem) : selectedItem;
             //oldToNew = new Dictionary<ulong, ulong>();
             //tgiToItem - TGIs we're interested in and the Item they refer to
             try
@@ -1737,7 +1882,7 @@ namespace ObjectCloner
                                 item.Resource["Unknown8"] = new TypedValue(typeof(uint), unknown8 + 1);
                         }
 
-                        if (!ckbCatlgDetails.Checked)
+                        if (cloneFixOptions.IsFix)
                             UpdateTGIsFromField((AResource)item.Resource);
 
                         dirty = true;
@@ -1843,16 +1988,13 @@ namespace ObjectCloner
             }
             finally
             {
-                splitContainer1.Panel1.Controls.Clear();
-                this.Enabled = true;
-                objectChooser.Items.Clear();
-                ClearTabs();
-                ClosePkg();
-                step = None;
-                setButtons(Page.None, None);
+                this.toolStripProgressBar1.Visible = false;
+                this.toolStripStatusLabel1.Visible = false;
             }
 
             CopyableMessageBox.Show("OK", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
+            ClosePkg();
+            DisplayNothing();
         }
 
         int numNewInstances = 0;
@@ -1866,6 +2008,7 @@ namespace ObjectCloner
             if (typeof(AResource.TGIBlock).IsAssignableFrom(t))
             {
                 AResource.TGIBlock tgib = (AResource.TGIBlock)field;
+                if (cloneFixOptions.IsExcludeCatalogResources && ctList.Contains(tgib.ResourceType)) return dirty;
                 if (tgib != new TGI(0, 0, 0) && tgiToItem.ContainsKey(tgib) && oldToNew.ContainsKey(tgib.Instance)) { tgib.Instance = oldToNew[tgib.Instance]; dirty = true; }
             }
             else
@@ -2047,44 +2190,46 @@ namespace ObjectCloner
             if (dr != DialogResult.OK) return;
             ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(openPackageDialog.FileName);
 
+            fileReOpenToFix(openPackageDialog.FileName, 0);
+        }
+
+        void fileReOpenToFix(string filename, uint type)
+        {
             ClosePkg();
             IPackage pkg;
             try
             {
-                pkg = s3pi.Package.Package.OpenPackage(0, openPackageDialog.FileName, true);
+                pkg = s3pi.Package.Package.OpenPackage(0, filename, true);
             }
             catch (Exception ex)
             {
                 string s = ex.Message;
                 for (Exception inex = ex.InnerException; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
-                CopyableMessageBox.Show("Could not open package " + openPackageDialog.FileName + "\n\n" + s, "File Open", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                CopyableMessageBox.Show("Could not open package " + filename + "\n\n" + s, "File Open", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
                 return;
             }
 
-            menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + new List<uint>(catalogTypes).IndexOf(currentCatalogType)), false);
+            if (currentCatalogType != 0) menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + new List<uint>(catalogTypes).IndexOf(currentCatalogType)), false);
             currentCatalogType = 0;
-            currentPackage = openPackageDialog.FileName;
+            currentPackage = filename;
             tmbPkgs = ddsPkgs = objPkgs = new List<IPackage>(new IPackage[] { pkg, });
 
             mode = Mode.Fix;
-            fileNewOpen(0);
+            fileNewOpen(type, type != 0);
         }
 
-        void fileNewOpen(uint resourceType)
+        void fileNewOpen(uint resourceType, bool IsFixPass)
         {
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, false);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, false);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBC, false);
 
-            tlpButtons.Enabled = false;
-            ckbDefault.Checked = mode == Mode.Clone;
-            ckbPadSTBLs.Checked = ckbNoOBJD.Checked = ckbCatlgDetails.Checked = false;
-
             DoWait("Please wait, loading object catalog...");
+            tlpTask.Enabled = false;
             Application.DoEvents();
 
             if (!haveLoaded)
-                StartLoading(resourceType);
+                StartLoading(resourceType, IsFixPass);
             else
                 DisplayObjectChooser();
         }
@@ -2096,44 +2241,21 @@ namespace ObjectCloner
         #endregion
 
         #region Cloning menu
-        public static uint[] catalogTypes = new uint[] {
-            //NOTE: the order of these is IMPORTANT - the index numbers are used to identfy the types
-            0x319E4F1D, //0: Catalog Object
-            0xCF9A4ACE, //1: Modular Resource
-            0x0418FE2A, //2: Catalog Fence
-            0x049CA4CD, //3: Catalog Stairs
-            0x04AC5D93, //4: Catalog Proxy Product
-            0x04B30669, //5: Catalog Terrain Geometry Brush
-            0x04C58103, //6: Catalog Railing
-            0x04ED4BB2, //7: Catalog Terrain Paint Brush
-            0x04F3CC01, //8: Catalog Fireplace
-            0x060B390C, //9: Catalog Terrain Water Brush
-            0x316C78F2, //10: Catalog Foundation
-            0x515CA4CD, //11: Catalog Wall/Floor Pattern
-            0x9151E6BC, //12: Catalog Wall
-            0x91EDBD3E, //13: Catalog Roof Style
-            0xF1EDBD86, //14: Catalog Roof Pattern
-        };
         uint currentCatalogType = 0;
         private void menuBarWidget1_MBCloning_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
         {
-            try
+            Application.DoEvents();
+            int i = ((int)mn.mn) - ((int)MenuBarWidget.MB.MBC_objd);
+            if (i >= 0 && i < catalogTypes.Length)
             {
-                this.Enabled = false;
-                Application.DoEvents();
-                int i = ((int)mn.mn) - ((int)MenuBarWidget.MB.MBC_objd);
-                if (i >= 0 && i < catalogTypes.Length)
+                int j = new List<uint>(catalogTypes).IndexOf(currentCatalogType);
+                if (i != j)
                 {
-                    int j = new List<uint>(catalogTypes).IndexOf(currentCatalogType);
-                    if (i != j)
-                    {
-                        if (j >= 0) menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + j), false);
-                        menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + i), true);
-                    }
-                    cloneType(catalogTypes[i]);
+                    if (j >= 0) menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + j), false);
+                    menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + i), true);
                 }
+                cloneType(catalogTypes[i]);
             }
-            finally { this.Enabled = true; }
         }
 
         private void cloneType(uint resourceType)
@@ -2150,7 +2272,7 @@ namespace ObjectCloner
             }
 
             mode = Mode.Clone;
-            fileNewOpen(resourceType);
+            fileNewOpen(resourceType, false);
         }
         void setList(string path, IList<string> files, out List<IPackage> pkgs)
         {
@@ -2391,153 +2513,6 @@ namespace ObjectCloner
 
         #endregion
 
-        #region Buttons
-        void setButtons(Page p, Step s)
-        {
-            Application.DoEvents();
-            tlpButtons.Enabled = true;
-
-            bool flag = p != Page.Resources;
-            ckbPadSTBLs.Enabled = ckbDefault.Enabled = mode == Mode.Clone && flag;//note: ckbDefault is not visible pending investigations
-            if (s == None) ckbNoOBJD.Checked = false;
-            ckbNoOBJD.Enabled = mode == Mode.Fix && !ckbCatlgDetails.Checked && flag;
-            ckbCatlgDetails.Enabled = mode == Mode.Fix && flag;
-
-            Color btnListBackColor = Color.FromKnownColor(KnownColor.Control);
-            Color btnStartBackColor = Color.FromKnownColor(KnownColor.Control);
-            Color btnNextBackColor = Color.FromKnownColor(KnownColor.Control);
-            Color btnSaveBackColor = Color.FromKnownColor(KnownColor.Control);
-
-            switch (p)
-            {
-                case Page.None:
-                    btnListBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
-                    this.AcceptButton = btnList;
-                    btnList.Enabled = haveLoaded;
-                    break;
-                case Page.ObjectChooser:
-                    btnList.Enabled = false;
-                    break;
-                case Page.Resources:
-                    btnList.Enabled = haveLoaded;
-                    break;
-            }
-
-            if (objectChooser.SelectedItems.Count > 0)
-            {
-                btnStart.Enabled = true;
-                if (stepList == null)
-                {
-                    btnStartBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
-                    this.AcceptButton = btnStart;
-                    btnNext.Enabled = false;
-                }
-                else
-                {
-                    if (s != stepList[stepList.Count - 1])
-                    {
-                        btnNextBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
-                        this.AcceptButton = btnNext;
-                        btnNext.Enabled = true;
-                    }
-                    else
-                    {
-                        btnSaveBackColor = Color.FromKnownColor(KnownColor.ControlLightLight);
-                        this.AcceptButton = btnSave;
-                        btnNext.Enabled = false;
-                    }
-                }
-            }
-            else
-            {
-                btnStart.Enabled = false;
-                btnNext.Enabled = false;
-            }
-
-            float price;
-            btnSave.Enabled = stepList != null && float.TryParse(tbPrice.Text, out price);//Start has populated the stepList and price is valid
-
-            btnList.BackColor = btnListBackColor;
-            btnStart.BackColor = btnStartBackColor;
-            btnNext.BackColor = btnNextBackColor;
-            btnSave.BackColor = btnSaveBackColor;
-
-            tlpButtons.Enabled = haveLoaded;
-        }
-
-        private void btnList_Click(object sender, EventArgs e)
-        {
-            DisplayObjectChooser();
-        }
-
-        private void btnStart_Click(object sender, EventArgs e)
-        {
-            tlpButtons.Enabled = false;
-            resourceList.Clear();
-            tgiLookup.Clear();
-
-            if (mode == Mode.Fix)
-            {
-                uniqueObject = null;
-                if (UniqueObject == null)
-                {
-                    DisplayObjectChooser();
-                    return;
-                }
-            }
-
-            SetStepList(selectedItem, out stepList);
-            if (stepList == null)
-            {
-                DisplayObjectChooser();
-                return;
-            }
-
-            DoWait("Please wait, performing operations...");
-
-            stepNum = 0;
-            while (stepNum < stepList.Count)
-            {
-                step = stepList[stepNum];
-                updateProgress(true, StepText[step], true, stepList.Count - 1, true, stepNum);
-                Application.DoEvents();
-                stepNum++;
-                step();
-            }
-
-            this.toolStripProgressBar1.Visible = false;
-            this.toolStripStatusLabel1.Visible = false;
-            DisplayResources();
-        }
-
-        private void btnSave_Click(object sender, EventArgs e)
-        {
-            tlpButtons.Enabled = false;
-            if (mode == Mode.Clone)
-            {
-                string prefix = CreatorName;
-                prefix = (prefix != null) ? prefix + "_" : "";
-                if (selectedItem.tgi.t == catalogTypes[1]) prefix += "MDLR_";
-                if (ObjectCloner.Properties.Settings.Default.LastSaveFolder != null)
-                    saveFileDialog1.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder;
-                saveFileDialog1.FileName = objectChooser.SelectedItems.Count > 0 ? prefix + objectChooser.SelectedItems[0].Text : "";
-                DialogResult dr = saveFileDialog1.ShowDialog();
-                if (dr != DialogResult.OK) { if (haveSaved) btnList_Click(null, null); else DisplayResources(); return; }
-                ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(saveFileDialog1.FileName);
-
-                this.Enabled = false;
-                DoWait("Please wait, creating your new package...");
-                waitingForSavePackage = true;
-                StartSaving();
-            }
-            else
-            {
-                DoWait("Please wait, updating your package...");
-                StartFixing();
-            }
-        }
-        #endregion
-
         #region Steps
         Item objkItem;
         List<Item> vpxyItems;
@@ -2582,7 +2557,8 @@ namespace ObjectCloner
         void OBJD_Steps(out List<Step> stepList, out Step lastStepInChain)
         {
             stepList = new List<Step>(new Step[] { Item_addSelf, });
-            if (!ckbCatlgDetails.Checked)
+            lastStepInChain = None;
+            if (cloneFixOptions.IsClone || cloneFixOptions.IsFix)
             {
                 stepList.AddRange(new Step[] {
                     // either OBJD_SlurpDDSes or Catlg_SlurpTGIs
@@ -2602,16 +2578,18 @@ namespace ObjectCloner
 
                     SlurpThumbnails,
                 });
-                if (ckbDefault.Checked)
+                if (cloneFixOptions.IsDefaultOnly)
                 {
                     stepList.Insert(stepList.IndexOf(OBJD_getOBKJ), OBJD_SlurpDDSes);
                     stepList.Insert(stepList.IndexOf(OBJK_SlurpTGIs), OBJD_addOBJKref);
+                    lastStepInChain = MODLs_SlurpTXTCs;
                 }
                 else
                 {
                     stepList.Insert(stepList.IndexOf(OBJD_getOBKJ), Catlg_SlurpTGIs);
                     stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinXML);
                     stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinMTST);
+                    lastStepInChain = VPXYs_getKinMTST;
                 }
             }
             if (mode == Mode.Fix) stepList.Add(FixIntegrity);
@@ -2628,7 +2606,8 @@ namespace ObjectCloner
         void Common_Steps(out List<Step> stepList, out Step lastStepInChain)
         {
             stepList = new List<Step>(new Step[] { Item_addSelf, });
-            if (!ckbCatlgDetails.Checked)
+            lastStepInChain = None;
+            if (cloneFixOptions.IsClone || cloneFixOptions.IsFix)
             {
                 stepList.AddRange(new Step[] {
                     Catlg_getVPXY,
@@ -2644,24 +2623,27 @@ namespace ObjectCloner
 
                     SlurpThumbnails,
                 });
-                if (ckbDefault.Checked)
+                if (cloneFixOptions.IsDefaultOnly)
                 {
+                    lastStepInChain = MODLs_SlurpTXTCs;
                 }
                 else
                 {
                     //stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpTGIs);// Causes problems for CSTR and doesn't help for others
                     stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinXML);
                     stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinMTST);
+                    lastStepInChain = VPXYs_getKinMTST;
                 }
             }
             if (mode == Mode.Fix) stepList.Add(FixIntegrity);
-            lastStepInChain = MODLs_SlurpTXTCs;
+
         }
 
         void CTPT_Steps(out List<Step> stepList, out Step lastStepInChain)
         {
             stepList = new List<Step>(new Step[] { Item_addSelf, });
-            if (!ckbCatlgDetails.Checked)
+            lastStepInChain = None;
+            if (cloneFixOptions.IsClone || cloneFixOptions.IsFix)
             {
                 stepList.AddRange(new Step[] {
                     CTPT_addPair,
@@ -2669,7 +2651,7 @@ namespace ObjectCloner
                     //CTPT_addBrushShape is NOT default resources only
                     SlurpThumbnails,
                 });
-                if (ckbDefault.Checked)
+                if (cloneFixOptions.IsDefaultOnly)
                 {
                 }
                 else
@@ -2681,7 +2663,6 @@ namespace ObjectCloner
                 }
             }
             if (mode == Mode.Fix) stepList.Add(FixIntegrity);
-            lastStepInChain = None;
         }
 
         void CFIR_Steps(out List<Step> stepList, out Step lastStepInChain)
@@ -2694,7 +2675,8 @@ namespace ObjectCloner
         void CWAL_Steps(out List<Step> stepList, out Step lastStepInChain)
         {
             stepList = new List<Step>(new Step[] { Item_addSelf, });
-            if (!ckbCatlgDetails.Checked)
+            lastStepInChain = None;
+            if (cloneFixOptions.IsClone || cloneFixOptions.IsFix)
             {
                 stepList.AddRange(new Step[] {
                     Catlg_getVPXY,
@@ -2710,18 +2692,19 @@ namespace ObjectCloner
 
                     CWAL_SlurpThumbnails,
                 });
-                if (ckbDefault.Checked)
+                if (cloneFixOptions.IsDefaultOnly)
                 {
+                    lastStepInChain = MODLs_SlurpTXTCs;
                 }
                 else
                 {
                     stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpTGIs);
                     stepList.Insert(stepList.IndexOf(CWAL_SlurpThumbnails), VPXYs_getKinXML);
                     stepList.Insert(stepList.IndexOf(CWAL_SlurpThumbnails), VPXYs_getKinMTST);
+                    lastStepInChain = VPXYs_getKinMTST;
                 }
             }
             if (mode == Mode.Fix) stepList.Add(FixIntegrity);
-            lastStepInChain = MODLs_SlurpTXTCs;
         }
 
         Dictionary<Step, string> StepText;
@@ -3019,7 +3002,7 @@ namespace ObjectCloner
             }
 
             // We may also need to process RCOL internal chunks and NameMaps but only if we're renumbering
-            if (!ckbCatlgDetails.Checked)
+            if (cloneFixOptions.IsFix)
             {
                 //If there are internal chunk references not covered by the above, we also need to add them
                 Dictionary<TGI, Item> rcolChunks = new Dictionary<TGI, Item>();
@@ -3050,9 +3033,7 @@ namespace ObjectCloner
             // A list to hold the new numbers
             oldToNew = new Dictionary<ulong, ulong>();
 
-            if (ckbNoOBJD.Checked || ckbCatlgDetails.Checked)
-                oldToNew.Add(selectedItem.tgi.i, selectedItem.tgi.i);//Prevent selected item getting renumbered
-            else if (selectedItem.tgi.t == catalogTypes[1])
+            if (selectedItem.tgi.t == catalogTypes[1])
                 oldToNew.Add(selectedItem.tgi.i, FNV64.GetHash(UniqueObject));//MDLR needs its IID as a specific hash value
 
             ulong PngInstance = 0;
@@ -3064,12 +3045,13 @@ namespace ObjectCloner
                     oldToNew.Add(PngInstance, CreateInstance());
             }
 
-            if (!ckbCatlgDetails.Checked)
+            if (cloneFixOptions.IsFix)
             {
                 // Generate new numbers for everything we've decided to renumber
                 ulong langInst = FNV64.GetHash("StringTable:" + UniqueObject) >> 8;
                 foreach (TGI tgi in tgiToItem.Keys)
                 {
+                    if (cloneFixOptions.IsExcludeCatalogResources && ctList.Contains(tgi.t)) continue;
                     if (!oldToNew.ContainsKey(tgi.i))
                     {
                         if (tgi.t == 0x220557DA)//STBL
@@ -3082,7 +3064,7 @@ namespace ObjectCloner
 
             Item catlgItem = selectedItem;
             if (selectedItem.tgi.t == catalogTypes[1])
-                catlgItem = CatlgForMdlr(catlgItem);
+                catlgItem = ItemForTGIBlock0(catlgItem);
 
             nameGUID = (ulong)((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["NameGUID"].Value;
             descGUID = (ulong)((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["DescGUID"].Value;
@@ -3092,7 +3074,7 @@ namespace ObjectCloner
 
 
             resourceList.Clear();
-            if (!ckbCatlgDetails.Checked) foreach (var kvp in tgiToItem)
+            if (cloneFixOptions.IsFix) foreach (var kvp in tgiToItem)
                 {
                     string s = String.Format("Old: {0} --> New: {1}", "" + (TGIN)kvp.Key, "" + (TGIN)new TGI(kvp.Key.t, kvp.Key.g, oldToNew[kvp.Key.i]));
                     resourceList.Add(s);
@@ -3111,17 +3093,6 @@ namespace ObjectCloner
                 resourceList.Add("Old PngInstance: " + ((AApiVersionedFields)selectedItem.Resource["CommonBlock"].Value)["PngInstance"] + " --> New PngInstance: 0x" + oldToNew[PngInstance].ToString("X16"));
         }
         #endregion
-
-        private void ckbCatlgDetails_CheckedChanged(object sender, EventArgs e)
-        {
-            if (!ckbCatlgDetails.Enabled) return;
-            ckbNoOBJD.Enabled = !ckbCatlgDetails.Checked;
-        }
-
-        private void ckbNoComp_CheckedChanged(object sender, EventArgs e)
-        {
-            disableCompression = !ckbCompress.Checked;
-        }
 
         private void btnReplThumb_Click(object sender, EventArgs e)
         {
@@ -3143,14 +3114,9 @@ namespace ObjectCloner
         }
         bool gtAbort() { return false; }
 
-        private void ckbDefault_CheckedChanged(object sender, EventArgs e)
+        private void btnStart_Click(object sender, EventArgs e)
         {
-            resourceList.Clear();
-            tgiLookup.Clear();
-            haveSaved = false;//Clear now as settings changed
-            stepList = null;
-            step = None;
-            setButtons(Page.ObjectChooser, None);
+            DisplayOptions();
         }
     }
 }
