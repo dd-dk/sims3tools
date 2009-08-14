@@ -42,7 +42,7 @@ namespace ObjectCloner
         static List<View> viewMapKeys;
         static List<MenuBarWidget.MB> viewMapValues;
 
-        static string language_fmt = "Strings_{0}_{1:X2}{2:X62}";
+        static string language_fmt = "Strings_{0}_{1:x2}{2:x14}";
         static string[] languages = new string[] {
             "ENG_US", "CHI_CN", "CHI_TW", "CZE_CZ",
             "DAN_DK", "DUT_NL", "FIN_FI", "FRE_FR",
@@ -708,7 +708,7 @@ namespace ObjectCloner
                 waitingForSavePackage = true;
                 StartSaving();
             }
-            else if (cloneFixOptions.IsFix)
+            else
             {
                 DoWait("Please wait, updating your package...");
                 StartFixing();
@@ -1521,14 +1521,7 @@ namespace ObjectCloner
                 {
                     cloneFixOptions.IsPadSTBLs = false;
                     cloneFixOptions.IsClone = false;
-                    if (cloneFixOptions.IsFix)
-                        fileReOpenToFix(saveFileDialog1.FileName, selectedItem.tgi.t);
-                    else
-                    {
-                        CopyableMessageBox.Show("OK", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
-                        ClosePkg();
-                        DisplayNothing();
-                    }
+                    fileReOpenToFix(saveFileDialog1.FileName, selectedItem.tgi.t);
                 }
                 else
                 {
@@ -1991,7 +1984,7 @@ namespace ObjectCloner
                         if (name == null) name = tbCatlgName.Text;
                         if (desc == null) desc = tbCatlgDesc.Text;
 
-                        TGI newTGI = new TGI(English.tgi.t, English.tgi.g, (English.tgi.i & 0xFFFFFFFFFFFF0000) | ((ulong)i << 56));
+                        TGI newTGI = new TGI(English.tgi.t, English.tgi.g, English.tgi.i | ((ulong)i << 56));
                         RIE rie = new RIE(objPkgs[0], objPkgs[0].AddResource(newTGI.t, newTGI.g, newTGI.i, null, true));
                         Item newstbl = new Item(rie);
                         IDictionary<ulong, string> outstbl = (IDictionary<ulong, string>)newstbl.Resource;

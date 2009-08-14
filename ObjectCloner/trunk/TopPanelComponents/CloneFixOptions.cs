@@ -31,8 +31,6 @@ namespace ObjectCloner.TopPanelComponents
         {
             InitializeComponent();
             ckbExcludeCatalogResources.Enabled = ckbFix.Checked;
-            ckbFix.Checked = tlpCustomise.Enabled;
-            tlpCustomise.Enabled = ckbCustomise.Checked;
             ckbThumbs.Enabled = ckbDefault.Enabled = ckbClone.Checked;
         }
 
@@ -59,28 +57,11 @@ namespace ObjectCloner.TopPanelComponents
         public event EventHandler CancelClicked;
         public event EventHandler StartClicked;
 
-        private void tbUniqueName_TextChanged(object sender, EventArgs e)
-        {
-            btnStart.Enabled = tbUniqueName.Text.Length > 0 && (ckbClone.Checked || ckbCustomise.Checked);
-        }
-
         private void ckbClone_CheckedChanged(object sender, EventArgs e)
         {
             ckbThumbs.Enabled = ckbDefault.Enabled = ckbClone.Checked;
             ckbDefault.Checked = ckbClone.Checked;
             ckbThumbs.Checked = false;
-            btnStart.Enabled = tbUniqueName.Text.Length > 0 && (ckbClone.Checked || ckbCustomise.Checked);
-        }
-
-        private void ckbCustomise_CheckedChanged(object sender, EventArgs e)
-        {
-            tlpCustomise.Enabled = ckbCustomise.Checked;
-            btnStart.Enabled = tbUniqueName.Text.Length > 0 && (ckbClone.Checked || ckbCustomise.Checked);
-        }
-
-        private void tlpCustomise_EnabledChanged(object sender, EventArgs e)
-        {
-            ckbFix.Checked = tlpCustomise.Enabled;
         }
 
         private void ckbFix_CheckedChanged(object sender, EventArgs e)
@@ -89,14 +70,8 @@ namespace ObjectCloner.TopPanelComponents
             ckbExcludeCatalogResources.Checked = false;
         }
 
-        private void btnCancel_Click(object sender, EventArgs e)
-        {
-            if (CancelClicked != null) CancelClicked(this, EventArgs.Empty);
-        }
+        private void btnCancel_Click(object sender, EventArgs e) { if (CancelClicked != null) CancelClicked(this, EventArgs.Empty); }
 
-        private void btnStart_Click(object sender, EventArgs e)
-        {
-            if (StartClicked != null) StartClicked(this, EventArgs.Empty);
-        }
+        private void btnStart_Click(object sender, EventArgs e) { if (StartClicked != null) StartClicked(this, EventArgs.Empty); }
     }
 }

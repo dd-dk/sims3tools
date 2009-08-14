@@ -33,7 +33,6 @@
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.ckbExcludeCatalogResources = new System.Windows.Forms.CheckBox();
             this.label23 = new System.Windows.Forms.Label();
-            this.ckbCustomise = new System.Windows.Forms.CheckBox();
             this.ckbFix = new System.Windows.Forms.CheckBox();
             this.label22 = new System.Windows.Forms.Label();
             this.tlpOptions = new System.Windows.Forms.TableLayoutPanel();
@@ -76,7 +75,6 @@
             this.tbUniqueName.Name = "tbUniqueName";
             this.tbUniqueName.Size = new System.Drawing.Size(327, 20);
             this.tbUniqueName.TabIndex = 1;
-            this.tbUniqueName.TextChanged += new System.EventHandler(this.tbUniqueName_TextChanged);
             // 
             // tableLayoutPanel5
             // 
@@ -121,21 +119,11 @@
             this.label23.TabIndex = 0;
             this.label23.Text = "Advanced only!";
             // 
-            // ckbCustomise
-            // 
-            this.ckbCustomise.AutoSize = true;
-            this.tlpOptions.SetColumnSpan(this.ckbCustomise, 2);
-            this.ckbCustomise.Location = new System.Drawing.Point(179, 120);
-            this.ckbCustomise.Name = "ckbCustomise";
-            this.ckbCustomise.Size = new System.Drawing.Size(114, 17);
-            this.ckbCustomise.TabIndex = 3;
-            this.ckbCustomise.Text = "Step 2 - Customise";
-            this.ckbCustomise.UseVisualStyleBackColor = true;
-            this.ckbCustomise.CheckedChanged += new System.EventHandler(this.ckbCustomise_CheckedChanged);
-            // 
             // ckbFix
             // 
             this.ckbFix.AutoSize = true;
+            this.ckbFix.Checked = true;
+            this.ckbFix.CheckState = System.Windows.Forms.CheckState.Checked;
             this.ckbFix.Location = new System.Drawing.Point(27, 54);
             this.ckbFix.Name = "ckbFix";
             this.ckbFix.Size = new System.Drawing.Size(194, 17);
@@ -176,14 +164,13 @@
             this.tlpOptions.Controls.Add(this.ckbCompress, 1, 14);
             this.tlpOptions.Controls.Add(this.flowLayoutPanel1, 1, 15);
             this.tlpOptions.Controls.Add(this.panel1, 1, 13);
-            this.tlpOptions.Controls.Add(this.ckbCustomise, 4, 6);
             this.tlpOptions.Controls.Add(this.ckbPadSTBLs, 1, 11);
-            this.tlpOptions.Controls.Add(this.ckbThumbs, 1, 9);
-            this.tlpOptions.Controls.Add(this.ckbDefault, 1, 8);
             this.tlpOptions.Controls.Add(this.ckbClone, 1, 6);
             this.tlpOptions.Controls.Add(this.label1, 1, 1);
             this.tlpOptions.Controls.Add(this.tbUniqueName, 1, 4);
             this.tlpOptions.Controls.Add(this.label2, 1, 3);
+            this.tlpOptions.Controls.Add(this.ckbDefault, 2, 8);
+            this.tlpOptions.Controls.Add(this.ckbThumbs, 2, 9);
             this.tlpOptions.Location = new System.Drawing.Point(0, 0);
             this.tlpOptions.Name = "tlpOptions";
             this.tlpOptions.RowCount = 17;
@@ -230,7 +217,6 @@
             // 
             // btnStart
             // 
-            this.btnStart.Enabled = false;
             this.btnStart.Location = new System.Drawing.Point(84, 3);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(75, 23);
@@ -269,7 +255,6 @@
             this.tlpCustomise.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpCustomise.Size = new System.Drawing.Size(320, 116);
             this.tlpCustomise.TabIndex = 7;
-            this.tlpCustomise.EnabledChanged += new System.EventHandler(this.tlpCustomise_EnabledChanged);
             // 
             // ckbPadSTBLs
             // 
@@ -285,8 +270,8 @@
             // ckbThumbs
             // 
             this.ckbThumbs.AutoSize = true;
-            this.tlpOptions.SetColumnSpan(this.ckbThumbs, 5);
-            this.ckbThumbs.Location = new System.Drawing.Point(60, 172);
+            this.tlpOptions.SetColumnSpan(this.ckbThumbs, 4);
+            this.ckbThumbs.Location = new System.Drawing.Point(84, 172);
             this.ckbThumbs.Name = "ckbThumbs";
             this.ckbThumbs.Size = new System.Drawing.Size(114, 17);
             this.ckbThumbs.TabIndex = 5;
@@ -296,8 +281,8 @@
             // ckbDefault
             // 
             this.ckbDefault.AutoSize = true;
-            this.tlpOptions.SetColumnSpan(this.ckbDefault, 5);
-            this.ckbDefault.Location = new System.Drawing.Point(60, 149);
+            this.tlpOptions.SetColumnSpan(this.ckbDefault, 4);
+            this.ckbDefault.Location = new System.Drawing.Point(84, 149);
             this.ckbDefault.Name = "ckbDefault";
             this.ckbDefault.Size = new System.Drawing.Size(131, 17);
             this.ckbDefault.TabIndex = 4;
@@ -310,9 +295,9 @@
             this.tlpOptions.SetColumnSpan(this.ckbClone, 2);
             this.ckbClone.Location = new System.Drawing.Point(60, 120);
             this.ckbClone.Name = "ckbClone";
-            this.ckbClone.Size = new System.Drawing.Size(93, 17);
+            this.ckbClone.Size = new System.Drawing.Size(131, 17);
             this.ckbClone.TabIndex = 2;
-            this.ckbClone.Text = "Step 1 - Clone";
+            this.ckbClone.Text = "Create clone package";
             this.ckbClone.UseVisualStyleBackColor = true;
             this.ckbClone.CheckedChanged += new System.EventHandler(this.ckbClone_CheckedChanged);
             // 
@@ -364,7 +349,6 @@
         private System.Windows.Forms.CheckBox ckbCompress;
         private System.Windows.Forms.TextBox tbUniqueName;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
-        private System.Windows.Forms.CheckBox ckbCustomise;
         private System.Windows.Forms.CheckBox ckbFix;
         private System.Windows.Forms.CheckBox ckbExcludeCatalogResources;
         private System.Windows.Forms.Label label22;
