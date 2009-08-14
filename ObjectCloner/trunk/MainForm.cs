@@ -523,7 +523,7 @@ namespace ObjectCloner
                 }
             }
             public TGI tgi { get { return latest == null ? new TGI() : latest.tgi; } }
-            public IDictionary<ulong, string> map { get { return (IDictionary<ulong, string>)latest; } }
+            public IDictionary<ulong, string> map { get { return latest == null ? null : (IDictionary<ulong, string>)latest.Resource; } }
             public void Commit() { latest.Commit(); }
         }
         NameMap nmap;
@@ -1977,6 +1977,7 @@ namespace ObjectCloner
                     }
                 }
 
+                #region PadSTBLs
                 english = null;//reload
                 if (cloneFixOptions.IsPadSTBLs && English != null)
                 {
@@ -2004,6 +2005,7 @@ namespace ObjectCloner
                     }
                     NMap.Commit();
                 }
+                #endregion
 
                 foreach (Item item in tgiToItem.Values)
                 {
