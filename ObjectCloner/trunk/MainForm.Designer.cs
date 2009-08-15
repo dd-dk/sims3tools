@@ -193,10 +193,10 @@
             this.flowLayoutPanel1.Controls.Add(this.lbUseMenu);
             this.flowLayoutPanel1.Controls.Add(this.lbSelectOptions);
             this.flowLayoutPanel1.Controls.Add(this.btnStart);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(92, 0);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(60, 0);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(236, 75);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(300, 75);
             this.flowLayoutPanel1.TabIndex = 0;
             // 
             // lbUseMenu
@@ -219,10 +219,10 @@
             this.lbSelectOptions.Location = new System.Drawing.Point(0, 26);
             this.lbSelectOptions.Margin = new System.Windows.Forms.Padding(0);
             this.lbSelectOptions.Name = "lbSelectOptions";
-            this.lbSelectOptions.Size = new System.Drawing.Size(236, 26);
+            this.lbSelectOptions.Size = new System.Drawing.Size(300, 26);
             this.lbSelectOptions.TabIndex = 1;
-            this.lbSelectOptions.Text = "Complete the option form and click Start\r\n(or Cancel to return to return to the l" +
-                "ist of objects)";
+            this.lbSelectOptions.Text = "Update object details, complete the option form and click Start\r\n(or Cancel to re" +
+                "turn to return to the list of objects)";
             this.lbSelectOptions.Visible = false;
             // 
             // btnStart
