@@ -660,7 +660,7 @@ namespace ObjectCloner
             tabControl1.Enabled = false;
 
             uniqueObject = null;
-            if (UniqueObject == null)
+            if ((cloneFixOptions.IsClone || cloneFixOptions.IsRenumber) && UniqueObject == null)
             {
                 DisplayObjectChooser();
                 return;
@@ -700,7 +700,6 @@ namespace ObjectCloner
                 step();
             }
 
-            isFix = false;
             if (cloneFixOptions.IsClone)
             {
                 this.Enabled = false;
@@ -711,6 +710,7 @@ namespace ObjectCloner
             else
             {
                 DoWait("Please wait, updating your package...");
+                FixIntegrity();
                 StartFixing();
             }
         }
@@ -1649,10 +1649,10 @@ namespace ObjectCloner
                         if (name == null && desc == null)
                         {
                             if (!padSTBLs || english == null) goto skip;
-                            newTGI = new TGI(english.tgi.t, english.tgi.g, (english.tgi.i & 0xFFFFFFFFFFFF0000) | ((ulong)i << 56));
-                            newstbl = NewResource(target, newTGI);
                             name = english[nameGUID];
                             desc = english[descGUID];
+                            newTGI = new TGI(english.tgi.t, english.tgi.g, (english.tgi.i & 0xFFFFFFFFFFFF0000) | ((ulong)i << 56));
+                            newstbl = NewResource(target, newTGI);
                         }
                         else
                         {
@@ -1661,8 +1661,8 @@ namespace ObjectCloner
                         }
 
                         IDictionary<ulong, string> outstbl = (IDictionary<ulong, string>)newstbl.Resource;
-                        if (name != null) outstbl.Add(nameGUID, name);
-                        if (desc != null) outstbl.Add(descGUID, desc);
+                        if (!outstbl.ContainsKey(nameGUID)) outstbl.Add(nameGUID, name != null ? name : "");
+                        if (!outstbl.ContainsKey(descGUID)) outstbl.Add(descGUID, desc != null ? desc : "");
                         if (!stopSaving) newstbl.Commit();
 
                         if (!newnamemap.ContainsKey(newTGI.i))
@@ -1808,9 +1808,13 @@ namespace ObjectCloner
                         {
                             commonBlock["NameGUID"] = new TypedValue(typeof(ulong), newNameGUID);
                             commonBlock["DescGUID"] = new TypedValue(typeof(ulong), newDescGUID);
-                            commonBlock["Name"] = new TypedValue(typeof(string), "CatalogObjects/Name:" + UniqueObject);
-                            commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + UniqueObject);
                             commonBlock["Price"] = new TypedValue(typeof(float), float.Parse(tbPrice.Text));
+
+                            if (cloneFixOptions.IsRenumber)
+                            {
+                                commonBlock["Name"] = new TypedValue(typeof(string), "CatalogObjects/Name:" + UniqueObject);
+                                commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + UniqueObject);
+                            }
                         }
 
                         if (item.tgi == selectedItem.tgi || item.tgi == catlgItem.tgi)//Selected CatlgItem; 0th OBJD from MDLR or CFIR
@@ -1878,7 +1882,7 @@ namespace ObjectCloner
                                 item.Resource["Unknown8"] = new TypedValue(typeof(uint), unknown8 + 1);
                         }
 
-                        if (cloneFixOptions.IsFix)
+                        if (cloneFixOptions.IsRenumber)
                             UpdateTGIsFromField((AResource)item.Resource);
 
                         dirty = true;
@@ -2579,14 +2583,12 @@ namespace ObjectCloner
                     CWAL_Steps(stepList, out lastStepInChain); break;
             }
             lastInChain = stepList == null ? -1 : stepList.IndexOf(lastStepInChain);
-            if (mode == Mode.Fix)
-                stepList.Add(FixIntegrity);
         }
 
         void OBJD_Steps(List<Step> stepList, out Step lastStepInChain)
         {
             lastStepInChain = None;
-            if (cloneFixOptions.IsClone || cloneFixOptions.IsFix)
+            if (cloneFixOptions.IsClone || cloneFixOptions.IsRenumber)
             {
                 stepList.AddRange(new Step[] {
                     // either OBJD_SlurpDDSes or Catlg_SlurpTGIs
@@ -2632,7 +2634,7 @@ namespace ObjectCloner
         void Common_Steps(List<Step> stepList, out Step lastStepInChain)
         {
             lastStepInChain = None;
-            if (cloneFixOptions.IsClone || cloneFixOptions.IsFix)
+            if (cloneFixOptions.IsClone || cloneFixOptions.IsRenumber)
             {
                 stepList.AddRange(new Step[] {
                     Catlg_getVPXY,
@@ -2665,7 +2667,7 @@ namespace ObjectCloner
         void CTPT_Steps(List<Step> stepList, out Step lastStepInChain)
         {
             lastStepInChain = None;
-            if (cloneFixOptions.IsClone || cloneFixOptions.IsFix)
+            if (cloneFixOptions.IsClone || cloneFixOptions.IsRenumber)
             {
                 stepList.AddRange(new Step[] {
                     CTPT_addPair,
@@ -2698,7 +2700,7 @@ namespace ObjectCloner
         void CWAL_Steps(List<Step> stepList, out Step lastStepInChain)
         {
             lastStepInChain = None;
-            if (cloneFixOptions.IsClone || cloneFixOptions.IsFix)
+            if (cloneFixOptions.IsClone || cloneFixOptions.IsRenumber)
             {
                 stepList.AddRange(new Step[] {
                     Catlg_getVPXY,
@@ -3023,7 +3025,7 @@ namespace ObjectCloner
             }
 
             // We may also need to process RCOL internal chunks and NameMaps but only if we're renumbering
-            if (cloneFixOptions.IsFix)
+            if (cloneFixOptions.IsRenumber)
             {
                 //If there are internal chunk references not covered by the above, we also need to add them
                 Dictionary<TGI, Item> rcolChunks = new Dictionary<TGI, Item>();
@@ -3066,7 +3068,7 @@ namespace ObjectCloner
                     oldToNew.Add(PngInstance, CreateInstance());
             }
 
-            if (cloneFixOptions.IsFix)
+            if (cloneFixOptions.IsRenumber)
             {
                 // Generate new numbers for everything we've decided to renumber
                 ulong langInst = FNV64.GetHash("StringTable:" + UniqueObject) >> 8;
@@ -3090,22 +3092,32 @@ namespace ObjectCloner
             nameGUID = (ulong)((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["NameGUID"].Value;
             descGUID = (ulong)((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["DescGUID"].Value;
 
-            newNameGUID = FNV64.GetHash("CatalogObjects/Name:" + UniqueObject);
-            newDescGUID = FNV64.GetHash("CatalogObjects/Description:" + UniqueObject);
+            if (cloneFixOptions.IsRenumber)
+            {
+                newNameGUID = FNV64.GetHash("CatalogObjects/Name:" + UniqueObject);
+                newDescGUID = FNV64.GetHash("CatalogObjects/Description:" + UniqueObject);
+            }
+            else
+            {
+                newNameGUID = nameGUID;
+                newDescGUID = descGUID;
+            }
 
 
             resourceList.Clear();
-            if (cloneFixOptions.IsFix) foreach (var kvp in tgiToItem)
+            if (cloneFixOptions.IsRenumber)
+            {
+                foreach (var kvp in tgiToItem)
                 {
                     string s = String.Format("Old: {0} --> New: {1}", "" + (TGIN)kvp.Key, "" + (TGIN)new TGI(kvp.Key.t, kvp.Key.g, oldToNew[kvp.Key.i]));
                     resourceList.Add(s);
                 }
 
-            resourceList.Add("Old NameGUID: 0x" + nameGUID.ToString("X16") + " --> New NameGUID: 0x" + newNameGUID.ToString("X16"));
-            resourceList.Add("Old DescGUID: 0x" + descGUID.ToString("X16") + " --> New DescGUID: 0x" + newDescGUID.ToString("X16"));
-            resourceList.Add("Old ObjName: \"" + ((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["Name"] + "\" --> New Name: \"CatalogObjects/Name:" + UniqueObject + "\"");
-            resourceList.Add("Old ObjDesc: \"" + ((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["Desc"] + "\" --> New Desc: \"CatalogObjects/Description:" + UniqueObject + "\"");
-            
+                resourceList.Add("Old NameGUID: 0x" + nameGUID.ToString("X16") + " --> New NameGUID: 0x" + newNameGUID.ToString("X16"));
+                resourceList.Add("Old DescGUID: 0x" + descGUID.ToString("X16") + " --> New DescGUID: 0x" + newDescGUID.ToString("X16"));
+                resourceList.Add("Old ObjName: \"" + ((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["Name"] + "\" --> New Name: \"CatalogObjects/Name:" + UniqueObject + "\"");
+                resourceList.Add("Old ObjDesc: \"" + ((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["Desc"] + "\" --> New Desc: \"CatalogObjects/Description:" + UniqueObject + "\"");
+            }
 
             resourceList.Add("Old CatlgName: \"" + English[nameGUID] + "\" --> New CatlgName: \"" + tbCatlgName.Text + "\"");
             resourceList.Add("Old CatlgDesc: \"" + English[descGUID] + "\" --> New CatlgDesc: \"" + tbCatlgDesc.Text + "\"");

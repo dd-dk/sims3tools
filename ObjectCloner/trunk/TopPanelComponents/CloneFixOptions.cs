@@ -30,7 +30,7 @@ namespace ObjectCloner.TopPanelComponents
         public CloneFixOptions()
         {
             InitializeComponent();
-            ckbExcludeCatalogResources.Enabled = ckbFix.Checked;
+            tbUniqueName.Enabled = ckbExcludeCatalogResources.Enabled = ckbRenumber.Checked;
             ckbThumbs.Enabled = ckbDefault.Enabled = ckbClone.Checked;
         }
 
@@ -50,7 +50,7 @@ namespace ObjectCloner.TopPanelComponents
         public bool IsDefaultOnly { get { return ckbDefault.Checked; } }
         public bool IsIncludeThumbnails { get { return ckbThumbs.Checked; } }
         public bool IsPadSTBLs { get { return ckbPadSTBLs.Checked; } set { ckbPadSTBLs.Checked = value; } }
-        public bool IsFix { get { return ckbFix.Checked; } }
+        public bool IsRenumber { get { return ckbRenumber.Checked; } }
         public bool IsExcludeCatalogResources { get { return ckbExcludeCatalogResources.Checked; } }
         public bool IsCompress { get { return ckbCompress.Checked; } }
 
@@ -64,9 +64,9 @@ namespace ObjectCloner.TopPanelComponents
             ckbThumbs.Checked = false;
         }
 
-        private void ckbFix_CheckedChanged(object sender, EventArgs e)
+        private void ckbRenumber_CheckedChanged(object sender, EventArgs e)
         {
-            ckbExcludeCatalogResources.Enabled = ckbFix.Checked;
+            tbUniqueName.Enabled = ckbExcludeCatalogResources.Enabled = ckbRenumber.Checked;
             ckbExcludeCatalogResources.Checked = false;
         }
 
