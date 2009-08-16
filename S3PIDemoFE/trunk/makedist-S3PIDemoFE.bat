@@ -4,6 +4,7 @@ set ConfigurationName=Release
 set base=%TargetName%
 rem -%ConfigurationName%
 set src=%TargetName%-Source
+set viewDDS=ViewDDS\bin\ViewDDS
 
 set out=S:\Sims3\Tools\s3peDemoFE\
 set helpFolder=%out%\HelpFiles
@@ -46,6 +47,7 @@ del /f /q HelpFiles
 popd
 
 7za x -o"%base%-%suffix%" "%out%%base%_%suffix%.7z"
+xcopy "..\%viewDDS%\*" "%base%-%suffix%" /s /i /y
 pushd "%base%-%suffix%"
 (
 echo !cd %base%-%suffix%
