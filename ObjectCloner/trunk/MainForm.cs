@@ -582,9 +582,9 @@ namespace ObjectCloner
             {
                 string prefix = CreatorName;
                 prefix = (prefix != null) ? prefix + "_" : "";
-                List<string> exts;
-                if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + selectedItem.tgi.t.ToString("X8"), out exts)) prefix += exts[0] + "_";
-                else prefix += "UNKN_";
+                //List<string> exts;
+                //if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + selectedItem.tgi.t.ToString("X8"), out exts)) prefix += exts[0] + "_";
+                //else prefix += "UNKN_";
                 cloneFixOptions.UniqueName = prefix + objectChooser.SelectedItems[0].Text;
             }
             else
@@ -1295,7 +1295,11 @@ namespace ObjectCloner
                 for (Exception ex = item.Exception.InnerException; ex != null; ex = ex.InnerException) s += "  " + ex.Message;
                 lvi.Text = s;
             }
-            lvi.SubItems.AddRange(new string[] { item.tgi, });
+            List<string> exts;
+            string tag = "";
+            if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + item.tgi.t.ToString("X8"), out exts)) tag = exts[0];
+            else tag = "UNKN";
+            lvi.SubItems.AddRange(new string[] { tag, item.tgi, });
             lvi.Tag = item;
             objectChooser.Items.Add(lvi);
         }

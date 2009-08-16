@@ -31,12 +31,14 @@
             this.listView1 = new System.Windows.Forms.ListView();
             this.catlgName = new System.Windows.Forms.ColumnHeader();
             this.TGI = new System.Windows.Forms.ColumnHeader();
+            this.Tag = new System.Windows.Forms.ColumnHeader();
             this.SuspendLayout();
             // 
             // listView1
             // 
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.catlgName,
+            this.Tag,
             this.TGI});
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.FullRowSelect = true;
@@ -60,6 +62,10 @@
             // 
             this.TGI.Text = "Resource Key";
             // 
+            // Tag
+            // 
+            this.Tag.Text = "Tag";
+            // 
             // ObjectChooser
             // 
             this.Controls.Add(this.listView1);
@@ -74,6 +80,7 @@
         private System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.ColumnHeader catlgName;
         private System.Windows.Forms.ColumnHeader TGI;
+        private System.Windows.Forms.ColumnHeader Tag;
 
     }
 }
