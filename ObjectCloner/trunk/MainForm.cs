@@ -608,13 +608,19 @@ namespace ObjectCloner
             this.AcceptButton = null;
             tlpTask.Enabled = true;
             tabControl1.Enabled = false;
-            ClearTabs();
+            //ClearTabs();
 
             lbUseMenu.Visible = true;
             btnStart.Visible = false;
             lbSelectOptions.Visible = false;
 
             splitContainer1.Panel1.Controls.Clear();
+            if (cloneFixOptions != null)
+            {
+                cloneFixOptions.Enabled = false;
+                cloneFixOptions.Dock = DockStyle.Fill;
+                splitContainer1.Panel1.Controls.Add(cloneFixOptions);
+            }
         }
 
         private void DoWait() { DoWait("Please wait..."); }
@@ -653,20 +659,30 @@ namespace ObjectCloner
         #endregion
 
         #region CloneFixOptions
+        bool isClone = false;
+        bool isPadSTBLs = false;
         void cloneFixOptions_StartClicked(object sender, EventArgs e)
         {
             this.AcceptButton = null;
             tlpTask.Enabled = false;
             tabControl1.Enabled = false;
+            disableCompression = !cloneFixOptions.IsCompress;
+            isClone = cloneFixOptions.IsClone;
+            isPadSTBLs = cloneFixOptions.IsPadSTBLs;
 
+            CloneFixStart();
+        }
+
+        void CloneFixStart()
+        {
             uniqueObject = null;
-            if ((cloneFixOptions.IsClone || cloneFixOptions.IsRenumber) && UniqueObject == null)
+            if ((isClone || cloneFixOptions.IsRenumber) && UniqueObject == null)
             {
                 DisplayObjectChooser();
                 return;
             }
 
-            if (cloneFixOptions.IsClone)
+            if (isClone)
             {
                 saveFileDialog1.FileName = UniqueObject;
                 if (ObjectCloner.Properties.Settings.Default.LastSaveFolder != null)
@@ -676,7 +692,6 @@ namespace ObjectCloner
                 ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(saveFileDialog1.FileName);
             }
 
-            disableCompression = !cloneFixOptions.IsCompress;
 
             stepList = null;
             SetStepList(selectedItem, out stepList);
@@ -700,7 +715,7 @@ namespace ObjectCloner
                 step();
             }
 
-            if (cloneFixOptions.IsClone)
+            if (isClone)
             {
                 this.Enabled = false;
                 DoWait("Please wait, creating your new package...");
@@ -1240,7 +1255,7 @@ namespace ObjectCloner
                         DisplayObjectChooser();
                     }
                     else
-                        cloneFixOptions_StartClicked(null, null);
+                        CloneFixStart();
                 }
             }
             else
@@ -1480,7 +1495,7 @@ namespace ObjectCloner
             this.SavingComplete += new EventHandler<BoolEventArgs>(MainForm_SavingComplete);
 
             SaveList sl = new SaveList(this, objectChooser.SelectedItems[0].Tag as Item, tgiLookup, objPkgs, ddsPkgs, tmbPkgs,
-                saveFileDialog1.FileName, cloneFixOptions.IsPadSTBLs,
+                saveFileDialog1.FileName, isPadSTBLs,
                 updateProgress, stopSaving, OnSavingComplete);
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
@@ -1519,8 +1534,8 @@ namespace ObjectCloner
                 waitingForSavePackage = false;
                 if (e.arg)
                 {
-                    cloneFixOptions.IsPadSTBLs = false;
-                    cloneFixOptions.IsClone = false;
+                    isPadSTBLs = false;
+                    isClone = false;
                     fileReOpenToFix(saveFileDialog1.FileName, selectedItem.tgi.t);
                 }
                 else
@@ -1976,7 +1991,7 @@ namespace ObjectCloner
 
                 #region PadSTBLs
                 english = null;//reload
-                if (cloneFixOptions.IsPadSTBLs && English != null)
+                if (isPadSTBLs && English != null)
                 {
                     for (int i = 0; i < 0x17; i++)
                     {
@@ -2588,7 +2603,7 @@ namespace ObjectCloner
         void OBJD_Steps(List<Step> stepList, out Step lastStepInChain)
         {
             lastStepInChain = None;
-            if (cloneFixOptions.IsClone || cloneFixOptions.IsRenumber)
+            if (isClone || cloneFixOptions.IsRenumber)
             {
                 stepList.AddRange(new Step[] {
                     // either OBJD_SlurpDDSes or Catlg_SlurpTGIs
@@ -2634,7 +2649,7 @@ namespace ObjectCloner
         void Common_Steps(List<Step> stepList, out Step lastStepInChain)
         {
             lastStepInChain = None;
-            if (cloneFixOptions.IsClone || cloneFixOptions.IsRenumber)
+            if (isClone || cloneFixOptions.IsRenumber)
             {
                 stepList.AddRange(new Step[] {
                     Catlg_getVPXY,
@@ -2667,7 +2682,7 @@ namespace ObjectCloner
         void CTPT_Steps(List<Step> stepList, out Step lastStepInChain)
         {
             lastStepInChain = None;
-            if (cloneFixOptions.IsClone || cloneFixOptions.IsRenumber)
+            if (isClone || cloneFixOptions.IsRenumber)
             {
                 stepList.AddRange(new Step[] {
                     CTPT_addPair,
@@ -2700,7 +2715,7 @@ namespace ObjectCloner
         void CWAL_Steps(List<Step> stepList, out Step lastStepInChain)
         {
             lastStepInChain = None;
-            if (cloneFixOptions.IsClone || cloneFixOptions.IsRenumber)
+            if (isClone || cloneFixOptions.IsRenumber)
             {
                 stepList.AddRange(new Step[] {
                     Catlg_getVPXY,

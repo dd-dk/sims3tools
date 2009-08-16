@@ -46,10 +46,10 @@ namespace ObjectCloner.TopPanelComponents
         }
 
         public string UniqueName { get { return tbUniqueName.Text; } set { tbUniqueName.Text = value; } }
-        public bool IsClone { get { return ckbClone.Checked; } set { ckbClone.Checked = value; } }
+        public bool IsClone { get { return ckbClone.Checked; } }
         public bool IsDefaultOnly { get { return ckbDefault.Checked; } }
         public bool IsIncludeThumbnails { get { return ckbThumbs.Checked; } }
-        public bool IsPadSTBLs { get { return ckbPadSTBLs.Checked; } set { ckbPadSTBLs.Checked = value; } }
+        public bool IsPadSTBLs { get { return ckbPadSTBLs.Checked; } }
         public bool IsRenumber { get { return ckbRenumber.Checked; } }
         public bool IsExcludeCatalogResources { get { return ckbExcludeCatalogResources.Checked; } }
         public bool IsCompress { get { return ckbCompress.Checked; } }
