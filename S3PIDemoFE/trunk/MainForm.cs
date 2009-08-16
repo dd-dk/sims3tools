@@ -538,8 +538,6 @@ namespace S3PIDemoFE
 
             rie.Compressed = (ushort)(compress ? 0xffff : 0);
 
-            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, true);//Fail later, if at all
-            package.ReplaceResource(rie, res); // Commit new resource to package
             IsPackageDirty = true;
 
             return rie;
