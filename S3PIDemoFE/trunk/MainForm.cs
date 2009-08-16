@@ -552,9 +552,11 @@ namespace S3PIDemoFE
             tgin.ResName = resourceName;
 
             exportFileDialog.FileName = tgin;
+            exportFileDialog.InitialDirectory = S3PIDemoFE.Properties.Settings.Default.LastExportPath;
 
             DialogResult dr = exportFileDialog.ShowDialog();
             if (dr != DialogResult.OK) return;
+            S3PIDemoFE.Properties.Settings.Default.LastExportPath = Path.GetDirectoryName(exportFileDialog.FileName);
 
             Application.UseWaitCursor = true;
             Application.DoEvents();
@@ -564,8 +566,10 @@ namespace S3PIDemoFE
 
         private void exportBatch()
         {
+            exportBatchTarget.SelectedPath = S3PIDemoFE.Properties.Settings.Default.LastExportPath;
             DialogResult dr = exportBatchTarget.ShowDialog();
             if (dr != DialogResult.OK) return;
+            S3PIDemoFE.Properties.Settings.Default.LastExportPath = exportBatchTarget.SelectedPath;
 
             Application.UseWaitCursor = true;
             Application.DoEvents();

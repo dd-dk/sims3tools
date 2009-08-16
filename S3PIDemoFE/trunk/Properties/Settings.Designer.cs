@@ -308,5 +308,17 @@ namespace S3PIDemoFE.Properties {
                 this["Splitter2Position"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastExportPath {
+            get {
+                return ((string)(this["LastExportPath"]));
+            }
+            set {
+                this["LastExportPath"] = value;
+            }
+        }
     }
 }
