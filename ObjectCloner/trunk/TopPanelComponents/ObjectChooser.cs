@@ -23,12 +23,14 @@ using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Windows.Forms.Design;
 
 namespace ObjectCloner.TopPanelComponents
 {
     public partial class ObjectChooser : UserControl
     {
         ListViewColumnSorter lvwColumnSorter;
+        FindAsYouType fayt;
         public ObjectChooser()
         {
             InitializeComponent();
@@ -241,5 +243,35 @@ namespace ObjectCloner.TopPanelComponents
         public event EventHandler ItemActivate;
         protected void OnItemActivate(object sender, EventArgs e) { if (ItemActivate != null)ItemActivate(sender, e); }
         private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(sender, e); }
+
+        IButtonControl formAcceptButton;
+        private void listView1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (fayt == null)
+            {
+                formAcceptButton = Application.OpenForms[0].AcceptButton;
+                Application.OpenForms[0].AcceptButton = null;
+                fayt = new FindAsYouType(listView1);
+                this.Controls.Add(fayt);
+                fayt.Close += new EventHandler(fayt_Close);
+                fayt.Location = new Point(0, 0);
+                fayt.Visible = false;
+                fayt.BringToFront();
+            }
+            fayt.SendKeyDown(e);
+        }
+
+        void fayt_Close(object sender, EventArgs e)
+        {
+            fayt.Hide();
+            this.Controls.Remove(fayt);
+            fayt = null;
+            Application.OpenForms[0].AcceptButton = formAcceptButton;
+        }
+
+        private void ObjectChooser_ParentChanged(object sender, EventArgs e)
+        {
+            if (fayt != null) fayt_Close(sender, e);
+        }
     }
 }

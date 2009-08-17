@@ -43,6 +43,7 @@ namespace ObjectCloner.TopPanelComponents
                 ckbClone.Enabled = false;
             }
             form.AcceptButton = btnStart;
+            form.CancelButton = btnCancel;
         }
 
         public string UniqueName { get { return tbUniqueName.Text; } set { tbUniqueName.Text = value; } }
