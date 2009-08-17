@@ -83,28 +83,28 @@
             // newToolStripMenuItem
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
-            this.newToolStripMenuItem.Text = "&New (Clone)...";
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.newToolStripMenuItem.Text = "&New (Clone) (legacy)...";
             this.newToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
             this.openToolStripMenuItem.Text = "&Open (Fix)...";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(185, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(195, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
             // 
@@ -121,8 +121,8 @@
             this.cwalToolStripMenuItem,
             this.crmtToolStripMenuItem});
             this.cloningToolStripMenuItem.Name = "cloningToolStripMenuItem";
-            this.cloningToolStripMenuItem.Size = new System.Drawing.Size(127, 20);
-            this.cloningToolStripMenuItem.Text = "&Cloning (experimental)";
+            this.cloningToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
+            this.cloningToolStripMenuItem.Text = "&Cloning";
             this.cloningToolStripMenuItem.DropDownOpening += new System.EventHandler(this.tsMD_DropDownOpening);
             // 
             // objdToolStripMenuItem
