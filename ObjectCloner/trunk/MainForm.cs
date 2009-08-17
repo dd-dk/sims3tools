@@ -991,7 +991,6 @@ namespace ObjectCloner
 
             acbk[i].Anchor = AnchorStyles.Left;
             acbk[i].AutoSize = true;
-            acbk[i].Enabled = false;
             acbk[i].Name = "cb" + name;
             acbk[i].Text = name;
             acbk[i].TabIndex = ff.tlp.RowCount;
