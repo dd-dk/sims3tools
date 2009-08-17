@@ -250,7 +250,6 @@
             this.tabControl1.Controls.Add(this.tpFlagsRoom);
             this.tabControl1.Controls.Add(this.tpFlagsFunc);
             this.tabControl1.Controls.Add(this.tpFlagsBuildEtc);
-            this.tabControl1.Enabled = false;
             this.tabControl1.Location = new System.Drawing.Point(1, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;

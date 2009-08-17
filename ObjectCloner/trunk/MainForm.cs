@@ -163,6 +163,7 @@ namespace ObjectCloner
             SetStepText();
 
             InitialiseTabs(catalogTypes[4]);//Use the Proxy Product as it has pretty much nothing on it
+            TabEnable(false);
         }
 
         private void MainForm_LoadFormSettings()
@@ -561,7 +562,7 @@ namespace ObjectCloner
             lbSelectOptions.Visible = false;
             btnStart.Visible = true;
             tlpTask.Enabled = true;
-            tabControl1.Enabled = false;
+            //tabControl1.Enabled = false;
 
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(objectChooser);
@@ -573,7 +574,7 @@ namespace ObjectCloner
         {
             btnStart.Visible = false;
             lbSelectOptions.Visible = true;
-            tabControl1.Enabled = true;
+            //tabControl1.Enabled = true;
 
             cloneFixOptions = new CloneFixOptions(this, mode == Mode.Clone);
             cloneFixOptions.CancelClicked += new EventHandler(cloneFixOptions_CancelClicked);
@@ -609,7 +610,7 @@ namespace ObjectCloner
             this.AcceptButton = null;
             this.CancelButton = null;
             tlpTask.Enabled = true;
-            tabControl1.Enabled = false;
+            //tabControl1.Enabled = false;
             //ClearTabs();
 
             lbUseMenu.Visible = true;
@@ -668,7 +669,7 @@ namespace ObjectCloner
             this.AcceptButton = null;
             this.CancelButton = null;
             tlpTask.Enabled = false;
-            tabControl1.Enabled = false;
+            //tabControl1.Enabled = false;
             disableCompression = !cloneFixOptions.IsCompress;
             isClone = cloneFixOptions.IsClone;
             isPadSTBLs = cloneFixOptions.IsPadSTBLs;
@@ -1006,22 +1007,18 @@ namespace ObjectCloner
                 clearFlags();
                 clearOther();
             }
+            TabEnable(false);
         }
         void clearOverview()
         {
             pictureBox1.Image = null;
             lbThumbTGI.Text = "";
-            btnReplThumb.Enabled = false;
             tbObjName.Text = "";
             tbCatlgName.Text = "";
             tbObjDesc.Text = "";
             tbCatlgDesc.Text = "";
-            tbCatlgName.Enabled = false;
-            tbCatlgDesc.Enabled = false;
             ckbCopyToAll.Checked = false;
-            ckbCopyToAll.Enabled = false;
             tbPrice.Text = "";
-            tbPrice.ReadOnly = true;
         }
         void clearDetails()
         {
@@ -1034,7 +1031,7 @@ namespace ObjectCloner
         {
             foreach (flagField ff in flagFields)
                 foreach (Control c in ff.tlp.Controls)
-                    if (c is CheckBox) ((CheckBox)c).Checked = ((CheckBox)c).Enabled = false;
+                    if (c is CheckBox) ((CheckBox)c).Checked = false;
         }
         void clearOther()
         {
@@ -1061,6 +1058,7 @@ namespace ObjectCloner
                 fillFlags(catlg);
                 fillOther(catlg);
             }
+            TabEnable(false);
         }
         void fillOverview(Item objd)
         {
@@ -1154,6 +1152,57 @@ namespace ObjectCloner
                     tb.Text = tv;
 
                 tb.ReadOnly = tb.Tag == null;
+            }
+        }
+
+        void TabEnable(bool enabled)
+        {
+            tabEnableOverview(enabled);
+            tabEnableDetails(enabled);
+            if (tabControl1.Contains(tpFlagsRoom))
+            {
+                tabEnableFlags(enabled);
+                tabEnableOther(enabled);
+            }
+        }
+        void tabEnableOverview(bool enabled)
+        {
+            btnReplThumb.Enabled = enabled;
+            tbCatlgName.Enabled = enabled;
+            tbCatlgDesc.Enabled = enabled;
+            ckbCopyToAll.Enabled = enabled;
+            tbPrice.ReadOnly = !enabled;
+        }
+        void tabEnableDetails(bool enabled)
+        {
+            for (int i = 1; i < tlpObjectDetail.RowCount - 1; i++)
+            {
+                TextBox tb = (TextBox)tlpObjectDetail.GetControlFromPosition(1, i);
+                if (tb.Tag != null) tb.Enabled = enabled;
+            }
+            for (int i = 2; i < tlpObjectCommon.RowCount - 1; i++)
+            {
+                TextBox tb = (TextBox)tlpObjectCommon.GetControlFromPosition(1, i);
+                if (tb.Tag != null) tb.Enabled = enabled;
+            }
+        }
+        void tabEnableFlags(bool enabled)
+        {
+            foreach (flagField ff in flagFields)
+            {
+                for (int i = 1; i < ff.tlp.RowCount - 1; i++)
+                {
+                    CheckBox cb = (CheckBox)ff.tlp.GetControlFromPosition(0, i);
+                    cb.Enabled = enabled;
+                }
+            }
+        }
+        void tabEnableOther(bool enabled)
+        {
+            for (int i = 1; i < tlpOther.RowCount - 1; i++)
+            {
+                TextBox tb = (TextBox)tlpOther.GetControlFromPosition(1, i);
+                if (tb.Tag != null) tb.Enabled = enabled;
             }
         }
 
@@ -3170,6 +3219,7 @@ namespace ObjectCloner
 
         private void btnStart_Click(object sender, EventArgs e)
         {
+            TabEnable(true);
             DisplayOptions();
         }
     }
