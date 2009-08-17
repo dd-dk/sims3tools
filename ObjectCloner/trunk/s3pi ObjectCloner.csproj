@@ -112,12 +112,6 @@
     <Compile Include="TopPanelComponents\CloneFixOptions.Designer.cs">
       <DependentUpon>CloneFixOptions.cs</DependentUpon>
     </Compile>
-    <Compile Include="TopPanelComponents\FindAsYouType.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="TopPanelComponents\FindAsYouType.Designer.cs">
-      <DependentUpon>FindAsYouType.cs</DependentUpon>
-    </Compile>
     <Compile Include="TopPanelComponents\ObjectChooser.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -153,9 +147,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="TopPanelComponents\CloneFixOptions.resx">
       <DependentUpon>CloneFixOptions.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TopPanelComponents\FindAsYouType.resx">
-      <DependentUpon>FindAsYouType.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TopPanelComponents\ObjectChooser.resx">
       <DependentUpon>ObjectChooser.cs</DependentUpon>

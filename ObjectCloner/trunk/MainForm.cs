@@ -551,6 +551,7 @@ namespace ObjectCloner
         {
             waitingToDisplayObjects = false;
             this.AcceptButton = btnStart;
+            this.CancelButton = null;
 
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, currentCatalogType != catalogTypes[0]);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true);
@@ -606,6 +607,7 @@ namespace ObjectCloner
 
             this.Enabled = true;
             this.AcceptButton = null;
+            this.CancelButton = null;
             tlpTask.Enabled = true;
             tabControl1.Enabled = false;
             //ClearTabs();
@@ -664,6 +666,7 @@ namespace ObjectCloner
         void cloneFixOptions_StartClicked(object sender, EventArgs e)
         {
             this.AcceptButton = null;
+            this.CancelButton = null;
             tlpTask.Enabled = false;
             tabControl1.Enabled = false;
             disableCompression = !cloneFixOptions.IsCompress;

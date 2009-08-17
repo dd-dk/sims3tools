@@ -30,8 +30,8 @@
         {
             this.listView1 = new System.Windows.Forms.ListView();
             this.catlgName = new System.Windows.Forms.ColumnHeader();
-            this.TagID = new System.Windows.Forms.ColumnHeader();
             this.TGI = new System.Windows.Forms.ColumnHeader();
+            this.TagID = new System.Windows.Forms.ColumnHeader();
             this.SuspendLayout();
             // 
             // listView1
@@ -53,26 +53,24 @@
             this.listView1.ItemActivate += new System.EventHandler(this.listView1_ItemActivate);
             this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
             this.listView1.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView1_ColumnClick);
-            this.listView1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.listView1_KeyDown);
             // 
             // catlgName
             // 
             this.catlgName.Text = "Name";
             // 
-            // TagID
-            // 
-            this.TagID.Text = "Tag";
-            // 
             // TGI
             // 
             this.TGI.Text = "Resource Key";
+            // 
+            // Tag
+            // 
+            this.TagID.Text = "Tag";
             // 
             // ObjectChooser
             // 
             this.Controls.Add(this.listView1);
             this.Name = "ObjectChooser";
             this.Size = new System.Drawing.Size(390, 150);
-            this.ParentChanged += new System.EventHandler(this.ObjectChooser_ParentChanged);
             this.ResumeLayout(false);
 
         }
