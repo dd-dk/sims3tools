@@ -332,10 +332,8 @@ namespace S3PIDemoFE
 
                 if (isPackageDirty)
                 {
-                    /*int res = CopyableMessageBox.Show("Current package has unsaved changes.\nSave now?",
-                        myName, CopyableMessageBoxButtons.YesNoCancel, CopyableMessageBoxIcon.Warning, 2);/**///Causes error on Application.Exit();
-                    DialogResult drx = MessageBox.Show("Current package has unsaved changes.\nSave now?", myName, MessageBoxButtons.YesNoCancel);
-                    int res = drx == DialogResult.Yes ? 0 : drx == DialogResult.No ? 1 : 2;
+                    int res = CopyableMessageBox.Show("Current package has unsaved changes.\nSave now?",
+                        myName, CopyableMessageBoxButtons.YesNoCancel, CopyableMessageBoxIcon.Warning, 2);/**///Causes error on Application.Exit();... so use this.Close();
                     if (res == 2) return;
                     if (res == 0)
                     {
@@ -573,6 +571,8 @@ namespace S3PIDemoFE
 
             Application.UseWaitCursor = true;
             Application.DoEvents();
+            bool overwriteAll = false;
+            bool skipAll = false;
             try
             {
                 foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources)
@@ -580,7 +580,23 @@ namespace S3PIDemoFE
                     if (rie as AResourceIndexEntry == null) continue;
                     TGIN tgin = rie as AResourceIndexEntry;
                     tgin.ResName = browserWidget1.ResourceName(rie);
-                    exportFile(rie, Path.Combine(exportBatchTarget.SelectedPath, tgin));
+                    string file = Path.Combine(exportBatchTarget.SelectedPath, tgin);
+                    if (File.Exists(file))
+                    {
+                        if (skipAll) continue;
+                        if (!overwriteAll)
+                        {
+                            Application.UseWaitCursor = false;
+                            int i = CopyableMessageBox.Show("Overwrite file?\n" + file, myName, CopyableMessageBoxIcon.Question,
+                                new List<string>(new string[] { "&No", "N&o to all", "&Yes", "Y&es to all", "&Abandon", }), 0, 4);
+                            if (i == 0) continue;
+                            if (i == 1) { skipAll = true; continue; }
+                            if (i == 3) overwriteAll = true;
+                            if (i == 4) return;
+                        }
+                        Application.UseWaitCursor = true;
+                    }
+                    exportFile(rie, file);
                 }
             }
             finally { Application.UseWaitCursor = false; Application.DoEvents(); }
@@ -638,7 +654,7 @@ namespace S3PIDemoFE
                 {
                     int res = CopyableMessageBox.Show(
                         "Do you want to replace any duplicate resources in the target package discovered during export?",
-                        "Export to package", CopyableMessageBoxIcon.Question, new List<string>(new string[] { "Re&place", "Re&ject", "&Abandon" }), 1, 2);
+                        "Export to package", CopyableMessageBoxIcon.Question, new List<string>(new string[] { "Re&ject", "Re&place", "&Abandon" }), 0, 2);
                     if (res == 2) return;
                     replace = res == 0;
                 }
@@ -736,7 +752,7 @@ namespace S3PIDemoFE
 
         private void fileExit()
         {
-            Application.Exit();
+            this.Close();
         }
         #endregion
 
