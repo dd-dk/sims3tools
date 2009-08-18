@@ -194,7 +194,7 @@
             this.crmtToolStripMenuItem.Name = "crmtToolStripMenuItem";
             this.crmtToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D8)));
             this.crmtToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
-            this.crmtToolStripMenuItem.Text = "Roof pattern";
+            this.crmtToolStripMenuItem.Text = "Roof patterns";
             this.crmtToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
             // 
             // cfndToolStripMenuItem
