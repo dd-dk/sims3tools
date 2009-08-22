@@ -94,7 +94,7 @@ namespace S3PIDemoFE
             if (t.Equals(typeof(EnumChooserCTD))) return "Values";
             if (t.Equals(typeof(EnumFlagsCTD))) return "Fields";
             if (t.Equals(typeof(AsHexCTD))) return "Values";
-            if (t.Equals(typeof(IListAsHexCTD))) return "Lists";
+            if (t.Equals(typeof(ArrayAsHexCTD))) return "Lists";
             if (t.Equals(typeof(AApiVersionedFieldsCTD))) return "Fields";
             if (t.Equals(typeof(ICollectionAApiVersionedFieldsCTD))) return "Lists";
             if (t.Equals(typeof(IDictionaryCTD))) return "Lists";
@@ -156,7 +156,7 @@ namespace S3PIDemoFE
                 if (t.Equals(typeof(EnumChooserCTD))) return new EnumChooserCTD(owner, Name, component);
                 if (t.Equals(typeof(EnumFlagsCTD))) return new EnumFlagsCTD(owner, Name, component);
                 if (t.Equals(typeof(AsHexCTD))) return new AsHexCTD(owner, Name, component);
-                if (t.Equals(typeof(IListAsHexCTD))) return new IListAsHexCTD(owner, Name, component);
+                if (t.Equals(typeof(ArrayAsHexCTD))) return new ArrayAsHexCTD(owner, Name, component);
                 if (t.Equals(typeof(AApiVersionedFieldsCTD))) return new AApiVersionedFieldsCTD(owner, Name, component);
                 if (t.Equals(typeof(ICollectionAApiVersionedFieldsCTD))) return new ICollectionAApiVersionedFieldsCTD(owner, Name, component);
                 if (t.Equals(typeof(IDictionaryCTD))) return new IDictionaryCTD(owner, Name, component);
@@ -175,19 +175,14 @@ namespace S3PIDemoFE
             }
 
 
-            bool isCollection(List<Type> types, Type fieldType, bool checkEnum, bool checkIConvertible, bool checkAApiVersionedFields)
+            bool isCollection(Type fieldType)
             {
                 if (!typeof(ICollection).IsAssignableFrom(fieldType)) return false;
                 Type baseType;
-                if (fieldType.HasElementType) baseType = fieldType.GetElementType();
-                else if (fieldType.GetGenericArguments().Length == 1) baseType = fieldType.GetGenericArguments()[0];
+                if (fieldType.GetGenericArguments().Length == 1) baseType = fieldType.GetGenericArguments()[0];
                 else if (fieldType.BaseType.GetGenericArguments().Length == 1) baseType = fieldType.BaseType.GetGenericArguments()[0];
                 else return false;
-                return types.Contains(baseType)
-                    || (checkEnum && typeof(Enum).IsAssignableFrom(baseType))
-                    || (checkIConvertible && typeof(IConvertible).IsAssignableFrom(baseType))
-                    || (checkAApiVersionedFields && typeof(AApiVersionedFields).IsAssignableFrom(baseType))
-                    ;
+                return typeof(AApiVersionedFields).IsAssignableFrom(baseType);
             }
             /*
              *  * Boolset (as hex)
@@ -200,23 +195,28 @@ namespace S3PIDemoFE
             {
                 get
                 {
+                    // Must test these before IConvertible
                     List<Type> simpleTypes = new List<Type>(new Type[] { typeof(bool), typeof(DateTime), typeof(decimal), typeof(double), typeof(float), typeof(string), });
                     if (simpleTypes.Contains(fieldType)) return fieldType;
-                    //simpleTypes.Add(typeof(byte));
-                    if (isCollection(simpleTypes, fieldType, true, false, false)) // simpleTypes, byte, Enum
-                        return fieldType;
 
                     // Must test enum before IConvertible
                     if (typeof(Enum).IsAssignableFrom(fieldType) && fieldType.GetCustomAttributes(typeof(FlagsAttribute), true).Length == 0) return typeof(EnumChooserCTD);
                     if (typeof(Enum).IsAssignableFrom(fieldType) && fieldType.GetCustomAttributes(typeof(FlagsAttribute), true).Length == 1) return typeof(EnumFlagsCTD);
 
                     if (typeof(IConvertible).IsAssignableFrom(fieldType) || typeof(Boolset).Equals(fieldType)) return typeof(AsHexCTD);
-                    if (isCollection(new List<Type>(new Type[] { typeof(Boolset), }), fieldType, false, true, false)
-                        && typeof(IList).IsAssignableFrom(fieldType)) // need "object this[int index] { get; set; }" interface
-                        return typeof(IListAsHexCTD);
 
                     if (typeof(AApiVersionedFields).IsAssignableFrom(fieldType)) return typeof(AApiVersionedFieldsCTD);
-                    if (isCollection(new List<Type>(), fieldType, false, false, true))
+
+                    
+                    // More complex stuff
+
+                    // Arrays
+                    if (fieldType.HasElementType
+                        && (typeof(IConvertible).IsAssignableFrom(fieldType.GetElementType()) || typeof(Boolset).Equals(fieldType.GetElementType())))
+                        return typeof(ArrayAsHexCTD);
+
+                    // Collections of AApiVersionedFields (AResource.DependentList<T> where T is AHandlerElement)
+                    if (isCollection(fieldType))
                         return typeof(ICollectionAApiVersionedFieldsCTD);
 
                     if (typeof(IDictionary).IsAssignableFrom(fieldType)) return typeof(IDictionaryCTD);
@@ -699,7 +699,7 @@ namespace S3PIDemoFE
     }
 
     [Editor(typeof(ICollectionAApiVersionedFieldsEditor), typeof(UITypeEditor))]
-    [TypeConverter(typeof(ICollectionConverter))]
+    [TypeConverter(typeof(ICollectionAApiVersionedConverter))]
     public class ICollectionAApiVersionedFieldsCTD : ICustomTypeDescriptor
     {
         protected AApiVersionedFields owner;
@@ -778,16 +778,32 @@ namespace S3PIDemoFE
                 return value;
             }
         }
+
+        public class ICollectionAApiVersionedConverter : TypeConverter
+        {
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (typeof(string).Equals(destinationType)) return true;
+                return base.CanConvertTo(context, destinationType);
+            }
+            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+            {
+                ICollectionAApiVersionedFieldsCTD ctd = value as ICollectionAApiVersionedFieldsCTD;
+                ICollection ic = (ICollection)ctd.owner[ctd.field].Value;
+                if (ic == null) return "(null)";
+                if (typeof(string).Equals(destinationType)) return "(Collection: " + ic.Count + ")";
+                return base.ConvertTo(context, culture, value, destinationType);
+            }
+        }
     }
 
-    [Editor(typeof(IListAsHexEditor), typeof(UITypeEditor))]
-    [TypeConverter(typeof(ICollectionConverter))]
-    public class IListAsHexCTD : ICustomTypeDescriptor
+    [TypeConverter(typeof(ArrayAsHexConverter))]
+    public class ArrayAsHexCTD : ICustomTypeDescriptor
     {
         protected AApiVersionedFields owner;
         protected string field;
         protected object component;
-        public IListAsHexCTD(AApiVersionedFields owner, string field, object component) { this.owner = owner; this.field = field; this.component = component; }
+        public ArrayAsHexCTD(AApiVersionedFields owner, string field, object component) { this.owner = owner; this.field = field; this.component = component; }
 
         #region ICustomTypeDescriptor Members
 
@@ -854,11 +870,40 @@ namespace S3PIDemoFE
             {
                 IWindowsFormsEditorService edSvc = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
 
-                IListAsHexCTD field = (IListAsHexCTD)value;
+                ArrayAsHexCTD field = (ArrayAsHexCTD)value;
                 NewGridForm ui = new NewGridForm(new AsHex(field.owner, field.field));
                 edSvc.ShowDialog(ui);
 
                 return value;
+            }
+        }
+
+        public class ArrayAsHexConverter : ExpandableObjectConverter
+        {
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (typeof(string).Equals(destinationType)) return true;
+                return base.CanConvertTo(context, destinationType);
+            }
+            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+            {
+                ArrayAsHexCTD ctd = value as ArrayAsHexCTD;
+                Array ary = (Array)ctd.owner[ctd.field].Value;
+                if (ary == null) return "(null)";
+                if (typeof(string).Equals(destinationType)) return "(Array: " + ary.Length + ")";
+                return base.ConvertTo(context, culture, value, destinationType);
+            }
+
+            public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
+            {
+                ArrayAsHexCTD ctd = value as ArrayAsHexCTD;
+                AsHex ah = new AsHex(ctd.owner, ctd.field);
+                Array ary = ctd.owner[ctd.field].Value as Array;
+                AApiVersionedFieldsCTD.TypedValuePropertyDescriptor[] pds = new AApiVersionedFieldsCTD.TypedValuePropertyDescriptor[ary.Length];
+                string fmt = "[{0:X" + ary.Length.ToString("X").Length + "}] " + ary.GetType().GetElementType().Name;
+                for (int i = 0; i < ary.Length; i++)
+                    pds[i] = new AApiVersionedFieldsCTD.TypedValuePropertyDescriptor(ah, String.Format(fmt, i), new Attribute[] { });
+                return new PropertyDescriptorCollection(pds);
             }
         }
     }
@@ -922,7 +967,7 @@ namespace S3PIDemoFE
     }
 
     [Editor(typeof(IDictionaryEditor), typeof(UITypeEditor))]
-    [TypeConverter(typeof(ICollectionConverter))]
+    [TypeConverter(typeof(IDictionaryConverter))]
     public class IDictionaryCTD : ICustomTypeDescriptor
     {
         protected AApiVersionedFields owner;
@@ -1000,6 +1045,8 @@ namespace S3PIDemoFE
                 IWindowsFormsEditorService edSvc = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
 
                 IDictionaryCTD field = (IDictionaryCTD)value;
+                if (field.Value == null) return value;
+
                 List<AApiVersionedFields> list = new List<AApiVersionedFields>();
                 List<object> oldKeys = new List<object>();
                 foreach (var k in field.Value.Keys) { list.Add(new AsKVP(new DictionaryEntry(k, field.Value[k]))); oldKeys.Add(k); }
@@ -1020,6 +1067,23 @@ namespace S3PIDemoFE
                     else field.Value.Add(kvp["Key"].Value, kvp["Val"].Value);
 
                 return value;
+            }
+        }
+
+        public class IDictionaryConverter : TypeConverter
+        {
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (typeof(string).Equals(destinationType)) return true;
+                return base.CanConvertTo(context, destinationType);
+            }
+            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+            {
+                IDictionaryCTD ctd = value as IDictionaryCTD;
+                IDictionary id = (IDictionary)ctd.Value;
+                if (id == null) return "(null)";
+                if (typeof(string).Equals(destinationType)) return "(Dictionary: " + id.Count + ")";
+                return base.ConvertTo(context, culture, value, destinationType);
             }
         }
     }
@@ -1066,19 +1130,7 @@ namespace S3PIDemoFE
         }
     }
 
-    public class ICollectionConverter : TypeConverter
-    {
-        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-        {
-            if (typeof(string).Equals(destinationType)) return true;
-            return base.CanConvertTo(context, destinationType);
-        }
-        public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
-        {
-            if (typeof(string).Equals(destinationType)) return "(Collection)";
-            return base.ConvertTo(context, culture, value, destinationType);
-        }
-    }
+    // Fake up an "AsTGI" AApiVersionFields that formats the Type with the Tag, like the new ResourceInfo dialog
 
     [Editor(typeof(ReaderEditor), typeof(UITypeEditor))]
     [TypeConverter(typeof(ReaderConverter))]
