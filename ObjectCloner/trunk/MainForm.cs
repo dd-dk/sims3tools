@@ -1749,8 +1749,7 @@ namespace ObjectCloner
                     if (!stopSaving) newnmap.Commit();
 
                     updateProgress(true, "Saving package...", true, 0, true, 0);
-                    if (!disableCompression)
-                        foreach (IResourceIndexEntry ie in target.GetResourceList) ie.Compressed = 0xffff;
+                    foreach (IResourceIndexEntry ie in target.GetResourceList) ie.Compressed = (ushort)(disableCompression ? 0x0000 : 0xffff);
                     try
                     {
                         target.SaveAs(outputPackage);
