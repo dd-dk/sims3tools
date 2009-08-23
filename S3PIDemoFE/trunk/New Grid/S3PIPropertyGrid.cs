@@ -77,13 +77,14 @@ namespace S3PIDemoFE
         {
             if (value == null) value = (AApiVersionedFields)owner[field].Value;
 
-            List<string> filter = new List<string>(new string[] { "Stream", "AsBytes", "Value", });
+            List<string> filter = new List<string>(new string[] { "Stream", /*"AsBytes",/**/ "Value", });
             List<string> contentFields = value.ContentFields;
             PropertyDescriptorCollection pdc = new PropertyDescriptorCollection(null);
             if (typeof(IDictionary).IsAssignableFrom(value.GetType())) { pdc.Add(new IDictionaryPropertyDescriptor((IDictionary)value, "(this)", new Attribute[] { new CategoryAttribute("Lists") })); }
             foreach (string f in contentFields)
             {
                 if (filter.Contains(f)) continue;
+                if (!canWrite(value, f)) continue;
                 TypedValuePropertyDescriptor tvpd = new TypedValuePropertyDescriptor(value, f, null);
                 pdc.Add(new TypedValuePropertyDescriptor(value, f, new Attribute[] { new CategoryAttribute(tvpdToCategory(tvpd.PropertyType)) }));
             }
@@ -100,6 +101,11 @@ namespace S3PIDemoFE
             if (t.Equals(typeof(IDictionaryCTD))) return "Lists";
             if (t.Equals(typeof(ReaderCTD))) return "Readers";
             return "Values";
+        }
+        bool canWrite(AApiVersionedFields owner, string field)
+        {
+            if (owner.GetType().Equals(typeof(AsKVP))) return true;
+            return owner.GetType().GetProperty(field).CanWrite;
         }
 
         public PropertyDescriptorCollection GetProperties() { return GetProperties(new Attribute[] { }); }
@@ -209,6 +215,9 @@ namespace S3PIDemoFE
 
                     
                     // More complex stuff
+
+                    // Byte Arrays -> use default editor as it has a built in hex editor
+                    if (fieldType.HasElementType && fieldType.GetElementType().Equals(typeof(byte))) return fieldType;
 
                     // Arrays
                     if (fieldType.HasElementType
