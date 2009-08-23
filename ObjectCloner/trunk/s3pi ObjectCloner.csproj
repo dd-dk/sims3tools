@@ -50,7 +50,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="s3pi.Package, Version=906.27.10.17897, Culture=neutral, PublicKeyToken=b04bd8c032523d4e, processorArchitecture=MSIL">
+    <Reference Include="s3pi.ObjKeyResource, Version=908.23.16.27521, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.ObjKeyResource.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Package, Version=908.23.16.27523, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.Package.dll</HintPath>
     </Reference>
@@ -189,10 +193,6 @@
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.NameMapResource.dll">
       <Link>s3pi.NameMapResource.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\s3pi\build\bin\Release\s3pi.ObjKeyResource.dll">
-      <Link>s3pi.ObjKeyResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.Settings.dll">

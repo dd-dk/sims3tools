@@ -610,8 +610,6 @@ namespace ObjectCloner
             this.AcceptButton = null;
             this.CancelButton = null;
             tlpTask.Enabled = true;
-            //tabControl1.Enabled = false;
-            //ClearTabs();
 
             lbUseMenu.Visible = true;
             btnStart.Visible = false;
@@ -669,7 +667,7 @@ namespace ObjectCloner
             this.AcceptButton = null;
             this.CancelButton = null;
             tlpTask.Enabled = false;
-            //tabControl1.Enabled = false;
+            TabEnable(false);
             disableCompression = !cloneFixOptions.IsCompress;
             isClone = cloneFixOptions.IsClone;
             isPadSTBLs = cloneFixOptions.IsPadSTBLs;
@@ -2652,7 +2650,7 @@ namespace ObjectCloner
                 case 11:
                     CWAL_Steps(stepList, out lastStepInChain); break;
             }
-            lastInChain = stepList == null ? -1 : stepList.IndexOf(lastStepInChain);
+            lastInChain = stepList == null ? -1 : (stepList.IndexOf(lastStepInChain) + 1);
         }
 
         void OBJD_Steps(List<Step> stepList, out Step lastStepInChain)
@@ -2878,9 +2876,8 @@ namespace ObjectCloner
         void OBJK_getVPXY()
         {
             int index = -1;
-            IEnumerable keys = (IEnumerable)objkItem.Resource["Keys"].Value;
-            foreach (AHandlerElement element in keys)
-                if (((string)element["EntryName"].Value).Equals("modelKey")) { index = (int)element["CcIndex"].Value; break; }
+            if (((ObjKeyResource.ObjKeyResource)objkItem.Resource).ComponentData.ContainsKey("modelKey"))
+                index = ((ObjKeyResource.ObjKeyResource.CDTResourceKey)((ObjKeyResource.ObjKeyResource)objkItem.Resource).ComponentData["modelKey"]).Data;
 
             if (index == -1)
             {
