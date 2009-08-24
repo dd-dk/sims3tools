@@ -29,14 +29,6 @@ namespace S3PIDemoFE
 {
     public partial class ResourceDetails : Form
     {
-        static string[] tagDropDown;
-        static ResourceDetails()
-        {
-            List<string> tagList = new List<string>();
-            foreach (var kvp in ExtList.Ext)
-                if (kvp.Key.StartsWith("0x")) tagList.Add(kvp.Value[0] + " " + kvp.Key);
-            tagDropDown = tagList.ToArray();
-        }
         public ResourceDetails() : this(true, true) { }
         public ResourceDetails(bool useName, bool displayFilename)
         {
@@ -44,8 +36,6 @@ namespace S3PIDemoFE
             this.Icon = ((System.Drawing.Icon)(new ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
             tbName.Enabled = UseName = useName;
             lbFilename.Visible = tbFilename.Visible = displayFilename;
-            cbType.Items.Clear();
-            cbType.Items.AddRange(tagDropDown);
         }
 
         public string Filename { get { return tbFilename.Text; } set { this.tbFilename.Text = value; } }
@@ -137,29 +127,9 @@ namespace S3PIDemoFE
             FillPanel();
         }
 
-        private void cbType_TextUpdate(object sender, EventArgs e)
+        private void cbType_ValidChanged(object sender, EventArgs e)
         {
-            ComboBox cb = sender as ComboBox;
-
-            if (cb.Items.IndexOf(cb.Text) < 0)
-            {
-                try
-                {
-                    if (cb.Text.Length > 0)
-                        Convert.ToUInt32(cb.Text, cb.Text.StartsWith("0x") ? 16 : 10);
-                    btnOK.Enabled = cb.Text.Length * tbGroup.Text.Length * tbInstance.Text.Length > 0;
-                }
-                catch { btnOK.Enabled = false; }
-            }
-            else
-            {
-                btnOK.Enabled = cb.Text.Length * tbGroup.Text.Length * tbInstance.Text.Length > 0;
-            }
-        }
-
-        private void cbType_SelectedValueChanged(object sender, EventArgs e)
-        {
-            cbType_TextUpdate(sender, e);
+            btnOK.Enabled = cbType.Valid && (tbGroup.Text.Length * tbInstance.Text.Length > 0);
         }
     }
 }

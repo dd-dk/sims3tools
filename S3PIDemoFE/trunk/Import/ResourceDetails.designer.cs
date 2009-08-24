@@ -34,7 +34,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.cbType = new System.Windows.Forms.ComboBox();
+            this.cbType = new System.Windows.Forms.ResourceTypeCombo();
             this.tbGroup = new System.Windows.Forms.TextBox();
             this.tbInstance = new System.Windows.Forms.TextBox();
             this.lbFilename = new System.Windows.Forms.Label();
@@ -50,7 +50,7 @@
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnOK.Enabled = false;
-            this.btnOK.Location = new System.Drawing.Point(318, 196);
+            this.btnOK.Location = new System.Drawing.Point(324, 196);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 2;
@@ -62,7 +62,7 @@
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(237, 196);
+            this.btnCancel.Location = new System.Drawing.Point(243, 196);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 3;
@@ -99,7 +99,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(381, 178);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(387, 178);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // label3
@@ -135,23 +135,18 @@
             // cbType
             // 
             this.cbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.cbType.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
-            this.cbType.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
-            this.cbType.FormattingEnabled = true;
             this.cbType.Location = new System.Drawing.Point(58, 3);
             this.cbType.Name = "cbType";
-            this.cbType.Size = new System.Drawing.Size(320, 21);
-            this.cbType.Sorted = true;
+            this.cbType.Size = new System.Drawing.Size(326, 21);
             this.cbType.TabIndex = 4;
-            this.cbType.SelectedValueChanged += new System.EventHandler(this.cbType_SelectedValueChanged);
-            this.cbType.TextUpdate += new System.EventHandler(this.cbType_TextUpdate);
+            this.cbType.ValidChanged += new System.EventHandler(this.cbType_ValidChanged);
             // 
             // tbGroup
             // 
             this.tbGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tbGroup.Location = new System.Drawing.Point(58, 30);
             this.tbGroup.Name = "tbGroup";
-            this.tbGroup.Size = new System.Drawing.Size(320, 20);
+            this.tbGroup.Size = new System.Drawing.Size(326, 20);
             this.tbGroup.TabIndex = 4;
             this.tbGroup.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.tbGroup.TextChanged += new System.EventHandler(this.tbTGI_TextChanged);
@@ -161,7 +156,7 @@
             this.tbInstance.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tbInstance.Location = new System.Drawing.Point(58, 56);
             this.tbInstance.Name = "tbInstance";
-            this.tbInstance.Size = new System.Drawing.Size(320, 20);
+            this.tbInstance.Size = new System.Drawing.Size(326, 20);
             this.tbInstance.TabIndex = 6;
             this.tbInstance.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.tbInstance.TextChanged += new System.EventHandler(this.tbTGI_TextChanged);
@@ -184,7 +179,7 @@
             this.tbFilename.Location = new System.Drawing.Point(58, 166);
             this.tbFilename.Name = "tbFilename";
             this.tbFilename.ReadOnly = true;
-            this.tbFilename.Size = new System.Drawing.Size(320, 13);
+            this.tbFilename.Size = new System.Drawing.Size(326, 13);
             this.tbFilename.TabIndex = 11;
             this.tbFilename.TextChanged += new System.EventHandler(this.tbFilename_TextChanged);
             this.tbFilename.DragDrop += new System.Windows.Forms.DragEventHandler(this.tbFilename_DragDrop);
@@ -206,7 +201,7 @@
             this.tbName.Enabled = false;
             this.tbName.Location = new System.Drawing.Point(58, 140);
             this.tbName.Name = "tbName";
-            this.tbName.Size = new System.Drawing.Size(320, 20);
+            this.tbName.Size = new System.Drawing.Size(326, 20);
             this.tbName.TabIndex = 9;
             // 
             // importSettings1
@@ -214,7 +209,7 @@
             this.importSettings1.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.importSettings1.AutoSize = true;
             this.importSettings1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.importSettings1.Location = new System.Drawing.Point(58, 82);
+            this.importSettings1.Location = new System.Drawing.Point(61, 82);
             this.importSettings1.Name = "importSettings1";
             this.importSettings1.Size = new System.Drawing.Size(320, 52);
             this.importSettings1.TabIndex = 12;
@@ -226,7 +221,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(405, 231);
+            this.ClientSize = new System.Drawing.Size(411, 231);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
@@ -255,6 +250,6 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox tbName;
         private S3PIDemoFE.Import.ImportSettings importSettings1;
-        private System.Windows.Forms.ComboBox cbType;
+        private System.Windows.Forms.ResourceTypeCombo cbType;
     }
 }
