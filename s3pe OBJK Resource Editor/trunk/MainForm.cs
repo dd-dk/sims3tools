@@ -349,5 +349,18 @@ namespace s3pe_OBJK_Resource_Editor
             Environment.ExitCode = 1;
             this.Close();
         }
+
+        private void btnTGIEditor_Click(object sender, EventArgs e)
+        {
+            DialogResult dr = TGIBlockListEditor.Show(objk.TGIBlocks);
+            if (dr != DialogResult.OK) return;
+
+            tgis.Clear();
+            foreach (AResource.TGIBlock tgi in objk.TGIBlocks)
+                tgis.Add(tgi);
+
+            foreach(Control c in tableLayoutPanel1.Controls)
+                if (c as ComboBox != null) { ComboBox cb = c as ComboBox; cb.Items.Clear(); cb.Items.AddRange(tgis.ToArray()); }
+        }
     }
 }

@@ -110,4 +110,10 @@ echo using System.Runtime.InteropServices;
 echo /*"*/ [assembly: AssemblyVersion(%25version%25)] /*"*/
 )&gt;"$(ProjectDir)Properties\AssemblyVersion.cs"</PreBuildEvent>
   </PropertyGroup>
+  <ItemGroup>
+    <Content Include="..\s3pi\build\bin\Release\Extensions.txt">
+      <Link>Extensions.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

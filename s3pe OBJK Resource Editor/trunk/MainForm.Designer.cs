@@ -35,6 +35,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.ckbAllowObjectHiding = new System.Windows.Forms.CheckBox();
+            this.btnTGIEditor = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -106,12 +107,24 @@
             // 
             this.ckbAllowObjectHiding.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.ckbAllowObjectHiding.AutoSize = true;
-            this.ckbAllowObjectHiding.Location = new System.Drawing.Point(12, 518);
+            this.ckbAllowObjectHiding.Location = new System.Drawing.Point(320, 518);
             this.ckbAllowObjectHiding.Name = "ckbAllowObjectHiding";
             this.ckbAllowObjectHiding.Size = new System.Drawing.Size(114, 17);
             this.ckbAllowObjectHiding.TabIndex = 6;
             this.ckbAllowObjectHiding.Text = "Allow object hiding";
             this.ckbAllowObjectHiding.UseVisualStyleBackColor = true;
+            // 
+            // btnTGIEditor
+            // 
+            this.btnTGIEditor.AutoSize = true;
+            this.btnTGIEditor.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnTGIEditor.Location = new System.Drawing.Point(12, 514);
+            this.btnTGIEditor.Name = "btnTGIEditor";
+            this.btnTGIEditor.Size = new System.Drawing.Size(79, 23);
+            this.btnTGIEditor.TabIndex = 7;
+            this.btnTGIEditor.Text = "TGI Blocks...";
+            this.btnTGIEditor.UseVisualStyleBackColor = true;
+            this.btnTGIEditor.Click += new System.EventHandler(this.btnTGIEditor_Click);
             // 
             // MainForm
             // 
@@ -120,6 +133,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(608, 549);
+            this.Controls.Add(this.btnTGIEditor);
             this.Controls.Add(this.ckbAllowObjectHiding);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.btnCancel);
@@ -143,6 +157,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.CheckBox ckbAllowObjectHiding;
+        private System.Windows.Forms.Button btnTGIEditor;
 
     }
 }
