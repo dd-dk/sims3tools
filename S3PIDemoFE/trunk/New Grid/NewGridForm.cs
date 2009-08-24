@@ -35,8 +35,8 @@ namespace S3PIDemoFE
             splitContainer1.Panel1Collapsed = true;
             listBox1.Visible = false;
 
-            int h = 4 * Application.OpenForms[Application.OpenForms.Count - 1].ClientSize.Height / 5;
-            int w = 4 * Application.OpenForms[Application.OpenForms.Count - 1].ClientSize.Width / 5;
+            int h = 4 * Application.OpenForms[0].ClientSize.Height / 5;
+            int w = 4 * Application.OpenForms[0].ClientSize.Width / 5;
             this.ClientSize = new Size(w, h);
         }
 
