@@ -77,7 +77,7 @@ namespace S3PIDemoFE
         {
             if (value == null) value = (AApiVersionedFields)owner[field].Value;
 
-            List<string> filter = new List<string>(new string[] { "Stream", /*"AsBytes",/**/ "Value", });
+            List<string> filter = new List<string>(new string[] { "Stream", "AsBytes",/**/ "Value", });
             List<string> contentFields = value.ContentFields;
             PropertyDescriptorCollection pdc = new PropertyDescriptorCollection(null);
             if (typeof(IDictionary).IsAssignableFrom(value.GetType())) { pdc.Add(new IDictionaryPropertyDescriptor((IDictionary)value, "(this)", new Attribute[] { new CategoryAttribute("Lists") })); }
@@ -217,12 +217,20 @@ namespace S3PIDemoFE
                     // More complex stuff
 
                     // Byte Arrays -> use default editor as it has a built in hex editor
-                    if (fieldType.HasElementType && fieldType.GetElementType().Equals(typeof(byte))) return fieldType;
+                    //if (fieldType.HasElementType && fieldType.GetElementType().Equals(typeof(byte))) return fieldType;
+                    // except it's a bit unreliable...
 
                     // Arrays
                     if (fieldType.HasElementType
                         && (typeof(IConvertible).IsAssignableFrom(fieldType.GetElementType()) || typeof(Boolset).Equals(fieldType.GetElementType())))
                         return typeof(ArrayAsHexCTD);
+
+                    if (isCollection(fieldType) && (
+                        fieldType.GetGenericArguments().Length == 1 && fieldType.GetGenericArguments()[0].Equals(typeof(AResource.TGIBlock))
+                        ||
+                        fieldType.BaseType.GetGenericArguments().Length == 1 && fieldType.BaseType.GetGenericArguments()[0].Equals(typeof(AResource.TGIBlock))
+                        ))
+                        return typeof(TGIBlockListCTD);
 
                     // Collections of AApiVersionedFields (AResource.DependentList<T> where T is AHandlerElement)
                     if (isCollection(fieldType))
@@ -799,8 +807,8 @@ namespace S3PIDemoFE
             {
                 ICollectionAApiVersionedFieldsCTD ctd = value as ICollectionAApiVersionedFieldsCTD;
                 ICollection ic = (ICollection)ctd.owner[ctd.field].Value;
-                if (ic == null) return "(null)";
-                if (typeof(string).Equals(destinationType)) return "(Collection: " + ic.Count + ")";
+
+                if (typeof(string).Equals(destinationType)) return ic == null ? "(null)" : "(Collection: " + ic.Count + ")";
                 return base.ConvertTo(context, culture, value, destinationType);
             }
         }
@@ -836,7 +844,7 @@ namespace S3PIDemoFE
 
         public PropertyDescriptorCollection GetProperties(Attribute[] attributes)
         {
-            return new PropertyDescriptorCollection(new PropertyDescriptor[] { new IListAsHexPropertyDescriptor(owner, field, component, null), });
+            return new PropertyDescriptorCollection(new PropertyDescriptor[] { new ArrayAsHexPropertyDescriptor(owner, field, component, null), });
         }
 
         public PropertyDescriptorCollection GetProperties() { return GetProperties(null); }
@@ -845,12 +853,12 @@ namespace S3PIDemoFE
 
         #endregion
 
-        public class IListAsHexPropertyDescriptor : PropertyDescriptor
+        public class ArrayAsHexPropertyDescriptor : PropertyDescriptor
         {
             AApiVersionedFields owner;
             string field;
             object component;
-            public IListAsHexPropertyDescriptor(AApiVersionedFields owner, string field, object component, Attribute[] attr)
+            public ArrayAsHexPropertyDescriptor(AApiVersionedFields owner, string field, object component, Attribute[] attr)
                 : base(field, attr) { this.owner = owner; this.field = field; this.component = component; }
 
             public override string Name { get { return field; } }
@@ -872,7 +880,7 @@ namespace S3PIDemoFE
             public override bool ShouldSerializeValue(object component) { throw new InvalidOperationException(); }
         }
 
-        public class IListAsHexEditor : UITypeEditor
+        public class ArrayAsHexEditor : UITypeEditor
         {
             public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) { return UITypeEditorEditStyle.Modal; }
             public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
@@ -898,8 +906,8 @@ namespace S3PIDemoFE
             {
                 ArrayAsHexCTD ctd = value as ArrayAsHexCTD;
                 Array ary = (Array)ctd.owner[ctd.field].Value;
-                if (ary == null) return "(null)";
-                if (typeof(string).Equals(destinationType)) return "(Array: " + ary.Length + ")";
+
+                if (typeof(string).Equals(destinationType)) return ary == null ? "(null)" : "(Array: " + ary.Length + ")";
                 return base.ConvertTo(context, culture, value, destinationType);
             }
 
@@ -1090,8 +1098,8 @@ namespace S3PIDemoFE
             {
                 IDictionaryCTD ctd = value as IDictionaryCTD;
                 IDictionary id = (IDictionary)ctd.Value;
-                if (id == null) return "(null)";
-                if (typeof(string).Equals(destinationType)) return "(Dictionary: " + id.Count + ")";
+
+                if (typeof(string).Equals(destinationType)) return id == null ? "(null)" : "(Dictionary: " + id.Count + ")";
                 return base.ConvertTo(context, culture, value, destinationType);
             }
         }
@@ -1139,7 +1147,106 @@ namespace S3PIDemoFE
         }
     }
 
-    // Fake up an "AsTGI" AApiVersionFields that formats the Type with the Tag, like the new ResourceInfo dialog
+    [Editor(typeof(TGIBlockListEditor), typeof(UITypeEditor))]
+    [TypeConverter(typeof(TGIBlockListConverter))]
+    public class TGIBlockListCTD : ICustomTypeDescriptor
+    {
+        protected AApiVersionedFields owner;
+        protected string field;
+        protected object component;
+        public TGIBlockListCTD(AApiVersionedFields owner, string field, object component) { this.owner = owner; this.field = field; this.component = component; }
+
+        #region ICustomTypeDescriptor Members
+
+        public AttributeCollection GetAttributes() { return TypeDescriptor.GetAttributes(this, true); }
+
+        public string GetClassName() { return TypeDescriptor.GetClassName(this, true); }
+
+        public string GetComponentName() { return TypeDescriptor.GetComponentName(this, true); }
+
+        public TypeConverter GetConverter() { return TypeDescriptor.GetConverter(this, true); }
+
+        public EventDescriptor GetDefaultEvent() { return TypeDescriptor.GetDefaultEvent(this, true); }
+
+        public System.ComponentModel.PropertyDescriptor GetDefaultProperty() { return TypeDescriptor.GetDefaultProperty(this, true); }
+
+        public object GetEditor(Type editorBaseType) { return TypeDescriptor.GetEditor(this, editorBaseType, true); }
+
+        public EventDescriptorCollection GetEvents(Attribute[] attributes) { return TypeDescriptor.GetEvents(this, attributes, true); }
+
+        public EventDescriptorCollection GetEvents() { return TypeDescriptor.GetEvents(this, true); }
+
+        public PropertyDescriptorCollection GetProperties(Attribute[] attributes) { return new PropertyDescriptorCollection(new PropertyDescriptor[] { new TGIBlockListPropertyDescriptor(owner, field, component, null), }); }
+
+        public PropertyDescriptorCollection GetProperties() { return GetProperties(null); }
+
+        public object GetPropertyOwner(System.ComponentModel.PropertyDescriptor pd) { return this; }
+
+        #endregion
+
+        public class TGIBlockListPropertyDescriptor : PropertyDescriptor
+        {
+            AApiVersionedFields owner;
+            string field;
+            object component;
+            public TGIBlockListPropertyDescriptor(AApiVersionedFields owner, string field, object component, Attribute[] attr)
+                : base(field, attr) { this.owner = owner; this.field = field; this.component = component; }
+
+            public override bool CanResetValue(object component) { throw new InvalidOperationException(); }
+
+            public override void ResetValue(object component) { throw new InvalidOperationException(); }
+
+            public override Type PropertyType { get { throw new InvalidOperationException(); } }
+
+            public override object GetValue(object component) { throw new InvalidOperationException(); }
+
+            public override bool IsReadOnly { get { throw new InvalidOperationException(); } }
+
+            public override void SetValue(object component, object value) { throw new InvalidOperationException(); }
+
+            public override Type ComponentType { get { return component.GetType(); } }
+
+            public override bool ShouldSerializeValue(object component) { return true; }
+        }
+
+        public class TGIBlockListEditor : UITypeEditor
+        {
+            public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) { return UITypeEditorEditStyle.Modal; }
+            public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
+            {
+                IWindowsFormsEditorService edSvc = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
+
+                AResource.DependentList<AResource.TGIBlock> list = value as AResource.DependentList<AResource.TGIBlock>;
+
+                System.Windows.Forms.TGIBlockListEditorForm.MainForm ui = new System.Windows.Forms.TGIBlockListEditorForm.MainForm();
+                ui.Items = list;
+                DialogResult dr = edSvc.ShowDialog(ui);
+
+                if (dr != DialogResult.OK) return value;
+
+                list.Clear();
+                list.AddRange(ui.Items);
+
+                return value;
+            }
+        }
+
+        public class TGIBlockListConverter : TypeConverter
+        {
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (typeof(string).Equals(destinationType)) return true;
+                return base.CanConvertTo(context, destinationType);
+            }
+            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+            {
+                AResource.DependentList<AResource.TGIBlock> list = value as AResource.DependentList<AResource.TGIBlock>;
+
+                if (typeof(string).Equals(destinationType)) return list == null ? "(null)" : "(TGI Blocks: " + list.Count + ")";
+                return base.ConvertTo(context, culture, value, destinationType);
+            }
+        }
+    }
 
     [Editor(typeof(ReaderEditor), typeof(UITypeEditor))]
     [TypeConverter(typeof(ReaderConverter))]
