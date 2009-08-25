@@ -101,6 +101,7 @@ namespace S3PIDemoFE
 
             FileStream fs = new FileStream(saveFileDialog1.FileName, FileMode.Create, FileAccess.Write);
             BinaryReader r = owner[field].Value as BinaryReader;
+            if (r.BaseStream.CanSeek) r.BaseStream.Position = 0;
             (new BinaryWriter(fs)).Write(r.ReadBytes((int)r.BaseStream.Length));
             fs.Close();
         }
