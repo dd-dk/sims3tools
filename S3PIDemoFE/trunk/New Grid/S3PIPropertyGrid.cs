@@ -77,7 +77,7 @@ namespace S3PIDemoFE
         {
             if (value == null) value = (AApiVersionedFields)owner[field].Value;
 
-            List<string> filter = new List<string>(new string[] { "Stream", "AsBytes",/**/ "Value", });
+            List<string> filter = new List<string>(new string[] { "Stream", /*"AsBytes",/**/ "Value", });
             List<string> contentFields = value.ContentFields;
             PropertyDescriptorCollection pdc = new PropertyDescriptorCollection(null);
             if (typeof(IDictionary).IsAssignableFrom(value.GetType())) { pdc.Add(new IDictionaryPropertyDescriptor((IDictionary)value, "(this)", new Attribute[] { new CategoryAttribute("Lists") })); }
@@ -218,7 +218,7 @@ namespace S3PIDemoFE
 
                     // Byte Arrays -> use default editor as it has a built in hex editor
                     //if (fieldType.HasElementType && fieldType.GetElementType().Equals(typeof(byte))) return fieldType;
-                    // except it's a bit unreliable...
+                    // except it's not an editor...
 
                     // Arrays
                     if (fieldType.HasElementType
@@ -907,7 +907,7 @@ namespace S3PIDemoFE
                 ArrayAsHexCTD ctd = value as ArrayAsHexCTD;
                 Array ary = (Array)ctd.owner[ctd.field].Value;
 
-                if (typeof(string).Equals(destinationType)) return ary == null ? "(null)" : "(Array: " + ary.Length + ")";
+                if (typeof(string).Equals(destinationType)) return ary == null ? "(null)" : "(Array: 0x" + ary.Length.ToString("X") + ")";
                 return base.ConvertTo(context, culture, value, destinationType);
             }
 
@@ -1211,14 +1211,17 @@ namespace S3PIDemoFE
 
         public class TGIBlockListEditor : UITypeEditor
         {
+            System.Windows.Forms.TGIBlockListEditorForm.MainForm ui;
             public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) { return UITypeEditorEditStyle.Modal; }
             public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
             {
                 IWindowsFormsEditorService edSvc = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
 
+                if (ui == null)
+                    ui = new System.Windows.Forms.TGIBlockListEditorForm.MainForm();
+
                 AResource.DependentList<AResource.TGIBlock> list = value as AResource.DependentList<AResource.TGIBlock>;
 
-                System.Windows.Forms.TGIBlockListEditorForm.MainForm ui = new System.Windows.Forms.TGIBlockListEditorForm.MainForm();
                 ui.Items = list;
                 DialogResult dr = edSvc.ShowDialog(ui);
 
@@ -1323,10 +1326,7 @@ namespace S3PIDemoFE
         public class ReaderEditor : UITypeEditor
         {
             ReaderEditorPanel ui;
-            public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context)
-            {
-                return UITypeEditorEditStyle.DropDown;
-            }
+            public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) { return UITypeEditorEditStyle.DropDown; }
             public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
             {
                 IWindowsFormsEditorService edSvc = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
