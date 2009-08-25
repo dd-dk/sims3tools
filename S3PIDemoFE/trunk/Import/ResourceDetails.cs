@@ -40,22 +40,7 @@ namespace S3PIDemoFE
 
         public string Filename { get { return tbFilename.Text; } set { this.tbFilename.Text = value; } }
         public TGIN TGIN { get { return this.tbFilename.Text; } }
-        public uint ResourceType
-        {
-            get {
-                string txtToConvert = cbType.Text.Trim();
-                int startIndex = txtToConvert.LastIndexOf(" ");
-                if (startIndex > -1)
-                    txtToConvert = txtToConvert.Substring(startIndex + 1);
-                return Convert.ToUInt32(txtToConvert, txtToConvert.StartsWith("0x") ? 16 : 10);
-            }
-            set
-            {
-                string key = "0x" + value.ToString("X8");
-                if (ExtList.Ext.ContainsKey(key)) cbType.Text = ExtList.Ext[key][0] + " " + key;
-                else cbType.Text = key;
-            }
-        }
+        public uint ResourceType { get { return cbType.Value; } set { cbType.Value = value; } }
         public uint ResourceGroup
         {
             get { return Convert.ToUInt32(tbGroup.Text, tbGroup.Text.StartsWith("0x") ? 16 : 10); }
@@ -76,7 +61,7 @@ namespace S3PIDemoFE
         private void FillPanel()
         {
             TGIN details = this.tbFilename.Text;
-            cbType.Text = "0x" + details.ResType.ToString("X8");
+            cbType.Value = details.ResType;
             tbGroup.Text = "0x" + details.ResGroup.ToString("X8");
             tbInstance.Text = "0x" + details.ResInstance.ToString("X16");
             tbName.Text = details.ResName;
@@ -97,7 +82,7 @@ namespace S3PIDemoFE
                         Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
                     else
                         Convert.ToUInt32(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
-                    btnOK.Enabled = cbType.Text.Length * tbGroup.Text.Length * tbInstance.Text.Length > 0;
+                    btnOK.Enabled = cbType.Valid && (tbGroup.Text.Length * tbInstance.Text.Length > 0);
                 }
                 catch { btnOK.Enabled = false; }
             else
