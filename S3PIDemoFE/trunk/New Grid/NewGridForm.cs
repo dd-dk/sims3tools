@@ -33,7 +33,6 @@ namespace S3PIDemoFE
             InitializeComponent();
             this.Icon = ((System.Drawing.Icon)(new ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
             splitContainer1.Panel1Collapsed = true;
-            listBox1.Visible = false;
 
             int h = 4 * Application.OpenForms[0].ClientSize.Height / 5;
             int w = 4 * Application.OpenForms[0].ClientSize.Width / 5;
@@ -54,39 +53,74 @@ namespace S3PIDemoFE
                 this.AcceptButton = this.CancelButton = btnClose;
         }
 
-        public NewGridForm(AApiVersionedFields field, bool main) : this(main) { s3PIPropertyGrid1.s3piObject = field; }
-        public NewGridForm(AApiVersionedFields field) : this(false) { s3PIPropertyGrid1.s3piObject = field; }
+        public NewGridForm(AApiVersionedFields field, bool main) : this(main) { FieldList = null; s3PIPropertyGrid1.s3piObject = field; }
+        public NewGridForm(AApiVersionedFields field) : this(false) { FieldList = null; s3PIPropertyGrid1.s3piObject = field; }
 
-        public NewGridForm(IList<AApiVersionedFields> list) : this(false) { FieldList = list; }
+        public NewGridForm(IGenericAdd list) : this(false) { FieldList = list; }
 
-        IList<AApiVersionedFields> fieldList;
-        public IList<AApiVersionedFields> FieldList
+        IGenericAdd fieldList;
+        public IGenericAdd FieldList
         {
             get { return fieldList; }
             set
             {
                 this.fieldList = value;
+                listBox1.Items.Clear();
+
                 if (value == null)
                 {
                     splitContainer1.Panel1Collapsed = true;
-                    listBox1.Visible = false;
+                    tlpAddDelete.Visible = false;
                     s3PIPropertyGrid1.s3piObject = null;
                 }
                 else
                 {
                     splitContainer1.Panel1Collapsed = false;
-                    listBox1.Items.Clear();
-                    for (int i = 0; i < fieldList.Count; i++)
-                        listBox1.Items.Add("[" + i + "] " + fieldList[i].GetType().Name);
-                    listBox1.Visible = true;
-                    listBox1.SelectedIndex = fieldList.Count > 0 ? 0 : -1;
+                    tlpAddDelete.Visible = !(value.GetType().BaseType.IsGenericType && value.GetType().BaseType.GetGenericArguments()[0].IsAbstract);
+                    fillListBox(-1);
                 }
             }
+        }
+        void fillListBox(int selectedIndex)
+        {
+            listBox1.SuspendLayout();
+            listBox1.Items.Clear();
+            for (int i = 0; i < fieldList.Count; i++)
+                listBox1.Items.Add("[" + i + "] " + fieldList[i].GetType().Name);
+            if (selectedIndex == -1) selectedIndex = 0;
+            listBox1.SelectedIndex = fieldList.Count > selectedIndex ? selectedIndex : fieldList.Count - 1;
+            listBox1.ResumeLayout();
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            s3PIPropertyGrid1.s3piObject = listBox1.SelectedIndex >= 0 ? fieldList[listBox1.SelectedIndex] : null;
+            s3PIPropertyGrid1.s3piObject = (AHandlerElement)(listBox1.SelectedIndex >= 0 ? fieldList[listBox1.SelectedIndex] : null);
+            btnDelete.Enabled = listBox1.SelectedIndex >= 0;
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            int selectedIndex = listBox1.SelectedIndex;
+            int count = fieldList.Count;
+            try
+            {
+                fieldList.Add();
+            }
+            catch(Exception ex)
+            {
+                string s = "";
+                for (Exception inex = ex; inex != null; inex = ex.InnerException) s += inex.Message + "\n\n";
+                CopyableMessageBox.Show(s, this.Text, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+            }
+            fillListBox(selectedIndex);
+        }
+
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            int selectedIndex = listBox1.SelectedIndex;
+            fieldList.RemoveAt(listBox1.SelectedIndex);
+            listBox1.SelectedIndex = -1;
+            fillListBox(selectedIndex);
         }
     }
 }

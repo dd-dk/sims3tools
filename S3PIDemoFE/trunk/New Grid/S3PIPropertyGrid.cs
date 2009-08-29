@@ -35,7 +35,14 @@ namespace S3PIDemoFE
         AApiVersionedFieldsCTD target;
         public S3PIPropertyGrid() : base() { PropertySort = PropertySort.Alphabetical; HelpVisible = false; ToolbarVisible = false; }
 
-        public AApiVersionedFields s3piObject { set { if (value != null) target = new AApiVersionedFieldsCTD(value); SelectedObject = target; } }
+        public AApiVersionedFields s3piObject
+        {
+            set
+            {
+                if (value != null) { target = new AApiVersionedFieldsCTD(value); SelectedObject = target; }
+                else SelectedObject = null;
+            }
+        }
     }
 
 
@@ -105,6 +112,7 @@ namespace S3PIDemoFE
         bool canWrite(AApiVersionedFields owner, string field)
         {
             if (owner.GetType().Equals(typeof(AsKVP))) return true;
+            if (owner.GetType().Equals(typeof(AsHex))) return true;
             return owner.GetType().GetProperty(field).CanWrite;
         }
 
@@ -783,13 +791,8 @@ namespace S3PIDemoFE
             public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
             {
                 IWindowsFormsEditorService edSvc = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
-
                 ICollectionAApiVersionedFieldsCTD field = (ICollectionAApiVersionedFieldsCTD)value;
-                ICollection coll = (ICollection)field.owner[field.field].Value;
-                List<AApiVersionedFields> list = new List<AApiVersionedFields>();
-                foreach (AApiVersionedFields f in coll) list.Add(f);
-
-                NewGridForm ui = new NewGridForm(list);
+                NewGridForm ui = new NewGridForm((IGenericAdd)field.owner[field.field].Value);
                 edSvc.ShowDialog(ui);
 
                 return value;
@@ -814,6 +817,7 @@ namespace S3PIDemoFE
         }
     }
 
+    [Editor(typeof(ArrayAsHexEditor), typeof(UITypeEditor))]
     [TypeConverter(typeof(ArrayAsHexConverter))]
     public class ArrayAsHexCTD : ICustomTypeDescriptor
     {
@@ -1064,7 +1068,21 @@ namespace S3PIDemoFE
                 IDictionaryCTD field = (IDictionaryCTD)value;
                 if (field.Value == null) return value;
 
-                List<AApiVersionedFields> list = new List<AApiVersionedFields>();
+                Type keyType = typeof(Type), valueType = typeof(Type);
+                bool set = false;
+                foreach (Type t in field.Value.GetType().GetInterfaces())
+                {
+                    if (t.Name != "IDictionary`2") continue;
+                    if (!t.IsGenericType) continue;
+                    if (t.GetGenericArguments().Length != 2) continue;
+                    keyType = t.GetGenericArguments()[0];
+                    valueType = t.GetGenericArguments()[1];
+                    set = true;
+                    break;
+                }
+                if (!set) return value;
+
+                AsKVPList list = new AsKVPList(keyType, valueType);
                 List<object> oldKeys = new List<object>();
                 foreach (var k in field.Value.Keys) { list.Add(new AsKVP(new DictionaryEntry(k, field.Value[k]))); oldKeys.Add(k); }
 
@@ -1079,9 +1097,13 @@ namespace S3PIDemoFE
                 foreach (var k in field.Value.Keys) if (!newKeys.Contains(k)) delete.Add(k);
                 foreach (object k in delete) field.Value.Remove(k);
 
+                bool dups = false;
                 foreach (AsKVP kvp in list)
                     if (oldKeys.Contains(kvp["Key"].Value)) field.Value[kvp["Key"].Value] = kvp["Val"].Value;
-                    else field.Value.Add(kvp["Key"].Value, kvp["Val"].Value);
+                    else if (!field.Value.Contains(kvp["Key"].Value)) field.Value.Add(kvp["Key"].Value, kvp["Val"].Value);
+                    else dups = true;
+                if (dups)
+                    CopyableMessageBox.Show("Duplicate keyed entries were dropped.", "s3pe", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
 
                 return value;
             }
@@ -1105,11 +1127,11 @@ namespace S3PIDemoFE
         }
     }
 
-    public class AsKVP : AApiVersionedFields
+    public class AsKVP : AHandlerElement, IEquatable<AsKVP>
     {
         DictionaryEntry entry;
         List<string> contentFields;
-        public AsKVP(DictionaryEntry entry) { this.entry = entry; contentFields = new List<string>(new string[] { "Key", "Val", }); }
+        public AsKVP(DictionaryEntry entry) : base(0, null) { this.entry = entry; contentFields = new List<string>(new string[] { "Key", "Val", }); }
 
         public override List<string> ContentFields { get { return contentFields; } }
         public override int RecommendedApiVersion { get { return 0; } }
@@ -1145,6 +1167,24 @@ namespace S3PIDemoFE
                 default: throw new IndexOutOfRangeException();
             }
         }
+
+        public override AHandlerElement Clone(EventHandler handler) { throw new NotImplementedException(); }
+
+        #region IEquatable<AsKVP> Members
+
+        public bool Equals(AsKVP other) { return this.entry.Key.Equals(other.entry.Key) && this.entry.Value.Equals(other.entry.Value); }
+
+        #endregion
+    }
+
+    public class AsKVPList : AResource.DependentList<AsKVP>
+    {
+        Type keyType;
+        Type valueType;
+        public AsKVPList(Type keyType, Type valueType) : base(null) { this.keyType = keyType; this.valueType = valueType; }
+        public override void Add() { this.Add(new AsKVP(new DictionaryEntry((ulong)0, ""))); }
+        protected override AsKVP CreateElement(Stream s) { throw new NotImplementedException(); }
+        protected override void WriteElement(Stream s, AsKVP element) { throw new NotImplementedException(); }
     }
 
     [Editor(typeof(TGIBlockListEditor), typeof(UITypeEditor))]
