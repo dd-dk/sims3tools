@@ -50,6 +50,8 @@ namespace S3PIDemoFE
             this.lbProgress.Text = "";
 
             browserWidget1.Fields = new List<string>(fields.ToArray());
+            browserWidget1.ContextMenuStrip = menuBarWidget1.browserWidgetContextMenuStrip;
+
             List<string> filterFields = new List<string>(fields.ToArray());
             filterFields.Remove("Chunkoffset");
             filterFields.Remove("Filesize");
@@ -170,11 +172,12 @@ namespace S3PIDemoFE
             pnAuto.Controls.Clear();
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_saveAs, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_saveCopyAs, CurrentPackage != null);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_importResources, CurrentPackage != null);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_importPackages, CurrentPackage != null);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importResources, CurrentPackage != null);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importPackages, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_close, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_bookmarkCurrent, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBR, CurrentPackage != null);
+            menuBarWidget1.EnableCMSBW(CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBT_search, CurrentPackage != null);
             resourceDropDownOpening();
         }
@@ -393,10 +396,6 @@ namespace S3PIDemoFE
                     case MenuBarWidget.MB.MBF_saveAs: fileSaveAs(); break;
                     case MenuBarWidget.MB.MBF_saveCopyAs: fileSaveCopyAs(); break;
                     case MenuBarWidget.MB.MBF_close: fileClose(); break;
-                    case MenuBarWidget.MB.MBF_importResources: fileImport(); break;
-                    case MenuBarWidget.MB.MBF_importPackages: fileImportPackages(); break;
-                    case MenuBarWidget.MB.MBF_exportResources: fileExport(); break;
-                    case MenuBarWidget.MB.MBF_exportToPackage: fileExportToPackage(); break;
                     case MenuBarWidget.MB.MBF_setMaxRecent: fileSetMaxRecent(); break;
                     case MenuBarWidget.MB.MBF_bookmarkCurrent: fileBookmarkCurrent(); break;
                     case MenuBarWidget.MB.MBF_setMaxBookmarks: fileSetMaxBookmarks(); break;
@@ -482,241 +481,6 @@ namespace S3PIDemoFE
             Filename = "";
         }
 
-        // For "fileImport()", see Import/Import.cs
-        // For "fileImportPackages()", see Import/Import.cs
-
-        private bool UpdateNameMap(ulong instance, string resourceName, bool create, bool replace)
-        {
-            IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) });
-            if (rie == null && create)
-            {
-                rie = CurrentPackage.AddResource(0x0166038C, 0, 0, null, false);
-                if (rie != null) browserWidget1.Add(rie);
-            }
-            if (rie == null) return false;
-
-            try
-            {
-                IDictionary<ulong, string> nmap = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, false) as IDictionary<ulong, string>;
-                if (nmap == null) return false;
-
-                if (nmap.ContainsKey(instance))
-                {
-                    if (replace) nmap[instance] = resourceName;
-                }
-                else
-                    nmap.Add(instance, resourceName);
-                CurrentPackage.ReplaceResource(rie, (IResource)nmap);
-                IsPackageDirty = true;
-            }
-            catch (Exception ex)
-            {
-                string s = "Resource names cannot be added.  Other than that, you should be fine.  Carry on.";
-                s += String.Format("\n\nError reading _KEY {0:X8}:{1:X8}:{2:X16}", rie.ResourceType, rie.ResourceGroup, rie.Instance);
-                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
-                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
-                CopyableMessageBox.Show(s, "s3pe", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
-                return false;
-            }
-            return true;
-        }
-
-        private IResourceIndexEntry NewResource(uint type, uint group, ulong instance, MemoryStream ms, bool replace, bool compress)
-        {
-            IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType", "ResourceGroup", "Instance" },
-                new TypedValue[] { new TypedValue(type.GetType(), type), new TypedValue(group.GetType(), group), new TypedValue(instance.GetType(), instance), });
-            if (rie != null)
-            {
-                if (!replace) return null;
-                CurrentPackage.DeleteResource(rie);
-            }
-            
-            rie = CurrentPackage.AddResource(type, group, instance, ms, true);
-            if (rie == null) return null;
-
-            rie.Compressed = (ushort)(compress ? 0xffff : 0);
-
-            IsPackageDirty = true;
-
-            return rie;
-        }
-
-        private void fileExport()
-        {
-            if (browserWidget1.SelectedResources.Count > 1) { exportBatch(); return; }
-
-            if (browserWidget1.SelectedResource as AResourceIndexEntry == null) return;
-            TGIN tgin = browserWidget1.SelectedResource as AResourceIndexEntry;
-            tgin.ResName = resourceName;
-
-            exportFileDialog.FileName = tgin;
-            exportFileDialog.InitialDirectory = S3PIDemoFE.Properties.Settings.Default.LastExportPath;
-
-            DialogResult dr = exportFileDialog.ShowDialog();
-            if (dr != DialogResult.OK) return;
-            S3PIDemoFE.Properties.Settings.Default.LastExportPath = Path.GetDirectoryName(exportFileDialog.FileName);
-
-            Application.UseWaitCursor = true;
-            Application.DoEvents();
-            try { exportFile(browserWidget1.SelectedResource, exportFileDialog.FileName); }
-            finally { Application.UseWaitCursor = false; Application.DoEvents(); }
-        }
-
-        private void exportBatch()
-        {
-            exportBatchTarget.SelectedPath = S3PIDemoFE.Properties.Settings.Default.LastExportPath;
-            DialogResult dr = exportBatchTarget.ShowDialog();
-            if (dr != DialogResult.OK) return;
-            S3PIDemoFE.Properties.Settings.Default.LastExportPath = exportBatchTarget.SelectedPath;
-
-            Application.UseWaitCursor = true;
-            Application.DoEvents();
-            bool overwriteAll = false;
-            bool skipAll = false;
-            try
-            {
-                foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources)
-                {
-                    if (rie as AResourceIndexEntry == null) continue;
-                    TGIN tgin = rie as AResourceIndexEntry;
-                    tgin.ResName = browserWidget1.ResourceName(rie);
-                    string file = Path.Combine(exportBatchTarget.SelectedPath, tgin);
-                    if (File.Exists(file))
-                    {
-                        if (skipAll) continue;
-                        if (!overwriteAll)
-                        {
-                            Application.UseWaitCursor = false;
-                            int i = CopyableMessageBox.Show("Overwrite file?\n" + file, myName, CopyableMessageBoxIcon.Question,
-                                new List<string>(new string[] { "&No", "N&o to all", "&Yes", "Y&es to all", "&Abandon", }), 0, 4);
-                            if (i == 0) continue;
-                            if (i == 1) { skipAll = true; continue; }
-                            if (i == 3) overwriteAll = true;
-                            if (i == 4) return;
-                        }
-                        Application.UseWaitCursor = true;
-                    }
-                    exportFile(rie, file);
-                }
-            }
-            finally { Application.UseWaitCursor = false; Application.DoEvents(); }
-        }
-
-        private void exportFile(IResourceIndexEntry rie, string filename)
-        {
-            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, true);//Don't need wrapper
-            Stream s = res.Stream;
-            s.Position = 0;
-            if (s.Length != rie.Memsize) CopyableMessageBox.Show(String.Format("Resource stream has {0} bytes; index entry says {1}.", s.Length, rie.Memsize));
-            BinaryWriter w = new BinaryWriter(new FileStream(filename, FileMode.Create));
-            w.Write((new BinaryReader(s)).ReadBytes((int)s.Length));
-            w.Close();
-        }
-
-        private void fileExportToPackage()
-        {
-            DialogResult dr = exportToPackageDialog.ShowDialog();
-            if (dr != DialogResult.OK) return;
-
-            if (Filename != null && Filename.Length > 0 && Path.GetFullPath(Filename).Equals(Path.GetFullPath(exportToPackageDialog.FileName)))
-            {
-                CopyableMessageBox.Show("Target must not be same as source.", "Export to package", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
-                return;
-            }
-
-            bool isNew = false;
-            IPackage target;
-            if (!File.Exists(exportToPackageDialog.FileName))
-            {
-                try
-                {
-                    target = Package.NewPackage(0);
-                    target.SaveAs(exportToPackageDialog.FileName);
-                    Package.ClosePackage(0, target);
-                    isNew = true;
-                }
-                catch (Exception ex)
-                {
-                    string s = "Export cannot begin.  Could not create target package:\n" + exportToPackageDialog.FileName + "\n";
-                    for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
-                    for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
-                    CopyableMessageBox.Show(s, "Export to package", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
-                    return;
-                }
-            }
-
-            bool replace = false;
-            try
-            {
-                target = Package.OpenPackage(0, exportToPackageDialog.FileName, true);
-
-                if (!isNew)
-                {
-                    int res = CopyableMessageBox.Show(
-                        "Do you want to replace any duplicate resources in the target package discovered during export?",
-                        "Export to package", CopyableMessageBoxIcon.Question, new List<string>(new string[] { "Re&ject", "Re&place", "&Abandon" }), 0, 2);
-                    if (res == 2) return;
-                    replace = res == 0;
-                }
-
-            }
-            catch (Exception ex)
-            {
-                string s = "Export cannot begin.  Could not open target package:\n" + exportToPackageDialog.FileName + "\n";
-                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
-                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
-                CopyableMessageBox.Show(s, "Export to package", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
-                return;
-            }
-
-            try
-            {
-                Application.UseWaitCursor = true;
-                lbProgress.Text = "Exporting to " + Path.GetFileNameWithoutExtension(exportToPackageDialog.FileName) + "...";
-                Application.DoEvents();
-
-
-                progressBar1.Value = 0;
-                progressBar1.Maximum = browserWidget1.SelectedResources.Count;
-                foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources)
-                {
-                    exportResourceToPackage(target, rie, replace);
-                    progressBar1.Value++;
-                    if (progressBar1.Value % 100 == 0)
-                        Application.DoEvents();
-                }
-                progressBar1.Value = 0;
-
-                lbProgress.Text = "Saving...";
-                Application.DoEvents();
-                target.SavePackage();
-                Package.ClosePackage(0, target);
-            }
-            finally { Package.ClosePackage(0, target); lbProgress.Text = ""; Application.UseWaitCursor = false; Application.DoEvents(); }
-        }
-
-        private void exportResourceToPackage(IPackage tgtpkg, IResourceIndexEntry srcrie, bool replace)
-        {
-            IResourceIndexEntry rie = tgtpkg.Find(new string[] { "ResourceType", "ResourceGroup", "Instance" },
-                new TypedValue[] {
-                            new TypedValue(srcrie.ResourceType.GetType(), srcrie.ResourceType),
-                            new TypedValue(srcrie.ResourceGroup.GetType(), srcrie.ResourceGroup),
-                            new TypedValue(srcrie.Instance.GetType(), srcrie.Instance),
-                        });
-            if (rie != null)
-            {
-                if (!replace) return;
-                tgtpkg.DeleteResource(rie);
-            }
-
-            rie = tgtpkg.AddResource(srcrie.ResourceType, srcrie.ResourceGroup, srcrie.Instance, null, true);
-            if (rie == null) return;
-            rie.Compressed = srcrie.Compressed;
-
-            IResource srcres = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, srcrie, true);//Don't need wrapper
-            tgtpkg.ReplaceResource(rie, srcres);
-        }
-
         private void menuBarWidget1_MRUClick(object sender, MenuBarWidget.MRUClickEventArgs filename)
         {
             Filename = filename.filename;
@@ -799,6 +563,10 @@ namespace S3PIDemoFE
                     case MenuBarWidget.MB.MBR_isdeleted: resourceIsDeleted(); break;
                     case MenuBarWidget.MB.MBR_details: resourceDetails(); break;
                     case MenuBarWidget.MB.MBR_replace: resourceReplace(); break;
+                    case MenuBarWidget.MB.MBR_importResources: resourceImport(); break;
+                    case MenuBarWidget.MB.MBR_importPackages: resourceImportPackages(); break;
+                    case MenuBarWidget.MB.MBR_exportResources: resourceExport(); break;
+                    case MenuBarWidget.MB.MBR_exportToPackage: resourceExportToPackage(); break;
                 }
             }
             finally { /*this.Enabled = true;/**/ }
@@ -806,26 +574,40 @@ namespace S3PIDemoFE
 
         private void resourceDropDownOpening()
         {
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_paste, CurrentPackage != null &&
+            bool state;
+            state = CurrentPackage != null &&
                 (
                 Clipboard.ContainsData(myDataFormatSingleFile)
                 || Clipboard.ContainsData(myDataFormatBatch)
                 || Clipboard.ContainsFileDropList()
                 //|| Clipboard.ContainsText()
-                )
-            );
+                );
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_paste, state);
+            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_paste, state);
 
             CheckState res = CompressedCheckState();
             if (res == CheckState.Indeterminate)
+            {
                 menuBarWidget1.Indeterminate(MenuBarWidget.MB.MBR_compressed);
+                menuBarWidget1.Indeterminate(MenuBarWidget.CMS.MBR_compressed);
+            }
             else
+            {
                 menuBarWidget1.Checked(MenuBarWidget.MB.MBR_compressed, res == CheckState.Checked);
+                menuBarWidget1.Checked(MenuBarWidget.CMS.MBR_compressed, res == CheckState.Checked);
+            }
 
             res = IsDeletedCheckState();
             if (res == CheckState.Indeterminate)
+            {
                 menuBarWidget1.Indeterminate(MenuBarWidget.MB.MBR_isdeleted);
+                menuBarWidget1.Indeterminate(MenuBarWidget.CMS.MBR_isdeleted);
+            }
             else
+            {
                 menuBarWidget1.Checked(MenuBarWidget.MB.MBR_isdeleted, res == CheckState.Checked);
+                menuBarWidget1.Checked(MenuBarWidget.CMS.MBR_isdeleted, res == CheckState.Checked);
+            }
         }
         private CheckState CompressedCheckState()
         {
@@ -1023,6 +805,241 @@ namespace S3PIDemoFE
             package.ReplaceResource(browserWidget1.SelectedResource, resource);
             resourceIsDirty = controlPanel1.CommitEnabled = false;
             IsPackageDirty = true;
+        }
+
+        // For "resourceImport()", see Import/Import.cs
+        // For "resourceImportPackages()", see Import/Import.cs
+
+        private bool UpdateNameMap(ulong instance, string resourceName, bool create, bool replace)
+        {
+            IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) });
+            if (rie == null && create)
+            {
+                rie = CurrentPackage.AddResource(0x0166038C, 0, 0, null, false);
+                if (rie != null) browserWidget1.Add(rie);
+            }
+            if (rie == null) return false;
+
+            try
+            {
+                IDictionary<ulong, string> nmap = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, false) as IDictionary<ulong, string>;
+                if (nmap == null) return false;
+
+                if (nmap.ContainsKey(instance))
+                {
+                    if (replace) nmap[instance] = resourceName;
+                }
+                else
+                    nmap.Add(instance, resourceName);
+                CurrentPackage.ReplaceResource(rie, (IResource)nmap);
+                IsPackageDirty = true;
+            }
+            catch (Exception ex)
+            {
+                string s = "Resource names cannot be added.  Other than that, you should be fine.  Carry on.";
+                s += String.Format("\n\nError reading _KEY {0:X8}:{1:X8}:{2:X16}", rie.ResourceType, rie.ResourceGroup, rie.Instance);
+                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
+                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
+                CopyableMessageBox.Show(s, "s3pe", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
+                return false;
+            }
+            return true;
+        }
+
+        private IResourceIndexEntry NewResource(uint type, uint group, ulong instance, MemoryStream ms, bool replace, bool compress)
+        {
+            IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType", "ResourceGroup", "Instance" },
+                new TypedValue[] { new TypedValue(type.GetType(), type), new TypedValue(group.GetType(), group), new TypedValue(instance.GetType(), instance), });
+            if (rie != null)
+            {
+                if (!replace) return null;
+                CurrentPackage.DeleteResource(rie);
+            }
+
+            rie = CurrentPackage.AddResource(type, group, instance, ms, true);
+            if (rie == null) return null;
+
+            rie.Compressed = (ushort)(compress ? 0xffff : 0);
+
+            IsPackageDirty = true;
+
+            return rie;
+        }
+
+        private void resourceExport()
+        {
+            if (browserWidget1.SelectedResources.Count > 1) { exportBatch(); return; }
+
+            if (browserWidget1.SelectedResource as AResourceIndexEntry == null) return;
+            TGIN tgin = browserWidget1.SelectedResource as AResourceIndexEntry;
+            tgin.ResName = resourceName;
+
+            exportFileDialog.FileName = tgin;
+            exportFileDialog.InitialDirectory = S3PIDemoFE.Properties.Settings.Default.LastExportPath;
+
+            DialogResult dr = exportFileDialog.ShowDialog();
+            if (dr != DialogResult.OK) return;
+            S3PIDemoFE.Properties.Settings.Default.LastExportPath = Path.GetDirectoryName(exportFileDialog.FileName);
+
+            Application.UseWaitCursor = true;
+            Application.DoEvents();
+            try { exportFile(browserWidget1.SelectedResource, exportFileDialog.FileName); }
+            finally { Application.UseWaitCursor = false; Application.DoEvents(); }
+        }
+
+        private void exportBatch()
+        {
+            exportBatchTarget.SelectedPath = S3PIDemoFE.Properties.Settings.Default.LastExportPath;
+            DialogResult dr = exportBatchTarget.ShowDialog();
+            if (dr != DialogResult.OK) return;
+            S3PIDemoFE.Properties.Settings.Default.LastExportPath = exportBatchTarget.SelectedPath;
+
+            Application.UseWaitCursor = true;
+            Application.DoEvents();
+            bool overwriteAll = false;
+            bool skipAll = false;
+            try
+            {
+                foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources)
+                {
+                    if (rie as AResourceIndexEntry == null) continue;
+                    TGIN tgin = rie as AResourceIndexEntry;
+                    tgin.ResName = browserWidget1.ResourceName(rie);
+                    string file = Path.Combine(exportBatchTarget.SelectedPath, tgin);
+                    if (File.Exists(file))
+                    {
+                        if (skipAll) continue;
+                        if (!overwriteAll)
+                        {
+                            Application.UseWaitCursor = false;
+                            int i = CopyableMessageBox.Show("Overwrite file?\n" + file, myName, CopyableMessageBoxIcon.Question,
+                                new List<string>(new string[] { "&No", "N&o to all", "&Yes", "Y&es to all", "&Abandon", }), 0, 4);
+                            if (i == 0) continue;
+                            if (i == 1) { skipAll = true; continue; }
+                            if (i == 3) overwriteAll = true;
+                            if (i == 4) return;
+                        }
+                        Application.UseWaitCursor = true;
+                    }
+                    exportFile(rie, file);
+                }
+            }
+            finally { Application.UseWaitCursor = false; Application.DoEvents(); }
+        }
+
+        private void exportFile(IResourceIndexEntry rie, string filename)
+        {
+            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, true);//Don't need wrapper
+            Stream s = res.Stream;
+            s.Position = 0;
+            if (s.Length != rie.Memsize) CopyableMessageBox.Show(String.Format("Resource stream has {0} bytes; index entry says {1}.", s.Length, rie.Memsize));
+            BinaryWriter w = new BinaryWriter(new FileStream(filename, FileMode.Create));
+            w.Write((new BinaryReader(s)).ReadBytes((int)s.Length));
+            w.Close();
+        }
+
+        private void resourceExportToPackage()
+        {
+            DialogResult dr = exportToPackageDialog.ShowDialog();
+            if (dr != DialogResult.OK) return;
+
+            if (Filename != null && Filename.Length > 0 && Path.GetFullPath(Filename).Equals(Path.GetFullPath(exportToPackageDialog.FileName)))
+            {
+                CopyableMessageBox.Show("Target must not be same as source.", "Export to package", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                return;
+            }
+
+            bool isNew = false;
+            IPackage target;
+            if (!File.Exists(exportToPackageDialog.FileName))
+            {
+                try
+                {
+                    target = Package.NewPackage(0);
+                    target.SaveAs(exportToPackageDialog.FileName);
+                    Package.ClosePackage(0, target);
+                    isNew = true;
+                }
+                catch (Exception ex)
+                {
+                    string s = "Export cannot begin.  Could not create target package:\n" + exportToPackageDialog.FileName + "\n";
+                    for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
+                    for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
+                    CopyableMessageBox.Show(s, "Export to package", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                    return;
+                }
+            }
+
+            bool replace = false;
+            try
+            {
+                target = Package.OpenPackage(0, exportToPackageDialog.FileName, true);
+
+                if (!isNew)
+                {
+                    int res = CopyableMessageBox.Show(
+                        "Do you want to replace any duplicate resources in the target package discovered during export?",
+                        "Export to package", CopyableMessageBoxIcon.Question, new List<string>(new string[] { "Re&ject", "Re&place", "&Abandon" }), 0, 2);
+                    if (res == 2) return;
+                    replace = res == 0;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string s = "Export cannot begin.  Could not open target package:\n" + exportToPackageDialog.FileName + "\n";
+                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
+                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
+                CopyableMessageBox.Show(s, "Export to package", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                return;
+            }
+
+            try
+            {
+                Application.UseWaitCursor = true;
+                lbProgress.Text = "Exporting to " + Path.GetFileNameWithoutExtension(exportToPackageDialog.FileName) + "...";
+                Application.DoEvents();
+
+
+                progressBar1.Value = 0;
+                progressBar1.Maximum = browserWidget1.SelectedResources.Count;
+                foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources)
+                {
+                    exportResourceToPackage(target, rie, replace);
+                    progressBar1.Value++;
+                    if (progressBar1.Value % 100 == 0)
+                        Application.DoEvents();
+                }
+                progressBar1.Value = 0;
+
+                lbProgress.Text = "Saving...";
+                Application.DoEvents();
+                target.SavePackage();
+                Package.ClosePackage(0, target);
+            }
+            finally { Package.ClosePackage(0, target); lbProgress.Text = ""; Application.UseWaitCursor = false; Application.DoEvents(); }
+        }
+
+        private void exportResourceToPackage(IPackage tgtpkg, IResourceIndexEntry srcrie, bool replace)
+        {
+            IResourceIndexEntry rie = tgtpkg.Find(new string[] { "ResourceType", "ResourceGroup", "Instance" },
+                new TypedValue[] {
+                            new TypedValue(srcrie.ResourceType.GetType(), srcrie.ResourceType),
+                            new TypedValue(srcrie.ResourceGroup.GetType(), srcrie.ResourceGroup),
+                            new TypedValue(srcrie.Instance.GetType(), srcrie.Instance),
+                        });
+            if (rie != null)
+            {
+                if (!replace) return;
+                tgtpkg.DeleteResource(rie);
+            }
+
+            rie = tgtpkg.AddResource(srcrie.ResourceType, srcrie.ResourceGroup, srcrie.Instance, null, true);
+            if (rie == null) return;
+            rie.Compressed = srcrie.Compressed;
+
+            IResource srcres = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, srcrie, true);//Don't need wrapper
+            tgtpkg.ReplaceResource(rie, srcres);
         }
         #endregion
 
@@ -1332,15 +1349,24 @@ namespace S3PIDemoFE
                     controlPanel1.ViewerEnabled = controlPanel1.EditorEnabled = controlPanel1.HexEditEnabled = false;
             }
 
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_exportResources, resource != null || browserWidget1.SelectedResources.Count > 0);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_exportToPackage, resource != null || browserWidget1.SelectedResources.Count > 0);
+            bool selectedItems = resource != null || browserWidget1.SelectedResources.Count > 0; // one or more
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_exportResources, selectedItems);
+            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_exportResources, selectedItems);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_exportToPackage, selectedItems);
+            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_exportToPackage, selectedItems);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBE_cut, resource != null);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copy, resource != null || browserWidget1.SelectedResources.Count > 0);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copy, selectedItems);
+            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_copy, selectedItems);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_duplicate, resource != null);
+            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_duplicate, resource != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_replace, resource != null);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_compressed, resource != null || browserWidget1.SelectedResources.Count > 0);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_isdeleted, resource != null || browserWidget1.SelectedResources.Count > 0);
+            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_replace, resource != null);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_compressed, selectedItems);
+            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_compressed, selectedItems);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_isdeleted, selectedItems);
+            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_isdeleted, selectedItems);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_details, resource != null);
+            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_details, resource != null);
 
             resourceFilterWidget1.IndexEntry = browserWidget1.SelectedResource;
         }

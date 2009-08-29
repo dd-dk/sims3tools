@@ -28,18 +28,18 @@ namespace S3PIDemoFE
 {
     public partial class MenuBarWidget : UserControl
     {
-        List<ToolStripMenuItem> tsMD, tsMB;
+        List<ToolStripMenuItem> tsMD, tsMB, cmsBW;
 
         public MenuBarWidget()
         {
             InitializeComponent();
-            tsMD = new List<ToolStripMenuItem>(new ToolStripMenuItem[]{
+
+            tsMD = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 fileToolStripMenuItem, editToolStripMenuItem, resourceToolStripMenuItem, helpToolStripMenuItem,
             });
             tsMB = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //File
                 newToolStripMenuItem, openToolStripMenuItem, saveToolStripMenuItem, saveAsToolStripMenuItem, saveCopyAsToolStripMenuItem, closeToolStripMenuItem,
-                importToolStripMenuItem, importPackagesToolStripMenuItem, exportToolStripMenuItem, exportToPackageToolStripMenuItem,
                 setMaxRecentToolStripMenuItem, bookmarkCurrentToolStripMenuItem, setMaxBookmarksToolStripMenuItem,
                 exitToolStripMenuItem,
                 //Edit
@@ -47,6 +47,7 @@ namespace S3PIDemoFE
                 //Resource
                 addToolStripMenuItem, resCopyToolStripMenuItem1, resPasteToolStripMenuItem1, duplicateToolStripMenuItem, replaceToolStripMenuItem,
                 compressedToolStripMenuItem, deletedToolStripMenuItem, detailsToolStripMenuItem,
+                fromFileToolStripMenuItem, fromPackageToolStripMenuItem, toFileToolStripMenuItem, toPackageToolStripMenuItem,
                 //Tools
                 fNVHashToolStripMenuItem, searchToolStripMenuItem,
                 //Settings
@@ -54,6 +55,12 @@ namespace S3PIDemoFE
                 saveSettingsToolStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
+            });
+            cmsBW = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
+                //BrowserWidgetContextMenuStrip
+                bwcmAdd, bwcmCopy, bwcmPaste, bwcmDuplicate, bwcmReplace,
+                bwcmCompressed, bwcmDeleted, bwcmDetails,
+                bwcmFromFile, bwcmFromPackage, bwcmToFile, bwcmToPackage,
             });
             UpdateMRUList();
             UpdateBookmarks();
@@ -66,34 +73,48 @@ namespace S3PIDemoFE
             MBR,
             MBS,
             MBH,
+            CMSBW,
         }
 
         public enum MB
         {
             MBF_new = 0, MBF_open, MBF_save, MBF_saveAs, MBF_saveCopyAs, MBF_close,
-            MBF_importResources, MBF_importPackages, MBF_exportResources, MBF_exportToPackage,
             MBF_setMaxRecent, MBF_bookmarkCurrent, MBF_setMaxBookmarks,
             MBF_exit,
             MBE_cut, MBE_copy, MBE_paste,
             MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_replace,
             MBR_compressed, MBR_isdeleted, MBR_details,
+            MBR_importResources, MBR_importPackages, MBR_exportResources, MBR_exportToPackage,
             MBT_fnvHash, MBT_search,
             MBS_externals, MBS_bookmarks,
             MBS_saveSettings,
             MBH_contents, MBH_about, MBH_warranty, MBH_licence,
         }
 
+        public enum CMS
+        {
+            MBR_add = (int)MB.MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_replace,
+            MBR_compressed, MBR_isdeleted, MBR_details,
+            MBR_importResources, MBR_importPackages, MBR_exportResources, MBR_exportToPackage,
+        }
+
         public void Enable(MD mn, bool state) { tsMD[(int)mn].Enabled = state; }
+        public void EnableCMSBW(bool state) { browserWidgetContextMenuStrip.Enabled = state; }
         public void Enable(MB mn, bool state) { tsMB[(int)mn].Enabled = state; }
+        public void Enable(CMS mn, bool state) { cmsBW[(int)mn - (int)MB.MBR_add].Enabled = state; }
         public void Checked(MB mn, bool state) { tsMB[(int)mn].Checked = state; tsMB[(int)mn].CheckState = state ? CheckState.Checked : CheckState.Unchecked; }
+        public void Checked(CMS mn, bool state) { cmsBW[(int)mn - (int)MB.MBR_add].Checked = state; cmsBW[(int)mn - (int)MB.MBR_add].CheckState = state ? CheckState.Checked : CheckState.Unchecked; }
         public void Indeterminate(MB mn) { tsMB[(int)mn].CheckState = CheckState.Indeterminate; }
+        public void Indeterminate(CMS mn) { cmsBW[(int)mn - (int)MB.MBR_add].CheckState = CheckState.Indeterminate; }
         public bool IsChecked(MB mn) { return tsMB[(int)mn].Checked; }
+        public bool IsChecked(CMS mn) { return cmsBW[(int)mn - (int)MB.MBR_add].Checked; }
 
         public class MBDropDownOpeningEventArgs : EventArgs { public readonly MD mn; public MBDropDownOpeningEventArgs(MD mn) { this.mn = mn; } }
         public delegate void MBDropDownOpeningEventHandler(object sender, MBDropDownOpeningEventArgs mn);
         public event MBDropDownOpeningEventHandler MBDropDownOpening;
         protected void OnMBDropDownOpening(object sender, MD mn) { if (MBDropDownOpening != null) MBDropDownOpening(sender, new MBDropDownOpeningEventArgs(mn)); }
         private void tsMD_DropDownOpening(object sender, EventArgs e) { OnMBDropDownOpening(sender, (MD)tsMD.IndexOf(sender as ToolStripMenuItem)); }
+        private void cmsBW_Opening(object sender, CancelEventArgs e) { OnMBDropDownOpening(sender, MD.MBR); }
 
         public class MBClickEventArgs : EventArgs { public readonly MB mn; public MBClickEventArgs(MB mn) { this.mn = mn; } }
         public delegate void MBClickEventHandler(object sender, MBClickEventArgs mn);
@@ -121,6 +142,8 @@ namespace S3PIDemoFE
         public event MBClickEventHandler MBHelp_Click;
         protected void OnMBHelp_Click(object sender, MB mn) { if (MBHelp_Click != null) MBHelp_Click(sender, new MBClickEventArgs(mn)); }
         private void tsMBH_Click(object sender, EventArgs e) { OnMBHelp_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
+
+        private void tsCMSBW_Click(object sender, EventArgs e) { OnMBResource_Click(sender, (MB)(cmsBW.IndexOf(sender as ToolStripMenuItem)) + (int)MB.MBR_add); }
 
 
 

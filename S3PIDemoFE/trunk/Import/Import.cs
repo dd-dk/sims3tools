@@ -42,7 +42,7 @@ namespace S3PIDemoFE
             public byte[] data;
         }
 
-        private void fileImport()
+        private void resourceImport()
         {
             bool useNames = controlPanel1.UseNames;
             try
@@ -61,7 +61,7 @@ namespace S3PIDemoFE
             finally { controlPanel1.UseNames = useNames; browserWidget1.Visible = true; this.Enabled = true; }
         }
 
-        private void fileImportPackages()
+        private void resourceImportPackages()
         {
             try
             {
