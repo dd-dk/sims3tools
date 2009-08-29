@@ -129,7 +129,7 @@ namespace S3PIDemoFE
 
                 if (pkg != null && displayResourceNames) nameMap_ResourceChanged(null, null);
                 if (listView1.Columns.Count == 0) return;
-                listView1.Columns[0].Width = nameMap != null && displayResourceNames ? listView1.Columns[0].Width == 0 ? (columnWidths.Length > 0 && columnWidths[0] >= 0 ? columnWidths[0] : 80) : listView1.Columns[0].Width : 0;
+                listView1.Columns[0].Width = displayResourceNames ? listView1.Columns[0].Width == 0 ? (columnWidths.Length > 0 && columnWidths[0] >= 0 ? columnWidths[0] : 80) : listView1.Columns[0].Width : 0;
             }
         }
 
@@ -387,7 +387,7 @@ namespace S3PIDemoFE
             {
                 lookup = new Dictionary<IResourceIndexEntry, ListViewItem>();
                 if (resourceList == null) return;
-                listView1.Columns[0].Width = (nameMap == null || !displayResourceNames) ? 0 : (
+                listView1.Columns[0].Width = !displayResourceNames ? 0 : (
                     (listView1.Columns[0].Width != 0) ? listView1.Columns[0].Width : (
                     (columnWidths.Length > 0 && columnWidths[0] >= 0) ? columnWidths[0] : 80
                     ));
@@ -549,7 +549,7 @@ namespace S3PIDemoFE
                     Application.DoEvents();
                 }
             }
-            listView1.Columns[0].Width = hasNames ? listView1.Columns[0].Width == 0 ? 80 : listView1.Columns[0].Width : 0;
+            listView1.Columns[0].Width = displayResourceNames ? listView1.Columns[0].Width == 0 ? 80 : listView1.Columns[0].Width : 0;
             listView1.Enabled = true;
 
             pbLabel.Text = oldLabel;
