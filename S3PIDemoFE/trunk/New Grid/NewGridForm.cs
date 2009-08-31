@@ -122,5 +122,18 @@ namespace S3PIDemoFE
             listBox1.SelectedIndex = -1;
             fillListBox(selectedIndex);
         }
+
+        // added for http://www.simlogical.com/S3PIdevelforum/index.php?topic=685.0
+        bool OKtoClose = false;
+        private void btnClose_Click(object sender, EventArgs e)
+        {
+            OKtoClose = true;
+            this.Close();
+        }
+
+        private void NewGridForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing && !OKtoClose) e.Cancel = true;
+        }
     }
 }

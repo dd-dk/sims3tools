@@ -55,8 +55,9 @@
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(75, 23);
             this.btnClose.TabIndex = 1;
-            this.btnClose.Text = "Close";
+            this.btnClose.Text = "OK";
             this.btnClose.UseVisualStyleBackColor = true;
+            this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
             // splitContainer1
             // 
@@ -94,7 +95,7 @@
             this.s3PIPropertyGrid1.HelpVisible = false;
             this.s3PIPropertyGrid1.Location = new System.Drawing.Point(0, 0);
             this.s3PIPropertyGrid1.Name = "s3PIPropertyGrid1";
-            this.s3PIPropertyGrid1.PropertySort = System.Windows.Forms.PropertySort.Alphabetical;
+            this.s3PIPropertyGrid1.PropertySort = System.Windows.Forms.PropertySort.NoSort;
             this.s3PIPropertyGrid1.Size = new System.Drawing.Size(360, 277);
             this.s3PIPropertyGrid1.TabIndex = 2;
             this.s3PIPropertyGrid1.ToolbarVisible = false;
@@ -139,6 +140,7 @@
             this.btnCancel.TabIndex = 1;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnClose_Click);
             // 
             // btnOK
             // 
@@ -151,6 +153,7 @@
             this.btnOK.TabIndex = 2;
             this.btnOK.Text = "Commit";
             this.btnOK.UseVisualStyleBackColor = true;
+            this.btnOK.Click += new System.EventHandler(this.btnClose_Click);
             // 
             // tlpAddDelete
             // 
@@ -204,6 +207,7 @@
             this.Name = "NewGridForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Data Grid";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NewGridForm_FormClosing);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             this.splitContainer1.ResumeLayout(false);
