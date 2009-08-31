@@ -33,7 +33,7 @@ namespace S3PIDemoFE
     public class S3PIPropertyGrid : PropertyGrid
     {
         AApiVersionedFieldsCTD target;
-        public S3PIPropertyGrid() : base() { PropertySort = PropertySort.Alphabetical; HelpVisible = false; ToolbarVisible = false; }
+        public S3PIPropertyGrid() : base() { HelpVisible = false; ToolbarVisible = false; }
 
         public AApiVersionedFields s3piObject
         {
@@ -86,16 +86,19 @@ namespace S3PIDemoFE
 
             List<string> filter = new List<string>(new string[] { "Stream", /*"AsBytes",/**/ "Value", });
             List<string> contentFields = value.ContentFields;
-            PropertyDescriptorCollection pdc = new PropertyDescriptorCollection(null);
-            if (typeof(IDictionary).IsAssignableFrom(value.GetType())) { pdc.Add(new IDictionaryPropertyDescriptor((IDictionary)value, "(this)", new Attribute[] { new CategoryAttribute("Lists") })); }
+            List<TypedValuePropertyDescriptor> ltpdc = new List<TypedValuePropertyDescriptor>();
             foreach (string f in contentFields)
             {
                 if (filter.Contains(f)) continue;
                 if (!canWrite(value, f)) continue;
                 TypedValuePropertyDescriptor tvpd = new TypedValuePropertyDescriptor(value, f, null);
-                pdc.Add(new TypedValuePropertyDescriptor(value, f, new Attribute[] { new CategoryAttribute(tvpdToCategory(tvpd.PropertyType)) }));
+                ltpdc.Add(new TypedValuePropertyDescriptor(value, f, new Attribute[] { new CategoryAttribute(tvpdToCategory(tvpd.PropertyType)) }));
             }
-            return pdc;
+            ltpdc.Sort(CompareByPriority);
+            List<PropertyDescriptor> lpdc = new List<PropertyDescriptor>(ltpdc.ToArray());
+            int i = 0; while (i < ltpdc.Count && ltpdc[i].Priority < int.MaxValue) i++;
+            if (typeof(IDictionary).IsAssignableFrom(value.GetType())) { lpdc.Insert(i, new IDictionaryPropertyDescriptor((IDictionary)value, "(this)", new Attribute[] { new CategoryAttribute("Lists") })); }
+            return new PropertyDescriptorCollection(lpdc.ToArray());
         }
         string tvpdToCategory(Type t)
         {
@@ -114,6 +117,12 @@ namespace S3PIDemoFE
             if (owner.GetType().Equals(typeof(AsKVP))) return true;
             if (owner.GetType().Equals(typeof(AsHex))) return true;
             return owner.GetType().GetProperty(field).CanWrite;
+        }
+        public int CompareByPriority(TypedValuePropertyDescriptor x, TypedValuePropertyDescriptor y)
+        {
+            int res = x.Priority.CompareTo(y.Priority);
+            if (res != 0) return res;
+            return x.Name.CompareTo(y.Name);
         }
 
         public PropertyDescriptorCollection GetProperties() { return GetProperties(new Attribute[] { }); }
@@ -150,15 +159,26 @@ namespace S3PIDemoFE
         public class TypedValuePropertyDescriptor : PropertyDescriptor
         {
             AApiVersionedFields owner;
+            int priority;
             Type fieldType;
             public TypedValuePropertyDescriptor(AApiVersionedFields owner, string field, Attribute[] attrs)
                 : base(field, attrs)
             {
                 this.owner = owner;
+                this.priority = int.MaxValue;
                 if (typeof(AsHex).Equals(owner.GetType())) fieldType = ((AsHex)owner).ElementType;
-                else if (typeof(AsKVP).Equals(owner.GetType())) fieldType = ((AsKVP)owner).GetType(field);
-                else fieldType = AApiVersionedFields.GetContentFieldTypes(0, owner.GetType())[Name];
+                else if (typeof(AsKVP).Equals(owner.GetType())) fieldType = ((AsKVP)owner).GetType(Name);
+                else
+                {
+                    fieldType = AApiVersionedFields.GetContentFieldTypes(0, owner.GetType())[Name];
+                    PropertyInfo pi = owner.GetType().GetProperty(Name);
+                    foreach (Attribute attr in pi.GetCustomAttributes(typeof(ElementPriorityAttribute), true))
+                        priority = (attr as ElementPriorityAttribute).Priority;
+                }
             }
+
+            public int Priority { get { return priority; } }
+
 
             public override bool CanResetValue(object component) { return false; }
 
@@ -795,7 +815,7 @@ namespace S3PIDemoFE
                 NewGridForm ui = new NewGridForm((IGenericAdd)field.owner[field.field].Value);
                 edSvc.ShowDialog(ui);
 
-                return value;
+                return field.owner[field.field].Value;
             }
         }
 
@@ -817,7 +837,8 @@ namespace S3PIDemoFE
         }
     }
 
-    [Editor(typeof(ArrayAsHexEditor), typeof(UITypeEditor))]
+    //[Editor(typeof(ArrayAsHexEditor), typeof(UITypeEditor))]
+    //above removed for http://www.simlogical.com/S3PIdevelforum/index.php?topic=684.0
     [TypeConverter(typeof(ArrayAsHexConverter))]
     public class ArrayAsHexCTD : ICustomTypeDescriptor
     {
@@ -895,7 +916,7 @@ namespace S3PIDemoFE
                 NewGridForm ui = new NewGridForm(new AsHex(field.owner, field.field));
                 edSvc.ShowDialog(ui);
 
-                return value;
+                return field.owner[field.field].Value;
             }
         }
 
@@ -1380,7 +1401,7 @@ namespace S3PIDemoFE
                 edSvc.DropDownControl(ui);
                 // the ui (a) updates the value and (b) closes the dropdown
 
-                return value;
+                return o.owner[o.field].Value;
             }
         }
 
