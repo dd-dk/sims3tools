@@ -777,9 +777,12 @@ namespace S3PIDemoFE
             replaceResourceDialog.Filter = ext[0] + " by type|S3_" + tgin.ResType.ToString("X8") + "*.*" +
                 "|" + ext[0] + " by ext|*" + ext[ext.Count - 1] +
                 "|All files|*.*";
-            replaceResourceDialog.FileName = "S3_" + tgin.ResType.ToString("X8") + "*.*";
+            int i = S3PIDemoFE.Properties.Settings.Default.ResourceReplaceFilterIndex;
+            replaceResourceDialog.FilterIndex = (i >= 0 && i < 3) ? S3PIDemoFE.Properties.Settings.Default.ResourceReplaceFilterIndex + 1 : 1;
+            replaceResourceDialog.FileName = replaceResourceDialog.Filter.Split('|')[i * 2 + 1];
             DialogResult dr = replaceResourceDialog.ShowDialog();
             if (dr != DialogResult.OK) return;
+            S3PIDemoFE.Properties.Settings.Default.ResourceReplaceFilterIndex = replaceResourceDialog.FilterIndex - 1;
 
             BinaryReader br;
             try
