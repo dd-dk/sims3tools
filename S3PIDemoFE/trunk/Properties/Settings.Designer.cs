@@ -320,5 +320,17 @@ namespace S3PIDemoFE.Properties {
                 this["LastExportPath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int ResourceReplaceFilterIndex {
+            get {
+                return ((int)(this["ResourceReplaceFilterIndex"]));
+            }
+            set {
+                this["ResourceReplaceFilterIndex"] = value;
+            }
+        }
     }
 }
