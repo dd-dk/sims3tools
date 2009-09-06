@@ -59,8 +59,22 @@ namespace S3PIDemoFE
             DialogResult dr = openFileDialog1.ShowDialog();
             if (dr != DialogResult.OK) return;
 
+            TextReader sr = owner[field].Value as TextReader;
+            string oldval = sr.ReadToEnd();
+
             FileStream fs = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read);
-            owner[field] = new TypedValue(type, new StreamReader(fs));
+            try
+            {
+                owner[field] = new TypedValue(type, new StreamReader(fs));
+            }
+            catch (Exception ex)
+            {
+                owner[field] = new TypedValue(type, new StringReader(oldval));
+                string s = "Import failed.  Recovery attempted but resource may be corrupt.\n\n";
+                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
+                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
+                CopyableMessageBox.Show(ParentForm, s, "Import", CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK", }), 0, 0);
+            }
             fs.Close();
         }
         private void Import_BinaryReader()
@@ -69,8 +83,24 @@ namespace S3PIDemoFE
             DialogResult dr = openFileDialog1.ShowDialog();
             if (dr != DialogResult.OK) return;
 
+            BinaryReader br = owner[field].Value as BinaryReader;
+            byte[] oldval = new byte[br.BaseStream.Length];
+            br.BaseStream.Seek(0, SeekOrigin.Begin);
+            br.Read(oldval, 0, oldval.Length);
+
             FileStream fs = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read);
-            owner[field] = new TypedValue(type, new BinaryReader(fs));
+            try
+            {
+                owner[field] = new TypedValue(type, new BinaryReader(fs));
+            }
+            catch (Exception ex)
+            {
+                owner[field] = new TypedValue(type, new BinaryReader(new MemoryStream(oldval)));
+                string s = "Import failed.  Recovery attempted but resource may be corrupt.\n\n";
+                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
+                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
+                CopyableMessageBox.Show(ParentForm, s, "Import", CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK", }), 0, 0);
+            }
             fs.Close();
         }
         private void btnImport_Click(object sender, EventArgs e)
