@@ -2887,6 +2887,7 @@ namespace ObjectCloner
             vpxyItems = new List<Item>();
             foreach (TGI tgi in (IList<AResource.TGIBlock>)objkItem.Resource["TGIBlocks"].Value)
             {
+                if (tgi.t != 0x736884F1) continue;
                 Item vpxy = new Item(new RIE(objPkgs, tgi));
                 if (vpxy.ResourceIndexEntry != null && vpxy.Resource != null)
                     vpxyItems.Add(vpxy);
