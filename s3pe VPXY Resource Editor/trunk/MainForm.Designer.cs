@@ -34,17 +34,17 @@
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.btnMoveDown = new System.Windows.Forms.Button();
             this.btnMoveUp = new System.Windows.Forms.Button();
-            this.llAddPart = new System.Windows.Forms.LinkLabel();
-            this.llAddLinked = new System.Windows.Forms.LinkLabel();
-            this.llDel = new System.Windows.Forms.LinkLabel();
+            this.btnAddPart = new System.Windows.Forms.Button();
+            this.btnAddLinked = new System.Windows.Forms.Button();
+            this.btnDel = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.tlpParts = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
             this.tlpLPControls = new System.Windows.Forms.TableLayoutPanel();
             this.btnLPDown = new System.Windows.Forms.Button();
             this.btnLPUp = new System.Windows.Forms.Button();
-            this.llLPAdd = new System.Windows.Forms.LinkLabel();
-            this.llLPDel = new System.Windows.Forms.LinkLabel();
+            this.btnLPAdd = new System.Windows.Forms.Button();
+            this.btnLPDel = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
             this.tlpLinkedParts = new System.Windows.Forms.TableLayoutPanel();
             this.lbLPTitle = new System.Windows.Forms.Label();
@@ -66,6 +66,7 @@
             this.tbcFTPT = new System.Windows.Forms.TGIBlockCombo();
             this.lbCurrentPart = new System.Windows.Forms.Label();
             this.lbLPCurrent = new System.Windows.Forms.Label();
+            this.btnEditTGIs = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -90,7 +91,7 @@
             this.btnCancel.Location = new System.Drawing.Point(661, 346);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
-            this.btnCancel.TabIndex = 2;
+            this.btnCancel.TabIndex = 3;
             this.btnCancel.Text = "A&bandon";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
@@ -101,7 +102,7 @@
             this.btnOK.Location = new System.Drawing.Point(742, 346);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
-            this.btnOK.TabIndex = 3;
+            this.btnOK.TabIndex = 4;
             this.btnOK.Text = "&Save";
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
@@ -132,21 +133,20 @@
             // 
             // tableLayoutPanel2
             // 
-            this.tableLayoutPanel2.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.tableLayoutPanel2.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.tableLayoutPanel2.AutoSize = true;
             this.tableLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tableLayoutPanel2.ColumnCount = 1;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.Controls.Add(this.btnMoveDown, 0, 2);
-            this.tableLayoutPanel2.Controls.Add(this.btnMoveUp, 0, 1);
-            this.tableLayoutPanel2.Controls.Add(this.llAddPart, 0, 5);
-            this.tableLayoutPanel2.Controls.Add(this.llAddLinked, 0, 6);
-            this.tableLayoutPanel2.Controls.Add(this.llDel, 0, 7);
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(419, 25);
+            this.tableLayoutPanel2.Controls.Add(this.btnMoveDown, 0, 1);
+            this.tableLayoutPanel2.Controls.Add(this.btnMoveUp, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.btnAddPart, 0, 4);
+            this.tableLayoutPanel2.Controls.Add(this.btnAddLinked, 0, 5);
+            this.tableLayoutPanel2.Controls.Add(this.btnDel, 0, 6);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(391, 10);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 9;
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.RowCount = 7;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
@@ -154,8 +154,9 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(42, 103);
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(93, 133);
             this.tableLayoutPanel2.TabIndex = 3;
             // 
             // btnMoveDown
@@ -188,44 +189,45 @@
             this.btnMoveUp.UseVisualStyleBackColor = true;
             this.btnMoveUp.Click += new System.EventHandler(this.btnMoveUp_Click);
             // 
-            // llAddPart
+            // btnAddPart
             // 
-            this.llAddPart.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.llAddPart.AutoSize = true;
-            this.llAddPart.Location = new System.Drawing.Point(0, 64);
-            this.llAddPart.Margin = new System.Windows.Forms.Padding(0);
-            this.llAddPart.Name = "llAddPart";
-            this.llAddPart.Size = new System.Drawing.Size(36, 13);
-            this.llAddPart.TabIndex = 2;
-            this.llAddPart.TabStop = true;
-            this.llAddPart.Text = "Add P";
-            this.llAddPart.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llAddPart_LinkClicked);
+            this.btnAddPart.AutoSize = true;
+            this.btnAddPart.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnAddPart.Location = new System.Drawing.Point(0, 64);
+            this.btnAddPart.Margin = new System.Windows.Forms.Padding(0);
+            this.btnAddPart.Name = "btnAddPart";
+            this.btnAddPart.Size = new System.Drawing.Size(58, 23);
+            this.btnAddPart.TabIndex = 2;
+            this.btnAddPart.Text = "Add Part";
+            this.btnAddPart.UseVisualStyleBackColor = true;
+            this.btnAddPart.Click += new System.EventHandler(this.btnAddPart_Click);
             // 
-            // llAddLinked
+            // btnAddLinked
             // 
-            this.llAddLinked.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.llAddLinked.AutoSize = true;
-            this.llAddLinked.Location = new System.Drawing.Point(0, 77);
-            this.llAddLinked.Margin = new System.Windows.Forms.Padding(0);
-            this.llAddLinked.Name = "llAddLinked";
-            this.llAddLinked.Size = new System.Drawing.Size(42, 13);
-            this.llAddLinked.TabIndex = 2;
-            this.llAddLinked.TabStop = true;
-            this.llAddLinked.Text = "Add LP";
-            this.llAddLinked.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llAddLinked_LinkClicked);
+            this.btnAddLinked.AutoSize = true;
+            this.btnAddLinked.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnAddLinked.Enabled = false;
+            this.btnAddLinked.Location = new System.Drawing.Point(0, 87);
+            this.btnAddLinked.Margin = new System.Windows.Forms.Padding(0);
+            this.btnAddLinked.Name = "btnAddLinked";
+            this.btnAddLinked.Size = new System.Drawing.Size(93, 23);
+            this.btnAddLinked.TabIndex = 3;
+            this.btnAddLinked.Text = "Add Linked Part";
+            this.btnAddLinked.UseVisualStyleBackColor = true;
+            this.btnAddLinked.Click += new System.EventHandler(this.btnAddLinked_Click);
             // 
-            // llDel
+            // btnDel
             // 
-            this.llDel.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.llDel.AutoSize = true;
-            this.llDel.Location = new System.Drawing.Point(0, 90);
-            this.llDel.Margin = new System.Windows.Forms.Padding(0);
-            this.llDel.Name = "llDel";
-            this.llDel.Size = new System.Drawing.Size(23, 13);
-            this.llDel.TabIndex = 2;
-            this.llDel.TabStop = true;
-            this.llDel.Text = "Del";
-            this.llDel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llDel_LinkClicked);
+            this.btnDel.AutoSize = true;
+            this.btnDel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnDel.Location = new System.Drawing.Point(0, 110);
+            this.btnDel.Margin = new System.Windows.Forms.Padding(0);
+            this.btnDel.Name = "btnDel";
+            this.btnDel.Size = new System.Drawing.Size(70, 23);
+            this.btnDel.TabIndex = 4;
+            this.btnDel.Text = "Delete Part";
+            this.btnDel.UseVisualStyleBackColor = true;
+            this.btnDel.Click += new System.EventHandler(this.btnDel_Click);
             // 
             // panel1
             // 
@@ -238,7 +240,7 @@
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Margin = new System.Windows.Forms.Padding(0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(419, 154);
+            this.panel1.Size = new System.Drawing.Size(391, 154);
             this.panel1.TabIndex = 1;
             // 
             // tlpParts
@@ -247,17 +249,18 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.tlpParts.AutoSize = true;
             this.tlpParts.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tlpParts.ColumnCount = 2;
+            this.tlpParts.ColumnCount = 3;
+            this.tlpParts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlpParts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlpParts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpParts.Controls.Add(this.label1, 0, 0);
+            this.tlpParts.Controls.Add(this.label1, 1, 0);
             this.tlpParts.Location = new System.Drawing.Point(0, 0);
             this.tlpParts.Margin = new System.Windows.Forms.Padding(0);
             this.tlpParts.Name = "tlpParts";
             this.tlpParts.RowCount = 2;
             this.tlpParts.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpParts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpParts.Size = new System.Drawing.Size(418, 13);
+            this.tlpParts.Size = new System.Drawing.Size(390, 13);
             this.tlpParts.TabIndex = 1;
             // 
             // label1
@@ -266,7 +269,7 @@
             this.label1.AutoSize = true;
             this.tlpParts.SetColumnSpan(this.label1, 2);
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(163, 0);
+            this.label1.Location = new System.Drawing.Point(159, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(91, 13);
             this.label1.TabIndex = 0;
@@ -281,10 +284,10 @@
             this.tlpLPControls.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tlpLPControls.Controls.Add(this.btnLPDown, 0, 1);
             this.tlpLPControls.Controls.Add(this.btnLPUp, 0, 0);
-            this.tlpLPControls.Controls.Add(this.llLPAdd, 0, 3);
-            this.tlpLPControls.Controls.Add(this.llLPDel, 0, 4);
+            this.tlpLPControls.Controls.Add(this.btnLPAdd, 0, 3);
+            this.tlpLPControls.Controls.Add(this.btnLPDel, 0, 4);
             this.tlpLPControls.Enabled = false;
-            this.tlpLPControls.Location = new System.Drawing.Point(419, 206);
+            this.tlpLPControls.Location = new System.Drawing.Point(391, 196);
             this.tlpLPControls.Margin = new System.Windows.Forms.Padding(0);
             this.tlpLPControls.Name = "tlpLPControls";
             this.tlpLPControls.RowCount = 5;
@@ -293,12 +296,12 @@
             this.tlpLPControls.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlpLPControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpLPControls.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpLPControls.Size = new System.Drawing.Size(26, 90);
-            this.tlpLPControls.TabIndex = 4;
+            this.tlpLPControls.Size = new System.Drawing.Size(48, 110);
+            this.tlpLPControls.TabIndex = 5;
             // 
             // btnLPDown
             // 
-            this.btnLPDown.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnLPDown.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnLPDown.AutoSize = true;
             this.btnLPDown.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnLPDown.Font = new System.Drawing.Font("Wingdings", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(2)));
@@ -313,7 +316,7 @@
             // 
             // btnLPUp
             // 
-            this.btnLPUp.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnLPUp.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnLPUp.AutoSize = true;
             this.btnLPUp.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnLPUp.Font = new System.Drawing.Font("Wingdings", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(2)));
@@ -326,31 +329,31 @@
             this.btnLPUp.UseVisualStyleBackColor = true;
             this.btnLPUp.Click += new System.EventHandler(this.btnLPUp_Click);
             // 
-            // llLPAdd
+            // btnLPAdd
             // 
-            this.llLPAdd.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.llLPAdd.AutoSize = true;
-            this.llLPAdd.Location = new System.Drawing.Point(0, 64);
-            this.llLPAdd.Margin = new System.Windows.Forms.Padding(0);
-            this.llLPAdd.Name = "llLPAdd";
-            this.llLPAdd.Size = new System.Drawing.Size(26, 13);
-            this.llLPAdd.TabIndex = 2;
-            this.llLPAdd.TabStop = true;
-            this.llLPAdd.Text = "Add";
-            this.llLPAdd.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llLPAdd_LinkClicked);
+            this.btnLPAdd.AutoSize = true;
+            this.btnLPAdd.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnLPAdd.Location = new System.Drawing.Point(0, 64);
+            this.btnLPAdd.Margin = new System.Windows.Forms.Padding(0);
+            this.btnLPAdd.Name = "btnLPAdd";
+            this.btnLPAdd.Size = new System.Drawing.Size(36, 23);
+            this.btnLPAdd.TabIndex = 4;
+            this.btnLPAdd.Text = "Add";
+            this.btnLPAdd.UseVisualStyleBackColor = true;
+            this.btnLPAdd.Click += new System.EventHandler(this.btnLPAdd_Click);
             // 
-            // llLPDel
+            // btnLPDel
             // 
-            this.llLPDel.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.llLPDel.AutoSize = true;
-            this.llLPDel.Location = new System.Drawing.Point(0, 77);
-            this.llLPDel.Margin = new System.Windows.Forms.Padding(0);
-            this.llLPDel.Name = "llLPDel";
-            this.llLPDel.Size = new System.Drawing.Size(23, 13);
-            this.llLPDel.TabIndex = 2;
-            this.llLPDel.TabStop = true;
-            this.llLPDel.Text = "Del";
-            this.llLPDel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llLPDel_LinkClicked);
+            this.btnLPDel.AutoSize = true;
+            this.btnLPDel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnLPDel.Location = new System.Drawing.Point(0, 87);
+            this.btnLPDel.Margin = new System.Windows.Forms.Padding(0);
+            this.btnLPDel.Name = "btnLPDel";
+            this.btnLPDel.Size = new System.Drawing.Size(48, 23);
+            this.btnLPDel.TabIndex = 4;
+            this.btnLPDel.Text = "Delete";
+            this.btnLPDel.UseVisualStyleBackColor = true;
+            this.btnLPDel.Click += new System.EventHandler(this.btnLPDel_Click);
             // 
             // panel2
             // 
@@ -363,7 +366,7 @@
             this.panel2.Location = new System.Drawing.Point(0, 174);
             this.panel2.Margin = new System.Windows.Forms.Padding(0);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(419, 154);
+            this.panel2.Size = new System.Drawing.Size(391, 154);
             this.panel2.TabIndex = 3;
             // 
             // tlpLinkedParts
@@ -372,10 +375,11 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.tlpLinkedParts.AutoSize = true;
             this.tlpLinkedParts.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tlpLinkedParts.ColumnCount = 2;
+            this.tlpLinkedParts.ColumnCount = 3;
+            this.tlpLinkedParts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlpLinkedParts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlpLinkedParts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpLinkedParts.Controls.Add(this.lbLPTitle, 0, 0);
+            this.tlpLinkedParts.Controls.Add(this.lbLPTitle, 1, 0);
             this.tlpLinkedParts.Enabled = false;
             this.tlpLinkedParts.Location = new System.Drawing.Point(0, 0);
             this.tlpLinkedParts.Margin = new System.Windows.Forms.Padding(0);
@@ -383,7 +387,7 @@
             this.tlpLinkedParts.RowCount = 2;
             this.tlpLinkedParts.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpLinkedParts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpLinkedParts.Size = new System.Drawing.Size(418, 13);
+            this.tlpLinkedParts.Size = new System.Drawing.Size(390, 13);
             this.tlpLinkedParts.TabIndex = 1;
             // 
             // lbLPTitle
@@ -392,7 +396,7 @@
             this.lbLPTitle.AutoSize = true;
             this.tlpLinkedParts.SetColumnSpan(this.lbLPTitle, 2);
             this.lbLPTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbLPTitle.Location = new System.Drawing.Point(142, 0);
+            this.lbLPTitle.Location = new System.Drawing.Point(138, 0);
             this.lbLPTitle.Name = "lbLPTitle";
             this.lbLPTitle.Size = new System.Drawing.Size(133, 13);
             this.lbLPTitle.TabIndex = 0;
@@ -419,7 +423,7 @@
             this.tableLayoutPanel5.Controls.Add(this.nudUpperY, 2, 3);
             this.tableLayoutPanel5.Controls.Add(this.nudUpperZ, 3, 3);
             this.tableLayoutPanel5.Controls.Add(this.nudLowerZ, 3, 2);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(461, 0);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(484, 0);
             this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 5;
@@ -428,8 +432,8 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(344, 110);
-            this.tableLayoutPanel5.TabIndex = 5;
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(321, 110);
+            this.tableLayoutPanel5.TabIndex = 6;
             // 
             // label3
             // 
@@ -437,7 +441,7 @@
             this.label3.AutoSize = true;
             this.tableLayoutPanel5.SetColumnSpan(this.label3, 4);
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(130, 0);
+            this.label3.Location = new System.Drawing.Point(118, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(84, 13);
             this.label3.TabIndex = 0;
@@ -447,7 +451,7 @@
             // 
             this.label4.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(85, 13);
+            this.label4.Location = new System.Drawing.Point(81, 13);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(14, 13);
             this.label4.TabIndex = 1;
@@ -457,7 +461,7 @@
             // 
             this.label5.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(185, 13);
+            this.label5.Location = new System.Drawing.Point(174, 13);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(14, 13);
             this.label5.TabIndex = 1;
@@ -467,7 +471,7 @@
             // 
             this.label6.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(286, 13);
+            this.label6.Location = new System.Drawing.Point(267, 13);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(14, 13);
             this.label6.TabIndex = 1;
@@ -509,7 +513,7 @@
             0,
             -2147483648});
             this.nudLowerX.Name = "nudLowerX";
-            this.nudLowerX.Size = new System.Drawing.Size(94, 20);
+            this.nudLowerX.Size = new System.Drawing.Size(87, 20);
             this.nudLowerX.TabIndex = 2;
             this.nudLowerX.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.nudLowerX.ValueChanged += new System.EventHandler(this.nud_ValueChanged);
@@ -518,7 +522,7 @@
             // 
             this.nudLowerY.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.nudLowerY.DecimalPlaces = 8;
-            this.nudLowerY.Location = new System.Drawing.Point(145, 29);
+            this.nudLowerY.Location = new System.Drawing.Point(138, 29);
             this.nudLowerY.Maximum = new decimal(new int[] {
             0,
             -2147483648,
@@ -530,7 +534,7 @@
             0,
             -2147483648});
             this.nudLowerY.Name = "nudLowerY";
-            this.nudLowerY.Size = new System.Drawing.Size(94, 20);
+            this.nudLowerY.Size = new System.Drawing.Size(87, 20);
             this.nudLowerY.TabIndex = 3;
             this.nudLowerY.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
@@ -550,7 +554,7 @@
             0,
             -2147483648});
             this.nudUpperX.Name = "nudUpperX";
-            this.nudUpperX.Size = new System.Drawing.Size(94, 20);
+            this.nudUpperX.Size = new System.Drawing.Size(87, 20);
             this.nudUpperX.TabIndex = 5;
             this.nudUpperX.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
@@ -558,7 +562,7 @@
             // 
             this.nudUpperY.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.nudUpperY.DecimalPlaces = 8;
-            this.nudUpperY.Location = new System.Drawing.Point(145, 55);
+            this.nudUpperY.Location = new System.Drawing.Point(138, 55);
             this.nudUpperY.Maximum = new decimal(new int[] {
             0,
             -2147483648,
@@ -570,7 +574,7 @@
             0,
             -2147483648});
             this.nudUpperY.Name = "nudUpperY";
-            this.nudUpperY.Size = new System.Drawing.Size(94, 20);
+            this.nudUpperY.Size = new System.Drawing.Size(87, 20);
             this.nudUpperY.TabIndex = 6;
             this.nudUpperY.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
@@ -578,7 +582,7 @@
             // 
             this.nudUpperZ.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.nudUpperZ.DecimalPlaces = 8;
-            this.nudUpperZ.Location = new System.Drawing.Point(245, 55);
+            this.nudUpperZ.Location = new System.Drawing.Point(231, 55);
             this.nudUpperZ.Maximum = new decimal(new int[] {
             0,
             -2147483648,
@@ -590,7 +594,7 @@
             0,
             -2147483648});
             this.nudUpperZ.Name = "nudUpperZ";
-            this.nudUpperZ.Size = new System.Drawing.Size(96, 20);
+            this.nudUpperZ.Size = new System.Drawing.Size(87, 20);
             this.nudUpperZ.TabIndex = 7;
             this.nudUpperZ.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
@@ -598,7 +602,7 @@
             // 
             this.nudLowerZ.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.nudLowerZ.DecimalPlaces = 8;
-            this.nudLowerZ.Location = new System.Drawing.Point(245, 29);
+            this.nudLowerZ.Location = new System.Drawing.Point(231, 29);
             this.nudLowerZ.Maximum = new decimal(new int[] {
             0,
             -2147483648,
@@ -610,7 +614,7 @@
             0,
             -2147483648});
             this.nudLowerZ.Name = "nudLowerZ";
-            this.nudLowerZ.Size = new System.Drawing.Size(96, 20);
+            this.nudLowerZ.Size = new System.Drawing.Size(87, 20);
             this.nudLowerZ.TabIndex = 4;
             this.nudLowerZ.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
@@ -625,15 +629,15 @@
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel6.Controls.Add(this.ckbModular, 0, 0);
             this.tableLayoutPanel6.Controls.Add(this.tbcFTPT, 0, 1);
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(461, 174);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(484, 174);
             this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 3;
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(344, 154);
-            this.tableLayoutPanel6.TabIndex = 6;
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(321, 154);
+            this.tableLayoutPanel6.TabIndex = 7;
             // 
             // ckbModular
             // 
@@ -654,7 +658,7 @@
             this.tbcFTPT.Location = new System.Drawing.Point(0, 23);
             this.tbcFTPT.Margin = new System.Windows.Forms.Padding(0);
             this.tbcFTPT.Name = "tbcFTPT";
-            this.tbcFTPT.Size = new System.Drawing.Size(344, 21);
+            this.tbcFTPT.Size = new System.Drawing.Size(321, 21);
             this.tbcFTPT.TabIndex = 2;
             this.tbcFTPT.TGIBlocks = null;
             this.tbcFTPT.TGIBlockListChanged += new System.EventHandler(this.tbg_TGIBlockListChanged);
@@ -665,7 +669,7 @@
             this.lbCurrentPart.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.lbCurrentPart.AutoSize = true;
             this.lbCurrentPart.Font = new System.Drawing.Font("Wingdings", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(2)));
-            this.lbCurrentPart.Location = new System.Drawing.Point(12, 352);
+            this.lbCurrentPart.Location = new System.Drawing.Point(91, 352);
             this.lbCurrentPart.Name = "lbCurrentPart";
             this.lbCurrentPart.Size = new System.Drawing.Size(17, 12);
             this.lbCurrentPart.TabIndex = 0;
@@ -676,11 +680,25 @@
             this.lbLPCurrent.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.lbLPCurrent.AutoSize = true;
             this.lbLPCurrent.Font = new System.Drawing.Font("Wingdings", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(2)));
-            this.lbLPCurrent.Location = new System.Drawing.Point(35, 352);
+            this.lbLPCurrent.Location = new System.Drawing.Point(114, 352);
             this.lbLPCurrent.Name = "lbLPCurrent";
             this.lbLPCurrent.Size = new System.Drawing.Size(17, 12);
             this.lbLPCurrent.TabIndex = 0;
             this.lbLPCurrent.Text = "è";
+            // 
+            // btnEditTGIs
+            // 
+            this.btnEditTGIs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnEditTGIs.AutoSize = true;
+            this.btnEditTGIs.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnEditTGIs.Location = new System.Drawing.Point(9, 346);
+            this.btnEditTGIs.Margin = new System.Windows.Forms.Padding(0);
+            this.btnEditTGIs.Name = "btnEditTGIs";
+            this.btnEditTGIs.Size = new System.Drawing.Size(79, 23);
+            this.btnEditTGIs.TabIndex = 2;
+            this.btnEditTGIs.Text = "TGI Blocks...";
+            this.btnEditTGIs.UseVisualStyleBackColor = true;
+            this.btnEditTGIs.Click += new System.EventHandler(this.btnEditTGIs_Click);
             // 
             // MainForm
             // 
@@ -692,6 +710,7 @@
             this.Controls.Add(this.lbLPCurrent);
             this.Controls.Add(this.lbCurrentPart);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Controls.Add(this.btnEditTGIs);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
             this.Icon = global::s3pe_VPXY_Resource_Editor.Properties.Resources.s3pe;
@@ -754,11 +773,6 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
         private System.Windows.Forms.CheckBox ckbModular;
         private System.Windows.Forms.TGIBlockCombo tbcFTPT;
-        private System.Windows.Forms.LinkLabel llAddPart;
-        private System.Windows.Forms.LinkLabel llAddLinked;
-        private System.Windows.Forms.LinkLabel llDel;
-        private System.Windows.Forms.LinkLabel llLPAdd;
-        private System.Windows.Forms.LinkLabel llLPDel;
         private System.Windows.Forms.NumericUpDown nudLowerZ;
         private System.Windows.Forms.NumericUpDown nudLowerX;
         private System.Windows.Forms.NumericUpDown nudLowerY;
@@ -767,6 +781,12 @@
         private System.Windows.Forms.NumericUpDown nudUpperZ;
         private System.Windows.Forms.Label lbCurrentPart;
         private System.Windows.Forms.Label lbLPCurrent;
+        private System.Windows.Forms.Button btnAddPart;
+        private System.Windows.Forms.Button btnAddLinked;
+        private System.Windows.Forms.Button btnDel;
+        private System.Windows.Forms.Button btnLPAdd;
+        private System.Windows.Forms.Button btnLPDel;
+        private System.Windows.Forms.Button btnEditTGIs;
     }
 }
 
