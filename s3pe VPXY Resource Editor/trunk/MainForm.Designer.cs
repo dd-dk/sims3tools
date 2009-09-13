@@ -658,6 +658,7 @@
             this.tbcFTPT.Location = new System.Drawing.Point(0, 23);
             this.tbcFTPT.Margin = new System.Windows.Forms.Padding(0);
             this.tbcFTPT.Name = "tbcFTPT";
+            this.tbcFTPT.ShowEdit = false;
             this.tbcFTPT.Size = new System.Drawing.Size(319, 21);
             this.tbcFTPT.TabIndex = 2;
             this.tbcFTPT.TGIBlocks = null;
