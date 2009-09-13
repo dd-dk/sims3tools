@@ -376,7 +376,7 @@
             this.tlpLinkedParts.AutoSize = true;
             this.tlpLinkedParts.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tlpLinkedParts.ColumnCount = 3;
-            this.tlpLinkedParts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tlpLinkedParts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpLinkedParts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlpLinkedParts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tlpLinkedParts.Controls.Add(this.lbLPTitle, 1, 0);
@@ -396,7 +396,7 @@
             this.lbLPTitle.AutoSize = true;
             this.tlpLinkedParts.SetColumnSpan(this.lbLPTitle, 2);
             this.lbLPTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbLPTitle.Location = new System.Drawing.Point(137, 0);
+            this.lbLPTitle.Location = new System.Drawing.Point(127, 0);
             this.lbLPTitle.Name = "lbLPTitle";
             this.lbLPTitle.Size = new System.Drawing.Size(133, 13);
             this.lbLPTitle.TabIndex = 0;

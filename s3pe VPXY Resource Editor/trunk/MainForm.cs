@@ -229,7 +229,7 @@ namespace s3pe_VPXY_Resource_Editor
         void FillLinkedPartsTLP(int offset, VPXY.Entry00 entry)
         {
             tlpLinkedParts.SuspendLayout();
-            ClearLinkedPartsTLP(false);
+            //ClearLinkedPartsTLP(false);// should never be needed
             lLPtbc = new List<TGIBlockCombo>();
             int tabindex = 1;
             for (int i = 0; i < entry.TGIIndexes.Count; i++)
@@ -547,6 +547,7 @@ namespace s3pe_VPXY_Resource_Editor
         private void ckbModular_CheckedChanged(object sender, EventArgs e)
         {
             vpxy.Modular = tbcFTPT.Enabled = ckbModular.Checked;
+            if (ckbModular.Checked) tbcFTPT.Refresh();
         }
 
         private void tbcFTPT_SelectedIndexChanged(object sender, EventArgs e)
