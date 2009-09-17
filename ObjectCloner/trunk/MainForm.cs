@@ -1326,7 +1326,7 @@ namespace ObjectCloner
                 if ((status & 0x01) == 0) // do not list
                 {
                     uint unknown8 = (uint)item.Resource["Unknown8"].Value;
-                    CTPTUnknown8ToPair.Add(unknown8 - 1, item);
+                    CTPTUnknown8ToPair.Add(unknown8 + 1, item);
                     return;
                 }
             }
