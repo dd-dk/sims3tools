@@ -1326,7 +1326,7 @@ namespace ObjectCloner
                 if ((status & 0x01) == 0) // do not list
                 {
                     uint unknown8 = (uint)item.Resource["Unknown8"].Value;
-                    CTPTUnknown8ToPair.Add(unknown8 + 1, item);
+                    CTPTUnknown8ToPair.Add(unknown8 - 1, item);
                     return;
                 }
             }
@@ -1943,7 +1943,7 @@ namespace ObjectCloner
                         {
                             byte status = (byte)commonBlock["BuildBuyProductStatusFlags"].Value;
                             uint unknown8 = FNV32.GetHash(UniqueObject) << 1;
-                            if ((status & 0x01) == 0)
+                            if ((status & 0x01) != 0)
                                 item.Resource["Unknown8"] = new TypedValue(typeof(uint), unknown8);
                             else
                                 item.Resource["Unknown8"] = new TypedValue(typeof(uint), unknown8 + 1);
