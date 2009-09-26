@@ -97,8 +97,8 @@
             this.bwcmFromFile = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmFromPackage = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmExport = new System.Windows.Forms.ToolStripMenuItem();
-            this.bwcmToFile = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmToPackage = new System.Windows.Forms.ToolStripMenuItem();
+            this.bwcmToFile = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.browserWidgetContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -274,7 +274,7 @@
             // 
             this.editCutToolStripMenuItem.Enabled = false;
             this.editCutToolStripMenuItem.Name = "editCutToolStripMenuItem";
-            this.editCutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.editCutToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.editCutToolStripMenuItem.Text = "Cu&t";
             this.editCutToolStripMenuItem.Click += new System.EventHandler(this.tsMBE_Click);
             // 
@@ -282,7 +282,7 @@
             // 
             this.editCopyToolStripMenuItem.Enabled = false;
             this.editCopyToolStripMenuItem.Name = "editCopyToolStripMenuItem";
-            this.editCopyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.editCopyToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.editCopyToolStripMenuItem.Text = "&Copy";
             this.editCopyToolStripMenuItem.Click += new System.EventHandler(this.tsMBE_Click);
             // 
@@ -290,7 +290,7 @@
             // 
             this.editPasteToolStripMenuItem.Enabled = false;
             this.editPasteToolStripMenuItem.Name = "editPasteToolStripMenuItem";
-            this.editPasteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.editPasteToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
             this.editPasteToolStripMenuItem.Text = "&Paste";
             this.editPasteToolStripMenuItem.Click += new System.EventHandler(this.tsMBE_Click);
             // 
@@ -577,13 +577,14 @@
             this.bwcmImport,
             this.bwcmExport});
             this.browserWidgetContextMenuStrip.Name = "browserWidgetContextMenuStrip";
-            this.browserWidgetContextMenuStrip.Size = new System.Drawing.Size(145, 236);
+            this.browserWidgetContextMenuStrip.Size = new System.Drawing.Size(153, 258);
             this.browserWidgetContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.cmsBW_Opening);
             // 
             // bwcmAdd
             // 
+            this.bwcmAdd.Enabled = false;
             this.bwcmAdd.Name = "bwcmAdd";
-            this.bwcmAdd.Size = new System.Drawing.Size(144, 22);
+            this.bwcmAdd.Size = new System.Drawing.Size(152, 22);
             this.bwcmAdd.Text = "&Add...";
             this.bwcmAdd.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -591,14 +592,15 @@
             // 
             this.bwcmCopy.Enabled = false;
             this.bwcmCopy.Name = "bwcmCopy";
-            this.bwcmCopy.Size = new System.Drawing.Size(144, 22);
+            this.bwcmCopy.Size = new System.Drawing.Size(152, 22);
             this.bwcmCopy.Text = "Cop&y";
             this.bwcmCopy.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
             // bwcmPaste
             // 
+            this.bwcmPaste.Enabled = false;
             this.bwcmPaste.Name = "bwcmPaste";
-            this.bwcmPaste.Size = new System.Drawing.Size(144, 22);
+            this.bwcmPaste.Size = new System.Drawing.Size(152, 22);
             this.bwcmPaste.Text = "&Paste...";
             this.bwcmPaste.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -606,7 +608,7 @@
             // 
             this.bwcmDuplicate.Enabled = false;
             this.bwcmDuplicate.Name = "bwcmDuplicate";
-            this.bwcmDuplicate.Size = new System.Drawing.Size(144, 22);
+            this.bwcmDuplicate.Size = new System.Drawing.Size(152, 22);
             this.bwcmDuplicate.Text = "D&uplicate";
             this.bwcmDuplicate.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -614,20 +616,20 @@
             // 
             this.bwcmReplace.Enabled = false;
             this.bwcmReplace.Name = "bwcmReplace";
-            this.bwcmReplace.Size = new System.Drawing.Size(144, 22);
+            this.bwcmReplace.Size = new System.Drawing.Size(152, 22);
             this.bwcmReplace.Text = "&Replace...";
             this.bwcmReplace.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(141, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
             // 
             // bwcmCompressed
             // 
             this.bwcmCompressed.Enabled = false;
             this.bwcmCompressed.Name = "bwcmCompressed";
-            this.bwcmCompressed.Size = new System.Drawing.Size(144, 22);
+            this.bwcmCompressed.Size = new System.Drawing.Size(152, 22);
             this.bwcmCompressed.Text = "&Compressed";
             this.bwcmCompressed.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -635,7 +637,7 @@
             // 
             this.bwcmDeleted.Enabled = false;
             this.bwcmDeleted.Name = "bwcmDeleted";
-            this.bwcmDeleted.Size = new System.Drawing.Size(144, 22);
+            this.bwcmDeleted.Size = new System.Drawing.Size(152, 22);
             this.bwcmDeleted.Text = "De&leted";
             this.bwcmDeleted.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -643,22 +645,23 @@
             // 
             this.bwcmDetails.Enabled = false;
             this.bwcmDetails.Name = "bwcmDetails";
-            this.bwcmDetails.Size = new System.Drawing.Size(144, 22);
+            this.bwcmDetails.Size = new System.Drawing.Size(152, 22);
             this.bwcmDetails.Text = "&Details...";
             this.bwcmDetails.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
             // toolStripSeparator10
             // 
             this.toolStripSeparator10.Name = "toolStripSeparator10";
-            this.toolStripSeparator10.Size = new System.Drawing.Size(141, 6);
+            this.toolStripSeparator10.Size = new System.Drawing.Size(149, 6);
             // 
             // bwcmImport
             // 
             this.bwcmImport.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.bwcmFromFile,
             this.bwcmFromPackage});
+            this.bwcmImport.Enabled = false;
             this.bwcmImport.Name = "bwcmImport";
-            this.bwcmImport.Size = new System.Drawing.Size(144, 22);
+            this.bwcmImport.Size = new System.Drawing.Size(152, 22);
             this.bwcmImport.Text = "I&mport";
             // 
             // bwcmFromFile
@@ -678,19 +681,12 @@
             // bwcmExport
             // 
             this.bwcmExport.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.bwcmToPackage,
-            this.bwcmToFile});
+            this.bwcmToFile,
+            this.bwcmToPackage});
+            this.bwcmExport.Enabled = false;
             this.bwcmExport.Name = "bwcmExport";
-            this.bwcmExport.Size = new System.Drawing.Size(144, 22);
+            this.bwcmExport.Size = new System.Drawing.Size(152, 22);
             this.bwcmExport.Text = "E&xport";
-            // 
-            // bwcmToFile
-            // 
-            this.bwcmToFile.Enabled = false;
-            this.bwcmToFile.Name = "bwcmToFile";
-            this.bwcmToFile.Size = new System.Drawing.Size(152, 22);
-            this.bwcmToFile.Text = "To &file...";
-            this.bwcmToFile.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
             // bwcmToPackage
             // 
@@ -699,6 +695,14 @@
             this.bwcmToPackage.Size = new System.Drawing.Size(152, 22);
             this.bwcmToPackage.Text = "To &package...";
             this.bwcmToPackage.Click += new System.EventHandler(this.tsCMSBW_Click);
+            // 
+            // bwcmToFile
+            // 
+            this.bwcmToFile.Enabled = false;
+            this.bwcmToFile.Name = "bwcmToFile";
+            this.bwcmToFile.Size = new System.Drawing.Size(152, 22);
+            this.bwcmToFile.Text = "To &file...";
+            this.bwcmToFile.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
             // MenuBarWidget
             // 
