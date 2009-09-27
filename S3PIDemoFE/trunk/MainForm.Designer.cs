@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
@@ -79,7 +80,7 @@
             this.splitContainer1.Panel2.Controls.Add(this.tableLayoutPanel1);
             this.splitContainer1.Panel2.Controls.Add(this.panel1);
             this.splitContainer1.Panel2MinSize = 131;
-            this.splitContainer1.Size = new System.Drawing.Size(913, 654);
+            this.splitContainer1.Size = new System.Drawing.Size(923, 654);
             this.splitContainer1.SplitterDistance = 514;
             this.splitContainer1.TabIndex = 1;
             // 
@@ -98,7 +99,7 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.pnAuto);
-            this.splitContainer2.Size = new System.Drawing.Size(913, 514);
+            this.splitContainer2.Size = new System.Drawing.Size(923, 514);
             this.splitContainer2.SplitterDistance = 629;
             this.splitContainer2.TabIndex = 0;
             // 
@@ -129,7 +130,7 @@
             this.progressBar1.Location = new System.Drawing.Point(68, 0);
             this.progressBar1.Margin = new System.Windows.Forms.Padding(0);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(841, 27);
+            this.progressBar1.Size = new System.Drawing.Size(851, 27);
             this.progressBar1.TabIndex = 2;
             // 
             // lbProgress
@@ -150,7 +151,7 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.pnAuto.Location = new System.Drawing.Point(-2, 0);
             this.pnAuto.Name = "pnAuto";
-            this.pnAuto.Size = new System.Drawing.Size(280, 512);
+            this.pnAuto.Size = new System.Drawing.Size(290, 512);
             this.pnAuto.TabIndex = 4;
             // 
             // packageInfoWidget1
@@ -160,7 +161,7 @@
             this.packageInfoWidget1.Location = new System.Drawing.Point(0, 103);
             this.packageInfoWidget1.Name = "packageInfoWidget1";
             this.packageInfoWidget1.Package = null;
-            this.packageInfoWidget1.Size = new System.Drawing.Size(909, 2);
+            this.packageInfoWidget1.Size = new System.Drawing.Size(919, 2);
             this.packageInfoWidget1.TabIndex = 0;
             // 
             // tableLayoutPanel1
@@ -175,7 +176,7 @@
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(909, 27);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(919, 27);
             this.tableLayoutPanel1.TabIndex = 3;
             // 
             // panel1
@@ -185,7 +186,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(909, 103);
+            this.panel1.Size = new System.Drawing.Size(919, 103);
             this.panel1.TabIndex = 0;
             // 
             // controlPanel1
@@ -195,10 +196,9 @@
             this.controlPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.controlPanel1.Name = "controlPanel1";
             this.controlPanel1.Padding = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.controlPanel1.Size = new System.Drawing.Size(909, 29);
+            this.controlPanel1.Size = new System.Drawing.Size(919, 29);
             this.controlPanel1.TabIndex = 1;
             this.controlPanel1.CommitClick += new System.EventHandler(this.controlPanel1_CommitClick);
-            this.controlPanel1.ViewerClick += new System.EventHandler(this.controlPanel1_ViewerClick);
             this.controlPanel1.AutoChanged += new System.EventHandler(this.controlPanel1_AutoChanged);
             this.controlPanel1.UseTagsChanged += new System.EventHandler(this.controlPanel1_UseTagsChanged);
             this.controlPanel1.HexClick += new System.EventHandler(this.controlPanel1_HexClick);
@@ -206,16 +206,17 @@
             this.controlPanel1.UseNamesChanged += new System.EventHandler(this.controlPanel1_UseNamesChanged);
             this.controlPanel1.GridClick += new System.EventHandler(this.controlPanel1_GridClick);
             this.controlPanel1.SortChanged += new System.EventHandler(this.controlPanel1_SortChanged);
+            this.controlPanel1.Helper1Click += new System.EventHandler(this.controlPanel1_Helper1Click);
+            this.controlPanel1.Helper2Click += new System.EventHandler(this.controlPanel1_Helper2Click);
             this.controlPanel1.ValueClick += new System.EventHandler(this.controlPanel1_ValueClick);
             this.controlPanel1.HexOnlyChanged += new System.EventHandler(this.controlPanel1_HexOnlyChanged);
-            this.controlPanel1.EditorClick += new System.EventHandler(this.controlPanel1_EditorClick);
             // 
             // resourceFilterWidget1
             // 
             this.resourceFilterWidget1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.resourceFilterWidget1.Location = new System.Drawing.Point(0, 0);
             this.resourceFilterWidget1.Name = "resourceFilterWidget1";
-            this.resourceFilterWidget1.Size = new System.Drawing.Size(909, 103);
+            this.resourceFilterWidget1.Size = new System.Drawing.Size(919, 103);
             this.resourceFilterWidget1.TabIndex = 0;
             this.resourceFilterWidget1.FilterChanged += new System.EventHandler(this.resourceFilterWidget1_FilterChanged);
             // 
@@ -268,7 +269,7 @@
             this.menuBarWidget1.Location = new System.Drawing.Point(0, 0);
             this.menuBarWidget1.Margin = new System.Windows.Forms.Padding(0);
             this.menuBarWidget1.Name = "menuBarWidget1";
-            this.menuBarWidget1.Size = new System.Drawing.Size(913, 23);
+            this.menuBarWidget1.Size = new System.Drawing.Size(923, 23);
             this.menuBarWidget1.TabIndex = 0;
             this.menuBarWidget1.BookmarkClick += new S3PIDemoFE.MenuBarWidget.BookmarkClickEventHandler(this.menuBarWidget1_BookmarkClick);
             this.menuBarWidget1.MBHelp_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBHelp_Click);
@@ -289,7 +290,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(913, 677);
+            this.ClientSize = new System.Drawing.Size(923, 677);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.menuBarWidget1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));

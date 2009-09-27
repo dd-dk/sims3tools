@@ -1154,8 +1154,10 @@ namespace S3PIDemoFE
             {
                 s3pi.DemoPlugins.DemoPlugins.Config = S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt;
                 plug = new s3pi.DemoPlugins.DemoPlugins(browserWidget1.SelectedResource, resource);
-                controlPanel1.ViewerEnabled = plug.HasViewer;
-                controlPanel1.EditorEnabled = plug.HasEditor;
+                controlPanel1.Helper1Enabled = plug.HasHelper1;
+                controlPanel1.Helper1Label = plug.Helper1Label.Length > 0 ? plug.Helper1Label : "Helper1";
+                controlPanel1.Helper2Enabled = plug.HasHelper2;
+                controlPanel1.Helper2Label = plug.Helper2Label.Length > 0 ? plug.Helper2Label : "Helper2";
                 controlPanel1.HexEditEnabled = S3PIDemoFE.Properties.Settings.Default.HexEditorCmd != null
                     && S3PIDemoFE.Properties.Settings.Default.HexEditorCmd.Length > 0;
             }
@@ -1339,9 +1341,10 @@ namespace S3PIDemoFE
 
                 s3pi.DemoPlugins.DemoPlugins.Config = S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt;
                 plug = new s3pi.DemoPlugins.DemoPlugins(browserWidget1.SelectedResource, resource);
-                controlPanel1.ViewerEnabled = plug.HasViewer;
-                controlPanel1.EditorEnabled = plug.HasEditor;
-
+                controlPanel1.Helper1Enabled = plug.HasHelper1;
+                controlPanel1.Helper1Label = plug.Helper1Label.Length > 0 ? plug.Helper1Label : "Helper1";
+                controlPanel1.Helper2Enabled = plug.HasHelper2;
+                controlPanel1.Helper2Label = plug.Helper2Label.Length > 0 ? plug.Helper2Label : "Helper2";
                 controlPanel1.HexEditEnabled = S3PIDemoFE.Properties.Settings.Default.HexEditorCmd != null
                     && S3PIDemoFE.Properties.Settings.Default.HexEditorCmd.Length > 0;
             }
@@ -1349,7 +1352,7 @@ namespace S3PIDemoFE
             {
                 plug = null;
                 controlPanel1.ValueEnabled = controlPanel1.GridEnabled =
-                    controlPanel1.ViewerEnabled = controlPanel1.EditorEnabled = controlPanel1.HexEditEnabled = false;
+                    controlPanel1.Helper1Enabled = controlPanel1.Helper2Enabled = controlPanel1.HexEditEnabled = false;
             }
 
             bool selectedItems = resource != null || browserWidget1.SelectedResources.Count > 0; // one or more
@@ -1606,7 +1609,17 @@ namespace S3PIDemoFE
             IsPackageDirty = true;
         }
 
-        private void controlPanel1_ViewerClick(object sender, EventArgs e)
+        private void controlPanel1_Helper1Click(object sender, EventArgs e)
+        {
+            do_HelperClick("1");
+        }
+
+        private void controlPanel1_Helper2Click(object sender, EventArgs e)
+        {
+            do_HelperClick("2");
+        }
+
+        void do_HelperClick(string hlp)
         {
             try
             {
@@ -1615,26 +1628,13 @@ namespace S3PIDemoFE
 
                 Clipboard.SetData(DataFormats.Serializable, resource.Stream);
 
-                plug.View(resource);
+                bool res = hlp == "1" ? plug.Helper1(resource) : plug.Helper2(resource);
 
                 this.Activate();
                 Application.DoEvents();
-            }
-            finally { this.Enabled = true; }
-        }
 
-        private void controlPanel1_EditorClick(object sender, EventArgs e)
-        {
-            try
-            {
-                this.Enabled = false;
-                Application.DoEvents();
-
-                Clipboard.SetData(DataFormats.Serializable, resource.Stream);
-
-                bool res = plug.Edit(resource);
-
-                afterEdit(res);
+                if (hlp == "1" && !plug.Helper1IsReadOnly || hlp == "2" && !plug.Helper2IsReadOnly)
+                    afterEdit(res);
             }
             finally { this.Enabled = true; }
         }
@@ -1651,6 +1651,9 @@ namespace S3PIDemoFE
                     S3PIDemoFE.Properties.Settings.Default.HexEditorWantsQuotes,
                     S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS);
 
+                this.Activate();
+                Application.DoEvents();
+
                 afterEdit(res);
             }
             finally { this.Enabled = true; }
@@ -1658,9 +1661,6 @@ namespace S3PIDemoFE
 
         void afterEdit(bool res)
         {
-            this.Activate();
-            Application.DoEvents();
-
             if (res && Clipboard.ContainsData(DataFormats.Serializable))
             {
                 int dr = CopyableMessageBox.Show("Resource has been updated.  Commit changes?", "Commit changes?",
