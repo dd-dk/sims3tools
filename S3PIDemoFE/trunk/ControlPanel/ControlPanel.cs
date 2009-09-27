@@ -193,34 +193,46 @@ namespace S3PIDemoFE
         private void ckbUseTags_CheckedChanged(object sender, EventArgs e) { OnUseTagsChanged(sender, e); }
         #endregion
 
-        #region Viewer button
+        #region Helper1 button
         [Browsable(true)]
         [Category("Behavior")]
         [DefaultValue(false)]
-        [Description("The state of the Viewer button")]
-        public bool ViewerEnabled { get { return btnViewer.Enabled; } set { btnViewer.Enabled = value; } }
+        [Description("The state of the Helper1 button")]
+        public bool Helper1Enabled { get { return btnHelper1.Enabled; } set { btnHelper1.Enabled = value; } }
+
+        [Browsable(true)]
+        [Category("Appearance")]
+        [DefaultValue("Helper1")]
+        [Description("Helper1 button label")]
+        public string Helper1Label { get { return btnHelper1.Text; } set { btnHelper1.Text = value; } }
 
         [Browsable(true)]
         [Category("Action")]
-        [Description("Occurs when the Viewer button is clicked")]
-        public event EventHandler ViewerClick;
-        protected virtual void OnViewerClick(object sender, EventArgs e) { if (ViewerClick != null) ViewerClick(sender, e); }
-        private void btnViewer_Click(object sender, EventArgs e) { OnViewerClick(sender, e); }
+        [Description("Occurs when the Helper1 button is clicked")]
+        public event EventHandler Helper1Click;
+        protected virtual void OnHelper1Click(object sender, EventArgs e) { if (Helper1Click != null) Helper1Click(sender, e); }
+        private void btnHelper1_Click(object sender, EventArgs e) { OnHelper1Click(sender, e); }
         #endregion
 
-        #region Editor button
+        #region Helper2 button
         [Browsable(true)]
         [Category("Behavior")]
         [DefaultValue(false)]
-        [Description("The state of the Editor button")]
-        public bool EditorEnabled { get { return btnEditor.Enabled; } set { btnEditor.Enabled = value; } }
+        [Description("The state of the Helper2 button")]
+        public bool Helper2Enabled { get { return btnHelper2.Enabled; } set { btnHelper2.Enabled = value; } }
+
+        [Browsable(true)]
+        [Category("Appearance")]
+        [DefaultValue("Helper2")]
+        [Description("Helper2 button label")]
+        public string Helper2Label { get { return btnHelper2.Text; } set { btnHelper2.Text = value; } }
 
         [Browsable(true)]
         [Category("Action")]
-        [Description("Occurs when the Editor button is clicked")]
-        public event EventHandler EditorClick;
-        protected virtual void OnEditorClick(object sender, EventArgs e) { if (EditorClick != null) EditorClick(sender, e); }
-        private void btnEditor_Click(object sender, EventArgs e) { OnEditorClick(sender, e); }
+        [Description("Occurs when the Helper2 button is clicked")]
+        public event EventHandler Helper2Click;
+        protected virtual void OnHelper2Click(object sender, EventArgs e) { if (Helper2Click != null) Helper2Click(sender, e); }
+        private void btnHelper2_Click(object sender, EventArgs e) { OnHelper2Click(sender, e); }
         #endregion
 
         #region HexEdit button

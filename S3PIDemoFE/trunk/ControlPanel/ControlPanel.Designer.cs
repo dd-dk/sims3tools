@@ -37,8 +37,8 @@ namespace S3PIDemoFE
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.btnGrid = new System.Windows.Forms.Button();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.btnViewer = new System.Windows.Forms.Button();
-            this.btnEditor = new System.Windows.Forms.Button();
+            this.btnHelper1 = new System.Windows.Forms.Button();
+            this.btnHelper2 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.btnHexEdit = new System.Windows.Forms.Button();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
@@ -72,7 +72,7 @@ namespace S3PIDemoFE
             this.btnHex.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnHex.Enabled = false;
             this.btnHex.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnHex.Location = new System.Drawing.Point(320, 2);
+            this.btnHex.Location = new System.Drawing.Point(336, 2);
             this.btnHex.Margin = new System.Windows.Forms.Padding(0);
             this.btnHex.Name = "btnHex";
             this.btnHex.Size = new System.Drawing.Size(50, 23);
@@ -86,7 +86,7 @@ namespace S3PIDemoFE
             this.btnValue.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnValue.Enabled = false;
             this.btnValue.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnValue.Location = new System.Drawing.Point(376, 2);
+            this.btnValue.Location = new System.Drawing.Point(392, 2);
             this.btnValue.Margin = new System.Windows.Forms.Padding(0);
             this.btnValue.Name = "btnValue";
             this.btnValue.Size = new System.Drawing.Size(50, 23);
@@ -128,7 +128,7 @@ namespace S3PIDemoFE
             this.btnCommit.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnCommit.Enabled = false;
             this.btnCommit.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.btnCommit.Location = new System.Drawing.Point(836, 2);
+            this.btnCommit.Location = new System.Drawing.Point(1019, 2);
             this.btnCommit.Margin = new System.Windows.Forms.Padding(0);
             this.btnCommit.Name = "btnCommit";
             this.btnCommit.Size = new System.Drawing.Size(75, 23);
@@ -177,14 +177,14 @@ namespace S3PIDemoFE
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(911, 27);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1094, 27);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // btnGrid
             // 
             this.btnGrid.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnGrid.Enabled = false;
-            this.btnGrid.Location = new System.Drawing.Point(432, 2);
+            this.btnGrid.Location = new System.Drawing.Point(448, 2);
             this.btnGrid.Margin = new System.Windows.Forms.Padding(0);
             this.btnGrid.Name = "btnGrid";
             this.btnGrid.Size = new System.Drawing.Size(50, 23);
@@ -206,43 +206,51 @@ namespace S3PIDemoFE
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 6F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel2.Controls.Add(this.btnViewer, 1, 0);
-            this.tableLayoutPanel2.Controls.Add(this.btnEditor, 3, 0);
+            this.tableLayoutPanel2.Controls.Add(this.btnHelper1, 1, 0);
+            this.tableLayoutPanel2.Controls.Add(this.btnHelper2, 3, 0);
             this.tableLayoutPanel2.Controls.Add(this.label1, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.btnHexEdit, 5, 0);
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(653, 1);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(669, 1);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(239, 25);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(247, 25);
             this.tableLayoutPanel2.TabIndex = 13;
             // 
-            // btnViewer
+            // btnHelper1
             // 
-            this.btnViewer.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnViewer.Enabled = false;
-            this.btnViewer.Location = new System.Drawing.Point(56, 1);
-            this.btnViewer.Margin = new System.Windows.Forms.Padding(0);
-            this.btnViewer.Name = "btnViewer";
-            this.btnViewer.Size = new System.Drawing.Size(50, 23);
-            this.btnViewer.TabIndex = 2;
-            this.btnViewer.Text = "Viewer";
-            this.btnViewer.UseVisualStyleBackColor = true;
-            this.btnViewer.Click += new System.EventHandler(this.btnViewer_Click);
+            this.btnHelper1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnHelper1.AutoSize = true;
+            this.btnHelper1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnHelper1.Enabled = false;
+            this.btnHelper1.Location = new System.Drawing.Point(56, 1);
+            this.btnHelper1.Margin = new System.Windows.Forms.Padding(0);
+            this.btnHelper1.MaximumSize = new System.Drawing.Size(105, 23);
+            this.btnHelper1.MinimumSize = new System.Drawing.Size(20, 23);
+            this.btnHelper1.Name = "btnHelper1";
+            this.btnHelper1.Size = new System.Drawing.Size(54, 23);
+            this.btnHelper1.TabIndex = 2;
+            this.btnHelper1.Text = "Helper1";
+            this.btnHelper1.UseVisualStyleBackColor = true;
+            this.btnHelper1.Click += new System.EventHandler(this.btnHelper1_Click);
             // 
-            // btnEditor
+            // btnHelper2
             // 
-            this.btnEditor.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnEditor.Enabled = false;
-            this.btnEditor.Location = new System.Drawing.Point(114, 1);
-            this.btnEditor.Margin = new System.Windows.Forms.Padding(0);
-            this.btnEditor.Name = "btnEditor";
-            this.btnEditor.Size = new System.Drawing.Size(50, 23);
-            this.btnEditor.TabIndex = 3;
-            this.btnEditor.Text = "Editor";
-            this.btnEditor.UseVisualStyleBackColor = true;
-            this.btnEditor.Click += new System.EventHandler(this.btnEditor_Click);
+            this.btnHelper2.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnHelper2.AutoSize = true;
+            this.btnHelper2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnHelper2.Enabled = false;
+            this.btnHelper2.Location = new System.Drawing.Point(118, 1);
+            this.btnHelper2.Margin = new System.Windows.Forms.Padding(0);
+            this.btnHelper2.MaximumSize = new System.Drawing.Size(105, 23);
+            this.btnHelper2.MinimumSize = new System.Drawing.Size(20, 23);
+            this.btnHelper2.Name = "btnHelper2";
+            this.btnHelper2.Size = new System.Drawing.Size(54, 23);
+            this.btnHelper2.TabIndex = 3;
+            this.btnHelper2.Text = "Helper2";
+            this.btnHelper2.UseVisualStyleBackColor = true;
+            this.btnHelper2.Click += new System.EventHandler(this.btnHelper2_Click);
             // 
             // label1
             // 
@@ -259,7 +267,7 @@ namespace S3PIDemoFE
             this.btnHexEdit.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnHexEdit.AutoSize = true;
             this.btnHexEdit.Enabled = false;
-            this.btnHexEdit.Location = new System.Drawing.Point(172, 1);
+            this.btnHexEdit.Location = new System.Drawing.Point(180, 1);
             this.btnHexEdit.Margin = new System.Windows.Forms.Padding(0);
             this.btnHexEdit.Name = "btnHexEdit";
             this.btnHexEdit.Size = new System.Drawing.Size(66, 23);
@@ -281,7 +289,7 @@ namespace S3PIDemoFE
             this.tableLayoutPanel3.Controls.Add(this.label2, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.ckbUseNames, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.ckbUseTags, 2, 0);
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(494, 5);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(510, 5);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
@@ -321,7 +329,7 @@ namespace S3PIDemoFE
             this.label3.Location = new System.Drawing.Point(141, 7);
             this.label3.Margin = new System.Windows.Forms.Padding(0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(32, 13);
+            this.label3.Size = new System.Drawing.Size(48, 13);
             this.label3.TabIndex = 3;
             this.label3.Text = "Preview:";
             // 
@@ -330,7 +338,7 @@ namespace S3PIDemoFE
             this.rb1Off.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.rb1Off.AutoSize = true;
             this.rb1Off.Checked = true;
-            this.rb1Off.Location = new System.Drawing.Point(173, 5);
+            this.rb1Off.Location = new System.Drawing.Point(189, 5);
             this.rb1Off.Margin = new System.Windows.Forms.Padding(0);
             this.rb1Off.Name = "rb1Off";
             this.rb1Off.Size = new System.Drawing.Size(39, 17);
@@ -344,7 +352,7 @@ namespace S3PIDemoFE
             // 
             this.rb1Hex.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.rb1Hex.AutoSize = true;
-            this.rb1Hex.Location = new System.Drawing.Point(212, 5);
+            this.rb1Hex.Location = new System.Drawing.Point(228, 5);
             this.rb1Hex.Margin = new System.Windows.Forms.Padding(0);
             this.rb1Hex.Name = "rb1Hex";
             this.rb1Hex.Size = new System.Drawing.Size(44, 17);
@@ -357,7 +365,7 @@ namespace S3PIDemoFE
             // 
             this.rb1Value.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.rb1Value.AutoSize = true;
-            this.rb1Value.Location = new System.Drawing.Point(256, 5);
+            this.rb1Value.Location = new System.Drawing.Point(272, 5);
             this.rb1Value.Margin = new System.Windows.Forms.Padding(0);
             this.rb1Value.Name = "rb1Value";
             this.rb1Value.Size = new System.Drawing.Size(52, 17);
@@ -370,7 +378,7 @@ namespace S3PIDemoFE
             // 
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "ControlPanel";
-            this.Size = new System.Drawing.Size(911, 27);
+            this.Size = new System.Drawing.Size(1094, 27);
             this.Load += new System.EventHandler(this.ControlPanel_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
@@ -393,8 +401,8 @@ namespace S3PIDemoFE
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Button btnGrid;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
-        private System.Windows.Forms.Button btnViewer;
-        private System.Windows.Forms.Button btnEditor;
+        private System.Windows.Forms.Button btnHelper1;
+        private System.Windows.Forms.Button btnHelper2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.CheckBox ckbUseTags;
         private System.Windows.Forms.Label label2;
