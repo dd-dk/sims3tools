@@ -3138,7 +3138,7 @@ namespace ObjectCloner
             if (cloneFixOptions.IsRenumber)
             {
                 // Generate new numbers for everything we've decided to renumber
-                ulong langInst = FNV64.GetHash("StringTable:" + UniqueObject) >> 8;
+                ulong langInst = (CreateInstance() << 8) >> 8;
                 foreach (TGI tgi in tgiToItem.Keys)
                 {
                     if (cloneFixOptions.IsExcludeCatalogResources && ctList.Contains(tgi.t)) continue;
