@@ -51,12 +51,14 @@ namespace ObjectCloner.TopPanelComponents
         public bool IsDefaultOnly { get { return ckbDefault.Checked; } }
         public bool IsIncludeThumbnails { get { return ckbThumbs.Checked; } }
         public bool IsPadSTBLs { get { return ckbPadSTBLs.Checked; } }
+        public bool IsPadThumbs { get { return ckbPadThumbs.Checked; } }
         public bool IsRenumber { get { return ckbRenumber.Checked; } }
         public bool IsExcludeCatalogResources { get { return ckbExcludeCatalogResources.Checked; } }
         public bool IsCompress { get { return ckbCompress.Checked; } }
 
         public event EventHandler CancelClicked;
         public event EventHandler StartClicked;
+        public event EventHandler IsPadThumbsChanged;
 
         private void ckbClone_CheckedChanged(object sender, EventArgs e)
         {
@@ -64,6 +66,8 @@ namespace ObjectCloner.TopPanelComponents
             ckbDefault.Checked = ckbClone.Checked;
             ckbThumbs.Checked = false;
         }
+
+        private void ckbPadThumbs_CheckedChanged(object sender, EventArgs e) { if (IsPadThumbsChanged != null) IsPadThumbsChanged(this, EventArgs.Empty); }
 
         private void ckbRenumber_CheckedChanged(object sender, EventArgs e)
         {
