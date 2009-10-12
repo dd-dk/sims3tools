@@ -735,6 +735,7 @@ namespace ObjectCloner
         void cloneFixOptions_CancelClicked(object sender, EventArgs e)
         {
             DisplayObjectChooser();
+            cloneFixOptions = null;
         }
         #endregion
 
@@ -2686,7 +2687,7 @@ namespace ObjectCloner
                     stepList.Add(VPXYs_getKinMTST);
                     lastStepInChain = VPXYs_getKinMTST;
                 }
-                if (cloneFixOptions.IsIncludeThumbnails)
+                if (cloneFixOptions.IsIncludeThumbnails || (!isClone && cloneFixOptions.IsRenumber))
                     stepList.Add(SlurpThumbnails);
             }
             lastStepInChain = MODLs_SlurpTXTCs;
@@ -2726,7 +2727,7 @@ namespace ObjectCloner
                     stepList.Add(VPXYs_getKinMTST);
                     lastStepInChain = VPXYs_getKinMTST;
                 }
-                if (cloneFixOptions.IsIncludeThumbnails)
+                if (cloneFixOptions.IsIncludeThumbnails || (!isClone && cloneFixOptions.IsRenumber))
                     stepList.Add(SlurpThumbnails);
             }
         }
@@ -2751,7 +2752,7 @@ namespace ObjectCloner
                     //stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinXML);//No VPXYs in here
                     //stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinMTST);//No VPXYs in here
                 }
-                if (cloneFixOptions.IsIncludeThumbnails)
+                if (cloneFixOptions.IsIncludeThumbnails || (!isClone && cloneFixOptions.IsRenumber))
                     stepList.Add(SlurpThumbnails);
             }
         }
@@ -2759,7 +2760,7 @@ namespace ObjectCloner
         void CFIR_Steps(List<Step> stepList, out Step lastStepInChain)
         {
             stepList.AddRange(new Step[] { Item_findObjds, setupObjdStepList, Modular_Main, });
-            if (cloneFixOptions.IsIncludeThumbnails)
+            if (cloneFixOptions.IsIncludeThumbnails || (!isClone && cloneFixOptions.IsRenumber))
                 stepList.Add(SlurpThumbnails);
             lastStepInChain = None;
         }
@@ -2792,7 +2793,7 @@ namespace ObjectCloner
                     stepList.Add(VPXYs_getKinMTST);
                     lastStepInChain = VPXYs_getKinMTST;
                 }
-                if (cloneFixOptions.IsIncludeThumbnails)
+                if (cloneFixOptions.IsIncludeThumbnails || (!isClone && cloneFixOptions.IsRenumber))
                     stepList.Add(CWAL_SlurpThumbnails);
             }
         }
