@@ -38,10 +38,11 @@ namespace ObjectCloner
             tsMB = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //File
                 newToolStripMenuItem, openToolStripMenuItem, exitToolStripMenuItem,
-                //Cloning
-                objdToolStripMenuItem, mdlrToolStripMenuItem, cfenToolStripMenuItem, cstrToolStripMenuItem, cprxToolStripMenuItem,
-                cttlToolStripMenuItem, cralToolStripMenuItem, ctptToolStripMenuItem, cfirToolStripMenuItem, cwatToolStripMenuItem,
-                cfndToolStripMenuItem, cwalToolStripMenuItem, cwstToolStripMenuItem, crstToolStripMenuItem, crmtToolStripMenuItem,
+                //Cloning -- These must be in order of enum CatalogType by value:
+                cfenToolStripMenuItem, cstrToolStripMenuItem, cprxToolStripMenuItem, cttlToolStripMenuItem,
+                cralToolStripMenuItem, ctptToolStripMenuItem, cfirToolStripMenuItem, cwatToolStripMenuItem,
+                cfndToolStripMenuItem, objdToolStripMenuItem, cwalToolStripMenuItem, cwstToolStripMenuItem,
+                crstToolStripMenuItem, mdlrToolStripMenuItem, crmtToolStripMenuItem,
                 //View
                 tilesToolStripMenuItem, largeIconsToolStripMenuItem, smallIconsToolStripMenuItem, listToolStripMenuItem, detailedListToolStripMenuItem,
                 iconsToolStripMenuItem,
@@ -64,9 +65,10 @@ namespace ObjectCloner
         public enum MB
         {
             MBF_new = 0, MBF_open, MBF_exit,
-            MBC_objd, MBC_mdlr, MBC_cfen, MBC_cstr, MBC_cprx,
-            MBC_cttl, MBC_cral, MBC_ctpt, MBC_cfir, MBC_cwat,
-            MBC_cfnd, MBC_cwal, MBC_cwst, MBC_crst, MBC_crmt,
+            MBC_cfen, MBC_cstr, MBC_cprx, MBC_cttl,
+            MBC_cral, MBC_ctpt, MBC_cfir, MBC_cwat,
+            MBC_cfnd, MBC_objd, MBC_cwal, MBC_cwst,
+            MBC_crst, MBC_mdlr, MBC_crmt,
             MBV_tiles, MBV_largeIcons, MBV_smallIcons, MBV_list, MBV_detailedList,
             MBV_icons,
             MBS_sims3Folder, MBS_userName,

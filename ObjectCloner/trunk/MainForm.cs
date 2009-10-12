@@ -53,31 +53,9 @@ namespace ObjectCloner
             "SPA_MX", "SWE_SE", "THA_TH",
         };
 
-        public static uint[] catalogTypes = new uint[] {
-            //NOTE: the order of these is IMPORTANT - the index numbers are used to identfy the types
-            0x319E4F1D, //0: Catalog Object
-            0xCF9A4ACE, //1: Modular Resource
-            0x0418FE2A, //2: Catalog Fence
-            0x049CA4CD, //3: Catalog Stairs
-            0x04AC5D93, //4: Catalog Proxy Product
-            0x04B30669, //5: Catalog Terrain Geometry Brush
-            0x04C58103, //6: Catalog Railing
-            0x04ED4BB2, //7: Catalog Terrain Paint Brush
-            0x04F3CC01, //8: Catalog Fireplace
-            0x060B390C, //9: Catalog Terrain Water Brush
-            0x316C78F2, //10: Catalog Foundation
-            0x515CA4CD, //11: Catalog Wall/Floor Pattern
-            0x9151E6BC, //12: Catalog Wall
-            0x91EDBD3E, //13: Catalog Roof Style
-            0xF1EDBD86, //14: Catalog Roof Pattern
-        };
-        static List<uint> ctList;
-
         static Dictionary<string, List<string>> s3ocIni;
         static MainForm()
         {
-            ctList = new List<uint>(catalogTypes);
-
             viewMap = new Dictionary<View, MenuBarWidget.MB>();
             viewMap.Add(View.Tile, MenuBarWidget.MB.MBV_tiles);
             viewMap.Add(View.LargeIcon, MenuBarWidget.MB.MBV_largeIcons);
@@ -162,7 +140,7 @@ namespace ObjectCloner
 
             SetStepText();
 
-            InitialiseTabs(catalogTypes[4]);//Use the Proxy Product as it has pretty much nothing on it
+            InitialiseTabs(CatalogType.CatalogProxyProduct);//Use the Proxy Product as it has pretty much nothing on it
             TabEnable(false);
         }
 
@@ -423,30 +401,22 @@ namespace ObjectCloner
         }
         Image getImage(THUM.THUMSize size, Item item)
         {
-            if (item.tgi.t == catalogTypes[1])
+            if (item.CType == CatalogType.ModularResource)
                 return getImage(size, ItemForTGIBlock0(item));
             else
             {
-                ulong png = 0;
-                if (item.Resource != null) png = (ulong)((AHandlerElement)item.Resource["CommonBlock"].Value)["PngInstance"].Value;
-                Image res = png == 0 ? null : Thumb[item.tgi.t, png, size, true];
-                if (res != null) return res;
-                return Thumb[item.tgi.t, item.tgi.i, size];
+                ulong png = (item.Resource != null) ? (ulong)item.Resource["CommonBlock.PngInstance"].Value : 0;
+                return Thumb[item.tgi.t, png != 0 ? png : item.tgi.i, size, png != 0];
             }
         }
         TGI getImageTGI(THUM.THUMSize size, Item item)
         {
-            if (item.tgi.t == catalogTypes[1])
-            {
+            if (item.CType == CatalogType.ModularResource)
                 return new TGI();
-            }
             else
             {
-                ulong png = 0;
-                if (item.Resource != null) png = (ulong)((AHandlerElement)item.Resource["CommonBlock"].Value)["PngInstance"].Value;
-                if (png != 0 && Thumb[item.tgi.t, png, size, true] != null)
-                    return Thumb.getTGI(item.tgi.t, png, size, true);
-                return Thumb.getTGI(item.tgi.t, item.tgi.i, size, false);
+                ulong png = (item.Resource != null) ? (ulong)item.Resource["CommonBlock.PngInstance"].Value : 0;
+                return Thumb.getTGI(item.tgi.t, png != 0 ? png : item.tgi.i, size, png != 0);
             }
         }
         #endregion
@@ -554,7 +524,7 @@ namespace ObjectCloner
             this.AcceptButton = btnStart;
             this.CancelButton = null;
 
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, currentCatalogType != catalogTypes[0]);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, currentCatalogType != CatalogType.CatalogObject);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBC, true);
 
@@ -740,20 +710,20 @@ namespace ObjectCloner
         #endregion
 
         #region Tabs
-        uint tabType = 0;
-        void InitialiseTabs(uint resourceType)
+        CatalogType tabType = 0;
+        void InitialiseTabs(CatalogType resourceType)
         {
             if (tabType == resourceType) return;
             tabType = resourceType;
 
-            if (resourceType == catalogTypes[1]) resourceType = catalogTypes[0];//Modular Resources - display OBJD0
+            if (resourceType == CatalogType.ModularResource) resourceType = CatalogType.CatalogObject;//Modular Resources - display OBJD0
 
-            IResource res = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x" + resourceType.ToString("X8"));
-            InitialiseDetailsTab(resourceType, res);
+            IResource res = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x" + ((uint)resourceType).ToString("X8"));
+            InitialiseDetailsTab(res);
             this.tabControl1.Controls.Remove(this.tpFlagsRoom);
             this.tabControl1.Controls.Remove(this.tpFlagsFunc);
             this.tabControl1.Controls.Remove(this.tpFlagsBuildEtc);
-            if (tabType == catalogTypes[0])
+            if (tabType == CatalogType.CatalogObject)
             {
                 this.tabControl1.Controls.Add(this.tpFlagsRoom);
                 this.tabControl1.Controls.Add(this.tpFlagsFunc);
@@ -765,7 +735,7 @@ namespace ObjectCloner
 
         Dictionary<string, string> detailsFieldMap;
         Dictionary<string, string> detailsFieldMapReverse;
-        void InitialiseDetailsTab(uint resourceType, IResource catlg)
+        void InitialiseDetailsTab(IResource catlg)
         {
             List<string> detailsTabFields = new List<string>();
             List<string> detailsTabCommonFields = new List<string>();
@@ -1046,25 +1016,25 @@ namespace ObjectCloner
                 return;
             }
 
-            InitialiseTabs(item.tgi.t);
+            InitialiseTabs(item.CType);
 
-            Item catlg = (item.tgi.t == catalogTypes[1]) ? ItemForTGIBlock0(item) : item;
+            Item catlg = (item.CType == CatalogType.ModularResource) ? ItemForTGIBlock0(item) : item;
 
             fillOverview(catlg);
             fillDetails(catlg);
-            if (item.tgi.t == catalogTypes[0])
+            if (item.CType == CatalogType.CatalogObject)
             {
                 fillFlags(catlg);
                 fillOther(catlg);
             }
             TabEnable(false);
         }
-        void fillOverview(Item objd)
+        void fillOverview(Item item)
         {
-            pictureBox1.Image = getImage(THUM.THUMSize.large, objd);
-            lbThumbTGI.Text = getImageTGI(THUM.THUMSize.large, objd);
+            pictureBox1.Image = getImage(THUM.THUMSize.large, item);
+            lbThumbTGI.Text = getImageTGI(THUM.THUMSize.large, item);
             btnReplThumb.Enabled = true;
-            AApiVersionedFields common = objd.Resource["CommonBlock"].Value as AApiVersionedFields;
+            AApiVersionedFields common = item.Resource["CommonBlock"].Value as AApiVersionedFields;
             tbObjName.Text = common["Name"].Value + "";
             tbObjDesc.Text = common["Desc"].Value + "";
             tbCatlgName.Text = English[(ulong)common["NameGUID"].Value];
@@ -1239,7 +1209,7 @@ namespace ObjectCloner
         bool loading = false;
         bool isFix = false;
         Dictionary<uint, Item> CTPTUnknown8ToPair;
-        void StartLoading(uint resourceType, bool setIsFix)
+        void StartLoading(CatalogType resourceType, bool setIsFix)
         {
             if (haveLoaded) return;
             if (loading) { AbortLoading(false); }
@@ -1321,9 +1291,9 @@ namespace ObjectCloner
         public delegate void createListViewItemCallback(Item objd);
         void createListViewItem(Item item)
         {
-            if (item.tgi.t == catalogTypes[7])
+            if (item.CType ==  CatalogType.CatalogTerrainPaintBrush)
             {
-                byte status = (byte)((AApiVersionedFields)item.Resource["CommonBlock"].Value)["BuildBuyProductStatusFlags"].Value;
+                byte status = (byte)item.Resource["CommonBlock.BuildBuyProductStatusFlags"].Value;
                 if ((status & 0x01) == 0) // do not list
                 {
                     uint unknown8 = (uint)item.Resource["Unknown8"].Value;
@@ -1335,8 +1305,8 @@ namespace ObjectCloner
             if (item.Resource != null)
             {
                 string objdtag;
-                if (item.tgi.t == catalogTypes[1]) objdtag = ((AApiVersionedFields)ItemForTGIBlock0(item).Resource["CommonBlock"].Value)["Name"];
-                else objdtag = ((AApiVersionedFields)item.Resource["CommonBlock"].Value)["Name"];
+                if (item.CType == CatalogType.ModularResource) objdtag = ItemForTGIBlock0(item).Resource["CommonBlock.Name"];
+                else objdtag = item.Resource["CommonBlock.Name"];
                 lvi.Text = (objdtag.IndexOf(':') < 0) ? objdtag : objdtag.Substring(objdtag.LastIndexOf(':') + 1);
             }
             else
@@ -1590,7 +1560,7 @@ namespace ObjectCloner
                 {
                     isPadSTBLs = false;
                     isClone = false;
-                    fileReOpenToFix(saveFileDialog1.FileName, selectedItem.tgi.t);
+                    fileReOpenToFix(saveFileDialog1.FileName, selectedItem.CType);
                 }
                 else
                 {
@@ -1691,14 +1661,14 @@ namespace ObjectCloner
                     updateProgress(true, "Finding string tables...", true, 0, true, 0);
 
                     Item catlgItem = selectedItem;
-                    if (catlgItem.tgi.t == catalogTypes[1] || catlgItem.tgi.t == catalogTypes[8])
+                    if (catlgItem.CType == CatalogType.ModularResource || catlgItem.CType == CatalogType.CatalogFireplace)
                     {
                         AResource.TGIBlock tgib = ((AResource.TGIBlockList)catlgItem.Resource["TGIBlocks"].Value)[0];
                         catlgItem = new Item(objPkgs, tgib);
                     }
 
-                    ulong nameGUID = (ulong)((AHandlerElement)catlgItem.Resource["CommonBlock"].Value)["NameGUID"].Value;
-                    ulong descGUID = (ulong)((AHandlerElement)catlgItem.Resource["CommonBlock"].Value)["DescGUID"].Value;
+                    ulong nameGUID = (ulong)catlgItem.Resource["CommonBlock.NameGUID"].Value;
+                    ulong descGUID = (ulong)catlgItem.Resource["CommonBlock.DescGUID"].Value;
 
                     i = 0;
                     freq = 1;// Math.Max(1, lrie.Count / 10);
@@ -1851,7 +1821,7 @@ namespace ObjectCloner
 
         void StartFixing()
         {
-            Item catlgItem = (selectedItem.tgi.t == catalogTypes[1] || selectedItem.tgi.t == catalogTypes[8]) ? ItemForTGIBlock0(selectedItem) : selectedItem;
+            Item catlgItem = (selectedItem.CType == CatalogType.ModularResource || selectedItem.CType == CatalogType.CatalogFireplace) ? ItemForTGIBlock0(selectedItem) : selectedItem;
             //oldToNew = new Dictionary<ulong, ulong>();
             //tgiToItem - TGIs we're interested in and the Item they refer to
             try
@@ -1860,17 +1830,17 @@ namespace ObjectCloner
                 {
                     bool dirty = false;
 
-                    if ((item.tgi == selectedItem.tgi && item.tgi.t != catalogTypes[1])//Selected CatlgItem
-                        || item.tgi.t == catalogTypes[0]//all OBJDs (i.e. from MDLR or CFIR)
-                        || item.tgi.t == catalogTypes[7]//all CTPTs (i.e. pair of selectedItem)
+                    if ((item.tgi == selectedItem.tgi && item.CType != CatalogType.ModularResource)//Selected CatlgItem
+                        || item.CType == CatalogType.CatalogObject//all OBJDs (i.e. from MDLR or CFIR)
+                        || item.CType == CatalogType.CatalogTerrainPaintBrush//all CTPTs (i.e. pair of selectedItem)
                         )
                     {
                         #region Selected CatlgItem; all OBJD (i.e. from MDLR or CFIR)
                         AHandlerElement commonBlock = ((AHandlerElement)item.Resource["CommonBlock"].Value);
 
                         if (item.tgi == selectedItem.tgi//Selected CatlgItem
-                            || selectedItem.tgi.t == catalogTypes[1]//all MDLR OBJDs
-                            || selectedItem.tgi.t == catalogTypes[7]//both CTPTs
+                            || selectedItem.CType == CatalogType.ModularResource//all MDLR OBJDs
+                            || selectedItem.CType == CatalogType.CatalogTerrainPaintBrush//both CTPTs
                             || item.tgi == catlgItem.tgi//0th CFIR OBJD
                             )
                         {
@@ -1909,7 +1879,7 @@ namespace ObjectCloner
                                 item.Resource[detailsFieldMap[lb.Text]] = new TypedValue(tvOld.Type, val);
                             }
 
-                            if (selectedItem.tgi.t == catalogTypes[0])//Selected OBJD only
+                            if (selectedItem.CType == CatalogType.CatalogObject)//Selected OBJD only
                             {
                                 foreach (flagField ff in flagFields)
                                 {
@@ -1940,7 +1910,7 @@ namespace ObjectCloner
                             }
                         }
 
-                        if (item.tgi.t == catalogTypes[7])//Both CTPTs
+                        if (item.CType == CatalogType.CatalogTerrainPaintBrush)//Both CTPTs
                         {
                             byte status = (byte)commonBlock["BuildBuyProductStatusFlags"].Value;
                             uint unknown8 = FNV32.GetHash(UniqueObject) << 1;
@@ -2033,13 +2003,10 @@ namespace ObjectCloner
 
                 if (replacementForThumbs != null)
                 {
+                    ulong png = (selectedItem.Resource != null) ? (ulong)selectedItem.Resource["CommonBlock.PngInstance"].Value : 0;
                     foreach (THUM.THUMSize size in Enum.GetValues(typeof(THUM.THUMSize)))
-                    {
-                        if (Thumb[selectedItem.tgi.t, selectedItem.tgi.i, size, true] != null)
-                            Thumb[selectedItem.tgi.t, selectedItem.tgi.i, size, true] = replacementForThumbs;
-                        else if (Thumb[selectedItem.tgi.t, selectedItem.tgi.i, size] != null)
-                            Thumb[selectedItem.tgi.t, selectedItem.tgi.i, size] = replacementForThumbs;
-                    }
+                        if (Thumb[selectedItem.tgi.t, png != 0 ? png : selectedItem.tgi.i, size, png != 0] != null)
+                            Thumb[selectedItem.tgi.t, png != 0 ? png : selectedItem.tgi.i, size, png != 0] = replacementForThumbs;
                 }
 
                 #region PadSTBLs
@@ -2106,7 +2073,7 @@ namespace ObjectCloner
             if (typeof(AResource.TGIBlock).IsAssignableFrom(t))
             {
                 AResource.TGIBlock tgib = (AResource.TGIBlock)field;
-                if (cloneFixOptions.IsExcludeCatalogResources && ctList.Contains(tgib.ResourceType)) return dirty;
+                if (cloneFixOptions.IsExcludeCatalogResources && Enum.IsDefined(typeof(CatalogType), tgib.ResourceType)) return dirty;
                 if (tgib != new TGI(0, 0, 0) && tgiToItem.ContainsKey(tgib) && oldToNew.ContainsKey(tgib.Instance)) { tgib.Instance = oldToNew[tgib.Instance]; dirty = true; }
             }
             else
@@ -2291,7 +2258,7 @@ namespace ObjectCloner
             fileReOpenToFix(openPackageDialog.FileName, 0);
         }
 
-        void fileReOpenToFix(string filename, uint type)
+        void fileReOpenToFix(string filename, CatalogType type)
         {
             ClosePkg();
             IPackage pkg;
@@ -2307,7 +2274,7 @@ namespace ObjectCloner
                 return;
             }
 
-            if (currentCatalogType != 0) menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + new List<uint>(catalogTypes).IndexOf(currentCatalogType)), false);
+            if (currentCatalogType != 0) menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + ToCloningMenuEntry(currentCatalogType)), false);
             currentCatalogType = 0;
             currentPackage = filename;
             tmbPkgs = ddsPkgs = objPkgs = new List<IPackage>(new IPackage[] { pkg, });
@@ -2316,7 +2283,7 @@ namespace ObjectCloner
             fileNewOpen(type, type != 0);
         }
 
-        void fileNewOpen(uint resourceType, bool IsFixPass)
+        void fileNewOpen(CatalogType resourceType, bool IsFixPass)
         {
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, false);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, false);
@@ -2339,24 +2306,31 @@ namespace ObjectCloner
         #endregion
 
         #region Cloning menu
-        uint currentCatalogType = 0;
+        CatalogType currentCatalogType = 0;
         private void menuBarWidget1_MBCloning_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
         {
             Application.DoEvents();
-            int i = ((int)mn.mn) - ((int)MenuBarWidget.MB.MBC_objd);
-            if (i >= 0 && i < catalogTypes.Length)
-            {
-                int j = new List<uint>(catalogTypes).IndexOf(currentCatalogType);
-                if (i != j)
-                {
-                    if (j >= 0) menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + j), false);
-                    menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + i), true);
-                }
-                cloneType(catalogTypes[i]);
-            }
+
+            if (mn.mn == ToCloningMenuEntry(currentCatalogType)) return;
+            if (ToCloningMenuEntry(currentCatalogType) != 0)
+                menuBarWidget1.Checked(ToCloningMenuEntry(currentCatalogType), false);
+            menuBarWidget1.Checked(mn.mn, true);
+            cloneType(FromCloningMenuEntry(mn.mn));
+        }
+        MenuBarWidget.MB ToCloningMenuEntry(CatalogType resourceType)
+        {
+            if (!Enum.IsDefined(typeof(CatalogType), resourceType)) return 0;
+            List<MenuBarWidget.MB> ml = new List<MenuBarWidget.MB>((MenuBarWidget.MB[])Enum.GetValues(typeof(MenuBarWidget.MB)));
+            return ml[new List<CatalogType>((CatalogType[])Enum.GetValues(typeof(CatalogType))).IndexOf(resourceType) + ml.IndexOf(MenuBarWidget.MB.MBC_cfen)];
+        }
+        CatalogType FromCloningMenuEntry(MenuBarWidget.MB menuEntry)
+        {
+            if (!Enum.IsDefined(typeof(MenuBarWidget.MB), menuEntry)) return 0;
+            List<MenuBarWidget.MB> ml = new List<MenuBarWidget.MB>((MenuBarWidget.MB[])Enum.GetValues(typeof(MenuBarWidget.MB)));
+            return ((CatalogType[])Enum.GetValues(typeof(CatalogType)))[ml.IndexOf(menuEntry) - ml.IndexOf(MenuBarWidget.MB.MBC_cfen)];
         }
 
-        private void cloneType(uint resourceType)
+        private void cloneType(CatalogType resourceType)
         {
             if (Sims3Folder == null) return;
 
@@ -2632,22 +2606,22 @@ namespace ObjectCloner
             Step lastStepInChain = None;
             stepList = new List<Step>(new Step[] { Item_addSelf, });
 
-            switch (new List<uint>(catalogTypes).IndexOf(item.tgi.t))
+            switch (item.CType)
             {
-                case 0:
+                case CatalogType.CatalogObject:
                     OBJD_Steps(stepList, out lastStepInChain); break;
-                case 1:
+                case CatalogType.ModularResource:
                     MDLR_Steps(stepList, out lastStepInChain); break;
-                case 2:
-                case 3:
-                case 6:
-                case 14:
+                case CatalogType.CatalogFence:
+                case CatalogType.CatalogStairs:
+                case CatalogType.CatalogRailing:
+                case CatalogType.CatalogRoofPattern:
                     Common_Steps(stepList, out lastStepInChain); break;
-                case 7:
+                case CatalogType.CatalogTerrainPaintBrush:
                     CTPT_Steps(stepList, out lastStepInChain); break;
-                case 8:
+                case CatalogType.CatalogFireplace:
                     CFIR_Steps(stepList, out lastStepInChain); break;
-                case 11:
+                case CatalogType.CatalogWallFloorPattern:
                     CWAL_Steps(stepList, out lastStepInChain); break;
             }
             lastInChain = stepList == null ? -1 : (stepList.IndexOf(lastStepInChain) + 1);
@@ -3033,7 +3007,7 @@ namespace ObjectCloner
             foreach (THUM.THUMSize size in new THUM.THUMSize[] { THUM.THUMSize.small, THUM.THUMSize.medium, THUM.THUMSize.large, })
             {
                 TGI tgi = getImageTGI(size, selectedItem);
-                if (selectedItem.tgi.t == catalogTypes[14])
+                if (selectedItem.CType == CatalogType.CatalogRoofPattern)
                     Add(size + "Icon", tgi);
                 else
                     Add(size + "Thumb", tgi);
@@ -3124,14 +3098,14 @@ namespace ObjectCloner
             // A list to hold the new numbers
             oldToNew = new Dictionary<ulong, ulong>();
 
-            if (selectedItem.tgi.t == catalogTypes[1])
+            if (selectedItem.CType == CatalogType.ModularResource)
                 oldToNew.Add(selectedItem.tgi.i, FNV64.GetHash(UniqueObject));//MDLR needs its IID as a specific hash value
 
             ulong PngInstance = 0;
-            if (selectedItem.tgi.t != catalogTypes[1])
+            if (selectedItem.CType != CatalogType.ModularResource)
             {
                 // Renumber the PNGInstance we're referencing
-                PngInstance = (ulong)((AApiVersionedFields)selectedItem.Resource["CommonBlock"].Value)["PngInstance"].Value;
+                PngInstance = (ulong)selectedItem.Resource["CommonBlock.PngInstance"].Value;
                 if (PngInstance != 0)
                     oldToNew.Add(PngInstance, CreateInstance());
             }
@@ -3142,7 +3116,7 @@ namespace ObjectCloner
                 ulong langInst = (CreateInstance() << 8) >> 8;
                 foreach (TGI tgi in tgiToItem.Keys)
                 {
-                    if (cloneFixOptions.IsExcludeCatalogResources && ctList.Contains(tgi.t)) continue;
+                    if (cloneFixOptions.IsExcludeCatalogResources && Enum.IsDefined(typeof(CatalogType), tgi.t)) continue;
                     if (!oldToNew.ContainsKey(tgi.i))
                     {
                         if (tgi.t == 0x220557DA)//STBL
@@ -3154,11 +3128,11 @@ namespace ObjectCloner
             }
 
             Item catlgItem = selectedItem;
-            if (selectedItem.tgi.t == catalogTypes[1])
+            if (selectedItem.CType == CatalogType.ModularResource)
                 catlgItem = ItemForTGIBlock0(catlgItem);
 
-            nameGUID = (ulong)((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["NameGUID"].Value;
-            descGUID = (ulong)((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["DescGUID"].Value;
+            nameGUID = (ulong)catlgItem.Resource["CommonBlock.NameGUID"].Value;
+            descGUID = (ulong)catlgItem.Resource["CommonBlock.DescGUID"].Value;
 
             if (cloneFixOptions.IsRenumber)
             {
@@ -3183,15 +3157,15 @@ namespace ObjectCloner
 
                 resourceList.Add("Old NameGUID: 0x" + nameGUID.ToString("X16") + " --> New NameGUID: 0x" + newNameGUID.ToString("X16"));
                 resourceList.Add("Old DescGUID: 0x" + descGUID.ToString("X16") + " --> New DescGUID: 0x" + newDescGUID.ToString("X16"));
-                resourceList.Add("Old ObjName: \"" + ((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["Name"] + "\" --> New Name: \"CatalogObjects/Name:" + UniqueObject + "\"");
-                resourceList.Add("Old ObjDesc: \"" + ((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["Desc"] + "\" --> New Desc: \"CatalogObjects/Description:" + UniqueObject + "\"");
+                resourceList.Add("Old ObjName: \"" + catlgItem.Resource["CommonBlock.Name"] + "\" --> New Name: \"CatalogObjects/Name:" + UniqueObject + "\"");
+                resourceList.Add("Old ObjDesc: \"" + catlgItem.Resource["CommonBlock.Desc"] + "\" --> New Desc: \"CatalogObjects/Description:" + UniqueObject + "\"");
             }
 
             resourceList.Add("Old CatlgName: \"" + English[nameGUID] + "\" --> New CatlgName: \"" + tbCatlgName.Text + "\"");
             resourceList.Add("Old CatlgDesc: \"" + English[descGUID] + "\" --> New CatlgDesc: \"" + tbCatlgDesc.Text + "\"");
-            resourceList.Add("Old Price: " + ((AApiVersionedFields)catlgItem.Resource["CommonBlock"].Value)["Price"] + " --> New Price: " + float.Parse(tbPrice.Text));
+            resourceList.Add("Old Price: " + catlgItem.Resource["CommonBlock.Price"] + " --> New Price: " + float.Parse(tbPrice.Text));
             if (PngInstance != 0)
-                resourceList.Add("Old PngInstance: " + ((AApiVersionedFields)selectedItem.Resource["CommonBlock"].Value)["PngInstance"] + " --> New PngInstance: 0x" + oldToNew[PngInstance].ToString("X16"));
+                resourceList.Add("Old PngInstance: " + selectedItem.Resource["CommonBlock.PngInstance"] + " --> New PngInstance: 0x" + oldToNew[PngInstance].ToString("X16"));
         }
         #endregion
 

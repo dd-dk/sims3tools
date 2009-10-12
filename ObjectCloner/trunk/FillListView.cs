@@ -33,13 +33,13 @@ namespace ObjectCloner
         List<IPackage> objPkgs;
         List<IPackage> ddsPkgs;
         List<IPackage> tmbPkgs;
-        uint resourceType;
+        CatalogType resourceType;
         MainForm.createListViewItemCallback createListViewItemCB;
         MainForm.updateProgressCallback updateProgressCB;
         MainForm.stopLoadingCallback stopLoadingCB;
         MainForm.loadingCompleteCallback loadingCompleteCB;
 
-        public FillListView(Form mainForm, List<IPackage> objPkgs, List<IPackage> ddsPkgs, List<IPackage> tmbPkgs, uint resourceType
+        public FillListView(Form mainForm, List<IPackage> objPkgs, List<IPackage> ddsPkgs, List<IPackage> tmbPkgs, CatalogType resourceType
             , MainForm.createListViewItemCallback createListViewItemCB
             , MainForm.updateProgressCallback updateProgressCB
             , MainForm.stopLoadingCallback stopLoadingCB
@@ -81,7 +81,6 @@ namespace ObjectCloner
             try
             {
                 updateProgress(true, "Please wait, searching for objects...", true, -1, false, 0);
-                List<uint> validTypes = new List<uint>(MainForm.catalogTypes);
                 List<RIE> lrie = new List<RIE>();
                 List<TGI> seen = new List<TGI>();
                 List<IPackage> seenPkgs = new List<IPackage>();
@@ -92,13 +91,13 @@ namespace ObjectCloner
 
                     IList<IResourceIndexEntry> matches;
                     if (resourceType != 0)
-                        matches = pkg.FindAll(new string[] { "ResourceType", }, new TypedValue[] { new TypedValue(typeof(uint), resourceType, "X"), });
+                        matches = pkg.FindAll(new string[] { "ResourceType", }, new TypedValue[] { new TypedValue(typeof(uint), (uint)resourceType, "X"), });
                     else
                         matches = pkg.GetResourceList;
 
                     foreach (IResourceIndexEntry match in matches)
                     {
-                        if (!validTypes.Contains(match.ResourceType)) continue;
+                        if (!Enum.IsDefined(typeof(CatalogType), match.ResourceType)) continue;
                         TGI tgi = new TGI(match);
                         if (seen.Contains(tgi)) continue;
                         seen.Add(tgi);
@@ -129,6 +128,28 @@ namespace ObjectCloner
         }
     }
 
+
+    public enum CatalogType : uint
+    {
+        CatalogFence = 0x0418FE2A,
+        CatalogStairs = 0x049CA4CD,
+        CatalogProxyProduct = 0x04AC5D93,
+        CatalogTerrainGeometryBrush = 0x04B30669,
+
+        CatalogRailing = 0x04C58103,
+        CatalogTerrainPaintBrush = 0x04ED4BB2,
+        CatalogFireplace = 0x04F3CC01,
+        CatalogTerrainWaterBrush = 0x060B390C,
+
+        CatalogFoundation = 0x316C78F2,
+        CatalogObject = 0x319E4F1D,
+        CatalogWallFloorPattern = 0x515CA4CD,
+        CatalogWall = 0x9151E6BC,
+
+        CatalogRoofStyle = 0x91EDBD3E,
+        ModularResource = 0xCF9A4ACE,
+        CatalogRoofPattern = 0xF1EDBD86,
+    }
 
     public struct TGI : IEquatable<TGI>, IEqualityComparer<TGI>
     {
@@ -263,6 +284,8 @@ namespace ObjectCloner
         public IPackage Package { get { return myrie.pkg; } }
 
         public TGI tgi { get { return myrie.tgi; } }
+
+        public CatalogType CType { get { return (CatalogType)myrie.tgi.t; } }
 
         public Exception Exception { get { return ex; } }
 
