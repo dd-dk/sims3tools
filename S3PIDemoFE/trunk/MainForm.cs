@@ -177,7 +177,6 @@ namespace S3PIDemoFE
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_close, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_bookmarkCurrent, CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBR, CurrentPackage != null);
-            menuBarWidget1.EnableCMSBW(CurrentPackage != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBT_search, CurrentPackage != null);
             resourceDropDownOpening();
         }
@@ -583,30 +582,25 @@ namespace S3PIDemoFE
                 //|| Clipboard.ContainsText()
                 );
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_paste, state);
-            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_paste, state);
 
             CheckState res = CompressedCheckState();
             if (res == CheckState.Indeterminate)
             {
                 menuBarWidget1.Indeterminate(MenuBarWidget.MB.MBR_compressed);
-                menuBarWidget1.Indeterminate(MenuBarWidget.CMS.MBR_compressed);
             }
             else
             {
                 menuBarWidget1.Checked(MenuBarWidget.MB.MBR_compressed, res == CheckState.Checked);
-                menuBarWidget1.Checked(MenuBarWidget.CMS.MBR_compressed, res == CheckState.Checked);
             }
 
             res = IsDeletedCheckState();
             if (res == CheckState.Indeterminate)
             {
                 menuBarWidget1.Indeterminate(MenuBarWidget.MB.MBR_isdeleted);
-                menuBarWidget1.Indeterminate(MenuBarWidget.CMS.MBR_isdeleted);
             }
             else
             {
                 menuBarWidget1.Checked(MenuBarWidget.MB.MBR_isdeleted, res == CheckState.Checked);
-                menuBarWidget1.Checked(MenuBarWidget.CMS.MBR_isdeleted, res == CheckState.Checked);
             }
         }
         private CheckState CompressedCheckState()
@@ -1357,22 +1351,14 @@ namespace S3PIDemoFE
 
             bool selectedItems = resource != null || browserWidget1.SelectedResources.Count > 0; // one or more
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_exportResources, selectedItems);
-            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_exportResources, selectedItems);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_exportToPackage, selectedItems);
-            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_exportToPackage, selectedItems);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBE_cut, resource != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copy, selectedItems);
-            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_copy, selectedItems);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_duplicate, resource != null);
-            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_duplicate, resource != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_replace, resource != null);
-            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_replace, resource != null);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_compressed, selectedItems);
-            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_compressed, selectedItems);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_isdeleted, selectedItems);
-            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_isdeleted, selectedItems);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_details, resource != null);
-            menuBarWidget1.Enable(MenuBarWidget.CMS.MBR_details, resource != null);
 
             resourceFilterWidget1.IndexEntry = browserWidget1.SelectedResource;
         }

@@ -73,7 +73,6 @@ namespace S3PIDemoFE
             MBR,
             MBS,
             MBH,
-            CMSBW,
         }
 
         public enum MB
@@ -98,16 +97,21 @@ namespace S3PIDemoFE
             MBR_importResources, MBR_importPackages, MBR_exportResources, MBR_exportToPackage,
         }
 
-        public void Enable(MD mn, bool state) { tsMD[(int)mn].Enabled = state; }
-        public void EnableCMSBW(bool state) { browserWidgetContextMenuStrip.Enabled = state; }
-        public void Enable(MB mn, bool state) { tsMB[(int)mn].Enabled = state; }
-        public void Enable(CMS mn, bool state) { cmsBW[(int)mn - (int)MB.MBR_add].Enabled = state; }
-        public void Checked(MB mn, bool state) { tsMB[(int)mn].Checked = state; tsMB[(int)mn].CheckState = state ? CheckState.Checked : CheckState.Unchecked; }
-        public void Checked(CMS mn, bool state) { cmsBW[(int)mn - (int)MB.MBR_add].Checked = state; cmsBW[(int)mn - (int)MB.MBR_add].CheckState = state ? CheckState.Checked : CheckState.Unchecked; }
-        public void Indeterminate(MB mn) { tsMB[(int)mn].CheckState = CheckState.Indeterminate; }
-        public void Indeterminate(CMS mn) { cmsBW[(int)mn - (int)MB.MBR_add].CheckState = CheckState.Indeterminate; }
+        bool isCMSBW(MB mn) { return (mn >= MB.MBR_add && mn < MB.MBT_fnvHash); }
+        public void Enable(MD mn, bool state) { tsMD[(int)mn].Enabled = state; if (mn == MD.MBR) browserWidgetContextMenuStrip.Enabled = state; }
+        public void Enable(MB mn, bool state) { tsMB[(int)mn].Enabled = state; if (isCMSBW(mn)) cmsBW[(int)mn - (int)CMS.MBR_add].Enabled = state; }
+        public void Checked(MB mn, bool state)
+        {
+            tsMB[(int)mn].Checked = state;
+            tsMB[(int)mn].CheckState = state ? CheckState.Checked : CheckState.Unchecked;
+            if (isCMSBW(mn))
+            {
+                cmsBW[(int)mn - (int)CMS.MBR_add].Checked = state;
+                cmsBW[(int)mn - (int)CMS.MBR_add].CheckState = state ? CheckState.Checked : CheckState.Unchecked;
+            }
+        }
+        public void Indeterminate(MB mn) { tsMB[(int)mn].CheckState = CheckState.Indeterminate; if (isCMSBW(mn)) cmsBW[(int)mn - (int)CMS.MBR_add].CheckState = CheckState.Indeterminate; ; }
         public bool IsChecked(MB mn) { return tsMB[(int)mn].Checked; }
-        public bool IsChecked(CMS mn) { return cmsBW[(int)mn - (int)MB.MBR_add].Checked; }
 
         public class MBDropDownOpeningEventArgs : EventArgs { public readonly MD mn; public MBDropDownOpeningEventArgs(MD mn) { this.mn = mn; } }
         public delegate void MBDropDownOpeningEventHandler(object sender, MBDropDownOpeningEventArgs mn);
