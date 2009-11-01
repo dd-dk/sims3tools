@@ -35,10 +35,15 @@ namespace S3PIDemoFE
         static List<string> fields = null;
         static MainForm()
         {
-            fields = new List<string>();
-            foreach (string s in AApiVersionedFields.GetContentFields(0, typeof(AResourceIndexEntry)))
-                if (!s.Contains("Stream"))
-                    fields.Add(s);
+            //GetContentFields now returns a sorted list, which we don't want for "fields"
+            //foreach (string s in AApiVersionedFields.GetContentFields(0, typeof(AResourceIndexEntry)))
+            //    if (!s.Contains("Stream"))
+            //        fields.Add(s);
+            fields = new List<string>(new string[] {
+                "ResourceType", "ResourceGroup", "Instance",
+                "Chunkoffset", "Filesize", "Memsize", "Compressed", "Unknown2",
+                "IsDeleted",
+            });
         }
 
         const string myName = "s3pe";
