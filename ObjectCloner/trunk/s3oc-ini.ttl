@@ -1,0 +1,45 @@
+﻿@prefix : <http://sims3.drealm.info/s3octerms/1.0#> .
+
+:base
+   a  :Sims3, :baseGame ;
+   :hasName  "Sims3" ;
+   :hasLongname  "The Sims3";
+   :hasDefaultInstallDir  "C:/Program Files/EA Games/Sims3";
+   :hasPriority  0 ;
+   :isSuppressed  "not-allowed" ;
+   :hasPackages [
+      a :Objects ;
+      :in "GameData/Shared/Packages" ;
+      :packages ( "Deltabuild0.package" "Fullbuild0.package" ) .
+   ], [
+      a :Images ;
+      :in "GameData/Shared/Packages" ;
+      :packages ( "Deltabuild2.package" "Fullbuild2.package" ) .
+   ], [
+      a :Thumbnails ;
+      :in "Thumbnails" ;
+      :packages ( "AllThumbnails.package" ) .
+   ]
+.
+
+:ep1
+   a  :Sims3, :EP ;
+   :hasName  "EP1" ;
+   :hasLongname  "The Sims3 World Adventures";
+   :hasDefaultInstallDir  "C:/Program Files/EA Games/Sims3 World Adventures";
+   :hasPriority  1 ;
+   :isSuppressed  "false" ;
+   :hasPackages [
+      a :Objects ;
+      :in "GameData/Shared/Packages" ;
+      :packages ( "FullbuildEP1.package" ) .
+   ], [
+      a :Images ;
+      :in "GameData/Shared/Packages" ;
+      :packages ( "FullbuildEP1.package" ) .
+   ], [
+      a :Thumbnails ;
+      :in "Thumbnails" ;
+      :packages ( "AllThumbnails.package" ) .
+   ]
+.
