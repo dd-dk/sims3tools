@@ -3,8 +3,8 @@
 :base
    a  :Sims3, :baseGame ;
    :hasName  "Sims3" ;
-   :hasLongname  "The Sims3";
-   :hasDefaultInstallDir  "C:/Program Files/EA Games/Sims3";
+   :hasLongname  "The Sims 3";
+   :hasDefaultInstallDir  "C:/Program Files/Electronic Arts/The Sims 3";
    :hasPriority  0 ;
    :isSuppressed  "not-allowed" ;
    :hasPackages [
@@ -25,18 +25,18 @@
 :ep1
    a  :Sims3, :EP ;
    :hasName  "EP1" ;
-   :hasLongname  "The Sims3 World Adventures";
-   :hasDefaultInstallDir  "C:/Program Files/EA Games/Sims3 World Adventures";
+   :hasLongname  "The Sims 3 World Adventures";
+   :hasDefaultInstallDir  "C:/Program Files/Electronic Arts/The Sims 3 World Adventures";
    :hasPriority  1 ;
    :isSuppressed  "false" ;
    :hasPackages [
       a :Objects ;
       :in "GameData/Shared/Packages" ;
-      :packages ( "FullbuildEP1.package" ) .
+      :packages ( "FullBuildep1.package" ) .
    ], [
       a :Images ;
       :in "GameData/Shared/Packages" ;
-      :packages ( "FullbuildEP1.package" ) .
+      :packages ( "FullBuildep1.package" ) .
    ], [
       a :Thumbnails ;
       :in "Thumbnails" ;
