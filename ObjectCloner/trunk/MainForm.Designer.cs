@@ -96,7 +96,6 @@
             this.label6 = new System.Windows.Forms.Label();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openPackageDialog = new System.Windows.Forms.OpenFileDialog();
-            this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.openThumbnailDialog = new System.Windows.Forms.OpenFileDialog();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -1024,11 +1023,6 @@
             this.openPackageDialog.Filter = "DBPF Packages|*.package;*.world|All files|*.*";
             this.openPackageDialog.Title = "Select package containing object";
             // 
-            // folderBrowserDialog1
-            // 
-            this.folderBrowserDialog1.Description = "Select the folder where your Sims3 game is installed.";
-            this.folderBrowserDialog1.ShowNewFolderButton = false;
-            // 
             // openThumbnailDialog
             // 
             this.openThumbnailDialog.FileName = "*.PNG";
@@ -1127,7 +1121,6 @@
         private MenuBarWidget menuBarWidget1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.OpenFileDialog openPackageDialog;
-        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         private System.Windows.Forms.OpenFileDialog openThumbnailDialog;
         private System.Windows.Forms.TableLayoutPanel tlpTask;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;

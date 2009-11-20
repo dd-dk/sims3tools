@@ -30,6 +30,7 @@ using s3pi.Interfaces;
 using s3pi.Extensions;
 using s3pi.GenericRCOLResource;
 using ObjectCloner.TopPanelComponents;
+using SemWeb;
 
 namespace ObjectCloner
 {
@@ -65,6 +66,40 @@ namespace ObjectCloner
             viewMapKeys = new List<View>(viewMap.Keys);
             viewMapValues = new List<MenuBarWidget.MB>(viewMap.Values);
 
+            LoadIni();
+            LoadTTL();
+            LoadEPsDisabled();
+            LoadGameDirSettings();
+        }
+
+        static List<string> ePsDisabled = new List<string>();
+        private static void LoadEPsDisabled() { ePsDisabled = new List<string>(ObjectCloner.Properties.Settings.Default.EPsDisabled.Split(';')); }
+        private static void SaveEPsDisabled() { ObjectCloner.Properties.Settings.Default.EPsDisabled = String.Join(";", ePsDisabled.ToArray()); }
+
+        static Dictionary<string, string> gameDirs = new Dictionary<string, string>();
+        private static void LoadGameDirSettings()
+        {
+            gameDirs = new Dictionary<string, string>();
+            foreach (string s in ObjectCloner.Properties.Settings.Default.InstallDirs.Split(';'))
+            {
+                string[] p = s.Split(new char[] { '=' }, 2);
+                if (S3ocSims3.byName(p[0]) != null && Directory.Exists(p[1]))
+                    gameDirs.Add(p[0], p[1]);
+            }
+        }
+        private static void SaveGameDirSettings()
+        {
+            string value = "";
+            foreach (var kvp in gameDirs)
+                value = ";" + kvp.Key + "=" + kvp.Value;
+            ObjectCloner.Properties.Settings.Default.InstallDirs = value.TrimStart(';');
+        }
+
+        /// <summary>
+        /// This static method loads the old .ini file
+        /// </summary>
+        static void LoadIni()
+        {
             s3ocIni = new Dictionary<string, List<string>>();
             string file = Path.Combine(Path.GetDirectoryName(typeof(MainForm).Assembly.Location), "s3oc.ini");
             if (File.Exists(file))
@@ -85,6 +120,217 @@ namespace ObjectCloner
                 sr.Close();
             }
         }
+
+        #region LoadTTL
+        static MemoryStore s3oc_ini = new MemoryStore();
+        const string s3octerms = "http://sims3.drealm.info/s3octerms/1.0#";
+        const string RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+        const string RDFS = "http://www.w3.org/2000/01/rdf-schema#";
+        public static readonly Entity rdftype = RDF + "type";
+        public static readonly Entity rdf_first = RDF + "first";
+        static readonly Entity rdf_rest = RDF + "rest";
+        static readonly Entity rdf_nil = RDF + "nil";
+        static readonly Entity typeSims3 = s3octerms + "Sims3";
+        static readonly Entity predHasName = s3octerms + "hasName";
+        static readonly Entity predHasLongname = s3octerms + "hasLongname";
+        static readonly Entity predHasDefaultInstallDir = s3octerms + "hasDefaultInstallDir";
+        static readonly Entity predHasPriority = s3octerms + "hasPriority";
+        static readonly Entity predIsSuppressed = s3octerms + "isSuppressed";
+        static readonly Entity predHasPackages = s3octerms + "hasPackages";
+        static readonly Entity predIn = s3octerms + "in";
+        static readonly Entity predPackages = s3octerms + "packages";
+
+        public class S3ocSims3
+        {
+            public string subjectName;
+            public string hasName;
+            public string hasLongname;
+            public string hasDefaultInstallDir;
+            public int hasPriority;
+            public int isSuppressed; // -1: not-allowed; 0: false; else true
+            public List<Entity> hasPackages = new List<Entity>();
+            public List<Entity> otherStatements = new List<Entity>();
+
+            public S3ocSims3(Entity Subject) { subjectName = Subject.Uri.Split(new char[] { '#' }, 2)[1]; }
+
+            public bool Enabled
+            {
+                get
+                {
+                    return ePsDisabled.Contains(subjectName) ? false : isSuppressed < 1;
+                }
+                set
+                {
+                    if (Enabled == value) return;
+                    if (value)
+                        ePsDisabled.Remove(subjectName);
+                    else
+                        ePsDisabled.Add(subjectName);
+                    SaveEPsDisabled();
+                }
+            }
+            public string InstallDir
+            {
+                get
+                {
+                    return gameDirs.ContainsKey(subjectName) ? gameDirs[subjectName] : hasDefaultInstallDir;
+                }
+                set
+                {
+                    if (InstallDir == value) return;
+                    if (gameDirs.ContainsKey(subjectName))
+                        gameDirs[subjectName] = value;
+                    else
+                        gameDirs.Add(subjectName, value);
+                    SaveGameDirSettings();
+                }
+            }
+
+            public List<string> getPackages(string type)
+            {
+                if (hasPackages == null) return null;
+                foreach (Entity e in hasPackages)
+                {
+
+                }
+                return null;
+            }
+
+            public Resource getOtherStatement(Entity Predicate)
+            {
+                if (otherStatements == null) return null;
+                foreach (Entity e in this.otherStatements)
+                    if (e.Equals(Predicate)) return rdfFetch(s3oc_ini, s3octerms + subjectName, Predicate);
+                return null;
+            }
+
+            public override string ToString() { return hasLongname; }
+
+            public static S3ocSims3 byName(string name)
+            {
+                foreach (S3ocSims3 sims3 in lS3ocSims3) if (sims3.subjectName.Equals(name)) return sims3;
+                return null;
+            }
+        }
+        public static List<S3ocSims3> lS3ocSims3 = new List<S3ocSims3>();
+
+        /// <summary>
+        /// This static method loads the new Turtle resource definition file
+        /// </summary>
+        static void LoadTTL()
+        {
+            s3oc_ini.Import(new N3Reader("s3oc-ini.ttl"));
+            lS3ocSims3 = new List<S3ocSims3>();
+
+            foreach (Statement s in s3oc_ini.Select(new Statement(null, rdftype, typeSims3)))
+            {
+                S3ocSims3 sims3 = new S3ocSims3(s.Subject);
+                lS3ocSims3.Add(sims3);
+
+                foreach (Statement t in s3oc_ini.Select(new Statement(s.Subject, null, null)))
+                {
+                    if (t.Predicate.Equals(predHasName)) { sims3.hasName = getString(t.Object); continue; }
+                    if (t.Predicate.Equals(predHasLongname)) { sims3.hasLongname = getString(t.Object); continue; }
+                    if (t.Predicate.Equals(predHasDefaultInstallDir)) { sims3.hasDefaultInstallDir = getHasDefaultInstallDir(t.Object); continue; }
+                    if (t.Predicate.Equals(predHasPriority)) { sims3.hasPriority = getHasPriority(t.Object); continue; }
+                    if (t.Predicate.Equals(predIsSuppressed)) { sims3.isSuppressed = getIsSuppressed(t.Object); continue; }
+                    if (t.Predicate.Equals(predHasPackages)) { sims3.hasPackages.Add(t.Object as Entity); continue; }
+                    if (!sims3.otherStatements.Contains(t.Predicate))
+                        sims3.otherStatements.Add(t.Predicate);
+                }
+            }
+            lS3ocSims3.Sort(reversePriority);
+        }
+        static int reversePriority(S3ocSims3 x, S3ocSims3 y) { return y.hasPriority.CompareTo(x.hasPriority); }
+
+        static string getString(Resource value)
+        {
+            if (value as Literal == null) return null;
+            object o = ((Literal)value).ParseValue();
+            if (!o.GetType().Equals(typeof(string))) return null;
+            return (!o.GetType().Equals(typeof(string))) ? null : (string)o;
+        }
+
+        static int getIsSuppressed(Resource value)
+        {
+            if (value as Literal == null) return 0;
+            object o = ((Literal)value).ParseValue();
+            if (!o.GetType().Equals(typeof(string))) return -1;
+            string s = (string)o;
+            if (s.Equals("not-allowed")) return -1;
+            if (s.Equals("false")) return 0;
+            return 1;
+        }
+
+        static int getHasPriority(Resource value)
+        {
+            if (value as Literal == null) return 0;
+            object o = ((Literal)value).ParseValue();
+            if (!o.GetType().Equals(typeof(Decimal))) return 0;
+            return Convert.ToInt32((Decimal)o);
+        }
+
+        static string getHasDefaultInstallDir(Resource value)
+        {
+            string s = getString(value);
+            return (s == null || !Directory.Exists(s)) ? null : s;
+        }
+
+        static List<string> ini_fb0 { get { return iniGetPath("Objects"); } }
+        static List<string> ini_fb2 { get { return iniGetPath("Images"); } }
+        static List<string> ini_tmb { get { return iniGetPath("Thumbnails"); } }
+        static List<string> iniGetPath(string path)
+        {
+            List<string> res = new List<string>();
+            foreach (S3ocSims3 sims3 in lS3ocSims3)
+            {
+                if (!sims3.Enabled) continue;
+
+                foreach (Entity e in sims3.hasPackages)
+                {
+                    Resource r = rdfFetch(s3oc_ini, e, rdftype);
+                    if (!r.Equals((Entity)(s3octerms + path))) continue;
+
+                    r = rdfFetch(s3oc_ini, e, predIn);
+                    string subFolder = (r != null) ? (string)((Literal)r).ParseValue() : null;
+
+                    string prefix = Path.Combine(sims3.InstallDir, subFolder == null ? "" : subFolder);
+                    if (prefix.Length > 0 && !Directory.Exists(prefix)) break;
+
+                    Entity eList = (Entity)rdfFetch(s3oc_ini, e, predPackages);
+                    r = rdfFetch(s3oc_ini, eList, rdf_first);
+                    while (r != null && r != rdf_nil)
+                    {
+                        string file = Path.Combine(prefix, (string)((Literal)r).ParseValue());
+                        if (File.Exists(file)) res.Add(file);
+                        r = rdfFetch(s3oc_ini, eList, rdf_rest);
+                        eList = r as Entity;
+                        if (eList == null || eList == rdf_nil) break;
+                        r = rdfFetch(s3oc_ini, eList, rdf_first);
+                    }
+                }
+            }
+            return res;
+        }
+
+        static Resource rdfFetch(Store store, Entity Subject, Entity Predicate)
+        {
+            foreach (Statement r in store.Select(new Statement(Subject, Predicate, null)))
+                return r.Object;
+            return null;
+        }
+
+#if DEBUG
+        class StatementPrinter : StatementSink
+        {
+            public bool Add(Statement assertion)
+            {
+                Console.WriteLine(assertion.ToString());
+                return true;
+            }
+        }
+#endif
+        #endregion
         #endregion
 
         enum Mode
@@ -261,20 +507,6 @@ namespace ObjectCloner
         }
         #endregion
 
-
-        string Sims3Folder
-        {
-            get
-            {
-                if (ObjectCloner.Properties.Settings.Default.Sims3Folder == null || ObjectCloner.Properties.Settings.Default.Sims3Folder.Length == 0
-                    || !Directory.Exists(ObjectCloner.Properties.Settings.Default.Sims3Folder))
-                    settingsSims3Folder();
-                if (ObjectCloner.Properties.Settings.Default.Sims3Folder == null || ObjectCloner.Properties.Settings.Default.Sims3Folder.Length == 0
-                    || !Directory.Exists(ObjectCloner.Properties.Settings.Default.Sims3Folder))
-                    return null;
-                return ObjectCloner.Properties.Settings.Default.Sims3Folder;
-            }
-        }
 
         string creatorName = null;
         string CreatorName
@@ -2274,7 +2506,6 @@ namespace ObjectCloner
                 return;
             }
 
-            if (currentCatalogType != 0) menuBarWidget1.Checked((MenuBarWidget.MB)((int)MenuBarWidget.MB.MBC_objd + ToCloningMenuEntry(currentCatalogType)), false);
             currentCatalogType = 0;
             currentPackage = filename;
             tmbPkgs = ddsPkgs = objPkgs = new List<IPackage>(new IPackage[] { pkg, });
@@ -2312,8 +2543,11 @@ namespace ObjectCloner
             Application.DoEvents();
 
             if (mn.mn == ToCloningMenuEntry(currentCatalogType)) return;
-            if (ToCloningMenuEntry(currentCatalogType) != 0)
-                menuBarWidget1.Checked(ToCloningMenuEntry(currentCatalogType), false);
+
+            foreach (int i in Enum.GetValues(typeof(MenuBarWidget.MB)))
+                if (i >= (int)MenuBarWidget.MB.MBC_cfen && i <= (int)MenuBarWidget.MB.MBC_crmt)
+                    menuBarWidget1.Checked((MenuBarWidget.MB)i, false);
+
             menuBarWidget1.Checked(mn.mn, true);
             cloneType(FromCloningMenuEntry(mn.mn));
         }
@@ -2332,27 +2566,48 @@ namespace ObjectCloner
 
         private void cloneType(CatalogType resourceType)
         {
-            if (Sims3Folder == null) return;
+            if (!CheckInstallDirs()) return;
 
             if (currentCatalogType != resourceType)
             {
                 ClosePkg();
-                setList(@"Gamedata\Shared\Packages\", s3ocIni.ContainsKey("fb0") ? s3ocIni["fb0"] : new List<string>(new string[] { "FullBuild0", }), out objPkgs);
-                setList(@"Gamedata\Shared\Packages\", s3ocIni.ContainsKey("fb2") ? s3ocIni["fb2"] : new List<string>(new string[] { "FullBuild2", }), out ddsPkgs);
-                setList(@"Thumbnails\", s3ocIni.ContainsKey("tmb") ? s3ocIni["tmb"] : new List<string>(new string[] { "ALLThumbnails", }), out tmbPkgs);
+                setList(out objPkgs, ini_fb0);
+                setList(out ddsPkgs, ini_fb2);
+                setList(out tmbPkgs, ini_tmb);
                 currentCatalogType = resourceType;
             }
 
             mode = Mode.Clone;
             fileNewOpen(resourceType, false);
         }
-        void setList(string path, IList<string> files, out List<IPackage> pkgs)
+
+        private bool CheckInstallDirs()
         {
-            path = Path.Combine(Sims3Folder, path);
+            if (!doCheckInstallDirs())
+            {
+                settingsGameFolders();
+                return doCheckInstallDirs();
+            }
+            return true;
+        }
+        bool doCheckInstallDirs()
+        {
+            foreach (S3ocSims3 sims3 in lS3ocSims3)
+            {
+                if (!sims3.Enabled) continue;
+                if (sims3.InstallDir == null || sims3.InstallDir.Length == 0) return false;
+            }
+            return true;
+        }
+        void setList(out List<IPackage> pkgs, List<string> paths)
+        {
             pkgs = new List<IPackage>();
-            foreach (string file in files)
-                try { pkgs.Add(s3pi.Package.Package.OpenPackage(0, Path.Combine(path, file + ".package"))); }
-                catch { }
+
+            if (paths == null) return;
+            foreach (string file in paths)
+                if (File.Exists(file))
+                    try { pkgs.Add(s3pi.Package.Package.OpenPackage(0, file)); }
+                    catch { }
         }
         #endregion
 
@@ -2435,14 +2690,14 @@ namespace ObjectCloner
                 Application.DoEvents();
                 switch (mn.mn)
                 {
-                    case MenuBarWidget.MB.MBS_sims3Folder: settingsSims3Folder(); break;
+                    case MenuBarWidget.MB.MBS_sims3Folder: settingsGameFolders(); break;
                     case MenuBarWidget.MB.MBS_userName: settingsUserName(); break;
                 }
             }
             finally { this.Enabled = true; }
         }
 
-        private void settingsSims3Folder()
+        /*private void settingsSims3Folder()
         {
             folderBrowserDialog1.SelectedPath = ObjectCloner.Properties.Settings.Default.Sims3Folder == null || ObjectCloner.Properties.Settings.Default.Sims3Folder.Length == 0
                 ? "" : ObjectCloner.Properties.Settings.Default.Sims3Folder;
@@ -2458,6 +2713,13 @@ namespace ObjectCloner
                     "Select Sims3 Install Folder", CopyableMessageBoxButtons.OKCancel, CopyableMessageBoxIcon.Error) != 0) return;
             }
             ObjectCloner.Properties.Settings.Default.Sims3Folder = folderBrowserDialog1.SelectedPath;
+        }/**/
+
+        private void settingsGameFolders()
+        {
+            SettingsForms.GameFolders gf = new ObjectCloner.SettingsForms.GameFolders();
+            DialogResult dr = gf.ShowDialog();
+            if (dr != DialogResult.OK) return;
         }
 
         private void settingsUserName()

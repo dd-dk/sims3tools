@@ -32,10 +32,13 @@
     <Setting Name="LastSaveFolder" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="Sims3Folder" Type="System.String" Scope="User">
+    <Setting Name="CreatorName" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="CreatorName" Type="System.String" Scope="User">
+    <Setting Name="InstallDirs" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="EPsDisabled" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

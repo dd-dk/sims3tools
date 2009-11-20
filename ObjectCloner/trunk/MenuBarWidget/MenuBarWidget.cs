@@ -47,7 +47,7 @@ namespace ObjectCloner
                 tilesToolStripMenuItem, largeIconsToolStripMenuItem, smallIconsToolStripMenuItem, listToolStripMenuItem, detailedListToolStripMenuItem,
                 iconsToolStripMenuItem,
                 //Settings
-                sims3FolderToolStripMenuItem, userNameToopStripMenuItem,
+                gameFoldersToolStripMenuItem, userNameToopStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
