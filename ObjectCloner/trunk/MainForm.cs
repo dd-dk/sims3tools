@@ -161,7 +161,7 @@ namespace ObjectCloner
                 }
                 set
                 {
-                    if (Enabled == value) return;
+                    if (isSuppressed != 0 || Enabled == value) return;
                     if (value)
                         ePsDisabled.Remove(subjectName);
                     else
@@ -177,14 +177,21 @@ namespace ObjectCloner
                 }
                 set
                 {
-                    if (InstallDir == value) return;
+                    if (safeGetFullPath(InstallDir) == safeGetFullPath(value)) return;
+
                     if (gameDirs.ContainsKey(subjectName))
-                        gameDirs[subjectName] = value;
+                    {
+                        if (safeGetFullPath(hasDefaultInstallDir) == safeGetFullPath(value))
+                            gameDirs.Remove(subjectName);
+                        else
+                            gameDirs[subjectName] = value == null ? "" : value;
+                    }
                     else
                         gameDirs.Add(subjectName, value);
                     SaveGameDirSettings();
                 }
             }
+            string safeGetFullPath(string value) { return value == null ? null : Path.GetFullPath(value); }
 
             public List<string> getPackages(string type)
             {
@@ -285,29 +292,46 @@ namespace ObjectCloner
             foreach (S3ocSims3 sims3 in lS3ocSims3)
             {
                 if (!sims3.Enabled) continue;
+                foreach (string p in iniGetPath(sims3, path))
+                    if (File.Exists(p)) res.Add(p);
+            }
+            return res;
+        }
 
-                foreach (Entity e in sims3.hasPackages)
+        /// <summary>
+        /// Return the "raw" expanded list of a particular type - or all, if path is null
+        /// </summary>
+        /// <param name="sims3"></param>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static List<string> iniGetPath(S3ocSims3 sims3, string path)
+        {
+            if (!sims3.Enabled) return null;
+
+            List<string> res = new List<string>();
+
+            foreach (Entity e in sims3.hasPackages)
+            {
+                Resource r = rdfFetch(s3oc_ini, e, rdftype);
+                if (path != null) if (r == null || !r.Equals((Entity)(s3octerms + path))) continue;
+
+                Entity eList = rdfFetch(s3oc_ini, e, predPackages) as Entity;
+                if (eList == null) continue;
+
+                r = rdfFetch(s3oc_ini, e, predIn);
+                string subFolder = (r != null && r as Literal != null && ((Literal)r).ParseValue().GetType().Equals(typeof(string)))
+                    ? (string)((Literal)r).ParseValue() : "";
+
+                string prefix = Path.Combine(sims3.InstallDir == null ? "" : sims3.InstallDir, subFolder);
+                //if (prefix.Length > 0 && !Directory.Exists(prefix)) continue;
+
+                r = rdfFetch(s3oc_ini, eList, rdf_first);
+                while (r != null && r as Literal != null && ((Literal)r).ParseValue().GetType().Equals(typeof(string)))
                 {
-                    Resource r = rdfFetch(s3oc_ini, e, rdftype);
-                    if (!r.Equals((Entity)(s3octerms + path))) continue;
-
-                    r = rdfFetch(s3oc_ini, e, predIn);
-                    string subFolder = (r != null) ? (string)((Literal)r).ParseValue() : null;
-
-                    string prefix = Path.Combine(sims3.InstallDir, subFolder == null ? "" : subFolder);
-                    if (prefix.Length > 0 && !Directory.Exists(prefix)) break;
-
-                    Entity eList = (Entity)rdfFetch(s3oc_ini, e, predPackages);
+                    res.Add(Path.Combine(prefix, (string)((Literal)r).ParseValue()));
+                    eList = rdfFetch(s3oc_ini, eList, rdf_rest) as Entity;
+                    if (eList == null || eList == rdf_nil) break;
                     r = rdfFetch(s3oc_ini, eList, rdf_first);
-                    while (r != null && r != rdf_nil)
-                    {
-                        string file = Path.Combine(prefix, (string)((Literal)r).ParseValue());
-                        if (File.Exists(file)) res.Add(file);
-                        r = rdfFetch(s3oc_ini, eList, rdf_rest);
-                        eList = r as Entity;
-                        if (eList == null || eList == rdf_nil) break;
-                        r = rdfFetch(s3oc_ini, eList, rdf_first);
-                    }
                 }
             }
             return res;
@@ -2583,22 +2607,15 @@ namespace ObjectCloner
 
         private bool CheckInstallDirs()
         {
-            if (!doCheckInstallDirs())
+            if (!doCheckPackageLists())
             {
-                settingsGameFolders();
-                return doCheckInstallDirs();
+                CopyableMessageBox.Show("Found no packages\nPlease check your Game Folder settings.", "No objects to clone",
+                    CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Stop);
+                return false;
             }
             return true;
         }
-        bool doCheckInstallDirs()
-        {
-            foreach (S3ocSims3 sims3 in lS3ocSims3)
-            {
-                if (!sims3.Enabled) continue;
-                if (sims3.InstallDir == null || sims3.InstallDir.Length == 0) return false;
-            }
-            return true;
-        }
+        bool doCheckPackageLists() { return ini_fb0 != null && ini_fb2 != null && ini_tmb != null && ini_fb0.Count > 0; }
         void setList(out List<IPackage> pkgs, List<string> paths)
         {
             pkgs = new List<IPackage>();

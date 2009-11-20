@@ -51,16 +51,8 @@ namespace ObjectCloner.SettingsForms
 
                 ckbEnabled.Anchor = AnchorStyles.None;
                 ckbEnabled.AutoSize = true;
-                if (sims3.isSuppressed < 0)
-                {
-                    ckbEnabled.Enabled = false;
-                    ckbEnabled.CheckState = CheckState.Indeterminate;
-                }
-                else
-                {
-                    ckbEnabled.Enabled = true;
-                    ckbEnabled.Checked = sims3.Enabled;
-                }
+                ckbEnabled.Enabled = sims3.isSuppressed == 0;
+                ckbEnabled.Checked = sims3.Enabled;
                 ckbEnabled.CheckedChanged += new EventHandler(ckbEnabled_CheckedChanged);
 
                 tbInstFolder.Anchor = AnchorStyles.Left | AnchorStyles.Right;
@@ -102,10 +94,34 @@ namespace ObjectCloner.SettingsForms
             folderBrowserDialog1.SelectedPath = sims3.InstallDir == null ? "" : sims3.InstallDir;
             DialogResult dr = folderBrowserDialog1.ShowDialog();
             if (dr != DialogResult.OK) return;
+
             sims3.InstallDir = folderBrowserDialog1.SelectedPath;
 
             TextBox tb = tlpGameFolders.GetControlFromPosition(2, tlpGameFolders.GetCellPosition((Control)sender).Row) as TextBox;
             tb.Text = (sims3.InstallDir == null) ? "(not set)" : sims3.InstallDir;
+            tb.BackColor = SystemColors.Control;
+
+            List<string> files = MainForm.iniGetPath(sims3, null);
+            foreach(string file in files)
+                if (!File.Exists(file))
+                {
+                    CopyableMessageBox.Show("One or more expected packages in the path you chose was not found.", "File not found",
+                        CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
+                    tb.BackColor = SystemColors.ControlDark;
+                    break;
+                }
+
+        }
+
+        private void btnReset_Click(object sender, EventArgs e)
+        {
+            foreach (MainForm.S3ocSims3 sims3 in MainForm.lS3ocSims3)
+            {
+                sims3.Enabled = sims3.isSuppressed == 0;
+                sims3.InstallDir = sims3.hasDefaultInstallDir;
+            }
+            DialogResult = DialogResult.OK;
+            Close();
         }
     }
 }
