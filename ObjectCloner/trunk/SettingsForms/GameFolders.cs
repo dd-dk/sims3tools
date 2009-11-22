@@ -61,6 +61,7 @@ namespace ObjectCloner.SettingsForms
 
                 btnEdit.Anchor = AnchorStyles.None;
                 btnEdit.AutoSize = true;
+                btnEdit.Enabled = sims3.Enabled;
                 btnEdit.Text = "Edit";
                 btnEdit.Click += new EventHandler(btnEdit_Click);
 
@@ -84,6 +85,9 @@ namespace ObjectCloner.SettingsForms
             if (sims3 == null) return;
 
             sims3.Enabled = !sims3.Enabled;
+
+            Button btn = tlpGameFolders.GetControlFromPosition(3, tlpGameFolders.GetCellPosition((Control)sender).Row) as Button;
+            if (btn != null) btn.Enabled = sims3.Enabled;
         }
 
         void btnEdit_Click(object sender, EventArgs e)
