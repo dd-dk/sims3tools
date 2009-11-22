@@ -37,7 +37,7 @@ namespace ObjectCloner
             });
             tsMB = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //File
-                newToolStripMenuItem, openToolStripMenuItem, exitToolStripMenuItem,
+                openToolStripMenuItem, exitToolStripMenuItem,
                 //Cloning -- These must be in order of enum CatalogType by value:
                 cfenToolStripMenuItem, cstrToolStripMenuItem, cprxToolStripMenuItem, cttlToolStripMenuItem,
                 cralToolStripMenuItem, ctptToolStripMenuItem, cfirToolStripMenuItem, cwatToolStripMenuItem,
@@ -64,7 +64,7 @@ namespace ObjectCloner
 
         public enum MB
         {
-            MBF_new = 0, MBF_open, MBF_exit,
+            MBF_open = 0, MBF_exit,
             MBC_cfen, MBC_cstr, MBC_cprx, MBC_cttl,
             MBC_cral, MBC_ctpt, MBC_cfir, MBC_cwat,
             MBC_cfnd, MBC_objd, MBC_cwal, MBC_cwst,
