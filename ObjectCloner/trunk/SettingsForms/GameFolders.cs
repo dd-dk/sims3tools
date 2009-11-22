@@ -51,7 +51,7 @@ namespace ObjectCloner.SettingsForms
 
                 ckbEnabled.Anchor = AnchorStyles.None;
                 ckbEnabled.AutoSize = true;
-                ckbEnabled.Enabled = sims3.isSuppressed == 0;
+                ckbEnabled.Visible = sims3.isSuppressed == 0;
                 ckbEnabled.Checked = sims3.Enabled;
                 ckbEnabled.CheckedChanged += new EventHandler(ckbEnabled_CheckedChanged);
 
