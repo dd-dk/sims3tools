@@ -628,21 +628,20 @@ namespace ObjectCloner
             static Item getItem(List<IPackage> pkgs, ulong instance, uint type)
             {
                 if (type == 0x00000000) return null;
-                if (new List<uint>(thumTypes[0x515CA4CD]).Contains(type))
+                foreach (IPackage pkg in pkgs)
                 {
-                    foreach(IPackage pkg in pkgs)
-                    {
-                        IList<IResourceIndexEntry> lrie = pkg.FindAll(new string[] { "ResourceType", "Instance" }, new TypedValue[] {
+                    List<IResourceIndexEntry> lrie = new List<IResourceIndexEntry>(pkg.FindAll(new string[] { "ResourceType", "Instance" }, new TypedValue[] {
                             new TypedValue(typeof(uint), type),
                             new TypedValue(typeof(ulong), instance),
-                        });
-                        foreach (IResourceIndexEntry rie in lrie)
-                            if (rie.ResourceGroup > 0)
-                                return new Item(new RIE(pkg, rie));
-                    }
+                        }));
+                    lrie.Sort(byGroup);
+                    foreach (IResourceIndexEntry rie in lrie)
+                        if (!new List<uint>(thumTypes[0x515CA4CD]).Contains(type) || rie.ResourceGroup > 0)
+                            return new Item(new RIE(pkg, rie));
                 }
                 return new Item(pkgs, new TGI(type, 0, instance));
             }
+            static int byGroup(IResourceIndexEntry x, IResourceIndexEntry y) { return x.ResourceGroup.CompareTo(y.ResourceGroup); }
         }
         THUM thumb;
         THUM Thumb
@@ -780,9 +779,9 @@ namespace ObjectCloner
             this.AcceptButton = btnStart;
             this.CancelButton = null;
 
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, currentCatalogType != CatalogType.CatalogObject);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBC, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
 
             lbUseMenu.Visible = false;
             lbSelectOptions.Visible = false;
@@ -828,9 +827,9 @@ namespace ObjectCloner
 
         private void DisplayNothing()
         {
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, true);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBC, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
 
             this.Enabled = true;
             this.AcceptButton = null;
@@ -2488,17 +2487,11 @@ namespace ObjectCloner
                 Application.DoEvents();
                 switch (mn.mn)
                 {
-                    case MenuBarWidget.MB.MBF_new: fileNew(); break;
                     case MenuBarWidget.MB.MBF_open: fileOpen(); break;
                     case MenuBarWidget.MB.MBF_exit: fileExit(); break;
                 }
             }
             finally { this.Enabled = true; }
-        }
-
-        private void fileNew()
-        {
-            menuBarWidget1_MBCloning_Click(null, new MenuBarWidget.MBClickEventArgs(MenuBarWidget.MB.MBC_objd));
         }
 
         string currentPackage = "";
@@ -2540,9 +2533,9 @@ namespace ObjectCloner
 
         void fileNewOpen(CatalogType resourceType, bool IsFixPass)
         {
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_new, false);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, false);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBC, false);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBS, false);
 
             DoWait("Please wait, loading object catalog...");
             tlpTask.Enabled = false;
@@ -2737,6 +2730,8 @@ namespace ObjectCloner
             SettingsForms.GameFolders gf = new ObjectCloner.SettingsForms.GameFolders();
             DialogResult dr = gf.ShowDialog();
             if (dr != DialogResult.OK) return;
+            ClosePkg();
+            DisplayNothing();
         }
 
         private void settingsUserName()
