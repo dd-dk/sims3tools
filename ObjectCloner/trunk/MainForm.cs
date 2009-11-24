@@ -2558,21 +2558,7 @@ namespace ObjectCloner
         private void menuBarWidget1_MBCloning_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
         {
             Application.DoEvents();
-
-            if (mn.mn == ToCloningMenuEntry(currentCatalogType)) return;
-
-            foreach (int i in Enum.GetValues(typeof(MenuBarWidget.MB)))
-                if (i >= (int)MenuBarWidget.MB.MBC_cfen && i <= (int)MenuBarWidget.MB.MBC_crmt)
-                    menuBarWidget1.Checked((MenuBarWidget.MB)i, false);
-
-            menuBarWidget1.Checked(mn.mn, true);
             cloneType(FromCloningMenuEntry(mn.mn));
-        }
-        MenuBarWidget.MB ToCloningMenuEntry(CatalogType resourceType)
-        {
-            if (!Enum.IsDefined(typeof(CatalogType), resourceType)) return 0;
-            List<MenuBarWidget.MB> ml = new List<MenuBarWidget.MB>((MenuBarWidget.MB[])Enum.GetValues(typeof(MenuBarWidget.MB)));
-            return ml[new List<CatalogType>((CatalogType[])Enum.GetValues(typeof(CatalogType))).IndexOf(resourceType) + ml.IndexOf(MenuBarWidget.MB.MBC_cfen)];
         }
         CatalogType FromCloningMenuEntry(MenuBarWidget.MB menuEntry)
         {
@@ -2727,10 +2713,17 @@ namespace ObjectCloner
 
         private void settingsGameFolders()
         {
-            SettingsForms.GameFolders gf = new ObjectCloner.SettingsForms.GameFolders();
-            DialogResult dr = gf.ShowDialog();
-            if (dr != DialogResult.OK) return;
+            while (true)
+            {
+                SettingsForms.GameFolders gf = new ObjectCloner.SettingsForms.GameFolders();
+                DialogResult dr = gf.ShowDialog();
+                if (dr != DialogResult.OK && dr!= DialogResult.Retry) return;
+                if (dr != DialogResult.Retry) break;
+            }
             ClosePkg();
+            currentCatalogType = 0;
+            tabType = 0;
+            haveLoaded = false;
             DisplayNothing();
         }
 

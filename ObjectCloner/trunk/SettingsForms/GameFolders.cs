@@ -124,7 +124,7 @@ namespace ObjectCloner.SettingsForms
                 sims3.Enabled = sims3.isSuppressed == 0;
                 sims3.InstallDir = sims3.hasDefaultInstallDir;
             }
-            DialogResult = DialogResult.OK;
+            DialogResult = DialogResult.Retry;
             Close();
         }
     }
