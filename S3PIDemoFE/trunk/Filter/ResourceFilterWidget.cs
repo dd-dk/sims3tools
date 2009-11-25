@@ -54,7 +54,7 @@ namespace S3PIDemoFE.Filter
 
         void SetFields()
         {
-            Dictionary<string, Type> cft = AApiVersionedFields.GetContentFieldTypes(0, typeof(IResourceIndexEntry));
+            Dictionary<string, Type> cft = AApiVersionedFields.GetContentFieldTypes(0, typeof(AResourceIndexEntry));
             values = new Dictionary<string, FilterField>();
             tlpResourceInfo.ColumnCount = fields.Count + 1;
             tlpResourceInfo.RowCount = 1;
