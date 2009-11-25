@@ -44,16 +44,18 @@ namespace ObjectCloner.TopPanelComponents
 
             int w;
             listView1.Columns[0].Width = cws.Length > 0 && int.TryParse(cws[0], out w) && w > 0 ? w : (this.listView1.Width - 32) / 3;
-            listView1.Columns[1].Width = cws.Length > 1 && int.TryParse(cws[1], out w) && w > 0 ? w : (this.listView1.Width - 32) / 3;
-            listView1.Columns[2].Width = cws.Length > 2 && int.TryParse(cws[2], out w) && w > 0 ? w : (this.listView1.Width - 32) / 3;
+            listView1.Columns[1].Width = cws.Length > 1 && int.TryParse(cws[1], out w) && w > 0 ? w : (this.listView1.Width - 32) / 6;
+            listView1.Columns[2].Width = cws.Length > 2 && int.TryParse(cws[2], out w) && w > 0 ? w : (this.listView1.Width - 32) / 6;
+            listView1.Columns[3].Width = cws.Length > 3 && int.TryParse(cws[3], out w) && w > 0 ? w : (this.listView1.Width - 32) / 3;
         }
         public void ObjectChooser_SaveSettings()
         {
             lvwColumnSorter.ListViewColumnSorter_SaveSettings();
-            ObjectCloner.Properties.Settings.Default.ColumnWidths = string.Format("{0}:{1}:{2}"
+            ObjectCloner.Properties.Settings.Default.ColumnWidths = string.Format("{0}:{1}:{2}:{3}"
                 , listView1.Columns[0].Width
                 , listView1.Columns[1].Width
                 , listView1.Columns[2].Width
+                , listView1.Columns[3].Width
                 );
         }
 

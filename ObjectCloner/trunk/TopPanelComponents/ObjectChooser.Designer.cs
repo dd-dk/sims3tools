@@ -30,8 +30,9 @@
         {
             this.listView1 = new System.Windows.Forms.ListView();
             this.catlgName = new System.Windows.Forms.ColumnHeader();
-            this.TGI = new System.Windows.Forms.ColumnHeader();
             this.TagID = new System.Windows.Forms.ColumnHeader();
+            this.TGI = new System.Windows.Forms.ColumnHeader();
+            this.EPFlags = new System.Windows.Forms.ColumnHeader();
             this.SuspendLayout();
             // 
             // listView1
@@ -39,6 +40,7 @@
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.catlgName,
             this.TagID,
+            this.EPFlags,
             this.TGI});
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.FullRowSelect = true;
@@ -46,7 +48,7 @@
             this.listView1.Location = new System.Drawing.Point(0, 0);
             this.listView1.MultiSelect = false;
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(390, 150);
+            this.listView1.Size = new System.Drawing.Size(852, 150);
             this.listView1.TabIndex = 1;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -57,20 +59,29 @@
             // catlgName
             // 
             this.catlgName.Text = "Name";
+            this.catlgName.Width = 275;
+            // 
+            // TagID
+            // 
+            this.TagID.Text = "Tag";
             // 
             // TGI
             // 
+            this.TGI.DisplayIndex = 3;
             this.TGI.Text = "Resource Key";
+            this.TGI.Width = 246;
             // 
-            // Tag
+            // EPFlags
             // 
-            this.TagID.Text = "Tag";
+            this.EPFlags.DisplayIndex = 2;
+            this.EPFlags.Text = "EPFlags";
+            this.EPFlags.Width = 77;
             // 
             // ObjectChooser
             // 
             this.Controls.Add(this.listView1);
             this.Name = "ObjectChooser";
-            this.Size = new System.Drawing.Size(390, 150);
+            this.Size = new System.Drawing.Size(852, 150);
             this.ResumeLayout(false);
 
         }
@@ -81,6 +92,7 @@
         private System.Windows.Forms.ColumnHeader catlgName;
         private System.Windows.Forms.ColumnHeader TGI;
         private System.Windows.Forms.ColumnHeader TagID;
+        private System.Windows.Forms.ColumnHeader EPFlags;
 
     }
 }
