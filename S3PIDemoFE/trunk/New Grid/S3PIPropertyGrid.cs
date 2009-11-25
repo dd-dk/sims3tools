@@ -365,7 +365,7 @@ namespace S3PIDemoFE
             public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
             {
                 if (sourceType.Equals(typeof(string))) return true;
-                return base.CanConvertTo(context, sourceType);
+                return base.CanConvertFrom(context, sourceType);
             }
 
             public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
