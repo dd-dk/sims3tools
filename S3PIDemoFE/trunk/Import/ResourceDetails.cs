@@ -24,10 +24,11 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 using s3pi.Extensions;
+using s3pi.Interfaces;
 
 namespace S3PIDemoFE
 {
-    public partial class ResourceDetails : Form
+    public partial class ResourceDetails : Form, IResourceKey
     {
         public ResourceDetails() : this(true, true) { }
         public ResourceDetails(bool useName, bool displayFilename)
@@ -37,9 +38,16 @@ namespace S3PIDemoFE
             tbName.Enabled = UseName = useName;
             lbFilename.Visible = tbFilename.Visible = displayFilename;
         }
+        public ResourceDetails(bool useName, bool displayFilename, IResourceKey rk)
+            :this(useName, displayFilename)
+        {
+            ResourceType = rk.ResourceType;
+            ResourceGroup = rk.ResourceGroup;
+            Instance = rk.Instance;
+            EpFlags = rk.EpFlags;
+        }
 
-        public string Filename { get { return tbFilename.Text; } set { this.tbFilename.Text = value; } }
-        public TGIN TGIN { get { return this.tbFilename.Text; } }
+        #region IResourceKey Members
         public uint ResourceType { get { return cbType.Value; } set { cbType.Value = value; } }
         public uint ResourceGroup
         {
@@ -51,6 +59,13 @@ namespace S3PIDemoFE
             get { return Convert.ToUInt64(tbInstance.Text, tbInstance.Text.StartsWith("0x") ? 16 : 10); }
             set { tbInstance.Text = "0x" + value.ToString("X16"); }
         }
+        public EPFlags EpFlags
+        {
+            get { return (EPFlags)Convert.ToByte(tbEPFlags.Text, tbEPFlags.Text.StartsWith("0x") ? 16 : 10); }
+            set { tbEPFlags.Text = "0x" + ((byte)value).ToString("X2"); }
+        }
+        #endregion
+
         public string ResourceName { get { return tbName.Text; } set { tbName.Text = value; } }
         public bool Replace { get { return importSettings1.Replace; } }
         public bool Compress { get { return importSettings1.Compress; } set { importSettings1.Compress = value; } }
@@ -58,12 +73,17 @@ namespace S3PIDemoFE
         public bool UseName { get { return importSettings1.UseName; } set { importSettings1.UseName = value; } }
         public bool AllowRename { get { return importSettings1.AllowRename; } set { importSettings1.AllowRename = value; } }
 
+        public string Filename { get { return tbFilename.Text; } set { this.tbFilename.Text = value; } }
+        public static implicit operator TGIN(ResourceDetails form) { return form.tbFilename.Text; }
+        //public static implicit operator ResourceDetails(TGIN value) { ResourceDetails res = new ResourceDetails(); res.Filename = value; return res; }
+
         private void FillPanel()
         {
             TGIN details = this.tbFilename.Text;
             cbType.Value = details.ResType;
-            tbGroup.Text = "0x" + details.ResGroup.ToString("X8");
+            tbGroup.Text = "0x" + (details.ResGroup & 0x00FFFFFF).ToString("X6");
             tbInstance.Text = "0x" + details.ResInstance.ToString("X16");
+            tbEPFlags.Text = "0x" + (details.ResGroup >> 24).ToString("X2");
             tbName.Text = details.ResName;
         }
 
@@ -116,5 +136,28 @@ namespace S3PIDemoFE
         {
             btnOK.Enabled = cbType.Valid && (tbGroup.Text.Length * tbInstance.Text.Length > 0);
         }
+
+        #region IEqualityComparer<IResourceKey> Members
+        public bool Equals(IResourceKey x, IResourceKey y) { return x.Equals(y); }
+        public int GetHashCode(IResourceKey obj) { return obj.GetHashCode(); }
+        public override int GetHashCode() { return ResourceType.GetHashCode() ^ ResourceGroup.GetHashCode() ^ Instance.GetHashCode(); }
+        #endregion
+
+        #region IEquatable<IResourceKey> Members
+
+        public bool Equals(IResourceKey other) { return CompareTo(other) == 0; }
+
+        #endregion
+
+        #region IComparable<IResourceKey> Members
+
+        public int CompareTo(IResourceKey other)
+        {
+            int res = ResourceType.CompareTo(other.ResourceType); if (res != 0) return res;
+            res = ResourceGroup.CompareTo(other.ResourceGroup); if (res != 0) return res;
+            return Instance.CompareTo(other.Instance);
+        }
+
+        #endregion
     }
 }
