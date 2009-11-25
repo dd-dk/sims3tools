@@ -177,12 +177,7 @@ namespace S3PIDemoFE
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            TGIN tgin = new TGIN();
-            tgin.ResType = ir.ResourceType;
-            tgin.ResGroup = ir.ResourceGroup;
-            tgin.ResInstance = ir.Instance;
-            tgin.ResName = ir.ResourceName;
-            importFile(ir.Filename, tgin, ir.UseName, ir.AllowRename, ir.Compress, ir.Replace);
+            importFile(ir.Filename, ir, ir.UseName, ir.AllowRename, ir.Compress, ir.Replace);
         }
 
         void importSingle(myDataFormat data)
@@ -249,6 +244,8 @@ namespace S3PIDemoFE
 
         bool importFile(string filename, TGIN tgin, bool useName, bool rename, bool compress, bool replace)
         {
+            IResourceKey rk = (AResource.TGIBlock)tgin;
+            string resName = tgin.ResName;
             bool nmOK = true;
             MemoryStream ms = new MemoryStream();
             BinaryWriter w = new BinaryWriter(ms);
@@ -257,10 +254,10 @@ namespace S3PIDemoFE
             r.Close();
             w.Flush();
 
-            if (useName && tgin.ResName != null && tgin.ResName.Length > 0)
-                nmOK = UpdateNameMap(tgin.ResInstance, tgin.ResName, true, rename);
+            if (useName && resName != null && resName.Length > 0)
+                nmOK = UpdateNameMap(rk.Instance, resName, true, rename);
 
-            IResourceIndexEntry rie = NewResource(tgin.ResType, tgin.ResGroup, tgin.ResInstance, ms, replace, compress);
+            IResourceIndexEntry rie = NewResource(rk, ms, replace, compress);
             if (rie != null) browserWidget1.Add(rie);
             return nmOK;
         }
@@ -270,8 +267,7 @@ namespace S3PIDemoFE
             if (useName && data.tgin.ResName != null && data.tgin.ResName.Length > 0)
                 UpdateNameMap(data.tgin.ResInstance, data.tgin.ResName, true, rename);
 
-            IResourceIndexEntry rie = NewResource(data.tgin.ResType, data.tgin.ResGroup, data.tgin.ResInstance,
-                new MemoryStream(data.data), replace, compress);
+            IResourceIndexEntry rie = NewResource((AResource.TGIBlock)data.tgin, new MemoryStream(data.data), replace, compress);
             if (rie != null) browserWidget1.Add(rie);
         }
     }
