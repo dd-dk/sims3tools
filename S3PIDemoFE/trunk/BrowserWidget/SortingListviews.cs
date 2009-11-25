@@ -61,6 +61,7 @@ namespace System.Windows.Forms
             // Cast the objects to be compared to ListViewItem objects
             listviewX = (ListViewItem)x;
             listviewY = (ListViewItem)y;
+            if (ColumnToSort >= listviewX.SubItems.Count) return 0; // No idea what I should be doing...
 
             // Compare the two items
             compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
