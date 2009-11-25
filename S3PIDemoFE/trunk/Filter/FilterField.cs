@@ -90,8 +90,27 @@ namespace S3PIDemoFE.Filter
             try
             {
                 if (tbEntry.Text.Length == 0) { tvValue = new TypedValue(tvValue.Type, null, "X"); return; }
-                TypedValue tv = new TypedValue(tvValue.Type, Convert.ChangeType(Convert.ToUInt64(tbEntry.Text, tbEntry.Text.StartsWith("0x") ? 16 : 10), tvValue.Type), "X");
-                tvValue = tv;
+
+                string svalue = tbEntry.Text.Split(new char[] { ' ' }, 2)[0];
+                if (tvValue.Type.Equals(typeof(float))) { TypedValue tv = new TypedValue(tvValue.Type, float.Parse(svalue), "X"); tvValue = tv; }
+                else if (tvValue.Type.Equals(typeof(double))) { TypedValue tv = new TypedValue(tvValue.Type, double.Parse(svalue), "X"); tvValue = tv; }
+                else if (tvValue.Type.Equals(typeof(decimal))) { TypedValue tv = new TypedValue(tvValue.Type, decimal.Parse(svalue), "X"); tvValue = tv; }
+                else if (tvValue.Type.Equals(typeof(string))) { TypedValue tv = new TypedValue(tvValue.Type, tbEntry.Text, "X"); tvValue = tv; }
+                else if (tvValue.Type.Equals(typeof(object)))
+                {
+                    TypedValue tv = new TypedValue(tvValue.Type, tvValue.Type.GetConstructor(new Type[] { typeof(string) }).Invoke(null, new object[] { tbEntry.Text }), "X");
+                    tvValue = tv;
+                }
+                else if (tvValue.Type.IsPrimitive)
+                {
+                    TypedValue tv = new TypedValue(tvValue.Type, Convert.ChangeType(Convert.ToUInt64(svalue, svalue.StartsWith("0x") ? 16 : 10), tvValue.Type), "X");
+                    tvValue = tv;
+                }
+                else if (tvValue.Type.IsEnum)
+                {
+                    TypedValue tv = new TypedValue(tvValue.Type, Convert.ChangeType(Convert.ToUInt64(svalue, svalue.StartsWith("0x") ? 16 : 10), Enum.GetUnderlyingType(tvValue.Type)), "X");
+                    tvValue = tv;
+                }
             }
             catch (System.FormatException) { Value = tvValue; tbApplied.SelectAll(); }
             catch (System.InvalidCastException) { Value = tvValue; tbApplied.SelectAll(); }
