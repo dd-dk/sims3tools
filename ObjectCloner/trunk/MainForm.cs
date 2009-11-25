@@ -91,7 +91,7 @@ namespace ObjectCloner
         {
             string value = "";
             foreach (var kvp in gameDirs)
-                value = ";" + kvp.Key + "=" + kvp.Value;
+                value += ";" + kvp.Key + "=" + kvp.Value;
             ObjectCloner.Properties.Settings.Default.InstallDirs = value.TrimStart(';');
         }
 
@@ -374,7 +374,7 @@ namespace ObjectCloner
         Item selectedItem;
         Image replacementForThumbs;
 
-        Dictionary<string, TGI> tgiLookup = new Dictionary<string,TGI>();
+        Dictionary<string, IResourceKey> rkLookup = new Dictionary<string, IResourceKey>();
 
         private ObjectCloner.TopPanelComponents.ObjectChooser objectChooser;
         private ObjectCloner.TopPanelComponents.ResourceList resourceList;
@@ -619,10 +619,10 @@ namespace ObjectCloner
             }
             bool gtAbort() { return false; }
 
-            public TGI getTGI(uint type, ulong instance, THUMSize size, bool isPNGInstance)
+            public IResourceKey getRK(uint type, ulong instance, THUMSize size, bool isPNGInstance)
             {
                 Item item = getItem(isPNGInstance ? fb0Pkgs : tmbPkgs, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
-                return item == null ? new TGI() : item.tgi;
+                return item == null ? RK.NULL : item.rk;
             }
 
             static Item getItem(List<IPackage> pkgs, ulong instance, uint type)
@@ -639,7 +639,8 @@ namespace ObjectCloner
                         if (!new List<uint>(thumTypes[0x515CA4CD]).Contains(type) || rie.ResourceGroup > 0)
                             return new Item(new RIE(pkg, rie));
                 }
-                return new Item(pkgs, new TGI(type, 0, instance));
+                //return new Item(pkgs, new TGI(type, 0, instance));
+                return new Item(pkgs, RK.NULL);
             }
             static int byGroup(IResourceIndexEntry x, IResourceIndexEntry y) { return x.ResourceGroup.CompareTo(y.ResourceGroup); }
         }
@@ -661,17 +662,17 @@ namespace ObjectCloner
             else
             {
                 ulong png = (item.Resource != null) ? (ulong)item.Resource["CommonBlock.PngInstance"].Value : 0;
-                return Thumb[item.tgi.t, png != 0 ? png : item.tgi.i, size, png != 0];
+                return Thumb[item.rk.ResourceType, png != 0 ? png : item.rk.Instance, size, png != 0];
             }
         }
-        TGI getImageTGI(THUM.THUMSize size, Item item)
+        IResourceKey getImageRK(THUM.THUMSize size, Item item)
         {
             if (item.CType == CatalogType.ModularResource)
-                return new TGI();
+                return RK.NULL;
             else
             {
                 ulong png = (item.Resource != null) ? (ulong)item.Resource["CommonBlock.PngInstance"].Value : 0;
-                return Thumb.getTGI(item.tgi.t, png != 0 ? png : item.tgi.i, size, png != 0);
+                return Thumb.getRK(item.rk.ResourceType, png != 0 ? png : item.rk.Instance, size, png != 0);
             }
         }
         #endregion
@@ -709,7 +710,7 @@ namespace ObjectCloner
                     return null;
                 }
             }
-            public TGI tgi { get { return latest == null ? new TGI() : latest.tgi; } }
+            public IResourceKey rk { get { return latest == null ? RK.NULL : latest.rk; } }
         }
         STBL english;
         STBL English
@@ -748,7 +749,7 @@ namespace ObjectCloner
                     return null;
                 }
             }
-            public TGI tgi { get { return latest == null ? new TGI() : latest.tgi; } }
+            public IResourceKey rk { get { return latest == null ? RK.NULL : latest.rk; } }
             public IDictionary<ulong, string> map { get { return latest == null ? null : (IDictionary<ulong, string>)latest.Resource; } }
             public void Commit() { latest.Commit(); }
         }
@@ -766,8 +767,8 @@ namespace ObjectCloner
 
         Item ItemForTGIBlock0(Item item)
         {
-            AResource.TGIBlock tgib = ((AResource.TGIBlockList)item.Resource["TGIBlocks"].Value)[0];
-            return new Item(objPkgs, new TGI(tgib));
+            IResourceKey rk = ((AResource.TGIBlockList)item.Resource["TGIBlocks"].Value)[0];
+            return new Item(objPkgs, rk);
         }
 
 
@@ -932,7 +933,7 @@ namespace ObjectCloner
 
             stepNum = 0;
             resourceList.Clear();
-            tgiLookup.Clear();
+            rkLookup.Clear();
             while (stepNum < stepList.Count)
             {
                 step = stepList[stepNum];
@@ -1287,7 +1288,7 @@ namespace ObjectCloner
         void fillOverview(Item item)
         {
             pictureBox1.Image = getImage(THUM.THUMSize.large, item);
-            lbThumbTGI.Text = getImageTGI(THUM.THUMSize.large, item);
+            lbThumbTGI.Text = (AResourceKey)getImageRK(THUM.THUMSize.large, item);
             btnReplThumb.Enabled = true;
             AApiVersionedFields common = item.Resource["CommonBlock"].Value as AApiVersionedFields;
             tbObjName.Text = common["Name"].Value + "";
@@ -1572,9 +1573,9 @@ namespace ObjectCloner
             }
             List<string> exts;
             string tag = "";
-            if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + item.tgi.t.ToString("X8"), out exts)) tag = exts[0];
+            if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + item.rk.ResourceType.ToString("X8"), out exts)) tag = exts[0];
             else tag = "UNKN";
-            lvi.SubItems.AddRange(new string[] { tag, item.tgi, });
+            lvi.SubItems.AddRange(new string[] { tag, "" + item.ResourceIndexEntry.EpFlags, "" + (AResourceKey)item.rk, });
             lvi.Tag = item;
             objectChooser.Items.Add(lvi);
         }
@@ -1773,7 +1774,7 @@ namespace ObjectCloner
         {
             this.SavingComplete += new EventHandler<BoolEventArgs>(MainForm_SavingComplete);
 
-            SaveList sl = new SaveList(this, objectChooser.SelectedItems[0].Tag as Item, tgiLookup, objPkgs, ddsPkgs, tmbPkgs,
+            SaveList sl = new SaveList(this, objectChooser.SelectedItems[0].Tag as Item, rkLookup, objPkgs, ddsPkgs, tmbPkgs,
                 saveFileDialog1.FileName, isPadSTBLs,
                 updateProgress, stopSaving, OnSavingComplete);
 
@@ -1839,7 +1840,7 @@ namespace ObjectCloner
         {
             MainForm mainForm;
             Item selectedItem;
-            Dictionary<string, TGI> tgiList;
+            Dictionary<string, IResourceKey> rkList;
             List<IPackage> objPkgs;
             List<IPackage> ddsPkgs;
             List<IPackage> tmbPkgs;
@@ -1848,13 +1849,13 @@ namespace ObjectCloner
             updateProgressCallback updateProgressCB;
             stopSavingCallback stopSavingCB;
             savingCompleteCallback savingCompleteCB;
-            public SaveList(MainForm form, Item catlgItem, Dictionary<string, TGI> tgiList, List<IPackage> objPkgs, List<IPackage> ddsPkgs, List<IPackage> tmbPkgs,
+            public SaveList(MainForm form, Item catlgItem, Dictionary<string, IResourceKey> rkList, List<IPackage> objPkgs, List<IPackage> ddsPkgs, List<IPackage> tmbPkgs,
                 string outputPackage, bool padSTBLs,
                 updateProgressCallback updateProgressCB, stopSavingCallback stopSavingCB, savingCompleteCallback savingCompleteCB)
             {
                 this.mainForm = form;
                 this.selectedItem = catlgItem;
-                this.tgiList = tgiList;
+                this.rkList = rkList;
                 this.objPkgs = objPkgs;
                 this.ddsPkgs = ddsPkgs;
                 this.tmbPkgs = tmbPkgs;
@@ -1880,38 +1881,38 @@ namespace ObjectCloner
                 bool complete = false;
                 NameMap fb0nm = new NameMap(objPkgs);
                 NameMap fb2nm = new NameMap(ddsPkgs);
-                Item newnmap = NewResource(target, fb0nm.tgi);
+                Item newnmap = NewResource(target, fb0nm.rk);
                 IDictionary<ulong, string> newnamemap = (IDictionary<ulong, string>)newnmap.Resource;
                 try
                 {
                     int i = 0;
-                    int freq = Math.Max(1, tgiList.Count / 50);
-                    updateProgress(true, "Cloning... 0%", true, tgiList.Count, true, i);
+                    int freq = Math.Max(1, rkList.Count / 50);
+                    updateProgress(true, "Cloning... 0%", true, rkList.Count, true, i);
                     string lastSaved = "nothing yet";
-                    foreach (var kvp in tgiList)
+                    foreach (var kvp in rkList)
                     {
                         if (stopSaving) return;
 
-                        List<IPackage> lpkg = (selectedItem.tgi.t != 0x04ED4BB2 && kvp.Value.t == 0x00B2D882) ? ddsPkgs : kvp.Key.EndsWith("Thumb") ? tmbPkgs : objPkgs;
-                        NameMap nm = kvp.Value.t == 0x00B2D882 ? fb2nm : fb0nm;
+                        List<IPackage> lpkg = (selectedItem.rk.ResourceType != 0x04ED4BB2 && kvp.Value.ResourceType == 0x00B2D882) ? ddsPkgs : kvp.Key.EndsWith("Thumb") ? tmbPkgs : objPkgs;
+                        NameMap nm = kvp.Value.ResourceType == 0x00B2D882 ? fb2nm : fb0nm;
 
                         Item item = new Item(new RIE(lpkg, kvp.Value), true); // use default wrapper
                         if (item.ResourceIndexEntry != null)
                         {
-                            if (!stopSaving) target.AddResource(kvp.Value.t, kvp.Value.g, kvp.Value.i, item.Resource.Stream, true);
+                            if (!stopSaving) target.AddResource(kvp.Value, item.Resource.Stream, true);
                             lastSaved = kvp.Key;
-                            if (!newnamemap.ContainsKey(kvp.Value.i))
+                            if (!newnamemap.ContainsKey(kvp.Value.Instance))
                             {
-                                string name = nm[kvp.Value.i];
+                                string name = nm[kvp.Value.Instance];
                                 if (name != null)
-                                    if (!stopSaving) newnamemap.Add(kvp.Value.i, name);
+                                    if (!stopSaving) newnamemap.Add(kvp.Value.Instance, name);
                             }
                         }
 
                         if (++i % freq == 0)
-                            updateProgress(true, "Cloned " + lastSaved + "... " + i * 100 / tgiList.Count + "%", true, tgiList.Count, true, i);
+                            updateProgress(true, "Cloned " + lastSaved + "... " + i * 100 / rkList.Count + "%", true, rkList.Count, true, i);
                     }
-                    updateProgress(true, "", true, tgiList.Count, true, tgiList.Count);
+                    updateProgress(true, "", true, rkList.Count, true, rkList.Count);
 
                     updateProgress(true, "Finding string tables...", true, 0, true, 0);
 
@@ -1939,31 +1940,32 @@ namespace ObjectCloner
                         string desc = lang[descGUID];
 
                         Item newstbl;
-                        TGI newTGI;
+                        AResourceKey newRK;
                         if (name == null && desc == null)
                         {
                             if (!padSTBLs || english == null) goto skip;
                             name = english[nameGUID];
                             desc = english[descGUID];
-                            newTGI = new TGI(english.tgi.t, english.tgi.g, (english.tgi.i & 0xFFFFFFFFFFFF0000) | ((ulong)i << 56));
-                            newstbl = NewResource(target, newTGI);
+                            newRK = new RK(english.rk);
+                            newRK.Instance = (english.rk.Instance & 0xFFFFFFFFFFFF0000) | ((ulong)i << 56);
                         }
                         else
                         {
-                            newTGI = new TGI(lang.tgi.t, lang.tgi.g, lang.tgi.i & 0xFFFFFFFFFFFF0000);
-                            newstbl = NewResource(target, newTGI);
+                            newRK = new RK(lang.rk);
+                            newRK.Instance &= 0xFFFFFFFFFFFF0000;
                         }
+                        newstbl = NewResource(target, newRK);
 
                         IDictionary<ulong, string> outstbl = (IDictionary<ulong, string>)newstbl.Resource;
                         if (!outstbl.ContainsKey(nameGUID)) outstbl.Add(nameGUID, name != null ? name : "");
                         if (!outstbl.ContainsKey(descGUID)) outstbl.Add(descGUID, desc != null ? desc : "");
                         if (!stopSaving) newstbl.Commit();
 
-                        if (!newnamemap.ContainsKey(newTGI.i))
+                        if (!newnamemap.ContainsKey(newRK.Instance))
                         {
-                            string nmname = fb0nm[lang.tgi.i];
-                            if (nmname != null) { if (!stopSaving) newnamemap.Add(newTGI.i, nmname); }
-                            else { if (!stopSaving) newnamemap.Add(newTGI.i, String.Format(language_fmt, languages[i], i, english.tgi.i)); }
+                            string nmname = fb0nm[lang.rk.Instance];
+                            if (nmname != null) { if (!stopSaving) newnamemap.Add(newRK.Instance, nmname); }
+                            else { if (!stopSaving) newnamemap.Add(newRK.Instance, String.Format(language_fmt, languages[i], i, english.rk.Instance)); }
                         }
 
                     skip:
@@ -1990,9 +1992,9 @@ namespace ObjectCloner
                 }
             }
 
-            Item NewResource(IPackage pkg, TGI tgi)
+            Item NewResource(IPackage pkg, IResourceKey rk)
             {
-                RIE rie = new RIE(pkg, pkg.AddResource(tgi.t, tgi.g, tgi.i, null, true));
+                RIE rie = new RIE(pkg, pkg.AddResource(rk, null, true));
                 if (rie.rie == null) return null;
                 return new Item(rie);
             }
@@ -2047,7 +2049,7 @@ namespace ObjectCloner
 
         #region Make Unique bits
 
-        Dictionary<TGI, Item> tgiToItem;
+        Dictionary<IResourceKey, Item> rkToItem;
         Dictionary<ulong, ulong> oldToNew;
         string uniqueObject = null;
         string UniqueObject
@@ -2081,11 +2083,11 @@ namespace ObjectCloner
             //tgiToItem - TGIs we're interested in and the Item they refer to
             try
             {
-                foreach (Item item in tgiToItem.Values)
+                foreach (Item item in rkToItem.Values)
                 {
                     bool dirty = false;
 
-                    if ((item.tgi == selectedItem.tgi && item.CType != CatalogType.ModularResource)//Selected CatlgItem
+                    if ((item.rk == selectedItem.rk && item.CType != CatalogType.ModularResource)//Selected CatlgItem
                         || item.CType == CatalogType.CatalogObject//all OBJDs (i.e. from MDLR or CFIR)
                         || item.CType == CatalogType.CatalogTerrainPaintBrush//all CTPTs (i.e. pair of selectedItem)
                         )
@@ -2093,10 +2095,10 @@ namespace ObjectCloner
                         #region Selected CatlgItem; all OBJD (i.e. from MDLR or CFIR)
                         AHandlerElement commonBlock = ((AHandlerElement)item.Resource["CommonBlock"].Value);
 
-                        if (item.tgi == selectedItem.tgi//Selected CatlgItem
+                        if (item.rk == selectedItem.rk//Selected CatlgItem
                             || selectedItem.CType == CatalogType.ModularResource//all MDLR OBJDs
                             || selectedItem.CType == CatalogType.CatalogTerrainPaintBrush//both CTPTs
-                            || item.tgi == catlgItem.tgi//0th CFIR OBJD
+                            || item.rk == catlgItem.rk//0th CFIR OBJD
                             )
                         {
                             commonBlock["NameGUID"] = new TypedValue(typeof(ulong), newNameGUID);
@@ -2110,7 +2112,7 @@ namespace ObjectCloner
                             }
                         }
 
-                        if (item.tgi == selectedItem.tgi || item.tgi == catlgItem.tgi)//Selected CatlgItem; 0th OBJD from MDLR or CFIR
+                        if (item.rk == selectedItem.rk || item.rk == catlgItem.rk)//Selected CatlgItem; 0th OBJD from MDLR or CFIR
                         {
                             ulong PngInstance = (ulong)commonBlock["PngInstance"].Value;
                             if (PngInstance != 0 && oldToNew.ContainsKey(PngInstance))
@@ -2176,7 +2178,7 @@ namespace ObjectCloner
                         }
 
                         if (cloneFixOptions.IsRenumber)
-                            UpdateTGIsFromField((AResource)item.Resource);
+                            UpdateRKsFromField((AResource)item.Resource);
 
                         dirty = true;
                         #endregion
@@ -2201,12 +2203,12 @@ namespace ObjectCloner
 
                         string name = "";
                         if (stbl.ContainsKey(nameGUID)) { name = stbl[nameGUID]; stbl.Remove(nameGUID); }
-                        if (ckbCopyToAll.Checked || item.tgi.i >> 56 == 0x00) name = tbCatlgName.Text;
+                        if (ckbCopyToAll.Checked || item.rk.Instance >> 56 == 0x00) name = tbCatlgName.Text;
                         stbl.Add(newNameGUID, name);
 
                         string desc = "";
                         if (stbl.ContainsKey(descGUID)) { desc = stbl[descGUID]; stbl.Remove(descGUID); }
-                        if (ckbCopyToAll.Checked || item.tgi.i >> 56 == 0x00) desc = tbCatlgDesc.Text;
+                        if (ckbCopyToAll.Checked || item.rk.Instance >> 56 == 0x00) desc = tbCatlgDesc.Text;
                         stbl.Add(newDescGUID, desc);
 
                         dirty = true;
@@ -2249,7 +2251,7 @@ namespace ObjectCloner
                     }
                     else
                     {
-                        dirty = UpdateTGIsFromField((AResource)item.Resource);
+                        dirty = UpdateRKsFromField((AResource)item.Resource);
                     }
 
                     if (dirty) item.Commit();
@@ -2260,8 +2262,8 @@ namespace ObjectCloner
                 {
                     ulong png = (selectedItem.Resource != null) ? (ulong)selectedItem.Resource["CommonBlock.PngInstance"].Value : 0;
                     foreach (THUM.THUMSize size in Enum.GetValues(typeof(THUM.THUMSize)))
-                        if (Thumb[selectedItem.tgi.t, png != 0 ? png : selectedItem.tgi.i, size, png != 0] != null)
-                            Thumb[selectedItem.tgi.t, png != 0 ? png : selectedItem.tgi.i, size, png != 0] = replacementForThumbs;
+                        if (Thumb[selectedItem.rk.ResourceType, png != 0 ? png : selectedItem.rk.Instance, size, png != 0] != null)
+                            Thumb[selectedItem.rk.ResourceType, png != 0 ? png : selectedItem.rk.Instance, size, png != 0] = replacementForThumbs;
                 }
 
                 #region PadSTBLs
@@ -2271,15 +2273,16 @@ namespace ObjectCloner
                     for (int i = 0; i < 0x17; i++)
                     {
                         STBL lang = new STBL(objPkgs, (byte)i);
-                        if (lang.tgi != new TGI()) continue;
+                        if (lang.rk != RK.NULL) continue;
 
                         string name = English[nameGUID];
                         string desc = English[descGUID];
                         if (name == null) name = tbCatlgName.Text;
                         if (desc == null) desc = tbCatlgDesc.Text;
 
-                        TGI newTGI = new TGI(English.tgi.t, English.tgi.g, English.tgi.i | ((ulong)i << 56));
-                        RIE rie = new RIE(objPkgs[0], objPkgs[0].AddResource(newTGI.t, newTGI.g, newTGI.i, null, true));
+                        IResourceKey newRK = new RK(English.rk);
+                        newRK.Instance = English.rk.Instance | ((ulong)i << 56);
+                        RIE rie = new RIE(objPkgs[0], objPkgs[0].AddResource(newRK, null, true));
                         Item newstbl = new Item(rie);
                         IDictionary<ulong, string> outstbl = (IDictionary<ulong, string>)newstbl.Resource;
 
@@ -2287,16 +2290,16 @@ namespace ObjectCloner
                         outstbl.Add(newDescGUID, desc);
                         newstbl.Commit();
 
-                        if (NMap != null && NMap.map != null && !NMap.map.ContainsKey(newTGI.i))
-                            NMap.map.Add(newTGI.i, String.Format(language_fmt, languages[i], i, English.tgi.i));
+                        if (NMap != null && NMap.map != null && !NMap.map.ContainsKey(newRK.Instance))
+                            NMap.map.Add(newRK.Instance, String.Format(language_fmt, languages[i], i, English.rk.Instance));
                     }
                     NMap.Commit();
                 }
                 #endregion
 
-                foreach (Item item in tgiToItem.Values)
+                foreach (Item item in rkToItem.Values)
                 {
-                    if (item.tgi == new TGI(0, 0, 0)) { continue; }
+                    if (item.rk == RK.NULL) { continue; }
                     else if (!oldToNew.ContainsKey(item.ResourceIndexEntry.Instance)) { continue; }
                     else item.ResourceIndexEntry.Instance = oldToNew[item.ResourceIndexEntry.Instance];
                 }
@@ -2320,27 +2323,27 @@ namespace ObjectCloner
         int numNewInstances = 0;
         ulong CreateInstance() { numNewInstances++; return FNV64.GetHash(numNewInstances.ToString("X8") + "_" + UniqueObject + "_" + DateTime.UtcNow.ToBinary().ToString("X16")); }
 
-        private bool UpdateTGIsFromField(AApiVersionedFields field)
+        private bool UpdateRKsFromField(AApiVersionedFields field)
         {
             bool dirty = false;
 
             Type t = field.GetType();
-            if (typeof(AResource.TGIBlock).IsAssignableFrom(t))
+            if (typeof(IResourceKey).IsAssignableFrom(t))
             {
-                AResource.TGIBlock tgib = (AResource.TGIBlock)field;
-                if (cloneFixOptions.IsExcludeCatalogResources && Enum.IsDefined(typeof(CatalogType), tgib.ResourceType)) return dirty;
-                if (tgib != new TGI(0, 0, 0) && tgiToItem.ContainsKey(tgib) && oldToNew.ContainsKey(tgib.Instance)) { tgib.Instance = oldToNew[tgib.Instance]; dirty = true; }
+                IResourceKey rk = (IResourceKey)field;
+                if (cloneFixOptions.IsExcludeCatalogResources && Enum.IsDefined(typeof(CatalogType), rk.ResourceType)) return dirty;
+                if (rk != RK.NULL && rkToItem.ContainsKey(rk) && oldToNew.ContainsKey(rk.Instance)) { rk.Instance = oldToNew[rk.Instance]; dirty = true; }
             }
             else
             {
                 if (typeof(IEnumerable).IsAssignableFrom(field.GetType()))
-                    dirty = UpdateTGIsFromIEnumerable((IEnumerable)field) || dirty;
-                dirty = UpdateTGIsFromAApiVersionedFields(field) || dirty;
+                    dirty = UpdateRKsFromIEnumerable((IEnumerable)field) || dirty;
+                dirty = UpdateRKsFromAApiVersionedFields(field) || dirty;
             }
 
             return dirty;
         }
-        private bool UpdateTGIsFromAApiVersionedFields(AApiVersionedFields field)
+        private bool UpdateRKsFromAApiVersionedFields(AApiVersionedFields field)
         {
             bool dirty = false;
 
@@ -2354,23 +2357,23 @@ namespace ObjectCloner
                 if (t.IsArray && (!t.GetElementType().IsClass || t.GetElementType().Equals(typeof(string)))) continue;
 
                 if (typeof(IEnumerable).IsAssignableFrom(t))
-                    dirty = UpdateTGIsFromIEnumerable((IEnumerable)field[f].Value) || dirty;
+                    dirty = UpdateRKsFromIEnumerable((IEnumerable)field[f].Value) || dirty;
                 else if (typeof(AApiVersionedFields).IsAssignableFrom(t))
-                    dirty = UpdateTGIsFromField((AApiVersionedFields)field[f].Value) || dirty;
+                    dirty = UpdateRKsFromField((AApiVersionedFields)field[f].Value) || dirty;
             }
 
             return dirty;
         }
-        private bool UpdateTGIsFromIEnumerable(IEnumerable list)
+        private bool UpdateRKsFromIEnumerable(IEnumerable list)
         {
             bool dirty = false;
 
             if (list != null)
                 foreach (object o in list)
                     if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
-                        dirty = UpdateTGIsFromField((AApiVersionedFields)o) || dirty;
+                        dirty = UpdateRKsFromField((AApiVersionedFields)o) || dirty;
                     else if (typeof(IEnumerable).IsAssignableFrom(o.GetType()))
-                        dirty = UpdateTGIsFromIEnumerable((IEnumerable)o) || dirty;
+                        dirty = UpdateRKsFromIEnumerable((IEnumerable)o) || dirty;
 
             return dirty;
         }
@@ -2379,36 +2382,33 @@ namespace ObjectCloner
 
 
         #region Fetch resources
-        private void Add(string key, TGI tgi)
+        private void Add(string key, IResourceKey rk)
         {
             if (resourceList.Count % 100 == 0) Application.DoEvents();
-            tgiLookup.Add(key, tgi);
+            rkLookup.Add(key, rk);
 
-            TGIN tgin = new TGIN();
-            tgin.ResType = tgi.t;
-            tgin.ResGroup = tgi.g;
-            tgin.ResInstance = tgi.i;
+            TGIN tgin = (AResourceKey)rk;
             tgin.ResName = key;
             resourceList.Add(tgin);
         }
 
-        private void SlurpTGIsFromTGI(string key, TGI tgi) { Item item = new Item(objPkgs, tgi); if (item.ResourceIndexEntry != null) SlurpTGIsFromField(key, (AResource)item.Resource); }
-        private void SlurpTGIsFromField(string key, AApiVersionedFields field)
+        private void SlurpRKsFromRK(string key, IResourceKey rk) { Item item = new Item(objPkgs, rk); if (item.ResourceIndexEntry != null) SlurpRKsFromField(key, (AResource)item.Resource); }
+        private void SlurpRKsFromField(string key, AApiVersionedFields field)
         {
             Type t = field.GetType();
             if (typeof(GenericRCOLResource.ChunkEntry).IsAssignableFrom(t)) { }
             else if (typeof(AResource.TGIBlock).IsAssignableFrom(t))
             {
-                Add(key, "" + (AResource.TGIBlock)field);
+                Add(key, (IResourceKey)field);
             }
             else
             {
                 if (typeof(IEnumerable).IsAssignableFrom(t))
-                    SlurpTGIsFromIEnumerable(key, (IEnumerable)field);
-                SlurpTGIsFromAApiVersionedFields(key, field);
+                    SlurpRKsFromIEnumerable(key, (IEnumerable)field);
+                SlurpRKsFromAApiVersionedFields(key, field);
             }
         }
-        private void SlurpTGIsFromAApiVersionedFields(string key, AApiVersionedFields field)
+        private void SlurpRKsFromAApiVersionedFields(string key, AApiVersionedFields field)
         {
             List<string> fields = field.ContentFields;
             foreach (string f in fields)
@@ -2420,12 +2420,12 @@ namespace ObjectCloner
                 if (t.IsArray && (!t.GetElementType().IsClass || t.GetElementType().Equals(typeof(string)))) continue;
 
                 if (typeof(IEnumerable).IsAssignableFrom(t))
-                    SlurpTGIsFromIEnumerable(key + "." + f, (IEnumerable)field[f].Value);
+                    SlurpRKsFromIEnumerable(key + "." + f, (IEnumerable)field[f].Value);
                 else if (typeof(AApiVersionedFields).IsAssignableFrom(t))
-                    SlurpTGIsFromField(key + "." + f, (AApiVersionedFields)field[f].Value);
+                    SlurpRKsFromField(key + "." + f, (AApiVersionedFields)field[f].Value);
             }
         }
-        private void SlurpTGIsFromIEnumerable(string key, IEnumerable list)
+        private void SlurpRKsFromIEnumerable(string key, IEnumerable list)
         {
             if (list == null) return;
             int i = 0;
@@ -2433,12 +2433,12 @@ namespace ObjectCloner
             {
                 if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
                 {
-                    SlurpTGIsFromField(key + "[" + i + "]", (AApiVersionedFields)o);
+                    SlurpRKsFromField(key + "[" + i + "]", (AApiVersionedFields)o);
                     i++;
                 }
                 else if (typeof(IEnumerable).IsAssignableFrom(o.GetType()))
                 {
-                    SlurpTGIsFromIEnumerable(key + "[" + i + "]", (IEnumerable)o);
+                    SlurpRKsFromIEnumerable(key + "[" + i + "]", (IEnumerable)o);
                     i++;
                 }
             }
@@ -2446,17 +2446,16 @@ namespace ObjectCloner
 
         private void SlurpKindred(string key, IList<IPackage> pkgs, string[] fields, TypedValue[] values)
         {
-            List<TGI> seen = new List<TGI>();
+            List<IResourceKey> seen = new List<IResourceKey>();
             foreach (IPackage pkg in pkgs)
             {
                 IList<IResourceIndexEntry> lrie = pkg.FindAll(fields, values);
                 int i = 0;
                 foreach (IResourceIndexEntry rie in lrie)
                 {
-                    TGI tgi = new TGI(rie);
-                    if (seen.Contains(tgi)) continue;
-                    Add(key + "[" + i + "]", new TGI(rie));
-                    seen.Add(tgi);
+                    if (seen.Contains(rie)) continue;
+                    seen.Add(rie);
+                    Add(key + "[" + i + "]", rie);
                     i++;
                 }
             }
@@ -3075,21 +3074,21 @@ namespace ObjectCloner
             StepText.Add(Modular_Main, "Drive the modular process");
         }
 
-        void Item_addSelf() { Add("clone", selectedItem.tgi); }
-        void Catlg_SlurpTGIs() { SlurpTGIsFromField("clone", (AResource)selectedItem.Resource); }
+        void Item_addSelf() { Add("clone", selectedItem.rk); }
+        void Catlg_SlurpTGIs() { SlurpRKsFromField("clone", (AResource)selectedItem.Resource); }
         void Catlg_getVPXY()
         {
             vpxyItems = new List<Item>();
-            foreach (TGI tgi in (AResource.TGIBlockList)selectedItem.Resource["TGIBlocks"].Value)
+            foreach (IResourceKey rk in (AResource.TGIBlockList)selectedItem.Resource["TGIBlocks"].Value)
             {
-                if (tgi.t != 0x736884F1) continue;
-                Item vpxy = new Item(new RIE(objPkgs, tgi));
+                if (rk.ResourceType != 0x736884F1) continue;
+                Item vpxy = new Item(new RIE(objPkgs, rk));
                 if (vpxy.Resource != null)
                     vpxyItems.Add(vpxy);
             }
             if (vpxyItems.Count == 0) stepNum = lastInChain;
         }
-        void Catlg_addVPXYs() { for (int i = 0; i < vpxyItems.Count; i++) Add("vpxy[" + i + "]", vpxyItems[i].tgi); }
+        void Catlg_addVPXYs() { for (int i = 0; i < vpxyItems.Count; i++) Add("vpxy[" + i + "]", vpxyItems[i].rk); }
 
         #region OBJD Steps
         void OBJD_getOBKJ()
@@ -3100,10 +3099,9 @@ namespace ObjectCloner
             objkItem = new Item(objPkgs, objkTGI);
             if (objkItem == null) stepNum = lastInChain;
         }
-        void OBJD_addOBJKref() { Add("objk", objkItem.tgi); }
+        void OBJD_addOBJKref() { Add("objk", objkItem.rk); }
         void OBJD_SlurpDDSes()
         {
-            List<TGI> objdDDSes = new List<TGI>();
             IList<AResource.TGIBlock> ltgi = (IList<AResource.TGIBlock>)selectedItem.Resource["TGIBlocks"].Value;
             int i = 0;
             foreach (AApiVersionedFields mtdoor in (IList)selectedItem.Resource["MTDoors"].Value)
@@ -3113,7 +3111,7 @@ namespace ObjectCloner
             }
             Add("clone.sinkmask", ltgi[(int)(uint)selectedItem.Resource["SinkDDSIndex"].Value]);
         }
-        void OBJK_SlurpTGIs() { SlurpTGIsFromField("objk", (AResource)objkItem.Resource); }
+        void OBJK_SlurpTGIs() { SlurpRKsFromField("objk", (AResource)objkItem.Resource); }
         void OBJK_getVPXY()
         {
             int index = -1;
@@ -3127,10 +3125,10 @@ namespace ObjectCloner
             }
 
             vpxyItems = new List<Item>();
-            foreach (TGI tgi in (IList<AResource.TGIBlock>)objkItem.Resource["TGIBlocks"].Value)
+            foreach (IResourceKey rk in (IList<AResource.TGIBlock>)objkItem.Resource["TGIBlocks"].Value)
             {
-                if (tgi.t != 0x736884F1) continue;
-                Item vpxy = new Item(new RIE(objPkgs, tgi));
+                if (rk.ResourceType != 0x736884F1) continue;
+                Item vpxy = new Item(new RIE(objPkgs, rk));
                 if (vpxy.ResourceIndexEntry != null && vpxy.Resource != null)
                     vpxyItems.Add(vpxy);
             }
@@ -3142,7 +3140,7 @@ namespace ObjectCloner
         {
             uint unknown8 = (uint)selectedItem.Resource["Unknown8"].Value;
             if (CTPTUnknown8ToPair.ContainsKey(unknown8))
-                Add("ctpt_pair", CTPTUnknown8ToPair[unknown8].tgi);
+                Add("ctpt_pair", CTPTUnknown8ToPair[unknown8].rk);
         }
         void CTPT_addBrushTexture() { Add("ctpt_BrushTexture", (AResource.TGIBlock)selectedItem.Resource["BrushTexture"].Value); }
         void CTPT_addBrushShape() { Add("ctpt_BrushShape", (AResource.TGIBlock)selectedItem.Resource["BrushShape"].Value); }
@@ -3152,20 +3150,20 @@ namespace ObjectCloner
             for (int i = 0; i < vpxyItems.Count; i++)
             {
                 VPXY vpxyChunk = ((GenericRCOLResource)vpxyItems[i].Resource).ChunkEntries[0].RCOLBlock as VPXY;
-                SlurpTGIsFromField("vpxy[" + i + "]", vpxyChunk);
+                SlurpRKsFromField("vpxy[" + i + "]", vpxyChunk);
             }
         }
         void VPXYs_getKinXML()
         {
             for (int i = 0; i < vpxyItems.Count; i++)
                 SlurpKindred("vpxy[" + i + "].PresetXML", objPkgs, new string[] { "ResourceType", "Instance" },
-                    new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0333406C), new TypedValue(typeof(ulong), vpxyItems[i].tgi.i) });
+                    new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0333406C), new TypedValue(typeof(ulong), vpxyItems[i].rk.Instance) });
         }
         void VPXYs_getKinMTST()
         {
             for (int i = 0; i < vpxyItems.Count; i++)
                 SlurpKindred("vpxy[" + i + "].mtst", objPkgs, new string[] { "ResourceType", "Instance" },
-                    new TypedValue[] { new TypedValue(typeof(uint), (uint)0x02019972), new TypedValue(typeof(ulong), vpxyItems[i].tgi.i) });
+                    new TypedValue[] { new TypedValue(typeof(uint), (uint)0x02019972), new TypedValue(typeof(ulong), vpxyItems[i].rk.Instance) });
         }
         void VPXYs_getMODLs()
         {
@@ -3187,7 +3185,7 @@ namespace ObjectCloner
                 }
             }
         }
-        void MODLs_SlurpTGIs() { for (int i = 0; i < modlItems.Count; i++) SlurpTGIsFromField("modl[" + i + "]", (AResource)modlItems[i].Resource); }
+        void MODLs_SlurpTGIs() { for (int i = 0; i < modlItems.Count; i++) SlurpRKsFromField("modl[" + i + "]", (AResource)modlItems[i].Resource); }
         void MODLs_SlurpMLODs()
         {
             int k = 0;
@@ -3198,7 +3196,7 @@ namespace ObjectCloner
                 {
                     AResource.TGIBlock tgib = rcol.Resources[j];
                     if (tgib.ResourceType != 0x01D10F34) continue;
-                    SlurpTGIsFromTGI("modl[" + i + "].mlod[" + k + "]", tgib);
+                    SlurpRKsFromRK("modl[" + i + "].mlod[" + k + "]", tgib);
                     k++;
                 }
             }
@@ -3213,7 +3211,7 @@ namespace ObjectCloner
                 {
                     AResource.TGIBlock tgib = rcol.Resources[j];
                     if (tgib.ResourceType != 0x033A1435) continue;
-                    SlurpTGIsFromTGI("modl[" + i + "].txtc[" + k + "]", tgib);
+                    SlurpRKsFromRK("modl[" + i + "].txtc[" + k + "]", tgib);
                     k++;
                 }
             }
@@ -3223,10 +3221,10 @@ namespace ObjectCloner
         void Item_findObjds()
         {
             objdList = new List<Item>();
-            foreach (TGI tgi in (AResource.TGIBlockList)selectedItem.Resource["TGIBlocks"].Value)
+            foreach (IResourceKey rk in (AResource.TGIBlockList)selectedItem.Resource["TGIBlocks"].Value)
             {
-                if (tgi.t != 0x319E4F1D) continue;
-                Item objd = new Item(new RIE(objPkgs, tgi));
+                if (rk.ResourceType != 0x319E4F1D) continue;
+                Item objd = new Item(new RIE(objPkgs, rk));
                 if (objd.Resource != null)
                     objdList.Add(objd);
             }
@@ -3240,12 +3238,12 @@ namespace ObjectCloner
             Item realSelectedItem = selectedItem;
             int realStepNum = stepNum;
             Step mdlrStep;
-            Dictionary<string, TGI> MDLRtgiLookup = new Dictionary<string, TGI>();
-            foreach (var kvp in tgiLookup) MDLRtgiLookup.Add(kvp.Key, kvp.Value);
+            Dictionary<string, IResourceKey> MDLRrkLookup = new Dictionary<string, IResourceKey>();
+            foreach (var kvp in rkLookup) MDLRrkLookup.Add(kvp.Key, kvp.Value);
 
             for (int i = 0; i < objdList.Count; i++)
             {
-                tgiLookup = new Dictionary<string, TGI>();
+                rkLookup = new Dictionary<string, IResourceKey>();
                 selectedItem = objdList[i];
                 stepNum = 0;
                 while (stepNum < objdSteps.Count)
@@ -3256,12 +3254,12 @@ namespace ObjectCloner
                     stepNum++;
                     mdlrStep();
                 }
-                foreach (var kvp in tgiLookup) MDLRtgiLookup.Add("objd[" + i + "]." + kvp.Key, kvp.Value);
+                foreach (var kvp in rkLookup) MDLRrkLookup.Add("objd[" + i + "]." + kvp.Key, kvp.Value);
             }
 
             selectedItem = realSelectedItem;
             stepNum = realStepNum;
-            tgiLookup = MDLRtgiLookup;
+            rkLookup = MDLRrkLookup;
         }
 
         //Bring in all resources from ...\The Sims 3\Thumbnails\ALLThumbnails.package that match the instance number of the OBJD
@@ -3273,11 +3271,11 @@ namespace ObjectCloner
         {
             foreach (THUM.THUMSize size in new THUM.THUMSize[] { THUM.THUMSize.small, THUM.THUMSize.medium, THUM.THUMSize.large, })
             {
-                TGI tgi = getImageTGI(size, selectedItem);
+                IResourceKey rk = getImageRK(size, selectedItem);
                 if (selectedItem.CType == CatalogType.CatalogRoofPattern)
-                    Add(size + "Icon", tgi);
+                    Add(size + "Icon", rk);
                 else
-                    Add(size + "Thumb", tgi);
+                    Add(size + "Thumb", rk);
             }
         }
         //0x515CA4CD is very different
@@ -3287,7 +3285,7 @@ namespace ObjectCloner
             CWALThumbTypes.Add(THUM.THUMSize.small, 0x0589DC44);
             CWALThumbTypes.Add(THUM.THUMSize.medium, 0x0589DC45);
             CWALThumbTypes.Add(THUM.THUMSize.large, 0x0589DC46);
-            List<TGI> seen = new List<TGI>();
+            List<IResourceKey> seen = new List<IResourceKey>();
             foreach (THUM.THUMSize size in new THUM.THUMSize[] { THUM.THUMSize.small, THUM.THUMSize.medium, THUM.THUMSize.large, })
             {
                 int i = 0;
@@ -3296,13 +3294,13 @@ namespace ObjectCloner
                 {
                     IList<IResourceIndexEntry> lrie = pkg.FindAll(new string[] { "ResourceType", "Instance" }, new TypedValue[] {
                             new TypedValue(typeof(uint), type),
-                            new TypedValue(typeof(ulong), selectedItem.tgi.i),
+                            new TypedValue(typeof(ulong), selectedItem.rk.Instance),
                         });
                     foreach (IResourceIndexEntry rie in lrie)
                     {
                         RIE Rie = new RIE(pkg, rie);
-                        if (seen.Contains(Rie.tgi)) continue;
-                        Add(size + "[" + i++ + "]Thumb", Rie.tgi);
+                        if (seen.Contains(Rie.rk)) continue;
+                        Add(size + "[" + i++ + "]Thumb", Rie.rk);
                     }
                 }
             }
@@ -3312,61 +3310,55 @@ namespace ObjectCloner
         void FixIntegrity()
         {
             // A list of the TGIs we are going to renumber and the resource that "owns" them
-            tgiToItem = new Dictionary<TGI, Item>();
+            rkToItem = new Dictionary<IResourceKey, Item>();
 
             // We need to process anything we found in the previous steps
-            foreach (var kvp in tgiLookup)
+            foreach (var kvp in rkLookup)
             {
-                if (kvp.Value == new TGI(0, 0, 0)) continue;
-                if (tgiToItem.ContainsKey(kvp.Value)) continue; // seen this TGI before
+                if (kvp.Value == RK.NULL) continue;
+                if (rkToItem.ContainsKey(kvp.Value)) continue; // seen this TGI before
                 Item item = new Item(objPkgs, kvp.Value);
                 if (item.ResourceIndexEntry == null) continue; // TGI is not a packed resource
-                tgiToItem.Add(kvp.Value, item);
+                rkToItem.Add(kvp.Value, item);
             }
 
             // We need to process STBLs
             IList<IResourceIndexEntry> lstblrie = objPkgs[0].FindAll(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x220557DA), });
             foreach (IResourceIndexEntry rie in lstblrie)
-            {
-                TGI tgi = new TGI(rie);
-                if (!tgiToItem.ContainsKey(tgi))
-                    tgiToItem.Add(tgi, new Item(new RIE(objPkgs[0], rie)));
-            }
+                if (!rkToItem.ContainsKey(rie))
+                    rkToItem.Add(rie, new Item(new RIE(objPkgs[0], rie)));
 
             // We may also need to process RCOL internal chunks and NameMaps but only if we're renumbering
             if (cloneFixOptions.IsRenumber)
             {
                 //If there are internal chunk references not covered by the above, we also need to add them
-                Dictionary<TGI, Item> rcolChunks = new Dictionary<TGI, Item>();
-                foreach (var kvp in tgiToItem)
+                Dictionary<IResourceKey, Item> rcolChunks = new Dictionary<IResourceKey, Item>();
+                foreach (var kvp in rkToItem)
                 {
                     if (!typeof(GenericRCOLResource).IsAssignableFrom(kvp.Value.Resource.GetType())) continue;
 
                     foreach (GenericRCOLResource.ChunkEntry chunk in (kvp.Value.Resource as GenericRCOLResource).ChunkEntries)
                     {
-                        if (chunk.TGIBlock == new TGI(0, 0, 0)) continue;
-                        if (tgiToItem.ContainsKey(chunk.TGIBlock)) continue; // External reference and we've seen it
+                        if (chunk.TGIBlock == RK.NULL) continue;
+                        if (rkToItem.ContainsKey(chunk.TGIBlock)) continue; // External reference and we've seen it
                         if (rcolChunks.ContainsKey(chunk.TGIBlock)) continue; // Internal reference and we've seen it
                         rcolChunks.Add(chunk.TGIBlock, kvp.Value);
                     }
                 }
-                foreach (var kvp in rcolChunks) tgiToItem.Add(kvp.Key, kvp.Value);
+                foreach (var kvp in rcolChunks) rkToItem.Add(kvp.Key, kvp.Value);
 
                 // Add newest namemap
                 IList<IResourceIndexEntry> lnmaprie = objPkgs[0].FindAll(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C), });
                 foreach (IResourceIndexEntry rie in lnmaprie)
-                {
-                    TGI tgi = new TGI(rie);
-                    if (!tgiToItem.ContainsKey(tgi))
-                        tgiToItem.Add(tgi, new Item(new RIE(objPkgs[0], rie)));
-                }
+                    if (!rkToItem.ContainsKey(rie))
+                        rkToItem.Add(rie, new Item(new RIE(objPkgs[0], rie)));
             }
 
             // A list to hold the new numbers
             oldToNew = new Dictionary<ulong, ulong>();
 
             if (selectedItem.CType == CatalogType.ModularResource)
-                oldToNew.Add(selectedItem.tgi.i, FNV64.GetHash(UniqueObject));//MDLR needs its IID as a specific hash value
+                oldToNew.Add(selectedItem.rk.Instance, FNV64.GetHash(UniqueObject));//MDLR needs its IID as a specific hash value
 
             ulong PngInstance = 0;
             if (selectedItem.CType != CatalogType.ModularResource)
@@ -3381,15 +3373,15 @@ namespace ObjectCloner
             {
                 // Generate new numbers for everything we've decided to renumber
                 ulong langInst = (CreateInstance() << 8) >> 8;
-                foreach (TGI tgi in tgiToItem.Keys)
+                foreach (IResourceKey rk in rkToItem.Keys)
                 {
-                    if (cloneFixOptions.IsExcludeCatalogResources && Enum.IsDefined(typeof(CatalogType), tgi.t)) continue;
-                    if (!oldToNew.ContainsKey(tgi.i))
+                    if (cloneFixOptions.IsExcludeCatalogResources && Enum.IsDefined(typeof(CatalogType), rk.ResourceType)) continue;
+                    if (!oldToNew.ContainsKey(rk.Instance))
                     {
-                        if (tgi.t == 0x220557DA)//STBL
-                            oldToNew.Add(tgi.i, tgi.i & 0xFF00000000000000 | langInst);
+                        if (rk.ResourceType == 0x220557DA)//STBL
+                            oldToNew.Add(rk.Instance, rk.Instance & 0xFF00000000000000 | langInst);
                         else
-                            oldToNew.Add(tgi.i, CreateInstance());
+                            oldToNew.Add(rk.Instance, CreateInstance());
                     }
                 }
             }
@@ -3416,9 +3408,12 @@ namespace ObjectCloner
             resourceList.Clear();
             if (cloneFixOptions.IsRenumber)
             {
-                foreach (var kvp in tgiToItem)
+                foreach (var kvp in rkToItem)
                 {
-                    string s = String.Format("Old: {0} --> New: {1}", "" + (TGIN)kvp.Key, "" + (TGIN)new TGI(kvp.Key.t, kvp.Key.g, oldToNew[kvp.Key.i]));
+                    TGIN oldN = (AResourceKey)kvp.Key;
+                    TGIN newN = (AResourceKey)kvp.Key;
+                    newN.ResInstance = oldToNew[kvp.Key.Instance];
+                    string s = String.Format("Old: {0} --> New: {1}", "" + oldN, "" + newN);
                     resourceList.Add(s);
                 }
 
