@@ -33,7 +33,7 @@ namespace ObjectCloner
         {
             InitializeComponent();
             tsMD = new List<ToolStripMenuItem>(new ToolStripMenuItem[]{
-                fileToolStripMenuItem, cloningToolStripMenuItem, viewToolStripMenuItem, helpToolStripMenuItem,
+                fileToolStripMenuItem, cloningToolStripMenuItem, viewToolStripMenuItem, settingsToolStripMenuItem, helpToolStripMenuItem,
             });
             tsMB = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //File
