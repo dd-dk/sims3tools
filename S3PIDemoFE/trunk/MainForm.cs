@@ -32,18 +32,24 @@ namespace S3PIDemoFE
 {
     public partial class MainForm : Form
     {
-        static List<string> fields = null;
+        static List<string> fields = AApiVersionedFields.GetContentFields(0, typeof(AResourceIndexEntry));
+        static List<string> unwantedFields = new List<string>(new string[] {
+            "Stream",
+        });
         static MainForm()
         {
-            //GetContentFields now returns a sorted list, which we don't want for "fields"
-            //foreach (string s in AApiVersionedFields.GetContentFields(0, typeof(AResourceIndexEntry)))
-            //    if (!s.Contains("Stream"))
-            //        fields.Add(s);
-            fields = new List<string>(new string[] {
-                "ResourceType", "ResourceGroup", "Instance",
-                "Chunkoffset", "Filesize", "Memsize", "Compressed", "Unknown2",
-                "IsDeleted",
-            });
+            foreach (string s in unwantedFields) fields.Remove(s);
+            fields.Sort(byElementPriority);
+        }
+        static int byElementPriority(string x, string y)
+        {
+            int xPrio = int.MaxValue;
+            int yPrio = int.MaxValue;
+            object[] xCA = typeof(AResourceIndexEntry).GetProperty(x).GetCustomAttributes(typeof(ElementPriorityAttribute), true);
+            object[] yCA = typeof(AResourceIndexEntry).GetProperty(y).GetCustomAttributes(typeof(ElementPriorityAttribute), true);
+            foreach (ElementPriorityAttribute o in xCA) { xPrio = o.Priority; break; }
+            foreach (ElementPriorityAttribute o in yCA) { yPrio = o.Priority; break; }
+            return xPrio.CompareTo(yPrio);
         }
 
         const string myName = "s3pe";
@@ -57,7 +63,7 @@ namespace S3PIDemoFE
             browserWidget1.Fields = new List<string>(fields.ToArray());
             browserWidget1.ContextMenuStrip = menuBarWidget1.browserWidgetContextMenuStrip;
 
-            List<string> filterFields = new List<string>(fields.ToArray());
+            List<string> filterFields = new List<string>(fields);
             filterFields.Remove("Chunkoffset");
             filterFields.Remove("Filesize");
             filterFields.Remove("Memsize");
@@ -646,7 +652,7 @@ namespace S3PIDemoFE
             if (ir.UseName && ir.ResourceName != null && ir.ResourceName.Length > 0)
                 UpdateNameMap(ir.Instance, ir.ResourceName, true, ir.AllowRename);
 
-            IResourceIndexEntry rie = NewResource(ir.ResourceType, ir.ResourceGroup, ir.Instance, null, ir.Replace, ir.Compress);
+            IResourceIndexEntry rie = NewResource(ir, null, ir.Replace, ir.Compress);
             browserWidget1.Add(rie);
         }
 
@@ -704,9 +710,7 @@ namespace S3PIDemoFE
             MemoryStream ms = new MemoryStream();
             ms.Write(buffer, 0, buffer.Length);
 
-            IResourceIndexEntry rie = CurrentPackage.AddResource(
-                browserWidget1.SelectedResource.ResourceType, browserWidget1.SelectedResource.ResourceGroup, browserWidget1.SelectedResource.Instance,
-                ms, false);
+            IResourceIndexEntry rie = CurrentPackage.AddResource(browserWidget1.SelectedResource, ms, false);
             rie.Compressed = browserWidget1.SelectedResource.Compressed;
 
             IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, true);//Don't need wrapper
@@ -742,10 +746,7 @@ namespace S3PIDemoFE
         {
             if (browserWidget1.SelectedResource == null) return;
 
-            ResourceDetails ir = new ResourceDetails(resourceName != null && resourceName.Length > 0, false);
-            ir.ResourceType = browserWidget1.SelectedResource.ResourceType;
-            ir.ResourceGroup = browserWidget1.SelectedResource.ResourceGroup;
-            ir.Instance = browserWidget1.SelectedResource.Instance;
+            ResourceDetails ir = new ResourceDetails(resourceName != null && resourceName.Length > 0, false, browserWidget1.SelectedResource);
             ir.Compress = browserWidget1.SelectedResource.Compressed != 0;
             if (ir.UseName) ir.ResourceName = resourceName;
             
@@ -817,7 +818,7 @@ namespace S3PIDemoFE
             IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) });
             if (rie == null && create)
             {
-                rie = CurrentPackage.AddResource(0x0166038C, 0, 0, null, false);
+                rie = CurrentPackage.AddResource(new AResource.TGIBlock(0, null, 0x0166038C, 0, 0), null, false);
                 if (rie != null) browserWidget1.Add(rie);
             }
             if (rie == null) return false;
@@ -848,17 +849,22 @@ namespace S3PIDemoFE
             return true;
         }
 
-        private IResourceIndexEntry NewResource(uint type, uint group, ulong instance, MemoryStream ms, bool replace, bool compress)
+        private IResourceIndexEntry NewResource(IResourceKey rk, MemoryStream ms, bool replace, bool compress)
         {
-            IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType", "ResourceGroup", "Instance" },
-                new TypedValue[] { new TypedValue(type.GetType(), type), new TypedValue(group.GetType(), group), new TypedValue(instance.GetType(), instance), });
+            IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType", "EpFlags", "ResourceGroup", "Instance" },
+                new TypedValue[] {
+                    new TypedValue(rk.ResourceType.GetType(), rk.ResourceType),
+                    new TypedValue(rk.EpFlags.GetType(), rk.EpFlags),
+                    new TypedValue(rk.ResourceGroup.GetType(), rk.ResourceGroup),
+                    new TypedValue(rk.Instance.GetType(), rk.Instance),
+                });
             if (rie != null)
             {
                 if (!replace) return null;
                 CurrentPackage.DeleteResource(rie);
             }
 
-            rie = CurrentPackage.AddResource(type, group, instance, ms, true);
+            rie = CurrentPackage.AddResource(rk, ms, true);
             if (rie == null) return null;
 
             rie.Compressed = (ushort)(compress ? 0xffff : 0);
@@ -1036,7 +1042,7 @@ namespace S3PIDemoFE
                 tgtpkg.DeleteResource(rie);
             }
 
-            rie = tgtpkg.AddResource(srcrie.ResourceType, srcrie.ResourceGroup, srcrie.Instance, null, true);
+            rie = tgtpkg.AddResource(srcrie, null, true);
             if (rie == null) return;
             rie.Compressed = srcrie.Compressed;
 
@@ -1656,9 +1662,7 @@ namespace S3PIDemoFE
                 if (dr != 0) return;
 
                 MemoryStream ms = Clipboard.GetData(DataFormats.Serializable) as MemoryStream;
-                IResourceIndexEntry rie = NewResource(
-                    browserWidget1.SelectedResource.ResourceType, browserWidget1.SelectedResource.ResourceGroup, browserWidget1.SelectedResource.Instance,
-                    ms, true, browserWidget1.SelectedResource.Compressed != 0);
+                IResourceIndexEntry rie = NewResource(browserWidget1.SelectedResource, ms, true, browserWidget1.SelectedResource.Compressed != 0);
                 if (rie != null) browserWidget1.Add(rie);
             }
         }
