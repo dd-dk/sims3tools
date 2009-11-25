@@ -82,7 +82,7 @@ namespace ObjectCloner
             {
                 updateProgress(true, "Please wait, searching for objects...", true, -1, false, 0);
                 List<RIE> lrie = new List<RIE>();
-                List<TGI> seen = new List<TGI>();
+                List<IResourceKey> seen = new List<IResourceKey>();
                 List<IPackage> seenPkgs = new List<IPackage>();
                 foreach (IPackage pkg in objPkgs)
                 {
@@ -98,9 +98,8 @@ namespace ObjectCloner
                     foreach (IResourceIndexEntry match in matches)
                     {
                         if (!Enum.IsDefined(typeof(CatalogType), match.ResourceType)) continue;
-                        TGI tgi = new TGI(match);
-                        if (seen.Contains(tgi)) continue;
-                        seen.Add(tgi);
+                        if (seen.Contains(match)) continue;
+                        seen.Add(match);
                         lrie.Add(new RIE(pkg, match));
                     }
                 }
@@ -151,75 +150,36 @@ namespace ObjectCloner
         CatalogRoofPattern = 0xF1EDBD86,
     }
 
-    public struct TGI : IEquatable<TGI>, IEqualityComparer<TGI>
+    /// <summary>
+    /// This exists pretty much just so we have a small, concrete implementation of IResourceKey
+    /// </summary>
+    public class RK : AResourceKey
     {
-        public uint t;
-        public uint g;
-        public ulong i;
-        public TGI(uint t, uint g, ulong i) { this.t = t; this.g = g; this.i = i; }
+        public RK(IResourceKey rk) : base(0, null, rk) { }
 
-        public TGI(IResourceIndexEntry rie) : this(rie.ResourceType, rie.ResourceGroup, rie.Instance) { }
+        RK() : base(0, null) { }
+        static readonly RK rknull = new RK();
+        public static RK NULL { get { return rknull; } }
 
-        public TGI(s3pi.Extensions.TGIN tgin) { t = tgin.ResType; g = tgin.ResGroup; i = tgin.ResInstance; }
-        public static implicit operator TGI(s3pi.Extensions.TGIN tgin) { return new TGI(tgin); }
-        public static implicit operator s3pi.Extensions.TGIN(TGI tgi)
-        {
-            s3pi.Extensions.TGIN tgin = new s3pi.Extensions.TGIN();
-            tgin.ResType = tgi.t;
-            tgin.ResGroup = tgi.g;
-            tgin.ResInstance = tgi.i;
-            return tgin;
-        }
-
-        public TGI(AResource.TGIBlock tgib) { t = tgib.ResourceType; g = tgib.ResourceGroup; i = tgib.Instance; }
-        public static implicit operator TGI(AResource.TGIBlock tgib) { return new TGI(tgib); }
-
-        public static implicit operator String(TGI value) { return value.ToString(); }
-        public static implicit operator TGI(String value)
-        {
-            TGI res = new TGI();
-            string[] v = value.Split('-');
-            res.t = Convert.ToUInt32(v[0], v[0].StartsWith("0x") ? 16 : 10);
-            res.g = Convert.ToUInt32(v[1], v[1].StartsWith("0x") ? 16 : 10);
-            res.i = Convert.ToUInt64(v[2], v[2].StartsWith("0x") ? 16 : 10);
-            return res;
-        }
-
-        public static bool operator ==(TGI a, TGI b) { return a.Equals(b); }
-        public static bool operator !=(TGI a, TGI b) { return !a.Equals(b); }
-        //public override bool Equals(object obj) { return this.Equals((TGI)obj); } -- no, do not want invalid cast exception
-        public override int GetHashCode() { return GetHashCode(this); }
-        public override string ToString() { return String.Format("0x{0:X8}-0x{1:X8}-0x{2:X16}", t, g, i); }
-
-        #region IEquatable<TGI> Members
-
-        public bool Equals(TGI other) { return t.Equals(other.t) && g.Equals(other.g) && i.Equals(other.i); }
-
-        #endregion
-
-        #region IEqualityComparer<TGI> Members
-
-        public bool Equals(TGI x, TGI y) { return x.Equals(y); }
-
-        public int GetHashCode(TGI obj) { return obj.t.GetHashCode() ^ obj.g.GetHashCode() ^ obj.i.GetHashCode(); }
-
-        #endregion
+        public override AHandlerElement Clone(EventHandler handler) { throw new NotImplementedException(); }
+        public override List<string> ContentFields { get { throw new NotImplementedException(); } }
+        public override int RecommendedApiVersion { get { throw new NotImplementedException(); } }
     }
 
     public struct RIE
     {
         List<IPackage> posspkgs;
-        TGI mytgi;
+        IResourceKey myrk;
 
         IPackage package;
         AResourceIndexEntry irie;
 
-        public RIE(List<IPackage> posspkgs, TGI tgi) : this() { this.posspkgs = posspkgs; this.mytgi = tgi; }
-        public RIE(IPackage pkg, IResourceIndexEntry rie) : this(null, new TGI(rie)) { if (pkg.GetResourceList.Contains(rie)) { this.package = pkg; irie = rie as AResourceIndexEntry; } }
+        public RIE(List<IPackage> posspkgs, IResourceKey rk) : this() { this.posspkgs = posspkgs; this.myrk = rk; }
+        public RIE(IPackage pkg, IResourceIndexEntry rie) : this(null, (IResourceKey)rie) { if (pkg.GetResourceList.Contains(rie)) { this.package = pkg; irie = rie as AResourceIndexEntry; } }
 
         public IPackage pkg { get { return package; } }
         public AResourceIndexEntry rie { get { if (pkg == null || irie == null) irie = findIRIE(); return irie; } }
-        public TGI tgi { get { return mytgi; } }
+        public IResourceKey rk { get { return myrk; } }
         public static implicit operator AResourceIndexEntry(RIE rie) { return rie.findIRIE(); }
 
         AResourceIndexEntry findIRIE()
@@ -238,9 +198,9 @@ namespace ObjectCloner
         {
             return pkg.Find(new string[] { "ResourceType", "ResourceGroup", "Instance", },
                 new TypedValue[] {
-                    new TypedValue(typeof(uint), mytgi.t),
-                    new TypedValue(typeof(uint), mytgi.g),
-                    new TypedValue(typeof(ulong), mytgi.i),
+                    new TypedValue(typeof(uint), myrk.ResourceType),
+                    new TypedValue(typeof(uint), myrk.ResourceGroup),
+                    new TypedValue(typeof(ulong), myrk.Instance),
                     }
             ) as AResourceIndexEntry;
         }
@@ -257,8 +217,8 @@ namespace ObjectCloner
 
         //public Item(List<IPackage> posspkgs, IResourceIndexEntry rie) : this(posspkgs, rie, false) { }
         //public Item(List<IPackage> posspkgs, IResourceIndexEntry rie, bool defaultWrapper) : this(new RIE(pkg, rie), defaultWrapper) { }
-        public Item(List<IPackage> posspkgs, TGI tgi) : this(posspkgs, tgi, false) { }
-        Item(List<IPackage> posspkgs, TGI tgi, bool defaultWrapper) : this(new RIE(posspkgs, tgi), defaultWrapper) { }
+        public Item(List<IPackage> posspkgs, IResourceKey rk) : this(posspkgs, rk, false) { }
+        Item(List<IPackage> posspkgs, IResourceKey rk, bool defaultWrapper) : this(new RIE(posspkgs, rk), defaultWrapper) { }
         public Item(RIE rie) : this(rie, false) { }
         public Item(RIE rie, bool defaultWrapper) { this.defaultWrapper = defaultWrapper; this.myrie = rie; }
 
@@ -283,9 +243,9 @@ namespace ObjectCloner
 
         public IPackage Package { get { return myrie.pkg; } }
 
-        public TGI tgi { get { return myrie.tgi; } }
+        public IResourceKey rk { get { return myrie.rk; } }
 
-        public CatalogType CType { get { return (CatalogType)myrie.tgi.t; } }
+        public CatalogType CType { get { return (CatalogType)myrie.rk.ResourceType; } }
 
         public Exception Exception { get { return ex; } }
 
