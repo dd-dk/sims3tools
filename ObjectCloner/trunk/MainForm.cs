@@ -226,7 +226,8 @@ namespace ObjectCloner
         /// </summary>
         static void LoadTTL()
         {
-            s3oc_ini.Import(new N3Reader("s3oc-ini.ttl"));
+            string iniFile = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "s3oc-ini.ttl");
+            s3oc_ini.Import(new N3Reader(iniFile));
             lS3ocSims3 = new List<S3ocSims3>();
 
             foreach (Statement s in s3oc_ini.Select(new Statement(null, rdftype, typeSims3)))
