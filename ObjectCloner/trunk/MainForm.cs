@@ -1882,7 +1882,7 @@ namespace ObjectCloner
                 bool complete = false;
                 NameMap fb0nm = new NameMap(objPkgs);
                 NameMap fb2nm = new NameMap(ddsPkgs);
-                Item newnmap = NewResource(target, fb0nm.rk);
+                Item newnmap = NewResource(target, fb0nm.rk == RK.NULL ? new AResource.TGIBlock(0, null, 0x0166038C, 0, selectedItem.rk.Instance) : fb0nm.rk);
                 IDictionary<ulong, string> newnamemap = (IDictionary<ulong, string>)newnmap.Resource;
                 try
                 {
