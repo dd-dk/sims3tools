@@ -108,6 +108,7 @@ namespace S3PIDemoFE
             if (t.Equals(typeof(ArrayAsHexCTD))) return "Lists";
             if (t.Equals(typeof(AApiVersionedFieldsCTD))) return "Fields";
             if (t.Equals(typeof(ICollectionAApiVersionedFieldsCTD))) return "Lists";
+            if (t.Equals(typeof(IExpandableCollectionAApiVersionedFieldsCTD))) return "Lists";
             if (t.Equals(typeof(IDictionaryCTD))) return "Lists";
             if (t.Equals(typeof(ReaderCTD))) return "Readers";
             return "Values";
@@ -159,25 +160,30 @@ namespace S3PIDemoFE
         public class TypedValuePropertyDescriptor : PropertyDescriptor
         {
             AApiVersionedFields owner;
-            int priority;
+            int priority = int.MaxValue;
+            bool expandable = false;
             Type fieldType;
             public TypedValuePropertyDescriptor(AApiVersionedFields owner, string field, Attribute[] attrs)
                 : base(field, attrs)
             {
                 this.owner = owner;
-                this.priority = int.MaxValue;
                 if (typeof(AsHex).Equals(owner.GetType())) fieldType = ((AsHex)owner).ElementType;
                 else if (typeof(AsKVP).Equals(owner.GetType())) fieldType = ((AsKVP)owner).GetType(Name);
                 else
                 {
-                    fieldType = AApiVersionedFields.GetContentFieldTypes(0, owner.GetType())[Name];
-                    PropertyInfo pi = owner.GetType().GetProperty(Name);
+                    string name = Name.Split(' ').Length == 1 ? Name : Name.Split(new char[] { ' ' }, 2)[1].Trim();
+                    fieldType = AApiVersionedFields.GetContentFieldTypes(0, owner.GetType())[name];
+                    PropertyInfo pi = owner.GetType().GetProperty(name);
                     foreach (Attribute attr in pi.GetCustomAttributes(typeof(ElementPriorityAttribute), true))
                         priority = (attr as ElementPriorityAttribute).Priority;
+                    foreach (Attribute attr in pi.GetCustomAttributes(typeof(DataGridExpandableAttribute), true))
+                        expandable = (attr as DataGridExpandableAttribute).DataGridExpandable;
                 }
             }
 
             public int Priority { get { return priority; } }
+
+            public bool Expandable { get { return expandable; } }
 
 
             public override bool CanResetValue(object component) { return false; }
@@ -193,9 +199,11 @@ namespace S3PIDemoFE
                 if (t.Equals(typeof(ArrayAsHexCTD))) return new ArrayAsHexCTD(owner, Name, component);
                 if (t.Equals(typeof(AApiVersionedFieldsCTD))) return new AApiVersionedFieldsCTD(owner, Name, component);
                 if (t.Equals(typeof(ICollectionAApiVersionedFieldsCTD))) return new ICollectionAApiVersionedFieldsCTD(owner, Name, component);
+                if (t.Equals(typeof(IExpandableCollectionAApiVersionedFieldsCTD))) return new IExpandableCollectionAApiVersionedFieldsCTD(owner, Name, component);
                 if (t.Equals(typeof(IDictionaryCTD))) return new IDictionaryCTD(owner, Name, component);
                 if (t.Equals(typeof(ReaderCTD))) return new ReaderCTD(owner, Name, component);
-                return owner[Name].Value;
+                string name = Name.Split(' ').Length == 1 ? Name : Name.Split(new char[] { ' ' }, 2)[1].Trim();
+                return owner[name].Value;
             }
 
             public override bool IsReadOnly
@@ -204,7 +212,8 @@ namespace S3PIDemoFE
                 {
                     if (owner.GetType().Equals(typeof(AsHex))) return false;
                     if (owner.GetType().Equals(typeof(AsKVP))) return false;
-                    return !owner.GetType().GetProperty(Name).CanWrite; 
+                    string name = Name.Split(' ').Length == 1 ? Name : Name.Split(new char[] { ' ' }, 2)[1].Trim();
+                    return !owner.GetType().GetProperty(name).CanWrite; 
                 }
             }
 
@@ -262,7 +271,7 @@ namespace S3PIDemoFE
 
                     // Collections of AApiVersionedFields (AResource.DependentList<T> where T is AHandlerElement)
                     if (isCollection(fieldType))
-                        return typeof(ICollectionAApiVersionedFieldsCTD);
+                        return expandable ? typeof(IExpandableCollectionAApiVersionedFieldsCTD) : typeof(ICollectionAApiVersionedFieldsCTD);
 
                     if (typeof(IDictionary).IsAssignableFrom(fieldType)) return typeof(IDictionaryCTD);
 
@@ -275,7 +284,11 @@ namespace S3PIDemoFE
 
             public override void ResetValue(object component) { throw new NotImplementedException(); }
 
-            public override void SetValue(object component, object value) { owner[Name] = new TypedValue(value.GetType(), value); }
+            public override void SetValue(object component, object value)
+            {
+                string name = Name.Split(' ').Length == 1 ? Name : Name.Split(new char[] { ' ' }, 2)[1].Trim();
+                owner[name] = new TypedValue(value.GetType(), value);
+            }
 
             public override bool ShouldSerializeValue(object component) { return true; }
 
@@ -399,7 +412,8 @@ namespace S3PIDemoFE
                     try
                     {
                         AsHexCTD ctd = (AsHexCTD)value;
-                        return "" + ctd.owner[ctd.field];
+                        string name = ctd.field.Split(' ').Length == 1 ? ctd.field : ctd.field.Split(new char[] { ' ' }, 2)[1].Trim();
+                        return "" + ctd.owner[name];
                     }
                     catch { }
                 }
@@ -508,7 +522,8 @@ namespace S3PIDemoFE
                     try
                     {
                         EnumChooserCTD ctd = (EnumChooserCTD)value;
-                        return "" + ctd.owner[ctd.field];
+                        string name = ctd.field.Split(' ').Length == 1 ? ctd.field : ctd.field.Split(new char[] { ' ' }, 2)[1].Trim();
+                        return "" + ctd.owner[name];
                     }
                     catch { }
                 }
@@ -527,7 +542,8 @@ namespace S3PIDemoFE
                 IWindowsFormsEditorService edSvc = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
 
                 EnumChooserCTD ctd = (EnumChooserCTD)value;
-                TypedValue tv = ctd.owner[ctd.field];
+                string name = ctd.field.Split(' ').Length == 1 ? ctd.field : ctd.field.Split(new char[] { ' ' }, 2)[1].Trim();
+                TypedValue tv = ctd.owner[name];
 
                 List<string> enumValues = new List<string>();
                 int index = -1;
@@ -548,7 +564,7 @@ namespace S3PIDemoFE
                 lb.IntegralHeight = false;
                 edSvc.DropDownControl(lb);
 
-                ctd.owner[ctd.field] = new TypedValue(tv.Type,
+                ctd.owner[name] = new TypedValue(tv.Type,
                     (Enum)new EnumChooserConverter().ConvertFrom(context, System.Globalization.CultureInfo.CurrentCulture, lb.SelectedItem));
 
                 return value;
@@ -659,7 +675,8 @@ namespace S3PIDemoFE
                     try
                     {
                         EnumFlagsCTD ctd = (EnumFlagsCTD)value;
-                        TypedValue tv = ctd.owner[ctd.field];
+                        string name = ctd.field.Split(' ').Length == 1 ? ctd.field : ctd.field.Split(new char[] { ' ' }, 2)[1].Trim();
+                        TypedValue tv = ctd.owner[name];
                         return "0x" + Enum.Format(tv.Type, tv.Value, "X");
                     }
                     catch { }
@@ -678,7 +695,8 @@ namespace S3PIDemoFE
             public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
             {
                 EnumFlagsCTD ctd = (EnumFlagsCTD)value;
-                Type enumType = AApiVersionedFields.GetContentFieldTypes(0, ctd.owner.GetType())[ctd.field];
+                string name = ctd.field.Split(' ').Length == 1 ? ctd.field : ctd.field.Split(new char[] { ' ' }, 2)[1].Trim();
+                Type enumType = AApiVersionedFields.GetContentFieldTypes(0, ctd.owner.GetType())[name];
                 int bits = underlyingTypeToBits(Enum.GetUnderlyingType(enumType));
                 EnumFlagPropertyDescriptor[] enumFlags = new EnumFlagPropertyDescriptor[bits];
                 string fmt = "[{0:X" + bits.ToString("X").Length + "}] ";
@@ -714,7 +732,8 @@ namespace S3PIDemoFE
                 }
                 public override object GetValue(object component)
                 {
-                    ulong old = getFlags(owner, field);
+                    string name = field.Split(' ').Length == 1 ? field : field.Split(new char[] { ' ' }, 2)[1].Trim();
+                    ulong old = getFlags(owner, name);
                     return (old & mask) != 0;
                 }
 
@@ -829,10 +848,118 @@ namespace S3PIDemoFE
             public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
             {
                 ICollectionAApiVersionedFieldsCTD ctd = value as ICollectionAApiVersionedFieldsCTD;
-                ICollection ic = (ICollection)ctd.owner[ctd.field].Value;
+                string name = ctd.field.Split(' ').Length == 1 ? ctd.field : ctd.field.Split(new char[] { ' ' }, 2)[1].Trim();
+                ICollection ic = (ICollection)ctd.owner[name].Value;
 
                 if (typeof(string).Equals(destinationType)) return ic == null ? "(null)" : "(Collection: " + ic.Count + ")";
                 return base.ConvertTo(context, culture, value, destinationType);
+            }
+        }
+    }
+
+    [TypeConverter(typeof(IExpandableCollectionAApiVersionedFieldsConverter))]
+    public class IExpandableCollectionAApiVersionedFieldsCTD : ICustomTypeDescriptor
+    {
+        protected AApiVersionedFields owner;
+        protected string field;
+        protected object component;
+        public IExpandableCollectionAApiVersionedFieldsCTD(AApiVersionedFields owner, string field, object component) { this.owner = owner; this.field = field; this.component = component; }
+
+        #region ICustomTypeDescriptor Members
+
+        public AttributeCollection GetAttributes() { return TypeDescriptor.GetAttributes(this, true); }
+
+        public string GetClassName() { return TypeDescriptor.GetClassName(this, true); }
+
+        public string GetComponentName() { return TypeDescriptor.GetComponentName(this, true); }
+
+        public TypeConverter GetConverter() { return TypeDescriptor.GetConverter(this, true); }
+
+        public EventDescriptor GetDefaultEvent() { return TypeDescriptor.GetDefaultEvent(this, true); }
+
+        public System.ComponentModel.PropertyDescriptor GetDefaultProperty() { return TypeDescriptor.GetDefaultProperty(this, true); }
+
+        public object GetEditor(Type editorBaseType) { return TypeDescriptor.GetEditor(this, editorBaseType, true); }
+
+        public EventDescriptorCollection GetEvents(Attribute[] attributes) { return TypeDescriptor.GetEvents(this, attributes, true); }
+
+        public EventDescriptorCollection GetEvents() { return TypeDescriptor.GetEvents(this, true); }
+
+        public PropertyDescriptorCollection GetProperties(Attribute[] attributes)
+        {
+            return new PropertyDescriptorCollection(new PropertyDescriptor[] { new IExpandableCollectionAApiVersionedFieldsPropertyDescriptor(owner, field, component, null), });
+        }
+
+        public PropertyDescriptorCollection GetProperties() { return GetProperties(null); }
+
+        public object GetPropertyOwner(System.ComponentModel.PropertyDescriptor pd) { return this; }
+
+        #endregion
+
+        public class IExpandableCollectionAApiVersionedFieldsPropertyDescriptor : PropertyDescriptor
+        {
+            AApiVersionedFields owner;
+            string field;
+            object component;
+            public IExpandableCollectionAApiVersionedFieldsPropertyDescriptor(AApiVersionedFields owner, string field, object component, Attribute[] attr)
+                : base(field, attr) { this.owner = owner; this.field = field; this.component = component; }
+
+            public override string Name { get { return field; } }
+
+            public override bool CanResetValue(object component) { throw new InvalidOperationException(); }
+
+            public override void ResetValue(object component) { throw new InvalidOperationException(); }
+
+            public override Type PropertyType { get { throw new InvalidOperationException(); } }
+
+            public override object GetValue(object component) { throw new InvalidOperationException(); }
+
+            public override bool IsReadOnly { get { throw new InvalidOperationException(); } }
+
+            public override void SetValue(object component, object value) { throw new InvalidOperationException(); }
+
+            public override Type ComponentType { get { throw new InvalidOperationException(); } }
+
+            public override bool ShouldSerializeValue(object component) { throw new InvalidOperationException(); }
+        }
+
+        public class IExpandableCollectionAApiVersionedFieldsConverter : ExpandableObjectConverter
+        {
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (typeof(string).Equals(destinationType)) return true;
+                return base.CanConvertTo(context, destinationType);
+            }
+            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+            {
+                IExpandableCollectionAApiVersionedFieldsCTD ctd = value as IExpandableCollectionAApiVersionedFieldsCTD;
+                string name = ctd.field.Split(' ').Length == 1 ? ctd.field : ctd.field.Split(new char[] { ' ' }, 2)[1].Trim();
+                IList ary = (IList)ctd.owner[name].Value;
+
+                if (typeof(string).Equals(destinationType)) return ary == null ? "(null)" : "(Collection: 0x" + ary.Count.ToString("X") + ")";
+                return base.ConvertTo(context, culture, value, destinationType);
+            }
+
+            public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
+            {
+                List<string> filter = new List<string>(new string[] { "Stream", /*"AsBytes",/**/ "Value", });
+                IExpandableCollectionAApiVersionedFieldsCTD ctd = value as IExpandableCollectionAApiVersionedFieldsCTD;
+                string name = ctd.field.Split(' ').Length == 1 ? ctd.field : ctd.field.Split(new char[] { ' ' }, 2)[1].Trim();
+                IList ary = (IList)ctd.owner[name].Value;
+
+                List<AApiVersionedFieldsCTD.TypedValuePropertyDescriptor> pds = new List<AApiVersionedFieldsCTD.TypedValuePropertyDescriptor>();
+
+                string fmt = "[{0:X" + ary.Count.ToString("X").Length + "}] {1}";
+                for (int i = 0; i < ary.Count; i++)
+                {
+                    AApiVersionedFields a = ((AApiVersionedFields)ary[i]) as AApiVersionedFields;
+                    foreach (string s in a.ContentFields)
+                    {
+                        if (filter.Contains(s)) continue;
+                        pds.Add(new AApiVersionedFieldsCTD.TypedValuePropertyDescriptor(a, string.Format(fmt, i, s), new Attribute[] { }));
+                    }
+                }
+                return new PropertyDescriptorCollection(pds.ToArray());
             }
         }
     }
@@ -930,7 +1057,8 @@ namespace S3PIDemoFE
             public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
             {
                 ArrayAsHexCTD ctd = value as ArrayAsHexCTD;
-                Array ary = (Array)ctd.owner[ctd.field].Value;
+                string name = ctd.field.Split(' ').Length == 1 ? ctd.field : ctd.field.Split(new char[] { ' ' }, 2)[1].Trim();
+                Array ary = (Array)ctd.owner[name].Value;
 
                 if (typeof(string).Equals(destinationType)) return ary == null ? "(null)" : "(Array: 0x" + ary.Length.ToString("X") + ")";
                 return base.ConvertTo(context, culture, value, destinationType);
@@ -939,8 +1067,9 @@ namespace S3PIDemoFE
             public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
             {
                 ArrayAsHexCTD ctd = value as ArrayAsHexCTD;
-                AsHex ah = new AsHex(ctd.owner, ctd.field);
-                Array ary = ctd.owner[ctd.field].Value as Array;
+                string name = ctd.field.Split(' ').Length == 1 ? ctd.field : ctd.field.Split(new char[] { ' ' }, 2)[1].Trim();
+                AsHex ah = new AsHex(ctd.owner, name);
+                Array ary = ctd.owner[name].Value as Array;
                 AApiVersionedFieldsCTD.TypedValuePropertyDescriptor[] pds = new AApiVersionedFieldsCTD.TypedValuePropertyDescriptor[ary.Length];
                 string fmt = "[{0:X" + ary.Length.ToString("X").Length + "}] " + ary.GetType().GetElementType().Name;
                 for (int i = 0; i < ary.Length; i++)
