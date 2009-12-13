@@ -30,6 +30,8 @@ namespace S3PIDemoFE
 {
     public partial class ResourceDetails : Form, IResourceKey
     {
+        bool internalchg;
+
         public ResourceDetails() : this(true, true) { }
         public ResourceDetails(bool useName, bool displayFilename)
         {
@@ -39,12 +41,18 @@ namespace S3PIDemoFE
             lbFilename.Visible = tbFilename.Visible = displayFilename;
         }
         public ResourceDetails(bool useName, bool displayFilename, IResourceKey rk)
-            :this(useName, displayFilename)
+            : this(useName, displayFilename)
         {
-            ResourceType = rk.ResourceType;
-            ResourceGroup = rk.ResourceGroup;
-            Instance = rk.Instance;
-            EpFlags = rk.EpFlags;
+            internalchg = true;
+            try
+            {
+                ResourceType = rk.ResourceType;
+                ResourceGroup = rk.ResourceGroup;
+                Instance = rk.Instance;
+                EpFlags = rk.EpFlags;
+                btnOK.Enabled = btnOKCanEnable;
+            }
+            finally { internalchg = false; UpdateTGIN(); }
         }
 
         #region IResourceKey Members
@@ -77,7 +85,6 @@ namespace S3PIDemoFE
         public static implicit operator TGIN(ResourceDetails form) { return form.details; }
 
         TGIN details;
-        bool internalchg;
         private void FillPanel()
         {
             internalchg = true;
@@ -89,11 +96,13 @@ namespace S3PIDemoFE
                 tbInstance.Text = "0x" + details.ResInstance.ToString("X16");
                 tbEPFlags.Text = "0x" + (details.ResGroup >> 24).ToString("X2");
                 tbName.Text = details.ResName;
+                btnOK.Enabled = btnOKCanEnable;
             }
             finally { internalchg = false; }
         }
         private void UpdateTGIN()
         {
+            if (internalchg) return;
             details = new TGIN();
             details.ResType = cbType.Value;
             details.ResGroup = (uint)((byte)EpFlags) << 24 | ResourceGroup;
