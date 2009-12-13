@@ -199,7 +199,6 @@
             this.tbFilename.ReadOnly = true;
             this.tbFilename.Size = new System.Drawing.Size(278, 13);
             this.tbFilename.TabIndex = 12;
-            this.tbFilename.TextChanged += new System.EventHandler(this.tbFilename_TextChanged);
             this.tbFilename.DragDrop += new System.Windows.Forms.DragEventHandler(this.tbFilename_DragDrop);
             this.tbFilename.DragOver += new System.Windows.Forms.DragEventHandler(this.tbFilename_DragOver);
             // 

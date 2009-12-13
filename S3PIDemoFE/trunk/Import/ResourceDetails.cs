@@ -48,44 +48,60 @@ namespace S3PIDemoFE
         }
 
         #region IResourceKey Members
-        public uint ResourceType { get { return cbType.Value; } set { cbType.Value = value; } }
+        public uint ResourceType { get { return cbType.Value; } set { cbType.Value = value; UpdateTGIN(); } }
         public uint ResourceGroup
         {
             get { return Convert.ToUInt32(tbGroup.Text, tbGroup.Text.StartsWith("0x") ? 16 : 10); }
-            set { tbGroup.Text = "0x" + value.ToString("X8"); }
+            set { tbGroup.Text = "0x" + value.ToString("X8"); UpdateTGIN(); }
         }
         public ulong Instance
         {
             get { return Convert.ToUInt64(tbInstance.Text, tbInstance.Text.StartsWith("0x") ? 16 : 10); }
-            set { tbInstance.Text = "0x" + value.ToString("X16"); }
+            set { tbInstance.Text = "0x" + value.ToString("X16"); UpdateTGIN(); }
         }
         public EPFlags EpFlags
         {
             get { return (EPFlags)Convert.ToByte(tbEPFlags.Text, tbEPFlags.Text.StartsWith("0x") ? 16 : 10); }
-            set { tbEPFlags.Text = "0x" + ((byte)value).ToString("X2"); }
+            set { tbEPFlags.Text = "0x" + ((byte)value).ToString("X2"); UpdateTGIN(); }
         }
         #endregion
 
-        public string ResourceName { get { return tbName.Text; } set { tbName.Text = value; } }
+        public string ResourceName { get { return tbName.Text; } set { tbName.Text = value; UpdateTGIN(); } }
         public bool Replace { get { return importSettings1.Replace; } }
         public bool Compress { get { return importSettings1.Compress; } set { importSettings1.Compress = value; } }
 
         public bool UseName { get { return importSettings1.UseName; } set { importSettings1.UseName = value; } }
         public bool AllowRename { get { return importSettings1.AllowRename; } set { importSettings1.AllowRename = value; } }
 
-        public string Filename { get { return tbFilename.Text; } set { this.tbFilename.Text = value; } }
-        public static implicit operator TGIN(ResourceDetails form) { return form.tbFilename.Text; }
-        //public static implicit operator ResourceDetails(TGIN value) { ResourceDetails res = new ResourceDetails(); res.Filename = value; return res; }
+        public string Filename { get { return tbFilename.Text; } set { this.tbFilename.Text = value; FillPanel(); } }
+        public static implicit operator TGIN(ResourceDetails form) { return form.details; }
 
+        TGIN details;
+        bool internalchg;
         private void FillPanel()
         {
-            TGIN details = this.tbFilename.Text;
-            cbType.Value = details.ResType;
-            tbGroup.Text = "0x" + (details.ResGroup & 0x00FFFFFF).ToString("X6");
-            tbInstance.Text = "0x" + details.ResInstance.ToString("X16");
-            tbEPFlags.Text = "0x" + (details.ResGroup >> 24).ToString("X2");
-            tbName.Text = details.ResName;
+            internalchg = true;
+            try
+            {
+                details = this.tbFilename.Text;
+                cbType.Value = details.ResType;
+                tbGroup.Text = "0x" + (details.ResGroup & 0x00FFFFFF).ToString("X6");
+                tbInstance.Text = "0x" + details.ResInstance.ToString("X16");
+                tbEPFlags.Text = "0x" + (details.ResGroup >> 24).ToString("X2");
+                tbName.Text = details.ResName;
+            }
+            finally { internalchg = false; }
         }
+        private void UpdateTGIN()
+        {
+            details = new TGIN();
+            details.ResType = cbType.Value;
+            details.ResGroup = (uint)((byte)EpFlags) << 24 | ResourceGroup;
+            details.ResInstance = Instance;
+            details.ResName = ResourceName;
+        }
+
+        bool btnOKCanEnable { get { return cbType.Valid && (tbGroup.Text.Length * tbInstance.Text.Length * tbEPFlags.Text.Length > 0); } }
 
         private void btnOKCancel_Click(object sender, EventArgs e)
         {
@@ -94,15 +110,19 @@ namespace S3PIDemoFE
 
         private void tbTGI_TextChanged(object sender, EventArgs e)
         {
+            if (internalchg) return;
             TextBox tb = sender as TextBox;
             if (tb.Text.Length > 0)
                 try
                 {
                     if (tbInstance.Equals(sender))
                         Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
-                    else
+                    else if (!tbEPFlags.Equals(sender))
                         Convert.ToUInt32(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
-                    btnOK.Enabled = cbType.Valid && (tbGroup.Text.Length * tbInstance.Text.Length > 0);
+                    else
+                        Convert.ToByte(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
+                    btnOK.Enabled = btnOKCanEnable;
+                    if (btnOK.Enabled) UpdateTGIN();
                 }
                 catch { btnOK.Enabled = false; }
             else
@@ -124,23 +144,20 @@ namespace S3PIDemoFE
         {
             string[] fileDrop = e.Data.GetData("FileDrop") as String[];
             if (fileDrop != null && fileDrop.Length > 0)
-                this.tbFilename.Text = fileDrop[0];
-        }
-
-        private void tbFilename_TextChanged(object sender, EventArgs e)
-        {
-            FillPanel();
+                Filename = fileDrop[0];
         }
 
         private void cbType_ValidChanged(object sender, EventArgs e)
         {
-            btnOK.Enabled = cbType.Valid && (tbGroup.Text.Length * tbInstance.Text.Length > 0);
+            if (internalchg) return;
+            btnOK.Enabled = btnOKCanEnable;
+            if (btnOK.Enabled) UpdateTGIN();
         }
 
         #region IEqualityComparer<IResourceKey> Members
         public bool Equals(IResourceKey x, IResourceKey y) { return x.Equals(y); }
         public int GetHashCode(IResourceKey obj) { return obj.GetHashCode(); }
-        public override int GetHashCode() { return ResourceType.GetHashCode() ^ ResourceGroup.GetHashCode() ^ Instance.GetHashCode(); }
+        public override int GetHashCode() { return ResourceType.GetHashCode() ^ ResourceGroup.GetHashCode() ^ Instance.GetHashCode() ^ EpFlags.GetHashCode(); }
         #endregion
 
         #region IEquatable<IResourceKey> Members

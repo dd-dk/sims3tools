@@ -759,6 +759,7 @@ namespace S3PIDemoFE
             browserWidget1.SelectedResource.ResourceType = ir.ResourceType;
             browserWidget1.SelectedResource.ResourceGroup = ir.ResourceGroup;
             browserWidget1.SelectedResource.Instance = ir.Instance;
+            browserWidget1.SelectedResource.EpFlags = ir.EpFlags;
             browserWidget1.SelectedResource.Compressed = (ushort)(ir.Compress ? 0xffff : 0);
             IsPackageDirty = true;
         }

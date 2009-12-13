@@ -187,10 +187,7 @@ namespace S3PIDemoFE
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            data.tgin.ResType = ir.ResourceType;
-            data.tgin.ResGroup = ir.ResourceGroup;
-            data.tgin.ResInstance = ir.Instance;
-            data.tgin.ResName = ir.ResourceName;
+            data.tgin = ir;
             importStream(data, ir.UseName, ir.AllowRename, ir.Compress, ir.Replace);
         }
 
