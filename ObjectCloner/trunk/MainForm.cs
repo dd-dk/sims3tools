@@ -1465,7 +1465,7 @@ namespace ObjectCloner
         bool haveLoaded = false;
         bool loading = false;
         bool isFix = false;
-        Dictionary<uint, Item> CTPTUnknown8ToPair;
+        Dictionary<uint, Item> CTPTBrushIndexToPair;
         void StartLoading(CatalogType resourceType, bool setIsFix)
         {
             if (haveLoaded) return;
@@ -1476,7 +1476,7 @@ namespace ObjectCloner
 
             waitingToDisplayObjects = true;
             objectChooser.Items.Clear();
-            CTPTUnknown8ToPair = new Dictionary<uint, Item>();
+            CTPTBrushIndexToPair = new Dictionary<uint, Item>();
 
             this.LoadingComplete -= new EventHandler<BoolEventArgs>(MainForm_LoadingComplete);
             this.LoadingComplete += new EventHandler<BoolEventArgs>(MainForm_LoadingComplete);
@@ -1553,8 +1553,8 @@ namespace ObjectCloner
                 byte status = (byte)item.Resource["CommonBlock.BuildBuyProductStatusFlags"].Value;
                 if ((status & 0x01) == 0) // do not list
                 {
-                    uint unknown8 = (uint)item.Resource["Unknown8"].Value;
-                    CTPTUnknown8ToPair.Add(unknown8 - 1, item);
+                    uint brushIndex = (uint)item.Resource["BrushIndex"].Value;
+                    CTPTBrushIndexToPair.Add(brushIndex - 1, item);
                     return;
                 }
             }
@@ -2171,11 +2171,11 @@ namespace ObjectCloner
                         if (item.CType == CatalogType.CatalogTerrainPaintBrush)//Both CTPTs
                         {
                             byte status = (byte)commonBlock["BuildBuyProductStatusFlags"].Value;
-                            uint unknown8 = FNV32.GetHash(UniqueObject) << 1;
+                            uint brushIndex = FNV32.GetHash(UniqueObject) << 1;
                             if ((status & 0x01) != 0)
-                                item.Resource["Unknown8"] = new TypedValue(typeof(uint), unknown8);
+                                item.Resource["BrushIndex"] = new TypedValue(typeof(uint), brushIndex);
                             else
-                                item.Resource["Unknown8"] = new TypedValue(typeof(uint), unknown8 + 1);
+                                item.Resource["BrushIndex"] = new TypedValue(typeof(uint), brushIndex + 1);
                         }
 
                         if (cloneFixOptions.IsRenumber)
@@ -3139,9 +3139,9 @@ namespace ObjectCloner
 
         void CTPT_addPair()
         {
-            uint unknown8 = (uint)selectedItem.Resource["Unknown8"].Value;
-            if (CTPTUnknown8ToPair.ContainsKey(unknown8))
-                Add("ctpt_pair", CTPTUnknown8ToPair[unknown8].rk);
+            uint brushIndex = (uint)selectedItem.Resource["BrushIndex"].Value;
+            if (CTPTBrushIndexToPair.ContainsKey(brushIndex))
+                Add("ctpt_pair", CTPTBrushIndexToPair[brushIndex].rk);
         }
         void CTPT_addBrushTexture() { Add("ctpt_BrushTexture", (AResource.TGIBlock)selectedItem.Resource["BrushTexture"].Value); }
         void CTPT_addBrushShape() { Add("ctpt_BrushShape", (AResource.TGIBlock)selectedItem.Resource["BrushShape"].Value); }
