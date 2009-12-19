@@ -28,27 +28,21 @@ using ObjKeyResource;
 
 namespace s3pe_OBJK_Resource_Editor
 {
-    public partial class MainForm : Form
+    public partial class MainForm : Form, s3pi.DemoPlugins.IRunHelper
     {
         const string myName = "s3pe OBJK Resource Editor";
         public MainForm()
         {
             InitializeComponent();
+        }
 
-            MemoryStream ms = Clipboard.GetData(DataFormats.Serializable) as MemoryStream;
-            if (ms == null)
-#if DEBUG
-            {
-                loadObjKey(new ObjKeyResource.ObjKeyResource(0, null).Stream); return;
-            }
-#else
-                throw new Exception("Clipboard data not a MemoryStream");
-#endif
-
+        public MainForm(Stream s)
+            : this()
+        {
             try
             {
                 Application.UseWaitCursor = true;
-                loadObjKey(ms);
+                loadObjKey(s);
             }
             finally { Application.UseWaitCursor = false; }
         }
@@ -71,12 +65,14 @@ namespace s3pe_OBJK_Resource_Editor
             ComponentDataTypeMap.Add("Footprint", new TypeKey(typeof(ObjKeyResource.ObjKeyResource.CDTResourceKey), "footprintKey"));
         }
 
+        byte[] result = null;
+        public byte[] Result { get { return result; } }
+
         ObjKeyResource.ObjKeyResource objk;
         List<string> tgis = new List<string>();
         void loadObjKey(Stream data)
         {
             objk = new ObjKeyResource.ObjKeyResource(0, data);
-            Clipboard.Clear();
 
             foreach (AResource.TGIBlock tgi in objk.TGIBlocks)
                 tgis.Add(tgi);
@@ -108,13 +104,13 @@ namespace s3pe_OBJK_Resource_Editor
                     }
                     else if (type == "ResourceKey")
                     {
-                        ComboBox cb = (ComboBox)tableLayoutPanel1.GetControlFromPosition(2, row);
+                        TGIBlockCombo cb = (TGIBlockCombo)tableLayoutPanel1.GetControlFromPosition(2, row);
                         Int32 value = cb.SelectedIndex;
                         objk.ComponentData.Add(tk.key, (byte)0x01, value);
                     }
                     else if (type == "AssetResourceName")
                     {
-                        ComboBox cb = (ComboBox)tableLayoutPanel1.GetControlFromPosition(2, row);
+                        TGIBlockCombo cb = (TGIBlockCombo)tableLayoutPanel1.GetControlFromPosition(2, row);
                         Int32 value = cb.SelectedIndex;
                         objk.ComponentData.Add(tk.key, (byte)0x02, value);
                     }
@@ -138,8 +134,7 @@ namespace s3pe_OBJK_Resource_Editor
             if (ckbAllowObjectHiding.Checked)
                 objk.ComponentData.Add("allowObjectHiding", (byte)0x04, (UInt32)0);
 
-            MemoryStream ms = new MemoryStream(objk.AsBytes);
-            Clipboard.SetData(DataFormats.Serializable, ms);
+            result = (byte[])objk.AsBytes.Clone();
         }
 
         List<string> unused;
@@ -256,20 +251,21 @@ namespace s3pe_OBJK_Resource_Editor
             ObjKeyResource.ObjKeyResource.CDTResourceKey cdtResourceKey = cdt as ObjKeyResource.ObjKeyResource.CDTResourceKey;
             Label lb = new Label();
             lb.AutoSize = true;
-            lb.Text = "0xDDDDDDDD-0xDDDDDDDD-0xDDDDDDDDDDDDDDDD";
+            lb.Text = "(WWWW) 0xDDDDDDDD-0xDDDDDDDD-0xDDDDDDDDDDDDDDDD";
 
-            ComboBox cb = new ComboBox();
-            cb.Anchor = AnchorStyles.Left;
-            cb.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            cb.AutoCompleteSource = AutoCompleteSource.ListItems;
-            cb.DropDownStyle = ComboBoxStyle.DropDownList;
-            cb.Enabled = enabled;
-            cb.Items.AddRange(tgis.ToArray());
-            cb.Name = "cb" + name;
-            cb.SelectedIndex = cdtResourceKey == null ? -1 : cdtResourceKey.Data;
-            cb.TabIndex = tabIndex++;
-            cb.Width = lb.PreferredWidth;
-            return cb;
+            TGIBlockCombo tbc = new TGIBlockCombo(objk.TGIBlocks, cdtResourceKey == null ? -1 : cdtResourceKey.Data, false);
+            tbc.Anchor = AnchorStyles.Left;
+            tbc.Enabled = enabled;
+            tbc.Name = "tbc" + name;
+            tbc.TabIndex = tabIndex++;
+            tbc.Width = lb.PreferredWidth;
+            tbc.TGIBlockListChanged += new EventHandler(tbc_TGIBlockListChanged);
+            return tbc;
+        }
+
+        void tbc_TGIBlockListChanged(object sender, EventArgs e)
+        {
+            (sender as TGIBlockCombo).Refresh();
         }
 
         bool hasComponent(string name) { CheckBox ckb = ckbComponent(name); return (ckb == null) ? false : ckb.Checked; }
@@ -355,12 +351,9 @@ namespace s3pe_OBJK_Resource_Editor
             DialogResult dr = TGIBlockListEditor.Show(objk.TGIBlocks);
             if (dr != DialogResult.OK) return;
 
-            tgis.Clear();
-            foreach (AResource.TGIBlock tgi in objk.TGIBlocks)
-                tgis.Add(tgi);
-
-            foreach(Control c in tableLayoutPanel1.Controls)
-                if (c as ComboBox != null) { ComboBox cb = c as ComboBox; cb.Items.Clear(); cb.Items.AddRange(tgis.ToArray()); }
+            foreach (Control c in tableLayoutPanel1.Controls)
+                if (c as TGIBlockCombo != null)
+                    (c as TGIBlockCombo).Refresh();
         }
     }
 }
