@@ -10,11 +10,12 @@ namespace s3pi_STBL_Resource_Editor
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static int Main(params string[] args)
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+#if DEBUG
+            Clipboard.SetData(DataFormats.Serializable, new StblResource.StblResource(0, null).Stream);
+#endif
+            return s3pi.DemoPlugins.RunHelper.Run(typeof(MainForm), args);
         }
     }
 }

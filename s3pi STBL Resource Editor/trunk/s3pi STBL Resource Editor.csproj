@@ -35,6 +35,10 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="s3pi.DemoPlugins, Version=912.19.17.31233, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.DemoPlugins.dll</HintPath>
+    </Reference>
     <Reference Include="s3pi.Interfaces, Version=907.25.20.34685, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.Interfaces.dll</HintPath>

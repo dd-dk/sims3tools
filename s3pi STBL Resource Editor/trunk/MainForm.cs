@@ -27,20 +27,16 @@ using StblResource;
 
 namespace s3pi_STBL_Resource_Editor
 {
-    public partial class MainForm : Form
+    public partial class MainForm : Form, s3pi.DemoPlugins.IRunHelper
     {
         public MainForm()
         {
             InitializeComponent();
+        }
 
-            MemoryStream ms = Clipboard.GetData(DataFormats.Serializable) as MemoryStream;
-            if (ms == null)
-#if DEBUG
-                { loadStbl(new StblResource.StblResource(0, null).Stream); return; }
-#else
-                throw new Exception("Clipboard data not a MemoryStream");
-#endif
-
+        public MainForm(Stream ms)
+            : this()
+        {
             try
             {
                 Application.UseWaitCursor = true;
@@ -51,6 +47,9 @@ namespace s3pi_STBL_Resource_Editor
             if (lbStrings.Items.Count > 0)
                 lbStrings.SelectedIndices.Add(0);
         }
+
+        byte[] result = null;
+        public byte[] Result { get { return result; } }
 
         StblResource.StblResource stbl;
         List<ulong> stblKeys;
@@ -79,8 +78,7 @@ namespace s3pi_STBL_Resource_Editor
 
         void saveStbl()
         {
-            MemoryStream ms = new MemoryStream(stbl.AsBytes);
-            Clipboard.SetData(DataFormats.Serializable, ms);
+            result = (byte[])stbl.AsBytes;
         }
 
         int currentIndex = -1;
