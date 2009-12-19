@@ -716,7 +716,7 @@
             this.Controls.Add(this.btnOK);
             this.Icon = global::s3pe_VPXY_Resource_Editor.Properties.Resources.s3pe;
             this.Name = "MainForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "VPXY Resource Editor";
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();

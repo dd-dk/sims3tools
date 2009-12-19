@@ -28,42 +28,35 @@ using s3pi.GenericRCOLResource;
 
 namespace s3pe_VPXY_Resource_Editor
 {
-    public partial class MainForm : Form
+    public partial class MainForm : Form, s3pi.DemoPlugins.IRunHelper
     {
         const string myName = "s3pe VPXY Resource Editor";
         public MainForm()
         {
             InitializeComponent();
+
             this.Controls.Remove(lbCurrentPart);
             this.Controls.Remove(lbLPCurrent);
             lnud.AddRange(new NumericUpDown[]{
                 nudLowerX, nudLowerY, nudLowerZ,
                 nudUpperX, nudUpperY, nudUpperZ,
             });
+        }
 
-            MemoryStream ms = Clipboard.GetData(DataFormats.Serializable) as MemoryStream;
-            if (ms == null)
-#if DEBUG
-            {
-                AResource.TGIBlock tgib = new AResource.TGIBlock(0, null, "ITG", 0x736884F1, 0, 0);
-                ARCOLBlock rcol = GenericRCOLResourceHandler.CreateRCOLBlock(0, null, 0x736884F1);
-                GenericRCOLResource.ChunkEntry ce = new GenericRCOLResource.ChunkEntry(0, null, tgib, rcol);
-                GenericRCOLResource grr = new GenericRCOLResource(0, null);
-                grr.ChunkEntries.Add(ce);
-                ms = grr.Stream as MemoryStream;
-            }
-#else
-                throw new Exception("Clipboard data not a MemoryStream");
-#endif
-
+        public MainForm(Stream s)
+            :this()
+        {
             try
             {
                 Application.UseWaitCursor = true;
-                loadVPXY(ms);
+                loadVPXY(s);
             }
             finally { Application.UseWaitCursor = false; }
             btnOK.Enabled = vpxy.TGIBlocks.Count > 0;
         }
+
+        byte[] result = null;
+        public byte[] Result { get { return result; } }
 
         GenericRCOLResource rcol;
         VPXY vpxy;
@@ -82,15 +75,14 @@ namespace s3pe_VPXY_Resource_Editor
                 rcol = new GenericRCOLResource(0, data);
             }
             catch { rcol = null; }
-            Clipboard.Clear();
             if (rcol == null || rcol.ChunkEntries.Count != 1 || rcol.ChunkEntries[0].RCOLBlock.Tag != "VPXY")
             {
-                throw new Exception("Clipboard data was invalid.");
+                throw new Exception("RCOL was not a VPXY resource.");
             }
             vpxy = rcol.ChunkEntries[0].RCOLBlock as VPXY;
             if (vpxy == null)
             {
-                throw new Exception("Clipboard data was invalid.");
+                throw new Exception("VPXY resource contains invalid RCOL Chunk.");
             }
 
             FillPartsTLP();
@@ -137,10 +129,13 @@ namespace s3pe_VPXY_Resource_Editor
                         vpxy.Entries.Add(e00);
                 }
             }
+            if (vpxy.Modular && !ltgib.Contains(vpxy.TGIBlocks[tbcFTPT.SelectedIndex]))
+                ltgib.Add(vpxy.TGIBlocks[tbcFTPT.SelectedIndex]);
+
             vpxy.TGIBlocks.Clear();
             vpxy.TGIBlocks.AddRange(ltgib);
-            MemoryStream ms = new MemoryStream(rcol.AsBytes);
-            Clipboard.SetData(DataFormats.Serializable, ms);
+
+            result = (byte[])rcol.AsBytes.Clone();
         }
 
         void ClearPartsTLP()
@@ -571,13 +566,8 @@ namespace s3pe_VPXY_Resource_Editor
 
         private void btnOK_Click(object sender, EventArgs e)
         {
-            if (dirty)
-            {
-                saveVPXY();
-                Environment.ExitCode = 0;
-            }
-            else
-                Environment.ExitCode = 1;
+            saveVPXY();
+            Environment.ExitCode = dirty ? 0 : 1;
             this.Close();
         }
     }
