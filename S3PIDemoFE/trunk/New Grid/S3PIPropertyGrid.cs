@@ -857,6 +857,7 @@ namespace S3PIDemoFE
         }
     }
 
+    [Editor(typeof(IExpandableCollectionAApiVersionedFieldsEditor), typeof(UITypeEditor))]
     [TypeConverter(typeof(IExpandableCollectionAApiVersionedFieldsConverter))]
     public class IExpandableCollectionAApiVersionedFieldsCTD : ICustomTypeDescriptor
     {
@@ -921,6 +922,20 @@ namespace S3PIDemoFE
             public override Type ComponentType { get { throw new InvalidOperationException(); } }
 
             public override bool ShouldSerializeValue(object component) { throw new InvalidOperationException(); }
+        }
+
+        public class IExpandableCollectionAApiVersionedFieldsEditor : UITypeEditor
+        {
+            public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) { return UITypeEditorEditStyle.Modal; }
+            public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
+            {
+                IWindowsFormsEditorService edSvc = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
+                IExpandableCollectionAApiVersionedFieldsCTD field = (IExpandableCollectionAApiVersionedFieldsCTD)value;
+                NewGridForm ui = new NewGridForm((IGenericAdd)field.owner[field.field].Value);
+                edSvc.ShowDialog(ui);
+
+                return field.owner[field.field].Value;
+            }
         }
 
         public class IExpandableCollectionAApiVersionedFieldsConverter : ExpandableObjectConverter
