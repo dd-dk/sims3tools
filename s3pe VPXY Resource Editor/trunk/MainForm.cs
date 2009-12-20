@@ -52,8 +52,10 @@ namespace s3pe_VPXY_Resource_Editor
                 loadVPXY(s);
             }
             finally { Application.UseWaitCursor = false; }
-            btnOK.Enabled = vpxy.TGIBlocks.Count > 0;
+            btnOK.Enabled = btnOKEnabled;
         }
+
+        bool btnOKEnabled { get { return dirty && vpxy.TGIBlocks.Count > 0 && (!vpxy.Modular || tbcFTPT.SelectedIndex >= 0); } }
 
         byte[] result = null;
         public byte[] Result { get { return result; } }
@@ -96,46 +98,54 @@ namespace s3pe_VPXY_Resource_Editor
 
             tbcFTPT.Enabled = ckbModular.Checked = vpxy.Modular;
             tbcFTPT.TGIBlocks = vpxy.TGIBlocks;
-            tbcFTPT.SelectedIndex = vpxy.Modular ? (int)vpxy.FTPTIndex : -1;
+            tbcFTPT.SelectedIndex = vpxy.Modular && vpxy.FTPTIndex < vpxy.TGIBlocks.Count ? (int)vpxy.FTPTIndex : -1;
 
             rcol.ResourceChanged += new EventHandler(rcol_ResourceChanged);
         }
 
         void saveVPXY()
         {
-            ClearLinkedPartsTLP(true);
-            AResource.CountedTGIBlockList ltgib = new AResource.CountedTGIBlockList(null);
-            vpxy.Entries.Clear();
-            uint count = 0;
-            byte count00 = 0;
-            for (int row = 1; row < tlpParts.RowCount - 1; row++)
+            rcol.ResourceChanged -= new EventHandler(rcol_ResourceChanged);
+            try
             {
-                TGIBlockCombo c = tlpParts.GetControlFromPosition(2, row) as TGIBlockCombo;
-                if (ltbc.IndexOf(c) < 0) continue;
-                if (c.SelectedIndex < 0) continue;
-                ltgib.Add(vpxy.TGIBlocks[c.SelectedIndex]);
-                vpxy.Entries.Add(new VPXY.Entry01(0, null, 1, count++));
-                if (c.Tag != null)
+                ClearLinkedPartsTLP(true);
+                AResource.CountedTGIBlockList ltgib = new AResource.CountedTGIBlockList(null);
+                vpxy.Entries.Clear();
+                uint count = 0;
+                byte count00 = 1;
+                for (int row = 1; row < tlpParts.RowCount - 1; row++)
                 {
-                    VPXY.Entry00 e00 = c.Tag as VPXY.Entry00;
-                    if (e00.TGIIndexes.Count <= 0) continue;
-                    e00.EntryID = count00++;
-                    foreach (VPXY.ElementUInt32 elem in e00.TGIIndexes)
+                    TGIBlockCombo c = tlpParts.GetControlFromPosition(2, row) as TGIBlockCombo;
+                    if (ltbc.IndexOf(c) < 0) continue;
+                    if (c.SelectedIndex < 0) continue;
+                    ltgib.Add(vpxy.TGIBlocks[c.SelectedIndex]);
+                    vpxy.Entries.Add(new VPXY.Entry01(0, null, 1, count++));
+                    if (c.Tag != null)
                     {
-                        ltgib.Add(vpxy.TGIBlocks[(int)elem.Data]);
-                        elem.Data = count++;
+                        VPXY.Entry00 e00 = c.Tag as VPXY.Entry00;
+                        if (e00.TGIIndexes.Count <= 0) continue;
+                        e00.EntryID = count00++;
+                        foreach (VPXY.ElementUInt32 elem in e00.TGIIndexes)
+                        {
+                            ltgib.Add(vpxy.TGIBlocks[(int)elem.Data]);
+                            elem.Data = count++;
+                        }
+                        if (e00.TGIIndexes.Count > 0)
+                            vpxy.Entries.Add(e00);
                     }
-                    if (e00.TGIIndexes.Count > 0)
-                        vpxy.Entries.Add(e00);
                 }
+                if (vpxy.Modular)
+                {
+                    ltgib.Add(vpxy.TGIBlocks[tbcFTPT.SelectedIndex]);
+                    vpxy.FTPTIndex = count++;
+                }
+
+                vpxy.TGIBlocks.Clear();
+                vpxy.TGIBlocks.AddRange(ltgib);
+
+                result = (byte[])rcol.AsBytes.Clone();
             }
-            if (vpxy.Modular && !ltgib.Contains(vpxy.TGIBlocks[tbcFTPT.SelectedIndex]))
-                ltgib.Add(vpxy.TGIBlocks[tbcFTPT.SelectedIndex]);
-
-            vpxy.TGIBlocks.Clear();
-            vpxy.TGIBlocks.AddRange(ltgib);
-
-            result = (byte[])rcol.AsBytes.Clone();
+            finally { rcol.ResourceChanged -= new EventHandler(rcol_ResourceChanged); }
         }
 
         void ClearPartsTLP()
@@ -181,6 +191,8 @@ namespace s3pe_VPXY_Resource_Editor
                 {
                     Label lb = tlpParts.GetControlFromPosition(0, row++) as Label;
                     lb.Text = count.ToString("X");
+                    lb.Tag = ltbc[row - 2];
+                    lb.TabIndex = (tlpParts.GetControlFromPosition(2, row - 1) as TGIBlockCombo).TabIndex - 1;
                     count++;
                 }
             }
@@ -270,10 +282,28 @@ namespace s3pe_VPXY_Resource_Editor
 
             tbc.TGIBlockListChanged += new EventHandler(tbg_TGIBlockListChanged);
         }
+        void LPRenumberTLP()
+        {
+            tlpLinkedParts.SuspendLayout();
+            RenumberTLP();
+            VPXY.Entry00 entry = vpxy.Entries[currentVPXYEntry + 1] as VPXY.Entry00;
+            int count = currentVPXYEntry + 1;
+            int row = 1;
+            for (int i = 0; i < entry.TGIIndexes.Count; i++)
+            {
+                Label lb = tlpLinkedParts.GetControlFromPosition(0, row++) as Label;
+                lb.Text = count.ToString("X");
+                lb.Tag = lLPtbc[row - 2];
+                lb.TabIndex = (tlpLinkedParts.GetControlFromPosition(2, row - 1) as TGIBlockCombo).TabIndex - 1;
+                count++;
+            }
+            tlpLinkedParts.ResumeLayout();
+        }
 
         void rcol_ResourceChanged(object sender, EventArgs e)
         {
             dirty = true;
+            btnOK.Enabled = btnOKEnabled;
         }
 
         void tbg_TGIBlockListChanged(object sender, EventArgs e)
@@ -281,8 +311,6 @@ namespace s3pe_VPXY_Resource_Editor
             if (ltbc != null) foreach (TGIBlockCombo tbc in ltbc) tbc.Refresh();
             if (lLPtbc != null) foreach (TGIBlockCombo tbc in lLPtbc) tbc.Refresh();
             if (vpxy.Modular) tbcFTPT.Refresh();
-
-            btnOK.Enabled = vpxy.TGIBlocks.Count > 0;
         }
 
         void lb_Click(object sender, EventArgs e) { (((Label)sender).Tag as TGIBlockCombo).Focus(); }
@@ -295,6 +323,8 @@ namespace s3pe_VPXY_Resource_Editor
             {
                 ClearLinkedPartsTLP(true);//before currentEntry changes
                 currentPartEntry = ltbc.IndexOf(tbc);
+                btnMoveUp.Enabled = currentPartEntry > 0;
+                btnMoveDown.Enabled = currentPartEntry < ltbc.Count - 1;
                 currentVPXYEntry = int.Parse(((Label)tlpParts.GetControlFromPosition(0, tlpParts.GetCellPosition(ltbc[currentPartEntry]).Row)).Text, System.Globalization.NumberStyles.HexNumber);
                 tlpParts.Controls.Add(lbCurrentPart, 1, currentPartEntry + 1);
 
@@ -309,6 +339,8 @@ namespace s3pe_VPXY_Resource_Editor
             else
             {
                 currentLPEntry = lLPtbc.IndexOf(tbc);
+                btnLPUp.Enabled = currentLPEntry > 0;
+                btnLPDown.Enabled = currentLPEntry < lLPtbc.Count - 1;
                 tlpLinkedParts.Controls.Add(lbLPCurrent, 1, currentLPEntry + 1);
             }
         }
@@ -341,6 +373,47 @@ namespace s3pe_VPXY_Resource_Editor
             vpxy.TGIBlocks.AddRange(tgiBlocksCopy.ToArray());
         }
 
+        delegate void TLPRenumber();
+        void moveUp(TableLayoutPanel tlp, List<TGIBlockCombo> ltbc, Label lb, TLPRenumber renumber, ref int entry)
+        {
+            TGIBlockCombo c1 = tlp.GetControlFromPosition(2, entry + 1) as TGIBlockCombo;//this control
+            TGIBlockCombo c2 = tlp.GetControlFromPosition(2, entry) as TGIBlockCombo;//the one above to swap with
+            tlp.Controls.Remove(c1);//leaves entry + 1 free
+            tlp.Controls.Add(c2, 2, entry + 1);//leaves entry free
+            tlp.Controls.Add(c1, 2, entry);
+            c1.TabIndex--;
+            c2.TabIndex++;
+
+            int i = ltbc.IndexOf(c1);
+            ltbc.RemoveAt(i);
+            ltbc.Insert(i - 1, c1);
+
+            entry--;
+            tlp.Controls.Add(lb, 1, entry + 1);
+            renumber();
+            c1.Focus();
+        }
+
+        void moveDown(TableLayoutPanel tlp, List<TGIBlockCombo> ltbc, Label lb, TLPRenumber renumber, ref int entry)
+        {
+            TGIBlockCombo c1 = tlp.GetControlFromPosition(2, entry + 1) as TGIBlockCombo;//this control
+            TGIBlockCombo c2 = tlp.GetControlFromPosition(2, entry + 2) as TGIBlockCombo;//the one below to swap with
+            tlp.Controls.Remove(c1);//leaves entry + 1 free
+            tlp.Controls.Add(c2, 2, entry + 1);//leaves entry + 2 free
+            tlp.Controls.Add(c1, 2, entry + 2);
+            c2.TabIndex--;
+            c1.TabIndex++;
+
+            int i = ltbc.IndexOf(c1);
+            ltbc.RemoveAt(i);
+            ltbc.Insert(i + 1, c1);
+
+            entry++;
+            tlp.Controls.Add(lb, 1, entry + 1);
+            renumber();
+            c1.Focus();
+        }
+
         private void btnMoveUp_Click(object sender, EventArgs e)
         {
             if (currentPartEntry < 1 || ltbc.Count < 2) return;
@@ -349,23 +422,9 @@ namespace s3pe_VPXY_Resource_Editor
             vpxy.Entries.RemoveAt(currentVPXYEntry);
             if (ltbc[currentPartEntry].Tag != null) vpxy.Entries.RemoveAt(currentVPXYEntry);
             vpxy.Entries.Insert(currentVPXYEntry - 1, entry);
-            if (ltbc[currentPartEntry].Tag != null) vpxy.Entries.Insert(currentVPXYEntry - 1, ltbc[currentPartEntry].Tag as VPXY.Entry00);
+            if (ltbc[currentPartEntry].Tag != null) vpxy.Entries.Insert(currentVPXYEntry, ltbc[currentPartEntry].Tag as VPXY.Entry00);
 
-            TGIBlockCombo c1 = tlpParts.GetControlFromPosition(2, currentPartEntry + 1) as TGIBlockCombo;//this control
-            TGIBlockCombo c2 = tlpParts.GetControlFromPosition(2, currentPartEntry) as TGIBlockCombo;//the one above to swap with
-            tlpParts.Controls.Remove(c1);//leaves currentEntry + 1 free
-            tlpParts.Controls.Add(c2, 2, currentPartEntry + 1);//leaves currentEntry free
-            tlpParts.Controls.Add(c1, 2, currentPartEntry);
-            c2.TabIndex--;
-            c1.TabIndex++;
-
-            c1 = ltbc[currentVPXYEntry];
-            ltbc.RemoveAt(currentVPXYEntry);
-            ltbc.Insert(currentVPXYEntry - 1, c1);
-
-            currentPartEntry--;
-            tlpParts.Controls.Add(lbCurrentPart, 1, currentPartEntry + 1);
-            RenumberTLP();
+            moveUp(tlpParts, ltbc, lbCurrentPart, RenumberTLP, ref currentPartEntry);
         }
 
         private void btnMoveDown_Click(object sender, EventArgs e)
@@ -375,24 +434,10 @@ namespace s3pe_VPXY_Resource_Editor
             VPXY.Entry entry = vpxy.Entries[currentVPXYEntry];
             vpxy.Entries.RemoveAt(currentVPXYEntry);
             if (ltbc[currentPartEntry].Tag != null) vpxy.Entries.RemoveAt(currentVPXYEntry);
-            vpxy.Entries.Insert(currentPartEntry + 1, entry);
+            vpxy.Entries.Insert(currentVPXYEntry + 1, entry);
             if (ltbc[currentPartEntry].Tag != null) vpxy.Entries.Insert(currentVPXYEntry + 2, ltbc[currentPartEntry].Tag as VPXY.Entry00);
 
-            TGIBlockCombo c1 = tlpParts.GetControlFromPosition(2, currentPartEntry + 1) as TGIBlockCombo;//this control
-            TGIBlockCombo c2 = tlpParts.GetControlFromPosition(2, currentPartEntry + 2) as TGIBlockCombo;//the one below to swap with
-            tlpParts.Controls.Remove(c1);//leaves currentEntry + 1 free
-            tlpParts.Controls.Add(c2, 2, currentPartEntry + 1);//leaves currentEntry + 2 free
-            tlpParts.Controls.Add(c1, 2, currentPartEntry + 2);
-            c2.TabIndex++;
-            c1.TabIndex--;
-
-            c1 = ltbc[currentVPXYEntry];
-            ltbc.RemoveAt(currentVPXYEntry);
-            ltbc.Insert(currentVPXYEntry + 1, c1);
-
-            currentPartEntry++;
-            tlpParts.Controls.Add(lbCurrentPart, 1, currentPartEntry + 1);
-            RenumberTLP();
+            moveDown(tlpParts, ltbc, lbCurrentPart, RenumberTLP, ref currentPartEntry);
         }
 
         private void btnAddPart_Click(object sender, EventArgs e)
@@ -457,18 +502,7 @@ namespace s3pe_VPXY_Resource_Editor
             e00.TGIIndexes.RemoveAt(currentLPEntry);
             e00.TGIIndexes.Insert(currentLPEntry - 1, element);
 
-            Control c1 = tlpLinkedParts.GetControlFromPosition(2, currentLPEntry + 1);//this control
-            Control c2 = tlpLinkedParts.GetControlFromPosition(2, currentLPEntry);//the one above to swap with
-            tlpLinkedParts.Controls.Remove(c1);//leaves currentEntry + 1 free
-            tlpLinkedParts.Controls.Add(c2, 2, currentLPEntry + 1);//leaves currentEntry free
-            tlpLinkedParts.Controls.Add(c1, 2, currentLPEntry);
-
-            int i = lLPtbc.IndexOf(c1 as TGIBlockCombo);
-            lLPtbc.RemoveAt(i);
-            lLPtbc.Insert(i - 1, c1 as TGIBlockCombo);
-            currentLPEntry--;
-            tlpLinkedParts.Controls.Add(lbLPCurrent, 1, currentLPEntry + 1);
-            RenumberTLP();
+            moveUp(tlpLinkedParts, lLPtbc, lbLPCurrent, LPRenumberTLP, ref currentLPEntry);
         }
 
         private void btnLPDown_Click(object sender, EventArgs e)
@@ -481,18 +515,7 @@ namespace s3pe_VPXY_Resource_Editor
             e00.TGIIndexes.RemoveAt(currentLPEntry);
             e00.TGIIndexes.Insert(currentLPEntry + 1, element);
 
-            Control c1 = tlpLinkedParts.GetControlFromPosition(2, currentLPEntry + 1);//this control
-            Control c2 = tlpLinkedParts.GetControlFromPosition(2, currentLPEntry + 2);//the one below to swap with
-            tlpLinkedParts.Controls.Remove(c1);//leaves currentEntry + 1 free
-            tlpLinkedParts.Controls.Add(c2, 2, currentLPEntry + 1);//leaves currentEntry + 2 free
-            tlpLinkedParts.Controls.Add(c1, 2, currentLPEntry + 2);
-
-            int i = lLPtbc.IndexOf(c1 as TGIBlockCombo);
-            lLPtbc.RemoveAt(i);
-            lLPtbc.Insert(i + 1, c1 as TGIBlockCombo);
-            currentLPEntry++;
-            tlpLinkedParts.Controls.Add(lbLPCurrent, 1, currentLPEntry + 1);
-            RenumberTLP();
+            moveDown(tlpLinkedParts, lLPtbc, lbLPCurrent, LPRenumberTLP, ref currentLPEntry);
         }
 
         private void btnLPAdd_Click(object sender, EventArgs e)
@@ -502,7 +525,7 @@ namespace s3pe_VPXY_Resource_Editor
             e00.TGIIndexes.Add();
             AddTableRowTBC(tlpLinkedParts, currentVPXYEntry + e00.TGIIndexes.Count, -1, ref tabindex);
             tbc_Enter(lLPtbc[lLPtbc.Count - 1], EventArgs.Empty);
-            RenumberTLP();
+            LPRenumberTLP();
         }
 
         private void btnLPDel_Click(object sender, EventArgs e)
@@ -530,13 +553,21 @@ namespace s3pe_VPXY_Resource_Editor
             }
             tlpLinkedParts.RowCount--;
             currentLPEntry = -1;
-            RenumberTLP();
+            LPRenumberTLP();
         }
 
         private void nud_ValueChanged(object sender, EventArgs e)
         {
             NumericUpDown nud = sender as NumericUpDown;
-            vpxy.BoundingBox[lnud.IndexOf(nud)] = Decimal.ToSingle(nud.Value);
+            int i = lnud.IndexOf(nud);
+            float[] bb = vpxy.BoundingBox;
+
+            //gah - rounding errors...
+            if (nud.Value != new Decimal(bb[i]))
+            {
+                bb[i] = Decimal.ToSingle(nud.Value);
+                vpxy.BoundingBox = bb;
+            }
         }
 
         private void ckbModular_CheckedChanged(object sender, EventArgs e)
@@ -566,8 +597,8 @@ namespace s3pe_VPXY_Resource_Editor
 
         private void btnOK_Click(object sender, EventArgs e)
         {
-            saveVPXY();
             Environment.ExitCode = dirty ? 0 : 1;
+            saveVPXY();
             this.Close();
         }
     }

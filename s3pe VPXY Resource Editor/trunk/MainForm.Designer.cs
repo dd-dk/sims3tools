@@ -537,6 +537,7 @@
             this.nudLowerY.Size = new System.Drawing.Size(86, 20);
             this.nudLowerY.TabIndex = 3;
             this.nudLowerY.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.nudLowerY.ValueChanged += new System.EventHandler(this.nud_ValueChanged);
             // 
             // nudUpperX
             // 
@@ -557,6 +558,7 @@
             this.nudUpperX.Size = new System.Drawing.Size(86, 20);
             this.nudUpperX.TabIndex = 5;
             this.nudUpperX.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.nudUpperX.ValueChanged += new System.EventHandler(this.nud_ValueChanged);
             // 
             // nudUpperY
             // 
@@ -577,6 +579,7 @@
             this.nudUpperY.Size = new System.Drawing.Size(86, 20);
             this.nudUpperY.TabIndex = 6;
             this.nudUpperY.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.nudUpperY.ValueChanged += new System.EventHandler(this.nud_ValueChanged);
             // 
             // nudUpperZ
             // 
@@ -597,6 +600,7 @@
             this.nudUpperZ.Size = new System.Drawing.Size(87, 20);
             this.nudUpperZ.TabIndex = 7;
             this.nudUpperZ.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.nudUpperZ.ValueChanged += new System.EventHandler(this.nud_ValueChanged);
             // 
             // nudLowerZ
             // 
@@ -617,6 +621,7 @@
             this.nudLowerZ.Size = new System.Drawing.Size(87, 20);
             this.nudLowerZ.TabIndex = 4;
             this.nudLowerZ.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.nudLowerZ.ValueChanged += new System.EventHandler(this.nud_ValueChanged);
             // 
             // tableLayoutPanel6
             // 
