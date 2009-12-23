@@ -1620,9 +1620,7 @@ namespace S3PIDemoFE
                 this.Enabled = false;
                 Application.DoEvents();
 
-                Clipboard.SetData(DataFormats.Serializable, resource.Stream);
-
-                bool res = hlp == "1" ? plug.Helper1(resource) : plug.Helper2(resource);
+                MemoryStream res = hlp == "1" ? plug.Helper1(resource) : plug.Helper2(resource);
 
                 this.Activate();
                 Application.DoEvents();
@@ -1640,7 +1638,7 @@ namespace S3PIDemoFE
                 this.Enabled = false;
                 Application.DoEvents();
 
-                bool res = s3pi.DemoPlugins.DemoPlugins.Edit(browserWidget1.SelectedResource, resource,
+                MemoryStream res = s3pi.DemoPlugins.DemoPlugins.Edit(browserWidget1.SelectedResource, resource,
                     S3PIDemoFE.Properties.Settings.Default.HexEditorCmd,
                     S3PIDemoFE.Properties.Settings.Default.HexEditorWantsQuotes,
                     S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS);
@@ -1653,16 +1651,15 @@ namespace S3PIDemoFE
             finally { this.Enabled = true; }
         }
 
-        void afterEdit(bool res)
+        void afterEdit(MemoryStream ms)
         {
-            if (res && Clipboard.ContainsData(DataFormats.Serializable))
+            if (ms != null)
             {
                 int dr = CopyableMessageBox.Show("Resource has been updated.  Commit changes?", "Commit changes?",
                     CopyableMessageBoxButtons.YesNo, CopyableMessageBoxIcon.Question, 0);
 
                 if (dr != 0) return;
 
-                MemoryStream ms = Clipboard.GetData(DataFormats.Serializable) as MemoryStream;
                 IResourceIndexEntry rie = NewResource(browserWidget1.SelectedResource, ms, true, browserWidget1.SelectedResource.Compressed != 0);
                 if (rie != null) browserWidget1.Add(rie);
             }
