@@ -13,7 +13,8 @@ namespace s3pi_STBL_Resource_Editor
         static int Main(params string[] args)
         {
 #if DEBUG
-            Clipboard.SetData(DataFormats.Serializable, new StblResource.StblResource(0, null).Stream);
+            if (args.Length == 0)
+                Clipboard.SetData(DataFormats.Serializable, new StblResource.StblResource(0, null).Stream);
 #endif
             return s3pi.DemoPlugins.RunHelper.Run(typeof(MainForm), args);
         }
