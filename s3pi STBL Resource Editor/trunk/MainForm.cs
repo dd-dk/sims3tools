@@ -61,7 +61,6 @@ namespace s3pi_STBL_Resource_Editor
             stblKeys = new List<ulong>(map.Keys);
             foreach (ulong key in map.Keys)
                 lbStrings.Items.Add("0x" + key.ToString("X16") + ": " + partValue(map[key]));
-            Clipboard.Clear();
         }
         string partValue(string value)
         {
