@@ -2168,18 +2168,20 @@ namespace ObjectCloner
                             }
                         }
 
-                        if (item.CType == CatalogType.CatalogTerrainPaintBrush)//Both CTPTs
-                        {
-                            byte status = (byte)commonBlock["BuildBuyProductStatusFlags"].Value;
-                            uint brushIndex = FNV32.GetHash(UniqueObject) << 1;
-                            if ((status & 0x01) != 0)
-                                item.Resource["BrushIndex"] = new TypedValue(typeof(uint), brushIndex);
-                            else
-                                item.Resource["BrushIndex"] = new TypedValue(typeof(uint), brushIndex + 1);
-                        }
-
                         if (cloneFixOptions.IsRenumber)
+                        {
+                            if (item.CType == CatalogType.CatalogTerrainPaintBrush)//Both CTPTs
+                            {
+                                byte status = (byte)commonBlock["BuildBuyProductStatusFlags"].Value;
+                                uint brushIndex = FNV32.GetHash(UniqueObject) << 1;
+                                if ((status & 0x01) != 0)
+                                    item.Resource["BrushIndex"] = new TypedValue(typeof(uint), brushIndex);
+                                else
+                                    item.Resource["BrushIndex"] = new TypedValue(typeof(uint), brushIndex + 1);
+                            }
+
                             UpdateRKsFromField((AResource)item.Resource);
+                        }
 
                         dirty = true;
                         #endregion
