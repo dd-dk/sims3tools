@@ -38,6 +38,7 @@
             this.btnOK = new System.Windows.Forms.Button();
             this.tlpAddDelete = new System.Windows.Forms.TableLayoutPanel();
             this.btnAdd = new System.Windows.Forms.Button();
+            this.btnCopy = new System.Windows.Forms.Button();
             this.btnDelete = new System.Windows.Forms.Button();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -74,8 +75,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.s3PIPropertyGrid1);
-            this.splitContainer1.Size = new System.Drawing.Size(531, 277);
-            this.splitContainer1.SplitterDistance = 167;
+            this.splitContainer1.Size = new System.Drawing.Size(523, 325);
+            this.splitContainer1.SplitterDistance = 164;
             this.splitContainer1.TabIndex = 0;
             // 
             // listBox1
@@ -85,7 +86,7 @@
             this.listBox1.IntegralHeight = false;
             this.listBox1.Location = new System.Drawing.Point(0, 0);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(167, 277);
+            this.listBox1.Size = new System.Drawing.Size(164, 325);
             this.listBox1.TabIndex = 1;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             // 
@@ -96,7 +97,7 @@
             this.s3PIPropertyGrid1.Location = new System.Drawing.Point(0, 0);
             this.s3PIPropertyGrid1.Name = "s3PIPropertyGrid1";
             this.s3PIPropertyGrid1.PropertySort = System.Windows.Forms.PropertySort.NoSort;
-            this.s3PIPropertyGrid1.Size = new System.Drawing.Size(360, 277);
+            this.s3PIPropertyGrid1.Size = new System.Drawing.Size(355, 325);
             this.s3PIPropertyGrid1.TabIndex = 2;
             this.s3PIPropertyGrid1.ToolbarVisible = false;
             // 
@@ -110,7 +111,7 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.Controls.Add(this.btnClose, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.flpMainButtons, 0, 0);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(294, 295);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(286, 343);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -160,23 +161,25 @@
             this.tlpAddDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.tlpAddDelete.AutoSize = true;
             this.tlpAddDelete.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tlpAddDelete.ColumnCount = 2;
+            this.tlpAddDelete.ColumnCount = 3;
             this.tlpAddDelete.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpAddDelete.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tlpAddDelete.Controls.Add(this.btnAdd, 0, 0);
-            this.tlpAddDelete.Controls.Add(this.btnDelete, 1, 0);
-            this.tlpAddDelete.Location = new System.Drawing.Point(12, 298);
+            this.tlpAddDelete.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpAddDelete.Controls.Add(this.btnAdd, 1, 0);
+            this.tlpAddDelete.Controls.Add(this.btnCopy, 0, 0);
+            this.tlpAddDelete.Controls.Add(this.btnDelete, 2, 0);
+            this.tlpAddDelete.Location = new System.Drawing.Point(12, 346);
             this.tlpAddDelete.Margin = new System.Windows.Forms.Padding(0);
             this.tlpAddDelete.Name = "tlpAddDelete";
             this.tlpAddDelete.RowCount = 1;
             this.tlpAddDelete.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpAddDelete.Size = new System.Drawing.Size(162, 23);
+            this.tlpAddDelete.Size = new System.Drawing.Size(255, 23);
             this.tlpAddDelete.TabIndex = 1;
             // 
             // btnAdd
             // 
-            this.btnAdd.Location = new System.Drawing.Point(0, 0);
-            this.btnAdd.Margin = new System.Windows.Forms.Padding(0, 0, 6, 0);
+            this.btnAdd.Location = new System.Drawing.Point(93, 0);
+            this.btnAdd.Margin = new System.Windows.Forms.Padding(9, 0, 6, 0);
             this.btnAdd.Name = "btnAdd";
             this.btnAdd.Size = new System.Drawing.Size(75, 23);
             this.btnAdd.TabIndex = 1;
@@ -184,9 +187,22 @@
             this.btnAdd.UseVisualStyleBackColor = true;
             this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             // 
+            // btnCopy
+            // 
+            this.btnCopy.Enabled = false;
+            this.btnCopy.Location = new System.Drawing.Point(0, 0);
+            this.btnCopy.Margin = new System.Windows.Forms.Padding(0, 0, 9, 0);
+            this.btnCopy.Name = "btnCopy";
+            this.btnCopy.Size = new System.Drawing.Size(75, 23);
+            this.btnCopy.TabIndex = 2;
+            this.btnCopy.Text = "Cop&y";
+            this.btnCopy.UseVisualStyleBackColor = true;
+            this.btnCopy.Click += new System.EventHandler(this.btnCopy_Click);
+            // 
             // btnDelete
             // 
-            this.btnDelete.Location = new System.Drawing.Point(87, 0);
+            this.btnDelete.Enabled = false;
+            this.btnDelete.Location = new System.Drawing.Point(180, 0);
             this.btnDelete.Margin = new System.Windows.Forms.Padding(6, 0, 0, 0);
             this.btnDelete.Name = "btnDelete";
             this.btnDelete.Size = new System.Drawing.Size(75, 23);
@@ -199,7 +215,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(555, 336);
+            this.ClientSize = new System.Drawing.Size(547, 384);
             this.Controls.Add(this.tlpAddDelete);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.splitContainer1);
@@ -233,5 +249,6 @@
         private System.Windows.Forms.TableLayoutPanel tlpAddDelete;
         private System.Windows.Forms.Button btnAdd;
         private System.Windows.Forms.Button btnDelete;
+        private System.Windows.Forms.Button btnCopy;
     }
 }

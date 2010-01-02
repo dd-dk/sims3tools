@@ -54,8 +54,7 @@ namespace S3PIDemoFE
         }
 
         public NewGridForm(AApiVersionedFields field, bool main) : this(main) { FieldList = null; s3PIPropertyGrid1.s3piObject = field; }
-        public NewGridForm(AApiVersionedFields field) : this(false) { FieldList = null; s3PIPropertyGrid1.s3piObject = field; }
-
+        public NewGridForm(AApiVersionedFields field) : this(field, false) { }
         public NewGridForm(IGenericAdd list) : this(false) { FieldList = list; }
 
         IGenericAdd fieldList;
@@ -76,7 +75,7 @@ namespace S3PIDemoFE
                 else
                 {
                     splitContainer1.Panel1Collapsed = false;
-                    tlpAddDelete.Visible = !(value.GetType().BaseType.IsGenericType && value.GetType().BaseType.GetGenericArguments()[0].IsAbstract);
+                    btnAdd.Visible = !(value.GetType().BaseType.IsGenericType && value.GetType().BaseType.GetGenericArguments()[0].IsAbstract);
                     fillListBox(-1);
                 }
             }
@@ -95,21 +94,46 @@ namespace S3PIDemoFE
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             s3PIPropertyGrid1.s3piObject = (AHandlerElement)(listBox1.SelectedIndex >= 0 ? fieldList[listBox1.SelectedIndex] : null);
-            btnDelete.Enabled = listBox1.SelectedIndex >= 0;
+            btnCopy.Enabled = btnDelete.Enabled = listBox1.SelectedIndex >= 0;
+        }
+
+        private void btnCopy_Click(object sender, EventArgs e)
+        {
+            int selectedIndex = listBox1.SelectedIndex;
+            AHandlerElement selectedElement = (AHandlerElement)(listBox1.SelectedIndex >= 0 ? fieldList[listBox1.SelectedIndex] : null);
+            if (selectedElement != null)
+                try
+                {
+                    if (fieldList.Add(selectedElement))
+                        selectedIndex = fieldList.Count - 1;
+                    else
+                        CopyableMessageBox.Show("Copy failed", this.Text, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    string s = "";
+                    for (Exception inex = ex; inex != null; inex = ex.InnerException) s += inex.Message + "\n\n";
+                    CopyableMessageBox.Show(s, this.Text, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                }
+            fillListBox(selectedIndex);
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
             int selectedIndex = listBox1.SelectedIndex;
-            int count = fieldList.Count;
             try
             {
                 fieldList.Add();
+                selectedIndex = fieldList.Count - 1;
             }
             catch(Exception ex)
             {
                 string s = "";
-                for (Exception inex = ex; inex != null; inex = ex.InnerException) s += inex.Message + "\n\n";
+                for (Exception inex = ex; inex != null; inex = inex.InnerException)
+                {
+                    s += "\r\n" + inex.Message;
+                    s += "\r\n----\r\nStack trace:\r\n" + inex.StackTrace + "\r\n----\r\n";
+                }
                 CopyableMessageBox.Show(s, this.Text, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
             }
             fillListBox(selectedIndex);
@@ -123,7 +147,7 @@ namespace S3PIDemoFE
             fillListBox(selectedIndex);
         }
 
-        // added for http://www.simlogical.com/S3PIdevelforum/index.php?topic=685.0
+        // added for http://dino.drealm.info/develforums/s3pi/index.php?topic=685.0
         bool OKtoClose = false;
         private void btnClose_Click(object sender, EventArgs e)
         {
