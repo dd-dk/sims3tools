@@ -1249,7 +1249,7 @@ namespace S3PIDemoFE
 
                 AsKVPList list = new AsKVPList(keyType, valueType);
                 List<object> oldKeys = new List<object>();
-                foreach (var k in field.Value.Keys) { list.Add(new AsKVP(new DictionaryEntry(k, field.Value[k]))); oldKeys.Add(k); }
+                foreach (var k in field.Value.Keys) { list.Add(k, field.Value[k]); oldKeys.Add(k); }
 
                 NewGridForm ui = new NewGridForm(list);
                 edSvc.ShowDialog(ui);
@@ -1294,9 +1294,11 @@ namespace S3PIDemoFE
 
     public class AsKVP : AHandlerElement, IEquatable<AsKVP>
     {
+        static List<string> contentFields = new List<string>(new string[] { "Key", "Val", });
         DictionaryEntry entry;
-        List<string> contentFields;
-        public AsKVP(DictionaryEntry entry) : base(0, null) { this.entry = entry; contentFields = new List<string>(new string[] { "Key", "Val", }); }
+
+        public AsKVP(int APIversion, EventHandler handler, AsKVP basis) : this(APIversion, handler, basis.entry.Key, basis.entry.Value) { }
+        public AsKVP(int APIversion, EventHandler handler, object key, object val) : base(APIversion, handler) { entry = new DictionaryEntry(key, val); }
 
         public override List<string> ContentFields { get { return contentFields; } }
         public override int RecommendedApiVersion { get { return 0; } }
@@ -1333,7 +1335,7 @@ namespace S3PIDemoFE
             }
         }
 
-        public override AHandlerElement Clone(EventHandler handler) { throw new NotImplementedException(); }
+        public override AHandlerElement Clone(EventHandler handler) { return new AsKVP(requestedApiVersion, handler, this); }
 
         #region IEquatable<AsKVP> Members
 
@@ -1347,7 +1349,7 @@ namespace S3PIDemoFE
         Type keyType;
         Type valueType;
         public AsKVPList(Type keyType, Type valueType) : base(null) { this.keyType = keyType; this.valueType = valueType; }
-        public override void Add() { this.Add(new AsKVP(new DictionaryEntry((ulong)0, ""))); }
+        public override void Add() { this.Add((ulong)0, ""); }
         protected override AsKVP CreateElement(Stream s) { throw new NotImplementedException(); }
         protected override void WriteElement(Stream s, AsKVP element) { throw new NotImplementedException(); }
     }
