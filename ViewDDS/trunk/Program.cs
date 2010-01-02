@@ -7,6 +7,15 @@ namespace ViewDDS
 {
     static class Program
     {
+        static void IssueException(Exception ex)
+        {
+            string s = "";
+            for (Exception inex = ex; inex != null; inex = ex.InnerException) s += "\n" + inex.Message;
+            s += "\n-----";
+            for (Exception inex = ex; inex != null; inex = ex.InnerException) s += "\n" + inex.StackTrace;
+            MessageBox.Show(s, "Program Exception", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+        }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -24,45 +33,70 @@ namespace ViewDDS
                 {
                     if ("clipboard".StartsWith(p.Substring(1).ToLower()))
                         useClipboard = true;
+                    else
+                    {
+                        MessageBox.Show(String.Format("Unrecognised switch: \"{0}\"", p),
+                            "Fail", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                        return 1;
+                    }
                 }
                 else
                     files.Add(s);
             }
-            useFile = !useClipboard && files.Count > 0;
 
-            if (!useClipboard && !useFile)
+            if (useClipboard && files.Count > 0)
             {
-                MessageBox.Show("Either pass \"/Clipboard\" switch or a filename", "Fail", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                return 1;
-            }
-            if (useClipboard && !Clipboard.ContainsData(DataFormats.Serializable))
-            {
-                MessageBox.Show("No suitable data on clipboard", "Fail", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                MessageBox.Show("Do not use /Clipboard with other arguments",
+                    "Fail", MessageBoxButtons.OK, MessageBoxIcon.Stop);
                 return 2;
             }
-            if (useFile)
+            if (files.Count > 1)
             {
-                MessageBox.Show("Only pass one file at a time", "Fail", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                if (files.Count > 1) return 3;
-                MemoryStream ms = new MemoryStream();
-                FileStream fs = new FileStream(files[0], FileMode.Open, FileAccess.Read);
-                (new BinaryWriter(ms)).Write((new BinaryReader(fs)).ReadBytes((int)fs.Length));
-                fs.Close();
-                ms.Flush();
-                Clipboard.SetData(DataFormats.Serializable, ms.GetBuffer());
+                MessageBox.Show("Only pass a single file argument",
+                    "Fail", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                return 3;
             }
+
+            useFile = files.Count > 0;
+            useClipboard = !useFile;
+
+            Stream ms;
+
+            if (useClipboard)
+            {
+                ms = Clipboard.GetData(DataFormats.Serializable) as MemoryStream;
+                if (ms == null)
+                {
+                    MessageBox.Show("Invalid clipboard content",
+                        "Fail", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                    return 4;
+                }
+                Clipboard.Clear();
+            }
+            else
+            {
+                try
+                {
+                    ms = File.Open(files[0], FileMode.Open, FileAccess.ReadWrite);
+                }
+                catch (Exception ex)
+                {
+                    IssueException(ex);
+                    return -1;
+                }
+            }
+
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
             try
             {
-                Application.Run(new MainForm());
+                Application.Run(new MainForm(ms));
             }
             catch (Exception ex)
             {
-                string s = ex.Message;
-                for (Exception inex = ex.InnerException; inex != null; inex = ex.InnerException) s += "\n" + inex.Message;
-                    MessageBox.Show(s, "Fail", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                IssueException(ex);
                 return -1;
             }
 

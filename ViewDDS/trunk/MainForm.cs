@@ -9,16 +9,14 @@ namespace ViewDDS
 {
     public partial class MainForm : Form
     {
-        DdsFileTypePlugin.DdsFile ddsFile = new DdsFileTypePlugin.DdsFile();
-
         public MainForm()
         {
             InitializeComponent();
+        }
 
-            MemoryStream ms = Clipboard.GetData(DataFormats.Serializable) as MemoryStream;
-            if (ms == null)
-                throw new Exception("Clipboard data not a MemoryStream");
-
+        public MainForm(Stream ms)
+            : this()
+        {
             try
             {
                 Application.UseWaitCursor = true;
@@ -26,6 +24,8 @@ namespace ViewDDS
             }
             finally { Application.UseWaitCursor = false; }
         }
+
+        DdsFileTypePlugin.DdsFile ddsFile = new DdsFileTypePlugin.DdsFile();
 
         private void ckb_CheckedChanged(object sender, EventArgs e)
         {
