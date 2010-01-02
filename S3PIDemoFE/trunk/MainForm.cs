@@ -1433,8 +1433,11 @@ namespace S3PIDemoFE
                 IResourceIndexEntry rie = browserWidget1.SelectedResource;
                 string s = "";
                 if (rie != null) s += String.Format("Error reading resource {0:X8}:{1:X8}:{2:X16}", rie.ResourceType, rie.ResourceGroup, rie.Instance);
-                for (Exception inex = resException; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
-                for (Exception inex = resException; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
+                for (Exception inex = resException; inex != null; inex = inex.InnerException)
+                {
+                    s += "\r\n" + inex.Message;
+                    s += "\r\n----\r\nStack trace:\r\n" + inex.StackTrace + "\r\n----\r\n";
+                }
                 TextBox tb = new TextBox();
                 tb.Dock = DockStyle.Fill;
                 tb.Multiline = true;
