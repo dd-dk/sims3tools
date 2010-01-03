@@ -41,7 +41,6 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.controlPanel1 = new S3PIDemoFE.ControlPanel();
             this.resourceFilterWidget1 = new S3PIDemoFE.Filter.ResourceFilterWidget();
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.saveAsFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.exportFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.exportBatchTarget = new System.Windows.Forms.FolderBrowserDialog();
@@ -51,6 +50,7 @@
             this.menuBarWidget1 = new S3PIDemoFE.MenuBarWidget();
             this.packageInfoFields1 = new S3PIDemoFE.PackageInfo.PackageInfoFields();
             this.replaceResourceDialog = new System.Windows.Forms.OpenFileDialog();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -220,18 +220,10 @@
             this.resourceFilterWidget1.TabIndex = 0;
             this.resourceFilterWidget1.FilterChanged += new System.EventHandler(this.resourceFilterWidget1_FilterChanged);
             // 
-            // openFileDialog1
-            // 
-            this.openFileDialog1.FileName = "*.package";
-            this.openFileDialog1.Filter = "DBPF Packages|*.package;*.world|All Files|*.*";
-            this.openFileDialog1.ShowReadOnly = true;
-            this.openFileDialog1.SupportMultiDottedExtensions = true;
-            this.openFileDialog1.Title = "Open package";
-            // 
             // saveAsFileDialog
             // 
             this.saveAsFileDialog.FileName = "*.package";
-            this.saveAsFileDialog.Filter = "DBPF Packages|*.package;*.world|All Files|*.*";
+            this.saveAsFileDialog.Filter = global::S3PIDemoFE.Properties.Settings.Default.DBPFFilesAndAll;
             this.saveAsFileDialog.Title = "Save As";
             // 
             // exportFileDialog
@@ -252,7 +244,7 @@
             // 
             // importPackagesDialog
             // 
-            this.importPackagesDialog.Filter = "DBPF Packages|*.package;*.world|All Files|*.*";
+            this.importPackagesDialog.Filter = global::S3PIDemoFE.Properties.Settings.Default.DBPFFilesAndAll;
             this.importPackagesDialog.Multiselect = true;
             this.importPackagesDialog.Title = "Import Packages";
             // 
@@ -260,7 +252,7 @@
             // 
             this.exportToPackageDialog.CheckFileExists = false;
             this.exportToPackageDialog.DefaultExt = "package";
-            this.exportToPackageDialog.Filter = "DBPF Packages|*.package;*.world|All Files|*.*";
+            this.exportToPackageDialog.Filter = global::S3PIDemoFE.Properties.Settings.Default.DBPFFilesAndAll;
             this.exportToPackageDialog.Title = "Export to package";
             // 
             // menuBarWidget1
@@ -285,6 +277,14 @@
             // 
             this.replaceResourceDialog.AddExtension = false;
             this.replaceResourceDialog.Title = "Replace Resource";
+            // 
+            // openFileDialog1
+            // 
+            this.openFileDialog1.FileName = "*.package";
+            this.openFileDialog1.Filter = global::S3PIDemoFE.Properties.Settings.Default.DBPFFilesAndAll;
+            this.openFileDialog1.ShowReadOnly = true;
+            this.openFileDialog1.SupportMultiDottedExtensions = true;
+            this.openFileDialog1.Title = "Open package";
             // 
             // MainForm
             // 

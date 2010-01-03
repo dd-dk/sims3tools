@@ -47,7 +47,7 @@ namespace S3PIDemoFE
                 //Resource
                 addToolStripMenuItem, resCopyToolStripMenuItem1, resPasteToolStripMenuItem1, duplicateToolStripMenuItem, replaceToolStripMenuItem,
                 compressedToolStripMenuItem, deletedToolStripMenuItem, detailsToolStripMenuItem,
-                fromFileToolStripMenuItem, fromPackageToolStripMenuItem, toFileToolStripMenuItem, toPackageToolStripMenuItem,
+                fromFileToolStripMenuItem, fromPackageToolStripMenuItem, asDBCToolStripMenuItem, toFileToolStripMenuItem, toPackageToolStripMenuItem,
                 //Tools
                 fNVHashToolStripMenuItem, searchToolStripMenuItem,
                 //Settings
@@ -60,7 +60,7 @@ namespace S3PIDemoFE
                 //BrowserWidgetContextMenuStrip
                 bwcmAdd, bwcmCopy, bwcmPaste, bwcmDuplicate, bwcmReplace,
                 bwcmCompressed, bwcmDeleted, bwcmDetails,
-                bwcmFromFile, bwcmFromPackage, bwcmToFile, bwcmToPackage,
+                bwcmFromFile, bwcmFromPackage, bwcmAsDBC, bwcmToFile, bwcmToPackage,
             });
             UpdateMRUList();
             UpdateBookmarks();
@@ -83,7 +83,7 @@ namespace S3PIDemoFE
             MBE_cut, MBE_copy, MBE_paste,
             MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_replace,
             MBR_compressed, MBR_isdeleted, MBR_details,
-            MBR_importResources, MBR_importPackages, MBR_exportResources, MBR_exportToPackage,
+            MBR_importResources, MBR_importPackages, MBR_importAsDBC, MBR_exportResources, MBR_exportToPackage,
             MBT_fnvHash, MBT_search,
             MBS_externals, MBS_bookmarks,
             MBS_saveSettings,
@@ -94,7 +94,7 @@ namespace S3PIDemoFE
         {
             MBR_add = (int)MB.MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_replace,
             MBR_compressed, MBR_isdeleted, MBR_details,
-            MBR_importResources, MBR_importPackages, MBR_exportResources, MBR_exportToPackage,
+            MBR_importResources, MBR_importPackages, MBR_importAsDBC, MBR_exportResources, MBR_exportToPackage,
         }
 
         bool isCMSBW(MB mn) { return (mn >= MB.MBR_add && mn < MB.MBT_fnvHash); }

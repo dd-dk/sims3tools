@@ -424,7 +424,7 @@ namespace S3PIDemoFE
 
         private void fileOpen()
         {
-            openFileDialog1.FileName = "*.package";
+            openFileDialog1.FileName = "";
             openFileDialog1.FilterIndex = 1;
             DialogResult dr = openFileDialog1.ShowDialog();
             if (dr != DialogResult.OK) return;
@@ -454,6 +454,7 @@ namespace S3PIDemoFE
             if (CurrentPackage == null) return false;
 
             saveAsFileDialog.FileName = "";
+            saveAsFileDialog.FilterIndex = 1;
             DialogResult dr = saveAsFileDialog.ShowDialog();
             if (dr != DialogResult.OK) return false;
 
@@ -477,6 +478,7 @@ namespace S3PIDemoFE
             if (CurrentPackage == null) return;
 
             saveAsFileDialog.FileName = "";
+            saveAsFileDialog.FilterIndex = 1;
             DialogResult dr = saveAsFileDialog.ShowDialog();
             if (dr != DialogResult.OK) return;
 
@@ -575,6 +577,7 @@ namespace S3PIDemoFE
                     case MenuBarWidget.MB.MBR_replace: resourceReplace(); break;
                     case MenuBarWidget.MB.MBR_importResources: resourceImport(); break;
                     case MenuBarWidget.MB.MBR_importPackages: resourceImportPackages(); break;
+                    case MenuBarWidget.MB.MBR_importAsDBC: resourceImportAsDBC(); break;
                     case MenuBarWidget.MB.MBR_exportResources: resourceExport(); break;
                     case MenuBarWidget.MB.MBR_exportToPackage: resourceExportToPackage(); break;
                 }
@@ -652,7 +655,7 @@ namespace S3PIDemoFE
             if (ir.UseName && ir.ResourceName != null && ir.ResourceName.Length > 0)
                 UpdateNameMap(ir.Instance, ir.ResourceName, true, ir.AllowRename);
 
-            IResourceIndexEntry rie = NewResource(ir, null, ir.Replace, ir.Compress);
+            IResourceIndexEntry rie = NewResource(ir, null, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, ir.Compress);
             browserWidget1.Add(rie);
         }
 
@@ -850,7 +853,25 @@ namespace S3PIDemoFE
             return true;
         }
 
-        private IResourceIndexEntry NewResource(IResourceKey rk, MemoryStream ms, bool replace, bool compress)
+        /// <summary>
+        /// How to handle duplicate resources when adding to a package
+        /// </summary>
+        enum DuplicateHandling
+        {
+            /// <summary>
+            /// Refuse to create the request resource
+            /// </summary>
+            reject,
+            /// <summary>
+            /// Delete any conflicting resource
+            /// </summary>
+            replace,
+            /// <summary>
+            /// Ignore any conflicting resource
+            /// </summary>
+            allow,
+        }
+        private IResourceIndexEntry NewResource(IResourceKey rk, MemoryStream ms, DuplicateHandling dups, bool compress)
         {
             IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType", "EpFlags", "ResourceGroup", "Instance" },
                 new TypedValue[] {
@@ -861,11 +882,11 @@ namespace S3PIDemoFE
                 });
             if (rie != null)
             {
-                if (!replace) return null;
-                CurrentPackage.DeleteResource(rie);
+                if (dups == DuplicateHandling.reject) return null;
+                if (dups == DuplicateHandling.replace) CurrentPackage.DeleteResource(rie);
             }
 
-            rie = CurrentPackage.AddResource(rk, ms, true);
+            rie = CurrentPackage.AddResource(rk, ms, dups != DuplicateHandling.allow);
             if (rie == null) return null;
 
             rie.Compressed = (ushort)(compress ? 0xffff : 0);
@@ -1663,7 +1684,7 @@ namespace S3PIDemoFE
 
                 if (dr != 0) return;
 
-                IResourceIndexEntry rie = NewResource(browserWidget1.SelectedResource, ms, true, browserWidget1.SelectedResource.Compressed != 0);
+                IResourceIndexEntry rie = NewResource(browserWidget1.SelectedResource, ms, DuplicateHandling.replace, browserWidget1.SelectedResource.Compressed != 0);
                 if (rie != null) browserWidget1.Add(rie);
             }
         }

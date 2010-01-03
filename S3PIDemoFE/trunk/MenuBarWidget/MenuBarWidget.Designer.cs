@@ -65,6 +65,7 @@
             this.importToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.fromFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fromPackageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.asDBCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toPackageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -96,9 +97,10 @@
             this.bwcmImport = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmFromFile = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmFromPackage = new System.Windows.Forms.ToolStripMenuItem();
+            this.bwcmAsDBC = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmExport = new System.Windows.Forms.ToolStripMenuItem();
-            this.bwcmToPackage = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmToFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.bwcmToPackage = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.browserWidgetContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -400,7 +402,8 @@
             // 
             this.importToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fromFileToolStripMenuItem,
-            this.fromPackageToolStripMenuItem});
+            this.fromPackageToolStripMenuItem,
+            this.asDBCToolStripMenuItem});
             this.importToolStripMenuItem1.Name = "importToolStripMenuItem1";
             this.importToolStripMenuItem1.Size = new System.Drawing.Size(198, 22);
             this.importToolStripMenuItem1.Text = "I&mport";
@@ -410,16 +413,23 @@
             this.fromFileToolStripMenuItem.Name = "fromFileToolStripMenuItem";
             this.fromFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
                         | System.Windows.Forms.Keys.M)));
-            this.fromFileToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            this.fromFileToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
             this.fromFileToolStripMenuItem.Text = "From &file...";
             this.fromFileToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
             // 
             // fromPackageToolStripMenuItem
             // 
             this.fromPackageToolStripMenuItem.Name = "fromPackageToolStripMenuItem";
-            this.fromPackageToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            this.fromPackageToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
             this.fromPackageToolStripMenuItem.Text = "From &package...";
             this.fromPackageToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
+            // 
+            // asDBCToolStripMenuItem
+            // 
+            this.asDBCToolStripMenuItem.Name = "asDBCToolStripMenuItem";
+            this.asDBCToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.asDBCToolStripMenuItem.Text = "(EXPERIMENTAL) As &dbc...";
+            this.asDBCToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
             // 
             // exportToolStripMenuItem1
             // 
@@ -582,6 +592,7 @@
             // 
             // bwcmAdd
             // 
+            this.bwcmAdd.Enabled = false;
             this.bwcmAdd.Name = "bwcmAdd";
             this.bwcmAdd.Size = new System.Drawing.Size(152, 22);
             this.bwcmAdd.Text = "&Add...";
@@ -657,7 +668,9 @@
             // 
             this.bwcmImport.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.bwcmFromFile,
-            this.bwcmFromPackage});
+            this.bwcmFromPackage,
+            this.bwcmAsDBC});
+            this.bwcmImport.Enabled = false;
             this.bwcmImport.Name = "bwcmImport";
             this.bwcmImport.Size = new System.Drawing.Size(152, 22);
             this.bwcmImport.Text = "I&mport";
@@ -665,33 +678,33 @@
             // bwcmFromFile
             // 
             this.bwcmFromFile.Name = "bwcmFromFile";
-            this.bwcmFromFile.Size = new System.Drawing.Size(164, 22);
+            this.bwcmFromFile.Size = new System.Drawing.Size(214, 22);
             this.bwcmFromFile.Text = "From &file...";
             this.bwcmFromFile.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
             // bwcmFromPackage
             // 
             this.bwcmFromPackage.Name = "bwcmFromPackage";
-            this.bwcmFromPackage.Size = new System.Drawing.Size(164, 22);
+            this.bwcmFromPackage.Size = new System.Drawing.Size(214, 22);
             this.bwcmFromPackage.Text = "From &package...";
             this.bwcmFromPackage.Click += new System.EventHandler(this.tsCMSBW_Click);
+            // 
+            // bwcmAsDBC
+            // 
+            this.bwcmAsDBC.Name = "bwcmAsDBC";
+            this.bwcmAsDBC.Size = new System.Drawing.Size(214, 22);
+            this.bwcmAsDBC.Text = "(EXPERIMENTAL) As &dbc...";
+            this.bwcmAsDBC.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
             // bwcmExport
             // 
             this.bwcmExport.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.bwcmToFile,
             this.bwcmToPackage});
+            this.bwcmExport.Enabled = false;
             this.bwcmExport.Name = "bwcmExport";
             this.bwcmExport.Size = new System.Drawing.Size(152, 22);
             this.bwcmExport.Text = "E&xport";
-            // 
-            // bwcmToPackage
-            // 
-            this.bwcmToPackage.Enabled = false;
-            this.bwcmToPackage.Name = "bwcmToPackage";
-            this.bwcmToPackage.Size = new System.Drawing.Size(152, 22);
-            this.bwcmToPackage.Text = "To &package...";
-            this.bwcmToPackage.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
             // bwcmToFile
             // 
@@ -700,6 +713,14 @@
             this.bwcmToFile.Size = new System.Drawing.Size(152, 22);
             this.bwcmToFile.Text = "To &file...";
             this.bwcmToFile.Click += new System.EventHandler(this.tsCMSBW_Click);
+            // 
+            // bwcmToPackage
+            // 
+            this.bwcmToPackage.Enabled = false;
+            this.bwcmToPackage.Name = "bwcmToPackage";
+            this.bwcmToPackage.Size = new System.Drawing.Size(152, 22);
+            this.bwcmToPackage.Text = "To &package...";
+            this.bwcmToPackage.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
             // MenuBarWidget
             // 
@@ -787,5 +808,7 @@
         private System.Windows.Forms.ToolStripMenuItem bwcmExport;
         private System.Windows.Forms.ToolStripMenuItem bwcmToFile;
         private System.Windows.Forms.ToolStripMenuItem bwcmToPackage;
+        private System.Windows.Forms.ToolStripMenuItem asDBCToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bwcmAsDBC;
     }
 }
