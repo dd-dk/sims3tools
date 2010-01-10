@@ -112,7 +112,8 @@ namespace S3PIDemoFE
                 catch (Exception ex)
                 {
                     string s = "";
-                    for (Exception inex = ex; inex != null; inex = ex.InnerException) s += inex.Message + "\n\n";
+                    for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
+                    for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
                     CopyableMessageBox.Show(s, this.Text, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
                 }
             fillListBox(selectedIndex);
