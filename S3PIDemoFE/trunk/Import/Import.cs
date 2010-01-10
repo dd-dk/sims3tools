@@ -198,9 +198,11 @@ namespace S3PIDemoFE
         private void importPackagesCommon(string[] packageList, bool compress, DuplicateHandling dups, List<uint> dupsList)
         {
             bool useNames = controlPanel1.UseNames;
+            int autoState = controlPanel1.AutoOff ? 0 : controlPanel1.AutoHex ? 1 : 2;
             try
             {
                 controlPanel1.UseNames = false;
+                controlPanel1.AutoOff = true;
                 browserWidget1.Visible = false;
 
                 foreach (string filename in packageList)
@@ -236,7 +238,19 @@ namespace S3PIDemoFE
                     finally { progressBar1.Value = 0; Package.ClosePackage(0, imppkg); }
                 }
             }
-            finally { lbProgress.Text = ""; Application.DoEvents(); controlPanel1.UseNames = useNames; browserWidget1.Visible = true; }
+            finally
+            {
+                lbProgress.Text = "";
+                controlPanel1.UseNames = useNames;
+                switch (autoState)
+                {
+                    case 0: controlPanel1.AutoOff = true; break;
+                    case 1: controlPanel1.AutoHex = true; break;
+                    case 2: controlPanel1.AutoValue = true; break;
+                }
+                browserWidget1.Visible = true;
+                Application.DoEvents();
+            }
         }
 
         private void resourcePaste()
