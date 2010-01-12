@@ -990,16 +990,18 @@ namespace ObjectCloner
             }
         }
 
-        Dictionary<string, string> detailsFieldMap;
-        Dictionary<string, string> detailsFieldMapReverse;
+        Dictionary<string, string> detailsFieldMap;//(Type:)Label -> fieldname
+        Dictionary<string, string> detailsFieldMapReverse;//(Type:)fieldname -> Label
         void InitialiseDetailsTab(IResource catlg)
         {
-            List<string> detailsTabFields = new List<string>();
-            List<string> detailsTabCommonFields = new List<string>();
+            List<string> detailsTabFields = new List<string>();//fieldname
+            List<string> detailsTabCommonFields = new List<string>();//fieldname
             List<string> fields = AApiVersionedFields.GetContentFields(0, catlg.GetType());
             detailsFieldMap = new Dictionary<string, string>();
             detailsFieldMapReverse = new Dictionary<string, string>();
-            detailsFieldMap.Add("Product Status", "CommonBlock.BuildBuyProductStatusFlags");
+            detailsFieldMap.Add("TerrainPaintBrushCatalogResource:Category", "Category");
+            detailsFieldMap.Add("CommonBlock.Product Status", "CommonBlock.BuildBuyProductStatusFlags");
+            detailsFieldMapReverse.Add("TerrainPaintBrushCatalogResource:Category", "Category");
             detailsFieldMapReverse.Add("CommonBlock.BuildBuyProductStatusFlags", "Product Status");
 
             while (tlpObjectDetail.RowCount > 2)
@@ -1039,20 +1041,24 @@ namespace ObjectCloner
                     }
                 }
                 else if (!field.Equals("AsBytes") && !field.Equals("Stream") && !field.Equals("Value") &&
-                    !field.Equals("Count") && !field.Equals("IsReadOnly") && !field.EndsWith("Reader")) detailsTabFields.Add(field);
+                    !field.Equals("Count") && !field.Equals("IsReadOnly") && !field.EndsWith("Reader"))
+                    detailsTabFields.Add(field);
             }
 
             Dictionary<string, Type> types = AApiVersionedFields.GetContentFieldTypes(0, catlg.GetType());
             foreach (string field in detailsTabFields)
             {
-                CreateField(tlpObjectDetail, types[field], field);
+                if (detailsFieldMapReverse.ContainsKey(catlg.GetType().Name + ":" + field))
+                    CreateField(tlpObjectDetail, types[field], detailsFieldMapReverse[catlg.GetType().Name + ":" + field], true);
+                else
+                    CreateField(tlpObjectDetail, types[field], field);
             }
 
             AApiVersionedFields common = catlg["CommonBlock"].Value as AApiVersionedFields;
             types = AApiVersionedFields.GetContentFieldTypes(0, catlg["CommonBlock"].Type);
             foreach (string field in detailsTabCommonFields)
             {
-                if (detailsFieldMap.ContainsValue("CommonBlock." + field))
+                if (detailsFieldMapReverse.ContainsKey("CommonBlock." + field))
                     CreateField(tlpObjectCommon, types[field], detailsFieldMapReverse["CommonBlock." + field], true);
                 else
                     CreateField(tlpObjectCommon, types[field], field);
@@ -1311,8 +1317,8 @@ namespace ObjectCloner
 
 
                 TypedValue tv;
-                if (detailsFieldMap.ContainsKey(lb.Text))
-                    tv = objd.Resource[detailsFieldMap[lb.Text]];
+                if (detailsFieldMap.ContainsKey(objd.Resource.GetType().Name + ":" + lb.Text))
+                    tv = objd.Resource[detailsFieldMap[objd.Resource.GetType().Name + ":" + lb.Text]];
                 else
                     tv = objd.Resource[lb.Text];
 
@@ -1332,10 +1338,10 @@ namespace ObjectCloner
                 TextBox tb = (TextBox)tlpObjectCommon.GetControlFromPosition(1, i);
 
                 TypedValue tv;
-                if (detailsFieldMap.ContainsKey(lb.Text))
-                    tv = objd.Resource[detailsFieldMap[lb.Text]];
+                if (detailsFieldMap.ContainsKey("CommonBlock." + lb.Text))
+                    tv = objd.Resource[detailsFieldMap["CommonBlock." + lb.Text]];
                 else
-                    tv = ((AApiVersionedFields)objd.Resource["CommonBlock"].Value)[lb.Text];
+                    tv = objd.Resource["CommonBlock." + lb.Text];
 
                 if (typeof(Enum).IsAssignableFrom(tv.Type))
                 {
@@ -2119,13 +2125,13 @@ namespace ObjectCloner
                             if (PngInstance != 0 && oldToNew.ContainsKey(PngInstance))
                                 commonBlock["PngInstance"] = new TypedValue(typeof(ulong), oldToNew[PngInstance]);
 
-                            for (int i = 2; i < tlpObjectCommon.RowCount - 1; i++)
+                            for (int i = 2; i < tlpObjectDetail.RowCount - 1; i++)
                             {
-                                Label lb = (Label)tlpObjectCommon.GetControlFromPosition(0, i);
-                                TextBox tb = (TextBox)tlpObjectCommon.GetControlFromPosition(1, i);
+                                Label lb = (Label)tlpObjectDetail.GetControlFromPosition(0, i);
+                                TextBox tb = (TextBox)tlpObjectDetail.GetControlFromPosition(1, i);
                                 if (tb.Tag == null) continue;
 
-                                TypedValue tvOld = item.Resource[detailsFieldMap[lb.Text]];
+                                TypedValue tvOld = item.Resource[detailsFieldMap[item.Resource.GetType().Name + ":" + lb.Text]];
 
                                 ulong u = Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
                                 object val;
@@ -2134,7 +2140,25 @@ namespace ObjectCloner
                                 else
                                     val = Convert.ChangeType(u, tvOld.Type);
 
-                                item.Resource[detailsFieldMap[lb.Text]] = new TypedValue(tvOld.Type, val);
+                                item.Resource[detailsFieldMap[item.Resource.GetType().Name + ":" + lb.Text]] = new TypedValue(tvOld.Type, val);
+                            }
+
+                            for (int i = 2; i < tlpObjectCommon.RowCount - 1; i++)
+                            {
+                                Label lb = (Label)tlpObjectCommon.GetControlFromPosition(0, i);
+                                TextBox tb = (TextBox)tlpObjectCommon.GetControlFromPosition(1, i);
+                                if (tb.Tag == null) continue;
+
+                                TypedValue tvOld = item.Resource[detailsFieldMap["CommonBlock." + lb.Text]];
+
+                                ulong u = Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
+                                object val;
+                                if (typeof(Enum).IsAssignableFrom(tvOld.Type))
+                                    val = Enum.ToObject(tvOld.Type, u);
+                                else
+                                    val = Convert.ChangeType(u, tvOld.Type);
+
+                                item.Resource[detailsFieldMap["CommonBlock." + lb.Text]] = new TypedValue(tvOld.Type, val);
                             }
 
                             if (selectedItem.CType == CatalogType.CatalogObject)//Selected OBJD only
