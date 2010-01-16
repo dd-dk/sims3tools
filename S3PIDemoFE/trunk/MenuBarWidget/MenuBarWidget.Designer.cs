@@ -592,7 +592,6 @@
             // 
             // bwcmAdd
             // 
-            this.bwcmAdd.Enabled = false;
             this.bwcmAdd.Name = "bwcmAdd";
             this.bwcmAdd.Size = new System.Drawing.Size(152, 22);
             this.bwcmAdd.Text = "&Add...";
@@ -670,7 +669,6 @@
             this.bwcmFromFile,
             this.bwcmFromPackage,
             this.bwcmAsDBC});
-            this.bwcmImport.Enabled = false;
             this.bwcmImport.Name = "bwcmImport";
             this.bwcmImport.Size = new System.Drawing.Size(152, 22);
             this.bwcmImport.Text = "I&mport";
@@ -701,7 +699,6 @@
             this.bwcmExport.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.bwcmToFile,
             this.bwcmToPackage});
-            this.bwcmExport.Enabled = false;
             this.bwcmExport.Name = "bwcmExport";
             this.bwcmExport.Size = new System.Drawing.Size(152, 22);
             this.bwcmExport.Text = "E&xport";
