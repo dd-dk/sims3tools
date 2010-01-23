@@ -70,10 +70,7 @@ namespace S3PIDemoFE
             catch (Exception ex)
             {
                 owner[field] = new TypedValue(type, new StringReader(oldval));
-                string s = "Import failed.  Recovery attempted but resource may be corrupt.\n\n";
-                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
-                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
-                CopyableMessageBox.Show(ParentForm, s, "Import", CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK", }), 0, 0);
+                MainForm.IssueException(ex, "Text import failed.  Recovery attempted but resource may be corrupt.");
             }
             fs.Close();
         }
@@ -96,10 +93,7 @@ namespace S3PIDemoFE
             catch (Exception ex)
             {
                 owner[field] = new TypedValue(type, new BinaryReader(new MemoryStream(oldval)));
-                string s = "Import failed.  Recovery attempted but resource may be corrupt.\n\n";
-                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
-                for (Exception inex = ex; inex != null; inex = inex.InnerException) s += "\n----\nStack trace:\n" + inex.StackTrace;
-                CopyableMessageBox.Show(ParentForm, s, "Import", CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK", }), 0, 0);
+                MainForm.IssueException(ex, "Binary import failed.  Recovery attempted but resource may be corrupt.");
             }
             fs.Close();
         }

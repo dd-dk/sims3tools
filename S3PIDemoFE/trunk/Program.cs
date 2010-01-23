@@ -43,10 +43,7 @@ namespace S3PIDemoFE
             }
             catch (Exception ex)
             {
-                string s = ex.ToString();
-                if (ex.InnerException != null)
-                    s += "\n\n-- Inner Exception --\n" + ex.InnerException.ToString();
-                CopyableMessageBox.Show(s, "s3pe", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                MainForm.IssueException(ex, "Application failed");
                 return 1;
             }
 #endif
