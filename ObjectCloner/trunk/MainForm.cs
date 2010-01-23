@@ -2543,9 +2543,7 @@ namespace ObjectCloner
             }
             catch (Exception ex)
             {
-                string s = ex.Message;
-                for (Exception inex = ex.InnerException; inex != null; inex = inex.InnerException) s += "\n" + inex.Message;
-                CopyableMessageBox.Show("Could not open package " + filename + "\n\n" + s, "File Open", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                CopyableMessageBox.IssueException(ex, "Could not open package:\n" + filename, "File Open");
                 return;
             }
 
@@ -3471,8 +3469,7 @@ namespace ObjectCloner
             }
             catch (Exception ex)
             {
-                CopyableMessageBox.Show("Could not read " + openThumbnailDialog.FileName + ":\n" + ex.Message, openThumbnailDialog.Title,
-                    CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                CopyableMessageBox.IssueException(ex, "Could not read thumbnail:\n" + openThumbnailDialog.FileName, openThumbnailDialog.Title);
                 replacementForThumbs = null;
             }
         }
