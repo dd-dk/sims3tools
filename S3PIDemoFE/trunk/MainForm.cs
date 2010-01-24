@@ -808,6 +808,7 @@ namespace S3PIDemoFE
             resource.Stream.Position = 0;
             resource.Stream.SetLength(br.BaseStream.Length);
             resource.Stream.Write(br.ReadBytes((int)br.BaseStream.Length), 0, (int)br.BaseStream.Length);
+            br.Close();
 
             package.ReplaceResource(browserWidget1.SelectedResource, resource);
             resourceIsDirty = controlPanel1.CommitEnabled = false;
@@ -1257,6 +1258,7 @@ namespace S3PIDemoFE
             if (!File.Exists(file)) return null;
             FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read);
             StreamReader t = new StreamReader(fs);
+            fs.Close();
             return t.ReadLine();
         }
 
