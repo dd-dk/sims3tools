@@ -1258,8 +1258,9 @@ namespace S3PIDemoFE
             if (!File.Exists(file)) return null;
             FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read);
             StreamReader t = new StreamReader(fs);
+            string res = t.ReadLine();
             fs.Close();
-            return t.ReadLine();
+            return res;
         }
 
         private void helpWarranty()
