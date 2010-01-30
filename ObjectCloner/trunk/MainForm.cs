@@ -2934,23 +2934,22 @@ namespace ObjectCloner
                     VPXYs_SlurpTGIs,
                     // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default resources only
                     VPXYs_getMODLs,
+                    VPXYs_getKinXML,
+                    VPXYs_getKinMTST,
 
                     MODLs_SlurpTGIs,
                     MODLs_SlurpMLODs,
                     MODLs_SlurpTXTCs,
                 });
+                lastStepInChain = MODLs_SlurpTXTCs;
                 if (cloneFixOptions.IsDefaultOnly)
                 {
                     stepList.Insert(stepList.IndexOf(OBJD_getOBKJ), OBJD_SlurpDDSes);
                     stepList.Insert(stepList.IndexOf(OBJK_SlurpTGIs), OBJD_addOBJKref);
-                    lastStepInChain = MODLs_SlurpTXTCs;
                 }
                 else
                 {
                     stepList.Insert(stepList.IndexOf(OBJD_getOBKJ), Catlg_SlurpTGIs);
-                    stepList.Add(VPXYs_getKinXML);
-                    stepList.Add(VPXYs_getKinMTST);
-                    lastStepInChain = VPXYs_getKinMTST;
                 }
                 if (cloneFixOptions.IsIncludeThumbnails || (!isClone && cloneFixOptions.IsRenumber))
                     stepList.Add(SlurpThumbnails);
@@ -2976,21 +2975,20 @@ namespace ObjectCloner
                     VPXYs_SlurpTGIs,
                     // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default resources only
                     VPXYs_getMODLs,
+                    VPXYs_getKinXML,
+                    VPXYs_getKinMTST,
 
                     MODLs_SlurpTGIs,
                     MODLs_SlurpMLODs,
                     MODLs_SlurpTXTCs,
                 });
+                lastStepInChain = MODLs_SlurpTXTCs;
                 if (cloneFixOptions.IsDefaultOnly)
                 {
-                    lastStepInChain = MODLs_SlurpTXTCs;
                 }
                 else
                 {
                     //stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpTGIs);// Causes problems for CSTR and doesn't help for others
-                    stepList.Add(VPXYs_getKinXML);
-                    stepList.Add(VPXYs_getKinMTST);
-                    lastStepInChain = VPXYs_getKinMTST;
                 }
                 if (cloneFixOptions.IsIncludeThumbnails || (!isClone && cloneFixOptions.IsRenumber))
                     stepList.Add(SlurpThumbnails);
@@ -3042,21 +3040,20 @@ namespace ObjectCloner
                     VPXYs_SlurpTGIs,
                     // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default textures only
                     VPXYs_getMODLs,
+                    VPXYs_getKinXML,
+                    VPXYs_getKinMTST,
 
                     MODLs_SlurpTGIs,
                     MODLs_SlurpMLODs,
                     MODLs_SlurpTXTCs,
                 });
+                lastStepInChain = MODLs_SlurpTXTCs;
                 if (cloneFixOptions.IsDefaultOnly)
                 {
-                    lastStepInChain = MODLs_SlurpTXTCs;
                 }
                 else
                 {
                     stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpTGIs);
-                    stepList.Add(VPXYs_getKinXML);
-                    stepList.Add(VPXYs_getKinMTST);
-                    lastStepInChain = VPXYs_getKinMTST;
                 }
                 if (cloneFixOptions.IsIncludeThumbnails || (!isClone && cloneFixOptions.IsRenumber))
                     stepList.Add(CWAL_SlurpThumbnails);
