@@ -60,7 +60,7 @@ namespace S3PIDemoFE
         public uint ResourceGroup
         {
             get { return Convert.ToUInt32(tbGroup.Text, tbGroup.Text.StartsWith("0x") ? 16 : 10); }
-            set { tbGroup.Text = "0x" + value.ToString("X8"); UpdateTGIN(); }
+            set { tbGroup.Text = "0x" + value.ToString("X6"); UpdateTGIN(); }
         }
         public ulong Instance
         {
@@ -126,6 +126,12 @@ namespace S3PIDemoFE
                 {
                     if (tbInstance.Equals(sender))
                         Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
+                    else if (tbGroup.Equals(sender))
+                    {
+                        uint i = Convert.ToUInt32(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
+                        if ((i & 0xFF000000) > 0)
+                            throw new Exception();
+                    }
                     else if (!tbEPFlags.Equals(sender))
                         Convert.ToUInt32(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
                     else
