@@ -797,13 +797,24 @@ namespace ObjectCloner
             objectChooser.Focus();
         }
 
+        bool hasOBJDs()
+        {
+            switch (selectedItem.CType)
+            {
+                case CatalogType.ModularResource:
+                case CatalogType.CatalogFireplace:
+                case CatalogType.CatalogObject:
+                    return true;
+            }
+            return false;
+        }
         private void DisplayOptions()
         {
             btnStart.Visible = false;
             lbSelectOptions.Visible = true;
             //tabControl1.Enabled = true;
 
-            cloneFixOptions = new CloneFixOptions(this, mode == Mode.Clone);
+            cloneFixOptions = new CloneFixOptions(this, mode == Mode.Clone, hasOBJDs());
             cloneFixOptions.CancelClicked += new EventHandler(cloneFixOptions_CancelClicked);
             cloneFixOptions.StartClicked += new EventHandler(cloneFixOptions_StartClicked);
 
@@ -2349,6 +2360,7 @@ namespace ObjectCloner
 
         int numNewInstances = 0;
         ulong CreateInstance() { numNewInstances++; return FNV64.GetHash(numNewInstances.ToString("X8") + "_" + UniqueObject + "_" + DateTime.UtcNow.ToBinary().ToString("X16")); }
+        ulong CreateInstance32() { numNewInstances++; return FNV32.GetHash(numNewInstances.ToString("X8") + "_" + UniqueObject + "_" + DateTime.UtcNow.ToBinary().ToString("X16")); }
 
         private bool UpdateRKsFromField(AApiVersionedFields field)
         {
@@ -2358,7 +2370,6 @@ namespace ObjectCloner
             if (typeof(IResourceKey).IsAssignableFrom(t))
             {
                 IResourceKey rk = (IResourceKey)field;
-                if (cloneFixOptions.IsExcludeCatalogResources && Enum.IsDefined(typeof(CatalogType), rk.ResourceType)) return dirty;
                 if (rk != RK.NULL && rkToItem.ContainsKey(rk) && oldToNew.ContainsKey(rk.Instance)) { rk.Instance = oldToNew[rk.Instance]; dirty = true; }
             }
             else
@@ -3397,11 +3408,13 @@ namespace ObjectCloner
                 ulong langInst = (CreateInstance() << 8) >> 8;
                 foreach (IResourceKey rk in rkToItem.Keys)
                 {
-                    if (cloneFixOptions.IsExcludeCatalogResources && Enum.IsDefined(typeof(CatalogType), rk.ResourceType)) continue;
                     if (!oldToNew.ContainsKey(rk.Instance))
                     {
                         if (rk.ResourceType == 0x220557DA)//STBL
                             oldToNew.Add(rk.Instance, rk.Instance & 0xFF00000000000000 | langInst);
+                        else if (cloneFixOptions.Is32bitIIDs &&
+                            (rk.ResourceType == (uint)CatalogType.CatalogObject || rk.ResourceType == 0x02DC343F))//OBJD&OBJK
+                            oldToNew.Add(rk.Instance, CreateInstance32());
                         else
                             oldToNew.Add(rk.Instance, CreateInstance());
                     }

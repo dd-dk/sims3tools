@@ -31,7 +31,7 @@
             this.ckbCompress = new System.Windows.Forms.CheckBox();
             this.tbUniqueName = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
-            this.ckbExcludeCatalogResources = new System.Windows.Forms.CheckBox();
+            this.ckb32bitIIDs = new System.Windows.Forms.CheckBox();
             this.label23 = new System.Windows.Forms.Label();
             this.ckbRenumber = new System.Windows.Forms.CheckBox();
             this.label22 = new System.Windows.Forms.Label();
@@ -89,7 +89,7 @@
             this.tableLayoutPanel5.ColumnCount = 2;
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel5.Controls.Add(this.ckbExcludeCatalogResources, 0, 1);
+            this.tableLayoutPanel5.Controls.Add(this.ckb32bitIIDs, 0, 1);
             this.tableLayoutPanel5.Controls.Add(this.label23, 1, 0);
             this.tableLayoutPanel5.Location = new System.Drawing.Point(27, 77);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
@@ -97,26 +97,26 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(184, 36);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(162, 36);
             this.tableLayoutPanel5.TabIndex = 3;
             // 
-            // ckbExcludeCatalogResources
+            // ckb32bitIIDs
             // 
-            this.ckbExcludeCatalogResources.AutoSize = true;
-            this.tableLayoutPanel5.SetColumnSpan(this.ckbExcludeCatalogResources, 2);
-            this.ckbExcludeCatalogResources.Location = new System.Drawing.Point(3, 16);
-            this.ckbExcludeCatalogResources.Name = "ckbExcludeCatalogResources";
-            this.ckbExcludeCatalogResources.Size = new System.Drawing.Size(178, 17);
-            this.ckbExcludeCatalogResources.TabIndex = 2;
-            this.ckbExcludeCatalogResources.Text = "Preserve Catalog Resource IIDs";
-            this.ckbExcludeCatalogResources.UseVisualStyleBackColor = false;
+            this.ckb32bitIIDs.AutoSize = true;
+            this.tableLayoutPanel5.SetColumnSpan(this.ckb32bitIIDs, 2);
+            this.ckb32bitIIDs.Location = new System.Drawing.Point(3, 16);
+            this.ckb32bitIIDs.Name = "ckb32bitIIDs";
+            this.ckb32bitIIDs.Size = new System.Drawing.Size(156, 17);
+            this.ckb32bitIIDs.TabIndex = 2;
+            this.ckb32bitIIDs.Text = "Use 32bit OBJD/OBJK IIDs";
+            this.ckb32bitIIDs.UseVisualStyleBackColor = false;
             // 
             // label23
             // 
             this.label23.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label23.AutoSize = true;
             this.label23.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.label23.Location = new System.Drawing.Point(63, 0);
+            this.label23.Location = new System.Drawing.Point(52, 0);
             this.label23.Name = "label23";
             this.label23.Size = new System.Drawing.Size(81, 13);
             this.label23.TabIndex = 1;
@@ -400,7 +400,7 @@
         private System.Windows.Forms.TextBox tbUniqueName;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
         private System.Windows.Forms.CheckBox ckbRenumber;
-        private System.Windows.Forms.CheckBox ckbExcludeCatalogResources;
+        private System.Windows.Forms.CheckBox ckb32bitIIDs;
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.Label label23;
         private System.Windows.Forms.TableLayoutPanel tlpOptions;

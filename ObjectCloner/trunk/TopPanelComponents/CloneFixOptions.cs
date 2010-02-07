@@ -27,16 +27,20 @@ namespace ObjectCloner.TopPanelComponents
 {
     public partial class CloneFixOptions : UserControl
     {
+        bool allow32bitIIDs = false;
+
         public CloneFixOptions()
         {
             InitializeComponent();
-            tbUniqueName.Enabled = ckbExcludeCatalogResources.Enabled = ckbRenumber.Checked;
+            tbUniqueName.Enabled = ckbRenumber.Checked;
             ckbThumbs.Enabled = ckbDefault.Enabled = ckbClone.Checked;
         }
 
-        public CloneFixOptions(Form form, bool mustClone)
+        public CloneFixOptions(Form form, bool mustClone, bool allow32bitIIDs)
             : this()
         {
+            this.allow32bitIIDs = allow32bitIIDs;
+            ckb32bitIIDs.Enabled = ckbRenumber.Checked && allow32bitIIDs;
             if (mustClone)
             {
                 ckbClone.Checked = true;
@@ -53,7 +57,7 @@ namespace ObjectCloner.TopPanelComponents
         public bool IsPadSTBLs { get { return ckbPadSTBLs.Checked; } }
         public bool IsPadThumbs { get { return ckbPadThumbs.Checked; } }
         public bool IsRenumber { get { return ckbRenumber.Checked; } }
-        public bool IsExcludeCatalogResources { get { return ckbExcludeCatalogResources.Checked; } }
+        public bool Is32bitIIDs { get { return ckb32bitIIDs.Checked; } }
         public bool IsCompress { get { return ckbCompress.Checked; } }
 
         public event EventHandler CancelClicked;
@@ -71,8 +75,9 @@ namespace ObjectCloner.TopPanelComponents
 
         private void ckbRenumber_CheckedChanged(object sender, EventArgs e)
         {
-            tbUniqueName.Enabled = ckbExcludeCatalogResources.Enabled = ckbRenumber.Checked;
-            ckbExcludeCatalogResources.Checked = false;
+            tbUniqueName.Enabled = ckbRenumber.Checked;
+            ckb32bitIIDs.Enabled = ckbRenumber.Checked && allow32bitIIDs;
+            ckb32bitIIDs.Checked = false;
         }
 
         private void btnCancel_Click(object sender, EventArgs e) { if (CancelClicked != null) CancelClicked(this, EventArgs.Empty); }
