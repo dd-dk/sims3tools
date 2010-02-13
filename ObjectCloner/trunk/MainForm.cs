@@ -2254,38 +2254,7 @@ namespace ObjectCloner
                     }
                     else if (item.ResourceIndexEntry.ResourceType == 0x0333406C)
                     {
-                        #region XML
-                        StreamReader sr = new StreamReader(item.Resource.Stream, true);
-                        MemoryStream ms = new MemoryStream();
-                        StreamWriter sw = new StreamWriter(ms, sr.CurrentEncoding);
-                        while (!sr.EndOfStream)
-                        {
-                            string line = sr.ReadLine();
-                            int i = line.IndexOf("key:");
-                            while (i >= 0 && i + 22 + 16 < line.Length)
-                            {
-                                string iid = line.Substring(i + 22, 16);
-                                ulong IID;
-                                if (ulong.TryParse(iid, System.Globalization.NumberStyles.HexNumber, null, out IID))
-                                {
-                                    if (oldToNew.ContainsKey(IID))
-                                    {
-                                        string newiid = oldToNew[IID].ToString("X16");
-                                        line = line.Replace(iid, newiid);
-                                        dirty = true;
-                                    }
-                                }
-                                i = line.IndexOf("key:", i + 22 + 16);
-                            }
-                            sw.WriteLine(line);
-                        }
-                        sw.Flush();
-                        if (dirty)
-                        {
-                            item.Resource.Stream.SetLength(0);
-                            item.Resource.Stream.Write(ms.ToArray(), 0, (int)ms.Length);
-                        }
-                        #endregion
+                        dirty = UpdateRKsFromXML(item);
                     }
                     else
                     {
@@ -2415,6 +2384,41 @@ namespace ObjectCloner
 
             return dirty;
         }
+        private bool UpdateRKsFromXML(Item item)
+        {
+            bool dirty = false;
+            StreamReader sr = new StreamReader(item.Resource.Stream, true);
+            MemoryStream ms = new MemoryStream();
+            StreamWriter sw = new StreamWriter(ms, sr.CurrentEncoding);
+            while (!sr.EndOfStream)
+            {
+                string line = sr.ReadLine();
+                int i = line.IndexOf("key:");
+                while (i >= 0 && i + 22 + 16 < line.Length)
+                {
+                    string iid = line.Substring(i + 22, 16);
+                    ulong IID;
+                    if (ulong.TryParse(iid, System.Globalization.NumberStyles.HexNumber, null, out IID))
+                    {
+                        if (oldToNew.ContainsKey(IID))
+                        {
+                            string newiid = oldToNew[IID].ToString("X16");
+                            line = line.Replace(iid, newiid);
+                            dirty = true;
+                        }
+                    }
+                    i = line.IndexOf("key:", i + 22 + 16);
+                }
+                sw.WriteLine(line);
+            }
+            sw.Flush();
+            if (dirty)
+            {
+                item.Resource.Stream.SetLength(0);
+                item.Resource.Stream.Write(ms.ToArray(), 0, (int)ms.Length);
+            }
+            return dirty;
+        }
 
         #endregion
 
@@ -2481,6 +2485,25 @@ namespace ObjectCloner
                 }
             }
         }
+        private void SlurpRKsFromXML(string key, Item item)
+        {
+            int j = 0;
+            StreamReader sr = new StreamReader(item.Resource.Stream, true);
+            while (!sr.EndOfStream)
+            {
+                string line = sr.ReadLine();
+                int i = line.IndexOf("key:");
+                while (i >= 0 && i + 38 < line.Length)
+                {
+                    TGIN field = new TGIN();
+                    if (uint.TryParse(line.Substring(i + 4, 8), System.Globalization.NumberStyles.HexNumber, null, out field.ResType)
+                        && uint.TryParse(line.Substring(i + 13, 8), System.Globalization.NumberStyles.HexNumber, null, out field.ResGroup)
+                        && ulong.TryParse(line.Substring(i + 22, 16), System.Globalization.NumberStyles.HexNumber, null, out field.ResInstance))
+                        Add(key + "[" + (j++) + "]", (AResourceKey)field);
+                    i = line.IndexOf("key:", i + 38);
+                }
+            }
+        }
 
         private void SlurpKindred(string key, IList<IPackage> pkgs, string[] fields, TypedValue[] values)
         {
@@ -2494,6 +2517,9 @@ namespace ObjectCloner
                     if (seen.Contains(rie)) continue;
                     seen.Add(rie);
                     Add(key + "[" + i + "]", rie);
+                    Item item = new Item(new RIE(objPkgs, rie));
+                    if (item.Resource != null)
+                        vpxyKinItems.Add(item);
                     i++;
                 }
             }
@@ -2891,6 +2917,7 @@ namespace ObjectCloner
         Item objkItem;
         List<Item> vpxyItems;
         List<Item> modlItems;
+        List<Item> vpxyKinItems;
         
         delegate void Step();
         void None() { }
@@ -2942,13 +2969,14 @@ namespace ObjectCloner
                     OBJK_getVPXY,
                     Catlg_addVPXYs,
 
-                    VPXYs_SlurpTGIs,
+                    VPXYs_SlurpRKs,
                     // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default resources only
                     VPXYs_getMODLs,
                     VPXYs_getKinXML,
                     VPXYs_getKinMTST,
+                    VPXYKin_SlurpRKs,
 
-                    MODLs_SlurpTGIs,
+                    MODLs_SlurpRKs,
                     MODLs_SlurpMLODs,
                     MODLs_SlurpTXTCs,
                 });
@@ -2960,7 +2988,7 @@ namespace ObjectCloner
                 }
                 else
                 {
-                    stepList.Insert(stepList.IndexOf(OBJD_getOBKJ), Catlg_SlurpTGIs);
+                    stepList.Insert(stepList.IndexOf(OBJD_getOBKJ), Catlg_SlurpRKs);
                 }
                 if (cloneFixOptions.IsIncludeThumbnails || (!isClone && cloneFixOptions.IsRenumber))
                     stepList.Add(SlurpThumbnails);
@@ -2983,13 +3011,14 @@ namespace ObjectCloner
                     Catlg_getVPXY,
                     Catlg_addVPXYs,
 
-                    VPXYs_SlurpTGIs,
+                    VPXYs_SlurpRKs,
                     // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default resources only
                     VPXYs_getMODLs,
                     VPXYs_getKinXML,
                     VPXYs_getKinMTST,
+                    VPXYKin_SlurpRKs,
 
-                    MODLs_SlurpTGIs,
+                    MODLs_SlurpRKs,
                     MODLs_SlurpMLODs,
                     MODLs_SlurpTXTCs,
                 });
@@ -3048,13 +3077,14 @@ namespace ObjectCloner
                     Catlg_getVPXY,
                     Catlg_addVPXYs,
 
-                    VPXYs_SlurpTGIs,
+                    VPXYs_SlurpRKs,
                     // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default textures only
                     VPXYs_getMODLs,
                     VPXYs_getKinXML,
                     VPXYs_getKinMTST,
+                    VPXYKin_SlurpRKs,
 
-                    MODLs_SlurpTGIs,
+                    MODLs_SlurpRKs,
                     MODLs_SlurpMLODs,
                     MODLs_SlurpTXTCs,
                 });
@@ -3064,7 +3094,7 @@ namespace ObjectCloner
                 }
                 else
                 {
-                    stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpTGIs);
+                    stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpRKs);
                 }
                 if (cloneFixOptions.IsIncludeThumbnails || (!isClone && cloneFixOptions.IsRenumber))
                     stepList.Add(CWAL_SlurpThumbnails);
@@ -3080,7 +3110,7 @@ namespace ObjectCloner
             StepText.Add(OBJD_getOBKJ, "Find OBJK");
             StepText.Add(OBJD_addOBJKref, "Add OBJK");
             StepText.Add(OBJD_SlurpDDSes, "OBJD-referenced resources");
-            StepText.Add(Catlg_SlurpTGIs, "Catalog object-referenced resources");
+            StepText.Add(Catlg_SlurpRKs, "Catalog object-referenced resources");
             StepText.Add(OBJK_SlurpTGIs, "OBJK-referenced resources");
             StepText.Add(OBJK_getVPXY, "Find OBJK-referenced VPXY");
 
@@ -3091,11 +3121,12 @@ namespace ObjectCloner
             StepText.Add(CTPT_addBrushShape, "Add Brush Shape");
 
             StepText.Add(Catlg_addVPXYs, "Add VPXY resources");
-            StepText.Add(VPXYs_SlurpTGIs, "VPXY-referenced resources");
+            StepText.Add(VPXYs_SlurpRKs, "VPXY-referenced resources");
             StepText.Add(VPXYs_getKinXML, "Preset XML (same instance as VPXY)");
             StepText.Add(VPXYs_getKinMTST, "MTST (same instance as VPXY)");
+            StepText.Add(VPXYKin_SlurpRKs, "Find Preset XML and MTST referenced resources");
             StepText.Add(VPXYs_getMODLs, "Find VPXY-referenced MODLs");
-            StepText.Add(MODLs_SlurpTGIs, "MODL-referenced resources");
+            StepText.Add(MODLs_SlurpRKs, "MODL-referenced resources");
             StepText.Add(MODLs_SlurpMLODs, "MLOD-referenced resources");
             StepText.Add(MODLs_SlurpTXTCs, "TXTC-referenced resources");
             StepText.Add(SlurpThumbnails, "Add thumbnails");
@@ -3108,10 +3139,12 @@ namespace ObjectCloner
         }
 
         void Item_addSelf() { Add("clone", selectedItem.rk); }
-        void Catlg_SlurpTGIs() { SlurpRKsFromField("clone", (AResource)selectedItem.Resource); }
+        void Catlg_SlurpRKs() { SlurpRKsFromField("clone", (AResource)selectedItem.Resource); }
         void Catlg_getVPXY()
         {
             vpxyItems = new List<Item>();
+            vpxyKinItems = new List<Item>();
+
             foreach (IResourceKey rk in (AResource.TGIBlockList)selectedItem.Resource["TGIBlocks"].Value)
             {
                 if (rk.ResourceType != 0x736884F1) continue;
@@ -3158,6 +3191,8 @@ namespace ObjectCloner
             }
 
             vpxyItems = new List<Item>();
+            vpxyKinItems = new List<Item>();
+
             foreach (IResourceKey rk in (IList<AResource.TGIBlock>)objkItem.Resource["TGIBlocks"].Value)
             {
                 if (rk.ResourceType != 0x736884F1) continue;
@@ -3178,7 +3213,7 @@ namespace ObjectCloner
         void CTPT_addBrushTexture() { Add("ctpt_BrushTexture", (AResource.TGIBlock)selectedItem.Resource["BrushTexture"].Value); }
         void CTPT_addBrushShape() { Add("ctpt_BrushShape", (AResource.TGIBlock)selectedItem.Resource["BrushShape"].Value); }
 
-        void VPXYs_SlurpTGIs()
+        void VPXYs_SlurpRKs()
         {
             for (int i = 0; i < vpxyItems.Count; i++)
             {
@@ -3197,6 +3232,22 @@ namespace ObjectCloner
             for (int i = 0; i < vpxyItems.Count; i++)
                 SlurpKindred("vpxy[" + i + "].mtst", objPkgs, new string[] { "ResourceType", "Instance" },
                     new TypedValue[] { new TypedValue(typeof(uint), (uint)0x02019972), new TypedValue(typeof(ulong), vpxyItems[i].rk.Instance) });
+        }
+        void VPXYKin_SlurpRKs()
+        {
+            int i = 0;
+            foreach(Item item in vpxyKinItems)
+            {
+                if (item.rk.ResourceType == (uint)0x0333406C)
+                {
+                    SlurpRKsFromXML("PresetXML[" + i + "]", item);
+                }
+                else
+                {
+                    SlurpRKsFromField("mtst[" + i + "]", item.Resource as AApiVersionedFields);
+                }
+                i++;
+            }
         }
         void VPXYs_getMODLs()
         {
@@ -3218,7 +3269,7 @@ namespace ObjectCloner
                 }
             }
         }
-        void MODLs_SlurpTGIs() { for (int i = 0; i < modlItems.Count; i++) SlurpRKsFromField("modl[" + i + "]", (AResource)modlItems[i].Resource); }
+        void MODLs_SlurpRKs() { for (int i = 0; i < modlItems.Count; i++) SlurpRKsFromField("modl[" + i + "]", (AResource)modlItems[i].Resource); }
         void MODLs_SlurpMLODs()
         {
             int k = 0;
