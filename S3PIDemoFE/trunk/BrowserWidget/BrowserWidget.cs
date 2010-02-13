@@ -278,6 +278,35 @@ namespace S3PIDemoFE
         }
 
         /// <summary>
+        /// Set the Resource Key for a list entry
+        /// </summary>
+        [Browsable(false)]
+        public IResourceKey ResourceKey
+        {
+            get { return SelectedResource; }
+            set
+            {
+                if (selectedResource == null)
+                    throw new InvalidOperationException();
+
+                IResourceIndexEntry rie = selectedResource.Tag as IResourceIndexEntry;
+                ListViewItem lvi = lookup.ContainsKey(rie) ? lookup[rie] : null;
+                if (lvi != null) lookup.Remove(rie);
+
+                rie.ResourceIndexEntryChanged -= new EventHandler(BrowserWidget_ResourceIndexEntryChanged);
+                rie.ResourceType = value.ResourceType;
+                rie.ResourceGroup = value.ResourceGroup;
+                rie.EpFlags = value.EpFlags;
+                rie.Instance = value.Instance;
+                rie.ResourceIndexEntryChanged += new EventHandler(BrowserWidget_ResourceIndexEntryChanged);
+
+                if (lvi != null) lookup.Add(rie, lvi);
+
+                BrowserWidget_ResourceIndexEntryChanged(rie, EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
         /// The list of resources selected
         /// </summary>
         [Browsable(false)]
@@ -657,6 +686,7 @@ namespace S3PIDemoFE
 
             IResourceIndexEntry rie = sender as IResourceIndexEntry;
             if (rie == null) return;
+
             if (!lookup.ContainsKey(rie)) { rie.ResourceIndexEntryChanged -= new EventHandler(BrowserWidget_ResourceIndexEntryChanged); return; }
 
             ListViewItem lvi = lookup[rie];
