@@ -56,7 +56,7 @@
             this.importSettings1.Location = new System.Drawing.Point(3, 108);
             this.importSettings1.Name = "importSettings1";
             this.importSettings1.Size = new System.Drawing.Size(333, 52);
-            this.importSettings1.TabIndex = 0;
+            this.importSettings1.TabIndex = 9;
             this.importSettings1.UseNameChanged += new System.EventHandler(this.ckbUseName_CheckedChanged);
             // 
             // btnOK
@@ -186,7 +186,7 @@
             this.lbFilename.Location = new System.Drawing.Point(3, 192);
             this.lbFilename.Name = "lbFilename";
             this.lbFilename.Size = new System.Drawing.Size(49, 13);
-            this.lbFilename.TabIndex = 11;
+            this.lbFilename.TabIndex = 12;
             this.lbFilename.Text = "Filename";
             // 
             // tbFilename
@@ -209,7 +209,7 @@
             this.label4.Location = new System.Drawing.Point(17, 169);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(35, 13);
-            this.label4.TabIndex = 9;
+            this.label4.TabIndex = 10;
             this.label4.Text = "Name";
             // 
             // tbName
@@ -219,7 +219,7 @@
             this.tbName.Location = new System.Drawing.Point(58, 166);
             this.tbName.Name = "tbName";
             this.tbName.Size = new System.Drawing.Size(278, 20);
-            this.tbName.TabIndex = 10;
+            this.tbName.TabIndex = 11;
             // 
             // tbEPFlags
             // 
