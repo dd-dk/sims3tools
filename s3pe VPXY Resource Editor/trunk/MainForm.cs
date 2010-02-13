@@ -474,7 +474,7 @@ namespace s3pe_VPXY_Resource_Editor
             tlpParts.Controls.Remove(c1);
             c1 = tlpParts.GetControlFromPosition(2, currentPartEntry + 1);
             tlpParts.Controls.Remove(c1);
-            ltbc.RemoveAt(currentVPXYEntry);
+            ltbc.Remove(c1 as TGIBlockCombo);
 
             for (int row = currentPartEntry + 1; row < tlpParts.RowCount - 2; row++)
             {
