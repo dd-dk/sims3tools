@@ -220,6 +220,7 @@
             this.tbName.Name = "tbName";
             this.tbName.Size = new System.Drawing.Size(278, 20);
             this.tbName.TabIndex = 11;
+            this.tbName.TextChanged += new System.EventHandler(this.tbName_TextChanged);
             // 
             // tbEPFlags
             // 

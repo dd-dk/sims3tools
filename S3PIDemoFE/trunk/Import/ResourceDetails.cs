@@ -149,6 +149,11 @@ namespace S3PIDemoFE
             tbName.Enabled = importSettings1.UseName;
         }
 
+        private void tbName_TextChanged(object sender, EventArgs e)
+        {
+            if (btnOK.Enabled) UpdateTGIN();
+        }
+
         private void tbFilename_DragOver(object sender, DragEventArgs e)
         {
             if ((new List<string>(e.Data.GetFormats())).Contains("FileDrop"))
