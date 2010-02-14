@@ -90,13 +90,56 @@ namespace S3PIDemoFE
         {
             ListViewItem lvi = CreateItem(rie);
             if (lvi == null) return;
-            if (rie.ResourceType == 0x0166038C) { ClearNameMap(); nameMap_ResourceChanged(null, null); }
 
             listView1.BeginUpdate();
             listView1.Items.Add(lvi);
             lookup.Add(rie, lvi);
             SelectedResource = rie;
+
+            if (rie.ResourceType == 0x0166038C) { ClearNameMap(); nameMap_ResourceChanged(null, null); }
             listView1.EndUpdate();
+        }
+
+        public bool ResourceName(ulong instance, string resourceName, bool create, bool replace)
+        {
+            if (nameMap == null) CreateNameMap();
+            if (nameMap == null || nameMap.Count == 0 && create)
+            {
+                IResourceIndexEntry rie = pkg.AddResource(new AResource.TGIBlock(0, null, 0x0166038C, 0, 0), null, false);
+                if (rie != null) Add(rie);
+                CreateNameMap();
+                if (nameMap == null)
+                {
+                    string s = "Resource names cannot be added.  Other than that, you should be fine.  Carry on.";
+                    CopyableMessageBox.Show(s, "s3pe", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
+                    return false;
+                }
+            }
+
+            try
+            {
+                IDictionary<ulong, string> nmap = nameMap[0] as IDictionary<ulong, string>;
+                if (nmap == null) return false;
+
+                if (nmap.ContainsKey(instance))
+                {
+                    if (replace) nmap[instance] = resourceName;
+                }
+                else
+                    nmap.Add(instance, resourceName);
+                pkg.ReplaceResource(nameMapRIEs[0], nameMap[0]);
+
+                if (selectedResource.Tag as IResourceIndexEntry == nameMapRIEs[0])
+                    OnSelectedResourceChanged(this, new ResourceChangedEventArgs(selectedResource));
+            }
+            catch (Exception ex)
+            {
+                string s = "Resource names cannot be added.  Other than that, you should be fine.  Carry on.";
+                s += String.Format("\n\nError updating _KEY {0}", "" + nameMapRIEs[0]);
+                MainForm.IssueException(ex, s);
+                return false;
+            }
+            return true;
         }
 
         public string ResourceName(IResourceIndexEntry rie)
@@ -301,6 +344,8 @@ namespace S3PIDemoFE
                 rie.ResourceIndexEntryChanged += new EventHandler(BrowserWidget_ResourceIndexEntryChanged);
 
                 if (lvi != null) lookup.Add(rie, lvi);
+
+                if (nameMapRIEs != null && nameMapRIEs.Contains(rie)) { ClearNameMap(); nameMap_ResourceChanged(null, null); }
 
                 BrowserWidget_ResourceIndexEntryChanged(rie, EventArgs.Empty);
             }
@@ -682,21 +727,20 @@ namespace S3PIDemoFE
 
         private void BrowserWidget_ResourceIndexEntryChanged(object sender, EventArgs e)
         {
-            if (lookup == null) return;
-
             IResourceIndexEntry rie = sender as IResourceIndexEntry;
             if (rie == null) return;
 
+            if (lookup == null) return;
             if (!lookup.ContainsKey(rie)) { rie.ResourceIndexEntryChanged -= new EventHandler(BrowserWidget_ResourceIndexEntryChanged); return; }
 
             ListViewItem lvi = lookup[rie];
-
             ListViewItem newlvi = CreateItem(rie);
+
+            listView1.SuspendLayout();
             lvi.SubItems.Clear(); for (int i = 1; i < newlvi.SubItems.Count; i++) lvi.SubItems.Add(newlvi.SubItems[i]);
             lvi.Font = newlvi.Font;
             lvi.Text = newlvi.Text;
-
-            if (nameMapRIEs != null && nameMapRIEs.Contains(rie)) { ClearNameMap(); nameMap_ResourceChanged(null, null); }
+            listView1.ResumeLayout();
         }
 
         private void pkg_ResourceIndexInvalidated(object sender, EventArgs e)

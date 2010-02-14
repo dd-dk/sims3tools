@@ -658,11 +658,13 @@ namespace S3PIDemoFE
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            if (ir.UseName && ir.ResourceName != null && ir.ResourceName.Length > 0)
-                UpdateNameMap(ir.Instance, ir.ResourceName, true, ir.AllowRename);
-
             IResourceIndexEntry rie = NewResource(ir, null, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, ir.Compress);
+            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie);
+            CurrentPackage.ReplaceResource(rie, res);
             browserWidget1.Add(rie);
+
+            if (ir.UseName && ir.ResourceName != null && ir.ResourceName.Length > 0)
+                browserWidget1.ResourceName(ir.Instance, ir.ResourceName, true, ir.AllowRename);
         }
 
         //private void resourceCut() { resourceCopy(); if (browserWidget1.SelectedResource != null) package.DeleteResource(browserWidget1.SelectedResource); }
@@ -762,11 +764,12 @@ namespace S3PIDemoFE
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            if (ir.UseName && ir.ResourceName != null && ir.ResourceName.Length > 0)
-                UpdateNameMap(ir.Instance, ir.ResourceName, true, ir.AllowRename);
-
             browserWidget1.ResourceKey = ir;
             browserWidget1.SelectedResource.Compressed = (ushort)(ir.Compress ? 0xffff : 0);
+
+            if (ir.UseName && ir.ResourceName != null && ir.ResourceName.Length > 0)
+                browserWidget1.ResourceName(ir.Instance, ir.ResourceName, true, ir.AllowRename);
+
             IsPackageDirty = true;
         }
 
@@ -814,40 +817,6 @@ namespace S3PIDemoFE
 
         // For "resourceImport()", see Import/Import.cs
         // For "resourceImportPackages()", see Import/Import.cs
-
-        private bool UpdateNameMap(ulong instance, string resourceName, bool create, bool replace)
-        {
-            IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) });
-            if (rie == null && create)
-            {
-                rie = CurrentPackage.AddResource(new AResource.TGIBlock(0, null, 0x0166038C, 0, 0), null, false);
-                if (rie != null) browserWidget1.Add(rie);
-            }
-            if (rie == null) return false;
-
-            try
-            {
-                IDictionary<ulong, string> nmap = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, false) as IDictionary<ulong, string>;
-                if (nmap == null) return false;
-
-                if (nmap.ContainsKey(instance))
-                {
-                    if (replace) nmap[instance] = resourceName;
-                }
-                else
-                    nmap.Add(instance, resourceName);
-                CurrentPackage.ReplaceResource(rie, (IResource)nmap);
-                IsPackageDirty = true;
-            }
-            catch (Exception ex)
-            {
-                string s = "Resource names cannot be added.  Other than that, you should be fine.  Carry on.";
-                s += String.Format("\n\nError reading _KEY {0:X8}:{1:X8}:{2:X16}", rie.ResourceType, rie.ResourceGroup, rie.Instance);
-                IssueException(ex, s);
-                return false;
-            }
-            return true;
-        }
 
         /// <summary>
         /// How to handle duplicate resources when adding to a package

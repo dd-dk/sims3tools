@@ -395,7 +395,7 @@ namespace S3PIDemoFE
             w.Flush();
 
             if (useName && resName != null && resName.Length > 0)
-                nmOK = UpdateNameMap(rk.Instance, resName, true, rename);
+                nmOK = browserWidget1.ResourceName(rk.Instance, resName, true, rename);
 
             IResourceIndexEntry rie = NewResource(rk, ms, dups, compress);
             if (rie != null) browserWidget1.Add(rie);
@@ -405,7 +405,7 @@ namespace S3PIDemoFE
         void importStream(myDataFormat data, bool useName, bool rename, bool compress, DuplicateHandling dups)
         {
             if (useName && data.tgin.ResName != null && data.tgin.ResName.Length > 0)
-                UpdateNameMap(data.tgin.ResInstance, data.tgin.ResName, true, rename);
+                browserWidget1.ResourceName(data.tgin.ResInstance, data.tgin.ResName, true, rename);
 
             IResourceIndexEntry rie = NewResource((AResource.TGIBlock)data.tgin, new MemoryStream(data.data), dups, compress);
             if (rie != null) browserWidget1.Add(rie);
