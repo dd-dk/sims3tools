@@ -197,7 +197,7 @@ namespace s3pe_VPXY_Resource_Editor
                 }
             }
             if (currentVPXYEntry != -1)
-                currentVPXYEntry = int.Parse(((Label)tlpParts.GetControlFromPosition(0, tlpParts.GetCellPosition(ltbc[currentPartEntry]).Row)).Text);
+                currentVPXYEntry = int.Parse(((Label)tlpParts.GetControlFromPosition(0, tlpParts.GetCellPosition(ltbc[currentPartEntry]).Row)).Text, System.Globalization.NumberStyles.HexNumber);
             tlpParts.ResumeLayout();
         }
         void ClearLinkedPartsTLP(bool saving)
@@ -351,7 +351,7 @@ namespace s3pe_VPXY_Resource_Editor
 
             if (ltbc.Contains(tbc))
             {
-                int i = int.Parse(((Label)tlpParts.GetControlFromPosition(0, tlpParts.GetCellPosition(tbc).Row)).Text);
+                int i = int.Parse(((Label)tlpParts.GetControlFromPosition(0, tlpParts.GetCellPosition(tbc).Row)).Text, System.Globalization.NumberStyles.HexNumber);
                 VPXY.Entry01 e01 = vpxy.Entries[i] as VPXY.Entry01;
                 e01.TGIIndex = (tbc.SelectedIndex >= 0) ? (uint)tbc.SelectedIndex : 0;
             }
