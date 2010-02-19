@@ -1593,7 +1593,7 @@ namespace ObjectCloner
             string tag = "";
             if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + item.rk.ResourceType.ToString("X8"), out exts)) tag = exts[0];
             else tag = "UNKN";
-            lvi.SubItems.AddRange(new string[] { tag, "" + item.ResourceIndexEntry.EpFlags, "" + (AResourceKey)item.rk, });
+            lvi.SubItems.AddRange(new string[] { tag, item.ResourceIndexEntry.ContentCategory > 0 ? "" + item.ResourceIndexEntry.ContentCategory : "", "" + (AResourceKey)item.rk, });
             lvi.Tag = item;
             objectChooser.Items.Add(lvi);
         }

@@ -31,8 +31,8 @@
             this.listView1 = new System.Windows.Forms.ListView();
             this.catlgName = new System.Windows.Forms.ColumnHeader();
             this.TagID = new System.Windows.Forms.ColumnHeader();
+            this.ContentCategoryFlags = new System.Windows.Forms.ColumnHeader();
             this.TGI = new System.Windows.Forms.ColumnHeader();
-            this.EPFlags = new System.Windows.Forms.ColumnHeader();
             this.SuspendLayout();
             // 
             // listView1
@@ -40,7 +40,7 @@
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.catlgName,
             this.TagID,
-            this.EPFlags,
+            this.ContentCategoryFlags,
             this.TGI});
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.FullRowSelect = true;
@@ -65,17 +65,15 @@
             // 
             this.TagID.Text = "Tag";
             // 
+            // ContentCategoryFlags
+            // 
+            this.ContentCategoryFlags.Text = "Cont. Cat.";
+            this.ContentCategoryFlags.Width = 77;
+            // 
             // TGI
             // 
-            this.TGI.DisplayIndex = 3;
             this.TGI.Text = "Resource Key";
             this.TGI.Width = 246;
-            // 
-            // EPFlags
-            // 
-            this.EPFlags.DisplayIndex = 2;
-            this.EPFlags.Text = "EPFlags";
-            this.EPFlags.Width = 77;
             // 
             // ObjectChooser
             // 
@@ -92,7 +90,7 @@
         private System.Windows.Forms.ColumnHeader catlgName;
         private System.Windows.Forms.ColumnHeader TGI;
         private System.Windows.Forms.ColumnHeader TagID;
-        private System.Windows.Forms.ColumnHeader EPFlags;
+        private System.Windows.Forms.ColumnHeader ContentCategoryFlags;
 
     }
 }
