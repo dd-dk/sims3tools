@@ -1,5 +1,5 @@
 ﻿/***************************************************************************
- *  Copyright (C) 2009 by Peter L Jones                                    *
+ *  Copyright (C) 2009, 2010 by Peter L Jones                              *
  *  pljones@users.sf.net                                                   *
  *                                                                         *
  *  This file is part of the Sims 3 Package Interface (s3pi)               *
@@ -82,7 +82,7 @@ namespace ObjectCloner
             {
                 updateProgress(true, "Please wait, searching for objects...", true, -1, false, 0);
                 List<RIE> lrie = new List<RIE>();
-                List<IResourceKey> seen = new List<IResourceKey>();
+                ListIResourceKey seen = new ListIResourceKey();
                 List<IPackage> seenPkgs = new List<IPackage>();
                 foreach (IPackage pkg in objPkgs)
                 {
@@ -166,6 +166,32 @@ namespace ObjectCloner
         public override int RecommendedApiVersion { get { throw new NotImplementedException(); } }
     }
 
+    public class ListIResourceKey : List<IResourceKey>, IComparer<IResourceKey>
+    {
+        public ListIResourceKey() : base() { }
+        public ListIResourceKey(IList<IResourceKey> value) : base(value) { }
+        /// <summary>
+        /// Determines whether an element is in the list.
+        /// </summary>
+        /// <param name="item">The object to locate in the list.</param>
+        /// <returns>true if item is found in the list; otherwise, false.</returns>
+        public new bool Contains(IResourceKey item) { return this.BinarySearch(item, this) >= 0; }
+        /// <summary>
+        /// Compares two IResourceKeys and returns a value indicating whether one is less than, equal to, or greater than the other.
+        /// </summary>
+        /// <param name="x">The first IResourceKey to compare.</param>
+        /// <param name="y">The second IResourceKey to compare.</param>
+        /// <returns>
+        /// Value Condition Less than zero x is less than y.  Zero x equals y.  Greater than zero x is greater than y.
+        /// </returns>
+        public int Compare(IResourceKey x, IResourceKey y)
+        {
+            int res = x.ResourceType.CompareTo(y.ResourceType); if (res != 0) return res;
+            res = (x.ResourceGroup & 0x00FFFFFF).CompareTo(y.ResourceGroup & 0x00FFFFFF); if (res != 0) return res;
+            return x.Instance.CompareTo(y.Instance);
+        }
+    }
+
     public struct RIE
     {
         List<IPackage> posspkgs;
@@ -196,13 +222,16 @@ namespace ObjectCloner
         }
         AResourceIndexEntry findIRIEinPkg(IPackage pkg)
         {
-            return pkg.Find(new string[] { "ResourceType", "ResourceGroup", "Instance", },
+            IList<IResourceIndexEntry> lrie = pkg.FindAll(new string[] { "ResourceType", "Instance", },
                 new TypedValue[] {
                     new TypedValue(typeof(uint), myrk.ResourceType),
-                    new TypedValue(typeof(uint), myrk.ResourceGroup),
                     new TypedValue(typeof(ulong), myrk.Instance),
                     }
-            ) as AResourceIndexEntry;
+            );
+            foreach (AResourceIndexEntry rie in lrie)
+                if ((rie.ResourceGroup & 0x00FFFFFF) == (myrk.ResourceGroup & 0x00FFFFFF))
+                    return rie;
+            return null;
         }
 
     }
@@ -248,6 +277,25 @@ namespace ObjectCloner
         public CatalogType CType { get { return (CatalogType)myrie.rk.ResourceType; } }
 
         public Exception Exception { get { return ex; } }
+
+        /// <summary>
+        /// Specifies the Content Category overlays that appear in the catalog
+        /// </summary>
+        [Flags]
+        public enum CCFlags : byte
+        {
+            //Unk = 0x00,
+            /// <summary>
+            /// EP1: World Adventures
+            /// </summary>
+            EP1 = 0x08,
+            /// <summary>
+            /// SP1: High-end Lofts
+            /// </summary>
+            SP1 = 0x10,
+        }
+
+        public CCFlags CC { get { return (CCFlags)(this.ResourceIndexEntry == null ? 0 : this.ResourceIndexEntry.ResourceGroup >> 24); } }
 
         public void Commit() { myrie.pkg.ReplaceResource(myrie.rie, Resource); }
     }

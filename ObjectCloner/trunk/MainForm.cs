@@ -1,5 +1,5 @@
 ﻿/***************************************************************************
- *  Copyright (C) 2009 by Peter L Jones                                    *
+ *  Copyright (C) 2009, 2010 by Peter L Jones                              *
  *  pljones@users.sf.net                                                   *
  *                                                                         *
  *  This file is part of the Sims 3 Package Interface (s3pi)               *
@@ -123,11 +123,11 @@ namespace ObjectCloner
 
         #region LoadTTL
         static MemoryStore s3oc_ini = new MemoryStore();
-        const string s3octerms = "http://sims3.drealm.info/s3octerms/1.0#";
-        const string RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-        const string RDFS = "http://www.w3.org/2000/01/rdf-schema#";
-        public static readonly Entity rdftype = RDF + "type";
-        public static readonly Entity rdf_first = RDF + "first";
+        static readonly string s3octerms = "http://sims3.drealm.info/s3octerms/1.0#";
+        static readonly string RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+        //static readonly string RDFS = "http://www.w3.org/2000/01/rdf-schema#";
+        static readonly Entity rdftype = RDF + "type";
+        static readonly Entity rdf_first = RDF + "first";
         static readonly Entity rdf_rest = RDF + "rest";
         static readonly Entity rdf_nil = RDF + "nil";
         static readonly Entity typeSims3 = s3octerms + "Sims3";
@@ -637,13 +637,13 @@ namespace ObjectCloner
                         }));
                     lrie.Sort(byGroup);
                     foreach (IResourceIndexEntry rie in lrie)
-                        if (!new List<uint>(thumTypes[0x515CA4CD]).Contains(type) || rie.ResourceGroup > 0)
+                        if (!new List<uint>(thumTypes[0x515CA4CD]).Contains(type) || (rie.ResourceGroup & 0x00FFFFFF) > 0)
                             return new Item(new RIE(pkg, rie));
                 }
                 //return new Item(pkgs, new TGI(type, 0, instance));
                 return new Item(pkgs, RK.NULL);
             }
-            static int byGroup(IResourceIndexEntry x, IResourceIndexEntry y) { return x.ResourceGroup.CompareTo(y.ResourceGroup); }
+            static int byGroup(IResourceIndexEntry x, IResourceIndexEntry y) { return (x.ResourceGroup & 0x00FFFFFF).CompareTo(y.ResourceGroup & 0x00FFFFFF); }
         }
         THUM thumb;
         THUM Thumb
@@ -1593,7 +1593,7 @@ namespace ObjectCloner
             string tag = "";
             if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + item.rk.ResourceType.ToString("X8"), out exts)) tag = exts[0];
             else tag = "UNKN";
-            lvi.SubItems.AddRange(new string[] { tag, item.ResourceIndexEntry.ContentCategory > 0 ? "" + item.ResourceIndexEntry.ContentCategory : "", "" + (AResourceKey)item.rk, });
+            lvi.SubItems.AddRange(new string[] { tag, item.CC > 0 ? "" + item.CC : "", "" + (AResourceKey)item.rk, });
             lvi.Tag = item;
             objectChooser.Items.Add(lvi);
         }
@@ -2507,7 +2507,7 @@ namespace ObjectCloner
 
         private void SlurpKindred(string key, IList<IPackage> pkgs, string[] fields, TypedValue[] values)
         {
-            List<IResourceKey> seen = new List<IResourceKey>();
+            ListIResourceKey seen = new ListIResourceKey();
             foreach (IPackage pkg in pkgs)
             {
                 IList<IResourceIndexEntry> lrie = pkg.FindAll(fields, values);
@@ -3369,7 +3369,7 @@ namespace ObjectCloner
             CWALThumbTypes.Add(THUM.THUMSize.small, 0x0589DC44);
             CWALThumbTypes.Add(THUM.THUMSize.medium, 0x0589DC45);
             CWALThumbTypes.Add(THUM.THUMSize.large, 0x0589DC46);
-            List<IResourceKey> seen = new List<IResourceKey>();
+            ListIResourceKey seen = new ListIResourceKey();
             foreach (THUM.THUMSize size in new THUM.THUMSize[] { THUM.THUMSize.small, THUM.THUMSize.medium, THUM.THUMSize.large, })
             {
                 int i = 0;
