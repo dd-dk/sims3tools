@@ -841,7 +841,6 @@ namespace S3PIDemoFE
             IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType", "ContentCategory", "ResourceGroup", "Instance" },
                 new TypedValue[] {
                     new TypedValue(rk.ResourceType.GetType(), rk.ResourceType),
-                    new TypedValue(rk.ContentCategory.GetType(), rk.ContentCategory),
                     new TypedValue(rk.ResourceGroup.GetType(), rk.ResourceGroup),
                     new TypedValue(rk.Instance.GetType(), rk.Instance),
                 });

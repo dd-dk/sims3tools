@@ -49,7 +49,6 @@ namespace S3PIDemoFE
                 ResourceType = rk.ResourceType;
                 ResourceGroup = rk.ResourceGroup;
                 Instance = rk.Instance;
-                ContentCategory = rk.ContentCategory;
                 btnOK.Enabled = btnOKCanEnable;
             }
             finally { internalchg = false; UpdateTGIN(); }
@@ -60,17 +59,12 @@ namespace S3PIDemoFE
         public uint ResourceGroup
         {
             get { return Convert.ToUInt32(tbGroup.Text, tbGroup.Text.StartsWith("0x") ? 16 : 10); }
-            set { tbGroup.Text = "0x" + value.ToString("X6"); UpdateTGIN(); }
+            set { tbGroup.Text = "0x" + value.ToString("X8"); UpdateTGIN(); }
         }
         public ulong Instance
         {
             get { return Convert.ToUInt64(tbInstance.Text, tbInstance.Text.StartsWith("0x") ? 16 : 10); }
             set { tbInstance.Text = "0x" + value.ToString("X16"); UpdateTGIN(); }
-        }
-        public ContentCategoryFlags ContentCategory
-        {
-            get { return (ContentCategoryFlags)Convert.ToByte(tbCC.Text, tbCC.Text.StartsWith("0x") ? 16 : 10); }
-            set { tbCC.Text = "0x" + ((byte)value).ToString("X2"); UpdateTGIN(); }
         }
         #endregion
 
@@ -92,9 +86,8 @@ namespace S3PIDemoFE
             {
                 details = this.tbFilename.Text;
                 cbType.Value = details.ResType;
-                tbGroup.Text = "0x" + (details.ResGroup & 0x00FFFFFF).ToString("X6");
+                tbGroup.Text = "0x" + details.ResGroup.ToString("X8");
                 tbInstance.Text = "0x" + details.ResInstance.ToString("X16");
-                tbCC.Text = "0x" + (details.ResGroup >> 24).ToString("X2");
                 tbName.Text = details.ResName;
                 btnOK.Enabled = btnOKCanEnable;
             }
@@ -105,12 +98,12 @@ namespace S3PIDemoFE
             if (internalchg) return;
             details = new TGIN();
             details.ResType = cbType.Value;
-            details.ResGroup = (uint)((byte)ContentCategory) << 24 | ResourceGroup;
+            details.ResGroup = ResourceGroup;
             details.ResInstance = Instance;
             details.ResName = ResourceName;
         }
 
-        bool btnOKCanEnable { get { return cbType.Valid && (tbGroup.Text.Length * tbInstance.Text.Length * tbCC.Text.Length > 0); } }
+        bool btnOKCanEnable { get { return cbType.Valid && (tbGroup.Text.Length * tbInstance.Text.Length > 0); } }
 
         private void btnOKCancel_Click(object sender, EventArgs e)
         {
@@ -126,16 +119,8 @@ namespace S3PIDemoFE
                 {
                     if (tbInstance.Equals(sender))
                         Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
-                    else if (tbGroup.Equals(sender))
-                    {
-                        uint i = Convert.ToUInt32(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
-                        if ((i & 0xFF000000) > 0)
-                            throw new Exception();
-                    }
-                    else if (!tbCC.Equals(sender))
-                        Convert.ToUInt32(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
                     else
-                        Convert.ToByte(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
+                        Convert.ToUInt32(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
                     btnOK.Enabled = btnOKCanEnable;
                     if (btnOK.Enabled) UpdateTGIN();
                 }
@@ -177,7 +162,7 @@ namespace S3PIDemoFE
         #region IEqualityComparer<IResourceKey> Members
         public bool Equals(IResourceKey x, IResourceKey y) { return x.Equals(y); }
         public int GetHashCode(IResourceKey obj) { return obj.GetHashCode(); }
-        public override int GetHashCode() { return ResourceType.GetHashCode() ^ ResourceGroup.GetHashCode() ^ Instance.GetHashCode() ^ ContentCategory.GetHashCode(); }
+        public override int GetHashCode() { return ResourceType.GetHashCode() ^ ResourceGroup.GetHashCode() ^ Instance.GetHashCode(); }
         #endregion
 
         #region IEquatable<IResourceKey> Members
