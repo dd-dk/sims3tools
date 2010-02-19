@@ -74,8 +74,17 @@ namespace S3PIDemoFE
                 }
                 else
                 {
+                    contextMenuStrip1.Items.Clear();
                     splitContainer1.Panel1Collapsed = false;
-                    btnAdd.Visible = !(value.GetType().BaseType.IsGenericType && value.GetType().BaseType.GetGenericArguments()[0].IsAbstract);
+                    tlpAddDelete.Visible = true;
+                    if (value.GetType().BaseType.IsGenericType && value.GetType().BaseType.GetGenericArguments()[0].IsAbstract)
+                    {
+                        btnAdd.Visible = SelectTypes(value.GetType().BaseType.GetGenericArguments()[0]);
+                    }
+                    else
+                    {
+                        btnAdd.Visible = true;
+                    }
                     fillListBox(-1);
                 }
             }
@@ -89,6 +98,24 @@ namespace S3PIDemoFE
             if (selectedIndex == -1) selectedIndex = 0;
             listBox1.SelectedIndex = fieldList.Count > selectedIndex ? selectedIndex : fieldList.Count - 1;
             listBox1.ResumeLayout();
+        }
+
+        bool SelectTypes(Type abstractType)
+        {
+            contextMenuStrip1.ItemClicked -= new ToolStripItemClickedEventHandler(contextMenuStrip1_ItemClicked);
+            contextMenuStrip1.ItemClicked += new ToolStripItemClickedEventHandler(contextMenuStrip1_ItemClicked);
+            Type declaringType = abstractType.DeclaringType;
+            foreach (Type type in declaringType.GetNestedTypes())
+            {
+                if (!type.IsSubclassOf(abstractType)) continue;
+                object[] attrs = type.GetCustomAttributes(typeof(ConstructorParametersAttribute), true);
+                if (attrs == null || attrs.Length == 0) continue;
+
+                ToolStripItem tsi = new ToolStripMenuItem(type.Name);
+                tsi.Tag = type;
+                contextMenuStrip1.Items.Add(tsi);
+            }
+            return contextMenuStrip1.Items.Count > 0;
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -118,6 +145,30 @@ namespace S3PIDemoFE
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
+            if (contextMenuStrip1.Items.Count == 0) simple_btnAdd_Click(sender, e);
+            else contextMenuStrip1.Show((Control)sender, new Point(3, 3));
+        }
+
+        void contextMenuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            Type type = e.ClickedItem.Tag as Type;
+            if (type == null) return;
+
+            int selectedIndex = listBox1.SelectedIndex;
+            try
+            {
+                fieldList.Add((type.GetCustomAttributes(typeof(ConstructorParametersAttribute), true)[0] as ConstructorParametersAttribute).parameters);
+                selectedIndex = fieldList.Count - 1;
+            }
+            catch (Exception ex)
+            {
+                MainForm.IssueException(ex, "");
+            }
+            fillListBox(selectedIndex);
+        }
+
+        private void simple_btnAdd_Click(object sender, EventArgs e)
+        {
             int selectedIndex = listBox1.SelectedIndex;
             try
             {
@@ -126,13 +177,7 @@ namespace S3PIDemoFE
             }
             catch(Exception ex)
             {
-                string s = "";
-                for (Exception inex = ex; inex != null; inex = inex.InnerException)
-                {
-                    s += "\r\n" + inex.Message;
-                    s += "\r\n----\r\nStack trace:\r\n" + inex.StackTrace + "\r\n----\r\n";
-                }
-                CopyableMessageBox.Show(s, this.Text, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                MainForm.IssueException(ex, "");
             }
             fillListBox(selectedIndex);
         }
