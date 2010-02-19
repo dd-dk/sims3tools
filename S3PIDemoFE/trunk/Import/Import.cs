@@ -186,11 +186,11 @@ namespace S3PIDemoFE
         }
         IList<IResourceIndexEntry> getDups(IResourceKey rk)
         {
-            return CurrentPackage.FindAll(new string[] { "ResourceType", "ResourceGroup", "EpFlags", "Instance", },
+            return CurrentPackage.FindAll(new string[] { "ResourceType", "ResourceGroup", "ContentCategory", "Instance", },
                 new TypedValue[] {
                     new TypedValue(rk.ResourceType.GetType(), rk.ResourceType),
                     new TypedValue(rk.ResourceGroup.GetType(), rk.ResourceGroup),
-                    new TypedValue(rk.EpFlags.GetType(), rk.EpFlags),
+                    new TypedValue(rk.ContentCategory.GetType(), rk.ContentCategory),
                     new TypedValue(rk.Instance.GetType(), rk.Instance),
                 });
         }

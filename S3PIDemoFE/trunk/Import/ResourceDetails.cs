@@ -49,7 +49,7 @@ namespace S3PIDemoFE
                 ResourceType = rk.ResourceType;
                 ResourceGroup = rk.ResourceGroup;
                 Instance = rk.Instance;
-                EpFlags = rk.EpFlags;
+                ContentCategory = rk.ContentCategory;
                 btnOK.Enabled = btnOKCanEnable;
             }
             finally { internalchg = false; UpdateTGIN(); }
@@ -67,10 +67,10 @@ namespace S3PIDemoFE
             get { return Convert.ToUInt64(tbInstance.Text, tbInstance.Text.StartsWith("0x") ? 16 : 10); }
             set { tbInstance.Text = "0x" + value.ToString("X16"); UpdateTGIN(); }
         }
-        public EPFlags EpFlags
+        public ContentCategoryFlags ContentCategory
         {
-            get { return (EPFlags)Convert.ToByte(tbEPFlags.Text, tbEPFlags.Text.StartsWith("0x") ? 16 : 10); }
-            set { tbEPFlags.Text = "0x" + ((byte)value).ToString("X2"); UpdateTGIN(); }
+            get { return (ContentCategoryFlags)Convert.ToByte(tbCC.Text, tbCC.Text.StartsWith("0x") ? 16 : 10); }
+            set { tbCC.Text = "0x" + ((byte)value).ToString("X2"); UpdateTGIN(); }
         }
         #endregion
 
@@ -94,7 +94,7 @@ namespace S3PIDemoFE
                 cbType.Value = details.ResType;
                 tbGroup.Text = "0x" + (details.ResGroup & 0x00FFFFFF).ToString("X6");
                 tbInstance.Text = "0x" + details.ResInstance.ToString("X16");
-                tbEPFlags.Text = "0x" + (details.ResGroup >> 24).ToString("X2");
+                tbCC.Text = "0x" + (details.ResGroup >> 24).ToString("X2");
                 tbName.Text = details.ResName;
                 btnOK.Enabled = btnOKCanEnable;
             }
@@ -105,12 +105,12 @@ namespace S3PIDemoFE
             if (internalchg) return;
             details = new TGIN();
             details.ResType = cbType.Value;
-            details.ResGroup = (uint)((byte)EpFlags) << 24 | ResourceGroup;
+            details.ResGroup = (uint)((byte)ContentCategory) << 24 | ResourceGroup;
             details.ResInstance = Instance;
             details.ResName = ResourceName;
         }
 
-        bool btnOKCanEnable { get { return cbType.Valid && (tbGroup.Text.Length * tbInstance.Text.Length * tbEPFlags.Text.Length > 0); } }
+        bool btnOKCanEnable { get { return cbType.Valid && (tbGroup.Text.Length * tbInstance.Text.Length * tbCC.Text.Length > 0); } }
 
         private void btnOKCancel_Click(object sender, EventArgs e)
         {
@@ -132,7 +132,7 @@ namespace S3PIDemoFE
                         if ((i & 0xFF000000) > 0)
                             throw new Exception();
                     }
-                    else if (!tbEPFlags.Equals(sender))
+                    else if (!tbCC.Equals(sender))
                         Convert.ToUInt32(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
                     else
                         Convert.ToByte(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
@@ -177,7 +177,7 @@ namespace S3PIDemoFE
         #region IEqualityComparer<IResourceKey> Members
         public bool Equals(IResourceKey x, IResourceKey y) { return x.Equals(y); }
         public int GetHashCode(IResourceKey obj) { return obj.GetHashCode(); }
-        public override int GetHashCode() { return ResourceType.GetHashCode() ^ ResourceGroup.GetHashCode() ^ Instance.GetHashCode() ^ EpFlags.GetHashCode(); }
+        public override int GetHashCode() { return ResourceType.GetHashCode() ^ ResourceGroup.GetHashCode() ^ Instance.GetHashCode() ^ ContentCategory.GetHashCode(); }
         #endregion
 
         #region IEquatable<IResourceKey> Members

@@ -838,10 +838,10 @@ namespace S3PIDemoFE
         }
         private IResourceIndexEntry NewResource(IResourceKey rk, MemoryStream ms, DuplicateHandling dups, bool compress)
         {
-            IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType", "EpFlags", "ResourceGroup", "Instance" },
+            IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType", "ContentCategory", "ResourceGroup", "Instance" },
                 new TypedValue[] {
                     new TypedValue(rk.ResourceType.GetType(), rk.ResourceType),
-                    new TypedValue(rk.EpFlags.GetType(), rk.EpFlags),
+                    new TypedValue(rk.ContentCategory.GetType(), rk.ContentCategory),
                     new TypedValue(rk.ResourceGroup.GetType(), rk.ResourceGroup),
                     new TypedValue(rk.Instance.GetType(), rk.Instance),
                 });
@@ -1526,7 +1526,7 @@ namespace S3PIDemoFE
             {
                 RichTextBox rtb = new RichTextBox();
                 rtb.Text = "" + resource["Value"];
-                rtb.Font = new Font("DejaVu Sans Mono", 8);
+                rtb.Font = new Font(FontFamily.GenericMonospace, 8);
                 rtb.Size = new Size(this.Width - (this.Width / 5), this.Height - (this.Height / 5));
                 rtb.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
                 rtb.ReadOnly = true;

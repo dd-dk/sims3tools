@@ -339,7 +339,7 @@ namespace S3PIDemoFE
                 rie.ResourceIndexEntryChanged -= new EventHandler(BrowserWidget_ResourceIndexEntryChanged);
                 rie.ResourceType = value.ResourceType;
                 rie.ResourceGroup = value.ResourceGroup;
-                rie.EpFlags = value.EpFlags;
+                rie.ContentCategory = value.ContentCategory;
                 rie.Instance = value.Instance;
                 rie.ResourceIndexEntryChanged += new EventHandler(BrowserWidget_ResourceIndexEntryChanged);
 
