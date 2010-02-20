@@ -122,7 +122,10 @@ namespace ObjectCloner.TopPanelComponents
                 listviewY = (ListViewItem)y;
 
                 // Compare the two items
-                compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
+                if (ColumnToSort == 3)
+                    compareResult = (listviewX.Tag as Item).Compare((listviewX.Tag as Item).ResourceIndexEntry, (listviewY.Tag as Item).ResourceIndexEntry);
+                else
+                    compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
 
                 // Calculate correct return value based on object comparison
                 if (OrderOfSort == SortOrder.Ascending)

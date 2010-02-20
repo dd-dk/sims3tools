@@ -166,7 +166,7 @@ namespace ObjectCloner
         public override int RecommendedApiVersion { get { throw new NotImplementedException(); } }
     }
 
-    public class ListIResourceKey : List<IResourceKey>, IComparer<IResourceKey>
+    public class ListIResourceKey : List<IResourceKey>
     {
         public ListIResourceKey() : base() { }
         public ListIResourceKey(IList<IResourceKey> value) : base(value) { }
@@ -175,20 +175,27 @@ namespace ObjectCloner
         /// </summary>
         /// <param name="item">The object to locate in the list.</param>
         /// <returns>true if item is found in the list; otherwise, false.</returns>
-        public new bool Contains(IResourceKey item) { return this.BinarySearch(item, this) >= 0; }
+        public new bool Contains(IResourceKey item) { return this.Exists(new Predicate(item).Match); }
         /// <summary>
-        /// Compares two IResourceKeys and returns a value indicating whether one is less than, equal to, or greater than the other.
+        /// Searches for the specified object and returns the zero-based index of the first occurrence within the entire list.
         /// </summary>
-        /// <param name="x">The first IResourceKey to compare.</param>
-        /// <param name="y">The second IResourceKey to compare.</param>
-        /// <returns>
-        /// Value Condition Less than zero x is less than y.  Zero x equals y.  Greater than zero x is greater than y.
-        /// </returns>
-        public int Compare(IResourceKey x, IResourceKey y)
+        /// <param name="item">The IResourceKey to locate in the list.</param>
+        /// <returns>The zero-based index of the first occurrence of item within the entire list, if found; otherwise, –1.</returns>
+        public int IndexOf(IResourceKey item) { return base.IndexOf(this.Find(new Predicate(item).Match)); }
+
+        /// <summary>
+        /// Suppress matching on top byte of ResourceGroup
+        /// </summary>
+        class Predicate
         {
-            int res = x.ResourceType.CompareTo(y.ResourceType); if (res != 0) return res;
-            res = (x.ResourceGroup & 0x00FFFFFF).CompareTo(y.ResourceGroup & 0x00FFFFFF); if (res != 0) return res;
-            return x.Instance.CompareTo(y.Instance);
+            IResourceKey predicate;
+            public Predicate(IResourceKey predicate) { this.predicate = predicate; }
+            public bool Match(IResourceKey target)
+            {
+                int res = predicate.ResourceType.CompareTo(target.ResourceType); if (res != 0) return false;
+                res = (predicate.ResourceGroup & 0x00FFFFFF).CompareTo(target.ResourceGroup & 0x00FFFFFF); if (res != 0) return false;
+                return predicate.Instance.CompareTo(target.Instance) == 0;
+            }
         }
     }
 
@@ -236,7 +243,7 @@ namespace ObjectCloner
 
     }
 
-    public class Item
+    public class Item : IComparer<IResourceIndexEntry>
     {
         RIE myrie;
         bool defaultWrapper;
@@ -296,6 +303,12 @@ namespace ObjectCloner
         }
 
         public CCFlags CC { get { return (CCFlags)(this.ResourceIndexEntry == null ? 0 : this.ResourceIndexEntry.ResourceGroup >> 24); } }
+        public int Compare(IResourceIndexEntry x, IResourceIndexEntry y)
+        {
+            int res = x.ResourceType.CompareTo(y.ResourceType); if (res != 0) return res;
+            res = (x.ResourceGroup & 0x00FFFFFF).CompareTo(y.ResourceGroup & 0x00FFFFFF); if (res != 0) return res;
+            return x.Instance.CompareTo(y.Instance);
+        }
 
         public void Commit() { myrie.pkg.ReplaceResource(myrie.rie, Resource); }
     }
