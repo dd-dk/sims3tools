@@ -181,7 +181,7 @@ namespace ObjectCloner
         /// </summary>
         /// <param name="item">The IResourceKey to locate in the list.</param>
         /// <returns>The zero-based index of the first occurrence of item within the entire list, if found; otherwise, –1.</returns>
-        public int IndexOf(IResourceKey item) { return base.IndexOf(this.Find(new Predicate(item).Match)); }
+        public new int IndexOf(IResourceKey item) { return base.IndexOf(this.Find(new Predicate(item).Match)); }
 
         /// <summary>
         /// Suppress matching on top byte of ResourceGroup
