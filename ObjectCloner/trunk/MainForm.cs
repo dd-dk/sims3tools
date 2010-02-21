@@ -130,6 +130,8 @@ namespace ObjectCloner
         static readonly Entity rdf_first = RDF + "first";
         static readonly Entity rdf_rest = RDF + "rest";
         static readonly Entity rdf_nil = RDF + "nil";
+        static readonly Entity typeResourceList = s3octerms + "ResourceList";
+        static readonly Entity predHasResource = s3octerms + "hasResource";
         static readonly Entity typeSims3 = s3octerms + "Sims3";
         static readonly Entity predHasName = s3octerms + "hasName";
         static readonly Entity predHasLongname = s3octerms + "hasLongname";
@@ -219,6 +221,7 @@ namespace ObjectCloner
                 return null;
             }
         }
+        public static List<Dictionary<String, TypedValue>> lS3ocResourceList = new List<Dictionary<String, TypedValue>>();
         public static List<S3ocSims3> lS3ocSims3 = new List<S3ocSims3>();
 
         /// <summary>
@@ -228,8 +231,30 @@ namespace ObjectCloner
         {
             string iniFile = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "s3oc-ini.ttl");
             s3oc_ini.Import(new N3Reader(iniFile));
-            lS3ocSims3 = new List<S3ocSims3>();
 
+            lS3ocResourceList = new List<Dictionary<String, TypedValue>>();
+            foreach (Statement s in s3oc_ini.Select(new Statement(null, rdftype, typeResourceList)))
+            {
+                foreach (Statement t in s3oc_ini.Select(new Statement(s.Subject, predHasResource, null)))
+                {
+                    Entity e = t.Object as Entity;
+                    String[] predicates = new String[] { "T", "G", "I", };
+                    String[] keys = new String[] { "ResourceType", "ResourceGroup", "Instance", };
+                    Type[] types = new Type[] { typeof(uint), typeof(uint), typeof(ulong), };
+                    Dictionary<String, TypedValue> dict = new Dictionary<string, TypedValue>();
+
+                    for (int i = 0; i < predicates.Length; i++)
+                    {
+                        Literal l = rdfFetch(s3oc_ini, e, s3octerms + predicates[i]) as Literal;
+                        if (l == null) continue;
+                        ulong value = ulong.Parse((l.ParseValue() as String).Substring(2), System.Globalization.NumberStyles.HexNumber);
+                        dict.Add(keys[i], new TypedValue(types[i], Convert.ChangeType(value, types[i]), "X"));
+                    }
+                    lS3ocResourceList.Add(dict);
+                }
+            }
+
+            lS3ocSims3 = new List<S3ocSims3>();
             foreach (Statement s in s3oc_ini.Select(new Statement(null, rdftype, typeSims3)))
             {
                 S3ocSims3 sims3 = new S3ocSims3(s.Subject);
@@ -788,9 +813,8 @@ namespace ObjectCloner
             lbUseMenu.Visible = false;
             lbSelectOptions.Visible = false;
             btnStart.Visible = true;
-            tlpTask.Enabled = true;
-            //tabControl1.Enabled = false;
 
+            StopWait();
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(objectChooser);
             objectChooser.Dock = DockStyle.Fill;
@@ -832,6 +856,7 @@ namespace ObjectCloner
                 cloneFixOptions.UniqueName = Path.GetFileNameWithoutExtension(openPackageDialog.FileName);
             }
 
+            StopWait();
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(cloneFixOptions);
             cloneFixOptions.Dock = DockStyle.Fill;
@@ -844,15 +869,14 @@ namespace ObjectCloner
             menuBarWidget1.Enable(MenuBarWidget.MD.MBC, true);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
 
-            this.Enabled = true;
             this.AcceptButton = null;
             this.CancelButton = null;
-            tlpTask.Enabled = true;
 
             lbUseMenu.Visible = true;
             btnStart.Visible = false;
             lbSelectOptions.Visible = false;
 
+            StopWait();
             splitContainer1.Panel1.Controls.Clear();
             if (cloneFixOptions != null)
             {
@@ -869,6 +893,15 @@ namespace ObjectCloner
             splitContainer1.Panel1.Controls.Add(pleaseWait);
             pleaseWait.Dock = DockStyle.Fill;
             pleaseWait.Label = waitText;
+            splitContainer1.Panel2.Enabled = false;
+            TabEnable(false);
+            this.Text = myName + " [busy]";
+            Application.DoEvents();
+        }
+        private void StopWait()
+        {
+            splitContainer1.Panel2.Enabled = true;
+            this.Text = myName;
             Application.DoEvents();
         }
         #endregion
@@ -904,8 +937,6 @@ namespace ObjectCloner
         {
             this.AcceptButton = null;
             this.CancelButton = null;
-            tlpTask.Enabled = false;
-            TabEnable(false);
             disableCompression = !cloneFixOptions.IsCompress;
             isClone = cloneFixOptions.IsClone;
             isPadSTBLs = cloneFixOptions.IsPadSTBLs;
@@ -972,6 +1003,7 @@ namespace ObjectCloner
 
         void cloneFixOptions_CancelClicked(object sender, EventArgs e)
         {
+            TabEnable(false);
             DisplayObjectChooser();
             cloneFixOptions = null;
         }
@@ -1793,7 +1825,7 @@ namespace ObjectCloner
             this.SavingComplete += new EventHandler<BoolEventArgs>(MainForm_SavingComplete);
 
             SaveList sl = new SaveList(this, objectChooser.SelectedItems[0].Tag as Item, rkLookup, objPkgs, ddsPkgs, tmbPkgs,
-                saveFileDialog1.FileName, isPadSTBLs,
+                saveFileDialog1.FileName, isPadSTBLs, cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
                 updateProgress, stopSaving, OnSavingComplete);
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
@@ -1864,11 +1896,12 @@ namespace ObjectCloner
             List<IPackage> tmbPkgs;
             string outputPackage;
             bool padSTBLs;
+            List<Dictionary<String, TypedValue>> commonResources;
             updateProgressCallback updateProgressCB;
             stopSavingCallback stopSavingCB;
             savingCompleteCallback savingCompleteCB;
             public SaveList(MainForm form, Item catlgItem, Dictionary<string, IResourceKey> rkList, List<IPackage> objPkgs, List<IPackage> ddsPkgs, List<IPackage> tmbPkgs,
-                string outputPackage, bool padSTBLs,
+                string outputPackage, bool padSTBLs, List<Dictionary<String, TypedValue>> commonResources,
                 updateProgressCallback updateProgressCB, stopSavingCallback stopSavingCB, savingCompleteCallback savingCompleteCB)
             {
                 this.mainForm = form;
@@ -1879,6 +1912,7 @@ namespace ObjectCloner
                 this.tmbPkgs = tmbPkgs;
                 this.outputPackage = outputPackage;
                 this.padSTBLs = padSTBLs;
+                this.commonResources = commonResources;
                 this.updateProgressCB = updateProgressCB;
                 this.stopSavingCB = stopSavingCB;
                 this.savingCompleteCB = savingCompleteCB;
@@ -1911,19 +1945,22 @@ namespace ObjectCloner
                     {
                         if (stopSaving) return;
 
-                        List<IPackage> lpkg = (selectedItem.rk.ResourceType != 0x04ED4BB2 && kvp.Value.ResourceType == 0x00B2D882) ? ddsPkgs : kvp.Key.EndsWith("Thumb") ? tmbPkgs : objPkgs;
-                        NameMap nm = kvp.Value.ResourceType == 0x00B2D882 ? fb2nm : fb0nm;
-
-                        Item item = new Item(new RIE(lpkg, kvp.Value), true); // use default wrapper
-                        if (item.ResourceIndexEntry != null)
+                        if (!excludeResource(kvp.Value))
                         {
-                            if (!stopSaving) target.AddResource(kvp.Value, item.Resource.Stream, true);
-                            lastSaved = kvp.Key;
-                            if (!newnamemap.ContainsKey(kvp.Value.Instance))
+                            List<IPackage> lpkg = (selectedItem.rk.ResourceType != 0x04ED4BB2 && kvp.Value.ResourceType == 0x00B2D882) ? ddsPkgs : kvp.Key.EndsWith("Thumb") ? tmbPkgs : objPkgs;
+                            NameMap nm = kvp.Value.ResourceType == 0x00B2D882 ? fb2nm : fb0nm;
+
+                            Item item = new Item(new RIE(lpkg, kvp.Value), true); // use default wrapper
+                            if (item.ResourceIndexEntry != null)
                             {
-                                string name = nm[kvp.Value.Instance];
-                                if (name != null)
-                                    if (!stopSaving) newnamemap.Add(kvp.Value.Instance, name);
+                                if (!stopSaving) target.AddResource(kvp.Value, item.Resource.Stream, true);
+                                lastSaved = kvp.Key;
+                                if (!newnamemap.ContainsKey(kvp.Value.Instance))
+                                {
+                                    string name = nm[kvp.Value.Instance];
+                                    if (name != null)
+                                        if (!stopSaving) newnamemap.Add(kvp.Value.Instance, name);
+                                }
                             }
                         }
 
@@ -2030,6 +2067,21 @@ namespace ObjectCloner
                 Thread.Sleep(0);
                 if (mainForm.IsHandleCreated)
                     mainForm.BeginInvoke(savingCompleteCB, new object[] { complete, });
+            }
+
+            bool excludeResource(IResourceKey rk)
+            {
+                if (commonResources == null) return false;
+
+                AResource.TGIBlock tgib = new AResource.TGIBlock(0, null, rk);
+                foreach (var dict in commonResources)
+                {
+                    bool match = true;
+                    foreach (string key in dict.Keys)
+                        if (!tgib[key].Equals(dict[key])) { match = false; break; };
+                    if (match) return true;
+                }
+                return false;
             }
         }
         #endregion
@@ -2320,10 +2372,11 @@ namespace ObjectCloner
             {
                 this.toolStripProgressBar1.Visible = false;
                 this.toolStripStatusLabel1.Visible = false;
+                StopWait();
             }
 
-            CopyableMessageBox.Show("OK", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
             ClosePkg();
+            CopyableMessageBox.Show("OK", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
             DisplayNothing();
         }
 
@@ -2599,8 +2652,6 @@ namespace ObjectCloner
             menuBarWidget1.Enable(MenuBarWidget.MD.MBS, false);
 
             DoWait("Please wait, loading object catalog...");
-            tlpTask.Enabled = false;
-            Application.DoEvents();
 
             if (!haveLoaded)
                 StartLoading(resourceType, IsFixPass);

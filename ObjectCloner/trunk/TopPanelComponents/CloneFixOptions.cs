@@ -32,20 +32,22 @@ namespace ObjectCloner.TopPanelComponents
         public CloneFixOptions()
         {
             InitializeComponent();
-            tbUniqueName.Enabled = ckbRenumber.Checked;
-            ckbThumbs.Enabled = ckbDefault.Enabled = ckbClone.Checked;
         }
 
         public CloneFixOptions(Form form, bool mustClone, bool allow32bitIIDs)
             : this()
         {
-            this.allow32bitIIDs = allow32bitIIDs;
-            ckb32bitIIDs.Enabled = ckbRenumber.Checked && allow32bitIIDs;
             if (mustClone)
             {
-                ckbClone.Checked = true;
                 ckbClone.Enabled = false;
+                ckbClone.Checked = true;
             }
+            ckbClone_CheckedChanged(null, EventArgs.Empty);
+
+            this.allow32bitIIDs = allow32bitIIDs;
+            tbUniqueName.Enabled = ckbRenumber.Checked;
+            ckb32bitIIDs.Enabled = ckbRenumber.Checked && allow32bitIIDs;
+
             form.AcceptButton = btnStart;
             form.CancelButton = btnCancel;
         }
@@ -53,6 +55,7 @@ namespace ObjectCloner.TopPanelComponents
         public string UniqueName { get { return tbUniqueName.Text; } set { tbUniqueName.Text = value; } }
         public bool IsClone { get { return ckbClone.Checked; } }
         public bool IsDefaultOnly { get { return ckbDefault.Checked; } }
+        public bool IsExcludeCommon { get { return ckbExclCommon.Checked; } }
         public bool IsIncludeThumbnails { get { return ckbThumbs.Checked; } }
         public bool IsPadSTBLs { get { return ckbPadSTBLs.Checked; } }
         public bool IsPadThumbs { get { return ckbPadThumbs.Checked; } }
@@ -66,9 +69,14 @@ namespace ObjectCloner.TopPanelComponents
 
         private void ckbClone_CheckedChanged(object sender, EventArgs e)
         {
-            ckbThumbs.Enabled = ckbDefault.Enabled = ckbClone.Checked;
-            ckbDefault.Checked = ckbClone.Checked;
+            ckbThumbs.Enabled = ckbDefault.Enabled = ckbExclCommon.Enabled = !ckbClone.Enabled && ckbClone.Checked;
+            ckbExclCommon.Checked = ckbDefault.Checked = !ckbClone.Enabled && ckbClone.Checked;
             ckbThumbs.Checked = false;
+        }
+
+        private void ckbDefault_CheckedChanged(object sender, EventArgs e)
+        {
+            ckbExclCommon.Checked = ckbDefault.Checked;
         }
 
         private void ckbPadThumbs_CheckedChanged(object sender, EventArgs e) { if (IsPadThumbsChanged != null) IsPadThumbsChanged(this, EventArgs.Empty); }
