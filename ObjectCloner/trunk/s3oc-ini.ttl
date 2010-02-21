@@ -29,7 +29,7 @@
    , [ :T "0x00B2D882" ; :I "0x4A9A601660C41F69" ; :N "Default wood" ]		# _IMG
    , [ :T "0x00B2D882" ; :I "0x4A9A601660C41F6B" ; :N "Default wood" ]		# _IMG
 .
-
+   
 
 :base
    a  :Sims3, :baseGame ;
@@ -68,6 +68,28 @@
       a :Images ;
       :in "GameData/Shared/Packages" ;
       :packages ( "FullBuildep1.package" ) .
+   ], [
+      a :Thumbnails ;
+      :in "Thumbnails" ;
+      :packages ( "AllThumbnails.package" ) .
+   ]
+.
+
+:sp1
+   a  :Sims3, :SP ;
+   :hasName  "SP1" ;
+   :hasLongname  "The Sims 3 High-End Loft Stuff";
+   :hasDefaultInstallDir  "C:/Program Files/Electronic Arts/The Sims 3 High-End Loft Stuff";
+   :hasPriority  2 ;
+   :isSuppressed  "false" ;
+   :hasPackages [
+      a :Objects ;
+      :in "GameData/Shared/Packages" ;
+      :packages ( "FullBuild_p03.package" ) .
+   ], [
+      a :Images ;
+      :in "GameData/Shared/Packages" ;
+      :packages ( "FullBuild_p03.package" ) .
    ], [
       a :Thumbnails ;
       :in "Thumbnails" ;
