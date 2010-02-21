@@ -18,6 +18,17 @@ set m=%mytime:~3,2%
 set s=%mytime:~6,2%
 set suffix=%yy%%mm%-%dd%-%h%%m%
 
+if EXIST "%PROGRAMFILES%\nsis\makensis.exe" goto gotNotX86
+if EXIST "%PROGRAMFILES(x86)%\nsis\makensis.exe" goto gotX86
+echo "Could not find makensis."
+goto noNSIS
+
+:gotNotX86:
+set MAKENSIS=%PROGRAMFILES%\nsis\makensis.exe
+goto gotNSIS
+:gotX86:
+set MAKENSIS=%PROGRAMFILES(x86)%\nsis\makensis.exe
+:gotNSIS:
 set nsisv=/V3
 
 if x%ConfigurationName%==xRelease goto REL
@@ -67,9 +78,10 @@ popd
 attrib +r +h UNINST.LOG
 popd
 
-"%PROGRAMFILES%\nsis\makensis" "/DINSTFILES=INSTFILES.txt" "/DUNINSTFILES=UNINST.LOG" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%.exe"
+"%MAKENSIS%" "/DINSTFILES=INSTFILES.txt" "/DUNINSTFILES=UNINST.LOG" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%.exe"
 
 :done:
 rmdir /s/q %base%-%suffix%
 del INSTFILES.txt
+:noNSIS:
 pause
