@@ -310,7 +310,8 @@ namespace S3PIDemoFE
             get { return filename == null || filename.Length < 2 ? "" : filename.Substring(2); }
             set
             {
-                if (filename != "" && filename == value) return;
+                //http://dino.drealm.info/develforums/s3pi/index.php?topic=781.0
+                //if (filename != "" && filename == value) return;
 
                 CurrentPackage = null;
                 if (CurrentPackage != null) return;
@@ -838,7 +839,7 @@ namespace S3PIDemoFE
         }
         private IResourceIndexEntry NewResource(IResourceKey rk, MemoryStream ms, DuplicateHandling dups, bool compress)
         {
-            IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType", "ContentCategory", "ResourceGroup", "Instance" },
+            IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType", "ResourceGroup", "Instance" },
                 new TypedValue[] {
                     new TypedValue(rk.ResourceType.GetType(), rk.ResourceType),
                     new TypedValue(rk.ResourceGroup.GetType(), rk.ResourceGroup),
