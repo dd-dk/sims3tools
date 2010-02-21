@@ -129,7 +129,7 @@ namespace S3PIDemoFE
                     nmap.Add(instance, resourceName);
                 pkg.ReplaceResource(nameMapRIEs[0], nameMap[0]);
 
-                if (selectedResource.Tag as IResourceIndexEntry == nameMapRIEs[0])
+                if (selectedResource != null && selectedResource.Tag as IResourceIndexEntry == nameMapRIEs[0])
                     OnSelectedResourceChanged(this, new ResourceChangedEventArgs(selectedResource));
             }
             catch (Exception ex)
