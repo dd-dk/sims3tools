@@ -1,5 +1,5 @@
 /***************************************************************************
- *  Copyright (C) 2009 by Peter L Jones                                    *
+ *  Copyright (C) 2009, 2010 by Peter L Jones                              *
  *  pljones@users.sf.net                                                   *
  *                                                                         *
  *  This file is part of the Sims 3 Package Interface (s3pi)               *
@@ -207,6 +207,12 @@ namespace S3PIDemoFE
         public string Helper1Label { get { return btnHelper1.Text; } set { btnHelper1.Text = value; } }
 
         [Browsable(true)]
+        [Category("Appearance")]
+        [DefaultValue("")]
+        [Description("Helper1 button tooltip")]
+        public string Helper1Tip { get { return toolTip1.GetToolTip(btnHelper1); } set { toolTip1.SetToolTip(btnHelper1, value); } }
+
+        [Browsable(true)]
         [Category("Action")]
         [Description("Occurs when the Helper1 button is clicked")]
         public event EventHandler Helper1Click;
@@ -226,6 +232,12 @@ namespace S3PIDemoFE
         [DefaultValue("Helper2")]
         [Description("Helper2 button label")]
         public string Helper2Label { get { return btnHelper2.Text; } set { btnHelper2.Text = value; } }
+
+        [Browsable(true)]
+        [Category("Appearance")]
+        [DefaultValue("")]
+        [Description("Helper2 button tooltip")]
+        public string Helper2Tip { get { return toolTip1.GetToolTip(btnHelper2); } set { toolTip1.SetToolTip(btnHelper2, value); } }
 
         [Browsable(true)]
         [Category("Action")]

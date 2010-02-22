@@ -28,6 +28,7 @@ namespace S3PIDemoFE
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.ckbSortable = new System.Windows.Forms.CheckBox();
             this.btnHex = new System.Windows.Forms.Button();
             this.btnValue = new System.Windows.Forms.Button();
@@ -48,6 +49,7 @@ namespace S3PIDemoFE
             this.rb1Off = new System.Windows.Forms.RadioButton();
             this.rb1Hex = new System.Windows.Forms.RadioButton();
             this.rb1Value = new System.Windows.Forms.RadioButton();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -412,6 +414,7 @@ namespace S3PIDemoFE
         private System.Windows.Forms.RadioButton rb1Off;
         private System.Windows.Forms.RadioButton rb1Hex;
         private System.Windows.Forms.RadioButton rb1Value;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }
 
