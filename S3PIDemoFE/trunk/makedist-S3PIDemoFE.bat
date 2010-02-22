@@ -70,6 +70,11 @@ echo SetOutPath $INSTDIR\HelpFiles
 for %%f in (*) do echo File /a HelpFiles\%%f
 echo SetOutPath $INSTDIR
 popd
+pushd Helpers
+echo SetOutPath $INSTDIR\Helpers
+for %%f in (*) do echo File /a Helpers\%%f
+echo SetOutPath $INSTDIR
+popd
 ) > ..\INSTFILES.txt
 
 (

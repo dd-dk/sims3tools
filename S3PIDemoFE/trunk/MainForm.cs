@@ -374,7 +374,7 @@ namespace S3PIDemoFE
 
         #region Current Resource
         string resourceName = "";
-        s3pi.DemoPlugins.DemoPlugins plug = null;
+        s3pi.DemoPlugins.DemoPlugins helpers = null;
 
         Exception resException = null;
         IResource resource = null;
@@ -1090,16 +1090,6 @@ namespace S3PIDemoFE
         private void settingsExternalPrograms()
         {
             Settings.ExternalProgramsDialog epd = new S3PIDemoFE.Settings.ExternalProgramsDialog();
-            if (S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt != null && S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt.Length > 0)
-            {
-                epd.HasUserHelpersTxt = true;
-                epd.UserHelpersTxt = S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt;
-            }
-            else
-            {
-                epd.HasUserHelpersTxt = false;
-                epd.UserHelpersTxt = "";
-            }
             if (S3PIDemoFE.Properties.Settings.Default.HexEditorCmd != null && S3PIDemoFE.Properties.Settings.Default.HexEditorCmd.Length > 0)
             {
                 epd.HasUserHexEditor = true;
@@ -1113,16 +1103,14 @@ namespace S3PIDemoFE
                 epd.UserHexEditor = "";
                 epd.HexEditorIgnoreTS = false;
             }
+            if (S3PIDemoFE.Properties.Settings.Default.DisabledHelpers == null)
+                S3PIDemoFE.Properties.Settings.Default.DisabledHelpers = new System.Collections.Specialized.StringCollection();
+
+            string[] disabledHelpers = new string[S3PIDemoFE.Properties.Settings.Default.DisabledHelpers.Count];
+            S3PIDemoFE.Properties.Settings.Default.DisabledHelpers.CopyTo(disabledHelpers, 0);
+            epd.DisabledHelpers = disabledHelpers;
             DialogResult dr = epd.ShowDialog();
             if (dr != DialogResult.OK) return;
-            if (epd.HasUserHelpersTxt && epd.UserHelpersTxt.Length > 0 && File.Exists(epd.UserHelpersTxt))
-            {
-                S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt = epd.UserHelpersTxt;
-            }
-            else
-            {
-                S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt = null;
-            }
             if (epd.HasUserHexEditor && epd.UserHexEditor.Length > 0 && File.Exists(epd.UserHexEditor))
             {
                 S3PIDemoFE.Properties.Settings.Default.HexEditorCmd = epd.UserHexEditor;
@@ -1135,18 +1123,15 @@ namespace S3PIDemoFE
                 S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS = false;
                 S3PIDemoFE.Properties.Settings.Default.HexEditorWantsQuotes = false;
             }
-
-            if (browserWidget1.SelectedResource != null)
+            disabledHelpers = epd.DisabledHelpers;
+            if (disabledHelpers.Length == 0)
+                S3PIDemoFE.Properties.Settings.Default.DisabledHelpers = null;
+            else
             {
-                s3pi.DemoPlugins.DemoPlugins.Config = S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt;
-                plug = new s3pi.DemoPlugins.DemoPlugins(browserWidget1.SelectedResource, resource);
-                controlPanel1.Helper1Enabled = plug.HasHelper1;
-                controlPanel1.Helper1Label = plug.Helper1Label.Length > 0 ? plug.Helper1Label : "Helper1";
-                controlPanel1.Helper2Enabled = plug.HasHelper2;
-                controlPanel1.Helper2Label = plug.Helper2Label.Length > 0 ? plug.Helper2Label : "Helper2";
-                controlPanel1.HexEditEnabled = S3PIDemoFE.Properties.Settings.Default.HexEditorCmd != null
-                    && S3PIDemoFE.Properties.Settings.Default.HexEditorCmd.Length > 0;
+                S3PIDemoFE.Properties.Settings.Default.DisabledHelpers = new System.Collections.Specialized.StringCollection();
+                S3PIDemoFE.Properties.Settings.Default.DisabledHelpers.AddRange(epd.DisabledHelpers);
             }
+            if (browserWidget1.SelectedResource != null && resource != null) setExternalButtons();
         }
 
         private void settingsOrganiseBookmarks()
@@ -1326,19 +1311,11 @@ namespace S3PIDemoFE
                         if (lf.Contains(f)) lf.Remove(f);
                     controlPanel1.GridEnabled = lf.Count > 0;
                 }
-
-                s3pi.DemoPlugins.DemoPlugins.Config = S3PIDemoFE.Properties.Settings.Default.UserHelpersTxt;
-                plug = new s3pi.DemoPlugins.DemoPlugins(browserWidget1.SelectedResource, resource);
-                controlPanel1.Helper1Enabled = plug.HasHelper1;
-                controlPanel1.Helper1Label = plug.Helper1Label.Length > 0 ? plug.Helper1Label : "Helper1";
-                controlPanel1.Helper2Enabled = plug.HasHelper2;
-                controlPanel1.Helper2Label = plug.Helper2Label.Length > 0 ? plug.Helper2Label : "Helper2";
-                controlPanel1.HexEditEnabled = S3PIDemoFE.Properties.Settings.Default.HexEditorCmd != null
-                    && S3PIDemoFE.Properties.Settings.Default.HexEditorCmd.Length > 0;
+                setExternalButtons();
             }
             else
             {
-                plug = null;
+                helpers = null;
                 controlPanel1.ValueEnabled = controlPanel1.GridEnabled =
                     controlPanel1.Helper1Enabled = controlPanel1.Helper2Enabled = controlPanel1.HexEditEnabled = false;
             }
@@ -1355,6 +1332,28 @@ namespace S3PIDemoFE
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_details, resource != null);
 
             resourceFilterWidget1.IndexEntry = browserWidget1.SelectedResource;
+        }
+
+        void setExternalButtons()
+        {
+            helpers = new s3pi.DemoPlugins.DemoPlugins(browserWidget1.SelectedResource, resource);
+            if (S3PIDemoFE.Properties.Settings.Default.DisabledHelpers != null)
+                foreach (string id in S3PIDemoFE.Properties.Settings.Default.DisabledHelpers)
+                {
+                    List<s3pi.DemoPlugins.DemoPlugins.Helper> disabled = new List<s3pi.DemoPlugins.DemoPlugins.Helper>();
+                    foreach (var helper in helpers) if (helper.id == id) disabled.Add(helper);
+                    foreach (var helper in disabled) helpers.Remove(helper);
+                }
+            controlPanel1.Helper1Enabled = helpers.Count > 0;
+            controlPanel1.Helper1Label = helpers.Count > 0 && helpers[0].label.Length > 0 ? helpers[0].label : "Helper1";
+            controlPanel1.Helper1Tip = helpers.Count > 0 && helpers[0].desc.Length > 0 ? helpers[0].desc : "";
+
+            controlPanel1.Helper2Enabled = helpers.Count > 1;
+            controlPanel1.Helper2Label = helpers.Count > 1 && helpers[1].label.Length > 0 ? helpers[1].label : "Helper2";
+            controlPanel1.Helper1Tip = helpers.Count > 1 && helpers[1].desc.Length > 0 ? helpers[1].desc : "";
+
+            controlPanel1.HexEditEnabled = S3PIDemoFE.Properties.Settings.Default.HexEditorCmd != null
+                && S3PIDemoFE.Properties.Settings.Default.HexEditorCmd.Length > 0;
         }
 
         private void browserWidget1_DragOver(object sender, DragEventArgs e)
@@ -1590,28 +1589,25 @@ namespace S3PIDemoFE
 
         private void controlPanel1_Helper1Click(object sender, EventArgs e)
         {
-            do_HelperClick("1");
+            do_HelperClick(0);
         }
 
         private void controlPanel1_Helper2Click(object sender, EventArgs e)
         {
-            do_HelperClick("2");
+            do_HelperClick(1);
         }
 
-        void do_HelperClick(string hlp)
+        void do_HelperClick(int i)
         {
             try
             {
                 this.Enabled = false;
                 Application.DoEvents();
 
-                MemoryStream res = hlp == "1" ? plug.Helper1(resource) : plug.Helper2(resource);
+                MemoryStream res = helpers.execHelper(i);
+                MakeFormVisible();
 
-                this.Activate();
-                Application.DoEvents();
-
-                if (hlp == "1" && !plug.Helper1IsReadOnly || hlp == "2" && !plug.Helper2IsReadOnly)
-                    afterEdit(res);
+                if (!helpers[i].isReadOnly) afterEdit(res);
             }
             finally { this.Enabled = true; }
         }
@@ -1628,12 +1624,28 @@ namespace S3PIDemoFE
                     S3PIDemoFE.Properties.Settings.Default.HexEditorWantsQuotes,
                     S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS);
 
-                this.Activate();
+                MakeFormVisible();
                 Application.DoEvents();
 
                 afterEdit(res);
             }
             finally { this.Enabled = true; }
+        }
+
+        void MakeFormVisible()
+        {
+            this.TopMost = true;
+            Application.DoEvents();
+            this.BringToFront();
+            Application.DoEvents();
+            this.Visible = true;
+            Application.DoEvents();
+            this.Activate();
+            Application.DoEvents();
+            this.Focus();
+            Application.DoEvents();
+            this.TopMost = false;
+            Application.DoEvents();
         }
 
         void afterEdit(MemoryStream ms)

@@ -29,20 +29,104 @@ namespace S3PIDemoFE.Settings
         public ExternalProgramsDialog()
         {
             InitializeComponent();
+            InitaliseHelpers();
             this.Icon = ((System.Drawing.Icon)(new ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
         }
 
-        public bool HasUserHelpersTxt { get { return ckbOverrideHelpers.Checked; } set { ckbOverrideHelpers.Checked = value; } }
-
-        public string UserHelpersTxt { get { return tbUserHelpersTxt.Text; } set { tbUserHelpersTxt.Text = value; } }
-
-        private void ckbOverrideHelpers_CheckedChanged(object sender, EventArgs e) { btnHelpersBrowse.Enabled = ckbOverrideHelpers.Checked; }
-
-        private void btnHelpersBrowse_Click(object sender, EventArgs e)
+        struct HelperControls
         {
-            DialogResult dr = ofdUserHelpersTxt.ShowDialog();
-            if (dr != DialogResult.OK) return;
-            tbUserHelpersTxt.Text = ofdUserHelpersTxt.FileName;
+            public CheckBox cb;
+            public Label lb;
+            public Button btn;
+            public HelperControls(string name, ref int i)
+            {
+                btn = new Button();
+                btn.Anchor = AnchorStyles.None;
+                btn.AutoSize = true;
+                btn.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+                btn.Margin = Padding.Empty;
+                btn.Name = "btn" + name;
+                btn.TabIndex = i++;
+                btn.Text = "info";
+
+                cb = new CheckBox();
+                //cb.Anchor = AnchorStyles.Right;
+                cb.Anchor = AnchorStyles.None;
+                cb.AutoSize = true;
+                cb.Margin = Padding.Empty;
+                cb.Name = "cb" + name;
+                cb.TabIndex = i++;
+                cb.Text = "";
+
+                lb = new Label();
+                lb.Anchor = AnchorStyles.Left;
+                lb.AutoSize = true;
+                lb.Margin = Padding.Empty;
+                lb.TabIndex = i++;
+                lb.Name = "lb" + name;
+                lb.Text = name;
+                lb.Click += new EventHandler(lb_Click);
+            }
+
+            void lb_Click(object sender, EventArgs e) { cb.Checked = !cb.Checked; }
+        }
+
+        List<HelperControls> lhc = new List<HelperControls>();
+        void InitaliseHelpers()
+        {
+            s3pi.DemoPlugins.DemoPlugins.Reload();
+            int tabIndex = 4;
+            foreach (var helper in s3pi.DemoPlugins.DemoPlugins.Helpers)
+            {
+                HelperControls hc = new HelperControls(helper.id, ref tabIndex);
+                lhc.Add(hc);
+                hc.btn.Click += new EventHandler(hc_btn_Click);
+
+                int h = tlpHelpers.Height;
+
+                tlpHelpers.RowCount++;
+                tlpHelpers.RowStyles.Insert(tlpHelpers.RowCount - 2, new RowStyle(SizeType.AutoSize));
+                tlpHelpers.Controls.Add(hc.btn, 0, tlpHelpers.RowCount - 2);
+                tlpHelpers.Controls.Add(hc.cb, 1, tlpHelpers.RowCount - 2);
+                tlpHelpers.Controls.Add(hc.lb, 2, tlpHelpers.RowCount - 2);
+
+                this.Height = this.Height - h + tlpHelpers.Height;
+            }
+        }
+
+        public string[] DisabledHelpers
+        {
+            get
+            {
+                List<string> res = new List<string>();
+                foreach (var hc in lhc)
+                    if (hc.cb.Checked)
+                        res.Add(hc.cb.Name.Substring(2));
+                return res.ToArray();
+            }
+            set {
+                foreach (var hc in lhc) hc.cb.Checked = false;
+                foreach (string id in value)
+                    foreach (var hc in lhc)
+                        if (hc.cb.Name.Equals("cb" + id))
+                            hc.cb.Checked = true;
+            }
+        }
+
+        void hc_btn_Click(object sender, EventArgs e)
+        {
+            Button btn = sender as Button;
+            string id = btn.Name.Substring(3);
+            foreach (var helper in s3pi.DemoPlugins.DemoPlugins.Helpers)
+            {
+                if (helper.id != id) continue;
+                string s = "";
+                s += "File: Helpers\\" + helper.id + ".helper";
+                s += "\nButton: " + helper.label;
+                s += "\nDescription: " + helper.desc;
+                CopyableMessageBox.Show(s);
+                break;
+            }
         }
 
         public bool HasUserHexEditor { get { return ckbUserHexEditor.Checked; } set { ckbUserHexEditor.Checked = value; } }

@@ -61,18 +61,6 @@ namespace S3PIDemoFE.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string UserHelpersTxt {
-            get {
-                return ((string)(this["UserHelpersTxt"]));
-            }
-            set {
-                this["UserHelpersTxt"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string UserExtensionsTxt {
             get {
                 return ((string)(this["UserExtensionsTxt"]));
@@ -339,6 +327,17 @@ namespace S3PIDemoFE.Properties {
         public string DBPFFilesAndAll {
             get {
                 return ((string)(this["DBPFFilesAndAll"]));
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection DisabledHelpers {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["DisabledHelpers"]));
+            }
+            set {
+                this["DisabledHelpers"] = value;
             }
         }
     }
