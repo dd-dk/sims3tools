@@ -814,6 +814,13 @@ namespace S3PIDemoFE
             package.ReplaceResource(browserWidget1.SelectedResource, resource);
             resourceIsDirty = controlPanel1.CommitEnabled = false;
             IsPackageDirty = true;
+
+            // Reload the resource we just replaced as there's no way to get a changed trigger from it
+            SuspendLayout();
+            IResourceIndexEntry rie = browserWidget1.SelectedResource;
+            browserWidget1.SelectedResource = null;
+            browserWidget1.SelectedResource = rie;
+            ResumeLayout();
         }
 
         // For "resourceImport()", see Import/Import.cs
