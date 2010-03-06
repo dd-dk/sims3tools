@@ -1013,24 +1013,32 @@ namespace ObjectCloner
         CatalogType tabType = 0;
         void InitialiseTabs(CatalogType resourceType)
         {
-            if (tabType == resourceType) return;
-            tabType = resourceType;
-
-            if (resourceType == CatalogType.ModularResource) resourceType = CatalogType.CatalogObject;//Modular Resources - display OBJD0
-
-            IResource res = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x" + ((uint)resourceType).ToString("X8"));
-            InitialiseDetailsTab(res);
-            this.tabControl1.Controls.Remove(this.tpFlagsRoom);
-            this.tabControl1.Controls.Remove(this.tpFlagsFunc);
-            this.tabControl1.Controls.Remove(this.tpFlagsBuildEtc);
-            if (tabType == CatalogType.CatalogObject)
+            string appWas = this.Text;
+            this.Text = myName + " [busy]";
+            Application.UseWaitCursor = true;
+            Application.DoEvents();
+            try
             {
-                this.tabControl1.Controls.Add(this.tpFlagsRoom);
-                this.tabControl1.Controls.Add(this.tpFlagsFunc);
-                this.tabControl1.Controls.Add(this.tpFlagsBuildEtc);
-                InitialiseFlagTabs(res);
-                InitialiseOtherTab(res);
+                if (tabType == resourceType) return;
+                tabType = resourceType;
+
+                if (resourceType == CatalogType.ModularResource) resourceType = CatalogType.CatalogObject;//Modular Resources - display OBJD0
+
+                IResource res = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x" + ((uint)resourceType).ToString("X8"));
+                InitialiseDetailsTab(res);
+                this.tabControl1.Controls.Remove(this.tpFlagsRoom);
+                this.tabControl1.Controls.Remove(this.tpFlagsFunc);
+                this.tabControl1.Controls.Remove(this.tpFlagsBuildEtc);
+                if (tabType == CatalogType.CatalogObject)
+                {
+                    this.tabControl1.Controls.Add(this.tpFlagsRoom);
+                    this.tabControl1.Controls.Add(this.tpFlagsFunc);
+                    this.tabControl1.Controls.Add(this.tpFlagsBuildEtc);
+                    InitialiseFlagTabs(res);
+                    InitialiseOtherTab(res);
+                }
             }
+            finally { this.Text = appWas; Application.UseWaitCursor = false; Application.DoEvents(); }
         }
 
         Dictionary<string, string> detailsFieldMap;//(Type:)Label -> fieldname
@@ -1275,14 +1283,22 @@ namespace ObjectCloner
 
         void ClearTabs()
         {
-            clearOverview();
-            clearDetails();
-            if (tabControl1.Contains(tpFlagsRoom))
+            string appWas = this.Text;
+            this.Text = myName + " [busy]";
+            Application.UseWaitCursor = true;
+            Application.DoEvents();
+            try
             {
-                clearFlags();
-                clearOther();
+                clearOverview();
+                clearDetails();
+                if (tabControl1.Contains(tpFlagsRoom))
+                {
+                    clearFlags();
+                    clearOther();
+                }
+                TabEnable(false);
             }
-            TabEnable(false);
+            finally { this.Text = appWas; Application.UseWaitCursor = false; Application.DoEvents(); }
         }
         void clearOverview()
         {
@@ -1316,23 +1332,31 @@ namespace ObjectCloner
 
         void FillTabs(Item item)
         {
-            if (item.Resource == null)
+            string appWas = this.Text;
+            this.Text = myName + " [busy]";
+            Application.UseWaitCursor = true;
+            Application.DoEvents();
+            try
             {
-                ClearTabs();
-                return;
+                if (item.Resource == null)
+                {
+                    ClearTabs();
+                    return;
+                }
+
+                InitialiseTabs(item.CType);
+
+                Item catlg = (item.CType == CatalogType.ModularResource) ? ItemForTGIBlock0(item) : item;
+
+                fillOverview(catlg);
+                fillDetails(catlg);
+                if (item.CType == CatalogType.CatalogObject)
+                {
+                    fillFlags(catlg);
+                    fillOther(catlg);
+                }
             }
-
-            InitialiseTabs(item.CType);
-
-            Item catlg = (item.CType == CatalogType.ModularResource) ? ItemForTGIBlock0(item) : item;
-
-            fillOverview(catlg);
-            fillDetails(catlg);
-            if (item.CType == CatalogType.CatalogObject)
-            {
-                fillFlags(catlg);
-                fillOther(catlg);
-            }
+            finally { this.Text = appWas; Application.UseWaitCursor = false; Application.DoEvents(); }
             TabEnable(false);
         }
         void fillOverview(Item item)
@@ -1432,13 +1456,21 @@ namespace ObjectCloner
 
         void TabEnable(bool enabled)
         {
-            tabEnableOverview(enabled);
-            tabEnableDetails(enabled);
-            if (tabControl1.Contains(tpFlagsRoom))
+            string appWas = this.Text;
+            this.Text = myName + " [busy]";
+            Application.UseWaitCursor = true;
+            Application.DoEvents();
+            try
             {
-                tabEnableFlags(enabled);
-                tabEnableOther(enabled);
+                tabEnableOverview(enabled);
+                tabEnableDetails(enabled);
+                if (tabControl1.Contains(tpFlagsRoom))
+                {
+                    tabEnableFlags(enabled);
+                    tabEnableOther(enabled);
+                }
             }
+            finally { this.Text = appWas; Application.UseWaitCursor = false; Application.DoEvents(); }
         }
         void tabEnableOverview(bool enabled)
         {
@@ -1452,13 +1484,13 @@ namespace ObjectCloner
         {
             for (int i = 1; i < tlpObjectDetail.RowCount - 1; i++)
             {
-                TextBox tb = (TextBox)tlpObjectDetail.GetControlFromPosition(1, i);
-                if (tb.Tag != null) tb.Enabled = enabled;
+                Control c = tlpObjectDetail.GetControlFromPosition(1, i);
+                if (c.Tag != null) c.Enabled = enabled;
             }
             for (int i = 2; i < tlpObjectCommon.RowCount - 1; i++)
             {
-                TextBox tb = (TextBox)tlpObjectCommon.GetControlFromPosition(1, i);
-                if (tb.Tag != null) tb.Enabled = enabled;
+                Control c = tlpObjectCommon.GetControlFromPosition(1, i);
+                if (c.Tag != null) c.Enabled = enabled;
             }
         }
         void tabEnableFlags(bool enabled)
