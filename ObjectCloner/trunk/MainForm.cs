@@ -2165,6 +2165,7 @@ namespace ObjectCloner
                         #region Selected CatlgItem; all OBJD (i.e. from MDLR or CFIR)
                         AHandlerElement commonBlock = ((AHandlerElement)item.Resource["CommonBlock"].Value);
 
+                        #region Selected CatlgItem || all MDLR OBJDs || both CTPTs || 0th CFIR OBJD
                         if (item.rk == selectedItem.rk//Selected CatlgItem
                             || selectedItem.CType == CatalogType.ModularResource//all MDLR OBJDs
                             || selectedItem.CType == CatalogType.CatalogTerrainPaintBrush//both CTPTs
@@ -2181,12 +2182,21 @@ namespace ObjectCloner
                                 commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + UniqueObject);
                             }
                         }
+                        #endregion
 
+                        #region Selected CatlgItem; 0th OBJD from MDLR or CFIR
                         if (item.rk == selectedItem.rk || item.rk == catlgItem.rk)//Selected CatlgItem; 0th OBJD from MDLR or CFIR
                         {
                             ulong PngInstance = (ulong)commonBlock["PngInstance"].Value;
                             if (PngInstance != 0 && oldToNew.ContainsKey(PngInstance))
                                 commonBlock["PngInstance"] = new TypedValue(typeof(ulong), oldToNew[PngInstance]);
+
+                            if (replacementForThumbs != null)
+                            {
+                                foreach (THUM.THUMSize size in Enum.GetValues(typeof(THUM.THUMSize)))
+                                    if (Thumb[item.rk.ResourceType, PngInstance != 0 ? PngInstance : item.rk.Instance, size, PngInstance != 0] != null)
+                                        Thumb[item.rk.ResourceType, PngInstance != 0 ? PngInstance : item.rk.Instance, size, PngInstance != 0] = replacementForThumbs;
+                            }
 
                             for (int i = 2; i < tlpObjectDetail.RowCount - 1; i++)
                             {
@@ -2224,6 +2234,7 @@ namespace ObjectCloner
                                 item.Resource[detailsFieldMap["CommonBlock." + lb.Text]] = new TypedValue(tvOld.Type, val);
                             }
 
+                            #region Selected OBJD only
                             if (selectedItem.CType == CatalogType.CatalogObject)//Selected OBJD only
                             {
                                 foreach (flagField ff in flagFields)
@@ -2253,7 +2264,9 @@ namespace ObjectCloner
                                     item.Resource[otherFieldMap[lb.Text]] = new TypedValue(tvOld.Type, val);
                                 }
                             }
+                            #endregion
                         }
+                        #endregion
 
                         if (cloneFixOptions.IsRenumber)
                         {
@@ -2315,14 +2328,6 @@ namespace ObjectCloner
 
                     if (dirty) item.Commit();
 
-                }
-
-                if (replacementForThumbs != null)
-                {
-                    ulong png = (selectedItem.Resource != null) ? (ulong)selectedItem.Resource["CommonBlock.PngInstance"].Value : 0;
-                    foreach (THUM.THUMSize size in Enum.GetValues(typeof(THUM.THUMSize)))
-                        if (Thumb[selectedItem.rk.ResourceType, png != 0 ? png : selectedItem.rk.Instance, size, png != 0] != null)
-                            Thumb[selectedItem.rk.ResourceType, png != 0 ? png : selectedItem.rk.Instance, size, png != 0] = replacementForThumbs;
                 }
 
                 #region PadSTBLs
