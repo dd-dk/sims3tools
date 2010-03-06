@@ -806,19 +806,21 @@ namespace S3PIDemoFE
                 return;
             }
 
-            resource.Stream.Position = 0;
-            resource.Stream.SetLength(br.BaseStream.Length);
-            resource.Stream.Write(br.ReadBytes((int)br.BaseStream.Length), 0, (int)br.BaseStream.Length);
-            br.Close();
-
-            package.ReplaceResource(browserWidget1.SelectedResource, resource);
-            resourceIsDirty = controlPanel1.CommitEnabled = false;
-            IsPackageDirty = true;
-
             // Reload the resource we just replaced as there's no way to get a changed trigger from it
             SuspendLayout();
             IResourceIndexEntry rie = browserWidget1.SelectedResource;
+            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, true);
             browserWidget1.SelectedResource = null;
+
+            res.Stream.Position = 0;
+            res.Stream.SetLength(br.BaseStream.Length);
+            res.Stream.Write(br.ReadBytes((int)br.BaseStream.Length), 0, (int)br.BaseStream.Length);
+            br.Close();
+
+            package.ReplaceResource(rie, res);
+            resourceIsDirty = controlPanel1.CommitEnabled = false;
+            IsPackageDirty = true;
+
             browserWidget1.SelectedResource = rie;
             ResumeLayout();
         }
