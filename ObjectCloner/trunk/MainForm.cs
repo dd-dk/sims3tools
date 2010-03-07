@@ -1077,6 +1077,11 @@ namespace ObjectCloner
             {
                 if (field.StartsWith("Unknown")) { }
                 else if (field.EndsWith("Flags")) { }
+                else if (field.EndsWith("Index"))
+                {
+                    //if (field.Equals("FallbackIndex"))
+                        detailsTabFields.Add(field);
+                }
                 else if (field.Contains("Index")) { }
                 else if (field.Equals("Materials")) { }
                 else if (field.Equals("MTDoors")) { }
@@ -1101,6 +1106,8 @@ namespace ObjectCloner
             {
                 if (detailsFieldMapReverse.ContainsKey(catlg.GetType().Name + ":" + field))
                     CreateField(tlpObjectDetail, types[field], detailsFieldMapReverse[catlg.GetType().Name + ":" + field], true);
+                else if (field.EndsWith("Index"))
+                    CreateField(tlpObjectDetail, field);
                 else
                     CreateField(tlpObjectDetail, types[field], field);
             }
@@ -1251,6 +1258,36 @@ namespace ObjectCloner
             tlp.Controls.Add(tb, 1, tlp.RowCount - 2);
         }
 
+        void CreateField(TableLayoutPanel tlp, string name)
+        {
+            tlp.RowCount++;
+            tlp.RowStyles.Insert(tlp.RowCount - 2, new RowStyle(SizeType.AutoSize));
+
+            Label lb = new Label();
+            lb.Anchor = AnchorStyles.Right;
+            lb.AutoSize = true;
+            lb.Name = "lb" + name;
+            lb.TabIndex = tlp.RowCount * 2;
+            lb.Text = name;
+            tlp.Controls.Add(lb, 0, tlp.RowCount - 2);
+
+            TGIBlockCombo tbc = new TGIBlockCombo();
+            tbc.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            tbc.Name = "tbc" + name;
+            tbc.Enabled = false;
+            tbc.Margin = new Padding(3, 0 , 0, 0);
+            tbc.ShowEdit = false;
+            tbc.TabIndex = tlp.RowCount * 2 + 1;
+            tbc.Width = (int)tlp.ColumnStyles[1].Width;
+            tlp.Controls.Add(tbc, 1, tlp.RowCount - 2);
+        }
+
+        void tbc_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            TGIBlockCombo tbc = sender as TGIBlockCombo;
+            if (tbc == null) return;
+        }
+
         void tb_Validating(object sender, CancelEventArgs e)
         {
             TextBox tb = sender as TextBox;
@@ -1315,6 +1352,7 @@ namespace ObjectCloner
         {
             foreach (Control c in tlpObjectDetail.Controls)
                 if (c is TextBox) ((TextBox)c).Text = "";
+                else if (c is TGIBlockCombo) ((TGIBlockCombo)c).SelectedIndex = -1;
             foreach (Control c in tlpObjectCommon.Controls)
                 if (c is TextBox) ((TextBox)c).Text = "";
         }
@@ -1380,8 +1418,6 @@ namespace ObjectCloner
             for (int i = 1; i < tlpObjectDetail.RowCount - 1; i++)
             {
                 Label lb = (Label)tlpObjectDetail.GetControlFromPosition(0, i);
-                TextBox tb = (TextBox)tlpObjectDetail.GetControlFromPosition(1, i);
-
 
                 TypedValue tv;
                 if (detailsFieldMap.ContainsKey(objd.Resource.GetType().Name + ":" + lb.Text))
@@ -1389,15 +1425,28 @@ namespace ObjectCloner
                 else
                     tv = objd.Resource[lb.Text];
 
-                if (typeof(Enum).IsAssignableFrom(tv.Type))
+                Control c = tlpObjectDetail.GetControlFromPosition(1, i);
+                if (c is TextBox)
                 {
-                    string[] s = ("" + tv).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    tb.Text = s[0];
-                }
-                else
-                    tb.Text = tv;
+                    TextBox tb = (TextBox)tlpObjectDetail.GetControlFromPosition(1, i);
 
-                tb.ReadOnly = tb.Tag == null;
+                    if (typeof(Enum).IsAssignableFrom(tv.Type))
+                    {
+                        string[] s = ("" + tv).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        tb.Text = s[0];
+                    }
+                    else
+                        tb.Text = tv;
+
+                    tb.ReadOnly = tb.Tag == null;
+                }
+                else if (c is TGIBlockCombo)
+                {
+                    AResource.TGIBlockList tgiBlocks = objd.Resource["TGIBlocks"].Value as AResource.TGIBlockList;
+                    TGIBlockCombo tbc = (TGIBlockCombo)tlpObjectDetail.GetControlFromPosition(1, i);
+                    tbc.TGIBlocks = tgiBlocks;
+                    tbc.SelectedIndex = (int)(uint)tv.Value;
+                }
             }
             for (int i = 2; i < tlpObjectCommon.RowCount - 1; i++)
             {
@@ -2233,19 +2282,23 @@ namespace ObjectCloner
                             for (int i = 2; i < tlpObjectDetail.RowCount - 1; i++)
                             {
                                 Label lb = (Label)tlpObjectDetail.GetControlFromPosition(0, i);
-                                TextBox tb = (TextBox)tlpObjectDetail.GetControlFromPosition(1, i);
-                                if (tb.Tag == null) continue;
+                                Control c = tlpObjectDetail.GetControlFromPosition(1, i);
+                                if (c.Tag == null) continue;
 
-                                TypedValue tvOld = item.Resource[detailsFieldMap[item.Resource.GetType().Name + ":" + lb.Text]];
+                                if (c is TextBox)
+                                {
+                                    TextBox tb = c as TextBox;
+                                    TypedValue tvOld = item.Resource[detailsFieldMap[item.Resource.GetType().Name + ":" + lb.Text]];
 
-                                ulong u = Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
-                                object val;
-                                if (typeof(Enum).IsAssignableFrom(tvOld.Type))
-                                    val = Enum.ToObject(tvOld.Type, u);
-                                else
-                                    val = Convert.ChangeType(u, tvOld.Type);
+                                    ulong u = Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
+                                    object val;
+                                    if (typeof(Enum).IsAssignableFrom(tvOld.Type))
+                                        val = Enum.ToObject(tvOld.Type, u);
+                                    else
+                                        val = Convert.ChangeType(u, tvOld.Type);
 
-                                item.Resource[detailsFieldMap[item.Resource.GetType().Name + ":" + lb.Text]] = new TypedValue(tvOld.Type, val);
+                                    item.Resource[detailsFieldMap[item.Resource.GetType().Name + ":" + lb.Text]] = new TypedValue(tvOld.Type, val);
+                                }
                             }
 
                             for (int i = 2; i < tlpObjectCommon.RowCount - 1; i++)
@@ -2302,6 +2355,7 @@ namespace ObjectCloner
 
                         if (cloneFixOptions.IsRenumber)
                         {
+                            #region Keep brushes together
                             if (item.CType == CatalogType.CatalogTerrainPaintBrush)//Both CTPTs
                             {
                                 byte status = (byte)commonBlock["BuildBuyProductStatusFlags"].Value;
@@ -2311,8 +2365,22 @@ namespace ObjectCloner
                                 else
                                     item.Resource["BrushIndex"] = new TypedValue(typeof(uint), brushIndex + 1);
                             }
+                            #endregion
 
-                            UpdateRKsFromField((AResource)item.Resource);
+                            if (item.CType == CatalogType.CatalogObject)
+                            {
+                                #region Avoid renumbering Fallback TGI
+                                int fallbackIndex = (int)(uint)item.Resource["FallbackIndex"].Value;
+                                AResource.TGIBlockList tgiBlocks = item.Resource["TGIBlocks"].Value as AResource.TGIBlockList;
+                                AResourceKey fallbackRK = new AResource.TGIBlock(0, null, tgiBlocks[fallbackIndex]);
+
+                                UpdateRKsFromField((AResource)item.Resource);
+
+                                tgiBlocks[fallbackIndex] = new AResource.TGIBlock(0, null, fallbackRK);
+                                #endregion
+                            }
+                            else
+                                UpdateRKsFromField((AResource)item.Resource);
                         }
 
                         dirty = true;
@@ -3051,6 +3119,7 @@ namespace ObjectCloner
             {
                 stepList.AddRange(new Step[] {
                     // either OBJD_SlurpDDSes or Catlg_SlurpTGIs
+                    OBJD_removeRefdOBJDs,
                     OBJD_getOBKJ,
                     // OBJD_addOBJKref if default resources only
                     OBJK_SlurpTGIs,
@@ -3069,14 +3138,18 @@ namespace ObjectCloner
                     MODLs_SlurpTXTCs,
                 });
                 lastStepInChain = MODLs_SlurpTXTCs;
+                if (mode == Mode.Clone)
+                {
+                    stepList.Insert(stepList.IndexOf(OBJD_getOBKJ), OBJD_setFallback);
+                }
                 if (cloneFixOptions.IsDefaultOnly)
                 {
-                    stepList.Insert(stepList.IndexOf(OBJD_getOBKJ), OBJD_SlurpDDSes);
+                    stepList.Insert(stepList.IndexOf(OBJD_removeRefdOBJDs), OBJD_SlurpDDSes);
                     stepList.Insert(stepList.IndexOf(OBJK_SlurpTGIs), OBJD_addOBJKref);
                 }
                 else
                 {
-                    stepList.Insert(stepList.IndexOf(OBJD_getOBKJ), Catlg_SlurpRKs);
+                    stepList.Insert(stepList.IndexOf(OBJD_removeRefdOBJDs), Catlg_SlurpRKs);
                 }
                 if (cloneFixOptions.IsIncludeThumbnails || (!isClone && cloneFixOptions.IsRenumber))
                     stepList.Add(SlurpThumbnails);
@@ -3195,6 +3268,8 @@ namespace ObjectCloner
             StepText = new Dictionary<Step, string>();
             StepText.Add(Item_addSelf, "Add selected item");
 
+            StepText.Add(OBJD_setFallback, "Set fallback TGI");
+            StepText.Add(OBJD_removeRefdOBJDs, "Remove referenced OBJDs");
             StepText.Add(OBJD_getOBKJ, "Find OBJK");
             StepText.Add(OBJD_addOBJKref, "Add OBJK");
             StepText.Add(OBJD_SlurpDDSes, "OBJD-referenced resources");
@@ -3245,6 +3320,19 @@ namespace ObjectCloner
         void Catlg_addVPXYs() { for (int i = 0; i < vpxyItems.Count; i++) Add("vpxy[" + i + "]", vpxyItems[i].rk); }
 
         #region OBJD Steps
+        void OBJD_setFallback()
+        {
+            if ((selectedItem.rk.ResourceGroup & 0xFF) != 0x00) return;// Only base game objects
+
+            int fallbackIndex = (int)(uint)selectedItem.Resource["FallbackIndex"].Value;
+            AResource.TGIBlockList tgiBlocks = selectedItem.Resource["TGIBlocks"].Value as AResource.TGIBlockList;
+            if (tgiBlocks[fallbackIndex].Equals(RK.NULL))
+            {
+                selectedItem.Resource["FallbackIndex"] = new TypedValue(typeof(uint), (uint)tgiBlocks.Count, "X");
+                tgiBlocks.Add("TGI", selectedItem.rk.ResourceType, selectedItem.rk.ResourceGroup, selectedItem.rk.Instance);
+                selectedItem.Commit();
+            }
+        }
         void OBJD_getOBKJ()
         {
             uint index = (uint)selectedItem.Resource["OBJKIndex"].Value;
@@ -3289,6 +3377,19 @@ namespace ObjectCloner
                     vpxyItems.Add(vpxy);
             }
             if (vpxyItems.Count == 0) stepNum = lastInChain;
+        }
+        void OBJD_removeRefdOBJDs()
+        {
+            IList<AResource.TGIBlock> ltgi = (IList<AResource.TGIBlock>)selectedItem.Resource["TGIBlocks"].Value;
+            foreach (AResourceKey rk in ltgi)
+            {
+                if (rk.ResourceType == (uint)CatalogType.CatalogObject && rk.Instance != selectedItem.rk.Instance)
+                {
+                    int i = new List<IResourceKey>(rkLookup.Values).IndexOf(rk);
+                    if (i >= 0)
+                        rkLookup.Remove(new List<string>(rkLookup.Keys)[i]);
+                }
+            }
         }
         #endregion
 
