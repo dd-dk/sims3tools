@@ -94,7 +94,6 @@ namespace S3PIDemoFE
                 TypedValuePropertyDescriptor tvpd = new TypedValuePropertyDescriptor(value, f, null);
                 ltpdc.Add(new TypedValuePropertyDescriptor(value, f, new Attribute[] { new CategoryAttribute(tvpdToCategory(tvpd.PropertyType)) }));
             }
-            ltpdc.Sort(CompareByPriority);
             List<PropertyDescriptor> lpdc = new List<PropertyDescriptor>(ltpdc.ToArray());
             int i = 0; while (i < ltpdc.Count && ltpdc[i].Priority < int.MaxValue) i++;
             if (typeof(IDictionary).IsAssignableFrom(value.GetType())) { lpdc.Insert(i, new IDictionaryPropertyDescriptor((IDictionary)value, "(this)", new Attribute[] { new CategoryAttribute("Lists") })); }
@@ -118,12 +117,6 @@ namespace S3PIDemoFE
             if (owner.GetType().Equals(typeof(AsKVP))) return true;
             if (owner.GetType().Equals(typeof(AsHex))) return true;
             return owner.GetType().GetProperty(field).CanWrite;
-        }
-        public int CompareByPriority(TypedValuePropertyDescriptor x, TypedValuePropertyDescriptor y)
-        {
-            int res = x.Priority.CompareTo(y.Priority);
-            if (res != 0) return res;
-            return x.Name.CompareTo(y.Name);
         }
 
         public PropertyDescriptorCollection GetProperties() { return GetProperties(new Attribute[] { }); }
@@ -173,9 +166,8 @@ namespace S3PIDemoFE
                 {
                     string name = Name.Split(' ').Length == 1 ? Name : Name.Split(new char[] { ' ' }, 2)[1].Trim();
                     fieldType = AApiVersionedFields.GetContentFieldTypes(0, owner.GetType())[name];
+                    priority = AApiVersionedFields.GetPriority(owner.GetType(), name);
                     PropertyInfo pi = owner.GetType().GetProperty(name);
-                    foreach (Attribute attr in pi.GetCustomAttributes(typeof(ElementPriorityAttribute), true))
-                        priority = (attr as ElementPriorityAttribute).Priority;
                     foreach (Attribute attr in pi.GetCustomAttributes(typeof(DataGridExpandableAttribute), true))
                         expandable = (attr as DataGridExpandableAttribute).DataGridExpandable;
                 }
