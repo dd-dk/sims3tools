@@ -1106,7 +1106,7 @@ namespace ObjectCloner
             {
                 if (detailsFieldMapReverse.ContainsKey(catlg.GetType().Name + ":" + field))
                     CreateField(tlpObjectDetail, types[field], detailsFieldMapReverse[catlg.GetType().Name + ":" + field], true);
-                else if (field.EndsWith("Index"))
+                else if ((catlg as AResource).ContentFields.Contains("TGIBlocks") && field.EndsWith("Index"))
                     CreateField(tlpObjectDetail, field);
                 else
                     CreateField(tlpObjectDetail, types[field], field);
@@ -1445,7 +1445,8 @@ namespace ObjectCloner
                     AResource.TGIBlockList tgiBlocks = objd.Resource["TGIBlocks"].Value as AResource.TGIBlockList;
                     TGIBlockCombo tbc = (TGIBlockCombo)tlpObjectDetail.GetControlFromPosition(1, i);
                     tbc.TGIBlocks = tgiBlocks;
-                    tbc.SelectedIndex = (int)(uint)tv.Value;
+                    int index =(int)(uint)tv.Value;
+                    tbc.SelectedIndex = index >= 0 && index < tgiBlocks.Count ? index : -1;
                 }
             }
             for (int i = 2; i < tlpObjectCommon.RowCount - 1; i++)
