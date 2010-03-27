@@ -54,6 +54,10 @@ namespace ObjectCloner
             "SPA_MX", "SWE_SE", "THA_TH",
         };
 
+        static Image defaultThumbnail =
+            Image.FromFile(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Resources/defaultThumbnail.png"),
+            true).GetThumbnailImage(256, 256, gtAbort, IntPtr.Zero);
+
         static Dictionary<string, List<string>> s3ocIni;
         static MainForm()
         {
@@ -651,6 +655,15 @@ namespace ObjectCloner
                 return item == null ? RK.NULL : item.rk;
             }
 
+            public static IResourceKey getNewRK(uint type, ulong instance, THUMSize size, bool isPNGInstance)
+            {
+                TGIN tgin = new TGIN();
+                tgin.ResType = (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size];
+                tgin.ResGroup = (uint)(type == 0x515CA4CD ? 1 : 0);
+                tgin.ResInstance = instance;
+                return (AResourceKey)tgin;
+            }
+
             static Item getItem(List<IPackage> pkgs, ulong instance, uint type)
             {
                 if (type == 0x00000000) return null;
@@ -691,6 +704,16 @@ namespace ObjectCloner
                 return Thumb[item.rk.ResourceType, png != 0 ? png : item.rk.Instance, size, png != 0];
             }
         }
+        Image getLargestThumbOrDefault(Item item)
+        {
+            Image img = getImage(THUM.THUMSize.large, item);
+            if (img != null) return img;
+            img = getImage(THUM.THUMSize.medium, item);
+            if (img != null) return img;
+            img = getImage(THUM.THUMSize.small, item);
+            if (img != null) return img;
+            return defaultThumbnail;
+        }
         IResourceKey getImageRK(THUM.THUMSize size, Item item)
         {
             if (item.CType == CatalogType.ModularResource)
@@ -699,6 +722,34 @@ namespace ObjectCloner
             {
                 ulong png = (item.Resource != null) ? (ulong)item.Resource["CommonBlock.PngInstance"].Value : 0;
                 return Thumb.getRK(item.rk.ResourceType, png != 0 ? png : item.rk.Instance, size, png != 0);
+            }
+        }
+        static IResourceKey getNewRK(THUM.THUMSize size, Item item)
+        {
+            if (item.CType == CatalogType.ModularResource)
+                return RK.NULL;
+            else
+            {
+                ulong png = (item.Resource != null) ? (ulong)item.Resource["CommonBlock.PngInstance"].Value : 0;
+                return THUM.getNewRK(item.rk.ResourceType, png != 0 ? png : item.rk.Instance, size, png != 0);
+            }
+        }
+        IResourceKey makeImage(THUM.THUMSize size, Item item)
+        {
+            if (item.CType == CatalogType.ModularResource)
+                return RK.NULL;
+            else
+            {
+                IResourceKey rk = getImageRK(size, item);
+                if (rk == RK.NULL)
+                {
+                    rk = getNewRK(size, item);
+                    RIE rie = new RIE(objPkgs[0], objPkgs[0].AddResource(rk, null, true));
+                    Item thum = new Item(rie);
+                    defaultThumbnail.Save(thum.Resource.Stream, System.Drawing.Imaging.ImageFormat.Png);
+                    thum.Commit();
+                }
+                return rk;
             }
         }
         #endregion
@@ -1504,6 +1555,15 @@ namespace ObjectCloner
             }
         }
 
+        void fillOverviewUpdateImage(Item item)
+        {
+            if (pictureBox1.Image == null)
+            {
+                pictureBox1.Image = getLargestThumbOrDefault(item).GetThumbnailImage(pictureBox1.Width, pictureBox1.Height, gtAbort, IntPtr.Zero);
+                lbThumbTGI.Text = (AResourceKey)getNewRK(THUM.THUMSize.large, item);
+            }
+        }
+
         void TabEnable(bool enabled)
         {
             string appWas = this.Text;
@@ -2051,6 +2111,7 @@ namespace ObjectCloner
                     }
                     updateProgress(true, "", true, rkList.Count, true, rkList.Count);
 
+                    #region String tables
                     updateProgress(true, "Finding string tables...", true, 0, true, 0);
 
                     Item catlgItem = selectedItem;
@@ -2109,6 +2170,7 @@ namespace ObjectCloner
                         if (++i % freq == 0)
                             updateProgress(true, "Creating string tables extracts... " + i * 100 / 0x17 + "%", true, 0x17, true, i);
                     }
+                    #endregion
 
                     updateProgress(true, "Committing new name map... ", true, 0, true, 0);
                     if (!stopSaving) newnmap.Commit();
@@ -2230,6 +2292,8 @@ namespace ObjectCloner
 
         void StartFixing()
         {
+            Dictionary<IResourceKey, Item> rkToItemAdded = new Dictionary<IResourceKey,Item>();
+
             Item catlgItem = (selectedItem.CType == CatalogType.ModularResource || selectedItem.CType == CatalogType.CatalogFireplace) ? ItemForTGIBlock0(selectedItem) : selectedItem;
             //oldToNew = new Dictionary<ulong, ulong>();
             //tgiToItem - TGIs we're interested in and the Item they refer to
@@ -2270,14 +2334,25 @@ namespace ObjectCloner
                         if (item.rk == selectedItem.rk || item.rk == catlgItem.rk)//Selected CatlgItem; 0th OBJD from MDLR or CFIR
                         {
                             ulong PngInstance = (ulong)commonBlock["PngInstance"].Value;
-                            if (PngInstance != 0 && oldToNew.ContainsKey(PngInstance))
+                            bool isPng = PngInstance != 0;
+                            if (isPng && oldToNew.ContainsKey(PngInstance))
                                 commonBlock["PngInstance"] = new TypedValue(typeof(ulong), oldToNew[PngInstance]);
 
-                            if (replacementForThumbs != null)
+                            if (cloneFixOptions.IsIncludeThumbnails)
                             {
+                                Image img = getLargestThumbOrDefault(item);
+                                //Always output one of each size
                                 foreach (THUM.THUMSize size in Enum.GetValues(typeof(THUM.THUMSize)))
-                                    if (Thumb[item.rk.ResourceType, PngInstance != 0 ? PngInstance : item.rk.Instance, size, PngInstance != 0] != null)
-                                        Thumb[item.rk.ResourceType, PngInstance != 0 ? PngInstance : item.rk.Instance, size, PngInstance != 0] = replacementForThumbs;
+                                    if (getImage(size, item) == null)
+                                    {
+                                        IResourceKey rk = makeImage(size, item);
+                                        rkToItemAdded.Add(rk, new Item(objPkgs, rk));
+                                    }
+                                //Update
+                                if (replacementForThumbs != null) img = replacementForThumbs;
+                                ulong instance = isPng ? PngInstance : item.rk.Instance;
+                                foreach (THUM.THUMSize size in Enum.GetValues(typeof(THUM.THUMSize)))
+                                    Thumb[item.rk.ResourceType, instance, size, isPng] = img;
                             }
 
                             for (int i = 2; i < tlpObjectDetail.RowCount - 1; i++)
@@ -2457,11 +2532,16 @@ namespace ObjectCloner
 
                         if (NMap != null && NMap.map != null && !NMap.map.ContainsKey(newRK.Instance))
                             NMap.map.Add(newRK.Instance, String.Format(language_fmt, languages[i], i, English.rk.Instance));
+
+                        if (!rkToItem.ContainsKey(newRK))
+                            rkToItem.Add(newRK, newstbl);
                     }
                     NMap.Commit();
                 }
                 #endregion
 
+                foreach (var kvp in rkToItemAdded)
+                    if (!rkToItem.ContainsKey(kvp.Key)) rkToItem.Add(kvp.Key, kvp.Value);
                 foreach (Item item in rkToItem.Values)
                 {
                     if (item.rk == RK.NULL) { continue; }
@@ -3716,7 +3796,7 @@ namespace ObjectCloner
             try
             {
                 replacementForThumbs = Image.FromFile(openThumbnailDialog.FileName, true);
-                pictureBox1.Image = replacementForThumbs.GetThumbnailImage(128, 128, gtAbort, System.IntPtr.Zero);
+                pictureBox1.Image = replacementForThumbs.GetThumbnailImage(pictureBox1.Width, pictureBox1.Height, gtAbort, System.IntPtr.Zero);
             }
             catch (Exception ex)
             {
@@ -3724,10 +3804,11 @@ namespace ObjectCloner
                 replacementForThumbs = null;
             }
         }
-        bool gtAbort() { return false; }
+        static bool gtAbort() { return false; }
 
         private void btnStart_Click(object sender, EventArgs e)
         {
+            fillOverviewUpdateImage(selectedItem);
             TabEnable(true);
             DisplayOptions();
         }
