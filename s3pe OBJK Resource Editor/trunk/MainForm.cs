@@ -342,7 +342,6 @@ namespace s3pe_OBJK_Resource_Editor
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            Environment.ExitCode = 1;
             this.Close();
         }
 
