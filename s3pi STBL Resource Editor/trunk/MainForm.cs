@@ -125,7 +125,6 @@ namespace s3pi_STBL_Resource_Editor
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            Environment.ExitCode = 1;
             this.Close();
         }
 
