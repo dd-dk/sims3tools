@@ -667,8 +667,8 @@
             this.tbcFTPT.Size = new System.Drawing.Size(319, 21);
             this.tbcFTPT.TabIndex = 2;
             this.tbcFTPT.TGIBlocks = null;
-            this.tbcFTPT.TGIBlockListChanged += new System.EventHandler(this.tbg_TGIBlockListChanged);
             this.tbcFTPT.SelectedIndexChanged += new System.EventHandler(this.tbcFTPT_SelectedIndexChanged);
+            this.tbcFTPT.TGIBlockListChanged += new System.EventHandler(this.tbg_TGIBlockListChanged);
             // 
             // lbCurrentPart
             // 
