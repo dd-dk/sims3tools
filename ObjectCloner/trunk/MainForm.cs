@@ -410,6 +410,7 @@ namespace ObjectCloner
         private ObjectCloner.TopPanelComponents.ResourceList resourceList;
         private ObjectCloner.TopPanelComponents.PleaseWait pleaseWait;
         private ObjectCloner.TopPanelComponents.CloneFixOptions cloneFixOptions;
+        private ObjectCloner.TopPanelComponents.Search searchPane;
 
         public MainForm()
         {
@@ -688,7 +689,6 @@ namespace ObjectCloner
         {
             get
             {
-                if (!haveLoaded) return null;
                 if (thumb == null)
                     thumb = new THUM(objPkgs, tmbPkgs);
                 return thumb;
@@ -794,7 +794,6 @@ namespace ObjectCloner
         {
             get
             {
-                if (!haveLoaded) return null;
                 if (english == null)
                     english = new STBL(objPkgs);
                 return english;
@@ -835,7 +834,6 @@ namespace ObjectCloner
         {
             get
             {
-                if (!haveLoaded) return null;
                 if (nmap == null)
                     nmap = new NameMap(objPkgs);
                 return nmap;
@@ -850,17 +848,50 @@ namespace ObjectCloner
 
 
         #region LeftPanelComponents
-        bool waitingToDisplayObjects;
-        private void DisplayObjectChooser()
+
+        private void DisplaySearch()
         {
-            waitingToDisplayObjects = false;
+            searchPane.SelectedIndexChanged -= new EventHandler<Search.SelectedIndexChangedEventArgs>(searchPane_SelectedIndexChanged);
+            searchPane.SelectedIndexChanged += new EventHandler<Search.SelectedIndexChangedEventArgs>(searchPane_SelectedIndexChanged);
+            searchPane.ItemActivate -= new EventHandler<Search.ItemActivateEventArgs>(searchPane_ItemActivate);
+            searchPane.ItemActivate += new EventHandler<Search.ItemActivateEventArgs>(searchPane_ItemActivate);
+
             this.AcceptButton = btnStart;
             this.CancelButton = null;
 
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBC, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBT, true);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
 
+            lbSearch.Visible = true;
+            lbUseMenu.Visible = false;
+            lbSelectOptions.Visible = false;
+            btnStart.Visible = true;
+            btnStart.Enabled = false;
+
+            StopWait();
+            splitContainer1.Panel1.Controls.Clear();
+            splitContainer1.Panel1.Controls.Add(searchPane);
+            searchPane.Dock = DockStyle.Fill;
+            searchPane.Focus();
+        }
+
+
+        bool waitingToDisplayObjects;
+        private void DisplayObjectChooser()
+        {
+            waitingToDisplayObjects = false;
+            searchPane = null;
+            this.AcceptButton = btnStart;
+            this.CancelButton = null;
+
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBC, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBT, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
+
+            lbSearch.Visible = false;
             lbUseMenu.Visible = false;
             lbSelectOptions.Visible = false;
             btnStart.Visible = true;
@@ -885,8 +916,10 @@ namespace ObjectCloner
         }
         private void DisplayOptions()
         {
-            btnStart.Visible = false;
+            lbSearch.Visible = false;
+            lbUseMenu.Visible = false;
             lbSelectOptions.Visible = true;
+            btnStart.Visible = false;
             //tabControl1.Enabled = true;
 
             cloneFixOptions = new CloneFixOptions(this, mode == Mode.Clone, hasOBJDs());
@@ -916,16 +949,18 @@ namespace ObjectCloner
 
         private void DisplayNothing()
         {
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true);
-            menuBarWidget1.Enable(MenuBarWidget.MD.MBC, true);
-            menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
-
             this.AcceptButton = null;
             this.CancelButton = null;
 
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBC, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBT, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
+
+            lbSearch.Visible = false;
             lbUseMenu.Visible = true;
-            btnStart.Visible = false;
             lbSelectOptions.Visible = false;
+            btnStart.Visible = false;
 
             StopWait();
             splitContainer1.Panel1.Controls.Clear();
@@ -975,10 +1010,28 @@ namespace ObjectCloner
             }
         }
 
-        void objectChooser_ItemActivate(object sender, EventArgs e)
+        void objectChooser_ItemActivate(object sender, EventArgs e) { btnStart_Click(sender, EventArgs.Empty); }
+        #endregion
+
+        #region Search
+        private void searchPane_SelectedIndexChanged(object sender, Search.SelectedIndexChangedEventArgs e)
         {
-            btnStart_Click(sender, e);
+            replacementForThumbs = null;// might as well be here; needed after FillTabs, really.
+            if (e.SelectedItem == null)
+            {
+                selectedItem = null;
+                ClearTabs();
+                btnStart.Enabled = false;
+            }
+            else
+            {
+                selectedItem = e.SelectedItem;
+                FillTabs(selectedItem);
+                btnStart.Enabled = true;
+            }
         }
+
+        private void searchPane_ItemActivate(object sender, Search.ItemActivateEventArgs e) { btnStart_Click(sender, EventArgs.Empty); }
         #endregion
 
         #region CloneFixOptions
@@ -1055,7 +1108,10 @@ namespace ObjectCloner
         void cloneFixOptions_CancelClicked(object sender, EventArgs e)
         {
             TabEnable(false);
-            DisplayObjectChooser();
+            if (searchPane != null)
+                DisplaySearch();
+            else
+                DisplayObjectChooser();
             cloneFixOptions = null;
         }
         #endregion
@@ -1392,6 +1448,7 @@ namespace ObjectCloner
         {
             pictureBox1.Image = null;
             lbThumbTGI.Text = "";
+            tbResourceName.Text = "";
             tbObjName.Text = "";
             tbCatlgName.Text = "";
             tbObjDesc.Text = "";
@@ -1453,6 +1510,7 @@ namespace ObjectCloner
             pictureBox1.Image = getImage(THUM.THUMSize.large, item);
             lbThumbTGI.Text = (AResourceKey)getImageRK(THUM.THUMSize.large, item);
             btnReplThumb.Enabled = true;
+            tbResourceName.Text = NMap[item.rk.Instance];
             AApiVersionedFields common = item.Resource["CommonBlock"].Value as AApiVersionedFields;
             tbObjName.Text = common["Name"].Value + "";
             tbObjDesc.Text = common["Desc"].Value + "";
@@ -2240,6 +2298,7 @@ namespace ObjectCloner
         public delegate void updateProgressCallback(bool changeText, string text, bool changeMax, int max, bool changeValue, int value);
         void updateProgress(bool changeText, string text, bool changeMax, int max, bool changeValue, int value)
         {
+            if (!this.IsHandleCreated) return;
             if (changeText)
             {
                 toolStripStatusLabel1.Visible = text.Length > 0;
@@ -2774,6 +2833,7 @@ namespace ObjectCloner
                 case MenuBarWidget.MD.MBF: break;
                 case MenuBarWidget.MD.MBC: break;
                 case MenuBarWidget.MD.MBV: break;
+                case MenuBarWidget.MD.MBT: break;
                 case MenuBarWidget.MD.MBS: break;
                 case MenuBarWidget.MD.MBH: break;
                 default: break;
@@ -2835,6 +2895,7 @@ namespace ObjectCloner
         {
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, false);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBC, false);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBT, false);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBS, false);
 
             DoWait("Please wait, loading object catalog...");
@@ -2972,6 +3033,37 @@ namespace ObjectCloner
                         objectChooser.Items[i].ImageIndex = -1;
                 }
             }
+        }
+        #endregion
+
+        #region Tools menu
+        private void menuBarWidget1_MBTools_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
+        {
+            try
+            {
+                this.Enabled = false;
+                Application.DoEvents();
+                switch (mn.mn)
+                {
+                    case MenuBarWidget.MB.MBT_search: toolsSearch(); break;
+                }
+            }
+            finally { this.Enabled = true; }
+        }
+
+        private void toolsSearch()
+        {
+            if (!CheckInstallDirs()) return;
+
+            ClosePkg();
+            setList(out objPkgs, ini_fb0);
+            setList(out ddsPkgs, ini_fb2);
+            setList(out tmbPkgs, ini_tmb);
+            currentCatalogType = 0;
+
+            searchPane = new Search(objPkgs, updateProgress);
+
+            DisplaySearch();
         }
         #endregion
 

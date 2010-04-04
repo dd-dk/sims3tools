@@ -46,6 +46,8 @@ namespace ObjectCloner
                 //View
                 tilesToolStripMenuItem, largeIconsToolStripMenuItem, smallIconsToolStripMenuItem, listToolStripMenuItem, detailedListToolStripMenuItem,
                 iconsToolStripMenuItem,
+                //Tools
+                searchToolStripMenuItem,
                 //Settings
                 gameFoldersToolStripMenuItem, userNameToopStripMenuItem,
                 //Help
@@ -58,6 +60,7 @@ namespace ObjectCloner
             MBF,
             MBC,
             MBV,
+            MBT,
             MBS,
             MBH,
         }
@@ -71,6 +74,7 @@ namespace ObjectCloner
             MBC_crst, MBC_mdlr, MBC_crmt,
             MBV_tiles, MBV_largeIcons, MBV_smallIcons, MBV_list, MBV_detailedList,
             MBV_icons,
+            MBT_search,
             MBS_sims3Folder, MBS_userName,
             MBH_contents, MBH_about, MBH_warranty, MBH_licence,
         }
@@ -104,6 +108,11 @@ namespace ObjectCloner
         public event MBClickEventHandler MBView_Click;
         protected void OnMBView_Click(object sender, MB mn) { if (MBView_Click != null) MBView_Click(sender, new MBClickEventArgs(mn)); }
         private void tsMBV_Click(object sender, EventArgs e) { OnMBView_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
+
+        [Category("Action")]
+        public event MBClickEventHandler MBTools_Click;
+        protected void OnMBTools_Click(object sender, MB mn) { if (MBTools_Click != null) MBTools_Click(sender, new MBClickEventArgs(mn)); }
+        private void tsMBT_Click(object sender, EventArgs e) { OnMBTools_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
 
         [Category("Action")]
         public event MBClickEventHandler MBSettings_Click;

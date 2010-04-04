@@ -132,6 +132,12 @@
     <Compile Include="TopPanelComponents\CloneFixOptions.Designer.cs">
       <DependentUpon>CloneFixOptions.cs</DependentUpon>
     </Compile>
+    <Compile Include="TopPanelComponents\Search.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TopPanelComponents\Search.Designer.cs">
+      <DependentUpon>Search.cs</DependentUpon>
+    </Compile>
     <Compile Include="TopPanelComponents\ObjectChooser.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -170,6 +176,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="TopPanelComponents\CloneFixOptions.resx">
       <DependentUpon>CloneFixOptions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TopPanelComponents\Search.resx">
+      <DependentUpon>Search.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TopPanelComponents\ObjectChooser.resx">
       <DependentUpon>ObjectChooser.cs</DependentUpon>
