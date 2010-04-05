@@ -203,6 +203,7 @@ namespace S3PIDemoFE
                 controlPanel1.UseNames = false;
                 controlPanel1.AutoOff = true;
                 browserWidget1.Visible = false;
+                bool skipAll = false;
 
                 foreach (string filename in packageList)
                 {
@@ -221,9 +222,13 @@ namespace S3PIDemoFE
                     }
                     catch (InvalidDataException ex)
                     {
-                        CopyableMessageBox.Show(String.Format("Could not open package {0}.\n{1}", Path.GetFileName(filename), ex.Message),
-                            importPackagesDialog.Title, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
-                        continue;
+                        if (skipAll) continue;
+                        int btn = CopyableMessageBox.Show(String.Format("Could not open package {0}.\n{1}", Path.GetFileName(filename), ex.Message),
+                            importPackagesDialog.Title, CopyableMessageBoxIcon.Error, new List<string>(new string[] {
+                            "Skip this", "Skip all", "Abort"}), 0, 0);
+                        if (btn == 0) continue;
+                        if (btn == 1) { skipAll = true; continue; }
+                        break;
                     }
                     try
                     {
