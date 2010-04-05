@@ -214,7 +214,17 @@ namespace S3PIDemoFE
 
                     lbProgress.Text = "Importing " + Path.GetFileNameWithoutExtension(filename) + "...";
                     Application.DoEvents();
-                    IPackage imppkg = Package.OpenPackage(0, filename);
+                    IPackage imppkg = null;
+                    try
+                    {
+                        imppkg = Package.OpenPackage(0, filename);
+                    }
+                    catch (InvalidDataException ex)
+                    {
+                        CopyableMessageBox.Show(String.Format("Could not open package {0}.\n{1}", Path.GetFileName(filename), ex.Message),
+                            importPackagesDialog.Title, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                        continue;
+                    }
                     try
                     {
                         IList<IResourceIndexEntry> lrie = imppkg.GetResourceList;
