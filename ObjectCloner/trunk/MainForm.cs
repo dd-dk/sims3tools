@@ -932,7 +932,7 @@ namespace ObjectCloner
             {
                 string prefix = CreatorName;
                 prefix = (prefix != null) ? prefix + "_" : "";
-                cloneFixOptions.UniqueName = prefix + (searchPane==null ?
+                cloneFixOptions.UniqueName = prefix + (searchPane == null ?
                     objectChooser.SelectedItems[0].Text
                     : searchPane.SelectedItem.Text);
             }
@@ -1054,7 +1054,7 @@ namespace ObjectCloner
             uniqueObject = null;
             if ((isClone || cloneFixOptions.IsRenumber) && UniqueObject == null)
             {
-                DisplayObjectChooser();
+                cloneFixOptions_CancelClicked(null, null);
                 return;
             }
 
@@ -1064,7 +1064,7 @@ namespace ObjectCloner
                 if (ObjectCloner.Properties.Settings.Default.LastSaveFolder != null)
                     saveFileDialog1.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder;
                 DialogResult dr = saveFileDialog1.ShowDialog();
-                if (dr != DialogResult.OK) { DisplayObjectChooser(); return; }
+                if (dr != DialogResult.OK) { cloneFixOptions_CancelClicked(null, null); return; }
                 ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(saveFileDialog1.FileName);
             }
 
@@ -1073,7 +1073,7 @@ namespace ObjectCloner
             SetStepList(selectedItem, out stepList);
             if (stepList == null)
             {
-                DisplayObjectChooser();
+                cloneFixOptions_CancelClicked(null, null);
                 return;
             }
 
