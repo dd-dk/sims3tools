@@ -877,7 +877,6 @@ namespace ObjectCloner
             searchPane.Focus();
         }
 
-
         bool waitingToDisplayObjects;
         private void DisplayObjectChooser()
         {
@@ -922,6 +921,9 @@ namespace ObjectCloner
             btnStart.Visible = false;
             //tabControl1.Enabled = true;
 
+            if (searchPane != null)
+                mode = Mode.Clone;
+
             cloneFixOptions = new CloneFixOptions(this, mode == Mode.Clone, hasOBJDs());
             cloneFixOptions.CancelClicked += new EventHandler(cloneFixOptions_CancelClicked);
             cloneFixOptions.StartClicked += new EventHandler(cloneFixOptions_StartClicked);
@@ -930,10 +932,9 @@ namespace ObjectCloner
             {
                 string prefix = CreatorName;
                 prefix = (prefix != null) ? prefix + "_" : "";
-                //List<string> exts;
-                //if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + selectedItem.tgi.t.ToString("X8"), out exts)) prefix += exts[0] + "_";
-                //else prefix += "UNKN_";
-                cloneFixOptions.UniqueName = prefix + objectChooser.SelectedItems[0].Text;
+                cloneFixOptions.UniqueName = prefix + (searchPane==null ?
+                    objectChooser.SelectedItems[0].Text
+                    : searchPane.SelectedItem.Text);
             }
             else
             {
@@ -2024,7 +2025,9 @@ namespace ObjectCloner
         {
             this.SavingComplete += new EventHandler<BoolEventArgs>(MainForm_SavingComplete);
 
-            SaveList sl = new SaveList(this, objectChooser.SelectedItems[0].Tag as Item, rkLookup, objPkgs, ddsPkgs, tmbPkgs,
+            SaveList sl = new SaveList(this,
+                searchPane == null ? objectChooser.SelectedItems[0].Tag as Item
+                : searchPane.SelectedItem.Tag as Item, rkLookup, objPkgs, ddsPkgs, tmbPkgs,
                 saveFileDialog1.FileName, isPadSTBLs, cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
                 updateProgress, stopSaving, OnSavingComplete);
 

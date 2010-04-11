@@ -56,6 +56,8 @@
             this.ckbCopyToAll = new System.Windows.Forms.CheckBox();
             this.tbCatlgName = new System.Windows.Forms.RichTextBox();
             this.tbCatlgDesc = new System.Windows.Forms.RichTextBox();
+            this.label22 = new System.Windows.Forms.Label();
+            this.tbResourceName = new System.Windows.Forms.TextBox();
             this.tpDetail = new System.Windows.Forms.TabPage();
             this.tlpCatalog = new System.Windows.Forms.TableLayoutPanel();
             this.tlpObjectDetail = new System.Windows.Forms.TableLayoutPanel();
@@ -98,8 +100,6 @@
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openPackageDialog = new System.Windows.Forms.OpenFileDialog();
             this.openThumbnailDialog = new System.Windows.Forms.OpenFileDialog();
-            this.label22 = new System.Windows.Forms.Label();
-            this.tbResourceName = new System.Windows.Forms.TextBox();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
@@ -387,7 +387,7 @@
             this.label8.Location = new System.Drawing.Point(18, 160);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(69, 13);
-            this.label8.TabIndex = 1;
+            this.label8.TabIndex = 3;
             this.label8.Text = "Object Name";
             // 
             // tbObjName
@@ -397,7 +397,7 @@
             this.tbObjName.Name = "tbObjName";
             this.tbObjName.ReadOnly = true;
             this.tbObjName.Size = new System.Drawing.Size(256, 20);
-            this.tbObjName.TabIndex = 2;
+            this.tbObjName.TabIndex = 4;
             // 
             // tbPrice
             // 
@@ -405,7 +405,7 @@
             this.tbPrice.Location = new System.Drawing.Point(93, 329);
             this.tbPrice.Name = "tbPrice";
             this.tbPrice.Size = new System.Drawing.Size(100, 20);
-            this.tbPrice.TabIndex = 11;
+            this.tbPrice.TabIndex = 12;
             this.tbPrice.Validating += new System.ComponentModel.CancelEventHandler(this.tb_Validating);
             // 
             // label10
@@ -415,7 +415,7 @@
             this.label10.Location = new System.Drawing.Point(21, 186);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(66, 13);
-            this.label10.TabIndex = 3;
+            this.label10.TabIndex = 5;
             this.label10.Text = "Object Desc";
             // 
             // tbObjDesc
@@ -425,7 +425,7 @@
             this.tbObjDesc.Name = "tbObjDesc";
             this.tbObjDesc.ReadOnly = true;
             this.tbObjDesc.Size = new System.Drawing.Size(256, 20);
-            this.tbObjDesc.TabIndex = 4;
+            this.tbObjDesc.TabIndex = 6;
             // 
             // label12
             // 
@@ -434,7 +434,7 @@
             this.label12.Location = new System.Drawing.Point(56, 332);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(31, 13);
-            this.label12.TabIndex = 10;
+            this.label12.TabIndex = 12;
             this.label12.Text = "Price";
             // 
             // label9
@@ -444,7 +444,7 @@
             this.label9.Location = new System.Drawing.Point(13, 212);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(74, 13);
-            this.label9.TabIndex = 5;
+            this.label9.TabIndex = 7;
             this.label9.Text = "Catalog Name";
             // 
             // label11
@@ -454,7 +454,7 @@
             this.label11.Location = new System.Drawing.Point(16, 261);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(71, 13);
-            this.label11.TabIndex = 7;
+            this.label11.TabIndex = 9;
             this.label11.Text = "Catalog Desc";
             // 
             // ckbCopyToAll
@@ -463,7 +463,7 @@
             this.ckbCopyToAll.Location = new System.Drawing.Point(93, 306);
             this.ckbCopyToAll.Name = "ckbCopyToAll";
             this.ckbCopyToAll.Size = new System.Drawing.Size(164, 17);
-            this.ckbCopyToAll.TabIndex = 9;
+            this.ckbCopyToAll.TabIndex = 11;
             this.ckbCopyToAll.Text = "Copy English to all languages";
             this.ckbCopyToAll.UseVisualStyleBackColor = true;
             // 
@@ -474,7 +474,7 @@
             this.tbCatlgName.Multiline = false;
             this.tbCatlgName.Name = "tbCatlgName";
             this.tbCatlgName.Size = new System.Drawing.Size(256, 20);
-            this.tbCatlgName.TabIndex = 12;
+            this.tbCatlgName.TabIndex = 8;
             this.tbCatlgName.Text = "";
             // 
             // tbCatlgDesc
@@ -483,8 +483,27 @@
             this.tbCatlgDesc.Location = new System.Drawing.Point(93, 235);
             this.tbCatlgDesc.Name = "tbCatlgDesc";
             this.tbCatlgDesc.Size = new System.Drawing.Size(256, 65);
-            this.tbCatlgDesc.TabIndex = 12;
+            this.tbCatlgDesc.TabIndex = 10;
             this.tbCatlgDesc.Text = "";
+            // 
+            // label22
+            // 
+            this.label22.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label22.AutoSize = true;
+            this.label22.Location = new System.Drawing.Point(3, 134);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(84, 13);
+            this.label22.TabIndex = 1;
+            this.label22.Text = "Resource Name";
+            // 
+            // tbResourceName
+            // 
+            this.tbResourceName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbResourceName.Location = new System.Drawing.Point(93, 131);
+            this.tbResourceName.Name = "tbResourceName";
+            this.tbResourceName.ReadOnly = true;
+            this.tbResourceName.Size = new System.Drawing.Size(256, 20);
+            this.tbResourceName.TabIndex = 2;
             // 
             // tpDetail
             // 
@@ -493,7 +512,7 @@
             this.tpDetail.Location = new System.Drawing.Point(4, 22);
             this.tpDetail.Name = "tpDetail";
             this.tpDetail.Padding = new System.Windows.Forms.Padding(3);
-            this.tpDetail.Size = new System.Drawing.Size(352, 358);
+            this.tpDetail.Size = new System.Drawing.Size(352, 356);
             this.tpDetail.TabIndex = 1;
             this.tpDetail.Text = "Details";
             this.tpDetail.UseVisualStyleBackColor = true;
@@ -620,7 +639,7 @@
             this.tpFlagsRoom.Controls.Add(this.tlpFlagsRoom);
             this.tpFlagsRoom.Location = new System.Drawing.Point(4, 22);
             this.tpFlagsRoom.Name = "tpFlagsRoom";
-            this.tpFlagsRoom.Size = new System.Drawing.Size(352, 358);
+            this.tpFlagsRoom.Size = new System.Drawing.Size(352, 356);
             this.tpFlagsRoom.TabIndex = 2;
             this.tpFlagsRoom.Text = "Room Flags";
             this.tpFlagsRoom.UseVisualStyleBackColor = true;
@@ -738,7 +757,7 @@
             this.tpFlagsFunc.Controls.Add(this.tlpFlagsFunc);
             this.tpFlagsFunc.Location = new System.Drawing.Point(4, 22);
             this.tpFlagsFunc.Name = "tpFlagsFunc";
-            this.tpFlagsFunc.Size = new System.Drawing.Size(352, 358);
+            this.tpFlagsFunc.Size = new System.Drawing.Size(352, 356);
             this.tpFlagsFunc.TabIndex = 3;
             this.tpFlagsFunc.Text = "Function Flags";
             this.tpFlagsFunc.UseVisualStyleBackColor = true;
@@ -856,7 +875,7 @@
             this.tpFlagsBuildEtc.Controls.Add(this.tlpFlagsBuildEtc);
             this.tpFlagsBuildEtc.Location = new System.Drawing.Point(4, 22);
             this.tpFlagsBuildEtc.Name = "tpFlagsBuildEtc";
-            this.tpFlagsBuildEtc.Size = new System.Drawing.Size(352, 358);
+            this.tpFlagsBuildEtc.Size = new System.Drawing.Size(352, 356);
             this.tpFlagsBuildEtc.TabIndex = 4;
             this.tpFlagsBuildEtc.Text = "Build Flags && more...";
             this.tpFlagsBuildEtc.UseVisualStyleBackColor = true;
@@ -1049,25 +1068,6 @@
             this.openThumbnailDialog.FileName = "*.PNG";
             this.openThumbnailDialog.Filter = "Thumbnails|*.PNG|All files|*.*";
             this.openThumbnailDialog.Title = "Select thumbnail";
-            // 
-            // label22
-            // 
-            this.label22.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(3, 134);
-            this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(84, 13);
-            this.label22.TabIndex = 1;
-            this.label22.Text = "Resource Name";
-            // 
-            // tbResourceName
-            // 
-            this.tbResourceName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbResourceName.Location = new System.Drawing.Point(93, 131);
-            this.tbResourceName.Name = "tbResourceName";
-            this.tbResourceName.ReadOnly = true;
-            this.tbResourceName.Size = new System.Drawing.Size(256, 20);
-            this.tbResourceName.TabIndex = 2;
             // 
             // MainForm
             // 

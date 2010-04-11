@@ -39,13 +39,13 @@
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnStart = new System.Windows.Forms.Button();
+            this.ckbThumbs = new System.Windows.Forms.CheckBox();
             this.ckbPadSTBLs = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.ckbClone = new System.Windows.Forms.CheckBox();
             this.ckbDefault = new System.Windows.Forms.CheckBox();
-            this.ckbThumbs = new System.Windows.Forms.CheckBox();
             this.ckbExclCommon = new System.Windows.Forms.CheckBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.tlpCustomise = new System.Windows.Forms.TableLayoutPanel();
@@ -218,6 +218,17 @@
             this.btnStart.UseVisualStyleBackColor = true;
             this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
             // 
+            // ckbThumbs
+            // 
+            this.ckbThumbs.AutoSize = true;
+            this.tlpOptions.SetColumnSpan(this.ckbThumbs, 2);
+            this.ckbThumbs.Location = new System.Drawing.Point(35, 195);
+            this.ckbThumbs.Name = "ckbThumbs";
+            this.ckbThumbs.Size = new System.Drawing.Size(114, 17);
+            this.ckbThumbs.TabIndex = 4;
+            this.ckbThumbs.Text = "Include thumbnails";
+            this.ckbThumbs.UseVisualStyleBackColor = true;
+            // 
             // ckbPadSTBLs
             // 
             this.ckbPadSTBLs.AutoSize = true;
@@ -297,24 +308,13 @@
             this.ckbDefault.UseVisualStyleBackColor = true;
             this.ckbDefault.CheckedChanged += new System.EventHandler(this.ckbDefault_CheckedChanged);
             // 
-            // ckbThumbs
-            // 
-            this.ckbThumbs.AutoSize = true;
-            this.tlpOptions.SetColumnSpan(this.ckbThumbs, 2);
-            this.ckbThumbs.Location = new System.Drawing.Point(35, 195);
-            this.ckbThumbs.Name = "ckbThumbs";
-            this.ckbThumbs.Size = new System.Drawing.Size(114, 17);
-            this.ckbThumbs.TabIndex = 3;
-            this.ckbThumbs.Text = "Include thumbnails";
-            this.ckbThumbs.UseVisualStyleBackColor = true;
-            // 
             // ckbExclCommon
             // 
             this.ckbExclCommon.AutoSize = true;
             this.ckbExclCommon.Location = new System.Drawing.Point(27, 49);
             this.ckbExclCommon.Name = "ckbExclCommon";
             this.ckbExclCommon.Size = new System.Drawing.Size(157, 17);
-            this.ckbExclCommon.TabIndex = 2;
+            this.ckbExclCommon.TabIndex = 3;
             this.ckbExclCommon.Text = "Exclude Common Resource";
             this.ckbExclCommon.UseVisualStyleBackColor = true;
             // 
