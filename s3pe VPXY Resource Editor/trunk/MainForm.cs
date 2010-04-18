@@ -111,7 +111,7 @@ namespace s3pe_VPXY_Resource_Editor
                 ClearLinkedPartsTLP(true);
                 AResource.CountedTGIBlockList ltgib = new AResource.CountedTGIBlockList(null);
                 vpxy.Entries.Clear();
-                uint count = 0;
+                int count = 0;
                 byte count00 = 1;
                 for (int row = 1; row < tlpParts.RowCount - 1; row++)
                 {
@@ -125,7 +125,7 @@ namespace s3pe_VPXY_Resource_Editor
                         VPXY.Entry00 e00 = c.Tag as VPXY.Entry00;
                         if (e00.TGIIndexes.Count <= 0) continue;
                         e00.EntryID = count00++;
-                        foreach (VPXY.ElementUInt32 elem in e00.TGIIndexes)
+                        foreach (VPXY.ElementInt32 elem in e00.TGIIndexes)
                         {
                             ltgib.Add(vpxy.TGIBlocks[(int)elem.Data]);
                             elem.Data = count++;
@@ -213,7 +213,7 @@ namespace s3pe_VPXY_Resource_Editor
                         TGIBlockCombo c = tlpLinkedParts.GetControlFromPosition(2, row) as TGIBlockCombo;
                         if (lLPtbc.IndexOf(c) < 0) continue;
                         if (c.SelectedIndex < 0) continue;
-                        e00.TGIIndexes.Add(new VPXY.ElementUInt32(0, null, (uint)c.SelectedIndex));
+                        e00.TGIIndexes.Add(new VPXY.ElementInt32(0, null, c.SelectedIndex));
                     }
                     if (saving && e00.TGIIndexes.Count == 0)
                     {
@@ -353,14 +353,14 @@ namespace s3pe_VPXY_Resource_Editor
             {
                 int i = int.Parse(((Label)tlpParts.GetControlFromPosition(0, tlpParts.GetCellPosition(tbc).Row)).Text, System.Globalization.NumberStyles.HexNumber);
                 VPXY.Entry01 e01 = vpxy.Entries[i] as VPXY.Entry01;
-                e01.TGIIndex = (tbc.SelectedIndex >= 0) ? (uint)tbc.SelectedIndex : 0;
+                e01.TGIIndex = (tbc.SelectedIndex >= 0) ? tbc.SelectedIndex : 0;
             }
             else
             {
                 if (currentPartEntry == -1) return;
                 VPXY.Entry00 e00 = ltbc[currentPartEntry].Tag as VPXY.Entry00;
                 int i = lLPtbc.IndexOf(tbc);
-                e00.TGIIndexes[i].Data = (tbc.SelectedIndex >= 0) ? (uint)tbc.SelectedIndex : 0;
+                e00.TGIIndexes[i].Data = (tbc.SelectedIndex >= 0) ? tbc.SelectedIndex : 0;
             }
         }
 
@@ -451,7 +451,7 @@ namespace s3pe_VPXY_Resource_Editor
 
         private void btnAddLinked_Click(object sender, EventArgs e)
         {
-            VPXY.Entry00 e00 = new VPXY.Entry00(0, null, 0, (byte)vpxy.Entries.Count, new List<VPXY.ElementUInt32>());
+            VPXY.Entry00 e00 = new VPXY.Entry00(0, null, 0, (byte)vpxy.Entries.Count, new List<VPXY.ElementInt32>());
             vpxy.Entries.Insert(currentVPXYEntry + 1, e00);
             ltbc[currentVPXYEntry].Tag = e00;
 
@@ -498,7 +498,7 @@ namespace s3pe_VPXY_Resource_Editor
             VPXY.Entry00 e00 = ltbc[currentPartEntry].Tag as VPXY.Entry00;
             if (currentLPEntry < 1 || e00.TGIIndexes.Count < 2) return;
 
-            VPXY.ElementUInt32 element = e00.TGIIndexes[currentLPEntry];
+            VPXY.ElementInt32 element = e00.TGIIndexes[currentLPEntry];
             e00.TGIIndexes.RemoveAt(currentLPEntry);
             e00.TGIIndexes.Insert(currentLPEntry - 1, element);
 
@@ -511,7 +511,7 @@ namespace s3pe_VPXY_Resource_Editor
             VPXY.Entry00 e00 = ltbc[currentPartEntry].Tag as VPXY.Entry00;
             if (currentLPEntry == e00.TGIIndexes.Count - 1 || e00.TGIIndexes.Count < 2) return;
 
-            VPXY.ElementUInt32 element = e00.TGIIndexes[currentLPEntry];
+            VPXY.ElementInt32 element = e00.TGIIndexes[currentLPEntry];
             e00.TGIIndexes.RemoveAt(currentLPEntry);
             e00.TGIIndexes.Insert(currentLPEntry + 1, element);
 
