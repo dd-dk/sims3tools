@@ -336,11 +336,11 @@ namespace S3PIDemoFE
                 ListViewItem lvi = lookup.ContainsKey(rie) ? lookup[rie] : null;
                 if (lvi != null) lookup.Remove(rie);
 
-                rie.ResourceIndexEntryChanged -= new EventHandler(BrowserWidget_ResourceIndexEntryChanged);
+                (rie as AResourceIndexEntry).ResourceIndexEntryChanged -= new EventHandler(BrowserWidget_ResourceIndexEntryChanged);
                 rie.ResourceType = value.ResourceType;
                 rie.ResourceGroup = value.ResourceGroup;
                 rie.Instance = value.Instance;
-                rie.ResourceIndexEntryChanged += new EventHandler(BrowserWidget_ResourceIndexEntryChanged);
+                (rie as AResourceIndexEntry).ResourceIndexEntryChanged += new EventHandler(BrowserWidget_ResourceIndexEntryChanged);
 
                 if (lvi != null) lookup.Add(rie, lvi);
 
@@ -730,7 +730,7 @@ namespace S3PIDemoFE
             if (rie == null) return;
 
             if (lookup == null) return;
-            if (!lookup.ContainsKey(rie)) { rie.ResourceIndexEntryChanged -= new EventHandler(BrowserWidget_ResourceIndexEntryChanged); return; }
+            if (!lookup.ContainsKey(rie)) { (rie as AResourceIndexEntry).ResourceIndexEntryChanged -= new EventHandler(BrowserWidget_ResourceIndexEntryChanged); return; }
 
             ListViewItem lvi = lookup[rie];
             ListViewItem newlvi = CreateItem(rie);
