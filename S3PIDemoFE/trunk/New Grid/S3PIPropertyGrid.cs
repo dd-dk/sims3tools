@@ -811,7 +811,7 @@ namespace S3PIDemoFE
                 string name = ctd.field.Split(' ').Length == 1 ? ctd.field : ctd.field.Split(new char[] { ' ' }, 2)[1].Trim();
                 IList ary = (IList)ctd.owner[name].Value;
 
-                if (typeof(string).Equals(destinationType)) return ary == null ? "(null)" : "(Collection: 0x" + ary.Count.ToString("X") + ")";
+                if (typeof(string).Equals(destinationType)) return ary == null ? "(null)" : "(Collection: " + ary.Count + ")";
                 return base.ConvertTo(context, culture, value, destinationType);
             }
 
