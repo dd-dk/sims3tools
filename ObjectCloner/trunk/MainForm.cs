@@ -3806,7 +3806,7 @@ namespace ObjectCloner
             // A list to hold the new numbers
             oldToNew = new Dictionary<ulong, ulong>();
 
-            if (selectedItem.CType == CatalogType.ModularResource)
+            if (cloneFixOptions.IsRenumber && selectedItem.CType == CatalogType.ModularResource)
                 oldToNew.Add(selectedItem.rk.Instance, FNV64.GetHash(UniqueObject));//MDLR needs its IID as a specific hash value
 
             ulong PngInstance = 0;
