@@ -288,21 +288,28 @@ namespace ObjectCloner
         /// <summary>
         /// Specifies the Content Category overlays that appear in the catalog
         /// </summary>
-        [Flags]
         public enum CCFlags : byte
         {
             //Unk = 0x00,
             /// <summary>
             /// EP1: World Adventures
             /// </summary>
-            EP1 = 0x08,
+            EP1 = 0x01,
             /// <summary>
             /// SP1: High-end Lofts
             /// </summary>
-            SP1 = 0x10,
+            SP1 = 0x2,
+            /// <summary>
+            /// EP2: Ambitions
+            /// </summary>
+            EP2 = 0x3,
+            /// <summary>
+            /// SP2: Stuff Pack 2
+            /// </summary>
+            SP2 = 0x4,
         }
 
-        public CCFlags CC { get { return (CCFlags)(this.ResourceIndexEntry == null ? 0 : this.ResourceIndexEntry.ResourceGroup >> 24); } }
+        public CCFlags CC { get { return (CCFlags)(this.ResourceIndexEntry == null ? 0 : this.ResourceIndexEntry.ResourceGroup >> 27); } }
         public int Compare(IResourceIndexEntry x, IResourceIndexEntry y)
         {
             int res = x.ResourceType.CompareTo(y.ResourceType); if (res != 0) return res;
