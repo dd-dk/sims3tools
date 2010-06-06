@@ -33,11 +33,9 @@ namespace S3Pack
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            if (Path.GetFileNameWithoutExtension(Application.ExecutablePath).ToLower().Equals("unpack")
-                || true)
+            if (Path.GetFileNameWithoutExtension(Application.ExecutablePath).ToLower().Equals("unpack"))
                 Application.Run(new Unpack());
-            else if (Path.GetFileNameWithoutExtension(Application.ExecutablePath).ToLower().Equals("pack")
-                || false)
+            else if (Path.GetFileNameWithoutExtension(Application.ExecutablePath).ToLower().Equals("pack"))
                 Application.Run(new Pack());
             else
             {

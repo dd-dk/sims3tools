@@ -59,8 +59,17 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>s3pe.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="s3pi.CustomForms">
+      <HintPath>..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Custom">
+      <HintPath>..\s3pi\build\bin\Release\System.Custom.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -73,6 +82,11 @@
     </Compile>
     <Compile Include="Pack.Designer.cs">
       <DependentUpon>Pack.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Unpack.cs">
       <SubType>Form</SubType>
@@ -108,6 +122,10 @@
     <EmbeddedResource Include="Pack.resx">
       <DependentUpon>Pack.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Unpack.resx">
       <DependentUpon>Unpack.cs</DependentUpon>
     </EmbeddedResource>
@@ -116,6 +134,7 @@
     <Content Include="gpl-3.0.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="s3pe.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

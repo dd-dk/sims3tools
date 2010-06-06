@@ -89,19 +89,79 @@ namespace S3Pack
             if (!Directory.Exists(target))
                 throw new DirectoryNotFoundException(String.Format("Directory not found: {0}", target));
 
-            /*string[] pathElements = source.Split(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar });
+            bool loaded = false;
+            System.Xml.XmlDocument xdoc = new XmlDocument();
+            foreach (string xmlFile in Directory.GetFiles(source, "*.xml"))
+            {
+                try
+                {
+                    xdoc.Load(xmlFile);
+                    loaded = true;
+                    break;
+                }
+                catch { }
+            }
+            if (!loaded)
+            {
+                throw new FileNotFoundException(String.Format("No XML files loaded from {0}.", source));
+            }
 
-            string DisplayName = pathElements[pathElements.Length - 1];
+            if (!(xdoc.FirstChild is XmlDeclaration) || xdoc.FirstChild.NextSibling.Name != "Sims3Package")
+            {
+                throw new InvalidDataException(String.Format("XML file loaded from {0} is not a Sims3Pack manifest.", source));
+            }
 
-            string filename = Path.Combine(target, DisplayName + ".Sims3Pack");
+            XmlNode packageId = xdoc.FirstChild.NextSibling.SelectSingleNode("PackageId");
+            XmlNode packagedFile = xdoc.FirstChild.NextSibling.SelectSingleNode("PackagedFile");
 
-            if (File.Exists(filename)) File.Delete(filename);
-            FileStream fs = new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write);
-            BinaryWriter bw = new BinaryWriter(fs);
-            XmlWriterSettings xws = new XmlWriterSettings();
-            xws.Encoding = System.Text.Encoding.UTF8;
-            xws.Indent = true;
-            xws.OmitXmlDeclaration = false;/**/
+            if (packagedFile.SelectSingleNode("Name").InnerText != packageId.InnerText + ".package")
+            {
+                throw new InvalidDataException(
+                    String.Format("{0} contains invalid data - PackageId '{1}' should match PackagedFile Name '{2}'.",
+                    source, packageId.InnerText, packagedFile.SelectSingleNode("Name").InnerText));
+            }
+
+            if (packagedFile.SelectSingleNode("Guid").InnerText != packageId.InnerText)
+            {
+                throw new InvalidDataException(
+                    String.Format("{0} contains invalid data - PackageId '{1}' should match PackagedFile Guid '{2}'.",
+                    source, packageId.InnerText, packagedFile.SelectSingleNode("Guid").InnerText));
+            }
+
+            string file = Path.Combine(source, packagedFile.SelectSingleNode("Name").InnerText);
+            Stream s = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
+            try
+            {
+                string Magic = "S3Pack";
+                long Length = s.Length;
+                long Offset = 0;
+                UInt64 Crc = System.Security.Cryptography.Sims3PackCRC.CalculateCRC(s);
+
+                packagedFile.SelectSingleNode("Length").InnerText = s.Length + "";
+                packagedFile.SelectSingleNode("Offset").InnerText = Offset + "";
+                packagedFile.SelectSingleNode("Crc").InnerText = Crc.ToString("X");
+
+                string outfile = Path.Combine(target, xdoc.FirstChild.NextSibling.SelectSingleNode("DisplayName").InnerText + ".sims3pack");
+                Stream sw = new FileStream(outfile, FileMode.Create, FileAccess.Write, FileShare.None);
+                BinaryWriter bw = new BinaryWriter(sw);
+
+                try
+                {
+                    bw.Write((int)Magic.Length);
+                    bw.Write(Magic.ToCharArray());
+                    bw.Write((short)0x0101);
+                    MemoryStream ms = new MemoryStream();
+                    xdoc.Save(ms);
+                    bw.Write((int)ms.Length);
+                    bw.Write(ms.ToArray());
+                    s.Position = 0;
+                    sw.Write(new BinaryReader(s).ReadBytes((int)s.Length), 0, (int)s.Length);
+                }
+                catch (Exception e) { throw e; }
+                finally { sw.Close(); }
+            }
+            catch (Exception e) { throw e; }
+            finally { s.Close(); }
         }
     }
 }
