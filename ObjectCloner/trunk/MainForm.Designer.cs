@@ -100,6 +100,8 @@
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openPackageDialog = new System.Windows.Forms.OpenFileDialog();
             this.openThumbnailDialog = new System.Windows.Forms.OpenFileDialog();
+            this.label23 = new System.Windows.Forms.Label();
+            this.tbProductStatus = new System.Windows.Forms.TextBox();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
@@ -141,11 +143,11 @@
             // toolStripContainer1.ContentPanel
             // 
             this.toolStripContainer1.ContentPanel.Controls.Add(this.splitContainer1);
-            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(655, 467);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(655, 545);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer1.Name = "toolStripContainer1";
-            this.toolStripContainer1.Size = new System.Drawing.Size(655, 491);
+            this.toolStripContainer1.Size = new System.Drawing.Size(655, 569);
             this.toolStripContainer1.TabIndex = 3;
             this.toolStripContainer1.Text = "toolStripContainer1";
             // 
@@ -165,7 +167,7 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.tlpTask);
             this.splitContainer1.Panel2.Controls.Add(this.tabControl1);
-            this.splitContainer1.Size = new System.Drawing.Size(655, 467);
+            this.splitContainer1.Size = new System.Drawing.Size(655, 545);
             this.splitContainer1.SplitterDistance = 283;
             this.splitContainer1.TabIndex = 0;
             this.splitContainer1.TabStop = false;
@@ -179,7 +181,7 @@
             this.tlpTask.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpTask.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tlpTask.Controls.Add(this.flowLayoutPanel1, 1, 1);
-            this.tlpTask.Location = new System.Drawing.Point(1, 388);
+            this.tlpTask.Location = new System.Drawing.Point(1, 466);
             this.tlpTask.Name = "tlpTask";
             this.tlpTask.RowCount = 3;
             this.tlpTask.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -269,7 +271,7 @@
             this.tabControl1.Location = new System.Drawing.Point(1, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(360, 382);
+            this.tabControl1.Size = new System.Drawing.Size(360, 460);
             this.tabControl1.TabIndex = 1;
             // 
             // tpMain
@@ -279,7 +281,7 @@
             this.tpMain.Location = new System.Drawing.Point(4, 22);
             this.tpMain.Name = "tpMain";
             this.tpMain.Padding = new System.Windows.Forms.Padding(3);
-            this.tpMain.Size = new System.Drawing.Size(352, 356);
+            this.tpMain.Size = new System.Drawing.Size(352, 434);
             this.tpMain.TabIndex = 0;
             this.tpMain.Text = "Overview";
             this.tpMain.UseVisualStyleBackColor = true;
@@ -305,9 +307,12 @@
             this.tlpOverview.Controls.Add(this.tbCatlgDesc, 1, 5);
             this.tlpOverview.Controls.Add(this.label22, 0, 1);
             this.tlpOverview.Controls.Add(this.tbResourceName, 1, 1);
+            this.tlpOverview.Controls.Add(this.label23, 0, 8);
+            this.tlpOverview.Controls.Add(this.tbProductStatus, 1, 8);
             this.tlpOverview.Location = new System.Drawing.Point(0, 0);
             this.tlpOverview.Name = "tlpOverview";
-            this.tlpOverview.RowCount = 9;
+            this.tlpOverview.RowCount = 10;
+            this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -317,7 +322,7 @@
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpOverview.Size = new System.Drawing.Size(352, 353);
+            this.tlpOverview.Size = new System.Drawing.Size(352, 383);
             this.tlpOverview.TabIndex = 0;
             // 
             // tableLayoutPanel2
@@ -512,7 +517,7 @@
             this.tpDetail.Location = new System.Drawing.Point(4, 22);
             this.tpDetail.Name = "tpDetail";
             this.tpDetail.Padding = new System.Windows.Forms.Padding(3);
-            this.tpDetail.Size = new System.Drawing.Size(352, 356);
+            this.tpDetail.Size = new System.Drawing.Size(352, 434);
             this.tpDetail.TabIndex = 1;
             this.tpDetail.Text = "Details";
             this.tpDetail.UseVisualStyleBackColor = true;
@@ -997,7 +1002,7 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripProgressBar1,
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 491);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 569);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(655, 22);
             this.statusStrip1.TabIndex = 2;
@@ -1069,11 +1074,31 @@
             this.openThumbnailDialog.Filter = "Thumbnails|*.PNG|All files|*.*";
             this.openThumbnailDialog.Title = "Select thumbnail";
             // 
+            // label23
+            // 
+            this.label23.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(10, 358);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(77, 13);
+            this.label23.TabIndex = 13;
+            this.label23.Text = "Product Status";
+            // 
+            // tbProductStatus
+            // 
+            this.tbProductStatus.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.tbProductStatus.Location = new System.Drawing.Point(93, 355);
+            this.tbProductStatus.Name = "tbProductStatus";
+            this.tbProductStatus.ReadOnly = true;
+            this.tbProductStatus.Size = new System.Drawing.Size(35, 20);
+            this.tbProductStatus.TabIndex = 14;
+            this.tbProductStatus.Validating += new System.ComponentModel.CancelEventHandler(this.tb_Validating);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(655, 513);
+            this.ClientSize = new System.Drawing.Size(655, 591);
             this.Controls.Add(this.toolStripContainer1);
             this.Controls.Add(this.statusStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -1221,6 +1246,8 @@
         private System.Windows.Forms.Label lbSearch;
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.TextBox tbResourceName;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.TextBox tbProductStatus;
     }
 }
 
