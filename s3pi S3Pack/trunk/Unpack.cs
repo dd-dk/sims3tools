@@ -47,6 +47,7 @@ namespace S3Pack
             haveSource = true;
             btnOK.Enabled = haveSource && haveTarget;
             tbSource.Text = openFileDialog1.FileName;
+            tbStatus.Text = btnOK.Enabled ? "Click 'Unpack...' to unpack the Sims3Pack." : "";
         }
 
         private void btnTarget_Click(object sender, EventArgs e)
@@ -56,6 +57,7 @@ namespace S3Pack
             haveTarget = true;
             btnOK.Enabled = haveSource && haveTarget;
             tbTarget.Text = folderBrowserDialog1.SelectedPath;
+            tbStatus.Text = btnOK.Enabled ? "Click 'Unpack...' to unpack the Sims3Pack." : "";
         }
 
         private void btnCancel_Click(object sender, EventArgs e)

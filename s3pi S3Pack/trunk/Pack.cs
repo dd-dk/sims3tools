@@ -47,6 +47,7 @@ namespace S3Pack
             haveSource = true;
             btnOK.Enabled = haveSource && haveTarget;
             tbSource.Text = folderBrowserDialog1.SelectedPath;
+            tbStatus.Text = btnOK.Enabled ? "Click 'Pack...' to create a Sims3Pack." : "";
         }
 
         private void btnTarget_Click(object sender, EventArgs e)
@@ -56,6 +57,7 @@ namespace S3Pack
             haveTarget = true;
             btnOK.Enabled = haveSource && haveTarget;
             tbTarget.Text = folderBrowserDialog2.SelectedPath;
+            tbStatus.Text = btnOK.Enabled ? "Click 'Pack...' to create a Sims3Pack." : "";
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -68,6 +70,7 @@ namespace S3Pack
             S3Pack.Sims3Pack.Pack(folderBrowserDialog1.SelectedPath, folderBrowserDialog2.SelectedPath);
             tbSource.Text = tbTarget.Text = "";
             btnOK.Enabled = haveSource = haveTarget = false;
+            tbStatus.Text = "Done.  Select another Sims3Pack and target folder, or Exit.";
             //MainForm_Shown(null, null);
         }
     }
