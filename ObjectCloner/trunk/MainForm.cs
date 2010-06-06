@@ -143,6 +143,7 @@ namespace ObjectCloner
         static readonly Entity predHasPriority = s3octerms + "hasPriority";
         static readonly Entity predIsSuppressed = s3octerms + "isSuppressed";
         static readonly Entity predHasPackages = s3octerms + "hasPackages";
+        static readonly Entity predHasRGVersion = s3octerms + "hasRGVersion";
         static readonly Entity predIn = s3octerms + "in";
         static readonly Entity predPackages = s3octerms + "packages";
 
@@ -153,6 +154,7 @@ namespace ObjectCloner
             public string hasLongname;
             public string hasDefaultInstallDir;
             public int hasPriority;
+            public int hasRGVersion;
             public int isSuppressed; // -1: not-allowed; 0: false; else true
             public List<Entity> hasPackages = new List<Entity>();
             public List<Entity> otherStatements = new List<Entity>();
@@ -227,6 +229,7 @@ namespace ObjectCloner
         }
         public static List<Dictionary<String, TypedValue>> lS3ocResourceList = new List<Dictionary<String, TypedValue>>();
         public static List<S3ocSims3> lS3ocSims3 = new List<S3ocSims3>();
+        public static Dictionary<byte, string> RGVersionLookup = new Dictionary<byte, string>();
 
         /// <summary>
         /// This static method loads the new Turtle resource definition file
@@ -263,6 +266,7 @@ namespace ObjectCloner
             {
                 S3ocSims3 sims3 = new S3ocSims3(s.Subject);
                 lS3ocSims3.Add(sims3);
+                bool seenHasRGVersion = false;
 
                 foreach (Statement t in s3oc_ini.Select(new Statement(s.Subject, null, null)))
                 {
@@ -270,11 +274,13 @@ namespace ObjectCloner
                     if (t.Predicate.Equals(predHasLongname)) { sims3.hasLongname = getString(t.Object); continue; }
                     if (t.Predicate.Equals(predHasDefaultInstallDir)) { sims3.hasDefaultInstallDir = getHasDefaultInstallDir(t.Object); continue; }
                     if (t.Predicate.Equals(predHasPriority)) { sims3.hasPriority = getHasPriority(t.Object); continue; }
+                    if (t.Predicate.Equals(predHasRGVersion)) { sims3.hasRGVersion = getHasRGVersion(t.Object); seenHasRGVersion = true; continue; }
                     if (t.Predicate.Equals(predIsSuppressed)) { sims3.isSuppressed = getIsSuppressed(t.Object); continue; }
                     if (t.Predicate.Equals(predHasPackages)) { sims3.hasPackages.Add(t.Object as Entity); continue; }
                     if (!sims3.otherStatements.Contains(t.Predicate))
                         sims3.otherStatements.Add(t.Predicate);
                 }
+                if (seenHasRGVersion && sims3.hasRGVersion > 0) RGVersionLookup.Add((byte)sims3.hasRGVersion, sims3.hasName);
             }
             lS3ocSims3.Sort(reversePriority);
         }
@@ -305,6 +311,14 @@ namespace ObjectCloner
             object o = ((Literal)value).ParseValue();
             if (!o.GetType().Equals(typeof(Decimal))) return 0;
             return Convert.ToInt32((Decimal)o);
+        }
+
+        static int getHasRGVersion(Resource value)
+        {
+            if (value as Literal == null) return 0;
+            object o = ((Literal)value).ParseValue();
+            if (!o.GetType().Equals(typeof(Decimal))) return 0;
+            return Convert.ToInt32((Decimal)o) & 0x1F;
         }
 
         static string getHasDefaultInstallDir(Resource value)
@@ -1077,6 +1091,8 @@ namespace ObjectCloner
                 return;
             }
 
+            if (fetching) { AbortFetching(false); }
+
             DoWait("Please wait, performing operations...");
 
             stepNum = 0;
@@ -1225,7 +1241,7 @@ namespace ObjectCloner
             foreach (string field in detailsTabCommonFields)
             {
                 if (detailsFieldMapReverse.ContainsKey("CommonBlock." + field))
-                    CreateField(tlpObjectCommon, types[field], detailsFieldMapReverse["CommonBlock." + field], true);
+                    CreateField(tlpObjectCommon, types[field], detailsFieldMapReverse["CommonBlock." + field], field != "BuildBuyProductStatusFlags");
                 else
                     CreateField(tlpObjectCommon, types[field], field);
             }
@@ -1404,12 +1420,16 @@ namespace ObjectCloner
                 float res;
                 e.Cancel = !Single.TryParse(tb.Text, out res);
             }
-            else
-                try
-                {
-                    ulong res = Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
-                }
+            else if (tb.Name == "tbProductStatus")
+            {
+                try { byte res = Convert.ToByte(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10); }
                 catch { e.Cancel = true; }
+            }
+            else
+            {
+                try { ulong res = Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10); }
+                catch { e.Cancel = true; }
+            }
             if (e.Cancel) tb.SelectAll();
         }
 
@@ -1456,6 +1476,7 @@ namespace ObjectCloner
             tbCatlgDesc.Text = "";
             ckbCopyToAll.Checked = false;
             tbPrice.Text = "";
+            tbProductStatus.Text = "";
         }
         void clearDetails()
         {
@@ -1522,6 +1543,8 @@ namespace ObjectCloner
             ckbCopyToAll.Enabled = true;
             tbPrice.Text = common["Price"].Value + "";
             tbPrice.ReadOnly = false;
+            tbProductStatus.Text = "0x" + ((byte)common["BuildBuyProductStatusFlags"].Value).ToString("X2");
+            tbProductStatus.ReadOnly = false;
         }
         void fillDetails(Item objd)
         {
@@ -1648,6 +1671,7 @@ namespace ObjectCloner
             tbCatlgDesc.Enabled = enabled;
             ckbCopyToAll.Enabled = enabled;
             tbPrice.ReadOnly = !enabled;
+            tbProductStatus.ReadOnly = !enabled;
         }
         void tabEnableDetails(bool enabled)
         {
@@ -1826,7 +1850,7 @@ namespace ObjectCloner
             string tag = "";
             if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + item.rk.ResourceType.ToString("X8"), out exts)) tag = exts[0];
             else tag = "UNKN";
-            lvi.SubItems.AddRange(new string[] { tag, item.CC > 0 ? "" + item.CC : "", "" + (AResourceKey)item.rk, });
+            lvi.SubItems.AddRange(new string[] { tag, item.RGVsn, "" + (AResourceKey)item.rk, });
             lvi.Tag = item;
             objectChooser.Items.Add(lvi);
         }
@@ -2383,6 +2407,7 @@ namespace ObjectCloner
                             commonBlock["NameGUID"] = new TypedValue(typeof(ulong), newNameGUID);
                             commonBlock["DescGUID"] = new TypedValue(typeof(ulong), newDescGUID);
                             commonBlock["Price"] = new TypedValue(typeof(float), float.Parse(tbPrice.Text));
+                            commonBlock["BuildBuyProductStatusFlags"] = new TypedValue(commonBlock["BuildBuyProductStatusFlags"].Type, Convert.ToByte(tbProductStatus.Text, tbProductStatus.Text.StartsWith("0x") ? 16 : 10));
 
                             if (cloneFixOptions.IsRenumber)
                             {
@@ -3877,6 +3902,7 @@ namespace ObjectCloner
             resourceList.Add("Old CatlgName: \"" + English[nameGUID] + "\" --> New CatlgName: \"" + tbCatlgName.Text + "\"");
             resourceList.Add("Old CatlgDesc: \"" + English[descGUID] + "\" --> New CatlgDesc: \"" + tbCatlgDesc.Text + "\"");
             resourceList.Add("Old Price: " + catlgItem.Resource["CommonBlock.Price"] + " --> New Price: " + float.Parse(tbPrice.Text));
+            resourceList.Add("Old Product Status: 0x" + ((byte)catlgItem.Resource["CommonBlock.BuildBuyProductStatusFlags"].Value).ToString("X2") + " --> New Product Status: " + tbProductStatus.Text);
             if (PngInstance != 0)
                 resourceList.Add("Old PngInstance: " + selectedItem.Resource["CommonBlock.PngInstance"] + " --> New PngInstance: 0x" + oldToNew[PngInstance].ToString("X16"));
         }

@@ -285,31 +285,18 @@ namespace ObjectCloner
 
         public Exception Exception { get { return ex; } }
 
-        /// <summary>
-        /// Specifies the Content Category overlays that appear in the catalog
-        /// </summary>
-        public enum CCFlags : byte
+        public string RGVsn
         {
-            //Unk = 0x00,
-            /// <summary>
-            /// EP1: World Adventures
-            /// </summary>
-            EP1 = 0x01,
-            /// <summary>
-            /// SP1: High-end Lofts
-            /// </summary>
-            SP1 = 0x2,
-            /// <summary>
-            /// EP2: Ambitions
-            /// </summary>
-            EP2 = 0x3,
-            /// <summary>
-            /// SP2: Stuff Pack 2
-            /// </summary>
-            SP2 = 0x4,
+            get
+            {
+                if (this.ResourceIndexEntry == null) return "";
+                byte rgVersion = (byte)(this.ResourceIndexEntry.ResourceGroup >> 27);
+                if (rgVersion == 0) return "";
+                if (!MainForm.RGVersionLookup.ContainsKey(rgVersion)) return "Unk";
+                return MainForm.RGVersionLookup[rgVersion];
+            }
         }
 
-        public CCFlags CC { get { return (CCFlags)(this.ResourceIndexEntry == null ? 0 : this.ResourceIndexEntry.ResourceGroup >> 27); } }
         public int Compare(IResourceIndexEntry x, IResourceIndexEntry y)
         {
             int res = x.ResourceType.CompareTo(y.ResourceType); if (res != 0) return res;

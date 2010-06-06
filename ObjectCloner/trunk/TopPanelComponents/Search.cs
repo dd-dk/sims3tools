@@ -150,7 +150,7 @@ namespace ObjectCloner.TopPanelComponents
             string tag = "";
             if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + item.rk.ResourceType.ToString("X8"), out exts)) tag = exts[0];
             else tag = "UNKN";
-            lvi.SubItems.AddRange(new string[] { tag, item.CC > 0 ? "" + item.CC : "", "" + (AResourceKey)item.rk, });
+            lvi.SubItems.AddRange(new string[] { tag, item.RGVsn, "" + (AResourceKey)item.rk, });
             lvi.Tag = item;
 
             listView1.Items.Add(lvi);

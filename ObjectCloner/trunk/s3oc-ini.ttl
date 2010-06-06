@@ -59,12 +59,15 @@
    :hasLongname  "The Sims 3 World Adventures";
    :hasDefaultInstallDir  "C:/Program Files/Electronic Arts/The Sims 3 World Adventures";
    :hasPriority  1 ;
+   :hasRGVersion  1 ;
    :isSuppressed  "false" ;
    :hasPackages [
       a :Objects ;
       :in "GameData/Shared" ;
-#      :packages ( "DeltaPackages/p02/DeltaBuild_p02.package" "Packages/FullBuildep1.package" ) .
-      :packages ( "Packages/FullBuildep1.package" ) .
+      :packages (
+         "DeltaPackages/p02/DeltaBuild_p02.package"
+		 "Packages/FullBuildep1.package"
+      ) .
    ], [
       a :Images ;
       :in "GameData/Shared" ;
@@ -82,12 +85,16 @@
    :hasLongname  "The Sims 3 High-End Loft Stuff";
    :hasDefaultInstallDir  "C:/Program Files/Electronic Arts/The Sims 3 High-End Loft Stuff";
    :hasPriority  2 ;
+   :hasRGVersion  2 ;
    :isSuppressed  "false" ;
    :hasPackages [
       a :Objects ;
       :in "GameData/Shared" ;
-#      :packages ( "DeltaPackages/p03/DeltaBuild_p03.package" "DeltaPackages/p02/DeltaBuild_p02.package" "Packages/FullBuild_p03.package" ) .
-      :packages ( "Packages/FullBuild_p03.package" ) .
+      :packages (
+         "DeltaPackages/p03/DeltaBuild_p03.package"
+         "DeltaPackages/p02/DeltaBuild_p02.package"
+		 "Packages/FullBuild_p03.package"
+      ) .
    ], [
       a :Images ;
       :in "GameData/Shared" ;
@@ -105,16 +112,47 @@
    :hasLongname  "The Sims 3 Ambitions";
    :hasDefaultInstallDir  "C:/Program Files/Electronic Arts/The Sims 3 Ambitions";
    :hasPriority  3 ;
+   :hasRGVersion  3 ;
    :isSuppressed  "false" ;
    :hasPackages [
       a :Objects ;
       :in "GameData/Shared" ;
-#      :packages ( "DeltaPackages/p03/DeltaBuild_p03.package" "DeltaPackages/p02/DeltaBuild_p02.package" "Packages/FullBuild_p04.package" ) .
-      :packages ( "Packages/FullBuild_p04.package" ) .
+      :packages (
+         "DeltaPackages/p03/DeltaBuild_p03.package"
+         "DeltaPackages/p02/DeltaBuild_p02.package"
+		 "Packages/FullBuild_p04.package"
+      ) .
    ], [
       a :Images ;
       :in "GameData/Shared" ;
       :packages ( "Packages/FullBuild_p04.package" ) .
+   ], [
+      a :Thumbnails ;
+      :in "Thumbnails" ;
+      :packages ( "AllThumbnails.package" ) .
+   ]
+.
+
+:sp2
+   a  :Sims3, :SP ;
+   :hasName  "SP2" ;
+   :hasLongname  "The Sims 3 Stuff Pack 2";
+   :hasDefaultInstallDir  "C:/Program Files/Electronic Arts/The Sims 3 Stuff Pack 2";
+   :hasPriority  4 ;
+   :hasRGVersion  4 ;
+   :isSuppressed  "false" ;
+   :hasPackages [
+      a :Objects ;
+      :in "GameData/Shared" ;
+      :packages (
+         "DeltaPackages/p03/DeltaBuild_p03.package"
+         "DeltaPackages/p02/DeltaBuild_p02.package"
+		 "Packages/FullBuild_p05.package"
+      ) .
+   ], [
+      a :Images ;
+      :in "GameData/Shared" ;
+      :packages ( "Packages/FullBuild_p05.package" ) .
    ], [
       a :Thumbnails ;
       :in "Thumbnails" ;
