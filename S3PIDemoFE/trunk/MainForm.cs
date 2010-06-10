@@ -1423,8 +1423,12 @@ namespace S3PIDemoFE
                 IResourceIndexEntry rie = browserWidget1.SelectedResource;
                 string s = "";
                 if (rie != null) s += String.Format("Error reading resource {0:X8}:{1:X8}:{2:X16}", rie.ResourceType, rie.ResourceGroup, rie.Instance);
+                s += String.Format("\r\nFront-end Distribution: {0}\r\nLibrary Distribution: {1}\r\n",
+                    getVersion(typeof(MainForm), "s3pe"), getVersion(typeof(s3pi.Interfaces.AApiVersionedFields), "s3pe"));
                 for (Exception inex = resException; inex != null; inex = inex.InnerException)
                 {
+                    s += "\r\nSource: " + inex.Source;
+                    s += "\r\nAssembly: " + inex.TargetSite.DeclaringType.Assembly.FullName;
                     s += "\r\n" + inex.Message;
                     s += "\r\n----\r\nStack trace:\r\n" + inex.StackTrace + "\r\n----\r\n";
                 }
