@@ -1436,6 +1436,7 @@ namespace S3PIDemoFE
                 tb.Dock = DockStyle.Fill;
                 tb.Multiline = true;
                 tb.ReadOnly = true;
+                tb.ScrollBars = ScrollBars.Vertical;
                 tb.Text = s;
                 pnAuto.Controls.Add(tb);
             }
