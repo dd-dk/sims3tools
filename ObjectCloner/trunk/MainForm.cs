@@ -2539,7 +2539,7 @@ namespace ObjectCloner
 
                                 UpdateRKsFromField((AResource)item.Resource);
 
-                                tgiBlocks[fallbackIndex] = new AResource.TGIBlock(0, null, fallbackRK);
+                                tgiBlocks[fallbackIndex] = new AResource.TGIBlock(0, null, (IResourceKey)fallbackRK);
                                 #endregion
                             }
                             else
