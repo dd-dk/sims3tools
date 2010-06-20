@@ -236,7 +236,7 @@ namespace ObjectCloner
                     }
             );
             foreach (AResourceIndexEntry rie in lrie)
-                if ((rie.ResourceGroup & 0x00FFFFFF) == (myrk.ResourceGroup & 0x00FFFFFF))
+                if ((rie.ResourceGroup & 0x07FFFFFF) == (myrk.ResourceGroup & 0x07FFFFFF))
                     return rie;
             return null;
         }
