@@ -418,7 +418,7 @@ namespace ObjectCloner
         Item selectedItem;
         Image replacementForThumbs;
 
-        Dictionary<string, IResourceKey> rkLookup = new Dictionary<string, IResourceKey>();
+        Dictionary<string, IResourceKey> rkLookup = null;
 
         private ObjectCloner.TopPanelComponents.ObjectChooser objectChooser;
         private ObjectCloner.TopPanelComponents.ResourceList resourceList;
@@ -435,6 +435,10 @@ namespace ObjectCloner
             objectChooser.ItemActivate += new EventHandler(objectChooser_ItemActivate);
             resourceList = new ResourceList();
             pleaseWait = new PleaseWait();
+
+            Diagnostics.Enabled = ObjectCloner.Properties.Settings.Default.Diagnostics;
+            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_diagnostics, Diagnostics.Enabled);
+
         }
 
         public MainForm(params string[] args)
@@ -600,8 +604,8 @@ namespace ObjectCloner
         public class THUM
         {
             static Dictionary<uint, uint[]> thumTypes;
-            static uint[] PNGTypes;
-            static ushort[] thumSizes;
+            public static uint[] PNGTypes = new uint[] { 0x2E75C764, 0x2E75C765, 0x2E75C766, };
+            public static ushort[] thumSizes = new ushort[] { 32, 64, 128, };
             static uint defType = 0x319E4F1D;
             static THUM()
             {
@@ -621,9 +625,6 @@ namespace ObjectCloner
                 thumTypes.Add(0x9151E6BC, new uint[] { 0x00000000, 0x00000000, 0x00000000, }); //Catalog Wall -- doesn't have any
                 thumTypes.Add(0x91EDBD3E, thumTypes[0x319E4F1D]); //Catalog Roof Style
                 thumTypes.Add(0xF1EDBD86, thumTypes[0x319E4F1D]); //Catalog Roof Pattern
-
-                PNGTypes = new uint[] { 0x2E75C764, 0x2E75C765, 0x2E75C766, };
-                thumSizes = new ushort[] { 32, 64, 128, };
             }
             public enum THUMSize : int
             {
@@ -760,7 +761,7 @@ namespace ObjectCloner
                     rk = getNewRK(size, item);
                     RIE rie = new RIE(objPkgs[0], objPkgs[0].AddResource(rk, null, true));
                     Item thum = new Item(rie);
-                    defaultThumbnail.Save(thum.Resource.Stream, System.Drawing.Imaging.ImageFormat.Png);
+                    defaultThumbnail.GetThumbnailImage(THUM.thumSizes[(int)size], THUM.thumSizes[(int)size], gtAbort, System.IntPtr.Zero).Save(thum.Resource.Stream, System.Drawing.Imaging.ImageFormat.Png);
                     thum.Commit();
                 }
                 return rk;
@@ -933,7 +934,6 @@ namespace ObjectCloner
             lbUseMenu.Visible = false;
             lbSelectOptions.Visible = true;
             btnStart.Visible = false;
-            //tabControl1.Enabled = true;
 
             if (searchPane != null)
                 mode = Mode.Clone;
@@ -1011,6 +1011,7 @@ namespace ObjectCloner
         private void objectChooser_SelectedIndexChanged(object sender, EventArgs e)
         {
             replacementForThumbs = null;// might as well be here; needed after FillTabs, really.
+            rkLookup = null;//Indicate that we're not working on the same resource any more
             if (objectChooser.SelectedItems.Count == 0)
             {
                 selectedItem = null;
@@ -1032,6 +1033,7 @@ namespace ObjectCloner
         private void searchPane_SelectedIndexChanged(object sender, Search.SelectedIndexChangedEventArgs e)
         {
             replacementForThumbs = null;// might as well be here; needed after FillTabs, really.
+            rkLookup = null;//Indicate that we're not working on the same resource any more
             if (e.SelectedItem == null)
             {
                 selectedItem = null;
@@ -1082,29 +1084,31 @@ namespace ObjectCloner
                 ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(saveFileDialog1.FileName);
             }
 
-
-            stepList = null;
-            SetStepList(selectedItem, out stepList);
-            if (stepList == null)
-            {
-                cloneFixOptions_CancelClicked(null, null);
-                return;
-            }
-
             if (fetching) { AbortFetching(false); }
 
             DoWait("Please wait, performing operations...");
 
-            stepNum = 0;
-            resourceList.Clear();
-            rkLookup.Clear();
-            while (stepNum < stepList.Count)
+            if (rkLookup == null)
             {
-                step = stepList[stepNum];
-                updateProgress(true, StepText[step], true, stepList.Count - 1, true, stepNum);
-                Application.DoEvents();
-                stepNum++;
-                step();
+                stepList = null;
+                SetStepList(selectedItem, out stepList);
+                if (stepList == null)
+                {
+                    cloneFixOptions_CancelClicked(null, null);
+                    return;
+                }
+
+                stepNum = 0;
+                resourceList.Clear();
+                rkLookup = new Dictionary<string, IResourceKey>();
+                while (stepNum < stepList.Count)
+                {
+                    step = stepList[stepNum];
+                    updateProgress(true, StepText[step], true, stepList.Count - 1, true, stepNum);
+                    Application.DoEvents();
+                    stepNum++;
+                    step();
+                }
             }
 
             if (isClone)
@@ -2382,14 +2386,15 @@ namespace ObjectCloner
 
             Item catlgItem = (selectedItem.CType == CatalogType.ModularResource || selectedItem.CType == CatalogType.CatalogFireplace) ? ItemForTGIBlock0(selectedItem) : selectedItem;
             //oldToNew = new Dictionary<ulong, ulong>();
-            //tgiToItem - TGIs we're interested in and the Item they refer to
             try
             {
-                foreach (Item item in rkToItem.Values)
+                IList<IResourceIndexEntry> lirie = objPkgs[0].GetResourceList;
+                foreach(IResourceIndexEntry irie in lirie)
                 {
+                    Item item = new Item(new RIE(objPkgs[0], irie));
                     bool dirty = false;
 
-                    if ((item.rk == selectedItem.rk && item.CType != CatalogType.ModularResource)//Selected CatlgItem
+                    if ((item.rk.Instance == selectedItem.rk.Instance && item.CType != CatalogType.ModularResource)//Selected CatlgItem
                         || item.CType == CatalogType.CatalogObject//all OBJDs (i.e. from MDLR or CFIR)
                         || item.CType == CatalogType.CatalogTerrainPaintBrush//all CTPTs (i.e. pair of selectedItem)
                         )
@@ -2398,10 +2403,10 @@ namespace ObjectCloner
                         AHandlerElement commonBlock = ((AHandlerElement)item.Resource["CommonBlock"].Value);
 
                         #region Selected CatlgItem || all MDLR OBJDs || both CTPTs || 0th CFIR OBJD
-                        if (item.rk == selectedItem.rk//Selected CatlgItem
+                        if (item.rk.Instance == selectedItem.rk.Instance//Selected CatlgItem
                             || selectedItem.CType == CatalogType.ModularResource//all MDLR OBJDs
                             || selectedItem.CType == CatalogType.CatalogTerrainPaintBrush//both CTPTs
-                            || item.rk == catlgItem.rk//0th CFIR OBJD
+                            || item.rk.Instance == catlgItem.rk.Instance//0th CFIR OBJD
                             )
                         {
                             commonBlock["NameGUID"] = new TypedValue(typeof(ulong), newNameGUID);
@@ -2418,13 +2423,10 @@ namespace ObjectCloner
                         #endregion
 
                         #region Selected CatlgItem; 0th OBJD from MDLR or CFIR
-                        if (item.rk == selectedItem.rk || item.rk == catlgItem.rk)//Selected CatlgItem; 0th OBJD from MDLR or CFIR
+                        if (item.rk.Instance == selectedItem.rk.Instance || item.rk.Instance == catlgItem.rk.Instance)//Selected CatlgItem; 0th OBJD from MDLR or CFIR
                         {
                             ulong PngInstance = (ulong)commonBlock["PngInstance"].Value;
                             bool isPng = PngInstance != 0;
-                            if (isPng && oldToNew.ContainsKey(PngInstance))
-                                commonBlock["PngInstance"] = new TypedValue(typeof(ulong), oldToNew[PngInstance]);
-
                             if (cloneFixOptions.IsIncludeThumbnails)
                             {
                                 Image img = getLargestThumbOrDefault(item);
@@ -2441,6 +2443,9 @@ namespace ObjectCloner
                                 foreach (THUM.THUMSize size in Enum.GetValues(typeof(THUM.THUMSize)))
                                     Thumb[item.rk.ResourceType, instance, size, isPng] = img;
                             }
+
+                            if (isPng && oldToNew.ContainsKey(PngInstance))
+                                commonBlock["PngInstance"] = new TypedValue(typeof(ulong), oldToNew[PngInstance]);
 
                             for (int i = 2; i < tlpObjectDetail.RowCount - 1; i++)
                             {
@@ -2760,7 +2765,12 @@ namespace ObjectCloner
             resourceList.Add(tgin);
         }
 
-        private void SlurpRKsFromRK(string key, IResourceKey rk) { Item item = new Item(objPkgs, rk); if (item.ResourceIndexEntry != null) SlurpRKsFromField(key, (AResource)item.Resource); }
+        private void SlurpRKsFromRK(string key, IResourceKey rk)
+        {
+            Item item = new Item(objPkgs, rk);
+            if (item.ResourceIndexEntry != null) SlurpRKsFromField(key, (AResource)item.Resource);
+            else Diagnostics.Show(String.Format("RK {0} not found", key));
+        }
         private void SlurpRKsFromField(string key, AApiVersionedFields field)
         {
             Type t = field.GetType();
@@ -2833,6 +2843,7 @@ namespace ObjectCloner
 
         private void SlurpKindred(string key, IList<IPackage> pkgs, string[] fields, TypedValue[] values)
         {
+            string s = "";
             ListIResourceKey seen = new ListIResourceKey();
             foreach (IPackage pkg in pkgs)
             {
@@ -2846,9 +2857,12 @@ namespace ObjectCloner
                     Item item = new Item(new RIE(objPkgs, rie));
                     if (item.Resource != null)
                         vpxyKinItems.Add(item);
+                    else
+                        s += String.Format("VPKY kin RK {0} not found", (IResourceKey)rie);
                     i++;
                 }
             }
+            Diagnostics.Show(s, "Missing VPXY Kin");
         }
         #endregion
 
@@ -3106,28 +3120,11 @@ namespace ObjectCloner
                 {
                     case MenuBarWidget.MB.MBS_sims3Folder: settingsGameFolders(); break;
                     case MenuBarWidget.MB.MBS_userName: settingsUserName(); break;
+                    case MenuBarWidget.MB.MBS_diagnostics: settingsDiagnostics(); break;
                 }
             }
             finally { this.Enabled = true; }
         }
-
-        /*private void settingsSims3Folder()
-        {
-            folderBrowserDialog1.SelectedPath = ObjectCloner.Properties.Settings.Default.Sims3Folder == null || ObjectCloner.Properties.Settings.Default.Sims3Folder.Length == 0
-                ? "" : ObjectCloner.Properties.Settings.Default.Sims3Folder;
-            while (true)
-            {
-                DialogResult dr = folderBrowserDialog1.ShowDialog();
-                if (dr != DialogResult.OK) return;
-
-                string path = Path.Combine(folderBrowserDialog1.SelectedPath, @"GameData\Shared\Packages\FullBuild0.package");
-                if (File.Exists(path)) break;
-
-                if (CopyableMessageBox.Show(@"Cannot find ""GameData\Shared\Packages\FullBuild0.package""" + "\nin \"" + folderBrowserDialog1.SelectedPath + @"""",
-                    "Select Sims3 Install Folder", CopyableMessageBoxButtons.OKCancel, CopyableMessageBoxIcon.Error) != 0) return;
-            }
-            ObjectCloner.Properties.Settings.Default.Sims3Folder = folderBrowserDialog1.SelectedPath;
-        }/**/
 
         private void settingsGameFolders()
         {
@@ -3155,6 +3152,13 @@ namespace ObjectCloner
             DialogResult dr = cn.ShowDialog();
             if (dr != DialogResult.OK) return;
             ObjectCloner.Properties.Settings.Default.CreatorName = cn.Value;
+        }
+
+        private void settingsDiagnostics()
+        {
+            Application.DoEvents();
+            ObjectCloner.Properties.Settings.Default.Diagnostics = Diagnostics.Enabled = !Diagnostics.Enabled;
+            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_diagnostics, Diagnostics.Enabled);
         }
         #endregion
 
@@ -3509,21 +3513,29 @@ namespace ObjectCloner
             vpxyItems = new List<Item>();
             vpxyKinItems = new List<Item>();
 
+            string s = "";
             foreach (IResourceKey rk in (AResource.TGIBlockList)selectedItem.Resource["TGIBlocks"].Value)
             {
                 if (rk.ResourceType != 0x736884F1) continue;
                 Item vpxy = new Item(new RIE(objPkgs, rk));
                 if (vpxy.Resource != null)
                     vpxyItems.Add(vpxy);
+                else
+                    s += String.Format("Catalog Resource {0} -> RK {1}: not found\n", (IResourceKey)selectedItem.ResourceIndexEntry, rk);
             }
-            if (vpxyItems.Count == 0) stepNum = lastInChain;
+            Diagnostics.Show(s, "Missing VPXYs");
+            if (vpxyItems.Count == 0)
+            {
+                Diagnostics.Show(String.Format("Catalog Resource {0} has no VPXY items", (IResourceKey)selectedItem.ResourceIndexEntry), "No VPXY items");
+                stepNum = lastInChain;
+            }
         }
         void Catlg_addVPXYs() { for (int i = 0; i < vpxyItems.Count; i++) Add("vpxy[" + i + "]", vpxyItems[i].rk); }
 
         #region OBJD Steps
         void OBJD_setFallback()
         {
-            if ((selectedItem.rk.ResourceGroup & 0xFF) != 0x00) return;// Only base game objects
+            if ((selectedItem.rk.ResourceGroup >> 27) > 0) return;// Only base game objects
 
             int fallbackIndex = (int)(uint)selectedItem.Resource["FallbackIndex"].Value;
             AResource.TGIBlockList tgiBlocks = selectedItem.Resource["TGIBlocks"].Value as AResource.TGIBlockList;
@@ -3540,7 +3552,12 @@ namespace ObjectCloner
             IList<AResource.TGIBlock> ltgi = (IList<AResource.TGIBlock>)selectedItem.Resource["TGIBlocks"].Value;
             AResource.TGIBlock objkTGI = ltgi[(int)index];
             objkItem = new Item(objPkgs, objkTGI);
-            if (objkItem == null) stepNum = lastInChain;
+            if (objkItem == null)
+            {
+                Diagnostics.Show(String.Format("OBJK {0} -> OBJK {1}: not found\n", (IResourceKey)selectedItem.ResourceIndexEntry, objkTGI), "Missing OBJK");
+                stepNum = lastInChain;
+            }
+
         }
         void OBJD_addOBJKref() { Add("objk", objkItem.rk); }
         void OBJD_SlurpDDSes()
@@ -3563,6 +3580,7 @@ namespace ObjectCloner
 
             if (index == -1)
             {
+                Diagnostics.Show(String.Format("OBJK {0} has no modelKey", (IResourceKey)objkItem.ResourceIndexEntry), "Missing modelKey");
                 stepNum = lastInChain;//Skip past the chain
                 return;
             }
@@ -3570,14 +3588,22 @@ namespace ObjectCloner
             vpxyItems = new List<Item>();
             vpxyKinItems = new List<Item>();
 
+            string s = "";
             foreach (IResourceKey rk in (IList<AResource.TGIBlock>)objkItem.Resource["TGIBlocks"].Value)
             {
                 if (rk.ResourceType != 0x736884F1) continue;
                 Item vpxy = new Item(new RIE(objPkgs, rk));
                 if (vpxy.ResourceIndexEntry != null && vpxy.Resource != null)
                     vpxyItems.Add(vpxy);
+                else
+                    s += String.Format("OBJK {0} -> RK {1}: not found\n", (IResourceKey)objkItem.ResourceIndexEntry, rk);
             }
-            if (vpxyItems.Count == 0) stepNum = lastInChain;
+            Diagnostics.Show(s, "Missing VPXYs");
+            if (vpxyItems.Count == 0)
+            {
+                Diagnostics.Show(String.Format("OBJK {0} has no VPXY items", (IResourceKey)selectedItem.ResourceIndexEntry), "No VPXY items");
+                stepNum = lastInChain;
+            }
         }
         void OBJD_removeRefdOBJDs()
         {
@@ -3599,6 +3625,8 @@ namespace ObjectCloner
             uint brushIndex = (uint)selectedItem.Resource["BrushIndex"].Value;
             if (CTPTBrushIndexToPair.ContainsKey(brushIndex))
                 Add("ctpt_pair", CTPTBrushIndexToPair[brushIndex].rk);
+            else
+                Diagnostics.Show(String.Format("CTPT {0} BrushIndex {1} not found", selectedItem.rk, brushIndex), "No ctpt_pair item");
         }
         void CTPT_addBrushTexture() { Add("ctpt_BrushTexture", (AResource.TGIBlock)selectedItem.Resource["BrushTexture"].Value); }
         void CTPT_addBrushShape() { Add("ctpt_BrushShape", (AResource.TGIBlock)selectedItem.Resource["BrushShape"].Value); }
@@ -3642,11 +3670,13 @@ namespace ObjectCloner
         void VPXYs_getMODLs()
         {
             modlItems = new List<Item>();
+            string s = "";
             for (int i = 0; i < vpxyItems.Count; i++)
             {
                 GenericRCOLResource rcol = (vpxyItems[i].Resource as GenericRCOLResource);
                 for (int j = 0; j < rcol.ChunkEntries.Count; j++)
                 {
+                    bool found = false;
                     VPXY vpxychunk = rcol.ChunkEntries[j].RCOLBlock as VPXY;
                     for (int k = 0; k < vpxychunk.TGIBlocks.Count; k++)
                     {
@@ -3654,17 +3684,25 @@ namespace ObjectCloner
                         if (tgib.ResourceType != 0x01661233) continue;
                         Item modl = new Item(new RIE(objPkgs, tgib));
                         if (modl.Resource != null)
+                        {
+                            found = true;
                             modlItems.Add(modl);
+                        }
                     }
+                    if (!found)
+                        s += String.Format("VPXY {0} (chunk {1}) has no MODL items\n", (IResourceKey)vpxyItems[i].ResourceIndexEntry, j);
                 }
             }
+            Diagnostics.Show(s, "No MODL items");
         }
         void MODLs_SlurpRKs() { for (int i = 0; i < modlItems.Count; i++) SlurpRKsFromField("modl[" + i + "]", (AResource)modlItems[i].Resource); }
         void MODLs_SlurpMLODs()
         {
             int k = 0;
+            string s = "";
             for (int i = 0; i < modlItems.Count; i++)
             {
+                bool found = false;
                 GenericRCOLResource rcol = (modlItems[i].Resource as GenericRCOLResource);
                 for (int j = 0; j < rcol.Resources.Count; j++)
                 {
@@ -3672,14 +3710,20 @@ namespace ObjectCloner
                     if (tgib.ResourceType != 0x01D10F34) continue;
                     SlurpRKsFromRK("modl[" + i + "].mlod[" + k + "]", tgib);
                     k++;
+                    found = true;
                 }
+                if (!found)
+                    s += String.Format("MODL {0} has no MLOD items\n", (IResourceKey)modlItems[i].ResourceIndexEntry);
             }
+            Diagnostics.Show(s, "No MLOD items");
         }
         void MODLs_SlurpTXTCs()
         {
             int k = 0;
+            string s = "";
             for (int i = 0; i < modlItems.Count; i++)
             {
+                bool found = false;
                 GenericRCOLResource rcol = (modlItems[i].Resource as GenericRCOLResource);
                 for (int j = 0; j < rcol.Resources.Count; j++)
                 {
@@ -3687,21 +3731,29 @@ namespace ObjectCloner
                     if (tgib.ResourceType != 0x033A1435) continue;
                     SlurpRKsFromRK("modl[" + i + "].txtc[" + k + "]", tgib);
                     k++;
+                    found = true;
                 }
+                if (!found)
+                    s += String.Format("MODL {0} has no TXTC items\n", (IResourceKey)modlItems[i].ResourceIndexEntry);
             }
+            Diagnostics.Show(s, "No TXTC items");
         }
 
         List<Item> objdList;
         void Item_findObjds()
         {
             objdList = new List<Item>();
+            string s = "";
             foreach (IResourceKey rk in (AResource.TGIBlockList)selectedItem.Resource["TGIBlocks"].Value)
             {
                 if (rk.ResourceType != 0x319E4F1D) continue;
                 Item objd = new Item(new RIE(objPkgs, rk));
                 if (objd.Resource != null)
                     objdList.Add(objd);
+                else
+                    s += String.Format("OBJD {0}\n", rk);
             }
+            Diagnostics.Show(s, String.Format("Item {0} has missing OBJDs:", selectedItem));
         }
 
         List<Step> objdSteps;
@@ -3736,23 +3788,22 @@ namespace ObjectCloner
             rkLookup = MDLRrkLookup;
         }
 
-        //Bring in all resources from ...\The Sims 3\Thumbnails\ALLThumbnails.package that match the instance number of the OBJD
-        //FullBuild0 is:
-        //  ...\Gamedata\Shared\Packages\FullBuild0.package
-        //Relative path to ALLThumbnails is:
-        // .\..\..\..\Thumbnails\ALLThumbnails.package
+        //Thumbnails for everything but walls
+        //PNGs come from :Objects; Icons come from :Images; Thumbs come from :Thumbnails.
         void SlurpThumbnails()
         {
             foreach (THUM.THUMSize size in new THUM.THUMSize[] { THUM.THUMSize.small, THUM.THUMSize.medium, THUM.THUMSize.large, })
             {
                 IResourceKey rk = getImageRK(size, selectedItem);
-                if (selectedItem.CType == CatalogType.CatalogRoofPattern)
+                if (THUM.PNGTypes[(int)size] == rk.ResourceType)
+                    Add(size + "PNG", rk);
+                else if (selectedItem.CType == CatalogType.CatalogRoofPattern)
                     Add(size + "Icon", rk);
                 else
                     Add(size + "Thumb", rk);
             }
         }
-        //0x515CA4CD is very different
+        //0x515CA4CD is very different - but they do come from :Thumbnails, at least.
         void CWAL_SlurpThumbnails()
         {
             Dictionary<THUM.THUMSize, uint> CWALThumbTypes = new Dictionary<THUM.THUMSize, uint>();
@@ -3836,16 +3887,16 @@ namespace ObjectCloner
 
             ulong PngInstance = 0;
             if (selectedItem.CType != CatalogType.ModularResource)
-            {
-                // Renumber the PNGInstance we're referencing
                 PngInstance = (ulong)selectedItem.Resource["CommonBlock.PngInstance"].Value;
-                if (PngInstance != 0)
-                    oldToNew.Add(PngInstance, CreateInstance());
-            }
 
             if (cloneFixOptions.IsRenumber)
             {
                 // Generate new numbers for everything we've decided to renumber
+
+                // Renumber the PNGInstance we're referencing
+                if (PngInstance != 0)
+                    oldToNew.Add(PngInstance, CreateInstance());
+
                 ulong langInst = (CreateInstance() << 8) >> 8;
                 foreach (IResourceKey rk in rkToItem.Keys)
                 {
@@ -3903,7 +3954,7 @@ namespace ObjectCloner
             resourceList.Add("Old CatlgDesc: \"" + English[descGUID] + "\" --> New CatlgDesc: \"" + tbCatlgDesc.Text + "\"");
             resourceList.Add("Old Price: " + catlgItem.Resource["CommonBlock.Price"] + " --> New Price: " + float.Parse(tbPrice.Text));
             resourceList.Add("Old Product Status: 0x" + ((byte)catlgItem.Resource["CommonBlock.BuildBuyProductStatusFlags"].Value).ToString("X2") + " --> New Product Status: " + tbProductStatus.Text);
-            if (PngInstance != 0)
+            if (PngInstance != 0 && cloneFixOptions.IsRenumber)
                 resourceList.Add("Old PngInstance: " + selectedItem.Resource["CommonBlock.PngInstance"] + " --> New PngInstance: 0x" + oldToNew[PngInstance].ToString("X16"));
         }
         #endregion
@@ -3932,6 +3983,27 @@ namespace ObjectCloner
             fillOverviewUpdateImage(selectedItem);
             TabEnable(true);
             DisplayOptions();
+        }
+    }
+
+    static class Diagnostics
+    {
+        static bool enabled = false;
+        public static bool Enabled { get { return enabled; } set { enabled = value; } }
+        public static void Show(string value, string title = "")
+        {
+            string msg = value.Trim('\n');
+            if (msg == "") return;
+            if (title == "")
+            {
+                System.Diagnostics.Debug.WriteLine(msg);
+                if (enabled) CopyableMessageBox.Show(msg);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine(String.Format("{0}: {1}", title, msg));
+                if (enabled) CopyableMessageBox.Show(msg, title);
+            }
         }
     }
 }
