@@ -164,6 +164,15 @@ namespace ObjectCloner
         public override AHandlerElement Clone(EventHandler handler) { throw new NotImplementedException(); }
         public override List<string> ContentFields { get { throw new NotImplementedException(); } }
         public override int RecommendedApiVersion { get { throw new NotImplementedException(); } }
+
+        public static bool Equals(IResourceKey x, IResourceKey y)
+        {
+            return
+                x.ResourceType == y.ResourceType
+                && ((y.ResourceGroup & 0x07FFFFFF) == (y.ResourceGroup & 0x07FFFFFF))
+                && x.Instance == y.Instance
+                ;
+        }
     }
 
     public class ListIResourceKey : List<IResourceKey>
