@@ -2394,7 +2394,7 @@ namespace ObjectCloner
                     Item item = new Item(new RIE(objPkgs[0], irie));
                     bool dirty = false;
 
-                    if ((item.rk.Instance == selectedItem.rk.Instance && item.CType != CatalogType.ModularResource)//Selected CatlgItem
+                    if ((RK.Equals(item.rk, selectedItem.rk) && item.CType != CatalogType.ModularResource)//Selected CatlgItem
                         || item.CType == CatalogType.CatalogObject//all OBJDs (i.e. from MDLR or CFIR)
                         || item.CType == CatalogType.CatalogTerrainPaintBrush//all CTPTs (i.e. pair of selectedItem)
                         )
@@ -2403,10 +2403,10 @@ namespace ObjectCloner
                         AHandlerElement commonBlock = ((AHandlerElement)item.Resource["CommonBlock"].Value);
 
                         #region Selected CatlgItem || all MDLR OBJDs || both CTPTs || 0th CFIR OBJD
-                        if (item.rk.Instance == selectedItem.rk.Instance//Selected CatlgItem
+                        if (RK.Equals(item.rk, selectedItem.rk)//Selected CatlgItem
                             || selectedItem.CType == CatalogType.ModularResource//all MDLR OBJDs
                             || selectedItem.CType == CatalogType.CatalogTerrainPaintBrush//both CTPTs
-                            || item.rk.Instance == catlgItem.rk.Instance//0th CFIR OBJD
+                            || RK.Equals(item.rk, catlgItem.rk)//0th CFIR OBJD
                             )
                         {
                             commonBlock["NameGUID"] = new TypedValue(typeof(ulong), newNameGUID);
@@ -2423,7 +2423,7 @@ namespace ObjectCloner
                         #endregion
 
                         #region Selected CatlgItem; 0th OBJD from MDLR or CFIR
-                        if (item.rk.Instance == selectedItem.rk.Instance || item.rk.Instance == catlgItem.rk.Instance)//Selected CatlgItem; 0th OBJD from MDLR or CFIR
+                        if (RK.Equals(item.rk, selectedItem.rk) || RK.Equals(item.rk, catlgItem.rk))//Selected CatlgItem; 0th OBJD from MDLR or CFIR
                         {
                             ulong PngInstance = (ulong)commonBlock["PngInstance"].Value;
                             bool isPng = PngInstance != 0;
