@@ -155,6 +155,7 @@ namespace S3PIDemoFE
             AApiVersionedFields owner;
             int priority = int.MaxValue;
             bool expandable = false;
+            string tgiBlockListContentField = null;
             Type fieldType;
             public TypedValuePropertyDescriptor(AApiVersionedFields owner, string field, Attribute[] attrs)
                 : base(field, attrs)
@@ -170,6 +171,8 @@ namespace S3PIDemoFE
                     PropertyInfo pi = owner.GetType().GetProperty(name);
                     foreach (Attribute attr in pi.GetCustomAttributes(typeof(DataGridExpandableAttribute), true))
                         expandable = (attr as DataGridExpandableAttribute).DataGridExpandable;
+                    foreach (Attribute attr in pi.GetCustomAttributes(typeof(TGIBlockListContentFieldAttribute), true))
+                        tgiBlockListContentField = (attr as TGIBlockListContentFieldAttribute).TGIBlockListContentField;
                 }
             }
 
@@ -177,6 +180,8 @@ namespace S3PIDemoFE
 
             public bool Expandable { get { return expandable; } }
 
+            public bool hasTGIBlockListContentField { get { return tgiBlockListContentField != null; } }
+            public string TGIBlockListContentField { get { return tgiBlockListContentField; } }
 
             public override bool CanResetValue(object component) { return false; }
 
@@ -185,6 +190,7 @@ namespace S3PIDemoFE
             public override object GetValue(object component)
             {
                 Type t = PropertyType;
+                if (t.Equals(typeof(TGIBlockListIndexCTD))) return new TGIBlockListIndexCTD(owner, Name, tgiBlockListContentField, component);
                 if (t.Equals(typeof(EnumChooserCTD))) return new EnumChooserCTD(owner, Name, component);
                 if (t.Equals(typeof(EnumFlagsCTD))) return new EnumFlagsCTD(owner, Name, component);
                 if (t.Equals(typeof(AsHexCTD))) return new AsHexCTD(owner, Name, component);
@@ -238,6 +244,9 @@ namespace S3PIDemoFE
                     // Must test enum before IConvertible
                     if (typeof(Enum).IsAssignableFrom(fieldType) && fieldType.GetCustomAttributes(typeof(FlagsAttribute), true).Length == 0) return typeof(EnumChooserCTD);
                     if (typeof(Enum).IsAssignableFrom(fieldType) && fieldType.GetCustomAttributes(typeof(FlagsAttribute), true).Length == 1) return typeof(EnumFlagsCTD);
+
+                    // Must test Index fields before IConvertible
+                    if (hasTGIBlockListContentField) return typeof(TGIBlockListIndexCTD);
 
                     if (typeof(IConvertible).IsAssignableFrom(fieldType) || typeof(Boolset).Equals(fieldType)) return typeof(AsHexCTD);
 
@@ -298,6 +307,153 @@ namespace S3PIDemoFE
             public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
             {
                 if (typeof(string).Equals(destinationType)) return "";
+                return base.ConvertTo(context, culture, value, destinationType);
+            }
+        }
+    }
+
+    [Editor(typeof(TGIBlockListIndexEditor), typeof(UITypeEditor))]
+    [TypeConverter(typeof(TGIBlockListIndexConverter))]
+    public class TGIBlockListIndexCTD : ICustomTypeDescriptor
+    {
+        protected AApiVersionedFields owner;
+        protected string field;
+        protected string tgiBlockList;
+        protected object component;
+        public TGIBlockListIndexCTD(AApiVersionedFields owner, string field, string tgiBlockList, object component)
+        {
+            this.owner = owner;
+            this.field = field;
+            this.tgiBlockList = tgiBlockList;
+            this.component = component;
+        }
+
+        #region ICustomTypeDescriptor Members
+
+        public AttributeCollection GetAttributes() { return TypeDescriptor.GetAttributes(this, true); }
+
+        public string GetClassName() { return TypeDescriptor.GetClassName(this, true); }
+
+        public string GetComponentName() { return TypeDescriptor.GetComponentName(this, true); }
+
+        public TypeConverter GetConverter() { return TypeDescriptor.GetConverter(this, true); }
+
+        public EventDescriptor GetDefaultEvent() { return TypeDescriptor.GetDefaultEvent(this, true); }
+
+        public System.ComponentModel.PropertyDescriptor GetDefaultProperty() { return TypeDescriptor.GetDefaultProperty(this, true); }
+
+        public object GetEditor(Type editorBaseType) { return TypeDescriptor.GetEditor(this, editorBaseType, true); }
+
+        public EventDescriptorCollection GetEvents(Attribute[] attributes) { return TypeDescriptor.GetEvents(this, attributes, true); }
+
+        public EventDescriptorCollection GetEvents() { return TypeDescriptor.GetEvents(this, true); }
+
+        //public PropertyDescriptorCollection GetProperties(Attribute[] attributes) { return new PropertyDescriptorCollection(new PropertyDescriptor[] { new TGIBlockListIndexDescriptor() }); }
+        public PropertyDescriptorCollection GetProperties(Attribute[] attributes) { return new PropertyDescriptorCollection(new PropertyDescriptor[] { new ConverterPropertyDescriptor(owner, field, component, null), }); }
+
+        public PropertyDescriptorCollection GetProperties() { return GetProperties(null); }
+
+        public object GetPropertyOwner(System.ComponentModel.PropertyDescriptor pd) { return this; }
+
+        #endregion
+
+        /*public class TGIBlockListIndexDescriptor : PropertyDescriptor
+        {
+            TGIBlockListIndexEditor editor;
+            public TGIBlockListIndexDescriptor() : base("Edit value", null) { }
+
+            public override object GetEditor(Type editorBaseType)
+            {
+                if (editorBaseType == typeof(System.Drawing.Design.UITypeEditor))
+                {
+                    if (editor == null) editor = new TGIBlockListIndexEditor();
+                    return editor;
+                }
+                return base.GetEditor(editorBaseType);
+            }
+
+            public override bool CanResetValue(object component) { throw new InvalidOperationException(); }
+
+            public override void ResetValue(object component) { throw new InvalidOperationException(); }
+
+            public override Type PropertyType { get { throw new InvalidOperationException(); } }
+
+            public override object GetValue(object component) { throw new InvalidOperationException(); }
+
+            public override bool IsReadOnly { get { throw new InvalidOperationException(); } }
+
+            public override void SetValue(object component, object value) { throw new InvalidOperationException(); }
+
+            public override Type ComponentType { get { throw new InvalidOperationException(); } }
+
+            public override bool ShouldSerializeValue(object component) { throw new InvalidOperationException(); }
+        }/**/
+
+        public class TGIBlockListIndexEditor : UITypeEditor
+        {
+            TGIBlockSelection ui;
+            public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) { return UITypeEditorEditStyle.DropDown; }
+            public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
+            {
+                IWindowsFormsEditorService edSvc = (IWindowsFormsEditorService)provider.GetService(typeof(IWindowsFormsEditorService));
+
+                if (ui == null)
+                    ui = new TGIBlockSelection();
+
+                TGIBlockListIndexCTD o = value as TGIBlockListIndexCTD;
+                ui.SetField(o.owner, o.field, o.tgiBlockList);
+                ui.EdSvc = edSvc;
+                edSvc.DropDownControl(ui);
+                // the ui (a) updates the value and (b) closes the dropdown
+
+                return o.owner[o.field].Value;
+            }
+        }
+
+        public class TGIBlockListIndexConverter : TypeConverter
+        {
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
+                if (sourceType.Equals(typeof(string))) return true;
+                return base.CanConvertFrom(context, sourceType);
+            }
+
+            public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+            {
+                if (value.GetType().Equals(typeof(string)))
+                {
+                    string str = (string)value;
+                    try
+                    {
+                        AApiVersionedFieldsCTD.TypedValuePropertyDescriptor pd = (AApiVersionedFieldsCTD.TypedValuePropertyDescriptor)context.PropertyDescriptor;
+                        if (typeof(Boolset).Equals(pd.FieldType))
+                            return new Boolset(str);
+                        ulong num = Convert.ToUInt64(str, str.StartsWith("0x", StringComparison.InvariantCultureIgnoreCase) ? 16 : 10);
+                        return Convert.ChangeType(num, pd.FieldType);
+                    }
+                    catch (Exception ex) { throw new NotSupportedException("Invalid data: " + str, ex); }
+                }
+                return base.ConvertFrom(context, culture, value);
+            }/**/
+
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (destinationType.Equals(typeof(string))) return true;
+                return base.CanConvertTo(context, destinationType);
+            }
+
+            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+            {
+                if (value as TGIBlockListIndexCTD != null && destinationType.Equals(typeof(string)))
+                {
+                    try
+                    {
+                        TGIBlockListIndexCTD ctd = (TGIBlockListIndexCTD)value;
+                        string name = ctd.field.Split(' ').Length == 1 ? ctd.field : ctd.field.Split(new char[] { ' ' }, 2)[1].Trim();
+                        return "" + ctd.owner[name];
+                    }
+                    catch { }
+                }
                 return base.ConvertTo(context, culture, value, destinationType);
             }
         }

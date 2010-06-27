@@ -101,6 +101,12 @@
     <Compile Include="New Grid\ReaderEditorPanel.Designer.cs">
       <DependentUpon>ReaderEditorPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="New Grid\TGIBlockSelection.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="New Grid\TGIBlockSelection.Designer.cs">
+      <DependentUpon>TGIBlockSelection.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyVersion.cs" />
     <Compile Include="BrowserWidget\BrowserWidget.cs">
       <SubType>UserControl</SubType>
@@ -205,6 +211,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="New Grid\ReaderEditorPanel.resx">
       <DependentUpon>ReaderEditorPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="New Grid\TGIBlockSelection.resx">
+      <DependentUpon>TGIBlockSelection.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PackageInfo\PackageInfoWidget.resx">
       <DependentUpon>PackageInfoWidget.cs</DependentUpon>
