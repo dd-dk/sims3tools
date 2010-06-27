@@ -697,7 +697,7 @@ namespace ObjectCloner
                 //return new Item(pkgs, new TGI(type, 0, instance));
                 return new Item(pkgs, RK.NULL);
             }
-            static int byGroup(IResourceIndexEntry x, IResourceIndexEntry y) { return (x.ResourceGroup & 0x00FFFFFF).CompareTo(y.ResourceGroup & 0x00FFFFFF); }
+            static int byGroup(IResourceIndexEntry x, IResourceIndexEntry y) { return (x.ResourceGroup & 0x07FFFFFF).CompareTo(y.ResourceGroup & 0x07FFFFFF); }
         }
         THUM thumb;
         THUM Thumb
