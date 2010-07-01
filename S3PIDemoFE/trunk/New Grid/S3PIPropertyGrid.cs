@@ -420,7 +420,7 @@ namespace S3PIDemoFE
 
             public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
             {
-                if (value.GetType().Equals(typeof(string)))
+                if (value != null && value.GetType().Equals(typeof(string)))
                 {
                     string str = (string)value;
                     try
@@ -505,7 +505,7 @@ namespace S3PIDemoFE
 
             public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
             {
-                if (value.GetType().Equals(typeof(string)))
+                if (value != null && value.GetType().Equals(typeof(string)))
                 {
                     string str = (string)value;
                     try
@@ -590,7 +590,7 @@ namespace S3PIDemoFE
             }
             public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
             {
-                if (value.GetType().Equals(typeof(string)))
+                if (value != null && value.GetType().Equals(typeof(string)))
                 {
                     string[] content = ((string)value).Split(new char[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
                     string str = content[0];
@@ -715,7 +715,7 @@ namespace S3PIDemoFE
 
             public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
             {
-                if (value.GetType().Equals(typeof(string)))
+                if (value != null && value.GetType().Equals(typeof(string)))
                 {
                     string[] content = ((string)value).Split(new char[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
                     string str = content[0];
