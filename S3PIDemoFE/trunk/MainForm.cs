@@ -1111,6 +1111,21 @@ namespace S3PIDemoFE
                 epd.HasUserHexEditor = false;
                 epd.UserHexEditor = "";
                 epd.HexEditorIgnoreTS = false;
+                epd.HexEditorWantsQuotes = false;
+            }
+            if (S3PIDemoFE.Properties.Settings.Default.TextEditorCmd != null && S3PIDemoFE.Properties.Settings.Default.TextEditorCmd.Length > 0)
+            {
+                epd.HasUserTextEditor = true;
+                epd.UserTextEditor = S3PIDemoFE.Properties.Settings.Default.TextEditorCmd;
+                epd.TextEditorIgnoreTS = S3PIDemoFE.Properties.Settings.Default.TextEditorIgnoreTS;
+                epd.TextEditorWantsQuotes = S3PIDemoFE.Properties.Settings.Default.TextEditorWantsQuotes;
+            }
+            else
+            {
+                epd.HasUserTextEditor = false;
+                epd.UserTextEditor = "";
+                epd.TextEditorIgnoreTS = false;
+                epd.TextEditorWantsQuotes = false;
             }
             if (S3PIDemoFE.Properties.Settings.Default.DisabledHelpers == null)
                 S3PIDemoFE.Properties.Settings.Default.DisabledHelpers = new System.Collections.Specialized.StringCollection();
@@ -1131,6 +1146,18 @@ namespace S3PIDemoFE
                 S3PIDemoFE.Properties.Settings.Default.HexEditorCmd = null;
                 S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS = false;
                 S3PIDemoFE.Properties.Settings.Default.HexEditorWantsQuotes = false;
+            }
+            if (epd.HasUserTextEditor && epd.UserTextEditor.Length > 0 && File.Exists(epd.UserTextEditor))
+            {
+                S3PIDemoFE.Properties.Settings.Default.TextEditorCmd = epd.UserTextEditor;
+                S3PIDemoFE.Properties.Settings.Default.TextEditorIgnoreTS = epd.TextEditorIgnoreTS;
+                S3PIDemoFE.Properties.Settings.Default.TextEditorWantsQuotes = epd.TextEditorWantsQuotes;
+            }
+            else
+            {
+                S3PIDemoFE.Properties.Settings.Default.TextEditorCmd = null;
+                S3PIDemoFE.Properties.Settings.Default.TextEditorIgnoreTS = false;
+                S3PIDemoFE.Properties.Settings.Default.TextEditorWantsQuotes = false;
             }
             disabledHelpers = epd.DisabledHelpers;
             if (disabledHelpers.Length == 0)
@@ -1618,22 +1645,45 @@ namespace S3PIDemoFE
                 this.Enabled = false;
                 Application.DoEvents();
 
-                MemoryStream res = helpers.execHelper(i);
+                MemoryStream ms = helpers.execHelper(i);
                 MakeFormVisible();
+                Application.DoEvents();
 
-                if (!helpers[i].isReadOnly) afterEdit(res);
+                if (!helpers[i].isReadOnly) afterEdit(ms);
             }
             finally { this.Enabled = true; }
         }
 
-        private void controlPanel1_HexEditClick(object sender, EventArgs e)
+        private void controlPanel1_HexEditClick(object sender, EventArgs e) { HexEdit(browserWidget1.SelectedResource, resource); }
+
+        void TextEdit(IResourceKey key, IResource res)
         {
             try
             {
                 this.Enabled = false;
                 Application.DoEvents();
 
-                MemoryStream res = s3pi.DemoPlugins.DemoPlugins.Edit(browserWidget1.SelectedResource, resource,
+                MemoryStream ms = s3pi.DemoPlugins.DemoPlugins.Edit(key, res,
+                    S3PIDemoFE.Properties.Settings.Default.TextEditorCmd,
+                    S3PIDemoFE.Properties.Settings.Default.TextEditorWantsQuotes,
+                    S3PIDemoFE.Properties.Settings.Default.TextEditorIgnoreTS);
+
+                MakeFormVisible();
+                Application.DoEvents();
+
+                afterEdit(ms);
+            }
+            finally { this.Enabled = true; }
+        }
+
+        void HexEdit(IResourceKey key, IResource res)
+        {
+            try
+            {
+                this.Enabled = false;
+                Application.DoEvents();
+
+                MemoryStream ms = s3pi.DemoPlugins.DemoPlugins.Edit(key, res,
                     S3PIDemoFE.Properties.Settings.Default.HexEditorCmd,
                     S3PIDemoFE.Properties.Settings.Default.HexEditorWantsQuotes,
                     S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS);
@@ -1641,25 +1691,16 @@ namespace S3PIDemoFE
                 MakeFormVisible();
                 Application.DoEvents();
 
-                afterEdit(res);
+                afterEdit(ms);
             }
             finally { this.Enabled = true; }
         }
 
         void MakeFormVisible()
         {
-            this.TopMost = true;
-            Application.DoEvents();
-            this.BringToFront();
-            Application.DoEvents();
-            this.Visible = true;
-            Application.DoEvents();
-            this.Activate();
-            Application.DoEvents();
-            this.Focus();
-            Application.DoEvents();
-            this.TopMost = false;
-            Application.DoEvents();
+            foreach (Form f in Application.OpenForms) { f.TopMost = true; Application.DoEvents(); }
+            foreach (Form f in Application.OpenForms) { f.Focus(); Application.DoEvents(); }
+            foreach (Form f in Application.OpenForms) { f.TopMost = false; Application.DoEvents(); }
         }
 
         void afterEdit(MemoryStream ms)
