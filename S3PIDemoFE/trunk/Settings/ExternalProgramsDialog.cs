@@ -129,21 +129,42 @@ namespace S3PIDemoFE.Settings
             }
         }
 
+
         public bool HasUserHexEditor { get { return ckbUserHexEditor.Checked; } set { ckbUserHexEditor.Checked = value; } }
 
         public string UserHexEditor { get { return tbUserHexEditor.Text; } set { tbUserHexEditor.Text = value; } }
 
         public bool HexEditorIgnoreTS { get { return ckbHexEditorTS.Checked; } set { ckbHexEditorTS.Checked = value; } }
         
-        public bool HexEditorWantsQuotes { get { return ckbQuotes.Checked; } set { ckbQuotes.Checked = value; } }
+        public bool HexEditorWantsQuotes { get { return ckbHexQuotes.Checked; } set { ckbHexQuotes.Checked = value; } }
 
-        private void ckbUserHexEditor_CheckedChanged(object sender, EventArgs e) { ckbQuotes.Enabled = ckbHexEditorTS.Enabled = btnHexEditorBrowse.Enabled = ckbUserHexEditor.Checked; }
+        private void ckbUserHexEditor_CheckedChanged(object sender, EventArgs e) { ckbHexQuotes.Enabled = ckbHexEditorTS.Enabled = btnHexEditorBrowse.Enabled = ckbUserHexEditor.Checked; }
 
         private void btnHexEditorBrowse_Click(object sender, EventArgs e)
         {
-            DialogResult dr = ofdUserHexEditor.ShowDialog();
+            ofdUserEditor.Title = "Choose your hex editor";
+            DialogResult dr = ofdUserEditor.ShowDialog();
             if (dr != DialogResult.OK) return;
-            tbUserHexEditor.Text = ofdUserHexEditor.FileName;
+            tbUserHexEditor.Text = ofdUserEditor.FileName;
+        }
+
+
+        public bool HasUserTextEditor { get { return ckbUserTextEditor.Checked; } set { ckbUserTextEditor.Checked = value; } }
+
+        public string UserTextEditor { get { return tbUserTextEditor.Text; } set { tbUserTextEditor.Text = value; } }
+
+        public bool TextEditorIgnoreTS { get { return ckbTextEditorTS.Checked; } set { ckbTextEditorTS.Checked = value; } }
+
+        public bool TextEditorWantsQuotes { get { return ckbTextQuotes.Checked; } set { ckbTextQuotes.Checked = value; } }
+
+        private void ckbUserTextEditor_CheckedChanged(object sender, EventArgs e) { ckbTextQuotes.Enabled = ckbTextEditorTS.Enabled = btnTextEditorBrowse.Enabled = ckbUserTextEditor.Checked; }
+
+        private void btnTextEditorBrowse_Click(object sender, EventArgs e)
+        {
+            ofdUserEditor.Title = "Choose your text editor";
+            DialogResult dr = ofdUserEditor.ShowDialog();
+            if (dr != DialogResult.OK) return;
+            tbUserTextEditor.Text = ofdUserEditor.FileName;
         }
     }
 }
