@@ -33,6 +33,7 @@
             this.btnExport = new System.Windows.Forms.Button();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.btnEdit = new System.Windows.Forms.Button();
             this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -43,10 +44,11 @@
             this.flowLayoutPanel1.BackColor = System.Drawing.SystemColors.ButtonFace;
             this.flowLayoutPanel1.Controls.Add(this.btnImport);
             this.flowLayoutPanel1.Controls.Add(this.btnExport);
+            this.flowLayoutPanel1.Controls.Add(this.btnEdit);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(132, 23);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(204, 23);
             this.flowLayoutPanel1.TabIndex = 0;
             // 
             // btnImport
@@ -65,7 +67,7 @@
             // 
             this.btnExport.BackColor = System.Drawing.SystemColors.Control;
             this.btnExport.Location = new System.Drawing.Point(72, 0);
-            this.btnExport.Margin = new System.Windows.Forms.Padding(6, 0, 0, 0);
+            this.btnExport.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.btnExport.Name = "btnExport";
             this.btnExport.Size = new System.Drawing.Size(60, 23);
             this.btnExport.TabIndex = 1;
@@ -81,6 +83,18 @@
             // 
             this.openFileDialog1.Title = "Import...";
             // 
+            // btnEdit
+            // 
+            this.btnEdit.BackColor = System.Drawing.SystemColors.Control;
+            this.btnEdit.Location = new System.Drawing.Point(144, 0);
+            this.btnEdit.Margin = new System.Windows.Forms.Padding(6, 0, 0, 0);
+            this.btnEdit.Name = "btnEdit";
+            this.btnEdit.Size = new System.Drawing.Size(60, 23);
+            this.btnEdit.TabIndex = 2;
+            this.btnEdit.Text = "Edit...";
+            this.btnEdit.UseVisualStyleBackColor = false;
+            this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
+            // 
             // ReaderEditorPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -89,7 +103,7 @@
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.Controls.Add(this.flowLayoutPanel1);
             this.Name = "ReaderEditorPanel";
-            this.Size = new System.Drawing.Size(132, 23);
+            this.Size = new System.Drawing.Size(204, 23);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -103,5 +117,6 @@
         private System.Windows.Forms.Button btnExport;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.Button btnEdit;
     }
 }

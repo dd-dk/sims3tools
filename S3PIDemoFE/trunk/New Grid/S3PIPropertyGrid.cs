@@ -1305,7 +1305,7 @@ namespace S3PIDemoFE
         public class ReaderPropertyDescriptor : PropertyDescriptor
         {
             ReaderEditor editor;
-            public ReaderPropertyDescriptor() : base("Export/Import value", null) { }
+            public ReaderPropertyDescriptor() : base("Export/Import/Edit value", null) { }
 
             public override object GetEditor(Type editorBaseType)
             {
@@ -1366,7 +1366,7 @@ namespace S3PIDemoFE
             public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
             {
                 if (typeof(string).IsAssignableFrom(destinationType))
-                    return "Import/Export...";
+                    return "Import/Export/Edit...";
                 return base.ConvertTo(context, culture, value, destinationType);
             }
         }

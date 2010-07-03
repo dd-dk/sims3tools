@@ -38,7 +38,6 @@ namespace S3PIDemoFE
         AApiVersionedFields owner;
         string field;
         Type type;
-        //TypedValue field;
         public void SetField(AApiVersionedFields owner, string field)
         {
             type = AApiVersionedFields.GetContentFieldTypes(0, owner.GetType())[field];
@@ -48,6 +47,15 @@ namespace S3PIDemoFE
             this.field = field;
             btnImport.Enabled = owner.GetType().GetProperty(field).CanWrite;
             btnExport.Enabled = owner.GetType().GetProperty(field).CanRead;
+
+            btnEdit.Enabled = false;
+            if (btnExport.Enabled && btnImport.Enabled)
+            {
+                bool hasText = S3PIDemoFE.Properties.Settings.Default.TextEditorCmd != null && S3PIDemoFE.Properties.Settings.Default.TextEditorCmd.Length > 0;
+                bool hasHex = S3PIDemoFE.Properties.Settings.Default.HexEditorCmd != null && S3PIDemoFE.Properties.Settings.Default.HexEditorCmd.Length > 0;
+
+                btnEdit.Enabled = (typeof(TextReader).IsAssignableFrom(type) && hasText) || (typeof(BinaryReader).IsAssignableFrom(type) && hasHex);
+            }
         }
 
         IWindowsFormsEditorService edSvc;
@@ -134,6 +142,63 @@ namespace S3PIDemoFE
             if (typeof(TextReader).IsAssignableFrom(type)) Export_TextReader();
             if (typeof(BinaryReader).IsAssignableFrom(type)) Export_BinaryReader();
             edSvc.CloseDropDown();
+        }
+
+        private void Edit_TextReader()
+        {
+            byte[] data = null;
+            TextReader r = owner[field].Value as TextReader;
+            try { data = ((MemoryStream)((StreamReader)r).BaseStream).ToArray(); }
+            catch { data = System.Text.Encoding.Default.GetBytes(r.ReadToEnd()); }
+            data = Edit(data, TextEdit);
+            if (data != null)
+                owner[field] = new TypedValue(type, new StringReader(System.Text.Encoding.Default.GetString(data)));
+        }
+        private void Edit_BinaryReader()
+        {
+            byte[] data = null;
+            BinaryReader r = owner[field].Value as BinaryReader;
+            if (r.BaseStream.CanSeek) r.BaseStream.Position = 0;
+            data = r.ReadBytes((int)r.BaseStream.Length);
+            data = Edit(data, HexEdit);
+            if (data != null)
+                owner[field] = new TypedValue(type, new BinaryReader(new MemoryStream(data)));
+        }
+        private void btnEdit_Click(object sender, EventArgs e)
+        {
+            if (typeof(TextReader).IsAssignableFrom(type)) Edit_TextReader();
+            if (typeof(BinaryReader).IsAssignableFrom(type)) Edit_BinaryReader();
+            edSvc.CloseDropDown();
+            foreach (Form f in Application.OpenForms) { f.TopMost = true; Application.DoEvents(); }
+            foreach (Form f in Application.OpenForms) { f.Focus(); Application.DoEvents(); }
+            foreach (Form f in Application.OpenForms) { f.TopMost = false; Application.DoEvents(); }
+        }
+
+        delegate MemoryStream Editor(IResourceKey key, IResource res);
+        private byte[] Edit(byte[] data, Editor editor)
+        {
+            IResourceKey rk = new AResource.TGIBlock(0, null);
+            IResource res = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x00000000");
+            res.Stream.Position = 0;
+            new BinaryWriter(res.Stream).Write(data);
+
+            MemoryStream ms = editor(rk, res);
+
+            return ms == null ? null : ms.ToArray();
+        }
+        MemoryStream TextEdit(IResourceKey key, IResource res)
+        {
+            return s3pi.DemoPlugins.DemoPlugins.Edit(key, res,
+                S3PIDemoFE.Properties.Settings.Default.TextEditorCmd,
+                S3PIDemoFE.Properties.Settings.Default.TextEditorWantsQuotes,
+                S3PIDemoFE.Properties.Settings.Default.TextEditorIgnoreTS);
+        }
+        MemoryStream HexEdit(IResourceKey key, IResource res)
+        {
+            return s3pi.DemoPlugins.DemoPlugins.Edit(key, res,
+                S3PIDemoFE.Properties.Settings.Default.HexEditorCmd,
+                S3PIDemoFE.Properties.Settings.Default.HexEditorWantsQuotes,
+                S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS);
         }
     }
 }
