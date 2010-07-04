@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("A tool to clone an object using the s3pi library")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Peter L Jones")]
-[assembly: AssemblyProduct("s3pi ObjectCloner")]
+[assembly: AssemblyProduct("s3oc")]
 [assembly: AssemblyCopyright("Copyright © 2009  Peter L Jones  Released under the GPL 3.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
