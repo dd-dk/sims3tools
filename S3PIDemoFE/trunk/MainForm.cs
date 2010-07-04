@@ -40,6 +40,8 @@ namespace S3PIDemoFE
         {
             foreach (string s in unwantedFields) fields.Remove(s);
             fields.Sort(byElementPriority);
+
+            S3PIDemoFE.Settings.Checker.Daily();
         }
         static int byElementPriority(string x, string y)
         {
@@ -1090,6 +1092,7 @@ namespace S3PIDemoFE
                 {
                     case MenuBarWidget.MB.MBS_externals: settingsExternalPrograms(); break;
                     case MenuBarWidget.MB.MBS_bookmarks: settingsOrganiseBookmarks(); break;
+                    case MenuBarWidget.MB.MBS_updates: settingsAutomaticUpdates(); break;
                     case MenuBarWidget.MB.MBS_saveSettings: saveSettings(); break;
                 }
             }
@@ -1177,6 +1180,11 @@ namespace S3PIDemoFE
             menuBarWidget1.UpdateBookmarks();
         }
 
+        private void settingsAutomaticUpdates()
+        {
+            S3PIDemoFE.Settings.Checker.AutoUpdateChoice = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_updates);
+        }
+
         private void saveSettings()
         {
             OnSaveSettings(this, new EventArgs());
@@ -1195,6 +1203,7 @@ namespace S3PIDemoFE
                 {
                     case MenuBarWidget.MB.MBH_contents: helpContents(); break;
                     case MenuBarWidget.MB.MBH_about: helpAbout(); break;
+                    case MenuBarWidget.MB.MBH_update: helpUpdate(); break;
                     case MenuBarWidget.MB.MBH_warranty: helpWarranty(); break;
                     case MenuBarWidget.MB.MBH_licence: helpLicence(); break;
                 }
@@ -1248,6 +1257,14 @@ namespace S3PIDemoFE
             string res = t.ReadLine();
             fs.Close();
             return res;
+        }
+
+        private void helpUpdate()
+        {
+            bool msgDisplayed = S3PIDemoFE.Settings.Checker.GetUpdate(false);
+            if (!msgDisplayed)
+                CopyableMessageBox.Show("Your " + Application.ProductName + " is up to date", this.Text,
+                    CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
         }
 
         private void helpWarranty()

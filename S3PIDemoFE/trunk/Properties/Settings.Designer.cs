@@ -376,5 +376,53 @@ namespace S3PIDemoFE.Properties {
                 this["TextEditorWantsQuotes"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int AutoUpdateChoice {
+            get {
+                return ((int)(this["AutoUpdateChoice"]));
+            }
+            set {
+                this["AutoUpdateChoice"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2010-07-01")]
+        public global::System.DateTime AULastUpdateTS {
+            get {
+                return ((global::System.DateTime)(this["AULastUpdateTS"]));
+            }
+            set {
+                this["AULastUpdateTS"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1007-01-0000")]
+        public string AULastIgnoredVsn {
+            get {
+                return ((string)(this["AULastIgnoredVsn"]));
+            }
+            set {
+                this["AULastIgnoredVsn"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("http://simlogical.com/s3pi/s3peUpdate.xml")]
+        public string AutoUpdateURL {
+            get {
+                return ((string)(this["AutoUpdateURL"]));
+            }
+            set {
+                this["AutoUpdateURL"] = value;
+            }
+        }
     }
 }

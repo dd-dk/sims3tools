@@ -251,6 +251,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Settings.cs" />
+    <Compile Include="Settings\AutoUpdate.cs" />
     <Compile Include="Settings\ExternalProgramsDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -397,7 +398,9 @@
       <Link>Helpers\s3pe_VPXYResourceEditor.helper</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Resources\s3pe.ico" />
   </ItemGroup>
   <ItemGroup>
