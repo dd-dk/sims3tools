@@ -46,7 +46,7 @@ namespace S3PIDemoFE.Settings
         public String AvailableVersion { get { return pgmUpdate["Version"]; } }
         public String UpdateURL { get { return pgmUpdate["UpdateURL"]; } }
         public String Message { get { return pgmUpdate["Message"]; } }
-        public bool Reset { get { return pgmUpdate.ContainsKey("Reset"); } }
+        public bool Reset { get { bool res = false; return pgmUpdate.ContainsKey("Reset") && bool.TryParse(pgmUpdate["Reset"], out res) ? res : false; } }
 
         public UpdateInfo(String url)
         {
