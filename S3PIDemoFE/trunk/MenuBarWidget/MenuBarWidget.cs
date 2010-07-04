@@ -51,10 +51,10 @@ namespace S3PIDemoFE
                 //Tools
                 fNVHashToolStripMenuItem, searchToolStripMenuItem,
                 //Settings
-                externalProgramsToolStripMenuItem, organiseBookmarksToolStripMenuItem,
+                externalProgramsToolStripMenuItem, organiseBookmarksToolStripMenuItem, automaticUpdateChecksToolStripMenuItem,
                 saveSettingsToolStripMenuItem,
                 //Help
-                contentsToolStripMenuItem, aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
+                contentsToolStripMenuItem, aboutToolStripMenuItem, checkForUpdateToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
             cmsBW = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //BrowserWidgetContextMenuStrip
@@ -64,6 +64,13 @@ namespace S3PIDemoFE
             });
             UpdateMRUList();
             UpdateBookmarks();
+            S3PIDemoFE.Settings.Checker.AutoUpdateChoice_Changed += new EventHandler(Checker_AutoUpdateChoice_Changed);
+            Checker_AutoUpdateChoice_Changed(null, null);
+        }
+
+        void Checker_AutoUpdateChoice_Changed(object sender, EventArgs e)
+        {
+            Checked(MB.MBS_updates, S3PIDemoFE.Settings.Checker.AutoUpdateChoice);
         }
 
         public enum MD
@@ -85,9 +92,8 @@ namespace S3PIDemoFE
             MBR_compressed, MBR_isdeleted, MBR_details,
             MBR_importResources, MBR_importPackages, MBR_importAsDBC, MBR_exportResources, MBR_exportToPackage,
             MBT_fnvHash, MBT_search,
-            MBS_externals, MBS_bookmarks,
-            MBS_saveSettings,
-            MBH_contents, MBH_about, MBH_warranty, MBH_licence,
+            MBS_externals, MBS_bookmarks, MBS_updates, MBS_saveSettings,
+            MBH_contents, MBH_about, MBH_update, MBH_warranty, MBH_licence,
         }
 
         public enum CMS
