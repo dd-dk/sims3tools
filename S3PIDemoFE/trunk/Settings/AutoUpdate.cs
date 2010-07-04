@@ -46,6 +46,7 @@ namespace S3PIDemoFE.Settings
         public String AvailableVersion { get { return pgmUpdate["Version"]; } }
         public String UpdateURL { get { return pgmUpdate["UpdateURL"]; } }
         public String Message { get { return pgmUpdate["Message"]; } }
+        public bool Reset { get { return pgmUpdate.ContainsKey("Reset"); } }
 
         public UpdateInfo(String url)
         {
@@ -149,6 +150,9 @@ namespace S3PIDemoFE.Settings
 
         private static bool UpdateApplicable(UpdateInfo ui, bool autoCheck)
         {
+            if (ui.Reset && ui.AvailableVersion.CompareTo(pgmSettings.AULastIgnoredVsn) != 0)
+                pgmSettings.AULastIgnoredVsn = Version.CurrentVersion;
+
             if (autoCheck && ui.AvailableVersion.CompareTo(pgmSettings.AULastIgnoredVsn) <= 0)
                 return false;
 
