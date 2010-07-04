@@ -49,10 +49,17 @@ namespace ObjectCloner
                 //Tools
                 searchToolStripMenuItem,
                 //Settings
-                gameFoldersToolStripMenuItem, userNameToopStripMenuItem, diagnosticsToolStripMenuItem,
+                gameFoldersToolStripMenuItem, userNameToopStripMenuItem, automaticUpdateCheckToolStripMenuItem, diagnosticsToolStripMenuItem,
                 //Help
-                contentsToolStripMenuItem, aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
+                contentsToolStripMenuItem, aboutToolStripMenuItem, checkForUpdateToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
+            ObjectCloner.Checker.AutoUpdateChoice_Changed += new EventHandler(Checker_AutoUpdateChoice_Changed);
+            Checker_AutoUpdateChoice_Changed(null, null);
+        }
+
+        void Checker_AutoUpdateChoice_Changed(object sender, EventArgs e)
+        {
+            Checked(MB.MBS_updates, ObjectCloner.Checker.AutoUpdateChoice);
         }
 
         public enum MD
@@ -75,8 +82,8 @@ namespace ObjectCloner
             MBV_tiles, MBV_largeIcons, MBV_smallIcons, MBV_list, MBV_detailedList,
             MBV_icons,
             MBT_search,
-            MBS_sims3Folder, MBS_userName, MBS_diagnostics,
-            MBH_contents, MBH_about, MBH_warranty, MBH_licence,
+            MBS_sims3Folder, MBS_userName, MBS_updates, MBS_diagnostics,
+            MBH_contents, MBH_about, MBH_update, MBH_warranty, MBH_licence,
         }
 
         public void Enable(MD mn, bool state) { tsMD[(int)mn].Enabled = state; }

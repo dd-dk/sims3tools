@@ -70,6 +70,8 @@ namespace ObjectCloner
             viewMapKeys = new List<View>(viewMap.Keys);
             viewMapValues = new List<MenuBarWidget.MB>(viewMap.Values);
 
+            ObjectCloner.Checker.Daily();
+
             LoadIni();
             LoadTTL();
             LoadEPsDisabled();
@@ -3120,6 +3122,7 @@ namespace ObjectCloner
                 {
                     case MenuBarWidget.MB.MBS_sims3Folder: settingsGameFolders(); break;
                     case MenuBarWidget.MB.MBS_userName: settingsUserName(); break;
+                    case MenuBarWidget.MB.MBS_updates: settingsAutomaticUpdates(); break;
                     case MenuBarWidget.MB.MBS_diagnostics: settingsDiagnostics(); break;
                 }
             }
@@ -3154,6 +3157,11 @@ namespace ObjectCloner
             ObjectCloner.Properties.Settings.Default.CreatorName = cn.Value;
         }
 
+        private void settingsAutomaticUpdates()
+        {
+            ObjectCloner.Checker.AutoUpdateChoice = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_updates);
+        }
+
         private void settingsDiagnostics()
         {
             Application.DoEvents();
@@ -3173,6 +3181,7 @@ namespace ObjectCloner
                 {
                     case MenuBarWidget.MB.MBH_contents: helpContents(); break;
                     case MenuBarWidget.MB.MBH_about: helpAbout(); break;
+                    case MenuBarWidget.MB.MBH_update: helpUpdate(); break;
                     case MenuBarWidget.MB.MBH_warranty: helpWarranty(); break;
                     case MenuBarWidget.MB.MBH_licence: helpLicence(); break;
                 }
@@ -3227,6 +3236,14 @@ namespace ObjectCloner
             FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read);
             StreamReader t = new StreamReader(fs);
             return t.ReadLine();
+        }
+
+        private void helpUpdate()
+        {
+            bool msgDisplayed = ObjectCloner.Checker.GetUpdate(false);
+            if (!msgDisplayed)
+                CopyableMessageBox.Show("Your " + Application.ProductName + " is up to date", this.Text,
+                    CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
         }
 
         private void helpWarranty()

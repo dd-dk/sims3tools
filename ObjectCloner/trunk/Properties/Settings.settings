@@ -44,5 +44,17 @@
     <Setting Name="Diagnostics" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="AutoUpdateChoice" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="AULastUpdateTS" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)">2010-07-01</Value>
+    </Setting>
+    <Setting Name="AULastIgnoredVsn" Type="System.String" Scope="User">
+      <Value Profile="(Default)">1007-01-0000</Value>
+    </Setting>
+    <Setting Name="AutoUpdateURL" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://simlogical.com/s3pi/s3ocUpdate.xml</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

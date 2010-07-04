@@ -61,14 +61,16 @@
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameFoldersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.userNameToopStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.diagnosticsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.diagnosticsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkForUpdateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.automaticUpdateCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SuspendLayout();
             // 
             // fileToolStripMenuItem
@@ -326,6 +328,7 @@
             this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.gameFoldersToolStripMenuItem,
             this.userNameToopStripMenuItem,
+            this.automaticUpdateCheckToolStripMenuItem,
             this.toolStripSeparator3,
             this.diagnosticsToolStripMenuItem});
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
@@ -347,6 +350,13 @@
             this.userNameToopStripMenuItem.Text = "Creator &Name...";
             this.userNameToopStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
+            // automaticUpdateCheckToolStripMenuItem
+            // 
+            this.automaticUpdateCheckToolStripMenuItem.Name = "automaticUpdateCheckToolStripMenuItem";
+            this.automaticUpdateCheckToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.automaticUpdateCheckToolStripMenuItem.Text = "Automatic &Update Check";
+            this.automaticUpdateCheckToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
@@ -365,6 +375,7 @@
             this.contentsToolStripMenuItem,
             this.toolStripSeparator4,
             this.aboutToolStripMenuItem,
+            this.checkForUpdateToolStripMenuItem,
             this.warrantyToolStripMenuItem,
             this.licenceToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
@@ -391,6 +402,13 @@
             this.aboutToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             this.aboutToolStripMenuItem.Text = "&About...";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
+            // 
+            // checkForUpdateToolStripMenuItem
+            // 
+            this.checkForUpdateToolStripMenuItem.Name = "checkForUpdateToolStripMenuItem";
+            this.checkForUpdateToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+            this.checkForUpdateToolStripMenuItem.Text = "Check for &update...";
+            this.checkForUpdateToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
             // 
             // warrantyToolStripMenuItem
             // 
@@ -464,5 +482,7 @@
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem warrantyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem licenceToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem automaticUpdateCheckToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem checkForUpdateToolStripMenuItem;
     }
 }
