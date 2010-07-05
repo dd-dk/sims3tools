@@ -52,7 +52,15 @@ namespace ObjectCloner
         {
             try
             {
-                XmlReader xr = XmlReader.Create(url);
+                XmlReaderSettings xrs = new XmlReaderSettings();
+                xrs.CloseInput = true;
+                xrs.IgnoreComments = true;
+                xrs.IgnoreProcessingInstructions = true;
+                xrs.IgnoreWhitespace = true;
+                xrs.ProhibitDtd = false;
+                xrs.ValidationType = ValidationType.None;
+                XmlReader xr = XmlReader.Create(url, xrs);
+
                 xr.MoveToContent();
                 if (!xr.Name.Equals(Application.ProductName + "Update"))
                     xr.Skip();
