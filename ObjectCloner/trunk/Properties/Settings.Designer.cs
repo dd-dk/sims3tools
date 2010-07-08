@@ -226,17 +226,5 @@ namespace ObjectCloner.Properties {
                 this["AULastIgnoredVsn"] = value;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://simlogical.com/s3pi/s3ocUpdate.xml")]
-        public string AutoUpdateURL {
-            get {
-                return ((string)(this["AutoUpdateURL"]));
-            }
-            set {
-                this["AutoUpdateURL"] = value;
-            }
-        }
     }
 }

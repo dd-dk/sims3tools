@@ -70,8 +70,6 @@ namespace ObjectCloner
             viewMapKeys = new List<View>(viewMap.Keys);
             viewMapValues = new List<MenuBarWidget.MB>(viewMap.Values);
 
-            ObjectCloner.Checker.Daily();
-
             LoadIni();
             LoadTTL();
             LoadEPsDisabled();
@@ -440,7 +438,6 @@ namespace ObjectCloner
 
             Diagnostics.Enabled = ObjectCloner.Properties.Settings.Default.Diagnostics;
             menuBarWidget1.Checked(MenuBarWidget.MB.MBS_diagnostics, Diagnostics.Enabled);
-
         }
 
         public MainForm(params string[] args)
