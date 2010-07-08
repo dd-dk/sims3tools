@@ -101,8 +101,5 @@
     <Setting Name="AULastIgnoredVsn" Type="System.String" Scope="User">
       <Value Profile="(Default)">1007-01-0000</Value>
     </Setting>
-    <Setting Name="AutoUpdateURL" Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://simlogical.com/s3pi/s3peUpdate.xml</Value>
-    </Setting>
   </Settings>
 </SettingsFile>

@@ -40,8 +40,6 @@ namespace S3PIDemoFE
         {
             foreach (string s in unwantedFields) fields.Remove(s);
             fields.Sort(byElementPriority);
-
-            S3PIDemoFE.Settings.Checker.Daily();
         }
         static int byElementPriority(string x, string y)
         {

@@ -412,17 +412,5 @@ namespace S3PIDemoFE.Properties {
                 this["AULastIgnoredVsn"] = value;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://simlogical.com/s3pi/s3peUpdate.xml")]
-        public string AutoUpdateURL {
-            get {
-                return ((string)(this["AutoUpdateURL"]));
-            }
-            set {
-                this["AutoUpdateURL"] = value;
-            }
-        }
     }
 }

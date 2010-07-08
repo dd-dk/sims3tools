@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -30,7 +31,7 @@ namespace S3PIDemoFE.Settings
         static String timestamp;
         static Version()
         {
-            String version_txt = Path.Combine(Path.GetDirectoryName(typeof(Version).Assembly.Location),  Application.ProductName + "-Version.txt");
+            String version_txt = Path.Combine(Path.GetDirectoryName(typeof(Version).Assembly.Location), Application.ProductName + "-Version.txt");
             System.IO.StreamReader sr = new StreamReader(version_txt);
             String line1 = sr.ReadLine();
             sr.Close();
@@ -50,30 +51,51 @@ namespace S3PIDemoFE.Settings
 
         public UpdateInfo(String url)
         {
-            try
+            if (url.ToLower().EndsWith(".xml"))
             {
-                XmlReaderSettings xrs = new XmlReaderSettings();
-                xrs.CloseInput = true;
-                xrs.IgnoreComments = true;
-                xrs.IgnoreProcessingInstructions = true;
-                xrs.IgnoreWhitespace = true;
-                xrs.ProhibitDtd = false;
-                xrs.ValidationType = ValidationType.None;
-                XmlReader xr = XmlReader.Create(url, xrs);
+                try
+                {
+                    XmlReaderSettings xrs = new XmlReaderSettings();
+                    xrs.CloseInput = true;
+                    xrs.IgnoreComments = true;
+                    xrs.IgnoreProcessingInstructions = true;
+                    xrs.IgnoreWhitespace = true;
+                    xrs.ProhibitDtd = false;
+                    xrs.ValidationType = ValidationType.None;
+                    XmlReader xr = XmlReader.Create(url, xrs);
 
-                xr.MoveToContent();
-                if (!xr.Name.Equals(Application.ProductName + "Update"))
-                    xr.Skip();
+                    xr.MoveToContent();
+                    if (!xr.Name.Equals(Application.ProductName + "Update"))
+                        xr.Skip();
 
-                while (xr.Read())
-                    if (xr.MoveToContent() == XmlNodeType.Element)
-                        pgmUpdate.Add(xr.Name, xr.ReadString());
-                xr.Close();
+                    while (xr.Read())
+                        if (xr.MoveToContent() == XmlNodeType.Element)
+                            pgmUpdate.Add(xr.Name, xr.ReadString());
+                    xr.Close();
+                }
+                catch (XmlException xe) { throw new System.Net.WebException("Invalid Update Info file found:\n" + xe.Message); }
+
+                if (!pgmUpdate.ContainsKey("Version") || !pgmUpdate.ContainsKey("UpdateURL") || !pgmUpdate.ContainsKey("Message"))
+                    throw new System.Net.WebException("Invalid Update Info file found:\nData content invalid.");
             }
-            catch (XmlException xe) { throw new System.Net.WebException("Invalid Update Info file found:\n" + xe.Message); }
-
-            if (!pgmUpdate.ContainsKey("Version") || !pgmUpdate.ContainsKey("UpdateURL") || !pgmUpdate.ContainsKey("Message"))
-                throw new System.Net.WebException("Invalid Update Info file found:\nData content invalid.");
+            else
+            {
+                TextReader tr = new StreamReader(new System.Net.WebClient().OpenRead(url));
+                string line1 = tr.ReadLine().Trim();
+                bool reset = false;
+                if (bool.TryParse(line1, out reset))
+                {
+                    pgmUpdate.Add("Reset", reset ? Boolean.TrueString : Boolean.FalseString);
+                    pgmUpdate.Add("Version", tr.ReadLine().Trim());
+                }
+                else
+                {
+                    pgmUpdate.Add("Version", line1);
+                }
+                pgmUpdate.Add("UpdateURL", tr.ReadLine().Trim());
+                pgmUpdate.Add("Message", tr.ReadToEnd().Trim());
+                tr.Close();
+            }
         }
     }
     public class Checker
@@ -108,6 +130,9 @@ namespace S3PIDemoFE.Settings
 
         public static void Daily()
         {
+#if DEBUG
+            GetUpdate(true);
+#else
             if ((pgmSettings.AutoUpdateChoice == 1)
                 && (DateTime.UtcNow.Date != pgmSettings.AULastUpdateTS.Date))
             {
@@ -115,25 +140,60 @@ namespace S3PIDemoFE.Settings
                 pgmSettings.AULastUpdateTS = DateTime.UtcNow; // Only the automated check updates this setting
                 pgmSettings.Save();
             }
+#endif
         }
 
         public static bool GetUpdate(bool autoCheck)
         {
             UpdateInfo ui = null;
-            try { ui = new UpdateInfo(pgmSettings.AutoUpdateURL); }
-            catch (System.Net.WebException we)
+            string ini = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), Application.ProductName + "Update.ini");
+            if (!File.Exists(ini))
             {
-                if (we != null)
+                CopyableMessageBox.Show(
+                    "Problem checking for update" + (autoCheck ? " - will try again later" : "") + "\n"
+                    + ini + " - not found"
+                    , Application.ProductName + " AutoUpdate"
+                    , CopyableMessageBoxButtons.OK
+                    , CopyableMessageBoxIcon.Error);
+                return true;
+            }
+            try
+            {
+                string url = new StreamReader(ini).ReadLine();
+                if (url == null)
+                    throw new IOException(ini + " - failed to read url");
+                url = url.Trim();
+                try
                 {
-                    CopyableMessageBox.Show(
-                        "Problem checking for update" + (autoCheck ? " - will try again later" : "") + "\n"
-                        + (we.Response != null ? "\nURL: " + we.Response.ResponseUri : "")
-                        + "\n" + we.Message
-                        , Application.ProductName + " AutoUpdate"
-                        , CopyableMessageBoxButtons.OK
-                        , CopyableMessageBoxIcon.Error);
-                    return true;
+                    if (autoCheck || true)
+                        StartSplash();
+                    try { ui = new UpdateInfo(url); }
+                    finally { StopSplash(); }
                 }
+                catch (System.Net.WebException we)
+                {
+                    if (we != null)
+                    {
+                        CopyableMessageBox.Show(
+                            "Problem checking for update" + (autoCheck ? " - will try again later" : "") + "\n"
+                            + (we.Response != null ? "\nURL: " + we.Response.ResponseUri : "")
+                            + "\n" + we.Message
+                            , Application.ProductName + " AutoUpdate"
+                            , CopyableMessageBoxButtons.OK
+                            , CopyableMessageBoxIcon.Error);
+                        return true;
+                    }
+                }
+            }
+            catch (IOException ioe)
+            {
+                CopyableMessageBox.Show(
+                    "Problem checking for update" + (autoCheck ? " - will try again later" : "") + "\n"
+                    + ioe.Message
+                    , Application.ProductName + " AutoUpdate"
+                    , CopyableMessageBoxButtons.OK
+                    , CopyableMessageBoxIcon.Error);
+                return true;
             }
 
             if (UpdateApplicable(ui, autoCheck))
@@ -155,6 +215,8 @@ namespace S3PIDemoFE.Settings
             }
             return false;
         }
+        static void StartSplash() { SplashScreen.Start(); }
+        static void StopSplash() { SplashScreen.Stop(); }
 
         private static bool UpdateApplicable(UpdateInfo ui, bool autoCheck)
         {
@@ -173,5 +235,107 @@ namespace S3PIDemoFE.Settings
         public static event EventHandler AutoUpdateChoice_Changed;
         protected static void OnAutoUpdateChoice_Changed() { if (AutoUpdateChoice_Changed != null) AutoUpdateChoice_Changed(pgmSettings, EventArgs.Empty); }
         public static bool AutoUpdateChoice { get { return pgmSettings.AutoUpdateChoice == 1; } set { pgmSettings.AutoUpdateChoice = value ? 1 : 2; OnAutoUpdateChoice_Changed(); } }
+    }
+
+    public class SplashScreen
+    {
+        class SplashScreenForm : System.Windows.Forms.Form
+        {
+            System.Windows.Forms.Timer timer;
+            private System.ComponentModel.IContainer components;
+            public SplashScreenForm()
+            {
+                this.components = new System.ComponentModel.Container();
+                timer = new System.Windows.Forms.Timer(this.components);
+                this.SuspendLayout();
+
+                timer.Interval = 50;
+                timer.Tick += new EventHandler(timer_Tick);
+
+                Label lbText = new Label();
+                lbText.AutoSize = true;
+                lbText.Margin = new Padding(0);
+                lbText.Padding = new Padding(12);
+                lbText.Text = "Please wait, checking for updates...";
+                lbText.ForeColor = System.Drawing.SystemColors.InfoText;
+
+                Panel pn1 = new Panel();
+                pn1.AutoSize = true;
+                pn1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+                pn1.BackColor = System.Drawing.SystemColors.Info;
+                pn1.BorderStyle = BorderStyle.Fixed3D;
+                pn1.Margin = new Padding(0);
+                pn1.Padding = new Padding(0);
+                pn1.Controls.Add(lbText);
+
+                this.AutoSize = true;
+                this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+                this.BackColor = System.Drawing.SystemColors.Info;
+                this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+                this.ShowInTaskbar = false;
+                this.StartPosition = FormStartPosition.CenterScreen;
+                this.TopMost = true;
+                this.UseWaitCursor = true;
+                this.Controls.Add(pn1);
+
+                this.ResumeLayout(false);
+                this.CenterToScreen();
+
+                timer.Start();
+            }
+
+            void timer_Tick(object sender, EventArgs e)
+            {
+                if (stop)
+                {
+                    timer.Stop();
+                    this.Close();
+                    ss = null;
+                }
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                if (disposing)
+                {
+                    if (components != null)
+                    {
+                        components.Dispose();
+                    }
+                }
+                base.Dispose(disposing);
+            }
+
+            static SplashScreenForm ss = null;
+            static bool stop = false;
+            public static void Run()
+            {
+                if (ss != null) return;
+                ss = new SplashScreenForm();
+                try { Application.Run(ss); }
+                catch (ThreadAbortException) { stop = true; }
+            }
+        }
+
+        static Thread t = null;
+        public static void Start()
+        {
+            if (t != null) return;
+            t = new Thread(SplashScreenForm.Run);
+            t.IsBackground = true;
+            t.SetApartmentState(ApartmentState.STA);
+            t.Start();
+        }
+
+        public static void Stop()
+        {
+            if (t != null && t.ThreadState == ThreadState.Background)
+            {
+                t.Abort();
+                Application.DoEvents();
+                t.Join();
+            }
+            t = null;
+        }
     }
 }

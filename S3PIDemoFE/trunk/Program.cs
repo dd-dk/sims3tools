@@ -34,6 +34,7 @@ namespace S3PIDemoFE
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Settings();
+            S3PIDemoFE.Settings.Checker.Daily();
 #if DEBUG
             Application.Run(new MainForm(args));
 #else

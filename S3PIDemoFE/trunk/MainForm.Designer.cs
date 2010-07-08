@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
@@ -114,15 +113,16 @@
             this.browserWidget1.Package = null;
             this.browserWidget1.ProgressBar = this.progressBar1;
             this.browserWidget1.ProgressLabel = this.lbProgress;
+            this.browserWidget1.ResourceKey = null;
             this.browserWidget1.SelectedResource = null;
             this.browserWidget1.Size = new System.Drawing.Size(625, 510);
             this.browserWidget1.Sortable = false;
             this.browserWidget1.TabIndex = 0;
-            this.browserWidget1.DragOver += new System.Windows.Forms.DragEventHandler(this.browserWidget1_DragOver);
-            this.browserWidget1.DragDrop += new System.Windows.Forms.DragEventHandler(this.browserWidget1_DragDrop);
             this.browserWidget1.ItemActivate += new System.EventHandler(this.browserWidget1_ItemActivate);
             this.browserWidget1.SelectedResourceChanging += new System.EventHandler<S3PIDemoFE.BrowserWidget.ResourceChangingEventArgs>(this.browserWidget1_SelectedResourceChanging);
             this.browserWidget1.SelectedResourceChanged += new System.EventHandler<S3PIDemoFE.BrowserWidget.ResourceChangedEventArgs>(this.browserWidget1_SelectedResourceChanged);
+            this.browserWidget1.DragDrop += new System.Windows.Forms.DragEventHandler(this.browserWidget1_DragDrop);
+            this.browserWidget1.DragOver += new System.Windows.Forms.DragEventHandler(this.browserWidget1_DragOver);
             // 
             // progressBar1
             // 
@@ -198,18 +198,18 @@
             this.controlPanel1.Padding = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.controlPanel1.Size = new System.Drawing.Size(919, 29);
             this.controlPanel1.TabIndex = 1;
-            this.controlPanel1.CommitClick += new System.EventHandler(this.controlPanel1_CommitClick);
-            this.controlPanel1.AutoChanged += new System.EventHandler(this.controlPanel1_AutoChanged);
-            this.controlPanel1.UseTagsChanged += new System.EventHandler(this.controlPanel1_UseTagsChanged);
-            this.controlPanel1.HexClick += new System.EventHandler(this.controlPanel1_HexClick);
-            this.controlPanel1.HexEditClick += new System.EventHandler(this.controlPanel1_HexEditClick);
-            this.controlPanel1.UseNamesChanged += new System.EventHandler(this.controlPanel1_UseNamesChanged);
-            this.controlPanel1.GridClick += new System.EventHandler(this.controlPanel1_GridClick);
             this.controlPanel1.SortChanged += new System.EventHandler(this.controlPanel1_SortChanged);
+            this.controlPanel1.HexClick += new System.EventHandler(this.controlPanel1_HexClick);
+            this.controlPanel1.AutoChanged += new System.EventHandler(this.controlPanel1_AutoChanged);
+            this.controlPanel1.HexOnlyChanged += new System.EventHandler(this.controlPanel1_HexOnlyChanged);
+            this.controlPanel1.ValueClick += new System.EventHandler(this.controlPanel1_ValueClick);
+            this.controlPanel1.GridClick += new System.EventHandler(this.controlPanel1_GridClick);
+            this.controlPanel1.UseNamesChanged += new System.EventHandler(this.controlPanel1_UseNamesChanged);
+            this.controlPanel1.UseTagsChanged += new System.EventHandler(this.controlPanel1_UseTagsChanged);
             this.controlPanel1.Helper1Click += new System.EventHandler(this.controlPanel1_Helper1Click);
             this.controlPanel1.Helper2Click += new System.EventHandler(this.controlPanel1_Helper2Click);
-            this.controlPanel1.ValueClick += new System.EventHandler(this.controlPanel1_ValueClick);
-            this.controlPanel1.HexOnlyChanged += new System.EventHandler(this.controlPanel1_HexOnlyChanged);
+            this.controlPanel1.HexEditClick += new System.EventHandler(this.controlPanel1_HexEditClick);
+            this.controlPanel1.CommitClick += new System.EventHandler(this.controlPanel1_CommitClick);
             // 
             // resourceFilterWidget1
             // 
@@ -263,15 +263,15 @@
             this.menuBarWidget1.Name = "menuBarWidget1";
             this.menuBarWidget1.Size = new System.Drawing.Size(923, 23);
             this.menuBarWidget1.TabIndex = 0;
-            this.menuBarWidget1.BookmarkClick += new S3PIDemoFE.MenuBarWidget.BookmarkClickEventHandler(this.menuBarWidget1_BookmarkClick);
-            this.menuBarWidget1.MBHelp_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBHelp_Click);
-            this.menuBarWidget1.MBResource_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBResource_Click);
-            this.menuBarWidget1.MBEdit_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBEdit_Click);
-            this.menuBarWidget1.MBFile_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBFile_Click);
             this.menuBarWidget1.MBDropDownOpening += new S3PIDemoFE.MenuBarWidget.MBDropDownOpeningEventHandler(this.menuBarWidget1_MBDropDownOpening);
+            this.menuBarWidget1.MBFile_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBFile_Click);
+            this.menuBarWidget1.MBEdit_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBEdit_Click);
+            this.menuBarWidget1.MBResource_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBResource_Click);
             this.menuBarWidget1.MBTools_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBTools_Click);
             this.menuBarWidget1.MBSettings_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBSettings_Click);
+            this.menuBarWidget1.MBHelp_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBHelp_Click);
             this.menuBarWidget1.MRUClick += new S3PIDemoFE.MenuBarWidget.MRUClickEventHandler(this.menuBarWidget1_MRUClick);
+            this.menuBarWidget1.BookmarkClick += new S3PIDemoFE.MenuBarWidget.BookmarkClickEventHandler(this.menuBarWidget1_BookmarkClick);
             // 
             // replaceResourceDialog
             // 
