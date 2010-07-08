@@ -330,7 +330,11 @@ namespace S3PIDemoFE
             set
             {
                 if (selectedResource == null)
-                    throw new InvalidOperationException();
+                {
+                    if (value != null)
+                        throw new InvalidOperationException();
+                    else return;
+                }
 
                 IResourceIndexEntry rie = selectedResource.Tag as IResourceIndexEntry;
                 ListViewItem lvi = lookup.ContainsKey(rie) ? lookup[rie] : null;
