@@ -1711,12 +1711,7 @@ namespace S3PIDemoFE
             finally { this.Enabled = true; }
         }
 
-        void MakeFormVisible()
-        {
-            foreach (Form f in Application.OpenForms) { f.TopMost = true; Application.DoEvents(); }
-            foreach (Form f in Application.OpenForms) { f.Focus(); Application.DoEvents(); }
-            foreach (Form f in Application.OpenForms) { f.TopMost = false; Application.DoEvents(); }
-        }
+        void MakeFormVisible() { Microsoft.Win32.ForceFocus.Focus(this); }
 
         void afterEdit(MemoryStream ms)
         {
