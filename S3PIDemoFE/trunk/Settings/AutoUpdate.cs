@@ -168,7 +168,7 @@ namespace S3PIDemoFE.Settings
                     if (autoCheck || true)
                         StartSplash();
                     try { ui = new UpdateInfo(url); }
-                    finally { StopSplash(); }
+                    finally { StopSplash(); if (!autoCheck) Microsoft.Win32.ForceFocus.Focus(Application.OpenForms[0]); }
                 }
                 catch (System.Net.WebException we)
                 {
