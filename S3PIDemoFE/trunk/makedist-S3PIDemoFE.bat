@@ -17,7 +17,7 @@ set mytime=%time: =0%
 set h=%mytime:~0,2%
 set m=%mytime:~3,2%
 set s=%mytime:~6,2%
-set suffix=%yy%%mm%-%dd%-%h%%m%
+set suffix=%yy%-%mm%%dd%-%h%%m%
 
 if EXIST "%PROGRAMFILES%\nsis\makensis.exe" goto gotNotX86
 if EXIST "%PROGRAMFILES(x86)%\nsis\makensis.exe" goto gotX86
