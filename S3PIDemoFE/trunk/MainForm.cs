@@ -284,7 +284,6 @@ namespace S3PIDemoFE
                 cmdline.RemoveAt(0);
             }
 
-            fileNew();
             this.Show();
             importBatch(batch.ToArray());
             return false;
@@ -1411,7 +1410,7 @@ namespace S3PIDemoFE
 
         private void browserWidget1_DragOver(object sender, DragEventArgs e)
         {
-            if (package == null) return;
+            //if (package == null) return;
             if ((new List<string>(e.Data.GetFormats())).Contains("FileDrop"))
                 e.Effect = DragDropEffects.Copy;
         }
