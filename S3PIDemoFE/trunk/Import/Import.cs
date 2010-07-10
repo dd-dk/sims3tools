@@ -96,6 +96,9 @@ namespace S3PIDemoFE
         static List<uint> allowList = new List<uint>();
         private void resourceImportAsDBC()
         {
+            DialogResult maty = new ExperimentalDBCWarning().ShowDialog();
+            if (maty != System.Windows.Forms.DialogResult.OK) return;
+
             if (allowList.Count == 0)
             {
                 allowList.AddRange(xmlList);
@@ -350,15 +353,29 @@ namespace S3PIDemoFE
 
         void importBatch(string[] batch)
         {
+            if (CurrentPackage == null)
+                fileNew();
+
             ImportBatch ib = new ImportBatch(batch);
             DialogResult dr = ib.ShowDialog();
             if (dr != DialogResult.OK) return;
 
+            List<string> pkgExts = new List<string>(new string[] { ".package", ".world", ".dbc", });
+
+            List<string> resList = new List<string>();
+            List<string> pkgList = new List<string>();
+            foreach (string s in batch)
+                (pkgExts.Contains(s.Substring(s.LastIndexOf('.'))) ? pkgList : resList).Add(s);
+
             try
             {
                 this.Enabled = false;
+
+                if (pkgList.Count > 0)
+                    importPackagesCommon(pkgList.ToArray(), ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null);
+
                 bool nmOK = true;
-                foreach (string filename in batch)
+                foreach (string filename in resList)
                 {
                     nmOK = importFile(filename, filename, nmOK && ib.UseNames, ib.Rename, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject);
                     Application.DoEvents();
