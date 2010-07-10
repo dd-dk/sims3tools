@@ -429,6 +429,7 @@ namespace ObjectCloner
         public MainForm()
         {
             InitializeComponent();
+
             this.Text = myName;
             objectChooser = new ObjectChooser();
             objectChooser.SelectedIndexChanged += new EventHandler(objectChooser_SelectedIndexChanged);
@@ -436,23 +437,10 @@ namespace ObjectCloner
             resourceList = new ResourceList();
             pleaseWait = new PleaseWait();
 
+            MainForm_LoadFormSettings();
+
             Diagnostics.Enabled = ObjectCloner.Properties.Settings.Default.Diagnostics;
             menuBarWidget1.Checked(MenuBarWidget.MB.MBS_diagnostics, Diagnostics.Enabled);
-        }
-
-        public MainForm(params string[] args)
-            : this()
-        {
-            MainForm_LoadFormSettings();
-            CmdLine(args);//In case of conflict, command line overrides settings
-#if DEBUG
-            cmdlineTest = true;
-#endif
-
-            // Settings for test mode
-            if (cmdlineTest)
-            {
-            }
 
             disableCompression = false;
 
@@ -460,6 +448,19 @@ namespace ObjectCloner
 
             InitialiseTabs(CatalogType.CatalogProxyProduct);//Use the Proxy Product as it has pretty much nothing on it
             TabEnable(false);
+
+            Microsoft.Win32.ForceFocus.Focus(this);
+        }
+
+        public MainForm(params string[] args)
+            : this()
+        {
+            CmdLine(args);
+
+            // Settings for test mode
+            if (cmdlineTest)
+            {
+            }
         }
 
         private void MainForm_LoadFormSettings()
@@ -3156,7 +3157,7 @@ namespace ObjectCloner
 
         private void settingsAutomaticUpdates()
         {
-            ObjectCloner.Checker.AutoUpdateChoice = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_updates);
+            AutoUpdate.Checker.AutoUpdateChoice = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_updates);
         }
 
         private void settingsDiagnostics()
@@ -3237,7 +3238,7 @@ namespace ObjectCloner
 
         private void helpUpdate()
         {
-            bool msgDisplayed = ObjectCloner.Checker.GetUpdate(false);
+            bool msgDisplayed = AutoUpdate.Checker.GetUpdate(false);
             if (!msgDisplayed)
                 CopyableMessageBox.Show("Your " + Application.ProductName + " is up to date", this.Text,
                     CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);

@@ -24,14 +24,14 @@ using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
 
-namespace ObjectCloner
+namespace AutoUpdate
 {
     public class Version
     {
         static String timestamp;
         static Version()
         {
-            String version_txt = Path.Combine(Path.GetDirectoryName(typeof(Version).Assembly.Location),  Application.ProductName + "-Version.txt");
+            String version_txt = Path.Combine(Path.GetDirectoryName(typeof(Version).Assembly.Location), Application.ProductName + "-Version.txt");
             System.IO.StreamReader sr = new StreamReader(version_txt);
             String line1 = sr.ReadLine();
             sr.Close();
@@ -100,7 +100,7 @@ namespace ObjectCloner
     }
     public class Checker
     {
-        static Properties.Settings pgmSettings = ObjectCloner.Properties.Settings.Default;
+        static ObjectCloner.Properties.Settings pgmSettings = ObjectCloner.Properties.Settings.Default;
 
         static Checker()
         {
@@ -108,7 +108,10 @@ namespace ObjectCloner
             if (pgmSettings.AutoUpdateChoice == 0) // AskMe
             {
                 int dr = CopyableMessageBox.Show(
-                    "Do you want " + Application.ProductName + " to check for updates automatically\n(no more than once per day)?"
+                    Application.ProductName + " is under development.\n"
+                    + "It is recommended you allow automated update checking\n"
+                    + "(no more than once per day, when the program is run).\n\n"
+                    + "Do you want " + Application.ProductName + " to check for updates automatically?"
                     , Application.ProductName + " AutoUpdate Setting"
                     , CopyableMessageBoxButtons.YesNo, CopyableMessageBoxIcon.Question, -1, 1
                 );
@@ -165,10 +168,9 @@ namespace ObjectCloner
                 url = url.Trim();
                 try
                 {
-                    if (autoCheck || true)
-                        StartSplash();
+                    StartSplash();
                     try { ui = new UpdateInfo(url); }
-                    finally { StopSplash(); if (!autoCheck) Microsoft.Win32.ForceFocus.Focus(Application.OpenForms[0]); }
+                    finally { StopSplash(); }
                 }
                 catch (System.Net.WebException we)
                 {
@@ -220,13 +222,13 @@ namespace ObjectCloner
 
         private static bool UpdateApplicable(UpdateInfo ui, bool autoCheck)
         {
+            if (ui.AvailableVersion.CompareTo(Version.CurrentVersion) <= 0)
+                return false;
+
             if (ui.Reset && ui.AvailableVersion.CompareTo(pgmSettings.AULastIgnoredVsn) != 0)
                 pgmSettings.AULastIgnoredVsn = Version.CurrentVersion;
 
             if (autoCheck && ui.AvailableVersion.CompareTo(pgmSettings.AULastIgnoredVsn) <= 0)
-                return false;
-
-            if (ui.AvailableVersion.CompareTo(Version.CurrentVersion) <= 0)
                 return false;
 
             return true;
@@ -316,12 +318,12 @@ namespace ObjectCloner
                 catch (ThreadAbortException) { stop = true; }
             }
         }
-        
+
         static Thread t = null;
         public static void Start()
         {
             if (t != null) return;
-            t = new Thread(new ThreadStart(SplashScreenForm.Run));
+            t = new Thread(SplashScreenForm.Run);
             t.IsBackground = true;
             t.SetApartmentState(ApartmentState.STA);
             t.Start();
