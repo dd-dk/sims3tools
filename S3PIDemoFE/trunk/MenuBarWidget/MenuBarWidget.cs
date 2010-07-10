@@ -64,13 +64,13 @@ namespace S3PIDemoFE
             });
             UpdateMRUList();
             UpdateBookmarks();
-            S3PIDemoFE.Settings.Checker.AutoUpdateChoice_Changed += new EventHandler(Checker_AutoUpdateChoice_Changed);
+            AutoUpdate.Checker.AutoUpdateChoice_Changed += new EventHandler(Checker_AutoUpdateChoice_Changed);
             Checker_AutoUpdateChoice_Changed(null, null);
         }
 
         void Checker_AutoUpdateChoice_Changed(object sender, EventArgs e)
         {
-            Checked(MB.MBS_updates, S3PIDemoFE.Settings.Checker.AutoUpdateChoice);
+            Checked(MB.MBS_updates, AutoUpdate.Checker.AutoUpdateChoice);
         }
 
         public enum MD

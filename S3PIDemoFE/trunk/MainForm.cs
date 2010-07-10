@@ -56,6 +56,7 @@ namespace S3PIDemoFE
         public MainForm()
         {
             InitializeComponent();
+
             this.Text = myName;
             
             this.lbProgress.Text = "";
@@ -78,19 +79,20 @@ namespace S3PIDemoFE
             this.SaveSettings += new EventHandler(browserWidget1.BrowserWidget_SaveSettings);
             this.SaveSettings += new EventHandler(controlPanel1.ControlPanel_SaveSettings);
             //this.SaveSettings += new EventHandler(hexWidget1.HexWidget_SaveSettings);
+
+            MainForm_LoadFormSettings();
+            Microsoft.Win32.ForceFocus.Focus(this);
         }
 
         public MainForm(params string[] args)
             :this()
         {
-            MainForm_LoadFormSettings();
-            CmdLine(args);//In case of conflict, command line overrides settings
+            CmdLine(args);
 
             // Settings for test mode
             if (cmdlineTest)
             {
             }
-
         }
 
         void MainForm_LoadFormSettings()
@@ -1180,7 +1182,7 @@ namespace S3PIDemoFE
 
         private void settingsAutomaticUpdates()
         {
-            S3PIDemoFE.Settings.Checker.AutoUpdateChoice = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_updates);
+            AutoUpdate.Checker.AutoUpdateChoice = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_updates);
         }
 
         private void saveSettings()
@@ -1259,7 +1261,7 @@ namespace S3PIDemoFE
 
         private void helpUpdate()
         {
-            bool msgDisplayed = S3PIDemoFE.Settings.Checker.GetUpdate(false);
+            bool msgDisplayed = AutoUpdate.Checker.GetUpdate(false);
             if (!msgDisplayed)
                 CopyableMessageBox.Show("Your " + Application.ProductName + " is up to date", this.Text,
                     CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
