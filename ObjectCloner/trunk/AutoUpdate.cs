@@ -217,8 +217,8 @@ namespace AutoUpdate
             }
             return false;
         }
-        static void StartSplash() { SplashScreen.Start(); }
-        static void StopSplash() { SplashScreen.Stop(); }
+        static void StartSplash() { }
+        static void StopSplash() { }
 
         private static bool UpdateApplicable(UpdateInfo ui, bool autoCheck)
         {
@@ -237,107 +237,5 @@ namespace AutoUpdate
         public static event EventHandler AutoUpdateChoice_Changed;
         protected static void OnAutoUpdateChoice_Changed() { if (AutoUpdateChoice_Changed != null) AutoUpdateChoice_Changed(pgmSettings, EventArgs.Empty); }
         public static bool AutoUpdateChoice { get { return pgmSettings.AutoUpdateChoice == 1; } set { pgmSettings.AutoUpdateChoice = value ? 1 : 2; OnAutoUpdateChoice_Changed(); } }
-    }
-
-    public class SplashScreen
-    {
-        class SplashScreenForm : System.Windows.Forms.Form
-        {
-            System.Windows.Forms.Timer timer;
-            private System.ComponentModel.IContainer components;
-            public SplashScreenForm()
-            {
-                this.components = new System.ComponentModel.Container();
-                timer = new System.Windows.Forms.Timer(this.components);
-                this.SuspendLayout();
-
-                timer.Interval = 50;
-                timer.Tick += new EventHandler(timer_Tick);
-
-                Label lbText = new Label();
-                lbText.AutoSize = true;
-                lbText.Margin = new Padding(0);
-                lbText.Padding = new Padding(12);
-                lbText.Text = "Please wait, checking for updates...";
-                lbText.ForeColor = System.Drawing.SystemColors.InfoText;
-
-                Panel pn1 = new Panel();
-                pn1.AutoSize = true;
-                pn1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-                pn1.BackColor = System.Drawing.SystemColors.Info;
-                pn1.BorderStyle = BorderStyle.Fixed3D;
-                pn1.Margin = new Padding(0);
-                pn1.Padding = new Padding(0);
-                pn1.Controls.Add(lbText);
-
-                this.AutoSize = true;
-                this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-                this.BackColor = System.Drawing.SystemColors.Info;
-                this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-                this.ShowInTaskbar = false;
-                this.StartPosition = FormStartPosition.CenterScreen;
-                this.TopMost = true;
-                this.UseWaitCursor = true;
-                this.Controls.Add(pn1);
-
-                this.ResumeLayout(false);
-                this.CenterToScreen();
-
-                timer.Start();
-            }
-
-            void timer_Tick(object sender, EventArgs e)
-            {
-                if (stop)
-                {
-                    timer.Stop();
-                    this.Close();
-                    ss = null;
-                }
-            }
-
-            protected override void Dispose(bool disposing)
-            {
-                if (disposing)
-                {
-                    if (components != null)
-                    {
-                        components.Dispose();
-                    }
-                }
-                base.Dispose(disposing);
-            }
-
-            static SplashScreenForm ss = null;
-            static bool stop = false;
-            public static void Run()
-            {
-                if (ss != null) return;
-                ss = new SplashScreenForm();
-                try { Application.Run(ss); }
-                catch (ThreadAbortException) { stop = true; }
-            }
-        }
-
-        static Thread t = null;
-        public static void Start()
-        {
-            if (t != null) return;
-            t = new Thread(SplashScreenForm.Run);
-            t.IsBackground = true;
-            t.SetApartmentState(ApartmentState.STA);
-            t.Start();
-        }
-
-        public static void Stop()
-        {
-            if (t != null && t.ThreadState == ThreadState.Background)
-            {
-                t.Abort();
-                Application.DoEvents();
-                t.Join();
-            }
-            t = null;
-        }
     }
 }

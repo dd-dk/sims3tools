@@ -448,8 +448,6 @@ namespace ObjectCloner
 
             InitialiseTabs(CatalogType.CatalogProxyProduct);//Use the Proxy Product as it has pretty much nothing on it
             TabEnable(false);
-
-            Microsoft.Win32.ForceFocus.Focus(this);
         }
 
         public MainForm(params string[] args)
