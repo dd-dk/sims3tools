@@ -81,7 +81,6 @@ namespace S3PIDemoFE
             //this.SaveSettings += new EventHandler(hexWidget1.HexWidget_SaveSettings);
 
             MainForm_LoadFormSettings();
-            Microsoft.Win32.ForceFocus.Focus(this);
         }
 
         public MainForm(params string[] args)
@@ -1712,7 +1711,12 @@ namespace S3PIDemoFE
             finally { this.Enabled = true; }
         }
 
-        void MakeFormVisible() { Microsoft.Win32.ForceFocus.Focus(this); }
+        void MakeFormVisible()
+        {
+            if (this.WindowState == FormWindowState.Minimized) this.WindowState = FormWindowState.Normal;
+            this.BringToFront();
+            this.Activate();
+        }
 
         void afterEdit(MemoryStream ms)
         {
