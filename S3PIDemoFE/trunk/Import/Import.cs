@@ -330,14 +330,30 @@ namespace S3PIDemoFE
             finally { this.Enabled = true; }
         }
 
+        static string[] asPkgExts = new string[] { ".package", ".world", ".dbc", };
         void importSingle(string filename)
         {
+            if (CurrentPackage == null)
+                fileNew();
+
             ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) }) != null, true);
             ir.Filename = filename;
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            importFile(ir.Filename, ir, ir.UseName, ir.AllowRename, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject);
+            if (new List<string>(asPkgExts).Contains(ir.Filename.Substring(ir.Filename.LastIndexOf('.'))))
+            {
+                try
+                {
+                    this.Enabled = false;
+                    importPackagesCommon(new string[] { ir.Filename, }, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null);
+                }
+                finally { this.Enabled = true; }
+            }
+            else
+            {
+                importFile(ir.Filename, ir, ir.UseName, ir.AllowRename, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject);
+            }
         }
 
         void importSingle(myDataFormat data)
@@ -360,10 +376,10 @@ namespace S3PIDemoFE
             DialogResult dr = ib.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            List<string> pkgExts = new List<string>(new string[] { ".package", ".world", ".dbc", });
-
             List<string> resList = new List<string>();
             List<string> pkgList = new List<string>();
+
+            List<string> pkgExts = new List<string>(asPkgExts);
             foreach (string s in batch)
                 (pkgExts.Contains(s.Substring(s.LastIndexOf('.'))) ? pkgList : resList).Add(s);
 
