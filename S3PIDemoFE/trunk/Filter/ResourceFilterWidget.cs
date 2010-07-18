@@ -23,6 +23,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using s3pi.Interfaces;
+using System.Text.RegularExpressions;
 
 namespace S3PIDemoFE.Filter
 {
@@ -76,9 +77,9 @@ namespace S3PIDemoFE.Filter
                 ff.Name = fields[i];
                 ff.Dock = DockStyle.Fill;
                 ff.Checked = false;
-                ff.Filter = new TypedValue(cft[fields[i]], null);
+                ff.Filter = new Regex("");
                 ff.Title = fields[i];
-                ff.Value = new TypedValue(cft[fields[i]], null);
+                ff.Value = new Regex("");
                 ff.TabIndex = i + 2;
                 tlpResourceInfo.Controls.Add(ff, i + 1, 0);
                 values.Add(fields[i], ff);
@@ -105,13 +106,14 @@ namespace S3PIDemoFE.Filter
 
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public IList<KeyValuePair<string, TypedValue>> Filter
+        public IList<KeyValuePair<string, Regex>> Filter
         {
             get
             {
-                if (values == null) return new List<KeyValuePair<string, TypedValue>>();
-                List<KeyValuePair<string, TypedValue>> f = new List<KeyValuePair<string, TypedValue>>();
-                foreach (string s in fields) if (values[s].Filter.Value != null) f.Add(new KeyValuePair<string, TypedValue>(s, values[s].Filter));
+                if (values == null) return new List<KeyValuePair<string, Regex>>();
+                List<KeyValuePair<string, Regex>> f = new List<KeyValuePair<string, Regex>>();
+                foreach (string s in fields) if (values[s].Filter != null && !values[s].Filter.ToString().Equals("^.*$"))
+                    f.Add(new KeyValuePair<string, Regex>(s, values[s].Filter));
                 return f;
             }
             set
@@ -121,7 +123,7 @@ namespace S3PIDemoFE.Filter
                 foreach (string s in values.Keys)
                     values[s].Checked = false;
 
-                foreach (KeyValuePair<string, TypedValue> kvp in value)
+                foreach (KeyValuePair<string, Regex> kvp in value)
                 {
                     if (values.ContainsKey(kvp.Key))
                     {
@@ -156,7 +158,7 @@ namespace S3PIDemoFE.Filter
 
         private void btnRevise_Click(object sender, EventArgs e) { foreach (KeyValuePair<string, FilterField> kvp in values) kvp.Value.Revise(); }
 
-        private void btnQBE_Click(object sender, EventArgs e) { if (ie == null || values == null) return; foreach (string s in fields) values[s].Value = ie[s]; }
+        private void btnQBE_Click(object sender, EventArgs e) { if (ie == null || values == null) return; foreach (string s in fields) values[s].Value = new Regex(ie[s].ToString("X")); }
 
         private void btnSet_Click(object sender, EventArgs e)
         {

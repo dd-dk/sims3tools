@@ -1,5 +1,5 @@
 ﻿/***************************************************************************
- *  Copyright (C) 2009 by Peter L Jones                                    *
+ *  Copyright (C) 2010 by Peter L Jones                                    *
  *  pljones@users.sf.net                                                   *
  *                                                                         *
  *  This file is part of the Sims 3 Package Interface (s3pi)               *
@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using s3pi.Interfaces;
 
@@ -28,14 +29,13 @@ namespace S3PIDemoFE.Filter
 {
     public partial class FilterField : UserControl
     {
-        TypedValue tvValue = null;
-        TypedValue tvFilter = null;
+        Regex rxFilter = null;
+        Regex rxValue = null;
 
         public FilterField()
         {
             InitializeComponent();
         }
-
 
         [Category("Appearance")]
         [Description("Indicate whether the filter field checkbox is checked")]
@@ -43,14 +43,15 @@ namespace S3PIDemoFE.Filter
 
         [Category("Appearance")]
         [Description("Value to filter for")]
-        public TypedValue Filter
+        public Regex Filter
         {
-            get { return tvFilter; }
+            get { return rxFilter; }
             set
             {
                 if (value == null) throw new ArgumentNullException();
-                tvFilter = value;
-                tbApplied.Text = (tvFilter.Value == null) ? "*" : tvFilter;
+                rxFilter = value;
+                tbApplied.Text = (rxFilter == null) ? "*" : rxFilter.ToString().TrimStart('^').TrimEnd('$');
+                if (tbApplied.Text == ".*") tbApplied.Text = "*";
             }
         }
 
@@ -60,14 +61,15 @@ namespace S3PIDemoFE.Filter
 
         [Category("Appearance")]
         [Description("Value being entered")]
-        public TypedValue Value
+        public Regex Value
         {
-            get { return tvValue; }
+            get { return rxValue; }
             set
             {
                 if (value == null) throw new ArgumentNullException();
-                tvValue = value;
-                tbEntry.Text = (tvValue.Value == null) ? "" : tvValue;
+                rxValue = value;
+                tbEntry.Text = (rxValue == null) ? "" : rxValue.ToString().TrimStart('^').TrimEnd('$');
+                if (tbEntry.Text == ".*") tbEntry.Text = "";
             }
         }
 
@@ -81,7 +83,7 @@ namespace S3PIDemoFE.Filter
         /// Set Filter from Value taking Checked into account
         /// </summary>
         [Description("Set Filter from Value taking Checked into account")]
-        public void Set() { Filter = Checked ? Value : Filter = new TypedValue(tvFilter.Type, null, "X"); }
+        public void Set() { Filter = Checked ? Value : new Regex(".*"); }
 
 
 
@@ -89,31 +91,10 @@ namespace S3PIDemoFE.Filter
         {
             try
             {
-                if (tbEntry.Text.Length == 0) { tvValue = new TypedValue(tvValue.Type, null, "X"); return; }
-
-                string svalue = tbEntry.Text.Split(new char[] { ' ' }, 2)[0];
-                if (tvValue.Type.Equals(typeof(float))) { TypedValue tv = new TypedValue(tvValue.Type, float.Parse(svalue), "X"); tvValue = tv; }
-                else if (tvValue.Type.Equals(typeof(double))) { TypedValue tv = new TypedValue(tvValue.Type, double.Parse(svalue), "X"); tvValue = tv; }
-                else if (tvValue.Type.Equals(typeof(decimal))) { TypedValue tv = new TypedValue(tvValue.Type, decimal.Parse(svalue), "X"); tvValue = tv; }
-                else if (tvValue.Type.Equals(typeof(string))) { TypedValue tv = new TypedValue(tvValue.Type, tbEntry.Text, "X"); tvValue = tv; }
-                else if (tvValue.Type.Equals(typeof(object)))
-                {
-                    TypedValue tv = new TypedValue(tvValue.Type, tvValue.Type.GetConstructor(new Type[] { typeof(string) }).Invoke(null, new object[] { tbEntry.Text }), "X");
-                    tvValue = tv;
-                }
-                else if (tvValue.Type.IsPrimitive)
-                {
-                    TypedValue tv = new TypedValue(tvValue.Type, Convert.ChangeType(Convert.ToUInt64(svalue, svalue.StartsWith("0x") ? 16 : 10), tvValue.Type), "X");
-                    tvValue = tv;
-                }
-                else if (tvValue.Type.IsEnum)
-                {
-                    TypedValue tv = new TypedValue(tvValue.Type, Convert.ChangeType(Convert.ToUInt64(svalue, svalue.StartsWith("0x") ? 16 : 10), Enum.GetUnderlyingType(tvValue.Type)), "X");
-                    tvValue = tv;
-                }
+                if (tbEntry.Text.Length == 0) { rxValue = new Regex(""); return; }
+                Value = new Regex("^" + tbEntry.Text.TrimStart('^').TrimEnd('$') + "$", RegexOptions.IgnoreCase);
             }
-            catch (System.FormatException) { Value = tvValue; tbApplied.SelectAll(); }
-            catch (System.InvalidCastException) { Value = tvValue; tbApplied.SelectAll(); }
+            catch (System.ArgumentException) { Value = rxValue; tbEntry.SelectAll(); }
         }
     }
 }

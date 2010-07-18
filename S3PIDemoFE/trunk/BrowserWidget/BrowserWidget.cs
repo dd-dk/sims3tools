@@ -23,6 +23,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using s3pi.Interfaces;
+using System.Text.RegularExpressions;
 
 namespace S3PIDemoFE
 {
@@ -37,7 +38,7 @@ namespace S3PIDemoFE
         string sortColumn = "Chunkoffset";
         bool displayResourceNames = false;
         bool displayResourceTags = false;
-        IList<KeyValuePair<string, TypedValue>> filter = null;
+        IList<KeyValuePair<string, Regex>> filter = null;
 
         //used internally
         Dictionary<IResourceIndexEntry, ListViewItem> lookup = null;
@@ -256,7 +257,7 @@ namespace S3PIDemoFE
         /// Specify how to filter the package resource list
         /// </summary>
         [Browsable(false)]
-        public IList<KeyValuePair<string, TypedValue>> Filter
+        public IList<KeyValuePair<string, Regex>> Filter
         {
             get { return filter; }
             set
@@ -647,14 +648,6 @@ namespace S3PIDemoFE
         }
 
 
-        void ILKvpToListList(IList<KeyValuePair<string, TypedValue>> ilkvp, out List<string> keys, out List<TypedValue> values)
-        {
-            keys = new List<string>();
-            values = new List<TypedValue>();
-            if (ilkvp != null)
-                foreach (KeyValuePair<string, TypedValue> kvp in ilkvp) { keys.Add(kvp.Key); values.Add(kvp.Value); }
-        }
-
 
         protected virtual void OnListUpdated(object sender, EventArgs e) { if (ListUpdated != null) ListUpdated(sender, e); }
 
@@ -751,18 +744,21 @@ namespace S3PIDemoFE
             nameMap = null;
             CreateNameMap();
 
-            List<string> keys;
-            List<TypedValue> values;
-            ILKvpToListList(filter, out keys, out values);
-
             string oldLabel = pbLabel.Text;
             pbLabel.Text = "Finding resources...";
             Application.DoEvents();
-            resourceList = pkg == null ? null : filter != null ? pkg.FindAll(keys.ToArray(), values.ToArray()) : pkg.GetResourceList;
+            resourceList = pkg == null ? null : filter == null ? pkg.GetResourceList : new List<IResourceIndexEntry>(pkg.GetResourceList).FindAll(ApplyFilter);
 
             UpdateList();
 
             pbLabel.Text = oldLabel;
+        }
+
+        private bool ApplyFilter(IResourceIndexEntry value)
+        {
+            foreach (var kvp in filter)
+                if (!kvp.Value.IsMatch(value[kvp.Key].ToString("X"))) return false;
+            return true;
         }
     }
 }
