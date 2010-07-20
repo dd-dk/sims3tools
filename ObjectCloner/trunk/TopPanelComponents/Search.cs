@@ -148,9 +148,9 @@ namespace ObjectCloner.TopPanelComponents
             }
             List<string> exts;
             string tag = "";
-            if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + item.rk.ResourceType.ToString("X8"), out exts)) tag = exts[0];
+            if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + item.RequestedRK.ResourceType.ToString("X8"), out exts)) tag = exts[0];
             else tag = "UNKN";
-            lvi.SubItems.AddRange(new string[] { tag, item.RGVsn, "" + (AResourceKey)item.rk, });
+            lvi.SubItems.AddRange(new string[] { tag, item.RGVsn, "" + (AResourceKey)item.RequestedRK, });
             lvi.Tag = item;
 
             listView1.Items.Add(lvi);
@@ -311,7 +311,7 @@ namespace ObjectCloner.TopPanelComponents
                 if (criteria.catalogDesc && MatchCatalogDesc(item)) return true;
                 return false;
             }
-            bool MatchResourceName(Item item) { if (nameMap[item.rk.Instance].Trim().ToLowerInvariant().Contains(criteria.text)) return true; return false; }
+            bool MatchResourceName(Item item) { if (nameMap[item.RequestedRK.Instance].Trim().ToLowerInvariant().Contains(criteria.text)) return true; return false; }
             bool MatchObjectName(Item item) { return ((string)item.Resource["CommonBlock.Name"].Value).Trim().ToLowerInvariant().Contains(criteria.text); }
             bool MatchObjectDesc(Item item) { return ((string)item.Resource["CommonBlock.Desc"].Value).Trim().ToLowerInvariant().Contains(criteria.text); }
             bool MatchCatalogName(Item item) { return MatchStbl((ulong)item.Resource["CommonBlock.NameGUID"].Value); }
