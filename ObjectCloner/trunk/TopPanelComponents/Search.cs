@@ -53,6 +53,7 @@ namespace ObjectCloner.TopPanelComponents
             CatalogType.CatalogWall,
             CatalogType.CatalogRoofPattern,
         };
+        static List<CatalogType> lct = new List<CatalogType>(act);
         #endregion
 
         List<IPackage> objPkgs;
@@ -219,7 +220,7 @@ namespace ObjectCloner.TopPanelComponents
                         IPackage pkg = objPkgs[p];
 
                         updateProgress(true, String.Format("Retrieving name map for package {0} of {1}...", p + 1, objPkgs.Count), true, -1, false, 0);
-                        IList<IResourceIndexEntry> lrie = pkg.FindAll(new String[] { "ResourceType", }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C), });
+                        IList<IResourceIndexEntry> lrie = pkg.FindAll(rie => rie.ResourceType == (uint)0x0166038C);
                         foreach (IResourceIndexEntry rie in lrie)
                         {
                             nameMap = new Item(new RIE(pkg, rie)).Resource as IDictionary<ulong, string>;
@@ -228,9 +229,9 @@ namespace ObjectCloner.TopPanelComponents
 
                         stbls = new List<IDictionary<ulong, string>>();
                         updateProgress(true, String.Format("Retrieving string tables for package {0} of {1}...", p + 1, objPkgs.Count), true, -1, false, 0);
+                        lrie = pkg.FindAll(rie => rie.ResourceType == (uint)0x220557DA);
                         if (criteria.allLanguages)
                         {
-                            lrie = pkg.FindAll(new String[] { "ResourceType", }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x220557DA), });
                             foreach (IResourceIndexEntry rie in lrie)
                             {
                                 stbls.Add(new Item(new RIE(pkg, rie)).Resource as IDictionary<ulong, string>);
@@ -239,7 +240,6 @@ namespace ObjectCloner.TopPanelComponents
                         }
                         else
                         {
-                            lrie = pkg.FindAll(new String[] { "ResourceType", }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x220557DA), });
                             foreach (IResourceIndexEntry rie in lrie)
                             {
                                 if (rie.Instance >> 56 == 0x00)
@@ -258,7 +258,7 @@ namespace ObjectCloner.TopPanelComponents
                         for (int i = 0; i < lrie.Count; i++)
                         {
                             if (stopSearch) return;
-                            if (!seen.Contains(lrie[i]))
+                            if (!seen.Exists(new RK(lrie[i]).Equals))
                             {
                                 seen.Add(lrie[i]);
                                 Item item = new Item(new RIE(pkg, lrie[i]));
@@ -285,21 +285,9 @@ namespace ObjectCloner.TopPanelComponents
             IList<IResourceIndexEntry> Find(IPackage pkg)
             {
                 if (criteria.catalogType == 0)
-                {
-                    List<IResourceIndexEntry> res = new List<IResourceIndexEntry>();
-                    foreach (uint ct in act)
-                        if (ct != 0)
-                            res.AddRange(pkg.FindAll(
-                                new string[] { "ResourceType", },
-                                new TypedValue[] { new TypedValue(typeof(uint), ct, "X"), }
-                                ));
-                    return res;
-                }
+                    return pkg.FindAll(rie => lct.Contains((CatalogType)rie.ResourceType));
                 else
-                    return pkg.FindAll(
-                        new string[] { "ResourceType", },
-                        new TypedValue[] { new TypedValue(typeof(uint), (uint)criteria.catalogType, "X"), }
-                        );
+                    return pkg.FindAll(rie => criteria.catalogType == (CatalogType)rie.ResourceType);
             }
 
             bool Match(Item item)
