@@ -683,10 +683,7 @@ namespace ObjectCloner
                 if (type == 0x00000000) return null;
                 foreach (IPackage pkg in pkgs)
                 {
-                    List<IResourceIndexEntry> lrie = new List<IResourceIndexEntry>(pkg.FindAll(new string[] { "ResourceType", "Instance" }, new TypedValue[] {
-                            new TypedValue(typeof(uint), type),
-                            new TypedValue(typeof(ulong), instance),
-                        }));
+                    List<IResourceIndexEntry> lrie = new List<IResourceIndexEntry>(pkg.FindAll(rie => rie.ResourceType == type && rie.Instance == instance));
                     lrie.Sort(byGroup);
                     foreach (IResourceIndexEntry rie in lrie)
                         if (!new List<uint>(thumTypes[0x515CA4CD]).Contains(type) || (rie.ResourceGroup & 0x00FFFFFF) > 0)
@@ -778,7 +775,7 @@ namespace ObjectCloner
                 stbls = new List<IDictionary<ulong, string>>();
                 foreach (IPackage pkg in stblPkgs)
                 {
-                    IList<IResourceIndexEntry> lrie = pkg.FindAll(new String[] { "ResourceType", }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x220557DA), });
+                    IList<IResourceIndexEntry> lrie = pkg.FindAll(rie => rie.ResourceType == (uint)0x220557DA);
                     foreach (IResourceIndexEntry rie in lrie)
                     {
                         if (rie.Instance >> 56 == langID)
@@ -822,7 +819,7 @@ namespace ObjectCloner
                 namemaps = new List<IDictionary<ulong, string>>();
                 foreach (IPackage pkg in nameMapPkgs)
                 {
-                    IList<IResourceIndexEntry> lrie = pkg.FindAll(new String[] { "ResourceType", }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C), });
+                    IList<IResourceIndexEntry> lrie = pkg.FindAll(rie => rie.ResourceType == (uint)0x0166038C);
                     if (lrie.Count > 0) latest = new Item(new RIE(pkg, lrie[0]));
                     foreach (IResourceIndexEntry rie in lrie)
                         namemaps.Add(new Item(new RIE(pkg, rie)).Resource as IDictionary<ulong, string>);
@@ -2839,28 +2836,21 @@ namespace ObjectCloner
             }
         }
 
-        private void SlurpKindred(string key, IList<IPackage> pkgs, string[] fields, TypedValue[] values)
+        private void SlurpKindred(string key, IList<IPackage> pkgs, Predicate<IResourceIndexEntry> Match)
         {
-            string s = "";
-            ListIResourceKey seen = new ListIResourceKey();
+            List<IResourceIndexEntry> seen = new List<IResourceIndexEntry>();
             foreach (IPackage pkg in pkgs)
             {
-                IList<IResourceIndexEntry> lrie = pkg.FindAll(fields, values);
+                IList<IResourceIndexEntry> lrie = pkg.FindAll(Match);
                 int i = 0;
                 foreach (IResourceIndexEntry rie in lrie)
                 {
-                    if (seen.Contains(rie)) continue;
+                    if (seen.Exists(new RK(rie).Equals)) continue;
                     seen.Add(rie);
                     Add(key + "[" + i + "]", rie);
-                    Item item = new Item(new RIE(objPkgs, rie));
-                    if (item.Resource != null)
-                        vpxyKinItems.Add(item);
-                    else
-                        s += String.Format("VPKY kin RK {0} not found", (IResourceKey)rie);
                     i++;
                 }
             }
-            Diagnostics.Show(s, "Missing VPXY Kin");
         }
         #endregion
 
@@ -3655,14 +3645,12 @@ namespace ObjectCloner
         void VPXYs_getKinXML()
         {
             for (int i = 0; i < vpxyItems.Count; i++)
-                SlurpKindred("vpxy[" + i + "].PresetXML", objPkgs, new string[] { "ResourceType", "Instance" },
-                    new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0333406C), new TypedValue(typeof(ulong), vpxyItems[i].RequestedRK.Instance) });
+                SlurpKindred("vpxy[" + i + "].PresetXML", objPkgs, rie => rie.ResourceType == (uint)0x0333406C && rie.Instance == vpxyItems[i].RequestedRK.Instance);
         }
         void VPXYs_getKinMTST()
         {
             for (int i = 0; i < vpxyItems.Count; i++)
-                SlurpKindred("vpxy[" + i + "].mtst", objPkgs, new string[] { "ResourceType", "Instance" },
-                    new TypedValue[] { new TypedValue(typeof(uint), (uint)0x02019972), new TypedValue(typeof(ulong), vpxyItems[i].RequestedRK.Instance) });
+                SlurpKindred("vpxy[" + i + "].mtst", objPkgs, rie => rie.ResourceType == (uint)0x02019972 && rie.Instance == vpxyItems[i].RequestedRK.Instance);
         }
         void VPXYKin_SlurpRKs()
         {
@@ -3823,21 +3811,18 @@ namespace ObjectCloner
             CWALThumbTypes.Add(THUM.THUMSize.small, 0x0589DC44);
             CWALThumbTypes.Add(THUM.THUMSize.medium, 0x0589DC45);
             CWALThumbTypes.Add(THUM.THUMSize.large, 0x0589DC46);
-            ListIResourceKey seen = new ListIResourceKey();
+            List<IResourceIndexEntry> seen = new List<IResourceIndexEntry>();
             foreach (THUM.THUMSize size in new THUM.THUMSize[] { THUM.THUMSize.small, THUM.THUMSize.medium, THUM.THUMSize.large, })
             {
                 int i = 0;
                 uint type = CWALThumbTypes[size];
                 foreach (IPackage pkg in tmbPkgs)
                 {
-                    IList<IResourceIndexEntry> lrie = pkg.FindAll(new string[] { "ResourceType", "Instance" }, new TypedValue[] {
-                            new TypedValue(typeof(uint), type),
-                            new TypedValue(typeof(ulong), selectedItem.RequestedRK.Instance),
-                        });
+                    IList<IResourceIndexEntry> lrie = pkg.FindAll(rie => rie.ResourceType == type && rie.Instance == selectedItem.RequestedRK.Instance);
                     foreach (IResourceIndexEntry rie in lrie)
                     {
                         RIE Rie = new RIE(pkg, rie);
-                        if (seen.Contains(Rie.RequestedRK)) continue;
+                        if (seen.Exists(Rie.RequestedRK.Equals)) continue;
                         Add(size + "[" + i++ + "]Thumb", Rie.RequestedRK);
                     }
                 }
@@ -3861,7 +3846,7 @@ namespace ObjectCloner
             }
 
             // We need to process STBLs
-            IList<IResourceIndexEntry> lstblrie = objPkgs[0].FindAll(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x220557DA), });
+            IList<IResourceIndexEntry> lstblrie = objPkgs[0].FindAll(rie => rie.ResourceType == (uint)0x220557DA);
             foreach (IResourceIndexEntry rie in lstblrie)
                 if (!rkToItem.ContainsKey(rie))
                     rkToItem.Add(rie, new Item(new RIE(objPkgs[0], rie)));
@@ -3886,7 +3871,7 @@ namespace ObjectCloner
                 foreach (var kvp in rcolChunks) rkToItem.Add(kvp.Key, kvp.Value);
 
                 // Add newest namemap
-                IList<IResourceIndexEntry> lnmaprie = objPkgs[0].FindAll(new String[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C), });
+                IList<IResourceIndexEntry> lnmaprie = objPkgs[0].FindAll(rie => rie.ResourceType == (uint)0x0166038C);
                 foreach (IResourceIndexEntry rie in lnmaprie)
                     if (!rkToItem.ContainsKey(rie))
                         rkToItem.Add(rie, new Item(new RIE(objPkgs[0], rie)));
