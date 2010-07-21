@@ -743,22 +743,36 @@ namespace S3PIDemoFE
         {
             nameMap = null;
             CreateNameMap();
-
-            string oldLabel = pbLabel.Text;
-            pbLabel.Text = "Finding resources...";
-            Application.DoEvents();
-            resourceList = pkg == null ? null : filter == null ? pkg.GetResourceList : new List<IResourceIndexEntry>(pkg.GetResourceList).FindAll(ApplyFilter);
-
+            resourceList = pkg == null ? null : filter == null ? pkg.GetResourceList : FilteredList();
             UpdateList();
-
-            pbLabel.Text = oldLabel;
         }
 
-        private bool ApplyFilter(IResourceIndexEntry value)
+        IList<IResourceIndexEntry> FilteredList()
         {
-            foreach (var kvp in filter)
-                if (!kvp.Value.IsMatch(value[kvp.Key].ToString("X"))) return false;
-            return true;
+            string oldLabel = pbLabel.Text;
+            int oldValue = pb.Value;
+            int oldMaximum = pb.Maximum;
+            try
+            {
+                pbLabel.Text = "Finding resources...";
+                pb.Value = 0;
+                pb.Maximum = pkg.GetResourceList.Count;
+
+                int i = 0;
+                Application.DoEvents();
+                return pkg.FindAll(value =>
+                {
+                    if (++i % 100 == 0) { pb.Value += 100; Application.DoEvents(); }
+                    foreach (var kvp in filter) if (!kvp.Value.IsMatch(value[kvp.Key].ToString("X"))) return false;
+                    return true;
+                });
+            }
+            finally
+            {
+                pbLabel.Text = oldLabel;
+                pb.Value = oldValue;
+                pb.Maximum = oldMaximum;
+            }
         }
     }
 }
