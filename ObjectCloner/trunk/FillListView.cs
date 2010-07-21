@@ -82,7 +82,7 @@ namespace ObjectCloner
             {
                 updateProgress(true, "Please wait, searching for objects...", true, -1, false, 0);
                 List<RIE> lrie = new List<RIE>();
-                ListIResourceKey seen = new ListIResourceKey();
+                List<ulong> seen = new List<ulong>();
                 List<IPackage> seenPkgs = new List<IPackage>();
                 foreach (IPackage pkg in objPkgs)
                 {
@@ -91,15 +91,15 @@ namespace ObjectCloner
 
                     IList<IResourceIndexEntry> matches;
                     if (resourceType != 0)
-                        matches = pkg.FindAll(new string[] { "ResourceType", }, new TypedValue[] { new TypedValue(typeof(uint), (uint)resourceType, "X"), });
+                        matches = pkg.FindAll(rie => rie.ResourceType == (uint)resourceType);
                     else
                         matches = pkg.GetResourceList;
 
                     foreach (IResourceIndexEntry match in matches)
                     {
                         if (!Enum.IsDefined(typeof(CatalogType), match.ResourceType)) continue;
-                        if (seen.Contains(match)) continue;
-                        seen.Add(match);
+                        if (seen.Contains(match.Instance)) continue;
+                        seen.Add(match.Instance);
                         lrie.Add(new RIE(pkg, match));
                     }
                 }
@@ -176,24 +176,6 @@ namespace ObjectCloner
         public new bool Equals(IResourceKey rk) { return this.Compare(rk) == 0; }
     }
 
-    public class ListIResourceKey : List<IResourceKey>
-    {
-        public ListIResourceKey() : base() { }
-        public ListIResourceKey(IList<IResourceKey> value) : base(value) { }
-        /// <summary>
-        /// Determines whether an element is in the list.
-        /// </summary>
-        /// <param name="item">The object to locate in the list.</param>
-        /// <returns>true if item is found in the list; otherwise, false.</returns>
-        public new bool Contains(IResourceKey item) { return this.Exists(new RK(item).Equals); }
-        /// <summary>
-        /// Searches for the specified object and returns the zero-based index of the first occurrence within the entire list.
-        /// </summary>
-        /// <param name="item">The IResourceKey to locate in the list.</param>
-        /// <returns>The zero-based index of the first occurrence of item within the entire list, if found; otherwise, –1.</returns>
-        public new int IndexOf(IResourceKey item) { return this.FindIndex(new RK(item).Equals); }
-    }
-
     public struct RIE
     {
         List<IPackage> searchList;
@@ -226,17 +208,16 @@ namespace ObjectCloner
 
         IResourceKey findRK()
         {
-            if (specificPkg != null) return findRKinPkg(specificPkg);
+            if (specificPkg != null) return specificPkg.Find(requestedRK.Equals);
 
             IResourceKey arie = null;
             for (int i = 0; arie == null && i < searchList.Count; i++)
                 {
-                    arie = findRKinPkg(searchList[i]);
+                    arie = searchList[i].Find(requestedRK.Equals);
                     if (arie != null) specificPkg = searchList[i];
                 }
             return arie;
         }
-        IResourceKey findRKinPkg(IPackage pkg) { return new List<IResourceIndexEntry>(pkg.GetResourceList).Find(requestedRK.Equals); }
     }
 
     public class Item
