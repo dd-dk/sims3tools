@@ -33,6 +33,9 @@ namespace S3PIDemoFE
         public MenuBarWidget()
         {
             InitializeComponent();
+            //VS2010Express likes setting these to false:
+            bwcmImport.Enabled = true;
+            bwcmExport.Enabled = true;
 
             tsMD = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 fileToolStripMenuItem, editToolStripMenuItem, resourceToolStripMenuItem, helpToolStripMenuItem,

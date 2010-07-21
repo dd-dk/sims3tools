@@ -75,12 +75,14 @@
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.externalProgramsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.organiseBookmarksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.automaticUpdateChecksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.saveSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkForUpdateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.browserWidgetContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -101,8 +103,6 @@
             this.bwcmExport = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmToFile = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmToPackage = new System.Windows.Forms.ToolStripMenuItem();
-            this.checkForUpdateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.automaticUpdateChecksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.browserWidgetContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -321,6 +321,7 @@
             // 
             // addToolStripMenuItem
             // 
+            this.addToolStripMenuItem.Enabled = false;
             this.addToolStripMenuItem.Name = "addToolStripMenuItem";
             this.addToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
                         | System.Windows.Forms.Keys.A)));
@@ -340,6 +341,7 @@
             // 
             // resPasteToolStripMenuItem1
             // 
+            this.resPasteToolStripMenuItem1.Enabled = false;
             this.resPasteToolStripMenuItem1.Name = "resPasteToolStripMenuItem1";
             this.resPasteToolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
                         | System.Windows.Forms.Keys.V)));
@@ -514,6 +516,13 @@
             this.organiseBookmarksToolStripMenuItem.Text = "Organise Boo&kmarks...";
             this.organiseBookmarksToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
+            // automaticUpdateChecksToolStripMenuItem
+            // 
+            this.automaticUpdateChecksToolStripMenuItem.Name = "automaticUpdateChecksToolStripMenuItem";
+            this.automaticUpdateChecksToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.automaticUpdateChecksToolStripMenuItem.Text = "Automatic &Update Checks";
+            this.automaticUpdateChecksToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
             // toolStripSeparator8
             // 
             this.toolStripSeparator8.Name = "toolStripSeparator8";
@@ -560,6 +569,13 @@
             this.aboutToolStripMenuItem.Text = "&About...";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
             // 
+            // checkForUpdateToolStripMenuItem
+            // 
+            this.checkForUpdateToolStripMenuItem.Name = "checkForUpdateToolStripMenuItem";
+            this.checkForUpdateToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
+            this.checkForUpdateToolStripMenuItem.Text = "Check for &update...";
+            this.checkForUpdateToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
+            // 
             // warrantyToolStripMenuItem
             // 
             this.warrantyToolStripMenuItem.Name = "warrantyToolStripMenuItem";
@@ -591,7 +607,7 @@
             this.bwcmImport,
             this.bwcmExport});
             this.browserWidgetContextMenuStrip.Name = "browserWidgetContextMenuStrip";
-            this.browserWidgetContextMenuStrip.Size = new System.Drawing.Size(153, 258);
+            this.browserWidgetContextMenuStrip.Size = new System.Drawing.Size(134, 236);
             this.browserWidgetContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.cmsBW_Opening);
             // 
             // bwcmAdd
@@ -725,20 +741,6 @@
             this.bwcmToPackage.Size = new System.Drawing.Size(141, 22);
             this.bwcmToPackage.Text = "To &package...";
             this.bwcmToPackage.Click += new System.EventHandler(this.tsCMSBW_Click);
-            // 
-            // checkForUpdateToolStripMenuItem
-            // 
-            this.checkForUpdateToolStripMenuItem.Name = "checkForUpdateToolStripMenuItem";
-            this.checkForUpdateToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
-            this.checkForUpdateToolStripMenuItem.Text = "Check for &update...";
-            this.checkForUpdateToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
-            // 
-            // automaticUpdateChecksToolStripMenuItem
-            // 
-            this.automaticUpdateChecksToolStripMenuItem.Name = "automaticUpdateChecksToolStripMenuItem";
-            this.automaticUpdateChecksToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
-            this.automaticUpdateChecksToolStripMenuItem.Text = "Automatic &Update Checks";
-            this.automaticUpdateChecksToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // MenuBarWidget
             // 
