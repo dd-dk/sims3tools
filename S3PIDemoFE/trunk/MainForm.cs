@@ -177,14 +177,14 @@ namespace S3PIDemoFE
         {
             browserWidget1.Package = packageInfoWidget1.Package = CurrentPackage;
             pnAuto.Controls.Clear();
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_saveAs, CurrentPackage != null);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_saveCopyAs, CurrentPackage != null);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importResources, CurrentPackage != null);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importPackages, CurrentPackage != null);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_close, CurrentPackage != null);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_bookmarkCurrent, CurrentPackage != null);
-            menuBarWidget1.Enable(MenuBarWidget.MD.MBR, CurrentPackage != null);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBT_search, CurrentPackage != null);
+            bool enable = CurrentPackage != null;
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_saveAs, enable);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_saveCopyAs, enable);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_close, enable);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_bookmarkCurrent, enable);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBR, enable);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_add, enable);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBT_search, enable);
             resourceDropDownOpening();
         }
 
