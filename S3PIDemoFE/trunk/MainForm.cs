@@ -286,7 +286,7 @@ namespace S3PIDemoFE
             }
 
             this.Show();
-            importBatch(batch.ToArray());
+            importBatch(batch.ToArray(), "-import");
             return false;
         }
         bool CmdLineHelp(ref List<string> cmdline)
@@ -657,11 +657,13 @@ namespace S3PIDemoFE
 
         private void resourceAdd()
         {
-            ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) }) != null, false);
+            ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(x => x.ResourceType == (uint)0x0166038C) != null, false);
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;
 
             IResourceIndexEntry rie = NewResource(ir, null, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, ir.Compress);
+            if (rie == null) return;
+
             IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie);
             CurrentPackage.ReplaceResource(rie, res);
             browserWidget1.Add(rie);
@@ -850,12 +852,7 @@ namespace S3PIDemoFE
         }
         private IResourceIndexEntry NewResource(IResourceKey rk, MemoryStream ms, DuplicateHandling dups, bool compress)
         {
-            IResourceIndexEntry rie = CurrentPackage.Find(new string[] { "ResourceType", "ResourceGroup", "Instance" },
-                new TypedValue[] {
-                    new TypedValue(rk.ResourceType.GetType(), rk.ResourceType),
-                    new TypedValue(rk.ResourceGroup.GetType(), rk.ResourceGroup),
-                    new TypedValue(rk.Instance.GetType(), rk.Instance),
-                });
+            IResourceIndexEntry rie = CurrentPackage.Find(x => rk.Equals(x));
             if (rie != null)
             {
                 if (dups == DuplicateHandling.reject) return null;
@@ -1022,12 +1019,7 @@ namespace S3PIDemoFE
 
         private void exportResourceToPackage(IPackage tgtpkg, IResourceIndexEntry srcrie, bool replace)
         {
-            IResourceIndexEntry rie = tgtpkg.Find(new string[] { "ResourceType", "ResourceGroup", "Instance" },
-                new TypedValue[] {
-                            new TypedValue(srcrie.ResourceType.GetType(), srcrie.ResourceType),
-                            new TypedValue(srcrie.ResourceGroup.GetType(), srcrie.ResourceGroup),
-                            new TypedValue(srcrie.Instance.GetType(), srcrie.Instance),
-                        });
+            IResourceIndexEntry rie = tgtpkg.Find(x => ((IResourceKey)srcrie).Equals(x));
             if (rie != null)
             {
                 if (!replace) return;

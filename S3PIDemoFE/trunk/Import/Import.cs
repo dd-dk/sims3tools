@@ -54,7 +54,7 @@ namespace S3PIDemoFE
                 if (dr != DialogResult.OK) return;
 
                 if (importResourcesDialog.FileNames.Length > 1)
-                    importBatch(importResourcesDialog.FileNames);
+                    importBatch(importResourcesDialog.FileNames, importResourcesDialog.Title);
                 else
                     importSingle(importResourcesDialog.FileName);
             }
@@ -73,7 +73,7 @@ namespace S3PIDemoFE
                 dr = ib.ShowDialog();
                 if (dr != DialogResult.OK) return;
 
-                importPackagesCommon(ib.Batch, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null);
+                importPackagesCommon(ib.Batch, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, importPackagesDialog.Title);
             }
             finally { this.Enabled = true; }
         }
@@ -111,68 +111,49 @@ namespace S3PIDemoFE
                 DialogResult dr = importPackagesDialog.ShowDialog();
                 if (dr != DialogResult.OK) return;
 
-                importPackagesCommon(importPackagesDialog.FileNames, true, DuplicateHandling.allow, allowList);
+                importPackagesCommon(importPackagesDialog.FileNames, true, DuplicateHandling.allow, allowList, importPackagesDialog.Title);
 
                 browserWidget1.Visible = false;
                 lbProgress.Text = "Doing DBC clean up...";
+
                 Application.DoEvents();
-
-                #region (Don't) Fix up XML clashes
-                bool needToMergeXMLs = false;
-                foreach (uint xml in xmlList)
+                DateTime now = DateTime.UtcNow;
+                IList<IResourceIndexEntry> lrie = CurrentPackage.FindAll(x => nmapList.Contains(x.ResourceType));
+                if (lrie.Count > 1)
                 {
-                    IList<IResourceIndexEntry> lrie = dupsOnly(CurrentPackage.FindAll(new string[] { "ResourceType", "Instance", },
-                        new TypedValue[] { new TypedValue(typeof(uint), xml), new TypedValue(typeof(ulong), (ulong)0), }));
-                    if (lrie.Count > 0)
+                    IResourceIndexEntry newRie = NewResource(lrie[0], null, DuplicateHandling.allow, true);
+                    IDictionary<ulong, string> newNmap = (IDictionary<ulong, string>)s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, newRie);
+                    foreach (IResourceIndexEntry rie in lrie)
                     {
-                        needToMergeXMLs = true;
-                        break;
+                        IDictionary<ulong, string> oldNmap = (IDictionary<ulong, string>)s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie);
+                        foreach (var kvp in oldNmap) if (!newNmap.ContainsKey(kvp.Key)) newNmap.Add(kvp);
+                        rie.IsDeleted = true;
+                        if (now.AddMilliseconds(100) < DateTime.UtcNow) { Application.DoEvents(); now = DateTime.UtcNow; }
                     }
+                    CurrentPackage.ReplaceResource(newRie, (IResource)newNmap);
+                    browserWidget1.Add(newRie);
                 }
-                if (needToMergeXMLs)
+
+                lrie = dupsOnly(CurrentPackage.FindAll(x => stblList.Contains(x.ResourceType)));
+                foreach (IResourceIndexEntry dup in lrie)
                 {
+                    IList<IResourceIndexEntry> ldups = getDups(dup);
+                    IResourceIndexEntry newRie = NewResource(dup, null, DuplicateHandling.allow, true);
+                    IDictionary<ulong, string> newStbl = (IDictionary<ulong, string>)s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, newRie);
+                    foreach (IResourceIndexEntry rie in ldups)
+                    {
+                        IDictionary<ulong, string> oldStbl = (IDictionary<ulong, string>)s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie);
+                        foreach (var kvp in oldStbl) if (!newStbl.ContainsKey(kvp.Key)) newStbl.Add(kvp);
+                        rie.IsDeleted = true;
+                        if (now.AddMilliseconds(100) < DateTime.UtcNow) { Application.DoEvents(); now = DateTime.UtcNow; }
+                    }
+                    CurrentPackage.ReplaceResource(newRie, (IResource)newStbl);
+                    browserWidget1.Add(newRie);
+                }
+
+                // We don't clean up XMLs as they're messy
+                if (dupsOnly(CurrentPackage.FindAll(x => xmlList.Contains(x.ResourceType) && x.Instance == 0)).Count > 0)
                     CopyableMessageBox.Show("Manual merge of XML files required.");
-                }
-                #endregion
-
-                foreach (uint stbl in stblList)
-                {
-                    IList<IResourceIndexEntry> lrie = dupsOnly(CurrentPackage.FindAll(new string[] { "ResourceType", },
-                        new TypedValue[] { new TypedValue(typeof(uint), stbl), }));
-                    foreach (IResourceIndexEntry dup in lrie)
-                    {
-                        IList<IResourceIndexEntry> ldups = getDups(dup);
-                        IResourceIndexEntry newRie = NewResource(dup, null, DuplicateHandling.allow, true);
-                        IDictionary<ulong, string> newStbl = (IDictionary<ulong, string>)s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, newRie);
-                        foreach (IResourceIndexEntry rie in ldups)
-                        {
-                            IDictionary<ulong, string> oldStbl = (IDictionary<ulong, string>)s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie);
-                            foreach (var kvp in oldStbl) if (!newStbl.ContainsKey(kvp.Key)) newStbl.Add(kvp);
-                            rie.IsDeleted = true;
-                        }
-                        CurrentPackage.ReplaceResource(newRie, (IResource)newStbl);
-                        browserWidget1.Add(newRie);
-                    }
-                }
-
-                foreach (uint nmap in nmapList)
-                {
-                    IList<IResourceIndexEntry> lrie = CurrentPackage.FindAll(new string[] { "ResourceType", },
-                        new TypedValue[] { new TypedValue(typeof(uint), nmap), });
-                    if (lrie.Count > 1)
-                    {
-                        IResourceIndexEntry newRie = NewResource(lrie[0], null, DuplicateHandling.allow, true);
-                        IDictionary<ulong, string> newNmap = (IDictionary<ulong, string>)s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, newRie);
-                        foreach (IResourceIndexEntry rie in lrie)
-                        {
-                            IDictionary<ulong, string> oldNmap = (IDictionary<ulong, string>)s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie);
-                            foreach (var kvp in oldNmap) if (!newNmap.ContainsKey(kvp.Key)) newNmap.Add(kvp);
-                            rie.IsDeleted = true;
-                        }
-                        CurrentPackage.ReplaceResource(newRie, (IResource)newNmap);
-                        browserWidget1.Add(newRie);
-                    }
-                }
             }
             finally { browserWidget1.Visible = true; lbProgress.Text = ""; Application.DoEvents(); this.Enabled = true; }
         }
@@ -187,20 +168,21 @@ namespace S3PIDemoFE
             }
             return res;
         }
-        IList<IResourceIndexEntry> getDups(IResourceKey rk)
-        {
-            return CurrentPackage.FindAll(new string[] { "ResourceType", "ResourceGroup", "Instance", },
-                new TypedValue[] {
-                    new TypedValue(rk.ResourceType.GetType(), rk.ResourceType),
-                    new TypedValue(rk.ResourceGroup.GetType(), rk.ResourceGroup),
-                    new TypedValue(rk.Instance.GetType(), rk.Instance),
-                });
-        }
+        IList<IResourceIndexEntry> getDups(IResourceKey rk) { return CurrentPackage.FindAll(rie => rk.Equals(rie)); }
 
-        private void importPackagesCommon(string[] packageList, bool compress, DuplicateHandling dups, List<uint> dupsList)
+        private void importPackagesCommon(string[] packageList, bool compress, DuplicateHandling dups, List<uint> dupsList, string title)
         {
             bool useNames = controlPanel1.UseNames;
             int autoState = controlPanel1.AutoOff ? 0 : controlPanel1.AutoHex ? 1 : 2;
+            DateTime now = DateTime.UtcNow;
+
+            bool autoSave = false;
+            switch (CopyableMessageBox.Show("Auto-save current package after each package imported?", importPackagesDialog.Title,
+                 CopyableMessageBoxButtons.YesNoCancel, CopyableMessageBoxIcon.Question))
+            {
+                case 0: autoSave = true; break;
+                case 2: return;
+            }
             try
             {
                 controlPanel1.UseNames = false;
@@ -248,11 +230,16 @@ namespace S3PIDemoFE
                             impres.data = res.AsBytes;
                             importStream(impres, false, false, compress, dupThis);
                             progressBar1.Value++;
-                            if (progressBar1.Value % 100 == 0)
-                                Application.DoEvents();
+                            if (now.AddMilliseconds(100) < DateTime.UtcNow) { Application.DoEvents(); now = DateTime.UtcNow; }
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        CopyableMessageBox.IssueException(ex, "Could not import all resources.\n", "Aborting import");
+                        break;
+                    }
                     finally { progressBar1.Value = 0; Package.ClosePackage(0, imppkg); }
+                    if (autoSave) if (!fileSave()) break;
                 }
             }
             finally
@@ -306,7 +293,7 @@ namespace S3PIDemoFE
                     {
                         string[] batch = new string[fileDrop.Count];
                         for (int i = 0; i < fileDrop.Count; i++) batch[i] = fileDrop[i];
-                        importBatch(batch);
+                        importBatch(batch, "Resource->Paste");
                     }
                 }
             }
@@ -323,7 +310,7 @@ namespace S3PIDemoFE
             {
                 this.Enabled = false;
                 if (fileDrop.Length > 1)
-                    importBatch(fileDrop);
+                    importBatch(fileDrop, "File(s)->Drop");
                 else
                     importSingle(fileDrop[0]);
             }
@@ -336,7 +323,7 @@ namespace S3PIDemoFE
             if (CurrentPackage == null)
                 fileNew();
 
-            ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) }) != null, true);
+            ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(_key => _key.ResourceType == (uint)0x0166038C) != null, true);
             ir.Filename = filename;
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;
@@ -346,7 +333,7 @@ namespace S3PIDemoFE
                 try
                 {
                     this.Enabled = false;
-                    importPackagesCommon(new string[] { ir.Filename, }, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null);
+                    importPackagesCommon(new string[] { ir.Filename, }, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, ir.Text);
                 }
                 finally { this.Enabled = true; }
             }
@@ -358,7 +345,7 @@ namespace S3PIDemoFE
 
         void importSingle(myDataFormat data)
         {
-            ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(new string[] { "ResourceType" }, new TypedValue[] { new TypedValue(typeof(uint), (uint)0x0166038C) }) != null, true);
+            ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(_key => _key.ResourceType == (uint)0x0166038C) != null, true);
             ir.Filename = data.tgin;
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;
@@ -367,7 +354,7 @@ namespace S3PIDemoFE
             importStream(data, ir.UseName, ir.AllowRename, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject);
         }
 
-        void importBatch(string[] batch)
+        void importBatch(string[] batch, string title)
         {
             if (CurrentPackage == null)
                 fileNew();
@@ -388,7 +375,7 @@ namespace S3PIDemoFE
                 this.Enabled = false;
 
                 if (pkgList.Count > 0)
-                    importPackagesCommon(pkgList.ToArray(), ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null);
+                    importPackagesCommon(pkgList.ToArray(), ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, title);
 
                 bool nmOK = true;
                 foreach (string filename in resList)
@@ -396,6 +383,10 @@ namespace S3PIDemoFE
                     nmOK = importFile(filename, filename, nmOK && ib.UseNames, ib.Rename, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject);
                     Application.DoEvents();
                 }
+            }
+            catch (Exception ex)
+            {
+                CopyableMessageBox.IssueException(ex, "Could not import all resources.\n", "Aborting import");
             }
             finally { this.Enabled = true; }
         }
@@ -425,6 +416,10 @@ namespace S3PIDemoFE
                     importStream(data, ib.UseNames, ib.Rename, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject);
                     Application.DoEvents();
                 }
+            }
+            catch (Exception ex)
+            {
+                CopyableMessageBox.IssueException(ex, "Could not import all resources.\n", "Aborting import");
             }
             finally { this.Enabled = true; }
         }
