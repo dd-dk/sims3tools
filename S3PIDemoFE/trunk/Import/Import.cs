@@ -56,7 +56,7 @@ namespace S3PIDemoFE
                 if (importResourcesDialog.FileNames.Length > 1)
                     importBatch(importResourcesDialog.FileNames, importResourcesDialog.Title);
                 else
-                    importSingle(importResourcesDialog.FileName);
+                    importSingle(importResourcesDialog.FileName, importResourcesDialog.Title);
             }
             finally { controlPanel1.UseNames = useNames; browserWidget1.Visible = true; this.Enabled = true; }
         }
@@ -177,7 +177,7 @@ namespace S3PIDemoFE
             DateTime now = DateTime.UtcNow;
 
             bool autoSave = false;
-            switch (CopyableMessageBox.Show("Auto-save current package after each package imported?", importPackagesDialog.Title,
+            switch (CopyableMessageBox.Show("Auto-save current package after each package imported?", title,
                  CopyableMessageBoxButtons.YesNoCancel, CopyableMessageBoxIcon.Question))
             {
                 case 0: autoSave = true; break;
@@ -209,7 +209,7 @@ namespace S3PIDemoFE
                     {
                         if (skipAll) continue;
                         int btn = CopyableMessageBox.Show(String.Format("Could not open package {0}.\n{1}", Path.GetFileName(filename), ex.Message),
-                            importPackagesDialog.Title, CopyableMessageBoxIcon.Error, new List<string>(new string[] {
+                            title, CopyableMessageBoxIcon.Error, new List<string>(new string[] {
                             "Skip this", "Skip all", "Abort"}), 0, 0);
                         if (btn == 0) continue;
                         if (btn == 1) { skipAll = true; continue; }
@@ -235,7 +235,7 @@ namespace S3PIDemoFE
                     }
                     catch (Exception ex)
                     {
-                        CopyableMessageBox.IssueException(ex, "Could not import all resources.\n", "Aborting import");
+                        CopyableMessageBox.IssueException(ex, "Could not import all resources - aborting.\n", title);
                         break;
                     }
                     finally { progressBar1.Value = 0; Package.ClosePackage(0, imppkg); }
@@ -287,7 +287,7 @@ namespace S3PIDemoFE
 
                     if (fileDrop.Count == 1)
                     {
-                        importSingle(fileDrop[0]);
+                        importSingle(fileDrop[0], "Resource->Paste");
                     }
                     else
                     {
@@ -312,13 +312,13 @@ namespace S3PIDemoFE
                 if (fileDrop.Length > 1)
                     importBatch(fileDrop, "File(s)->Drop");
                 else
-                    importSingle(fileDrop[0]);
+                    importSingle(fileDrop[0], "File(s)->Drop");
             }
             finally { this.Enabled = true; }
         }
 
         static string[] asPkgExts = new string[] { ".package", ".world", ".dbc", };
-        void importSingle(string filename)
+        void importSingle(string filename, string title)
         {
             if (CurrentPackage == null)
                 fileNew();
@@ -333,7 +333,7 @@ namespace S3PIDemoFE
                 try
                 {
                     this.Enabled = false;
-                    importPackagesCommon(new string[] { ir.Filename, }, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, ir.Text);
+                    importPackagesCommon(new string[] { ir.Filename, }, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, title);
                 }
                 finally { this.Enabled = true; }
             }
@@ -360,6 +360,7 @@ namespace S3PIDemoFE
                 fileNew();
 
             ImportBatch ib = new ImportBatch(batch);
+            ib.Text = title;
             DialogResult dr = ib.ShowDialog();
             if (dr != DialogResult.OK) return;
 
@@ -386,7 +387,7 @@ namespace S3PIDemoFE
             }
             catch (Exception ex)
             {
-                CopyableMessageBox.IssueException(ex, "Could not import all resources.\n", "Aborting import");
+                CopyableMessageBox.IssueException(ex, "Could not import all resources - aborting.\n", title);
             }
             finally { this.Enabled = true; }
         }
