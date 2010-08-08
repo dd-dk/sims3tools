@@ -91,7 +91,7 @@ namespace ObjectCloner
 
                     IList<IResourceIndexEntry> matches;
                     if (resourceType != 0)
-                        matches = pkg.FindAll(rie => !rie.IsDeleted && rie.ResourceType == (uint)resourceType);
+                        matches = pkg.FindAll(rie => rie.ResourceType == (uint)resourceType);
                     else
                         matches = pkg.GetResourceList;
 
@@ -209,12 +209,12 @@ namespace ObjectCloner
         IResourceKey findRK()
         {
             RK rk = requestedRK;
-            if (specificPkg != null) return specificPkg.Find(x => !x.IsDeleted && rk.Equals(x));
+            if (specificPkg != null) return specificPkg.Find(requestedRK.Equals);
 
             IResourceKey arie = null;
             for (int i = 0; arie == null && i < searchList.Count; i++)
                 {
-                    arie = searchList[i].Find(x => !x.IsDeleted && rk.Equals(x));
+                    arie = searchList[i].Find(requestedRK.Equals);
                     if (arie != null) specificPkg = searchList[i];
                 }
             return arie;

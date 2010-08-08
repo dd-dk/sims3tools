@@ -683,7 +683,7 @@ namespace ObjectCloner
                 if (type == 0x00000000) return null;
                 foreach (IPackage pkg in pkgs)
                 {
-                    List<IResourceIndexEntry> lrie = new List<IResourceIndexEntry>(pkg.FindAll(rie => !rie.IsDeleted && rie.ResourceType == type && rie.Instance == instance));
+                    List<IResourceIndexEntry> lrie = new List<IResourceIndexEntry>(pkg.FindAll(rie => rie.ResourceType == type && rie.Instance == instance));
                     lrie.Sort(byGroup);
                     foreach (IResourceIndexEntry rie in lrie)
                         if (!new List<uint>(thumTypes[0x515CA4CD]).Contains(type) || (rie.ResourceGroup & 0x00FFFFFF) > 0)
@@ -775,7 +775,7 @@ namespace ObjectCloner
                 stbls = new List<IDictionary<ulong, string>>();
                 foreach (IPackage pkg in stblPkgs)
                 {
-                    IList<IResourceIndexEntry> lrie = pkg.FindAll(rie => !rie.IsDeleted && rie.ResourceType == (uint)0x220557DA);
+                    IList<IResourceIndexEntry> lrie = pkg.FindAll(rie => rie.ResourceType == 0x220557DA);
                     foreach (IResourceIndexEntry rie in lrie)
                     {
                         if (rie.Instance >> 56 == langID)
@@ -819,7 +819,7 @@ namespace ObjectCloner
                 namemaps = new List<IDictionary<ulong, string>>();
                 foreach (IPackage pkg in nameMapPkgs)
                 {
-                    IList<IResourceIndexEntry> lrie = pkg.FindAll(rie => !rie.IsDeleted && rie.ResourceType == (uint)0x0166038C);
+                    IList<IResourceIndexEntry> lrie = pkg.FindAll(rie => rie.ResourceType == 0x0166038C);
                     if (lrie.Count > 0) latest = new Item(new RIE(pkg, lrie[0]));
                     foreach (IResourceIndexEntry rie in lrie)
                         namemaps.Add(new Item(new RIE(pkg, rie)).Resource as IDictionary<ulong, string>);
@@ -3645,12 +3645,12 @@ namespace ObjectCloner
         void VPXYs_getKinXML()
         {
             for (int i = 0; i < vpxyItems.Count; i++)
-                SlurpKindred("vpxy[" + i + "].PresetXML", objPkgs, rie => !rie.IsDeleted && rie.ResourceType == (uint)0x0333406C && rie.Instance == vpxyItems[i].RequestedRK.Instance);
+                SlurpKindred("vpxy[" + i + "].PresetXML", objPkgs, rie => rie.ResourceType == 0x0333406C && rie.Instance == vpxyItems[i].RequestedRK.Instance);
         }
         void VPXYs_getKinMTST()
         {
             for (int i = 0; i < vpxyItems.Count; i++)
-                SlurpKindred("vpxy[" + i + "].mtst", objPkgs, rie => !rie.IsDeleted && rie.ResourceType == (uint)0x02019972 && rie.Instance == vpxyItems[i].RequestedRK.Instance);
+                SlurpKindred("vpxy[" + i + "].mtst", objPkgs, rie => rie.ResourceType == 0x02019972 && rie.Instance == vpxyItems[i].RequestedRK.Instance);
         }
         void VPXYKin_SlurpRKs()
         {
@@ -3818,7 +3818,7 @@ namespace ObjectCloner
                 uint type = CWALThumbTypes[size];
                 foreach (IPackage pkg in tmbPkgs)
                 {
-                    IList<IResourceIndexEntry> lrie = pkg.FindAll(rie => !rie.IsDeleted && rie.ResourceType == type && rie.Instance == selectedItem.RequestedRK.Instance);
+                    IList<IResourceIndexEntry> lrie = pkg.FindAll(rie => rie.ResourceType == type && rie.Instance == selectedItem.RequestedRK.Instance);
                     foreach (IResourceIndexEntry rie in lrie)
                     {
                         RIE Rie = new RIE(pkg, rie);
@@ -3846,7 +3846,7 @@ namespace ObjectCloner
             }
 
             // We need to process STBLs
-            IList<IResourceIndexEntry> lstblrie = objPkgs[0].FindAll(rie => !rie.IsDeleted && rie.ResourceType == (uint)0x220557DA);
+            IList<IResourceIndexEntry> lstblrie = objPkgs[0].FindAll(rie => rie.ResourceType == 0x220557DA);
             foreach (IResourceIndexEntry rie in lstblrie)
                 if (!rkToItem.ContainsKey(rie))
                     rkToItem.Add(rie, new Item(new RIE(objPkgs[0], rie)));
@@ -3871,7 +3871,7 @@ namespace ObjectCloner
                 foreach (var kvp in rcolChunks) rkToItem.Add(kvp.Key, kvp.Value);
 
                 // Add newest namemap
-                IList<IResourceIndexEntry> lnmaprie = objPkgs[0].FindAll(rie => !rie.IsDeleted && rie.ResourceType == (uint)0x0166038C);
+                IList<IResourceIndexEntry> lnmaprie = objPkgs[0].FindAll(rie => rie.ResourceType == 0x0166038C);
                 foreach (IResourceIndexEntry rie in lnmaprie)
                     if (!rkToItem.ContainsKey(rie))
                         rkToItem.Add(rie, new Item(new RIE(objPkgs[0], rie)));

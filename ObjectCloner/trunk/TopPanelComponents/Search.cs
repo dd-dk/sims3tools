@@ -220,7 +220,7 @@ namespace ObjectCloner.TopPanelComponents
                         IPackage pkg = objPkgs[p];
 
                         updateProgress(true, String.Format("Retrieving name map for package {0} of {1}...", p + 1, objPkgs.Count), true, -1, false, 0);
-                        IList<IResourceIndexEntry> lrie = pkg.FindAll(rie => !rie.IsDeleted && rie.ResourceType == (uint)0x0166038C);
+                        IList<IResourceIndexEntry> lrie = pkg.FindAll(rie => rie.ResourceType == 0x0166038C);
                         foreach (IResourceIndexEntry rie in lrie)
                         {
                             nameMap = new Item(new RIE(pkg, rie)).Resource as IDictionary<ulong, string>;
@@ -229,7 +229,7 @@ namespace ObjectCloner.TopPanelComponents
 
                         stbls = new List<IDictionary<ulong, string>>();
                         updateProgress(true, String.Format("Retrieving string tables for package {0} of {1}...", p + 1, objPkgs.Count), true, -1, false, 0);
-                        lrie = pkg.FindAll(rie => !rie.IsDeleted && rie.ResourceType == (uint)0x220557DA);
+                        lrie = pkg.FindAll(rie => rie.ResourceType == 0x220557DA);
                         if (criteria.allLanguages)
                         {
                             foreach (IResourceIndexEntry rie in lrie)
@@ -285,9 +285,9 @@ namespace ObjectCloner.TopPanelComponents
             IList<IResourceIndexEntry> Find(IPackage pkg)
             {
                 if (criteria.catalogType == 0)
-                    return pkg.FindAll(rie => !rie.IsDeleted && lct.Contains((CatalogType)rie.ResourceType));
+                    return pkg.FindAll(rie => lct.Contains((CatalogType)rie.ResourceType));
                 else
-                    return pkg.FindAll(rie => !rie.IsDeleted && criteria.catalogType == (CatalogType)rie.ResourceType);
+                    return pkg.FindAll(rie => criteria.catalogType == (CatalogType)rie.ResourceType);
             }
 
             bool Match(Item item)
