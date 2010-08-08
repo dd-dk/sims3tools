@@ -81,11 +81,11 @@ namespace S3PIDemoFE
         static List<uint> xmlList = new List<uint>(new uint[] {
             0x025C95B6, //xml: UI Layout definitions
             0x025ED6F4, //xml: Sim Outfit
-            0x0333406C, //xml: XML Resource (Uses include tuning constants)
+            //-Anach: do not allow duplicates 0x0333406C, //xml: XML Resource (Uses include tuning constants)
             0x03B33DDF, //xml: Interaction Tuning (These are like the stuff you had in TTAB. Motive advertising and autonomy etc)
             0x044AE110, //xml: Complate Preset
             0x0604ABDA, //xml:
-            0x73E93EEB, //xml: Package manifest
+            //-Anach: delete these 0x73E93EEB, //xml: Package manifest
         });
         static List<uint> stblList = new List<uint>(new uint[] {
             0x220557DA, //STBL
@@ -93,11 +93,22 @@ namespace S3PIDemoFE
         static List<uint> nmapList = new List<uint>(new uint[] {
             0x0166038C, //NMAP
         });
+        // See http://dino.drealm.info/den/denforum/index.php?topic=244.0
+        static List<uint> deleteList = new List<uint>(new uint[] {
+            0x73E93EEB, //xml: sims3pack manifest
+            0x626F60CD, //THUM: sims3pack
+            0x2E75C765, //ICON: sims3pack
+        });
         static List<uint> allowList = new List<uint>();
+        static bool shownIt = false;
         private void resourceImportAsDBC()
         {
-            DialogResult maty = new ExperimentalDBCWarning().ShowDialog();
-            if (maty != System.Windows.Forms.DialogResult.OK) return;
+            if (!shownIt)
+            {
+                DialogResult maty = new ExperimentalDBCWarning().ShowDialog();
+                if (maty != System.Windows.Forms.DialogResult.OK) return;
+                shownIt = true;
+            }
 
             if (allowList.Count == 0)
             {
@@ -137,7 +148,7 @@ namespace S3PIDemoFE
                 lrie = dupsOnly(CurrentPackage.FindAll(x => stblList.Contains(x.ResourceType)));
                 foreach (IResourceIndexEntry dup in lrie)
                 {
-                    IList<IResourceIndexEntry> ldups = getDups(dup);
+                    IList<IResourceIndexEntry> ldups = CurrentPackage.FindAll(rie => ((IResourceKey)dup).Equals(rie));
                     IResourceIndexEntry newRie = NewResource(dup, null, DuplicateHandling.allow, true);
                     IDictionary<ulong, string> newStbl = (IDictionary<ulong, string>)s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, newRie);
                     foreach (IResourceIndexEntry rie in ldups)
@@ -151,8 +162,16 @@ namespace S3PIDemoFE
                     browserWidget1.Add(newRie);
                 }
 
-                // We don't clean up XMLs as they're messy
-                if (dupsOnly(CurrentPackage.FindAll(x => xmlList.Contains(x.ResourceType) && x.Instance == 0)).Count > 0)
+                // Get rid of Sims3Pack resource that sneak in
+                CurrentPackage.FindAll(x =>
+                {
+                    if (now.AddMilliseconds(100) < DateTime.UtcNow) { Application.DoEvents(); now = DateTime.UtcNow; }
+                    if (deleteList.Contains(x.ResourceType)) { x.IsDeleted = true; return false; }
+                    return false;
+                });
+
+                // If there are any remaining duplicate XMLs, give up - they're too messy to fix automatically
+                if (dupsOnly(CurrentPackage.FindAll(x => xmlList.Contains(x.ResourceType))).Count > 0)
                     CopyableMessageBox.Show("Manual merge of XML files required.");
             }
             finally { browserWidget1.Visible = true; lbProgress.Text = ""; Application.DoEvents(); this.Enabled = true; }
@@ -168,7 +187,6 @@ namespace S3PIDemoFE
             }
             return res;
         }
-        IList<IResourceIndexEntry> getDups(IResourceKey rk) { return CurrentPackage.FindAll(rie => rk.Equals(rie)); }
 
         private void importPackagesCommon(string[] packageList, bool compress, DuplicateHandling dups, List<uint> dupsList, string title)
         {
@@ -311,6 +329,8 @@ namespace S3PIDemoFE
                 this.Enabled = false;
                 if (fileDrop.Length > 1)
                     importBatch(fileDrop, "File(s)->Drop");
+                else if (Directory.Exists(fileDrop[0]))
+                    importBatch(fileDrop, "File(s)->Drop");
                 else
                     importSingle(fileDrop[0], "File(s)->Drop");
             }
@@ -323,7 +343,7 @@ namespace S3PIDemoFE
             if (CurrentPackage == null)
                 fileNew();
 
-            ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(_key => _key.ResourceType == (uint)0x0166038C) != null, true);
+            ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(_key => _key.ResourceType == 0x0166038C) != null, true);
             ir.Filename = filename;
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;
@@ -345,7 +365,7 @@ namespace S3PIDemoFE
 
         void importSingle(myDataFormat data)
         {
-            ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(_key => _key.ResourceType == (uint)0x0166038C) != null, true);
+            ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(_key => _key.ResourceType == 0x0166038C) != null, true);
             ir.Filename = data.tgin;
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;
@@ -354,10 +374,25 @@ namespace S3PIDemoFE
             importStream(data, ir.UseName, ir.AllowRename, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject);
         }
 
+        string[] getFiles(string folder)
+        {
+            if (!Directory.Exists(folder)) return null;
+            List<string> files = new List<string>();
+            foreach (string dir in Directory.GetDirectories(folder))
+                files.AddRange(getFiles(dir));
+            files.AddRange(Directory.GetFiles(folder));
+            return files.ToArray();
+        }
         void importBatch(string[] batch, string title)
         {
             if (CurrentPackage == null)
                 fileNew();
+
+            List<string> foo = new List<string>();
+            foreach (string bar in batch)
+                if (Directory.Exists(bar)) foo.AddRange(getFiles(bar));
+                else if (File.Exists(bar)) foo.Add(bar);
+            batch = foo.ToArray();
 
             ImportBatch ib = new ImportBatch(batch);
             ib.Text = title;
@@ -366,6 +401,7 @@ namespace S3PIDemoFE
 
             List<string> resList = new List<string>();
             List<string> pkgList = new List<string>();
+            List<string> folders = new List<string>();
 
             List<string> pkgExts = new List<string>(asPkgExts);
             foreach (string s in batch)

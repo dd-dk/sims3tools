@@ -566,7 +566,7 @@ namespace S3PIDemoFE
             nameMap = new List<IResource>();
             nameMapRIEs = new List<IResourceIndexEntry>();
 
-            IList<IResourceIndexEntry> lrie = pkg.FindAll(_key => _key.ResourceType == (uint)0x0166038C);
+            IList<IResourceIndexEntry> lrie = pkg.FindAll(_key => _key.ResourceType == 0x0166038C);
             foreach (IResourceIndexEntry rie in lrie)
             {
                 try

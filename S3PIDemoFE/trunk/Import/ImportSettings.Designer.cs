@@ -41,6 +41,8 @@
             // 
             this.ckbCompress.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ckbCompress.AutoSize = true;
+            this.ckbCompress.Checked = true;
+            this.ckbCompress.CheckState = System.Windows.Forms.CheckState.Checked;
             this.ckbCompress.Location = new System.Drawing.Point(3, 32);
             this.ckbCompress.Name = "ckbCompress";
             this.ckbCompress.Size = new System.Drawing.Size(72, 17);
