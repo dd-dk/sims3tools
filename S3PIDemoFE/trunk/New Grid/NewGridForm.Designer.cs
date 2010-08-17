@@ -73,10 +73,6 @@
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.Controls.Add(this.listBox1);
-            // 
-            // splitContainer1.Panel2
-            // 
-            this.splitContainer1.Panel2.Controls.Add(this.s3PIPropertyGrid1);
             this.splitContainer1.Size = new System.Drawing.Size(523, 325);
             this.splitContainer1.SplitterDistance = 164;
             this.splitContainer1.TabIndex = 0;
@@ -91,6 +87,10 @@
             this.listBox1.Size = new System.Drawing.Size(164, 325);
             this.listBox1.TabIndex = 1;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.s3PIPropertyGrid1);
             // 
             // s3PIPropertyGrid1
             // 
@@ -228,7 +228,7 @@
             this.Controls.Add(this.splitContainer1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Name = "NewGridForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.WindowsDefaultBounds;
             this.Text = "Data Grid";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NewGridForm_FormClosing);
             this.splitContainer1.Panel1.ResumeLayout(false);
