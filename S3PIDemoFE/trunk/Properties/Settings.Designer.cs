@@ -323,7 +323,7 @@ namespace S3PIDemoFE.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("DBPF Packages|*.package;*.world;*.dbc|All Files|*.*")]
+        [global::System.Configuration.DefaultSettingValueAttribute("DBPF Packages|*.package;*.world;*.dbc;*.nhd|All Files|*.*")]
         public string DBPFFilesAndAll {
             get {
                 return ((string)(this["DBPFFilesAndAll"]));

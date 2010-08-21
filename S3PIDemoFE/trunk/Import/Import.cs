@@ -337,7 +337,7 @@ namespace S3PIDemoFE
             finally { this.Enabled = true; }
         }
 
-        static string[] asPkgExts = new string[] { ".package", ".world", ".dbc", };
+        static string[] asPkgExts = new string[] { ".package", ".world", ".dbc", ".nhd", };
         void importSingle(string filename, string title)
         {
             if (CurrentPackage == null)
