@@ -158,6 +158,10 @@
     <Compile Include="TopPanelComponents\ResourceList.Designer.cs">
       <DependentUpon>ResourceList.cs</DependentUpon>
     </Compile>
+    <Content Include="..\s3pi\build\bin\Release\Acknowledgements.txt">
+      <Link>Acknowledgements.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="s3ocUpdate.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
