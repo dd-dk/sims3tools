@@ -40,6 +40,10 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="s3pi.CatalogResource, Version=1009.7.19.33908, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.CatalogResource.dll</HintPath>
+    </Reference>
     <Reference Include="s3pi.CustomForms, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
@@ -77,13 +81,24 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\System.Custom.dll</HintPath>
     </Reference>
-    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutoUpdate.cs" />
+    <Compile Include="CustomControls\EnumTextBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CustomControls\EnumTextBox.Designer.cs">
+      <DependentUpon>EnumTextBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControls\TopicRatings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CustomControls\TopicRatings.Designer.cs">
+      <DependentUpon>TopicRatings.cs</DependentUpon>
+    </Compile>
     <Compile Include="FillListView.cs" />
     <Compile Include="MenuBarWidget\MenuBarWidget.cs">
       <SubType>Component</SubType>
@@ -167,6 +182,12 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="CustomControls\EnumTextBox.resx">
+      <DependentUpon>EnumTextBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomControls\TopicRatings.resx">
+      <DependentUpon>TopicRatings.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -210,10 +231,6 @@
     </Content>
     <Content Include="..\s3pi\build\bin\Release\RCOLResources.txt">
       <Link>RCOLResources.txt</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\s3pi\build\bin\Release\s3pi.CatalogResource.dll">
-      <Link>s3pi.CatalogResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.DefaultResource.dll">

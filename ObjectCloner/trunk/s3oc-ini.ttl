@@ -29,13 +29,22 @@
    , [ :T "0x00B2D882" ; :I "0x4A9A601660C41F69" ; :N "Default wood" ]		# _IMG
    , [ :T "0x00B2D882" ; :I "0x4A9A601660C41F6B" ; :N "Default wood" ]		# _IMG
 .
-   
+
+:Win64
+ a :MicrosoftOS ;
+ :hasProgramFiles "C:/Program Files (x86)/"
+.
+
+:Win32
+ a :MicrosoftOS ;
+ :hasProgramFiles "C:/Program Files/"
+.
 
 :base
    a  :Sims3, :baseGame ;
    :hasName  "Sims3" ;
    :hasLongname  "The Sims 3";
-   :hasDefaultInstallDir  "C:/Program Files/Electronic Arts/The Sims 3";
+   :hasDefaultInstallDir  "Electronic Arts/The Sims 3";
    :hasPriority  0 ;
    :isSuppressed  "not-allowed" ;
    :hasPackages [
@@ -57,7 +66,7 @@
    a  :Sims3, :EP ;
    :hasName  "EP1" ;
    :hasLongname  "The Sims 3 World Adventures";
-   :hasDefaultInstallDir  "C:/Program Files/Electronic Arts/The Sims 3 World Adventures";
+   :hasDefaultInstallDir  "Electronic Arts/The Sims 3 World Adventures";
    :hasPriority  1 ;
    :hasRGVersion  1 ;
    :isSuppressed  "false" ;
@@ -65,8 +74,8 @@
       a :Objects ;
       :in "GameData/Shared" ;
       :packages (
-         "DeltaPackages/p02/DeltaBuild_p02.package"
-		 "Packages/FullBuildep1.package"
+         	"DeltaPackages/p02/DeltaBuild_p02.package"
+		"Packages/FullBuildep1.package"
       ) .
    ], [
       a :Images ;
@@ -83,7 +92,7 @@
    a  :Sims3, :SP ;
    :hasName  "SP1" ;
    :hasLongname  "The Sims 3 High-End Loft Stuff";
-   :hasDefaultInstallDir  "C:/Program Files/Electronic Arts/The Sims 3 High-End Loft Stuff";
+   :hasDefaultInstallDir  "Electronic Arts/The Sims 3 High-End Loft Stuff";
    :hasPriority  2 ;
    :hasRGVersion  2 ;
    :isSuppressed  "false" ;
@@ -91,9 +100,9 @@
       a :Objects ;
       :in "GameData/Shared" ;
       :packages (
-         "DeltaPackages/p03/DeltaBuild_p03.package"
-         "DeltaPackages/p02/DeltaBuild_p02.package"
-		 "Packages/FullBuild_p03.package"
+         	"DeltaPackages/p03/DeltaBuild_p03.package"
+         	"DeltaPackages/p02/DeltaBuild_p02.package"
+		"Packages/FullBuild_p03.package"
       ) .
    ], [
       a :Images ;
@@ -110,7 +119,7 @@
    a  :Sims3, :EP ;
    :hasName  "EP2" ;
    :hasLongname  "The Sims 3 Ambitions";
-   :hasDefaultInstallDir  "C:/Program Files/Electronic Arts/The Sims 3 Ambitions";
+   :hasDefaultInstallDir  "Electronic Arts/The Sims 3 Ambitions";
    :hasPriority  3 ;
    :hasRGVersion  3 ;
    :isSuppressed  "false" ;
@@ -118,9 +127,10 @@
       a :Objects ;
       :in "GameData/Shared" ;
       :packages (
-         "DeltaPackages/p03/DeltaBuild_p03.package"
-         "DeltaPackages/p02/DeltaBuild_p02.package"
-		 "Packages/FullBuild_p04.package"
+         	"DeltaPackages/p04/DeltaBuild_p04.package"
+         	"DeltaPackages/p03/DeltaBuild_p03.package"
+         	"DeltaPackages/p02/DeltaBuild_p02.package"
+		"Packages/FullBuild_p04.package"
       ) .
    ], [
       a :Images ;
@@ -136,8 +146,8 @@
 :sp2
    a  :Sims3, :SP ;
    :hasName  "SP2" ;
-   :hasLongname  "The Sims 3 Stuff Pack 2";
-   :hasDefaultInstallDir  "C:/Program Files/Electronic Arts/The Sims 3 Stuff Pack 2";
+   :hasLongname  "The Sims 3 Fast Lane Stuff";
+   :hasDefaultInstallDir  "Electronic Arts/The Sims 3 Fast Lane Stuff";
    :hasPriority  4 ;
    :hasRGVersion  4 ;
    :isSuppressed  "false" ;
@@ -145,9 +155,10 @@
       a :Objects ;
       :in "GameData/Shared" ;
       :packages (
-         "DeltaPackages/p03/DeltaBuild_p03.package"
-         "DeltaPackages/p02/DeltaBuild_p02.package"
-		 "Packages/FullBuild_p05.package"
+         	"DeltaPackages/p04/DeltaBuild_p04.package"
+         	"DeltaPackages/p03/DeltaBuild_p03.package"
+         	"DeltaPackages/p02/DeltaBuild_p02.package"
+		"Packages/FullBuild_p05.package"
       ) .
    ], [
       a :Images ;
