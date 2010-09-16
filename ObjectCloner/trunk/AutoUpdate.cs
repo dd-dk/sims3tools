@@ -133,7 +133,7 @@ namespace AutoUpdate
 
         public static void Daily()
         {
-#if DEBUG
+#if DEBUGUPDATE
             GetUpdate(true);
 #else
             if ((pgmSettings.AutoUpdateChoice == 1)
