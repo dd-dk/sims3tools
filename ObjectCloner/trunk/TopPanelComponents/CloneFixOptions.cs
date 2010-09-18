@@ -47,6 +47,7 @@ namespace ObjectCloner.TopPanelComponents
             this.allow32bitIIDs = allow32bitIIDs;
             tbUniqueName.Enabled = ckbRenumber.Checked;
             ckb32bitIIDs.Enabled = ckbRenumber.Checked && allow32bitIIDs;
+            ckbRenumber.Checked = mustClone;
 
             form.AcceptButton = btnStart;
             form.CancelButton = btnCancel;
