@@ -411,7 +411,6 @@
       <Link>Helpers\s3pe_VPXYResourceEditor.helper</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="app.config" />
     <None Include="Resources\s3pe.ico" />
     <Content Include="s3peUpdate.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

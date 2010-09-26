@@ -412,5 +412,41 @@ namespace S3PIDemoFE.Properties {
                 this["AULastIgnoredVsn"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1, -1")]
+        public global::System.Drawing.Point PersistentLocation {
+            get {
+                return ((global::System.Drawing.Point)(this["PersistentLocation"]));
+            }
+            set {
+                this["PersistentLocation"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1, -1")]
+        public global::System.Drawing.Size GridSize {
+            get {
+                return ((global::System.Drawing.Size)(this["GridSize"]));
+            }
+            set {
+                this["GridSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1, -1")]
+        public global::System.Drawing.Point GridLocation {
+            get {
+                return ((global::System.Drawing.Point)(this["GridLocation"]));
+            }
+            set {
+                this["GridLocation"] = value;
+            }
+        }
     }
 }

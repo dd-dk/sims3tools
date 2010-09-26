@@ -28,29 +28,56 @@ namespace S3PIDemoFE
 {
     public partial class NewGridForm : Form
     {
+        static Size size = new Size();
+
+        bool main = false;
+        bool ignoreResize = false;
+
         public NewGridForm()
         {
+            ignoreResize = true;
             InitializeComponent();
+            ignoreResize = false;
             this.Icon = ((System.Drawing.Icon)(new ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
             splitContainer1.Panel1Collapsed = true;
-
-            int h = 4 * Application.OpenForms[0].ClientSize.Height / 5;
-            int w = 4 * Application.OpenForms[0].ClientSize.Width / 5;
-            this.ClientSize = new Size(w, h);
         }
 
         private NewGridForm(bool main)
             : this()
         {
+            this.main = main;
             flpMainButtons.Visible = main;
             btnClose.Visible = !main;
             if (main)
             {
                 this.AcceptButton = btnOK;
                 this.CancelButton = btnCancel;
+                //this.StartPosition = FormStartPosition.CenterParent;
+                //Because WindowsDefaultLocation is so dumb, it's distracting to start centred then cascade.
+                //Until a better method comes along, always cascade.
+                this.StartPosition = FormStartPosition.WindowsDefaultLocation;
+                size = S3PIDemoFE.Properties.Settings.Default.GridSize;
+                if (size.Width == -1 && size.Height == -1)
+                    size = new Size(DefaultSize.Width, DefaultSize.Height);
             }
             else
+            {
                 this.AcceptButton = this.CancelButton = btnClose;
+                this.StartPosition = FormStartPosition.WindowsDefaultLocation;
+            }
+            Size = new Size(size.Width, size.Height);
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            if (!ignoreResize) size = new Size(Width, Height);
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+            if (main) S3PIDemoFE.Properties.Settings.Default.GridSize = size;
         }
 
         public NewGridForm(AApiVersionedFields field, bool main) : this(main) { FieldList = null; s3PIPropertyGrid1.s3piObject = field; }

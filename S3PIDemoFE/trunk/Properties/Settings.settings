@@ -101,5 +101,14 @@
     <Setting Name="AULastIgnoredVsn" Type="System.String" Scope="User">
       <Value Profile="(Default)">1007-01-0000</Value>
     </Setting>
+    <Setting Name="PersistentLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">-1, -1</Value>
+    </Setting>
+    <Setting Name="GridSize" Type="System.Drawing.Size" Scope="User">
+      <Value Profile="(Default)">-1, -1</Value>
+    </Setting>
+    <Setting Name="GridLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">-1, -1</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

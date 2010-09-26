@@ -105,6 +105,15 @@ namespace S3PIDemoFE
             if (w == -1) w = 4 * System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Width / 5;
             this.ClientSize = new Size(w, h);
 
+            Point xy = S3PIDemoFE.Properties.Settings.Default.PersistentLocation;
+            if (xy.X == -1 && xy.Y == -1)
+                this.StartPosition = FormStartPosition.CenterScreen;
+            else
+            {
+                this.StartPosition = FormStartPosition.Manual;
+                this.Location = xy;
+            }
+
             FormWindowState s =
                 Enum.IsDefined(typeof(FormWindowState), S3PIDemoFE.Properties.Settings.Default.FormWindowState)
                 ? (FormWindowState)S3PIDemoFE.Properties.Settings.Default.FormWindowState
@@ -124,11 +133,13 @@ namespace S3PIDemoFE
         {
             if (this.WindowState == FormWindowState.Normal)
             {
+                S3PIDemoFE.Properties.Settings.Default.PersistentLocation = this.Location;
                 S3PIDemoFE.Properties.Settings.Default.PersistentHeight = this.ClientSize.Height;
                 S3PIDemoFE.Properties.Settings.Default.PersistentWidth = this.ClientSize.Width;
             }
             else
             {
+                S3PIDemoFE.Properties.Settings.Default.PersistentLocation = new Point(-1, -1);
                 S3PIDemoFE.Properties.Settings.Default.PersistentHeight = -1;
                 S3PIDemoFE.Properties.Settings.Default.PersistentWidth = -1;
             }
