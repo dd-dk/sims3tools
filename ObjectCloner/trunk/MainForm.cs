@@ -496,6 +496,15 @@ namespace ObjectCloner
             if (w == -1) w = 4 * System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Width / 5;
             this.Width = w;
 
+            Point xy = ObjectCloner.Properties.Settings.Default.PersistentLocation;
+            if (xy.X == -1 && xy.Y == -1)
+                this.StartPosition = FormStartPosition.CenterScreen;
+            else
+            {
+                this.StartPosition = FormStartPosition.Manual;
+                this.Location = xy;
+            }
+
             w = ObjectCloner.Properties.Settings.Default.Splitter1Width;
             if (w > 0 && w < 100)
                 splitContainer1.SplitterDistance = this.Width * w / 100;
@@ -520,6 +529,7 @@ namespace ObjectCloner
 
             objectChooser.ObjectChooser_SaveSettings();
 
+            ObjectCloner.Properties.Settings.Default.PersistentLocation = this.WindowState == FormWindowState.Normal ? this.Location : new Point(-1, -1);
             ObjectCloner.Properties.Settings.Default.PersistentHeight = this.WindowState == FormWindowState.Normal ? this.Height : -1;
             ObjectCloner.Properties.Settings.Default.PersistentWidth = this.WindowState == FormWindowState.Normal ? this.Width : -1;
             ObjectCloner.Properties.Settings.Default.Splitter1Width = splitContainer1.SplitterDistance * 100 / this.Width;
@@ -1236,12 +1246,13 @@ namespace ObjectCloner
             List<string> excludeFields = new List<string>(new string[] {
                 "AsBytes", "Stream", "Value", "Count", "IsReadOnly",
                 "Version", "Materials", "CommonBlock",
+                "Unknown8", "Unknown9", "Unknown10", //Flags
                 "MTDoors",  "Hash", "TGIBlocks",
             });
             foreach (string field in fields)
             {
                 if (field.StartsWith("Unknown")) { }
-                else if (field.StartsWith("MaterialGrouping")) { }
+                else /**/if (field.StartsWith("MaterialGrouping")) { }
                 else if (field.EndsWith("Flags")) { }
                 else if (field.Contains("Index")) { }
                 else if (field.EndsWith("Reader")) { }
@@ -1254,10 +1265,10 @@ namespace ObjectCloner
             {
                 if (detailsFieldMapReverse.ContainsKey(catlg.GetType().Name + ":" + field))
                     CreateField(tlpObjectDetail, types[field], detailsFieldMapReverse[catlg.GetType().Name + ":" + field], true);
-                else if ((catlg as AResource).ContentFields.Contains("TGIBlocks") && field.EndsWith("Index"))
+                else if ((catlg as AResource).ContentFields.Contains("TGIBlocks") && field.Contains("Index"))
                     CreateField(tlpObjectDetail, field);
                 else
-                    CreateField(tlpObjectDetail, types[field], field);
+                    CreateField(tlpObjectDetail, types[field], field, true);
             }
         }
 
@@ -1425,6 +1436,26 @@ namespace ObjectCloner
                 tlp.Controls.Add(tb, 1, tlp.RowCount - 2);
             }
         }
+        void tb_Validating(object sender, CancelEventArgs e)
+        {
+            TextBox tb = sender as TextBox;
+            Type t = tb.Tag as Type;
+            if (t == null) return;
+
+            try { object val = tb_Value(tb, t); }
+            catch { e.Cancel = true; }
+
+            if (e.Cancel) tb.SelectAll();
+        }
+        object tb_Value(TextBox tb, Type t)
+        {
+            if (t == typeof(Single) || t == typeof(Boolean) || !tb.Text.StartsWith("0x"))
+                return Convert.ChangeType(tb.Text, t);
+            else
+                return Convert.ChangeType(UInt64.Parse(tb.Text.Substring(2), System.Globalization.NumberStyles.HexNumber), t);
+        }
+        object etb_Value(CustomControls.EnumTextBox etb) { return Enum.ToObject(etb.EnumType, etb.Value); }
+        object tr_Value(CustomControls.TopicRatings tr) { return tr.Value; }
 
         void CreateField(TableLayoutPanel tlp, string name)
         {
@@ -1446,38 +1477,9 @@ namespace ObjectCloner
             tbc.Margin = new Padding(3, 0 , 0, 0);
             tbc.ShowEdit = false;
             tbc.TabIndex = tlp.RowCount * 2 + 1;
+            tbc.Tag = true;
             tbc.Width = (int)tlp.ColumnStyles[1].Width;
             tlp.Controls.Add(tbc, 1, tlp.RowCount - 2);
-        }
-
-        void tb_Validating(object sender, CancelEventArgs e)
-        {
-            TextBox tb = sender as TextBox;
-            Type t = tb.Tag as Type;
-            if (t == null) return;
-
-            try { object val = tb_Value(tb, t); }
-            catch { e.Cancel = true; }
-
-            if (e.Cancel) tb.SelectAll();
-        }
-
-        object tb_Value(TextBox tb, Type t)
-        {
-            if (t == typeof(Single) || t == typeof(Boolean) || !tb.Text.StartsWith("0x"))
-                return Convert.ChangeType(tb.Text, t);
-            else
-                return Convert.ChangeType(UInt64.Parse(tb.Text.Substring(2), System.Globalization.NumberStyles.HexNumber), t);
-        }
-
-        object etb_Value(CustomControls.EnumTextBox etb)
-        {
-            return Enum.ToObject(etb.EnumType, etb.Value);
-        }
-
-        object tr_Value(CustomControls.TopicRatings tr)
-        {
-            return tr.Value;
         }
 
         void CreateField(flagField ff, string name, CheckBox[] acbk, int i)
@@ -1492,6 +1494,11 @@ namespace ObjectCloner
             acbk[i].TabIndex = ff.tlp.RowCount;
         }
 
+        void IterateTLP(TableLayoutPanel tlp, Action<Label, Control> action)
+        {
+            for (int i = 1; i < tlp.RowCount - 1; i++)
+                action((Label)tlp.GetControlFromPosition(0, i), tlp.GetControlFromPosition(1, i));
+        }
 
         void ClearTabs()
         {
@@ -1526,21 +1533,20 @@ namespace ObjectCloner
             tbPrice.Text = "";
             tbProductStatus.Text = "";
         }
-        void clearDetails() { clearTLP(tlpObjectDetail); }
+        void clearDetails() { IterateTLP(tlpObjectDetail, clearTLP); }
         void clearFlags()
         {
             foreach (flagField ff in flagFields)
                 foreach (Control c in ff.tlp.Controls)
                     if (c is CheckBox) ((CheckBox)c).Checked = false;
         }
-        void clearOther() { clearTLP(tlpOther); }
-        void clearTLP(TableLayoutPanel tlp)
+        void clearOther() { IterateTLP(tlpOther, clearTLP); }
+        void clearTLP(Label l, Control c)
         {
-            foreach (Control c in tlp.Controls)
-                if (c is TextBox) ((TextBox)c).Text = "";
-                else if (c is CustomControls.EnumTextBox) (c as CustomControls.EnumTextBox).Clear();
-                else if (c is CustomControls.TopicRatings) (c as CustomControls.TopicRatings).Clear();
-                else if (c is TGIBlockCombo) ((TGIBlockCombo)c).SelectedIndex = -1;
+            if (c is TextBox) ((TextBox)c).Text = "";
+            else if (c is CustomControls.EnumTextBox) (c as CustomControls.EnumTextBox).Clear();
+            else if (c is CustomControls.TopicRatings) (c as CustomControls.TopicRatings).Clear();
+            else if (c is TGIBlockCombo) ((TGIBlockCombo)c).SelectedIndex = -1;
         }
 
         void FillTabs(Item item)
@@ -1588,7 +1594,7 @@ namespace ObjectCloner
             tbPrice.Text = common["Price"].Value + "";
             tbProductStatus.Text = "0x" + ((byte)common["BuildBuyProductStatusFlags"].Value).ToString("X2");
         }
-        void fillDetails(Item objd) { fillTLP(objd, tlpObjectDetail, detailsFieldMap); }
+        void fillDetails(Item objd) { IterateTLP(tlpObjectDetail, (l, c) => fillControl(objd, l, c, detailsFieldMap)); }
         void fillFlags(Item objd)
         {
             foreach (flagField ff in flagFields)
@@ -1602,20 +1608,12 @@ namespace ObjectCloner
                 }
             }
         }
-        void fillOther(Item objd) { fillTLP(objd, tlpOther, otherFieldMap); }
-        void fillTLP(Item objd, TableLayoutPanel tlp, Dictionary<string, string> fieldMap)
-        {
-            for (int i = 1; i < tlp.RowCount - 1; i++)
-                fillControl(objd, (Label)tlp.GetControlFromPosition(0, i), tlp.GetControlFromPosition(1, i), fieldMap);
-        }
-
+        void fillOther(Item objd) { IterateTLP(tlpOther, (l, c) => fillControl(objd, l, c, otherFieldMap)); }
         void fillControl(Item objd, Label lb, Control c, Dictionary<string, string> fieldMap)
         {
-            TypedValue tv;
-            if (fieldMap.ContainsKey(objd.Resource.GetType().Name + ":" + lb.Text))
-                tv = objd.Resource[fieldMap[objd.Resource.GetType().Name + ":" + lb.Text]];
-            else
-                tv = objd.Resource[lb.Text];
+            string field = fieldMap.ContainsKey(objd.Resource.GetType().Name + ":" + lb.Text) ? fieldMap[objd.Resource.GetType().Name + ":" + lb.Text] : lb.Text;
+            if (!objd.Resource.ContentFields.Contains(field)) return;
+            TypedValue tv = objd.Resource[field];
 
             if (c is CustomControls.EnumTextBox)
             {
@@ -1690,7 +1688,7 @@ namespace ObjectCloner
             tbCatlgName.BackColor = tbPrice.BackColor;
             tbCatlgDesc.BackColor = tbPrice.BackColor;
         }
-        void tabEnableDetails(bool enabled) { EnableTLP(tlpObjectDetail, enabled); }
+        void tabEnableDetails(bool enabled) { IterateTLP(tlpObjectDetail, (l, c) => { if (c.Tag != null || c is CheckBox) c.Enabled = enabled; }); }
         void tabEnableFlags(bool enabled)
         {
             foreach (flagField ff in flagFields)
@@ -1702,15 +1700,7 @@ namespace ObjectCloner
                 }
             }
         }
-        void tabEnableOther(bool enabled) { EnableTLP(tlpOther, enabled); }
-        void EnableTLP(TableLayoutPanel tlp, bool enabled)
-        {
-            for (int i = 1; i < tlp.RowCount - 1; i++)
-            {
-                Control c = tlp.GetControlFromPosition(1, i);
-                if (c.Tag != null || c is CheckBox) c.Enabled = enabled;
-            }
-        }
+        void tabEnableOther(bool enabled) { IterateTLP(tlpOther, (l, c) => { if (c.Tag != null || c is CheckBox) c.Enabled = enabled; }); }
 
         ulong getFlags(AApiVersionedFields owner, string field)
         {

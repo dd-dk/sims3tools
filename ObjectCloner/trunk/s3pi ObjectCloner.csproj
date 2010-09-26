@@ -93,6 +93,12 @@
     <Compile Include="CustomControls\EnumTextBox.Designer.cs">
       <DependentUpon>EnumTextBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="CustomControls\TopicRating.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CustomControls\TopicRating.Designer.cs">
+      <DependentUpon>TopicRating.cs</DependentUpon>
+    </Compile>
     <Compile Include="CustomControls\TopicRatings.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -184,6 +190,9 @@
   <ItemGroup>
     <EmbeddedResource Include="CustomControls\EnumTextBox.resx">
       <DependentUpon>EnumTextBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomControls\TopicRating.resx">
+      <DependentUpon>TopicRating.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CustomControls\TopicRatings.resx">
       <DependentUpon>TopicRatings.cs</DependentUpon>
