@@ -29,49 +29,39 @@ namespace ObjectCloner.CustomControls
 {
     public partial class TopicRatings : UserControl
     {
-        ObjectCatalogResource.TopicRating[] topicRatings = null;
-        List<EnumTextBox> letb = null;
-        List<TextBox> ltb = null;
         bool readOnly = false;
 
         public TopicRatings()
         {
             InitializeComponent();
-            letb = new List<EnumTextBox>(new EnumTextBox[] { etbTopic0, etbTopic1, etbTopic2, etbTopic3, etbTopic4, });
-            ltb = new List<TextBox>(new TextBox[] { tbRating0, tbRating1, tbRating2, tbRating3, tbRating4, });
-            for (int i = 0; i < letb.Count; i++)
-                letb[i].EnumType = typeof(ObjectCatalogResource.TopicCategory);
             Clear();
         }
 
-        public void Clear()
+        void IterateTLP(Action<TopicRating> tr)
         {
-            Value = new ObjectCatalogResource(0, null).TopicRatings;
-            for (int i = 0; i < topicRatings.Length; i++) letb[i].ReadOnly = ltb[i].ReadOnly = true;
+            for (int i = 0; i < tlpTopicRatings.RowCount - 1; i++)
+                tr((TopicRating)tlpTopicRatings.GetControlFromPosition(1, i));
         }
 
-        public void Enable(bool enabled)
-        {
-            foreach (Control c in letb) c.Enabled = enabled;
-            foreach (Control c in ltb) c.Enabled = enabled;
-        }
+        public void Clear() { IterateTLP(x => x.Clear()); }
+
+        public void Enable(bool enabled) { IterateTLP(x => x.Enabled = enabled); }
 
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public ObjectCatalogResource.TopicRating[] Value
         {
-            get { return (ObjectCatalogResource.TopicRating[])topicRatings.Clone(); }
+            get
+            {
+                List<ObjectCatalogResource.TopicRating>res = new List<ObjectCatalogResource.TopicRating>();
+                IterateTLP(x => res.Add(x.Value));
+                return res.ToArray();
+            }
             set
             {
-                if ((topicRatings != null && AResource.ArrayCompare(topicRatings, value)) || topicRatings == value) return;
-
-                topicRatings = (ObjectCatalogResource.TopicRating[])value.Clone();
-                for (int i = 0; i < topicRatings.Length; i++)
-                {
-                    letb[i].Value = Convert.ToUInt64(topicRatings[i].Topic);
-                    ltb[i].Text = "" + topicRatings[i].Rating;// decimal and allowed to be negative
-                }
-                OnValueChanged(this, EventArgs.Empty);
+                if (AResource.ArrayCompare(Value, value)) return;
+                int i = 0;
+                IterateTLP(x => x.Value = value[i++]);
             }
         }
 
@@ -84,45 +74,8 @@ namespace ObjectCloner.CustomControls
             {
                 if (readOnly = value) return;
                 readOnly = value;
-                for (int i = 0; i < topicRatings.Length; i++)
-                    letb[i].ReadOnly = ltb[i].ReadOnly = readOnly;
+                IterateTLP(x => x.ReadOnly = value);
             }
         }
-
-        private void etbTopic_ValueChanged(object sender, EventArgs e)
-        {
-            int i = letb.IndexOf(sender as EnumTextBox);
-            topicRatings[i].Topic = (ObjectCatalogResource.TopicCategory)letb[i].Value;
-            OnValueChanged(this, EventArgs.Empty);
-        }
-
-        private void tbRating_Validating(object sender, CancelEventArgs e)
-        {
-            TextBox tb = sender as TextBox;
-
-            try { Get_Value(sender as TextBox); }
-            catch { e.Cancel = true; }
-
-            if (e.Cancel) tb.SelectAll();
-        }
-
-        private void tbRating_Validated(object sender, EventArgs e)
-        {
-            TextBox tb = sender as TextBox;
-            int i = ltb.IndexOf(tb);
-            topicRatings[ltb.IndexOf(tb)].Rating = Get_Value(tb);
-            OnValueChanged(this, EventArgs.Empty);
-        }
-
-        int Get_Value(TextBox tb)
-        {
-            if (!tb.Text.StartsWith("0x"))
-                return Int32.Parse(tb.Text);
-            else
-                return Int32.Parse(tb.Text.Substring(2), System.Globalization.NumberStyles.HexNumber);
-        }
-
-        public event EventHandler ValueChanged;
-        protected void OnValueChanged(object sender, EventArgs e) { if (ValueChanged != null)ValueChanged(sender, e); }
     }
 }
