@@ -226,5 +226,17 @@ namespace ObjectCloner.Properties {
                 this["AULastIgnoredVsn"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1, -1")]
+        public global::System.Drawing.Point PersistentLocation {
+            get {
+                return ((global::System.Drawing.Point)(this["PersistentLocation"]));
+            }
+            set {
+                this["PersistentLocation"] = value;
+            }
+        }
     }
 }
