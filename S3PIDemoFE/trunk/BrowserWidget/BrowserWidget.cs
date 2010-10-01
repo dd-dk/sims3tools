@@ -573,6 +573,7 @@ namespace S3PIDemoFE
                 {
                     IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, pkg, rie);
                     if (res == null) continue;
+                    if (!typeof(IDictionary<ulong, string>).IsAssignableFrom(res.GetType())) continue;
                     nameMap.Add(res);
                     nameMapRIEs.Add(rie);
                     res.ResourceChanged += new EventHandler(nameMap_ResourceChanged);
