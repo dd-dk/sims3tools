@@ -103,6 +103,7 @@
             this.bwcmExport = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmToFile = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmToPackage = new System.Windows.Forms.ToolStripMenuItem();
+            this.manageWrappersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.browserWidgetContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -492,9 +493,10 @@
             // settingsToolStripMenuItem
             // 
             this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.externalProgramsToolStripMenuItem,
-            this.organiseBookmarksToolStripMenuItem,
             this.automaticUpdateChecksToolStripMenuItem,
+            this.organiseBookmarksToolStripMenuItem,
+            this.externalProgramsToolStripMenuItem,
+            this.manageWrappersToolStripMenuItem,
             this.toolStripSeparator8,
             this.saveSettingsToolStripMenuItem});
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
@@ -742,6 +744,13 @@
             this.bwcmToPackage.Text = "To &package...";
             this.bwcmToPackage.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
+            // manageWrappersToolStripMenuItem
+            // 
+            this.manageWrappersToolStripMenuItem.Name = "manageWrappersToolStripMenuItem";
+            this.manageWrappersToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.manageWrappersToolStripMenuItem.Text = "Manage &Wrappers...";
+            this.manageWrappersToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
             // MenuBarWidget
             // 
             this.ContextMenuStrip = this.browserWidgetContextMenuStrip;
@@ -832,5 +841,6 @@
         private System.Windows.Forms.ToolStripMenuItem bwcmAsDBC;
         private System.Windows.Forms.ToolStripMenuItem automaticUpdateChecksToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem checkForUpdateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem manageWrappersToolStripMenuItem;
     }
 }

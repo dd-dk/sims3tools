@@ -237,6 +237,9 @@
     <EmbeddedResource Include="Settings\GetNumberDialog.resx">
       <DependentUpon>GetNumberDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Settings\ManageWrappersDialog.resx">
+      <DependentUpon>ManageWrappersDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Settings\OrganiseBookmarksDialog.resx">
       <DependentUpon>OrganiseBookmarksDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -272,6 +275,12 @@
     </Compile>
     <Compile Include="Settings\GetNumberDialog.Designer.cs">
       <DependentUpon>GetNumberDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Settings\ManageWrappersDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Settings\ManageWrappersDialog.Designer.cs">
+      <DependentUpon>ManageWrappersDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings\OrganiseBookmarksDialog.cs">
       <SubType>Form</SubType>

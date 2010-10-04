@@ -448,5 +448,16 @@ namespace S3PIDemoFE.Properties {
                 this["GridLocation"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection DisabledWrappers {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["DisabledWrappers"]));
+            }
+            set {
+                this["DisabledWrappers"] = value;
+            }
+        }
     }
 }

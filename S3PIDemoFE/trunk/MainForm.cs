@@ -42,6 +42,17 @@ namespace S3PIDemoFE
         {
             foreach (string s in unwantedFields) fields.Remove(s);
             fields.Sort(byElementPriority);
+
+            List<KeyValuePair<string, Type>> typeMap = new List<KeyValuePair<string, Type>>(s3pi.WrapperDealer.WrapperDealer.TypeMap);
+            s3pi.WrapperDealer.WrapperDealer.Disabled.Clear();
+            if (S3PIDemoFE.Properties.Settings.Default.DisabledWrappers != null)
+                foreach (var v in S3PIDemoFE.Properties.Settings.Default.DisabledWrappers)
+                {
+                    string[] kv = v.Trim().Split(new char[] { ':', },2);
+                    KeyValuePair<string, Type> kvp = typeMap.Find(x => x.Key == kv[0] && x.Value.FullName == kv[1]);
+                    if (!kvp.Equals(default(KeyValuePair<string, Type>)))
+                        s3pi.WrapperDealer.WrapperDealer.Disabled.Add(kvp);
+                }
         }
         static int byElementPriority(string x, string y)
         {
@@ -146,6 +157,10 @@ namespace S3PIDemoFE
             S3PIDemoFE.Properties.Settings.Default.FormWindowState = (int)this.WindowState;
             S3PIDemoFE.Properties.Settings.Default.Splitter1Position = splitContainer1.SplitterDistance;
             S3PIDemoFE.Properties.Settings.Default.Splitter2Position = splitContainer2.SplitterDistance;
+
+            S3PIDemoFE.Properties.Settings.Default.DisabledWrappers = new System.Collections.Specialized.StringCollection();
+            foreach (var kvp in s3pi.WrapperDealer.WrapperDealer.Disabled)
+                S3PIDemoFE.Properties.Settings.Default.DisabledWrappers.Add(kvp.Key + ":" + kvp.Value.FullName + "\n");
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -1093,13 +1108,26 @@ namespace S3PIDemoFE
                 Application.DoEvents();
                 switch (mn.mn)
                 {
-                    case MenuBarWidget.MB.MBS_externals: settingsExternalPrograms(); break;
-                    case MenuBarWidget.MB.MBS_bookmarks: settingsOrganiseBookmarks(); break;
                     case MenuBarWidget.MB.MBS_updates: settingsAutomaticUpdates(); break;
+                    case MenuBarWidget.MB.MBS_bookmarks: settingsOrganiseBookmarks(); break;
+                    case MenuBarWidget.MB.MBS_externals: settingsExternalPrograms(); break;
+                    case MenuBarWidget.MB.MBS_wrappers: settingsManageWrappers(); break;
                     case MenuBarWidget.MB.MBS_saveSettings: saveSettings(); break;
                 }
             }
             finally { this.Enabled = true; }
+        }
+
+        private void settingsAutomaticUpdates()
+        {
+            AutoUpdate.Checker.AutoUpdateChoice = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_updates);
+        }
+
+        private void settingsOrganiseBookmarks()
+        {
+            Settings.OrganiseBookmarksDialog obd = new S3PIDemoFE.Settings.OrganiseBookmarksDialog();
+            obd.ShowDialog();
+            menuBarWidget1.UpdateBookmarks();
         }
 
         private void settingsExternalPrograms()
@@ -1176,16 +1204,12 @@ namespace S3PIDemoFE
             if (browserWidget1.SelectedResource != null && resource != null) setExternalButtons();
         }
 
-        private void settingsOrganiseBookmarks()
+        private void settingsManageWrappers()
         {
-            Settings.OrganiseBookmarksDialog obd = new S3PIDemoFE.Settings.OrganiseBookmarksDialog();
-            obd.ShowDialog();
-            menuBarWidget1.UpdateBookmarks();
-        }
-
-        private void settingsAutomaticUpdates()
-        {
-            AutoUpdate.Checker.AutoUpdateChoice = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_updates);
+            new Settings.ManageWrappersDialog().ShowDialog();
+            IResourceIndexEntry rie = browserWidget1.SelectedResource;
+            browserWidget1.SelectedResource = null;
+            browserWidget1.SelectedResource = rie;
         }
 
         private void saveSettings()
