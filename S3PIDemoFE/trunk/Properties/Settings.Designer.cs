@@ -459,5 +459,17 @@ namespace S3PIDemoFE.Properties {
                 this["DisabledWrappers"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool EnableDDSPreview {
+            get {
+                return ((bool)(this["EnableDDSPreview"]));
+            }
+            set {
+                this["EnableDDSPreview"] = value;
+            }
+        }
     }
 }

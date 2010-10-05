@@ -73,9 +73,10 @@
             this.fNVHashToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.externalProgramsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.organiseBookmarksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.automaticUpdateChecksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.organiseBookmarksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.externalProgramsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.manageWrappersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.saveSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -103,7 +104,7 @@
             this.bwcmExport = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmToFile = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmToPackage = new System.Windows.Forms.ToolStripMenuItem();
-            this.manageWrappersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.enableDDSPreviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.browserWidgetContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -497,6 +498,7 @@
             this.organiseBookmarksToolStripMenuItem,
             this.externalProgramsToolStripMenuItem,
             this.manageWrappersToolStripMenuItem,
+            this.enableDDSPreviewToolStripMenuItem,
             this.toolStripSeparator8,
             this.saveSettingsToolStripMenuItem});
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
@@ -504,12 +506,12 @@
             this.settingsToolStripMenuItem.Text = "&Settings";
             this.settingsToolStripMenuItem.DropDownOpening += new System.EventHandler(this.tsMD_DropDownOpening);
             // 
-            // externalProgramsToolStripMenuItem
+            // automaticUpdateChecksToolStripMenuItem
             // 
-            this.externalProgramsToolStripMenuItem.Name = "externalProgramsToolStripMenuItem";
-            this.externalProgramsToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
-            this.externalProgramsToolStripMenuItem.Text = "External &Programs...";
-            this.externalProgramsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            this.automaticUpdateChecksToolStripMenuItem.Name = "automaticUpdateChecksToolStripMenuItem";
+            this.automaticUpdateChecksToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.automaticUpdateChecksToolStripMenuItem.Text = "Automatic &Update Checks";
+            this.automaticUpdateChecksToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // organiseBookmarksToolStripMenuItem
             // 
@@ -518,12 +520,19 @@
             this.organiseBookmarksToolStripMenuItem.Text = "Organise Boo&kmarks...";
             this.organiseBookmarksToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
-            // automaticUpdateChecksToolStripMenuItem
+            // externalProgramsToolStripMenuItem
             // 
-            this.automaticUpdateChecksToolStripMenuItem.Name = "automaticUpdateChecksToolStripMenuItem";
-            this.automaticUpdateChecksToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
-            this.automaticUpdateChecksToolStripMenuItem.Text = "Automatic &Update Checks";
-            this.automaticUpdateChecksToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            this.externalProgramsToolStripMenuItem.Name = "externalProgramsToolStripMenuItem";
+            this.externalProgramsToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.externalProgramsToolStripMenuItem.Text = "External &Programs...";
+            this.externalProgramsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
+            // manageWrappersToolStripMenuItem
+            // 
+            this.manageWrappersToolStripMenuItem.Name = "manageWrappersToolStripMenuItem";
+            this.manageWrappersToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.manageWrappersToolStripMenuItem.Text = "Manage &Wrappers...";
+            this.manageWrappersToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // toolStripSeparator8
             // 
@@ -744,12 +753,12 @@
             this.bwcmToPackage.Text = "To &package...";
             this.bwcmToPackage.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
-            // manageWrappersToolStripMenuItem
+            // enableDDSPreviewToolStripMenuItem
             // 
-            this.manageWrappersToolStripMenuItem.Name = "manageWrappersToolStripMenuItem";
-            this.manageWrappersToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
-            this.manageWrappersToolStripMenuItem.Text = "Manage &Wrappers...";
-            this.manageWrappersToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            this.enableDDSPreviewToolStripMenuItem.Name = "enableDDSPreviewToolStripMenuItem";
+            this.enableDDSPreviewToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.enableDDSPreviewToolStripMenuItem.Text = "Enable &DDS Preview";
+            this.enableDDSPreviewToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // MenuBarWidget
             // 
@@ -842,5 +851,6 @@
         private System.Windows.Forms.ToolStripMenuItem automaticUpdateChecksToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem checkForUpdateToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem manageWrappersToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem enableDDSPreviewToolStripMenuItem;
     }
 }

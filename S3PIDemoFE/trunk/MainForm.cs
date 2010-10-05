@@ -1112,6 +1112,7 @@ namespace S3PIDemoFE
                     case MenuBarWidget.MB.MBS_bookmarks: settingsOrganiseBookmarks(); break;
                     case MenuBarWidget.MB.MBS_externals: settingsExternalPrograms(); break;
                     case MenuBarWidget.MB.MBS_wrappers: settingsManageWrappers(); break;
+                    case MenuBarWidget.MB.MBS_previewDDS: settingsEnableDDSPreview(); break;
                     case MenuBarWidget.MB.MBS_saveSettings: saveSettings(); break;
                 }
             }
@@ -1212,6 +1213,26 @@ namespace S3PIDemoFE
             browserWidget1.SelectedResource = rie;
         }
 
+        bool ddsEnableWarningIssued = false;
+        private void settingsEnableDDSPreview()
+        {
+            if (!S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview && !ddsEnableWarningIssued)
+            {
+                ddsEnableWarningIssued = true;
+                if (CopyableMessageBox.Show("The DDS Preview feature is in early testing.\n" + "Please save your work frequently if you enable it.\n" +
+                    "\nClick OK to continue or Cancel to leave the feature disabled.", "Enable DDS Preview",
+                    CopyableMessageBoxButtons.OKCancel, CopyableMessageBoxIcon.Warning) != 0) return;
+            }
+            S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_previewDDS);
+            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_previewDDS, S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview);
+            if (S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview)
+            {
+                IResourceIndexEntry rie = browserWidget1.SelectedResource;
+                browserWidget1.SelectedResource = null;
+                browserWidget1.SelectedResource = rie;
+            }
+        }
+
         private void saveSettings()
         {
             OnSaveSettings(this, new EventArgs());
@@ -1259,7 +1280,9 @@ namespace S3PIDemoFE
                 "This program comes with ABSOLUTELY NO WARRANTY; for details see Help->Warranty.\n" +
                 "\n" +
                 "This is free software, and you are welcome to redistribute it\n" +
-                "under certain conditions; see Help->Licence for details.\n";
+                "under certain conditions; see Help->Licence for details.\n" +
+                "\n" +
+                "Please see Acknowledgements.txt and Acknowledgements-s3pe.txt for details of libraries used.\n";
             CopyableMessageBox.Show(String.Format(
                 "{0}\n"+
                 "Front-end Distribution: {1}\n" +
@@ -1352,6 +1375,7 @@ namespace S3PIDemoFE
             }
         }
 
+        bool ddsFailedWarningIssued = false;
         private void browserWidget1_SelectedResourceChanged(object sender, BrowserWidget.ResourceChangedEventArgs e)
         {
             resourceName = e.name;
@@ -1379,7 +1403,9 @@ namespace S3PIDemoFE
             {
                 if (!controlPanel1.HexOnly)
                 {
-                    if (resource.ContentFields.Contains("Value"))
+                    if (browserWidget1.SelectedResource["ResourceType"] == "0x00B2D882")
+                        controlPanel1.ValueEnabled = S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview;
+                    else if (resource.ContentFields.Contains("Value"))
                     {
                         Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
                         controlPanel1.ValueEnabled = typeof(String).IsAssignableFrom(t) || typeof(Image).IsAssignableFrom(t);
@@ -1488,7 +1514,7 @@ namespace S3PIDemoFE
         private void controlPanel1_AutoChanged(object sender, EventArgs e)
         {
             pnAuto.SuspendLayout();
-            pnAuto.Controls.Clear();
+            pnAutoCleanUp();
             if (resException != null)
             {
                 IResourceIndexEntry rie = browserWidget1.SelectedResource;
@@ -1525,19 +1551,21 @@ namespace S3PIDemoFE
                 {
                     Control c = getValueControl();
                     if (c != null)
-                    {
-                        if (c.GetType().Equals(typeof(RichTextBox)))
-                        {
-                            c.Dock = DockStyle.Fill;
-                        }
-                        else if (c.GetType().Equals(typeof(PictureBox)))
-                        {
-                        }
                         pnAuto.Controls.Add(c);
-                    }
                 }
             }
             pnAuto.ResumeLayout();
+        }
+
+        private void pnAutoCleanUp()
+        {
+            if (pnAuto.Controls.Count == 0) return;
+
+            foreach (Control c in pnAuto.Controls)
+                c.Dispose();
+            pnAuto.Controls.Clear();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
         private void controlPanel1_HexClick(object sender, EventArgs e)
@@ -1602,28 +1630,55 @@ namespace S3PIDemoFE
             }
             finally { this.Enabled = true; }
         }
+
         Control getValueControl()
         {
-            if (!AApiVersionedFields.GetContentFields(0, resource.GetType()).Contains("Value")) return null;
-            Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
-            if (typeof(String).IsAssignableFrom(t))
+            Control res = null;
+            if (browserWidget1.SelectedResource["ResourceType"] == "0x00B2D882" && S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview)
             {
-                RichTextBox rtb = new RichTextBox();
-                rtb.Text = "" + resource["Value"];
-                rtb.Font = new Font(FontFamily.GenericMonospace, 8);
-                rtb.Size = new Size(this.Width - (this.Width / 5), this.Height - (this.Height / 5));
-                rtb.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
-                rtb.ReadOnly = true;
-                return rtb;
+                try
+                {
+                    DDSWidget.DDSWidget dds = new DDSWidget.DDSWidget();
+                    dds.DDS = resource.Stream;
+                    res = dds;
+                }
+                catch(DDSWidget.DDSException e)
+                {
+                    if (!ddsFailedWarningIssued)
+                    {
+                        ddsFailedWarningIssued = true;
+                        ddsEnableWarningIssued = false;
+                        CopyableMessageBox.IssueException(e, "DDS Preview failed:\n" + e.Message + "\n\nDDS Preview has been disabled\n", "Cannot preview DDS");
+                        S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview = false;
+                        menuBarWidget1.Checked(MenuBarWidget.MB.MBS_previewDDS, S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview);
+                    }
+                    return null;
+                }
             }
-            else if (typeof(Image).IsAssignableFrom(t))
+            else
             {
-                PictureBox pb = new PictureBox();
-                pb.Image = (Image)resource["Value"].Value;
-                pb.Size = pb.Image.Size;
-                return pb;
+                if (!AApiVersionedFields.GetContentFields(0, resource.GetType()).Contains("Value")) return null;
+                Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
+                if (typeof(String).IsAssignableFrom(t))
+                {
+                    RichTextBox rtb = new RichTextBox();
+                    rtb.Text = "" + resource["Value"];
+                    rtb.Font = new Font(FontFamily.GenericMonospace, 8);
+                    rtb.Size = new Size(this.Width - (this.Width / 5), this.Height - (this.Height / 5));
+                    rtb.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+                    rtb.ReadOnly = true;
+                    res = rtb;
+                }
+                else if (typeof(Image).IsAssignableFrom(t))
+                {
+                    PictureBox pb = new PictureBox();
+                    pb.Image = (Image)resource["Value"].Value;
+                    pb.Size = pb.Image.Size;
+                    res = pb;
+                }
             }
-            return null;
+            if (res != null) res.Dock = DockStyle.Fill;
+            return res;
         }
 
         private void controlPanel1_GridClick(object sender, EventArgs e)

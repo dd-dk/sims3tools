@@ -55,7 +55,7 @@ namespace S3PIDemoFE
                 fNVHashToolStripMenuItem, searchToolStripMenuItem,
                 //Settings
                 automaticUpdateChecksToolStripMenuItem, organiseBookmarksToolStripMenuItem, externalProgramsToolStripMenuItem,
-                manageWrappersToolStripMenuItem, saveSettingsToolStripMenuItem,
+                manageWrappersToolStripMenuItem, enableDDSPreviewToolStripMenuItem, saveSettingsToolStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, checkForUpdateToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
@@ -69,6 +69,8 @@ namespace S3PIDemoFE
             UpdateBookmarks();
             AutoUpdate.Checker.AutoUpdateChoice_Changed += new EventHandler(Checker_AutoUpdateChoice_Changed);
             Checker_AutoUpdateChoice_Changed(null, null);
+
+            Checked(MenuBarWidget.MB.MBS_previewDDS, S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview);
         }
 
         void Checker_AutoUpdateChoice_Changed(object sender, EventArgs e)
@@ -95,7 +97,7 @@ namespace S3PIDemoFE
             MBR_compressed, MBR_isdeleted, MBR_details,
             MBR_importResources, MBR_importPackages, MBR_importAsDBC, MBR_exportResources, MBR_exportToPackage,
             MBT_fnvHash, MBT_search,
-            MBS_updates, MBS_bookmarks, MBS_externals, MBS_wrappers, MBS_saveSettings,
+            MBS_updates, MBS_bookmarks, MBS_externals, MBS_wrappers, MBS_previewDDS, MBS_saveSettings,
             MBH_contents, MBH_about, MBH_update, MBH_warranty, MBH_licence,
         }
 
