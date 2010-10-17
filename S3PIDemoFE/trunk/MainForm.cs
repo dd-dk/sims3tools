@@ -1397,32 +1397,18 @@ namespace S3PIDemoFE
 
             resourceIsDirty = controlPanel1.CommitEnabled = false;
 
-            controlPanel1.HexEnabled = (resource != null);
             controlPanel1_AutoChanged(null, null);
             if (resource != null)
             {
-                if (!controlPanel1.HexOnly)
-                {
-                    if (browserWidget1.SelectedResource["ResourceType"] == "0x00B2D882")
-                        controlPanel1.ValueEnabled = S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview;
-                    else if (resource.ContentFields.Contains("Value"))
-                    {
-                        Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
-                        controlPanel1.ValueEnabled = typeof(String).IsAssignableFrom(t) || typeof(Image).IsAssignableFrom(t);
-                    }
-                    else controlPanel1.ValueEnabled = false;
-
-                    List<string> lf = resource.ContentFields;
-                    foreach (string f in (new string[] { "Stream", "AsBytes", "Value" }))
-                        if (lf.Contains(f)) lf.Remove(f);
-                    controlPanel1.GridEnabled = lf.Count > 0;
-                }
+                controlPanel1.HexEnabled = true;
+                controlPanel1.ValueEnabled = hasValueContentField();
+                controlPanel1.GridEnabled = resource.ContentFields.Find(x => !x.Equals("AsBytes") && !x.Equals("Stream") && !x.Equals("Value")) != null;
                 setExternalButtons();
             }
             else
             {
                 helpers = null;
-                controlPanel1.ValueEnabled = controlPanel1.GridEnabled =
+                controlPanel1.HexEnabled = controlPanel1.ValueEnabled = controlPanel1.GridEnabled =
                     controlPanel1.Helper1Enabled = controlPanel1.Helper2Enabled = controlPanel1.HexEditEnabled = false;
             }
 
@@ -1438,6 +1424,18 @@ namespace S3PIDemoFE
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_details, resource != null);
 
             resourceFilterWidget1.IndexEntry = browserWidget1.SelectedResource;
+        }
+
+        bool hasValueContentField()
+        {
+            if (browserWidget1.SelectedResource["ResourceType"] == "0x00B2D882" && S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview)
+                return true;
+            //if (!AApiVersionedFields.GetContentFields(0, resource.GetType()).Contains("Value")) return false;
+            //-prefer to use the per-resource ContentFields property:
+            if (!resource.ContentFields.Contains("Value")) return false;
+            Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
+            if (typeof(String).IsAssignableFrom(t) || typeof(Image).IsAssignableFrom(t)) return true;
+            return false;
         }
 
         void setExternalButtons()
@@ -1547,7 +1545,7 @@ namespace S3PIDemoFE
                     hw.Resource = resource;
                     pnAuto.Controls.Add(hw);
                 }
-                else if (!controlPanel1.HexOnly && controlPanel1.AutoValue)
+                else if (controlPanel1.AutoValue && !controlPanel1.HexOnly)
                 {
                     Control c = getValueControl();
                     if (c != null)
@@ -1627,6 +1625,7 @@ namespace S3PIDemoFE
                 f.StartPosition = FormStartPosition.CenterParent;
                 f.ResumeLayout();
                 f.Show(this);
+                if (!f.IsDisposed) f.Dispose();
             }
             finally { this.Enabled = true; }
         }
@@ -1655,9 +1654,8 @@ namespace S3PIDemoFE
                     return null;
                 }
             }
-            else
+            else if (hasValueContentField())
             {
-                if (!AApiVersionedFields.GetContentFields(0, resource.GetType()).Contains("Value")) return null;
                 Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
                 if (typeof(String).IsAssignableFrom(t))
                 {
