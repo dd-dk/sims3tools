@@ -1624,10 +1624,15 @@ namespace S3PIDemoFE
 
                 f.StartPosition = FormStartPosition.CenterParent;
                 f.ResumeLayout();
+                f.FormClosed += new FormClosedEventHandler(f_FormClosed);
                 f.Show(this);
-                if (!f.IsDisposed) f.Dispose();
             }
             finally { this.Enabled = true; }
+        }
+
+        void f_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (!(sender as Form).IsDisposed) (sender as Form).Dispose();
         }
 
         Control getValueControl()
