@@ -268,9 +268,12 @@ namespace S3PIDemoFE
             // 
             this.btnHexEdit.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnHexEdit.AutoSize = true;
+            this.btnHexEdit.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnHexEdit.Enabled = false;
             this.btnHexEdit.Location = new System.Drawing.Point(180, 1);
             this.btnHexEdit.Margin = new System.Windows.Forms.Padding(0);
+            this.btnHexEdit.MaximumSize = new System.Drawing.Size(105, 23);
+            this.btnHexEdit.MinimumSize = new System.Drawing.Size(20, 23);
             this.btnHexEdit.Name = "btnHexEdit";
             this.btnHexEdit.Size = new System.Drawing.Size(66, 23);
             this.btnHexEdit.TabIndex = 4;
