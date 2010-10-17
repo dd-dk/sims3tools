@@ -120,8 +120,9 @@ namespace S3PIDemoFE
         {
             listBox1.SuspendLayout();
             listBox1.Items.Clear();
+            string fmt = "[{0:X" + fieldList.Count.ToString("X").Length + "}] {1}";
             for (int i = 0; i < fieldList.Count; i++)
-                listBox1.Items.Add("[" + i + "] " + fieldList[i].GetType().Name);
+                listBox1.Items.Add(String.Format(fmt, i, fieldList[i].GetType().Name));
             if (selectedIndex == -1) selectedIndex = 0;
             listBox1.SelectedIndex = fieldList.Count > selectedIndex ? selectedIndex : fieldList.Count - 1;
             listBox1.ResumeLayout();
