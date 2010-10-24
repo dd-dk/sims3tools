@@ -384,7 +384,6 @@
             // 
             this.deletedToolStripMenuItem.Enabled = false;
             this.deletedToolStripMenuItem.Name = "deletedToolStripMenuItem";
-            this.deletedToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
             this.deletedToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
             this.deletedToolStripMenuItem.Text = "De&leted";
             this.deletedToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
