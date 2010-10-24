@@ -31,10 +31,13 @@ namespace S3PIDemoFE.Filter
     {
         Regex rxFilter = null;
         Regex rxValue = null;
+        bool exact = true;
 
-        public FilterField()
+        public FilterField(bool exact = true)
         {
             InitializeComponent();
+            this.exact = exact;
+            if (!exact) tbApplied.TextAlign = tbEntry.TextAlign = HorizontalAlignment.Left;
         }
 
         [Category("Appearance")]
@@ -50,7 +53,13 @@ namespace S3PIDemoFE.Filter
             {
                 if (value == null) throw new ArgumentNullException();
                 rxFilter = value;
+
+                tbApplied.SuspendLayout();
                 tbApplied.Text = (rxFilter == null) ? "*" : rxFilter.ToString().TrimStart('^').TrimEnd('$');
+                while (tbApplied.Text.StartsWith(".*")) tbApplied.Text = tbApplied.Text.Substring(2);
+                while (tbApplied.Text.EndsWith(".*")) tbApplied.Text = tbApplied.Text.Substring(0, tbApplied.Text.Length - 2);
+                tbApplied.ResumeLayout();
+
                 if (tbApplied.Text == ".*") tbApplied.Text = "*";
             }
         }
@@ -68,10 +77,18 @@ namespace S3PIDemoFE.Filter
             {
                 if (value == null) throw new ArgumentNullException();
                 rxValue = value;
+
+                tbEntry.SuspendLayout();
                 tbEntry.Text = (rxValue == null) ? "" : rxValue.ToString().TrimStart('^').TrimEnd('$');
-                if (tbEntry.Text == ".*") tbEntry.Text = "";
+                while (tbEntry.Text.StartsWith(".*")) tbEntry.Text = tbEntry.Text.Substring(2);
+                while (tbEntry.Text.EndsWith(".*")) tbEntry.Text = tbEntry.Text.Substring(0, tbEntry.Text.Length - 2);
+                tbEntry.ResumeLayout();
             }
         }
+
+        [Category("Behavior")]
+        [Description("Whether filter field is an exact (rather than sub-string) match")]
+        public bool Exact { get { return exact; } set { exact = value; } }
 
         /// <summary>
         /// Set Value from Filter
@@ -92,7 +109,7 @@ namespace S3PIDemoFE.Filter
             try
             {
                 if (tbEntry.Text.Length == 0) { rxValue = new Regex(""); return; }
-                Value = new Regex("^" + tbEntry.Text.TrimStart('^').TrimEnd('$') + "$", RegexOptions.IgnoreCase);
+                Value = new Regex("^" + (exact ? "" : ".*") + tbEntry.Text.TrimStart('^').TrimEnd('$') + (exact ? "" : ".*") + "$", RegexOptions.IgnoreCase);
             }
             catch (System.ArgumentException) { Value = rxValue; tbEntry.SelectAll(); }
         }
