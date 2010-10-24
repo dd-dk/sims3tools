@@ -67,13 +67,15 @@ namespace S3PIDemoFE.Filter
             tlpResourceInfo.Controls.Add(tlpControls, 0, 0);
             for (int i = 0; i < fields.Count; i++)
             {
-                if (fields[i] == "Instance")
+                if (fields[i] == "Name")
+                    tlpResourceInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 133));
+                else if (fields[i] == "Instance")
                     tlpResourceInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 150));
-                else if (i > 5)
+                else if (i > 3)
                     tlpResourceInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 75));
                 else
                     tlpResourceInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-                FilterField ff = new FilterField();
+                FilterField ff = new FilterField(fields[i] != "Name");
                 ff.Name = fields[i];
                 ff.Dock = DockStyle.Fill;
                 ff.Checked = false;
@@ -158,7 +160,12 @@ namespace S3PIDemoFE.Filter
 
         private void btnRevise_Click(object sender, EventArgs e) { foreach (KeyValuePair<string, FilterField> kvp in values) kvp.Value.Revise(); }
 
-        private void btnQBE_Click(object sender, EventArgs e) { if (ie == null || values == null) return; foreach (string s in fields) values[s].Value = new Regex(ie[s].ToString("X")); }
+        private void btnQBE_Click(object sender, EventArgs e)
+        {
+            if (ie == null || values == null) return;
+            foreach (string s in fields)
+                values[s].Value = new Regex(s.Equals("Name") ? bw.ResourceName(ie) : ie[s].ToString("X"));
+        }
 
         private void btnSet_Click(object sender, EventArgs e)
         {

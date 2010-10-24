@@ -81,6 +81,7 @@ namespace S3PIDemoFE
             filterFields.Remove("Chunkoffset");
             filterFields.Remove("Filesize");
             filterFields.Remove("Memsize");
+            filterFields.Insert(0, "Name");
             resourceFilterWidget1.BrowserWidget = browserWidget1;
             resourceFilterWidget1.Fields = filterFields;
 
@@ -1472,6 +1473,11 @@ namespace S3PIDemoFE
         private void browserWidget1_ItemActivate(object sender, EventArgs e)
         {
             resourceDetails();
+        }
+
+        private void browserWidget1_DeletePressed(object sender, EventArgs e)
+        {
+            resourceIsDeleted();
         }
         #endregion
 
