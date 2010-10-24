@@ -378,7 +378,7 @@ namespace S3PIDemoFE
         public event EventHandler ListUpdated;
 
         [Browsable(true)]
-        [Category("Property Changed")]
+        [Category("Action")]
         [Description("Raised when an item is activated")]
         public event EventHandler ItemActivate;
 
@@ -391,6 +391,11 @@ namespace S3PIDemoFE
         [Category("Property Changed")]
         [Description("Raised when the selection changes")]
         public event EventHandler<ResourceChangedEventArgs> SelectedResourceChanged;
+
+        [Browsable(true)]
+        [Category("Action")]
+        [Description("Raise when the Delete key is pressed")]
+        public event EventHandler DeletePressed;
         #endregion
 
         #region Sub-classes
@@ -654,12 +659,16 @@ namespace S3PIDemoFE
 
         protected virtual void OnItemActivate(object sender, EventArgs e) { if (ItemActivate != null) ItemActivate(sender, e); }
 
+        protected virtual void OnDeletePressed(object sender, EventArgs e) { if (DeletePressed != null) DeletePressed(sender, e); }
+
         protected virtual void OnSelectedResourceChanging(object sender, ResourceChangingEventArgs e) { if (SelectedResourceChanging != null) SelectedResourceChanging(sender, e); }
 
         protected virtual void OnSelectedResourceChanged(object sender, ResourceChangedEventArgs e) { if (SelectedResourceChanged != null) SelectedResourceChanged(sender, e); }
 
 
         private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(sender, e); }
+
+        private void listView1_KeyUp(object sender, KeyEventArgs e) { if (e.KeyData == Keys.Delete) OnDeletePressed(sender, EventArgs.Empty); }
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -764,7 +773,8 @@ namespace S3PIDemoFE
                 return pkg.FindAll(value =>
                 {
                     if (++i % 100 == 0) { pb.Value += 100; Application.DoEvents(); }
-                    foreach (var kvp in filter) if (!kvp.Value.IsMatch(value[kvp.Key].ToString("X"))) return false;
+                    foreach (var kvp in filter)
+                        if (!kvp.Value.IsMatch(kvp.Key.Equals("Name") ? ResourceName(value) : value[kvp.Key].ToString("X"))) return false;
                     return true;
                 });
             }
