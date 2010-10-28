@@ -149,10 +149,10 @@ namespace S3PIDemoFE
             byte[] data = null;
             TextReader r = owner[field].Value as TextReader;
             try { data = ((MemoryStream)((StreamReader)r).BaseStream).ToArray(); }
-            catch { data = System.Text.Encoding.Default.GetBytes(r.ReadToEnd()); }
+            catch { data = System.Text.Encoding.UTF8.GetBytes(r.ReadToEnd()); }
             data = Edit(data, TextEdit);
             if (data != null)
-                owner[field] = new TypedValue(type, new StringReader(System.Text.Encoding.Default.GetString(data)));
+                owner[field] = new TypedValue(type, new StringReader(System.Text.Encoding.UTF8.GetString(data)));
         }
         private void Edit_BinaryReader()
         {
