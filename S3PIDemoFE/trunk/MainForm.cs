@@ -38,6 +38,9 @@ namespace S3PIDemoFE
         static List<string> unwantedFields = new List<string>(new string[] {
             "Stream",
         });
+        static List<string> ddsResources = new List<string>(new string[] {
+            "0x00B2D882", "0x8FFB80F6",
+        });
         static MainForm()
         {
             foreach (string s in unwantedFields) fields.Remove(s);
@@ -1429,7 +1432,7 @@ namespace S3PIDemoFE
 
         bool hasValueContentField()
         {
-            if (browserWidget1.SelectedResource["ResourceType"] == "0x00B2D882" && S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview)
+            if (ddsResources.Contains(browserWidget1.SelectedResource["ResourceType"] + "") && S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview)
                 return true;
             //if (!AApiVersionedFields.GetContentFields(0, resource.GetType()).Contains("Value")) return false;
             //-prefer to use the per-resource ContentFields property:
@@ -1644,7 +1647,7 @@ namespace S3PIDemoFE
         Control getValueControl()
         {
             Control res = null;
-            if (browserWidget1.SelectedResource["ResourceType"] == "0x00B2D882" && S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview)
+            if (ddsResources.Contains(browserWidget1.SelectedResource["ResourceType"] + "") && S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview)
             {
                 try
                 {
