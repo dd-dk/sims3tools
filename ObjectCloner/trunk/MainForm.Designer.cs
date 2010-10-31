@@ -1055,9 +1055,9 @@
             this.label3.Location = new System.Drawing.Point(6, 6);
             this.label3.Margin = new System.Windows.Forms.Padding(6);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(67, 13);
+            this.label3.Size = new System.Drawing.Size(76, 13);
             this.label3.TabIndex = 0;
-            this.label3.Text = "Unknown8";
+            this.label3.Text = "Object Type";
             // 
             // tlpUnknown9
             // 
@@ -1084,9 +1084,9 @@
             this.label4.Location = new System.Drawing.Point(6, 6);
             this.label4.Margin = new System.Windows.Forms.Padding(6);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(67, 13);
+            this.label4.Size = new System.Drawing.Size(95, 13);
             this.label4.TabIndex = 1;
-            this.label4.Text = "Unknown9";
+            this.label4.Text = "Wall Placement";
             // 
             // tlpUnknown10
             // 
@@ -1113,9 +1113,9 @@
             this.label7.Location = new System.Drawing.Point(6, 6);
             this.label7.Margin = new System.Windows.Forms.Padding(6);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(74, 13);
+            this.label7.Size = new System.Drawing.Size(65, 13);
             this.label7.TabIndex = 1;
-            this.label7.Text = "Unknown10";
+            this.label7.Text = "Movement";
             // 
             // menuBarWidget1
             // 

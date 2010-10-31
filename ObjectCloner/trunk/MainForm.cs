@@ -1245,9 +1245,8 @@ namespace ObjectCloner
 
             List<string> excludeFields = new List<string>(new string[] {
                 "AsBytes", "Stream", "Value", "Count", "IsReadOnly",
-                "Version", "Materials", "CommonBlock",
-                "Unknown8", "Unknown9", "Unknown10", //Flags
-                "MTDoors",  "Hash", "TGIBlocks",
+                "Version", "IsScriptEnabled", "Levels",
+                "Materials", "CommonBlock", "MTDoors",  "TGIBlocks",
             });
             foreach (string field in fields)
             {
@@ -1257,6 +1256,8 @@ namespace ObjectCloner
                 else if (field.Contains("Index")) { }
                 else if (field.EndsWith("Reader")) { }
                 else if (excludeFields.Contains(field)) { }
+                else if (field.Contains("Hash")) { }
+                else if (field.Contains("Cutout")) { }
                 else detailsTabFields.Add(field);
             }
 
@@ -1284,9 +1285,9 @@ namespace ObjectCloner
         void InitialiseFlagTabs(IResource objd)
         {
             flagFields = new List<flagField>(new flagField[] {
-                new flagField(tlpUnknown8, "Unknown8", 32, 0),
-                new flagField(tlpUnknown9, "Unknown9", 32, 0),
-                new flagField(tlpUnknown10, "Unknown10", 32, 0),
+                new flagField(tlpUnknown8, "ObjectTypeFlags", 32, 0),
+                new flagField(tlpUnknown9, "WallPlacementFlags", 32, 0),
+                new flagField(tlpUnknown10, "MovementFlags", 32, 0),
                 new flagField(tlpRoomSort, "RoomCategoryFlags", 32, 0),
                 new flagField(tlpRoomSubLow, "RoomSubCategoryFlags", 32, 0),
                 new flagField(tlpRoomSubHigh, "RoomSubCategoryFlags", 64, 32),
