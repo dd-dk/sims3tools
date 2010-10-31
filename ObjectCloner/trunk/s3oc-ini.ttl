@@ -174,8 +174,8 @@
 :ep3
    a  :Sims3, :EP ;
    :hasName  "EP3" ;
-   :hasLongname  "The Sims 3 EP3";
-   :hasDefaultInstallDir  "Electronic Arts/The Sims 3 EP3";
+   :hasLongname  "The Sims 3 Late Night";
+   :hasDefaultInstallDir  "Electronic Arts/The Sims 3 Late Night";
    :hasPriority  5 ;
    :hasRGVersion  5 ;
    :isSuppressed  "false" ;
@@ -183,6 +183,7 @@
       a :Objects ;
       :in "GameData/Shared" ;
       :packages (
+         	"DeltaPackages/p05/DeltaBuild_p05.package"
          	"DeltaPackages/p04/DeltaBuild_p04.package"
          	"DeltaPackages/p03/DeltaBuild_p03.package"
          	"DeltaPackages/p02/DeltaBuild_p02.package"

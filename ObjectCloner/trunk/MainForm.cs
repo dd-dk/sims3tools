@@ -3564,7 +3564,9 @@ namespace ObjectCloner
                 Add("clone.wallmask[" + i + "]", ltgi[(int)(uint)mtdoor["WallMaskIndex"].Value]);
                 i++;
             }
-            Add("clone.sinkmask", ltgi[(int)(uint)selectedItem.Resource["SinkDDSIndex"].Value]);
+            Add("clone.sinkmask", ltgi[(int)(uint)selectedItem.Resource["SurfaceCutoutDDSIndex"].Value]);
+            if (selectedItem.Resource.ContentFields.Contains("FloorCutoutDDSIndex"))
+                Add("clone.tubmask", ltgi[(int)(uint)selectedItem.Resource["FloorCutoutDDSIndex"].Value]);
         }
         void OBJK_SlurpTGIs() { SlurpRKsFromField("objk", (AResource)objkItem.Resource); }
         void OBJK_getVPXY()
