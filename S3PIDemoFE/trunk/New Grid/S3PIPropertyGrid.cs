@@ -116,9 +116,10 @@ namespace S3PIDemoFE
         {
             try
             {
-                if (type.GetGenericArguments().Length == 1) return type.GetGenericArguments()[0];
-                else if (type.BaseType.GetGenericArguments().Length == 1) return type.BaseType.GetGenericArguments()[0];
-                else return null;
+                Type t = type;
+                while (t.BaseType != typeof(object)) { t = t.BaseType; }
+                if (t.GetGenericArguments().Length == 1) return t.GetGenericArguments()[0];
+                return null;
             }
             catch (Exception ex) { throw ex; }
         }
