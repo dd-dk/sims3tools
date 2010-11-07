@@ -1268,6 +1268,7 @@ namespace ObjectCloner
                     CreateField(tlpObjectDetail, types[field], detailsFieldMapReverse[catlg.GetType().Name + ":" + field], true);
                 else if ((catlg as AResource).ContentFields.Contains("TGIBlocks") && field.Contains("Index"))
                     CreateField(tlpObjectDetail, field);
+                else if (types[field].Equals(typeof(AResource.TGIBlock))) { }
                 else
                     CreateField(tlpObjectDetail, types[field], field, true);
             }
