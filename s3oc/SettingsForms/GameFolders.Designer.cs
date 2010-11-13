@@ -44,8 +44,6 @@
             this.tlpGameFolders.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.tlpGameFolders.AutoSize = true;
-            this.tlpGameFolders.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tlpGameFolders.ColumnCount = 4;
             this.tlpGameFolders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpGameFolders.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
@@ -59,8 +57,8 @@
             this.tlpGameFolders.Name = "tlpGameFolders";
             this.tlpGameFolders.RowCount = 2;
             this.tlpGameFolders.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpGameFolders.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpGameFolders.Size = new System.Drawing.Size(604, 13);
+            this.tlpGameFolders.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpGameFolders.Size = new System.Drawing.Size(604, 196);
             this.tlpGameFolders.TabIndex = 0;
             // 
             // label1
@@ -107,7 +105,7 @@
             // 
             this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnClose.Location = new System.Drawing.Point(541, 31);
+            this.btnClose.Location = new System.Drawing.Point(541, 214);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(75, 23);
             this.btnClose.TabIndex = 1;
@@ -121,8 +119,7 @@
             // 
             // btnReset
             // 
-            this.btnReset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnReset.Location = new System.Drawing.Point(460, 31);
+            this.btnReset.Location = new System.Drawing.Point(460, 214);
             this.btnReset.Name = "btnReset";
             this.btnReset.Size = new System.Drawing.Size(75, 23);
             this.btnReset.TabIndex = 2;
@@ -135,7 +132,7 @@
             this.AcceptButton = this.btnClose;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(628, 66);
+            this.ClientSize = new System.Drawing.Size(628, 249);
             this.Controls.Add(this.btnReset);
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.tlpGameFolders);
@@ -147,7 +144,6 @@
             this.tlpGameFolders.ResumeLayout(false);
             this.tlpGameFolders.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 

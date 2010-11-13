@@ -16,7 +16,7 @@ set mytime=%time: =0%
 set h=%mytime:~0,2%
 set m=%mytime:~3,2%
 set s=%mytime:~6,2%
-set suffix=%yy%-%mm%%dd%-%h%%m%
+set suffix=%yy%%mm%-%dd%-%h%%m%
 
 if EXIST "%PROGRAMFILES%\nsis\makensis.exe" goto gotNotX86
 if EXIST "%PROGRAMFILES(x86)%\nsis\makensis.exe" goto gotX86
@@ -66,11 +66,6 @@ echo SetOutPath $INSTDIR\HelpFiles
 for %%f in (*) do echo File /a HelpFiles\%%f
 echo SetOutPath $INSTDIR
 popd
-pushd Resources
-echo SetOutPath $INSTDIR\Resources
-for %%f in (*) do echo File /a Resources\%%f
-echo SetOutPath $INSTDIR
-popd
 ) > ..\INSTFILES.txt
 
 (
@@ -78,10 +73,6 @@ for %%f in (*) do echo Delete $INSTDIR\%%f
 pushd HelpFiles
 for %%f in (*) do echo Delete $INSTDIR\HelpFiles\%%f
 echo RmDir HelpFiles
-popd
-pushd Resources
-for %%f in (*) do echo Delete $INSTDIR\Resources\%%f
-echo RmDir Resources
 popd
 ) > UNINST.LOG
 attrib +r +h UNINST.LOG

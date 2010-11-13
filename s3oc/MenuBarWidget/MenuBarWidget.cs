@@ -46,20 +46,11 @@ namespace ObjectCloner
                 //View
                 tilesToolStripMenuItem, largeIconsToolStripMenuItem, smallIconsToolStripMenuItem, listToolStripMenuItem, detailedListToolStripMenuItem,
                 iconsToolStripMenuItem,
-                //Tools
-                searchToolStripMenuItem,
                 //Settings
-                gameFoldersToolStripMenuItem, userNameToopStripMenuItem, automaticUpdateCheckToolStripMenuItem, diagnosticsToolStripMenuItem,
+                gameFoldersToolStripMenuItem, userNameToopStripMenuItem,
                 //Help
-                contentsToolStripMenuItem, aboutToolStripMenuItem, checkForUpdateToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
+                contentsToolStripMenuItem, aboutToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
-            AutoUpdate.Checker.AutoUpdateChoice_Changed += new EventHandler(Checker_AutoUpdateChoice_Changed);
-            Checker_AutoUpdateChoice_Changed(null, null);
-        }
-
-        void Checker_AutoUpdateChoice_Changed(object sender, EventArgs e)
-        {
-            Checked(MB.MBS_updates, AutoUpdate.Checker.AutoUpdateChoice);
         }
 
         public enum MD
@@ -67,7 +58,6 @@ namespace ObjectCloner
             MBF,
             MBC,
             MBV,
-            MBT,
             MBS,
             MBH,
         }
@@ -81,9 +71,8 @@ namespace ObjectCloner
             MBC_crst, MBC_mdlr, MBC_crmt,
             MBV_tiles, MBV_largeIcons, MBV_smallIcons, MBV_list, MBV_detailedList,
             MBV_icons,
-            MBT_search,
-            MBS_sims3Folder, MBS_userName, MBS_updates, MBS_diagnostics,
-            MBH_contents, MBH_about, MBH_update, MBH_warranty, MBH_licence,
+            MBS_sims3Folder, MBS_userName,
+            MBH_contents, MBH_about, MBH_warranty, MBH_licence,
         }
 
         public void Enable(MD mn, bool state) { tsMD[(int)mn].Enabled = state; }
@@ -115,11 +104,6 @@ namespace ObjectCloner
         public event MBClickEventHandler MBView_Click;
         protected void OnMBView_Click(object sender, MB mn) { if (MBView_Click != null) MBView_Click(sender, new MBClickEventArgs(mn)); }
         private void tsMBV_Click(object sender, EventArgs e) { OnMBView_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
-
-        [Category("Action")]
-        public event MBClickEventHandler MBTools_Click;
-        protected void OnMBTools_Click(object sender, MB mn) { if (MBTools_Click != null) MBTools_Click(sender, new MBClickEventArgs(mn)); }
-        private void tsMBT_Click(object sender, EventArgs e) { OnMBTools_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
 
         [Category("Action")]
         public event MBClickEventHandler MBSettings_Click;

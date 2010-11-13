@@ -82,7 +82,7 @@ namespace ObjectCloner
             {
                 updateProgress(true, "Please wait, searching for objects...", true, -1, false, 0);
                 List<RIE> lrie = new List<RIE>();
-                List<ulong> seen = new List<ulong>();
+                ListIResourceKey seen = new ListIResourceKey();
                 List<IPackage> seenPkgs = new List<IPackage>();
                 foreach (IPackage pkg in objPkgs)
                 {
@@ -91,15 +91,15 @@ namespace ObjectCloner
 
                     IList<IResourceIndexEntry> matches;
                     if (resourceType != 0)
-                        matches = pkg.FindAll(rie => rie.ResourceType == (uint)resourceType);
+                        matches = pkg.FindAll(new string[] { "ResourceType", }, new TypedValue[] { new TypedValue(typeof(uint), (uint)resourceType, "X"), });
                     else
                         matches = pkg.GetResourceList;
 
                     foreach (IResourceIndexEntry match in matches)
                     {
                         if (!Enum.IsDefined(typeof(CatalogType), match.ResourceType)) continue;
-                        if (seen.Contains(match.Instance)) continue;
-                        seen.Add(match.Instance);
+                        if (seen.Contains(match)) continue;
+                        seen.Add(match);
                         lrie.Add(new RIE(pkg, match));
                     }
                 }
@@ -164,64 +164,86 @@ namespace ObjectCloner
         public override AHandlerElement Clone(EventHandler handler) { throw new NotImplementedException(); }
         public override List<string> ContentFields { get { throw new NotImplementedException(); } }
         public override int RecommendedApiVersion { get { throw new NotImplementedException(); } }
+    }
 
-        public int Compare(IResourceKey rk)
+    public class ListIResourceKey : List<IResourceKey>
+    {
+        public ListIResourceKey() : base() { }
+        public ListIResourceKey(IList<IResourceKey> value) : base(value) { }
+        /// <summary>
+        /// Determines whether an element is in the list.
+        /// </summary>
+        /// <param name="item">The object to locate in the list.</param>
+        /// <returns>true if item is found in the list; otherwise, false.</returns>
+        public new bool Contains(IResourceKey item) { return this.Exists(new Predicate(item).Match); }
+        /// <summary>
+        /// Searches for the specified object and returns the zero-based index of the first occurrence within the entire list.
+        /// </summary>
+        /// <param name="item">The IResourceKey to locate in the list.</param>
+        /// <returns>The zero-based index of the first occurrence of item within the entire list, if found; otherwise, –1.</returns>
+        public new int IndexOf(IResourceKey item) { return base.IndexOf(this.Find(new Predicate(item).Match)); }
+
+        /// <summary>
+        /// Suppress matching on top byte of ResourceGroup
+        /// </summary>
+        class Predicate
         {
-            int res = this.ResourceType.CompareTo(rk.ResourceType); if (res != 0) return res;
-            res = (this.ResourceGroup & 0x07FFFFFF).CompareTo(rk.ResourceGroup & 0x07FFFFFF); if (res != 0) return res;
-            return ((this.ResourceType == 0x736884F1 && this.Instance >> 32 == 0) ? this.Instance & 0x07FFFFFF : this.Instance)
-                .CompareTo(((rk.ResourceType == 0x736884F1 && rk.Instance >> 32 == 0) ? rk.Instance & 0x07FFFFFF : rk.Instance));
+            IResourceKey predicate;
+            public Predicate(IResourceKey predicate) { this.predicate = predicate; }
+            public bool Match(IResourceKey target)
+            {
+                int res = predicate.ResourceType.CompareTo(target.ResourceType); if (res != 0) return false;
+                res = (predicate.ResourceGroup & 0x00FFFFFF).CompareTo(target.ResourceGroup & 0x00FFFFFF); if (res != 0) return false;
+                return predicate.Instance.CompareTo(target.Instance) == 0;
+            }
         }
-
-        public new bool Equals(IResourceKey rk) { return this.Compare(rk) == 0; }
     }
 
     public struct RIE
     {
-        List<IPackage> searchList;
-        RK requestedRK;
+        List<IPackage> posspkgs;
+        IResourceKey myrk;
 
-        IPackage specificPkg;
-        IResourceKey specificRK;
+        IPackage package;
+        AResourceIndexEntry irie;
 
-        public RIE(List<IPackage> searchList, IResourceKey requestedRK) : this()
+        public RIE(List<IPackage> posspkgs, IResourceKey rk) : this() { this.posspkgs = posspkgs; this.myrk = rk; }
+        public RIE(IPackage pkg, IResourceIndexEntry rie) : this(null, (IResourceKey)rie) { if (pkg.GetResourceList.Contains(rie)) { this.package = pkg; irie = rie as AResourceIndexEntry; } }
+
+        public IPackage pkg { get { return package; } }
+        public AResourceIndexEntry rie { get { if (pkg == null || irie == null) irie = findIRIE(); return irie; } }
+        public IResourceKey rk { get { return myrk; } }
+        public static implicit operator AResourceIndexEntry(RIE rie) { return rie.findIRIE(); }
+
+        AResourceIndexEntry findIRIE()
         {
-            this.searchList = searchList;
-            this.requestedRK = new RK(requestedRK);
-            this.specificPkg = null;
-            this.specificRK = null;
-        }
-        public RIE(IPackage pkg, IResourceIndexEntry specificRK) : this()
-        {
-            if (!pkg.GetResourceList.Contains(specificRK)) // Full RK matching
-                throw new ArgumentException();
-            this.searchList = null;
-            this.requestedRK = new RK(specificRK);
-            this.specificPkg = pkg;
-            this.specificRK = specificRK;
-        }
-
-        public IPackage SpecificPkg { get { return specificPkg; } }
-        public AResourceIndexEntry SpecificRK { get { if (specificPkg == null || specificRK == null) specificRK = findRK(); return specificRK as AResourceIndexEntry; } }
-        public RK RequestedRK { get { return requestedRK; } }
-        public static implicit operator AResourceIndexEntry(RIE rie) { return rie.findRK() as AResourceIndexEntry; }
-
-        IResourceKey findRK()
-        {
-            RK rk = requestedRK;
-            if (specificPkg != null) return specificPkg.Find(requestedRK.Equals);
-
-            IResourceKey arie = null;
-            for (int i = 0; arie == null && i < searchList.Count; i++)
+            AResourceIndexEntry arie = null;
+            if (package != null)
+                arie = findIRIEinPkg(package);
+            else for (int i = 0; arie == null && i < posspkgs.Count; i++)
                 {
-                    arie = searchList[i].Find(requestedRK.Equals);
-                    if (arie != null) specificPkg = searchList[i];
+                    arie = findIRIEinPkg(posspkgs[i]);
+                    if (arie != null) package = posspkgs[i];
                 }
             return arie;
         }
+        AResourceIndexEntry findIRIEinPkg(IPackage pkg)
+        {
+            IList<IResourceIndexEntry> lrie = pkg.FindAll(new string[] { "ResourceType", "Instance", },
+                new TypedValue[] {
+                    new TypedValue(typeof(uint), myrk.ResourceType),
+                    new TypedValue(typeof(ulong), myrk.Instance),
+                    }
+            );
+            foreach (AResourceIndexEntry rie in lrie)
+                if ((rie.ResourceGroup & 0x00FFFFFF) == (myrk.ResourceGroup & 0x00FFFFFF))
+                    return rie;
+            return null;
+        }
+
     }
 
-    public class Item
+    public class Item : IComparer<IResourceIndexEntry>
     {
         RIE myrie;
         bool defaultWrapper;
@@ -229,9 +251,12 @@ namespace ObjectCloner
         IResource my_ires = null;
         Exception ex = null;
 
+        //public Item(List<IPackage> posspkgs, IResourceIndexEntry rie) : this(posspkgs, rie, false) { }
+        //public Item(List<IPackage> posspkgs, IResourceIndexEntry rie, bool defaultWrapper) : this(new RIE(pkg, rie), defaultWrapper) { }
         public Item(List<IPackage> posspkgs, IResourceKey rk) : this(posspkgs, rk, false) { }
         Item(List<IPackage> posspkgs, IResourceKey rk, bool defaultWrapper) : this(new RIE(posspkgs, rk), defaultWrapper) { }
-        public Item(RIE rie, bool defaultWrapper = false) { this.myrie = rie; this.defaultWrapper = defaultWrapper; }
+        public Item(RIE rie) : this(rie, false) { }
+        public Item(RIE rie, bool defaultWrapper) { this.defaultWrapper = defaultWrapper; this.myrie = rie; }
 
         public IResource Resource
         {
@@ -239,7 +264,7 @@ namespace ObjectCloner
             {
                 try
                 {
-                    if (my_ires == null && myrie.SpecificRK != null) my_ires = s3pi.WrapperDealer.WrapperDealer.GetResource(0, myrie.SpecificPkg, myrie.SpecificRK, defaultWrapper);
+                    if (my_ires == null && myrie.rie != null) my_ires = s3pi.WrapperDealer.WrapperDealer.GetResource(0, myrie.pkg, myrie.rie, defaultWrapper);
                 }
                 catch (Exception ex)
                 {
@@ -250,28 +275,41 @@ namespace ObjectCloner
             }
         }
 
-        public AResourceIndexEntry SpecificRK { get { return myrie.SpecificRK; } set { this.myrie = new RIE(myrie.SpecificPkg, value); my_ires = null; } }
+        public IResourceIndexEntry ResourceIndexEntry { get { return myrie.rie; } set { this.myrie = new RIE(myrie.pkg, value); my_ires = null; } }
 
-        public IPackage Package { get { return myrie.SpecificPkg; } }
+        public IPackage Package { get { return myrie.pkg; } }
 
-        public RK RequestedRK { get { return myrie.RequestedRK; } }
+        public IResourceKey rk { get { return myrie.rk; } }
 
-        public CatalogType CType { get { return (CatalogType)myrie.RequestedRK.ResourceType; } }
+        public CatalogType CType { get { return (CatalogType)myrie.rk.ResourceType; } }
 
         public Exception Exception { get { return ex; } }
 
-        public string RGVsn
+        /// <summary>
+        /// Specifies the Content Category overlays that appear in the catalog
+        /// </summary>
+        [Flags]
+        public enum CCFlags : byte
         {
-            get
-            {
-                if (this.SpecificRK == null) return "";
-                byte rgVersion = (byte)(this.SpecificRK.ResourceGroup >> 27);
-                if (rgVersion == 0) return "";
-                if (!MainForm.RGVersionLookup.ContainsKey(rgVersion)) return "Unk";
-                return MainForm.RGVersionLookup[rgVersion];
-            }
+            //Unk = 0x00,
+            /// <summary>
+            /// EP1: World Adventures
+            /// </summary>
+            EP1 = 0x08,
+            /// <summary>
+            /// SP1: High-end Lofts
+            /// </summary>
+            SP1 = 0x10,
         }
 
-        public void Commit() { myrie.SpecificPkg.ReplaceResource(myrie.SpecificRK, Resource); }
+        public CCFlags CC { get { return (CCFlags)(this.ResourceIndexEntry == null ? 0 : this.ResourceIndexEntry.ResourceGroup >> 24); } }
+        public int Compare(IResourceIndexEntry x, IResourceIndexEntry y)
+        {
+            int res = x.ResourceType.CompareTo(y.ResourceType); if (res != 0) return res;
+            res = (x.ResourceGroup & 0x00FFFFFF).CompareTo(y.ResourceGroup & 0x00FFFFFF); if (res != 0) return res;
+            return x.Instance.CompareTo(y.Instance);
+        }
+
+        public void Commit() { myrie.pkg.ReplaceResource(myrie.rie, Resource); }
     }
 }

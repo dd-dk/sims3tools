@@ -40,10 +40,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="s3pi.CatalogResource, Version=1009.7.19.33908, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\s3pi\build\bin\Release\s3pi.CatalogResource.dll</HintPath>
-    </Reference>
     <Reference Include="s3pi.CustomForms, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
@@ -81,30 +77,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\System.Custom.dll</HintPath>
     </Reference>
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AutoUpdate.cs" />
-    <Compile Include="CustomControls\EnumTextBox.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="CustomControls\EnumTextBox.Designer.cs">
-      <DependentUpon>EnumTextBox.cs</DependentUpon>
-    </Compile>
-    <Compile Include="CustomControls\TopicRating.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="CustomControls\TopicRating.Designer.cs">
-      <DependentUpon>TopicRating.cs</DependentUpon>
-    </Compile>
-    <Compile Include="CustomControls\TopicRatings.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="CustomControls\TopicRatings.Designer.cs">
-      <DependentUpon>TopicRatings.cs</DependentUpon>
-    </Compile>
     <Compile Include="FillListView.cs" />
     <Compile Include="MenuBarWidget\MenuBarWidget.cs">
       <SubType>Component</SubType>
@@ -138,7 +116,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -154,12 +131,6 @@
     </Compile>
     <Compile Include="TopPanelComponents\CloneFixOptions.Designer.cs">
       <DependentUpon>CloneFixOptions.cs</DependentUpon>
-    </Compile>
-    <Compile Include="TopPanelComponents\Search.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="TopPanelComponents\Search.Designer.cs">
-      <DependentUpon>Search.cs</DependentUpon>
     </Compile>
     <Compile Include="TopPanelComponents\ObjectChooser.cs">
       <SubType>UserControl</SubType>
@@ -179,24 +150,8 @@
     <Compile Include="TopPanelComponents\ResourceList.Designer.cs">
       <DependentUpon>ResourceList.cs</DependentUpon>
     </Compile>
-    <Content Include="..\s3pi\build\bin\Release\Acknowledgements.txt">
-      <Link>Acknowledgements.txt</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="s3ocUpdate.ini">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="CustomControls\EnumTextBox.resx">
-      <DependentUpon>EnumTextBox.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="CustomControls\TopicRating.resx">
-      <DependentUpon>TopicRating.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="CustomControls\TopicRatings.resx">
-      <DependentUpon>TopicRatings.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -215,9 +170,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="TopPanelComponents\CloneFixOptions.resx">
       <DependentUpon>CloneFixOptions.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TopPanelComponents\Search.resx">
-      <DependentUpon>Search.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TopPanelComponents\ObjectChooser.resx">
       <DependentUpon>ObjectChooser.cs</DependentUpon>
@@ -240,6 +192,10 @@
     </Content>
     <Content Include="..\s3pi\build\bin\Release\RCOLResources.txt">
       <Link>RCOLResources.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.CatalogResource.dll">
+      <Link>s3pi.CatalogResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.DefaultResource.dll">
@@ -277,10 +233,8 @@
     <Content Include="gpl-3.0.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\defaultThumbnail.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="s3oc.ico" />
+    <None Include="app.config" />
     <None Include="Resources\s3oc.ico" />
     <None Include="s3oc-ini.ttl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

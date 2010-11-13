@@ -33,9 +33,6 @@ namespace ObjectCloner.SettingsForms
         {
             InitializeComponent();
 
-            Size size = this.Size;
-            Size sizeTLP = tlpGameFolders.Size;
-
             foreach (MainForm.S3ocSims3 sims3 in MainForm.lS3ocSims3)
             {
                 dS3ocSims3.Add(tlpGameFolders.RowCount - 2, sims3);
@@ -73,8 +70,6 @@ namespace ObjectCloner.SettingsForms
                 tlpGameFolders.Controls.Add(tbInstFolder, 2, tlpGameFolders.RowCount - 2);
                 tlpGameFolders.Controls.Add(btnEdit, 3, tlpGameFolders.RowCount - 2);
             }
-
-            this.Size = new Size(size.Width, size.Height - sizeTLP.Height + tlpGameFolders.Size.Height);
         }
 
         MainForm.S3ocSims3 S3ocSims3FromControl(Control c)

@@ -47,7 +47,6 @@ namespace ObjectCloner.TopPanelComponents
             this.allow32bitIIDs = allow32bitIIDs;
             tbUniqueName.Enabled = ckbRenumber.Checked;
             ckb32bitIIDs.Enabled = ckbRenumber.Checked && allow32bitIIDs;
-            ckbRenumber.Checked = mustClone;
 
             form.AcceptButton = btnStart;
             form.CancelButton = btnCancel;
@@ -57,24 +56,30 @@ namespace ObjectCloner.TopPanelComponents
         public bool IsClone { get { return ckbClone.Checked; } }
         public bool IsDefaultOnly { get { return ckbDefault.Checked; } }
         public bool IsExcludeCommon { get { return ckbExclCommon.Checked; } }
-        public bool IsPadSTBLs { get { return ckbPadSTBLs.Checked; } }
         public bool IsIncludeThumbnails { get { return ckbThumbs.Checked; } }
+        public bool IsPadSTBLs { get { return ckbPadSTBLs.Checked; } }
+        public bool IsPadThumbs { get { return ckbPadThumbs.Checked; } }
         public bool IsRenumber { get { return ckbRenumber.Checked; } }
         public bool Is32bitIIDs { get { return ckb32bitIIDs.Checked; } }
         public bool IsCompress { get { return ckbCompress.Checked; } }
 
         public event EventHandler CancelClicked;
         public event EventHandler StartClicked;
+        public event EventHandler IsPadThumbsChanged;
 
         private void ckbClone_CheckedChanged(object sender, EventArgs e)
         {
-            ckbDefault.Checked = ckbExclCommon.Checked = ckbDefault.Enabled = ckbExclCommon.Enabled = !ckbClone.Enabled && ckbClone.Checked;
+            ckbThumbs.Enabled = ckbDefault.Enabled = ckbExclCommon.Enabled = !ckbClone.Enabled && ckbClone.Checked;
+            ckbExclCommon.Checked = ckbDefault.Checked = !ckbClone.Enabled && ckbClone.Checked;
+            ckbThumbs.Checked = false;
         }
 
         private void ckbDefault_CheckedChanged(object sender, EventArgs e)
         {
             ckbExclCommon.Checked = ckbDefault.Checked;
         }
+
+        private void ckbPadThumbs_CheckedChanged(object sender, EventArgs e) { if (IsPadThumbsChanged != null) IsPadThumbsChanged(this, EventArgs.Empty); }
 
         private void ckbRenumber_CheckedChanged(object sender, EventArgs e)
         {
