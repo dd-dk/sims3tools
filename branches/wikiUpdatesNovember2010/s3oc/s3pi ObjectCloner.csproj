@@ -1,0 +1,317 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{93EF2A6F-D8CF-412A-BE62-49032D2B3B96}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ObjectCloner</RootNamespace>
+    <AssemblyName>s3oc</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ApplicationIcon>s3oc.ico</ApplicationIcon>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="s3pi.CatalogResource, Version=1009.7.19.33908, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.CatalogResource.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.CustomForms, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Extensions, Version=907.4.11.19808, Culture=neutral, PublicKeyToken=80159b679e88de38, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.GenericRCOLResource, Version=907.12.15.26089, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.GenericRCOLResource.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Interfaces, Version=906.27.10.17894, Culture=neutral, PublicKeyToken=596917de85953130, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.ObjKeyResource, Version=908.23.16.27521, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.ObjKeyResource.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Package, Version=908.23.16.27523, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.Package.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.WrapperDealer, Version=906.27.10.17895, Culture=neutral, PublicKeyToken=27f8fcb7ad5fda58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.WrapperDealer.dll</HintPath>
+    </Reference>
+    <Reference Include="SemWeb, Version=1.0.6.4, Culture=neutral, PublicKeyToken=3e1051c7e190e42e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\semweb-1.0.6.4\bin\SemWeb.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Custom, Version=906.27.10.17894, Culture=neutral, PublicKeyToken=dbb438eea69badfa, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\System.Custom.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AutoUpdate.cs" />
+    <Compile Include="CustomControls\EnumTextBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CustomControls\EnumTextBox.Designer.cs">
+      <DependentUpon>EnumTextBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControls\TopicRating.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CustomControls\TopicRating.Designer.cs">
+      <DependentUpon>TopicRating.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControls\TopicRatings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CustomControls\TopicRatings.Designer.cs">
+      <DependentUpon>TopicRatings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FillListView.cs" />
+    <Compile Include="MenuBarWidget\MenuBarWidget.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="MenuBarWidget\MenuBarWidget.designer.cs">
+      <DependentUpon>MenuBarWidget.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="SettingsForms\GameFolders.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SettingsForms\GameFolders.Designer.cs">
+      <DependentUpon>GameFolders.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SettingsForms\StringInputDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SettingsForms\StringInputDialog.Designer.cs">
+      <DependentUpon>StringInputDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyVersion.cs" />
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="Settings.cs" />
+    <Compile Include="TopPanelComponents\CloneFixOptions.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TopPanelComponents\CloneFixOptions.Designer.cs">
+      <DependentUpon>CloneFixOptions.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TopPanelComponents\Search.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TopPanelComponents\Search.Designer.cs">
+      <DependentUpon>Search.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TopPanelComponents\ObjectChooser.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TopPanelComponents\ObjectChooser.Designer.cs">
+      <DependentUpon>ObjectChooser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TopPanelComponents\PleaseWait.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TopPanelComponents\PleaseWait.Designer.cs">
+      <DependentUpon>PleaseWait.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TopPanelComponents\ResourceList.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TopPanelComponents\ResourceList.Designer.cs">
+      <DependentUpon>ResourceList.cs</DependentUpon>
+    </Compile>
+    <Content Include="..\s3pi\build\bin\Release\Acknowledgements.txt">
+      <Link>Acknowledgements.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="s3ocUpdate.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="CustomControls\EnumTextBox.resx">
+      <DependentUpon>EnumTextBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomControls\TopicRating.resx">
+      <DependentUpon>TopicRating.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CustomControls\TopicRatings.resx">
+      <DependentUpon>TopicRatings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MenuBarWidget\MenuBarWidget.resx">
+      <DependentUpon>MenuBarWidget.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SettingsForms\GameFolders.resx">
+      <DependentUpon>GameFolders.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SettingsForms\StringInputDialog.resx">
+      <DependentUpon>StringInputDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TopPanelComponents\CloneFixOptions.resx">
+      <DependentUpon>CloneFixOptions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TopPanelComponents\Search.resx">
+      <DependentUpon>Search.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TopPanelComponents\ObjectChooser.resx">
+      <DependentUpon>ObjectChooser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TopPanelComponents\PleaseWait.resx">
+      <DependentUpon>PleaseWait.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TopPanelComponents\ResourceList.resx">
+      <DependentUpon>ResourceList.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\s3pi\build\bin\Release\Extensions.txt">
+      <Link>Extensions.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\ImageResources.txt">
+      <Link>ImageResources.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\RCOLResources.txt">
+      <Link>RCOLResources.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.DefaultResource.dll">
+      <Link>s3pi.DefaultResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.ImageResource.dll">
+      <Link>s3pi.ImageResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.ModularResource.dll">
+      <Link>s3pi.ModularResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.NameMapResource.dll">
+      <Link>s3pi.NameMapResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.Settings.dll">
+      <Link>s3pi.Settings.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.StblResource.dll">
+      <Link>s3pi.StblResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.TxtcResource.dll">
+      <Link>s3pi.TxtcResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\semweb-1.0.6.4\README.txt">
+      <Link>README.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="gpl-3.0.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\defaultThumbnail.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="s3oc.ico" />
+    <None Include="Resources\s3oc.ico" />
+    <None Include="s3oc-ini.ttl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="s3oc.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PreBuildEvent>set mydate=%25date: =0%25
+set dd=%25mydate:~0,2%25
+set mm=%25mydate:~3,2%25
+set yy=%25mydate:~8,2%25
+set mytime=%25time: =0%25
+set h=%25mytime:~0,2%25
+set version="%25yy%25%25mm%25.%25dd%25.%25h%25%25m%25.*"
+
+(echo using System.Reflection;
+echo using System.Runtime.CompilerServices;
+echo using System.Runtime.InteropServices;
+echo /*"*/ [assembly: AssemblyVersion(%25version%25)] /*"*/
+)&gt;"$(ProjectDir)Properties\AssemblyVersion.cs"
+
+</PreBuildEvent>
+  </PropertyGroup>
+</Project>
