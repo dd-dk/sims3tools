@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3pi ObjectCloner", "s3pi ObjectCloner.csproj", "{93EF2A6F-D8CF-412A-BE62-49032D2B3B96}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3oc", "s3oc.csproj", "{93EF2A6F-D8CF-412A-BE62-49032D2B3B96}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
