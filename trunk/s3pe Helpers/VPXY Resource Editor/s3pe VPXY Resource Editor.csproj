@@ -43,24 +43,24 @@
   <ItemGroup>
     <Reference Include="s3pi.CustomForms, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
+      <HintPath>..\..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
     </Reference>
     <Reference Include="s3pi.DemoPlugins, Version=912.19.15.28587, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\s3pi\build\bin\Release\s3pi.DemoPlugins.dll</HintPath>
+      <HintPath>..\..\s3pi\build\bin\Release\s3pi.DemoPlugins.dll</HintPath>
     </Reference>
     <Reference Include="s3pi.GenericRCOLResource, Version=908.29.15.26596, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\s3pi\build\bin\Release\s3pi.GenericRCOLResource.dll</HintPath>
+      <HintPath>..\..\s3pi\build\bin\Release\s3pi.GenericRCOLResource.dll</HintPath>
     </Reference>
     <Reference Include="s3pi.Interfaces, Version=908.29.15.26595, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\s3pi\build\bin\Release\s3pi.Interfaces.dll</HintPath>
+      <HintPath>..\..\s3pi\build\bin\Release\s3pi.Interfaces.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Custom, Version=908.29.17.30214, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\s3pi\build\bin\Release\System.Custom.dll</HintPath>
+      <HintPath>..\..\s3pi\build\bin\Release\System.Custom.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -93,11 +93,11 @@
     <None Include="Resources\s3pe.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\s3pi\build\bin\Release\Extensions.txt">
+    <Content Include="..\..\s3pi\build\bin\Release\Extensions.txt">
       <Link>Extensions.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\s3pi\build\bin\Release\RCOLResources.txt">
+    <Content Include="..\..\s3pi\build\bin\Release\RCOLResources.txt">
       <Link>RCOLResources.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

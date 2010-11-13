@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+# Visual C# Express 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3pe OBJK Resource Editor", "s3pe OBJK Resource Editor.csproj", "{F2ABAB30-C375-4B67-8F50-0D4608C5BA5A}"
 EndProject
 Global

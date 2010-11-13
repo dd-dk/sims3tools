@@ -78,28 +78,28 @@
   <ItemGroup>
     <Reference Include="s3pi.CustomForms, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
+      <HintPath>..\..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="s3pi.DemoPlugins, Version=912.19.15.27992, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\s3pi\build\bin\Release\s3pi.DemoPlugins.dll</HintPath>
+      <HintPath>..\..\s3pi\build\bin\Release\s3pi.DemoPlugins.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="s3pi.Interfaces, Version=908.22.12.21448, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\s3pi\build\bin\Release\s3pi.Interfaces.dll</HintPath>
+      <HintPath>..\..\s3pi\build\bin\Release\s3pi.Interfaces.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="s3pi.ObjKeyResource, Version=908.22.12.21448, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\s3pi\build\bin\Release\s3pi.ObjKeyResource.dll</HintPath>
+      <HintPath>..\..\s3pi\build\bin\Release\s3pi.ObjKeyResource.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Custom, Version=908.22.14.24044, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\s3pi\build\bin\Release\System.Custom.dll</HintPath>
+      <HintPath>..\..\s3pi\build\bin\Release\System.Custom.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -123,7 +123,7 @@ echo /*"*/ [assembly: AssemblyVersion(%25version%25)] /*"*/
 )&gt;"$(ProjectDir)Properties\AssemblyVersion.cs"</PreBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="..\s3pi\build\bin\Release\Extensions.txt">
+    <Content Include="..\..\s3pi\build\bin\Release\Extensions.txt">
       <Link>Extensions.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
