@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>RigEditor</RootNamespace>
+    <AssemblyName>RigEditor</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+    <ApplicationIcon>Resources\s3pe.ico</ApplicationIcon>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\s3pe.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="RigResource, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\bin\Release\RigResource.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="s3pi.CustomForms">
+      <HintPath>..\lib\s3pi_current\s3pi.CustomForms.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="s3pi.DemoPlugins">
+      <HintPath>..\lib\s3pi_current\s3pi.DemoPlugins.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="s3pi.Interfaces">
+      <HintPath>..\lib\s3pi_current\s3pi.Interfaces.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Custom">
+      <HintPath>..\lib\s3pi_current\System.Custom.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyVersion.cs" />
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MatrixEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MatrixEditor.Designer.cs">
+      <DependentUpon>MatrixEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QuadEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="QuadEditor.Designer.cs">
+      <DependentUpon>QuadEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SingleEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SingleEditor.Designer.cs">
+      <DependentUpon>SingleEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TransformEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TransformEditor.Designer.cs">
+      <DependentUpon>TransformEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TripleEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TripleEditor.Designer.cs">
+      <DependentUpon>TripleEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UInt32Editor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UInt32Editor.Designer.cs">
+      <DependentUpon>UInt32Editor.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="MatrixEditor.resx">
+      <DependentUpon>MatrixEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="QuadEditor.resx">
+      <DependentUpon>QuadEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SingleEditor.resx">
+      <DependentUpon>SingleEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TransformEditor.resx">
+      <DependentUpon>TransformEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TripleEditor.resx">
+      <DependentUpon>TripleEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UInt32Editor.resx">
+      <DependentUpon>UInt32Editor.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="Resources\s3pe.ico" />
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="..\Atavera\bin\granny2.dll">
+      <Link>granny2.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Helpers\RigEditor.helper">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>set mydate=%25date: =0%25
+set dd=%25mydate:~0,2%25
+set mm=%25mydate:~3,2%25
+set yy=%25mydate:~8,2%25
+set mytime=%25time: =0%25
+set h=%25mytime:~0,2%25
+set version="%25yy%25%25mm%25.%25dd%25.%25h%25%25m%25.*"
+
+(echo using System.Reflection;
+echo using System.Runtime.CompilerServices;
+echo using System.Runtime.InteropServices;
+echo /*"*/ [assembly: AssemblyVersion(%25version%25)] /*"*/
+)&gt;"$(ProjectDir)Properties\AssemblyVersion.cs"</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

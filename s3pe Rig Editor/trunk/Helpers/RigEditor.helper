@@ -1,0 +1,5 @@
+ResourceType: 0x8EAF13DE
+Label: Edit
+Command: RigEditor
+Arguments: "{}"
+Desc: Edits bones in a RIG resource
