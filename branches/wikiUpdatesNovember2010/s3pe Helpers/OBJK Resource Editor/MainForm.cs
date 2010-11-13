@@ -28,7 +28,7 @@ using ObjKeyResource;
 
 namespace s3pe_OBJK_Resource_Editor
 {
-    public partial class MainForm : Form, s3pi.DemoPlugins.IRunHelper
+    public partial class MainForm : Form, s3pi.Helpers.IRunHelper
     {
         const string myName = "s3pe OBJK Resource Editor";
         public MainForm()

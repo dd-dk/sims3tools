@@ -28,7 +28,7 @@ using s3pi.GenericRCOLResource;
 
 namespace s3pe_VPXY_Resource_Editor
 {
-    public partial class MainForm : Form, s3pi.DemoPlugins.IRunHelper
+    public partial class MainForm : Form, s3pi.Helpers.IRunHelper
     {
         const string myName = "s3pe VPXY Resource Editor";
         public MainForm()
