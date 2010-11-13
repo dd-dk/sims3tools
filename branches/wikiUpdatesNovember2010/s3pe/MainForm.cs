@@ -406,7 +406,7 @@ namespace S3PIDemoFE
 
         #region Current Resource
         string resourceName = "";
-        s3pi.DemoPlugins.DemoPlugins helpers = null;
+        s3pi.Helpers.HelperManager helpers = null;
 
         Exception resException = null;
         IResource resource = null;
@@ -1444,11 +1444,11 @@ namespace S3PIDemoFE
 
         void setExternalButtons()
         {
-            helpers = new s3pi.DemoPlugins.DemoPlugins(browserWidget1.SelectedResource, resource);
+            helpers = new s3pi.Helpers.HelperManager(browserWidget1.SelectedResource, resource);
             if (S3PIDemoFE.Properties.Settings.Default.DisabledHelpers != null)
                 foreach (string id in S3PIDemoFE.Properties.Settings.Default.DisabledHelpers)
                 {
-                    List<s3pi.DemoPlugins.DemoPlugins.Helper> disabled = new List<s3pi.DemoPlugins.DemoPlugins.Helper>();
+                    List<s3pi.Helpers.HelperManager.Helper> disabled = new List<s3pi.Helpers.HelperManager.Helper>();
                     foreach (var helper in helpers) if (helper.id == id) disabled.Add(helper);
                     foreach (var helper in disabled) helpers.Remove(helper);
                 }
@@ -1774,7 +1774,7 @@ namespace S3PIDemoFE
                 this.Enabled = false;
                 Application.DoEvents();
 
-                MemoryStream ms = s3pi.DemoPlugins.DemoPlugins.Edit(key, res,
+                MemoryStream ms = s3pi.Helpers.HelperManager.Edit(key, res,
                     S3PIDemoFE.Properties.Settings.Default.TextEditorCmd,
                     S3PIDemoFE.Properties.Settings.Default.TextEditorWantsQuotes,
                     S3PIDemoFE.Properties.Settings.Default.TextEditorIgnoreTS);
@@ -1794,7 +1794,7 @@ namespace S3PIDemoFE
                 this.Enabled = false;
                 Application.DoEvents();
 
-                MemoryStream ms = s3pi.DemoPlugins.DemoPlugins.Edit(key, res,
+                MemoryStream ms = s3pi.Helpers.HelperManager.Edit(key, res,
                     S3PIDemoFE.Properties.Settings.Default.HexEditorCmd,
                     S3PIDemoFE.Properties.Settings.Default.HexEditorWantsQuotes,
                     S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS);

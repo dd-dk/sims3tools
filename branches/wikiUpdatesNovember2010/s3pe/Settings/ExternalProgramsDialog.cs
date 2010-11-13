@@ -74,9 +74,9 @@ namespace S3PIDemoFE.Settings
         List<HelperControls> lhc = new List<HelperControls>();
         void InitaliseHelpers()
         {
-            s3pi.DemoPlugins.DemoPlugins.Reload();
+            s3pi.Helpers.HelperManager.Reload();
             int tabIndex = 4;
-            foreach (var helper in s3pi.DemoPlugins.DemoPlugins.Helpers)
+            foreach (var helper in s3pi.Helpers.HelperManager.Helpers)
             {
                 HelperControls hc = new HelperControls(helper.id, ref tabIndex);
                 lhc.Add(hc);
@@ -117,7 +117,7 @@ namespace S3PIDemoFE.Settings
         {
             Button btn = sender as Button;
             string id = btn.Name.Substring(3);
-            foreach (var helper in s3pi.DemoPlugins.DemoPlugins.Helpers)
+            foreach (var helper in s3pi.Helpers.HelperManager.Helpers)
             {
                 if (helper.id != id) continue;
                 string s = "";
