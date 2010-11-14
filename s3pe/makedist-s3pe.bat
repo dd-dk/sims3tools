@@ -4,7 +4,7 @@ set ConfigurationName=Release
 set base=%TargetName%
 rem -%ConfigurationName%
 set src=%TargetName%-Source
-set viewDDS=ViewDDS\bin\ViewDDS
+set viewDDS=s3pe Helpers\ViewDDS\bin\ViewDDS
 
 set out=S:\Sims3\Tools\s3peDemoFE\
 set helpFolder=%out%\HelpFiles
@@ -44,7 +44,7 @@ rem there shouldn't be any to delete...
 del /q /f %out%%TargetName%*%suffix%.*
 
 pushd ..
-7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" S3PIDemoFE
+7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" s3pe
 popd
 
 
