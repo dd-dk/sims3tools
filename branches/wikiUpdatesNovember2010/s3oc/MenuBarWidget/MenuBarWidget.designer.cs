@@ -42,12 +42,12 @@
             this.cfirToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cwalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.crmtToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.cfndToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.cwstToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.crstToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cprxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cttlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cwatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cfndToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cwstToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.crstToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.largeIconsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -61,16 +61,17 @@
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameFoldersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.userNameToopStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.automaticUpdateCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.diagnosticsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkForUpdateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.checkForUpdateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.automaticUpdateCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.advancedCloningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SuspendLayout();
             // 
             // fileToolStripMenuItem
@@ -116,7 +117,13 @@
             this.ctptToolStripMenuItem,
             this.cfirToolStripMenuItem,
             this.cwalToolStripMenuItem,
-            this.crmtToolStripMenuItem});
+            this.crmtToolStripMenuItem,
+            this.cprxToolStripMenuItem,
+            this.cttlToolStripMenuItem,
+            this.cwatToolStripMenuItem,
+            this.cfndToolStripMenuItem,
+            this.cwstToolStripMenuItem,
+            this.crstToolStripMenuItem});
             this.cloningToolStripMenuItem.Name = "cloningToolStripMenuItem";
             this.cloningToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.cloningToolStripMenuItem.Text = "&Cloning";
@@ -203,47 +210,47 @@
             this.crmtToolStripMenuItem.Text = "Roof patterns";
             this.crmtToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
             // 
-            // cfndToolStripMenuItem
-            // 
-            this.cfndToolStripMenuItem.Name = "cfndToolStripMenuItem";
-            this.cfndToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
-            this.cfndToolStripMenuItem.Text = "Foundations";
-            this.cfndToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
-            // 
-            // cwstToolStripMenuItem
-            // 
-            this.cwstToolStripMenuItem.Name = "cwstToolStripMenuItem";
-            this.cwstToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
-            this.cwstToolStripMenuItem.Text = "Wall types";
-            this.cwstToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
-            // 
-            // crstToolStripMenuItem
-            // 
-            this.crstToolStripMenuItem.Name = "crstToolStripMenuItem";
-            this.crstToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
-            this.crstToolStripMenuItem.Text = "Roof Style";
-            this.crstToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
-            // 
             // cprxToolStripMenuItem
             // 
             this.cprxToolStripMenuItem.Name = "cprxToolStripMenuItem";
-            this.cprxToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.cprxToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.cprxToolStripMenuItem.Text = "Proxy product";
             this.cprxToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
             // 
             // cttlToolStripMenuItem
             // 
             this.cttlToolStripMenuItem.Name = "cttlToolStripMenuItem";
-            this.cttlToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.cttlToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.cttlToolStripMenuItem.Text = "Terrain geometry brush";
             this.cttlToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
             // 
             // cwatToolStripMenuItem
             // 
             this.cwatToolStripMenuItem.Name = "cwatToolStripMenuItem";
-            this.cwatToolStripMenuItem.Size = new System.Drawing.Size(198, 22);
+            this.cwatToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.cwatToolStripMenuItem.Text = "Terrain water brush";
             this.cwatToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
+            // cfndToolStripMenuItem
+            // 
+            this.cfndToolStripMenuItem.Name = "cfndToolStripMenuItem";
+            this.cfndToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.cfndToolStripMenuItem.Text = "Foundations";
+            this.cfndToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
+            // cwstToolStripMenuItem
+            // 
+            this.cwstToolStripMenuItem.Name = "cwstToolStripMenuItem";
+            this.cwstToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.cwstToolStripMenuItem.Text = "Wall types";
+            this.cwstToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
+            // crstToolStripMenuItem
+            // 
+            this.crstToolStripMenuItem.Name = "crstToolStripMenuItem";
+            this.crstToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.crstToolStripMenuItem.Text = "Roof Style";
+            this.crstToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
             // 
             // viewToolStripMenuItem
             // 
@@ -329,6 +336,7 @@
             this.gameFoldersToolStripMenuItem,
             this.userNameToopStripMenuItem,
             this.automaticUpdateCheckToolStripMenuItem,
+            this.advancedCloningToolStripMenuItem,
             this.toolStripSeparator3,
             this.diagnosticsToolStripMenuItem});
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
@@ -339,14 +347,14 @@
             // gameFoldersToolStripMenuItem
             // 
             this.gameFoldersToolStripMenuItem.Name = "gameFoldersToolStripMenuItem";
-            this.gameFoldersToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+            this.gameFoldersToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
             this.gameFoldersToolStripMenuItem.Text = "Game &Folders...";
             this.gameFoldersToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // userNameToopStripMenuItem
             // 
             this.userNameToopStripMenuItem.Name = "userNameToopStripMenuItem";
-            this.userNameToopStripMenuItem.Size = new System.Drawing.Size(153, 22);
+            this.userNameToopStripMenuItem.Size = new System.Drawing.Size(192, 22);
             this.userNameToopStripMenuItem.Text = "Creator &Name...";
             this.userNameToopStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
@@ -357,15 +365,22 @@
             this.automaticUpdateCheckToolStripMenuItem.Text = "Automatic &Update Check";
             this.automaticUpdateCheckToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
+            // advancedCloningToolStripMenuItem
+            // 
+            this.advancedCloningToolStripMenuItem.Name = "advancedCloningToolStripMenuItem";
+            this.advancedCloningToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.advancedCloningToolStripMenuItem.Text = "Advanced Cloning Menu";
+            this.advancedCloningToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(150, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(189, 6);
             // 
             // diagnosticsToolStripMenuItem
             // 
             this.diagnosticsToolStripMenuItem.Name = "diagnosticsToolStripMenuItem";
-            this.diagnosticsToolStripMenuItem.Size = new System.Drawing.Size(153, 22);
+            this.diagnosticsToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
             this.diagnosticsToolStripMenuItem.Text = "&Diagnostics";
             this.diagnosticsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
@@ -387,19 +402,19 @@
             // 
             this.contentsToolStripMenuItem.Name = "contentsToolStripMenuItem";
             this.contentsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F1;
-            this.contentsToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.contentsToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
             this.contentsToolStripMenuItem.Text = "&Contents...";
             this.contentsToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(146, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(166, 6);
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
             this.aboutToolStripMenuItem.Text = "&About...";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
             // 
@@ -413,14 +428,14 @@
             // warrantyToolStripMenuItem
             // 
             this.warrantyToolStripMenuItem.Name = "warrantyToolStripMenuItem";
-            this.warrantyToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.warrantyToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
             this.warrantyToolStripMenuItem.Text = "&Warranty...";
             this.warrantyToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
             // 
             // licenceToolStripMenuItem
             // 
             this.licenceToolStripMenuItem.Name = "licenceToolStripMenuItem";
-            this.licenceToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
+            this.licenceToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
             this.licenceToolStripMenuItem.Text = "&Licence...";
             this.licenceToolStripMenuItem.Click += new System.EventHandler(this.tsMBH_Click);
             // 
@@ -484,5 +499,6 @@
         private System.Windows.Forms.ToolStripMenuItem licenceToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem automaticUpdateCheckToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem checkForUpdateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem advancedCloningToolStripMenuItem;
     }
 }
