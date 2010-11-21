@@ -312,10 +312,8 @@ namespace S3PIDemoFE
                         if (typeof(Enum).IsAssignableFrom(fieldType))
                             return fieldType.GetCustomAttributes(typeof(FlagsAttribute), true).Length == 0 ? typeof(EnumChooserCTD) : typeof(EnumFlagsCTD);
 
-                        // Must test Index fields before IConvertible
-                        if (hasTGIBlockListContentField) return typeof(TGIBlockListIndexCTD);
-
-                        if (typeof(IConvertible).IsAssignableFrom(fieldType) || typeof(Boolset).Equals(fieldType)) return typeof(AsHexCTD);
+                        if (typeof(IConvertible).IsAssignableFrom(fieldType))
+                            return hasTGIBlockListContentField ? typeof(TGIBlockListIndexCTD) : typeof(AsHexCTD);
 
                         if (typeof(IResourceKey).IsAssignableFrom(fieldType)) return typeof(IResourceKeyCTD);
 
@@ -327,7 +325,6 @@ namespace S3PIDemoFE
                         // Arrays
                         if (fieldType.HasElementType
                             && (typeof(IConvertible).IsAssignableFrom(fieldType.GetElementType())
-                            || typeof(Boolset).Equals(fieldType.GetElementType())
                             || typeof(AApiVersionedFields).IsAssignableFrom(fieldType.GetElementType())
                             ))
                             return typeof(ArrayCTD);
@@ -467,8 +464,6 @@ namespace S3PIDemoFE
                     try
                     {
                         AApiVersionedFieldsCTD.TypedValuePropertyDescriptor pd = (AApiVersionedFieldsCTD.TypedValuePropertyDescriptor)context.PropertyDescriptor;
-                        if (typeof(Boolset).Equals(pd.FieldType))
-                            return new Boolset(str);
                         ulong num = Convert.ToUInt64(str, str.StartsWith("0x", StringComparison.InvariantCultureIgnoreCase) ? 16 : 10);
                         return Convert.ChangeType(num, pd.FieldType);
                     }
@@ -553,8 +548,6 @@ namespace S3PIDemoFE
                     try
                     {
                         AApiVersionedFieldsCTD.TypedValuePropertyDescriptor pd = (AApiVersionedFieldsCTD.TypedValuePropertyDescriptor)context.PropertyDescriptor;
-                        if (typeof(Boolset).Equals(pd.FieldType))
-                            return new Boolset(str);
                         ulong num = Convert.ToUInt64(str, str.StartsWith("0x", StringComparison.InvariantCultureIgnoreCase) ? 16 : 10);
                         return Convert.ChangeType(num, pd.FieldType);
                     }
