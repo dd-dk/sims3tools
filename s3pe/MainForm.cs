@@ -21,14 +21,15 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Windows.Forms;
-using s3pi.Interfaces;
-using s3pi.Package;
-using s3pi.Extensions;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
+using s3pi.Interfaces;
+using s3pi.Package;
+using s3pi.Extensions;
 
 namespace S3PIDemoFE
 {
@@ -44,7 +45,7 @@ namespace S3PIDemoFE
         static MainForm()
         {
             foreach (string s in unwantedFields) fields.Remove(s);
-            fields.Sort(byElementPriority);
+            //fields.Sort(byElementPriority);
 
             List<KeyValuePair<string, Type>> typeMap = new List<KeyValuePair<string, Type>>(s3pi.WrapperDealer.WrapperDealer.TypeMap);
             s3pi.WrapperDealer.WrapperDealer.Disabled.Clear();
@@ -1222,6 +1223,17 @@ namespace S3PIDemoFE
         {
             if (!S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview && !ddsEnableWarningIssued)
             {
+                Type type = null;
+                try { type = GetDDSWidgetType(); }
+                catch { type = null; }
+                if (type == null)
+                {
+                    CopyableMessageBox.Show("The DDS Preview feature is disabled as the\ns3pe.DDSPreviewWidget.dll cannot be loaded.\n"
+                        , "Enable DDS Preview",
+                        CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
+                    return;
+                }
+
                 ddsEnableWarningIssued = true;
                 if (CopyableMessageBox.Show("The DDS Preview feature is in early testing.\n" + "Please save your work frequently if you enable it.\n" +
                     "\nClick OK to continue or Cancel to leave the feature disabled.", "Enable DDS Preview",
@@ -1644,6 +1656,18 @@ namespace S3PIDemoFE
             if (!(sender as Form).IsDisposed) (sender as Form).Dispose();
         }
 
+
+        Type GetDDSWidgetType()
+        {
+            string folder = Path.GetDirectoryName(this.GetType().Assembly.Location);
+            string assemblyName = Path.Combine(folder, "s3pe.DDSPreviewWidget.dll");
+            if (!File.Exists(assemblyName)) return null;
+            Assembly assy = Assembly.LoadFile(assemblyName);
+            Type ddsWidget = assy.GetType("S3PIDemoFE.DDSWidget.DDSWidget");
+            if (ddsWidget == null || !ddsWidget.IsSubclassOf(typeof(Control))) return null;
+            return ddsWidget;
+        }
+
         Control getValueControl()
         {
             Control res = null;
@@ -1651,17 +1675,40 @@ namespace S3PIDemoFE
             {
                 try
                 {
-                    DDSWidget.DDSWidget dds = new DDSWidget.DDSWidget();
-                    dds.DDS = resource.Stream;
-                    res = dds;
+                    Type ddsWidget = GetDDSWidgetType();
+                    if (ddsWidget == null) return null;
+                    ConstructorInfo ctor = ddsWidget.GetConstructor(new Type[] { });
+                    if (ctor == null) return null;
+                    PropertyInfo pi = ddsWidget.GetProperty("DDS");
+                    if (pi == null) return null;
+
+                    object dds = ctor.Invoke(new object[] { });
+                    pi.SetValue(dds, resource.Stream, null);
+                    res = (Control)dds;
                 }
-                catch(DDSWidget.DDSException e)
+                catch (DDSWidget.DDSException e)
                 {
                     if (!ddsFailedWarningIssued)
                     {
                         ddsFailedWarningIssued = true;
                         ddsEnableWarningIssued = false;
-                        CopyableMessageBox.IssueException(e, "DDS Preview failed:\n" + e.Message + "\n\nDDS Preview has been disabled\n", "Cannot preview DDS");
+                        CopyableMessageBox.IssueException(e, "DDS Preview failed:\n" + e.Message + "\n\nDDS Preview has been disabled\n"
+                            + "You can prevent preview and suppress this message\nby removing s3pe.DDSPreviewWidget.dll from the s3pe folder\n"
+                            , "Cannot preview DDS");
+                        S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview = false;
+                        menuBarWidget1.Checked(MenuBarWidget.MB.MBS_previewDDS, S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview);
+                    }
+                    return null;
+                }
+                catch(Exception e)
+                {
+                    if (!ddsFailedWarningIssued)
+                    {
+                        ddsFailedWarningIssued = true;
+                        ddsEnableWarningIssued = false;
+                        CopyableMessageBox.IssueException(e, "DDS Preview failed:\n" + e.Message + "\n\nDDS Preview has been disabled\n"
+                            + "You can prevent preview and suppress this message\nby removing s3pe.DDSPreviewWidget.dll from the s3pe folder\n"
+                            , "Cannot preview DDS");
                         S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview = false;
                         menuBarWidget1.Checked(MenuBarWidget.MB.MBS_previewDDS, S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview);
                     }
