@@ -241,7 +241,7 @@ namespace s3pe_VPXY_Resource_Editor
             int tabindex = 1;
             for (int i = 0; i < entry.TGIIndexes.Count; i++)
             {
-                AddTableRowTBC(tlpLinkedParts, offset + 1 + i, (int)entry.TGIIndexes[i].Val, ref tabindex);
+                AddTableRowTBC(tlpLinkedParts, offset + 1 + i, entry.TGIIndexes[i], ref tabindex);
             }
             tlpLPControls.Enabled = tlpLinkedParts.Enabled = true;
             tlpLinkedParts.ResumeLayout();
@@ -360,7 +360,7 @@ namespace s3pe_VPXY_Resource_Editor
                 if (currentPartEntry == -1) return;
                 VPXY.Entry00 e00 = ltbc[currentPartEntry].Tag as VPXY.Entry00;
                 int i = lLPtbc.IndexOf(tbc);
-                e00.TGIIndexes[i].Val = (tbc.SelectedIndex >= 0) ? tbc.SelectedIndex : 0;
+                e00.TGIIndexes[i] = (tbc.SelectedIndex >= 0) ? tbc.SelectedIndex : 0;
             }
         }
 
@@ -498,7 +498,7 @@ namespace s3pe_VPXY_Resource_Editor
             VPXY.Entry00 e00 = ltbc[currentPartEntry].Tag as VPXY.Entry00;
             if (currentLPEntry < 1 || e00.TGIIndexes.Count < 2) return;
 
-            int val = e00.TGIIndexes[currentLPEntry].Val;
+            int val = e00.TGIIndexes[currentLPEntry];
             e00.TGIIndexes.RemoveAt(currentLPEntry);
             e00.TGIIndexes.Insert(currentLPEntry - 1, val);
 
@@ -511,7 +511,7 @@ namespace s3pe_VPXY_Resource_Editor
             VPXY.Entry00 e00 = ltbc[currentPartEntry].Tag as VPXY.Entry00;
             if (currentLPEntry == e00.TGIIndexes.Count - 1 || e00.TGIIndexes.Count < 2) return;
 
-            int val = e00.TGIIndexes[currentLPEntry].Val;
+            int val = e00.TGIIndexes[currentLPEntry];
             e00.TGIIndexes.RemoveAt(currentLPEntry);
             e00.TGIIndexes.Insert(currentLPEntry + 1, val);
 
