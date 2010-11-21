@@ -40,9 +40,28 @@
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
     <Reference Include="s3pi.CustomForms, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
@@ -70,12 +89,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.WrapperDealer.dll</HintPath>
     </Reference>
-    <Reference Include="SlimDX, Version=2.0.10.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="SlimDX.Wpf">
-      <HintPath>C:\Users\Peter L Jones\Documents\Visual Studio 2010\SlimDX Samples (June 2010)\Direct3D9\WPF Interop\SlimDX.Wpf\bin\Release\SlimDX.Wpf.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Custom, Version=906.19.14.24842, Culture=neutral, PublicKeyToken=dbb438eea69badfa, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -85,21 +98,8 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="UIAutomationProvider" />
-    <Reference Include="WindowsBase" />
-    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DDSWidget\DDSRenderEngine.cs" />
-    <Compile Include="DDSWidget\DDSSurface.xaml.cs">
-      <DependentUpon>DDSSurface.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="DDSWidget\DDSWidget.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="DDSWidget\DDSWidget.Designer.cs">
-      <DependentUpon>DDSWidget.cs</DependentUpon>
-    </Compile>
     <Compile Include="Import\ExperimentalDBCWarning.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -206,9 +206,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ControlPanel\ControlPanel.resx">
       <DependentUpon>ControlPanel.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DDSWidget\DDSWidget.resx">
-      <DependentUpon>DDSWidget.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Filter\FilterField.resx">
       <DependentUpon>FilterField.cs</DependentUpon>
@@ -341,10 +338,6 @@
       <Link>Acknowledgements.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\s3pi\build\bin\Release\ComplateResources.txt">
-      <Link>ComplateResources.txt</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="..\s3pi\build\bin\Release\Extensions.txt">
       <Link>Extensions.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -459,10 +452,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="DDSWidget\DDSSurface.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
+    <ProjectReference Include="DDSPreviewWidget\DDSPreviewWidget.csproj">
+      <Project>{92EB2F4A-193C-4122-9BBD-5B728A12D25A}</Project>
+      <Name>DDSPreviewWidget</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
