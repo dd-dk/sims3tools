@@ -49,12 +49,25 @@ namespace ObjectCloner
                 //Tools
                 searchToolStripMenuItem,
                 //Settings
-                gameFoldersToolStripMenuItem, userNameToopStripMenuItem, automaticUpdateCheckToolStripMenuItem, diagnosticsToolStripMenuItem,
+                gameFoldersToolStripMenuItem, userNameToopStripMenuItem, automaticUpdateCheckToolStripMenuItem,
+                advancedCloningToolStripMenuItem,
+                diagnosticsToolStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, checkForUpdateToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
             AutoUpdate.Checker.AutoUpdateChoice_Changed += new EventHandler(Checker_AutoUpdateChoice_Changed);
             Checker_AutoUpdateChoice_Changed(null, null);
+
+            advancedCloningToolStripMenuItem.CheckedChanged += new EventHandler(advancedCloningToolStripMenuItem_CheckedChanged);
+            advancedCloningToolStripMenuItem_CheckedChanged(null, null);
+        }
+
+        void advancedCloningToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        {
+            cprxToolStripMenuItem.Visible = cttlToolStripMenuItem.Visible =
+            cwatToolStripMenuItem.Visible =
+            cfndToolStripMenuItem.Visible = cwstToolStripMenuItem.Visible =
+            crstToolStripMenuItem.Visible = advancedCloningToolStripMenuItem.Checked;
         }
 
         void Checker_AutoUpdateChoice_Changed(object sender, EventArgs e)
@@ -82,7 +95,7 @@ namespace ObjectCloner
             MBV_tiles, MBV_largeIcons, MBV_smallIcons, MBV_list, MBV_detailedList,
             MBV_icons,
             MBT_search,
-            MBS_sims3Folder, MBS_userName, MBS_updates, MBS_diagnostics,
+            MBS_sims3Folder, MBS_userName, MBS_updates, MBS_advanced, MBS_diagnostics,
             MBH_contents, MBH_about, MBH_update, MBH_warranty, MBH_licence,
         }
 
