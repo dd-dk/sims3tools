@@ -6,7 +6,7 @@ rem -%ConfigurationName%
 set src=%TargetName%-Source
 set viewDDS=s3pe Helpers\ViewDDS\bin\ViewDDS
 
-set out=S:\Sims3\Tools\s3peDemoFE\
+set out=S:\Sims3\Tools\s3pe\
 set helpFolder=%out%\HelpFiles
 
 set mydate=%date: =0%
