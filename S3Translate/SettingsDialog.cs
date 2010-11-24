@@ -36,6 +36,7 @@ namespace S3Translate
         public SettingsDialog()
         {
             InitializeComponent();
+            this.ClientSize = new Size(tableLayoutPanel1.Bounds.Width, tableLayoutPanel1.Bounds.Height);
 
             cmbSourceLang.DataSource = Form1.locales.AsReadOnly();
             try { cmbSourceLang.SelectedIndex = Settings.Default.SourceLocale; }
