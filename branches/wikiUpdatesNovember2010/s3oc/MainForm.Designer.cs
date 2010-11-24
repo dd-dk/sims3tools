@@ -64,6 +64,8 @@
             this.label8 = new System.Windows.Forms.Label();
             this.tbNameGUID = new System.Windows.Forms.TextBox();
             this.tbObjName = new System.Windows.Forms.TextBox();
+            this.label26 = new System.Windows.Forms.Label();
+            this.tbPackage = new System.Windows.Forms.TextBox();
             this.tpDetail = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.tlpOther = new System.Windows.Forms.TableLayoutPanel();
@@ -155,11 +157,11 @@
             // toolStripContainer1.ContentPanel
             // 
             this.toolStripContainer1.ContentPanel.Controls.Add(this.splitContainer1);
-            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(671, 554);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(671, 574);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer1.Name = "toolStripContainer1";
-            this.toolStripContainer1.Size = new System.Drawing.Size(671, 578);
+            this.toolStripContainer1.Size = new System.Drawing.Size(671, 598);
             this.toolStripContainer1.TabIndex = 3;
             this.toolStripContainer1.Text = "toolStripContainer1";
             // 
@@ -179,7 +181,7 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.tlpTask);
             this.splitContainer1.Panel2.Controls.Add(this.tabControl1);
-            this.splitContainer1.Size = new System.Drawing.Size(671, 554);
+            this.splitContainer1.Size = new System.Drawing.Size(671, 574);
             this.splitContainer1.SplitterDistance = 189;
             this.splitContainer1.TabIndex = 0;
             this.splitContainer1.TabStop = false;
@@ -193,7 +195,7 @@
             this.tlpTask.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpTask.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tlpTask.Controls.Add(this.flowLayoutPanel1, 1, 1);
-            this.tlpTask.Location = new System.Drawing.Point(1, 475);
+            this.tlpTask.Location = new System.Drawing.Point(1, 495);
             this.tlpTask.Name = "tlpTask";
             this.tlpTask.RowCount = 3;
             this.tlpTask.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -284,7 +286,7 @@
             this.tabControl1.Location = new System.Drawing.Point(1, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(470, 469);
+            this.tabControl1.Size = new System.Drawing.Size(470, 489);
             this.tabControl1.TabIndex = 1;
             // 
             // tpMain
@@ -294,7 +296,7 @@
             this.tpMain.Location = new System.Drawing.Point(4, 22);
             this.tpMain.Name = "tpMain";
             this.tpMain.Padding = new System.Windows.Forms.Padding(3);
-            this.tpMain.Size = new System.Drawing.Size(462, 443);
+            this.tpMain.Size = new System.Drawing.Size(462, 463);
             this.tpMain.TabIndex = 0;
             this.tpMain.Text = "Overview";
             this.tpMain.UseVisualStyleBackColor = true;
@@ -326,9 +328,12 @@
             this.tlpOverview.Controls.Add(this.label8, 0, 2);
             this.tlpOverview.Controls.Add(this.tbNameGUID, 1, 3);
             this.tlpOverview.Controls.Add(this.tbObjName, 1, 2);
+            this.tlpOverview.Controls.Add(this.label26, 0, 11);
+            this.tlpOverview.Controls.Add(this.tbPackage, 1, 11);
             this.tlpOverview.Location = new System.Drawing.Point(0, 0);
             this.tlpOverview.Name = "tlpOverview";
-            this.tlpOverview.RowCount = 12;
+            this.tlpOverview.RowCount = 13;
+            this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -341,7 +346,7 @@
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpOverview.Size = new System.Drawing.Size(462, 436);
+            this.tlpOverview.Size = new System.Drawing.Size(462, 460);
             this.tlpOverview.TabIndex = 0;
             // 
             // tableLayoutPanel2
@@ -591,6 +596,25 @@
             this.tbObjName.Size = new System.Drawing.Size(366, 20);
             this.tbObjName.TabIndex = 4;
             // 
+            // label26
+            // 
+            this.label26.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label26.AutoSize = true;
+            this.label26.Location = new System.Drawing.Point(37, 436);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(50, 13);
+            this.label26.TabIndex = 20;
+            this.label26.Text = "Package";
+            // 
+            // tbPackage
+            // 
+            this.tbPackage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbPackage.Location = new System.Drawing.Point(93, 433);
+            this.tbPackage.Name = "tbPackage";
+            this.tbPackage.ReadOnly = true;
+            this.tbPackage.Size = new System.Drawing.Size(366, 20);
+            this.tbPackage.TabIndex = 21;
+            // 
             // tpDetail
             // 
             this.tpDetail.AutoScroll = true;
@@ -598,7 +622,7 @@
             this.tpDetail.Location = new System.Drawing.Point(4, 22);
             this.tpDetail.Name = "tpDetail";
             this.tpDetail.Padding = new System.Windows.Forms.Padding(3);
-            this.tpDetail.Size = new System.Drawing.Size(462, 443);
+            this.tpDetail.Size = new System.Drawing.Size(462, 550);
             this.tpDetail.TabIndex = 1;
             this.tpDetail.Text = "Details";
             this.tpDetail.UseVisualStyleBackColor = true;
@@ -711,7 +735,7 @@
             this.tpFlagsRoom.Controls.Add(this.tlpFlagsRoom);
             this.tpFlagsRoom.Location = new System.Drawing.Point(4, 22);
             this.tpFlagsRoom.Name = "tpFlagsRoom";
-            this.tpFlagsRoom.Size = new System.Drawing.Size(462, 443);
+            this.tpFlagsRoom.Size = new System.Drawing.Size(462, 550);
             this.tpFlagsRoom.TabIndex = 2;
             this.tpFlagsRoom.Text = "Room Flags";
             this.tpFlagsRoom.UseVisualStyleBackColor = true;
@@ -829,7 +853,7 @@
             this.tpFlagsFunc.Controls.Add(this.tlpFlagsFunc);
             this.tpFlagsFunc.Location = new System.Drawing.Point(4, 22);
             this.tpFlagsFunc.Name = "tpFlagsFunc";
-            this.tpFlagsFunc.Size = new System.Drawing.Size(462, 443);
+            this.tpFlagsFunc.Size = new System.Drawing.Size(462, 550);
             this.tpFlagsFunc.TabIndex = 3;
             this.tpFlagsFunc.Text = "Function Flags";
             this.tpFlagsFunc.UseVisualStyleBackColor = true;
@@ -947,7 +971,7 @@
             this.tpFlagsBuild.Controls.Add(this.tlpFlagsBuildEtc);
             this.tpFlagsBuild.Location = new System.Drawing.Point(4, 22);
             this.tpFlagsBuild.Name = "tpFlagsBuild";
-            this.tpFlagsBuild.Size = new System.Drawing.Size(462, 443);
+            this.tpFlagsBuild.Size = new System.Drawing.Size(462, 550);
             this.tpFlagsBuild.TabIndex = 4;
             this.tpFlagsBuild.Text = "Build Flags";
             this.tpFlagsBuild.UseVisualStyleBackColor = true;
@@ -1005,7 +1029,7 @@
             this.tpFlagsMisc.Controls.Add(this.tableLayoutPanel4);
             this.tpFlagsMisc.Location = new System.Drawing.Point(4, 22);
             this.tpFlagsMisc.Name = "tpFlagsMisc";
-            this.tpFlagsMisc.Size = new System.Drawing.Size(462, 443);
+            this.tpFlagsMisc.Size = new System.Drawing.Size(462, 550);
             this.tpFlagsMisc.TabIndex = 5;
             this.tpFlagsMisc.Text = "Misc Flags";
             this.tpFlagsMisc.UseVisualStyleBackColor = true;
@@ -1145,7 +1169,7 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripProgressBar1,
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 578);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 598);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(671, 22);
             this.statusStrip1.TabIndex = 2;
@@ -1221,7 +1245,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(671, 600);
+            this.ClientSize = new System.Drawing.Size(671, 620);
             this.Controls.Add(this.toolStripContainer1);
             this.Controls.Add(this.statusStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -1387,6 +1411,8 @@
         private System.Windows.Forms.TableLayoutPanel tlpOther;
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.Label label26;
+        private System.Windows.Forms.TextBox tbPackage;
     }
 }
 

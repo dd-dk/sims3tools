@@ -439,6 +439,9 @@ namespace ObjectCloner
         List<IPackage> objPkgs;
         List<IPackage> ddsPkgs;
         List<IPackage> tmbPkgs;
+        List<string> objPaths;
+        List<string> ddsPaths;
+        List<string> tmbPaths;
 
         Item selectedItem;
         Image replacementForThumbs;
@@ -1508,6 +1511,7 @@ namespace ObjectCloner
             ckbCopyToAll.Checked = false;
             tbPrice.Text = "";
             tbProductStatus.Text = "";
+            tbPackage.Text = "";
         }
         void clearDetails() { IterateTLP(tlpObjectDetail, clearTLP); }
         void clearOther() { IterateTLP(tlpOther, clearTLP); }
@@ -1570,6 +1574,7 @@ namespace ObjectCloner
             tbCatlgDesc.Text = English[(ulong)common["DescGUID"].Value];
             tbPrice.Text = common["Price"].Value + "";
             tbProductStatus.Text = "0x" + ((byte)common["BuildBuyProductStatusFlags"].Value).ToString("X2");
+            tbPackage.Text = objPaths[objPkgs.IndexOf(item.Package)];
         }
         void fillDetails(Item item) { IterateTLP(tlpObjectDetail, (l, c) => fillControl(item, l, c)); }
         void fillOther(Item item) { IterateTLP(tlpOther, (l, c) => fillControl(item, l, c)); }
@@ -2902,6 +2907,7 @@ namespace ObjectCloner
             currentCatalogType = 0;
             currentPackage = filename;
             tmbPkgs = ddsPkgs = objPkgs = new List<IPackage>(new IPackage[] { pkg, });
+            tmbPaths = ddsPaths = objPaths = new List<string>(new string[] { filename, });
 
             mode = Mode.Fix;
             fileNewOpen(type, type != 0);
@@ -2949,9 +2955,9 @@ namespace ObjectCloner
             if (currentCatalogType != resourceType)
             {
                 ClosePkg();
-                setList(out objPkgs, ini_fb0);
-                setList(out ddsPkgs, ini_fb2);
-                setList(out tmbPkgs, ini_tmb);
+                setList(out objPkgs, out objPaths, ini_fb0);
+                setList(out ddsPkgs, out ddsPaths, ini_fb2);
+                setList(out tmbPkgs, out tmbPaths, ini_tmb);
                 currentCatalogType = resourceType;
             }
 
@@ -2970,14 +2976,15 @@ namespace ObjectCloner
             return true;
         }
         bool doCheckPackageLists() { return ini_fb0 != null && ini_fb2 != null && ini_tmb != null && ini_fb0.Count > 0; }
-        void setList(out List<IPackage> pkgs, List<string> paths)
+        void setList(out List<IPackage> pkgs, out List<string> outPaths, List<string> inPaths)
         {
             pkgs = new List<IPackage>();
+            outPaths = new List<string>();
 
-            if (paths == null) return;
-            foreach (string file in paths)
+            if (inPaths == null) return;
+            foreach (string file in inPaths)
                 if (File.Exists(file))
-                    try { pkgs.Add(s3pi.Package.Package.OpenPackage(0, file)); }
+                    try { pkgs.Add(s3pi.Package.Package.OpenPackage(0, file)); outPaths.Add(file); }
                     catch { }
         }
         #endregion
@@ -3072,9 +3079,9 @@ namespace ObjectCloner
             if (!CheckInstallDirs()) return;
 
             ClosePkg();
-            setList(out objPkgs, ini_fb0);
-            setList(out ddsPkgs, ini_fb2);
-            setList(out tmbPkgs, ini_tmb);
+            setList(out objPkgs, out objPaths, ini_fb0);
+            setList(out ddsPkgs, out ddsPaths, ini_fb2);
+            setList(out tmbPkgs, out tmbPaths, ini_tmb);
             currentCatalogType = 0;
 
             searchPane = new Search(objPkgs, updateProgress);
