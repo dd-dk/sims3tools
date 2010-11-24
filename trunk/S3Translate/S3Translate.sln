@@ -1,0 +1,56 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C# Express 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "S3Translate", "S3Translate.csproj", "{C1DF2D91-11CA-4464-9A1A-D8C95C0DAA58}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StblResource", "..\..\..\..\Desktop\Bild\s3pi Wrappers\StblResource\StblResource.csproj", "{672D72EC-89DA-4EF3-88CC-BEEC5BA478B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interfaces", "..\..\..\..\Desktop\Bild\s3pi\Interfaces\Interfaces.csproj", "{51023BD2-9139-438D-B794-95E5EC023537}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Settings", "..\..\..\..\Desktop\Bild\s3pi\Settings\Settings.csproj", "{374F37CF-1F27-4613-96FD-9B956A3D82B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS System Classes", "..\..\..\..\Desktop\Bild\CS System Classes\CS System Classes.csproj", "{00200E76-C245-42A7-B567-5C30EDBCE977}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Package", "..\..\..\..\Desktop\Bild\s3pi\Package\Package.csproj", "{9D8BB6F7-373E-4FBC-B5E8-9709B4CE9A37}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WrapperDealer", "..\..\..\..\Desktop\Bild\s3pi\WrapperDealer\WrapperDealer.csproj", "{FE111523-3266-409B-BC72-F8D4A909A554}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C1DF2D91-11CA-4464-9A1A-D8C95C0DAA58}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{C1DF2D91-11CA-4464-9A1A-D8C95C0DAA58}.Debug|Any CPU.Build.0 = Debug|x86
+		{C1DF2D91-11CA-4464-9A1A-D8C95C0DAA58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1DF2D91-11CA-4464-9A1A-D8C95C0DAA58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{672D72EC-89DA-4EF3-88CC-BEEC5BA478B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{672D72EC-89DA-4EF3-88CC-BEEC5BA478B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{672D72EC-89DA-4EF3-88CC-BEEC5BA478B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{672D72EC-89DA-4EF3-88CC-BEEC5BA478B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51023BD2-9139-438D-B794-95E5EC023537}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51023BD2-9139-438D-B794-95E5EC023537}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51023BD2-9139-438D-B794-95E5EC023537}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51023BD2-9139-438D-B794-95E5EC023537}.Release|Any CPU.Build.0 = Release|Any CPU
+		{374F37CF-1F27-4613-96FD-9B956A3D82B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{374F37CF-1F27-4613-96FD-9B956A3D82B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{374F37CF-1F27-4613-96FD-9B956A3D82B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{374F37CF-1F27-4613-96FD-9B956A3D82B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00200E76-C245-42A7-B567-5C30EDBCE977}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00200E76-C245-42A7-B567-5C30EDBCE977}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00200E76-C245-42A7-B567-5C30EDBCE977}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00200E76-C245-42A7-B567-5C30EDBCE977}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D8BB6F7-373E-4FBC-B5E8-9709B4CE9A37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D8BB6F7-373E-4FBC-B5E8-9709B4CE9A37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D8BB6F7-373E-4FBC-B5E8-9709B4CE9A37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D8BB6F7-373E-4FBC-B5E8-9709B4CE9A37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE111523-3266-409B-BC72-F8D4A909A554}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE111523-3266-409B-BC72-F8D4A909A554}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE111523-3266-409B-BC72-F8D4A909A554}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE111523-3266-409B-BC72-F8D4A909A554}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
