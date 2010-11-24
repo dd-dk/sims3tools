@@ -85,23 +85,16 @@ namespace S3Translate
             set
             {
                 if (_selectedIndex == value) return;
-                if (txtIsDirty)
-                {
-                    var r = MessageBox.Show("Commit changes to target?", "Text has changed",
-                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (r == DialogResult.Yes)
-                        CommitText();
-                }
+                AskCommit();
                 _selectedIndex = value;
                 OnSelectedIndexChanged();
-                txtIsDirty = false;
             }
         }
 
-        private bool _langDirty;
+        /*private bool _langDirty;
         EventHandler LangIsDirtyChanged;
         void OnLangIsDirtyChanged() { if (LangIsDirtyChanged != null) LangIsDirtyChanged(this, EventArgs.Empty); }
-        private bool langIsDirty { get { return _langDirty; } set { if (_langDirty != value) { _langDirty = value; OnLangIsDirtyChanged(); } } }
+        private bool langIsDirty { get { return _langDirty; } set { if (_langDirty != value) { _langDirty = value; OnLangIsDirtyChanged(); } } }/**/
 
         private bool _pkgDirty;
         private bool pkgIsDirty { get { return _pkgDirty; } set { _pkgDirty = value; SetText(); } }
@@ -113,12 +106,10 @@ namespace S3Translate
         private const string packageFilter = "Sims 3 Package File (*.package)|*.package|All Files|*.*";
         private const string stblFilter = "Sims 3 String Table (*.stbl)|*.stbl|All Files|*.*";
 
+        const uint STBL = 0x220557DA;
         private List<ListViewItem> foundItems = null;
-
-
         Dictionary<ulong, Dictionary<ulong, StblResource.StblResource>> StringTables = new Dictionary<ulong, Dictionary<ulong, StblResource.StblResource>>();
 
-        const uint STBL = 0x220557DA;
 
         public Form1()
         {
@@ -135,14 +126,14 @@ namespace S3Translate
                 new SettingsDialog().ShowDialog();
             }
 
-            FileNameChanged += new EventHandler((sender, e) => { SetText(); });
+            FileNameChanged += new EventHandler((sender, e) => SetText());
 
             CurrentPackageChanged += new EventHandler((sender, e) =>
             {
                 _pkgDirty = _txtDirty = false;
                 SetText();
                 ReloadStringTables();
-                tlpFind.Enabled = currentPackage != null;
+                btnRevertAll.Enabled = btnRevertLang.Enabled = tlpFind.Enabled = currentPackage != null;
             });
 
             lstSTBLs.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler((sender, e) => ReloadStrings());
@@ -159,16 +150,68 @@ namespace S3Translate
             cmbTargetLang.SelectedIndex = Settings.Default.UserLocale;
         }
 
-        void SetText()
+        private void Form1_Shown(object sender, EventArgs e)
         {
-            Text = String.Format("Sims 3 Translate{0}{1}{2}"
-                , _fname != "" ? " - " + _fname : ""
-                , _pkgDirty ? " (unsaved)" : ""
-                , _txtDirty ? " (uncommitted)" : ""
-                );
+            openToolStripMenuItem_Click(null, null);
         }
 
-        private void saveAllLanguagesToolStripMenuItem_Click(object sender, EventArgs e)
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!AskSavePackage()) { e.Cancel = true; return; }
+
+            ClosePackage();
+        }
+
+        #region File menu
+        private void fileToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            bool isopen = (_currentPackage != null);
+            closeToolStripMenuItem.Enabled = exportLanguageToolStripMenuItem.Enabled = savePackageAsToolStripMenuItem.Enabled = savePackageToolStripMenuItem.Enabled = importLanguagetoolStripMenuItem.Enabled = isopen;
+            savePackageToolStripMenuItem.Enabled = savePackageToolStripMenuItem.Enabled && pkgIsDirty;
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!AskSavePackage()) return;
+
+            var ofd = new OpenFileDialog() { Filter = packageFilter };
+            if (ofd.ShowDialog() == DialogResult.OK) OpenPackage(ofd.FileName);
+        }
+
+        private void closeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!AskSavePackage()) return;
+
+            ClosePackage();
+            fileName = "";
+        }
+
+        private void savePackageToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AskCommit();
+            _currentPackage.SavePackage();
+            pkgIsDirty = false;
+        }
+
+        private void savePackageAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AskCommit();
+            var sfd = new SaveFileDialog();
+            sfd.Filter = packageFilter;
+            sfd.FileName = fileName;
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                _currentPackage.SaveAs(sfd.FileName);
+                fileName = sfd.FileName;
+            }
+        }
+
+        private void importLanguageToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Not implemented yet...", "Import Language");
+        }
+
+        private void exportLanguageToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (lstSTBLs.SelectedItems.Count == 1)
             {
@@ -200,39 +243,173 @@ namespace S3Translate
                 MessageBox.Show("Please select a STBL instance");
         }
 
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        private void preferencesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!saveChanges()) return;
-
-            var ofd = new OpenFileDialog();
-            ofd.Filter = packageFilter;
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                OpenPackage(ofd.FileName);
-            }
+            new SettingsDialog().ShowDialog();
         }
 
-        private void OpenPackage(string path)
+        private void quitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (fileName == path) return;
+            if (!AskSavePackage()) return;
 
             ClosePackage();
-            currentPackage = Package.OpenPackage(0, path, true);
-            
-            if (StringTables.Count == 0)
-            {
-                MessageBox.Show("There are no STBLs in the chosen package. It is not translateable using this tool.");
-                ClosePackage();
-                fileName = "";
-                return;
-            }
+            Application.Exit();
+        }
+        #endregion
 
-            fileName = path;
+        #region Designer-bound event handlers
+        private void txtTarget_TextChanged(object sender, EventArgs e)
+        {
+            if (inChangeHandler) return;
+
+            if (ckbAutoCommit.Checked)
+                CommitText();
+            else
+                txtIsDirty = true;
         }
 
-        bool saveChanges()
+        private void btnRevertLang_Click(object sender, EventArgs e)
         {
-            lstStrings.SelectedItems.Clear();
+            if (sender != null)
+                if (MessageBox.Show("This will revert all " + locales[cmbTargetLang.SelectedIndex]
+                + " texts to the " + locales[cmbSourceLang.SelectedIndex] + " defaults.\n\nContinue?",
+                "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
+                    return;
+
+            var stblgroup = (KeyValuePair<ulong, Dictionary<ulong, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
+            if (!StringTables[stblgroup.Key].ContainsKey((uint)cmbSourceLang.SelectedIndex))
+            {
+                int rlocale = (int)StringTables[stblgroup.Key].Keys.GetEnumerator().Current;
+                if (MessageBox.Show("The current source language doesn't exist in this string table. Use \"" + locales[rlocale] + "\" instead ?", "Language missing", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+                {
+                    cmbSourceLang.SelectedIndex = rlocale;
+                    lstStrings.Items.Clear();
+                }
+                else
+                    return;
+            }
+
+            MemoryStream ms = new MemoryStream(StringTables[stblgroup.Key][(uint)cmbSourceLang.SelectedIndex].AsBytes, true);
+            StblResource.StblResource targetSTBL = new StblResource.StblResource(0, ms);
+
+            ulong STBLinstance = stblgroup.Key | ((ulong)cmbTargetLang.SelectedIndex << 56);
+            IResourceIndexEntry rie = _currentPackage.Find(x => x.ResourceType == STBL && x.Instance == STBLinstance);
+            if (rie != null)
+                _currentPackage.ReplaceResource(rie, targetSTBL);
+            else
+                _currentPackage.AddResource(new RK(STBL, 0, STBLinstance), targetSTBL.Stream, false);
+            StringTables[stblgroup.Key][(uint)cmbTargetLang.SelectedIndex] = targetSTBL;
+            pkgIsDirty = true;
+            ReloadStrings();
+            SelectStrings();
+        }
+
+        private void btnRevertAll_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("This will revert all(!) texts in all(!) languages to the " + locales[cmbSourceLang.SelectedIndex] + " defaults. Continue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
+                return;
+            var a = cmbTargetLang.SelectedIndex;
+            for (var i = 0; i < locales.Count; i++)
+            {
+                cmbTargetLang.SelectedIndex = i;
+                btnRevertLang_Click(null, null);
+            }
+            cmbTargetLang.SelectedIndex = a;
+        }
+
+        private void btnMergeLangSTLBs_Click(object sender, EventArgs e)
+        {
+            var r = fileName + DateTime.Now.ToString();
+            var instance = FNV64.GetHash(r) & 0x00FFFFFFFFFFFFFF;
+            for (ulong lang = 0; lang < 23; lang++)
+            {
+                var stbl = new StblResource.StblResource(0,null);
+                foreach (var tables in StringTables.Values)
+                {
+                    if (tables.ContainsKey(lang))
+                    {
+                        foreach (var s in tables[lang])
+                        {
+                            stbl.Add(s.Key, s.Value);
+                        }
+                    }
+                }
+                _currentPackage.AddResource(new RK(STBL, 0, instance | (lang << 56)), stbl.Stream, false);
+            }
+            foreach (var res in _currentPackage.GetResourceList)
+            {
+                if (res.ResourceType == STBL && (res.Instance & 0xFFFFFFFFFFFFFF) != instance)
+                    _currentPackage.DeleteResource(res);
+            }
+            ReloadStringTables();
+            ReloadStrings();
+            SelectStrings();
+        }
+
+        private void txtFind_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnFindNext_Click(object sender, EventArgs e)
+        {
+            if (foundItems == null || foundItems.Count == 0)
+                return;
+            bool q = false;
+            foreach (var i in foundItems)
+            {
+                if (q == true)
+                {
+                    i.Selected = true;
+                    lstStrings.EnsureVisible(i.Index);
+                    return;
+                }
+                if (i.Selected == true)
+                {
+                    q = true;
+                    i.Selected = false;
+                }
+            }
+            if (foundItems.Count > 0)
+                foundItems[0].Selected = true;
+        }
+
+        private void btnFindFirst_Click(object sender, EventArgs e)
+        {
+            findText(txtFind.Text);
+        }
+
+        private void ckbAutoCommit_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ckbAutoCommit.Checked) btnCommit.Enabled = false;
+        }
+        #endregion
+
+        void AskCommit()
+        {
+            if (txtIsDirty)
+            {
+                var r = MessageBox.Show("Commit changes to target?", "Text has changed",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (r == DialogResult.Yes)
+                    CommitText();
+                else
+                    SelectStrings();
+            }
+        }
+
+        void SetText()
+        {
+            Text = String.Format("Sims 3 Translate{0}{1}{2}"
+                , _fname != "" ? " - " + _fname : ""
+                , _pkgDirty ? " (unsaved)" : ""
+                , _txtDirty ? " (uncommitted)" : ""
+                );
+        }
+
+        bool AskSavePackage()
+        {
+            AskCommit();
             if (pkgIsDirty)
             {
                 var r = MessageBox.Show("Save changes before closing file?", "Close Package", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
@@ -247,12 +424,22 @@ namespace S3Translate
             return true;
         }
 
-        private void closeToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OpenPackage(string path)
         {
-            if (!saveChanges()) return;
+            if (fileName == path) return;
 
             ClosePackage();
-            fileName = "";
+            currentPackage = Package.OpenPackage(0, path, true);
+
+            if (StringTables.Count == 0)
+            {
+                MessageBox.Show("There are no STBLs in the chosen package. It is not translateable using this tool.");
+                ClosePackage();
+                fileName = "";
+                return;
+            }
+
+            fileName = path;
         }
 
         private void ClosePackage()
@@ -461,150 +648,6 @@ namespace S3Translate
             txtIsDirty = false;
         }
 
-        private void quitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ClosePackage();
-            if(_currentPackage == null)
-                Application.Exit();
-        }
-
-        private void savePackageToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            _currentPackage.SavePackage();
-            pkgIsDirty = false;
-        }
-
-        private void savePackageAsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var sfd = new SaveFileDialog();
-            sfd.Filter = packageFilter;
-            sfd.FileName = fileName;
-            if (sfd.ShowDialog() == DialogResult.OK)
-            {
-                _currentPackage.SaveAs(sfd.FileName);
-                fileName = sfd.FileName;
-            }
-        }
-
-        private void txtTarget_TextChanged(object sender, EventArgs e)
-        {
-            if (inChangeHandler) return;
-
-            if (ckbAutoCommit.Checked)
-                CommitText();
-            else
-                txtIsDirty = true;
-        }
-
-        private void toolStripMenuItem5_Click(object sender, EventArgs e)
-        {
-            new SettingsDialog().ShowDialog();
-        }
-
-        private void Form1_Shown(object sender, EventArgs e)
-        {
-            var ofd = new OpenFileDialog();
-            ofd.Filter = packageFilter;
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                //new();
-                OpenPackage(ofd.FileName);
-            }
-        }
-
-        private void fileToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
-        {
-            bool isopen = (_currentPackage != null);
-            closeToolStripMenuItem.Enabled = saveAllLanguagesToolStripMenuItem.Enabled = savePackageAsToolStripMenuItem.Enabled = savePackageToolStripMenuItem.Enabled = toolStripMenuItem4.Enabled = isopen;
-            savePackageToolStripMenuItem.Enabled = savePackageToolStripMenuItem.Enabled && pkgIsDirty;
-        }
-
-        private void toolStripMenuItem4_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Not implemented yet...");
-        }
-
-        private void btnRevertLang_Click(object sender, EventArgs e)
-        {
-            if (MessageBox.Show("This will revert all " + locales[cmbTargetLang.SelectedIndex]
-                + " texts to the " + locales[cmbSourceLang.SelectedIndex] + " defaults.\n\nContinue?",
-                "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No) return;
-
-            var stblgroup = (KeyValuePair<ulong, Dictionary<ulong, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
-            if (!StringTables[stblgroup.Key].ContainsKey((uint)cmbSourceLang.SelectedIndex))
-            {
-                int rlocale = (int)StringTables[stblgroup.Key].Keys.GetEnumerator().Current;
-                if (MessageBox.Show("The current source language doesn't exist in this string table. Use \"" + locales[rlocale] + "\" instead ?", "Language missing", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
-                {
-                    cmbSourceLang.SelectedIndex = rlocale;
-                    lstStrings.Items.Clear();
-                }
-                else
-                    return;
-            }
-
-            MemoryStream ms = new MemoryStream(StringTables[stblgroup.Key][(uint)cmbSourceLang.SelectedIndex].AsBytes, true);
-            StblResource.StblResource targetSTBL = new StblResource.StblResource(0, ms);
-
-            ulong STBLinstance = stblgroup.Key | ((ulong)cmbTargetLang.SelectedIndex << 56);
-            IResourceIndexEntry rie = _currentPackage.Find(x => x.ResourceType == STBL && x.Instance == STBLinstance);
-            if (rie != null)
-                _currentPackage.ReplaceResource(rie, targetSTBL);
-            else
-                _currentPackage.AddResource(new RK(STBL, 0, STBLinstance), targetSTBL.Stream, false);
-            StringTables[stblgroup.Key][(uint)cmbTargetLang.SelectedIndex] = targetSTBL;
-            pkgIsDirty = true;
-            ReloadStrings();
-            SelectStrings();
-        }
-
-        private void btnRevertAll_Click(object sender, EventArgs e)
-        {
-            if (MessageBox.Show("This will revert all(!) texts in all(!) languages to the " + locales[cmbSourceLang.SelectedIndex] + " defaults. Continue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
-                return;
-            var a = cmbTargetLang.SelectedIndex;
-            for (var i = 0; i < locales.Count; i++)
-            {
-                cmbTargetLang.SelectedIndex = i;
-                btnRevertLang_Click(null, null);
-            }
-            cmbTargetLang.SelectedIndex = a;
-        }
-
-        private void btnMergeLangSTLBs_Click(object sender, EventArgs e)
-        {
-            var r = fileName + DateTime.Now.ToString();
-            var instance = FNV64.GetHash(r) & 0x00FFFFFFFFFFFFFF;
-            for (ulong lang = 0; lang < 23; lang++)
-            {
-                var stbl = new StblResource.StblResource(0,null);
-                foreach (var tables in StringTables.Values)
-                {
-                    if (tables.ContainsKey(lang))
-                    {
-                        foreach (var s in tables[lang])
-                        {
-                            stbl.Add(s.Key, s.Value);
-                        }
-                    }
-                }
-                _currentPackage.AddResource(new RK(STBL, 0, instance | (lang << 56)), stbl.Stream, false);
-            }
-            foreach (var res in _currentPackage.GetResourceList)
-            {
-                if (res.ResourceType == STBL && (res.Instance & 0xFFFFFFFFFFFFFF) != instance)
-                    _currentPackage.DeleteResource(res);
-            }
-            ReloadStringTables();
-            ReloadStrings();
-            SelectStrings();
-        }
-
-        private void txtFind_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void findText(string text)
         {
             text = text.ToLower();
@@ -638,46 +681,6 @@ namespace S3Translate
 
             foundItems[0].Selected = true;
             lstStrings.EnsureVisible(foundItems[0].Index);
-        }
-
-        private void btnFindNext_Click(object sender, EventArgs e)
-        {
-            if (foundItems == null || foundItems.Count == 0)
-                return;
-            bool q = false;
-            foreach (var i in foundItems)
-            {
-                if (q == true)
-                {
-                    i.Selected = true;
-                    lstStrings.EnsureVisible(i.Index);
-                    return;
-                }
-                if (i.Selected == true)
-                {
-                    q = true;
-                    i.Selected = false;
-                }
-            }
-            if (foundItems.Count > 0)
-                foundItems[0].Selected = true;
-        }
-
-        private void btnFindFirst_Click(object sender, EventArgs e)
-        {
-            findText(txtFind.Text);
-        }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            ClosePackage();
-            if (_currentPackage != null)
-                e.Cancel = true;
-        }
-
-        private void ckbAutoCommit_CheckedChanged(object sender, EventArgs e)
-        {
-            if (ckbAutoCommit.Checked) btnCommit.Enabled = false;
         }
     }
 }

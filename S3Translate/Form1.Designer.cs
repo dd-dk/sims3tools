@@ -98,10 +98,10 @@ namespace S3Translate
             this.savePackageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.savePackageAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveAllLanguagesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importLanguagetoolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportLanguageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripMenuItem();
+            this.preferencesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainToolTip = new System.Windows.Forms.ToolTip(this.components);
@@ -393,6 +393,7 @@ namespace S3Translate
             this.btnRevertAll.AutoSize = true;
             this.btnRevertAll.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnRevertAll.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnRevertAll.Enabled = false;
             this.btnRevertAll.Location = new System.Drawing.Point(75, 0);
             this.btnRevertAll.Margin = new System.Windows.Forms.Padding(3, 0, 0, 0);
             this.btnRevertAll.Name = "btnRevertAll";
@@ -407,6 +408,7 @@ namespace S3Translate
             this.btnRevertLang.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.btnRevertLang.AutoSize = true;
             this.btnRevertLang.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnRevertLang.Enabled = false;
             this.btnRevertLang.Location = new System.Drawing.Point(0, 0);
             this.btnRevertLang.Margin = new System.Windows.Forms.Padding(0, 0, 3, 0);
             this.btnRevertLang.Name = "btnRevertLang";
@@ -686,10 +688,10 @@ namespace S3Translate
             this.savePackageToolStripMenuItem,
             this.savePackageAsToolStripMenuItem,
             this.toolStripMenuItem2,
-            this.toolStripMenuItem4,
-            this.saveAllLanguagesToolStripMenuItem,
+            this.importLanguagetoolStripMenuItem,
+            this.exportLanguageToolStripMenuItem,
             this.toolStripMenuItem3,
-            this.toolStripMenuItem5,
+            this.preferencesToolStripMenuItem,
             this.toolStripSeparator1,
             this.quitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -738,32 +740,32 @@ namespace S3Translate
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
             this.toolStripMenuItem2.Size = new System.Drawing.Size(179, 6);
             // 
-            // toolStripMenuItem4
+            // importLanguagetoolStripMenuItem
             // 
-            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(182, 22);
-            this.toolStripMenuItem4.Text = "&Import Language...";
-            this.toolStripMenuItem4.Click += new System.EventHandler(this.toolStripMenuItem4_Click);
+            this.importLanguagetoolStripMenuItem.Name = "importLanguagetoolStripMenuItem";
+            this.importLanguagetoolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.importLanguagetoolStripMenuItem.Text = "&Import Language...";
+            this.importLanguagetoolStripMenuItem.Click += new System.EventHandler(this.importLanguageToolStripMenuItem_Click);
             // 
-            // saveAllLanguagesToolStripMenuItem
+            // exportLanguageToolStripMenuItem
             // 
-            this.saveAllLanguagesToolStripMenuItem.Name = "saveAllLanguagesToolStripMenuItem";
-            this.saveAllLanguagesToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
-            this.saveAllLanguagesToolStripMenuItem.Text = "&Export Language...";
-            this.saveAllLanguagesToolStripMenuItem.Click += new System.EventHandler(this.saveAllLanguagesToolStripMenuItem_Click);
+            this.exportLanguageToolStripMenuItem.Name = "exportLanguageToolStripMenuItem";
+            this.exportLanguageToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.exportLanguageToolStripMenuItem.Text = "&Export Language...";
+            this.exportLanguageToolStripMenuItem.Click += new System.EventHandler(this.exportLanguageToolStripMenuItem_Click);
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
             this.toolStripMenuItem3.Size = new System.Drawing.Size(179, 6);
             // 
-            // toolStripMenuItem5
+            // preferencesToolStripMenuItem
             // 
-            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(182, 22);
-            this.toolStripMenuItem5.Text = "&Preferences...";
-            this.toolStripMenuItem5.Click += new System.EventHandler(this.toolStripMenuItem5_Click);
+            this.preferencesToolStripMenuItem.Name = "preferencesToolStripMenuItem";
+            this.preferencesToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
+            this.preferencesToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
+            this.preferencesToolStripMenuItem.Text = "&Preferences...";
+            this.preferencesToolStripMenuItem.Click += new System.EventHandler(this.preferencesToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
@@ -858,7 +860,7 @@ namespace S3Translate
         private System.Windows.Forms.ToolStripMenuItem savePackageToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem savePackageAsToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
-        private System.Windows.Forms.ToolStripMenuItem saveAllLanguagesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportLanguageToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem3;
         private System.Windows.Forms.ToolStripMenuItem quitToolStripMenuItem;
         private System.Windows.Forms.Label label1;
@@ -878,10 +880,10 @@ namespace S3Translate
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.CheckBox ckbAutoCommit;
         private System.Windows.Forms.Button btnCommit;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
+        private System.Windows.Forms.ToolStripMenuItem importLanguagetoolStripMenuItem;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripProgressBar prg;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem5;
+        private System.Windows.Forms.ToolStripMenuItem preferencesToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.Button btnRevertAll;
         private System.Windows.Forms.Button btnRevertLang;
