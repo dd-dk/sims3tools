@@ -439,7 +439,6 @@
     <Content Include="Acknowledgements-s3pe.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="app.config" />
     <None Include="Resources\s3pe.ico" />
     <Content Include="s3peUpdate.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
