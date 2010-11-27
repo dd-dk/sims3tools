@@ -27,7 +27,7 @@ using StblResource;
 
 namespace s3pi_STBL_Resource_Editor
 {
-    public partial class MainForm : Form, s3pi.DemoPlugins.IRunHelper
+    public partial class MainForm : Form, s3pi.Helpers.IRunHelper
     {
         public MainForm()
         {

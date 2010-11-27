@@ -44,7 +44,7 @@ namespace s3pe_VPXY_Resource_Editor
                 Clipboard.SetData(DataFormats.Serializable, grr.Stream);
             }
 #endif
-            return s3pi.DemoPlugins.RunHelper.Run(typeof(MainForm), args);
+            return s3pi.Helpers.RunHelper.Run(typeof(MainForm), args);
         }
     }
 }

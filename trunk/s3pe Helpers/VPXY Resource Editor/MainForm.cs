@@ -28,7 +28,7 @@ using s3pi.GenericRCOLResource;
 
 namespace s3pe_VPXY_Resource_Editor
 {
-    public partial class MainForm : Form, s3pi.DemoPlugins.IRunHelper
+    public partial class MainForm : Form, s3pi.Helpers.IRunHelper
     {
         const string myName = "s3pe VPXY Resource Editor";
         public MainForm()
@@ -89,12 +89,12 @@ namespace s3pe_VPXY_Resource_Editor
 
             FillPartsTLP();
 
-            nudLowerX.Value = new Decimal(vpxy.BoundingBox[0]);
-            nudLowerY.Value = new Decimal(vpxy.BoundingBox[1]);
-            nudLowerZ.Value = new Decimal(vpxy.BoundingBox[2]);
-            nudUpperX.Value = new Decimal(vpxy.BoundingBox[3]);
-            nudUpperY.Value = new Decimal(vpxy.BoundingBox[4]);
-            nudUpperZ.Value = new Decimal(vpxy.BoundingBox[5]);
+            nudLowerX.Value = new Decimal(vpxy.Bounds.Min.X);
+            nudLowerY.Value = new Decimal(vpxy.Bounds.Min.Y);
+            nudLowerZ.Value = new Decimal(vpxy.Bounds.Min.Z);
+            nudUpperX.Value = new Decimal(vpxy.Bounds.Max.X);
+            nudUpperY.Value = new Decimal(vpxy.Bounds.Max.Y);
+            nudUpperZ.Value = new Decimal(vpxy.Bounds.Max.Z);
 
             tbcFTPT.Enabled = ckbModular.Checked = vpxy.Modular;
             tbcFTPT.TGIBlocks = vpxy.TGIBlocks;
@@ -241,7 +241,7 @@ namespace s3pe_VPXY_Resource_Editor
             int tabindex = 1;
             for (int i = 0; i < entry.TGIIndexes.Count; i++)
             {
-                AddTableRowTBC(tlpLinkedParts, offset + 1 + i, (int)entry.TGIIndexes[i].Val, ref tabindex);
+                AddTableRowTBC(tlpLinkedParts, offset + 1 + i, entry.TGIIndexes[i], ref tabindex);
             }
             tlpLPControls.Enabled = tlpLinkedParts.Enabled = true;
             tlpLinkedParts.ResumeLayout();
@@ -360,7 +360,7 @@ namespace s3pe_VPXY_Resource_Editor
                 if (currentPartEntry == -1) return;
                 VPXY.Entry00 e00 = ltbc[currentPartEntry].Tag as VPXY.Entry00;
                 int i = lLPtbc.IndexOf(tbc);
-                e00.TGIIndexes[i].Val = (tbc.SelectedIndex >= 0) ? tbc.SelectedIndex : 0;
+                e00.TGIIndexes[i] = (tbc.SelectedIndex >= 0) ? tbc.SelectedIndex : 0;
             }
         }
 
@@ -498,7 +498,7 @@ namespace s3pe_VPXY_Resource_Editor
             VPXY.Entry00 e00 = ltbc[currentPartEntry].Tag as VPXY.Entry00;
             if (currentLPEntry < 1 || e00.TGIIndexes.Count < 2) return;
 
-            int val = e00.TGIIndexes[currentLPEntry].Val;
+            int val = e00.TGIIndexes[currentLPEntry];
             e00.TGIIndexes.RemoveAt(currentLPEntry);
             e00.TGIIndexes.Insert(currentLPEntry - 1, val);
 
@@ -511,7 +511,7 @@ namespace s3pe_VPXY_Resource_Editor
             VPXY.Entry00 e00 = ltbc[currentPartEntry].Tag as VPXY.Entry00;
             if (currentLPEntry == e00.TGIIndexes.Count - 1 || e00.TGIIndexes.Count < 2) return;
 
-            int val = e00.TGIIndexes[currentLPEntry].Val;
+            int val = e00.TGIIndexes[currentLPEntry];
             e00.TGIIndexes.RemoveAt(currentLPEntry);
             e00.TGIIndexes.Insert(currentLPEntry + 1, val);
 
@@ -558,15 +558,14 @@ namespace s3pe_VPXY_Resource_Editor
 
         private void nud_ValueChanged(object sender, EventArgs e)
         {
-            NumericUpDown nud = sender as NumericUpDown;
-            int i = lnud.IndexOf(nud);
-            float[] bb = vpxy.BoundingBox;
-
-            //gah - rounding errors...
-            if (nud.Value != new Decimal(bb[i]))
+            switch (lnud.IndexOf(sender as NumericUpDown))
             {
-                bb[i] = Decimal.ToSingle(nud.Value);
-                vpxy.BoundingBox = bb;
+                case 0: vpxy.Bounds.Min.X = Decimal.ToSingle(nudLowerX.Value); break;
+                case 1: vpxy.Bounds.Min.Y = Decimal.ToSingle(nudLowerY.Value); break;
+                case 2: vpxy.Bounds.Min.Z = Decimal.ToSingle(nudLowerZ.Value); break;
+                case 3: vpxy.Bounds.Max.X = Decimal.ToSingle(nudUpperX.Value); break;
+                case 4: vpxy.Bounds.Max.Y = Decimal.ToSingle(nudUpperY.Value); break;
+                case 5: vpxy.Bounds.Max.Z = Decimal.ToSingle(nudUpperZ.Value); break;
             }
         }
 
