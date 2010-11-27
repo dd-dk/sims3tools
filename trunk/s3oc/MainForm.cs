@@ -439,6 +439,9 @@ namespace ObjectCloner
         List<IPackage> objPkgs;
         List<IPackage> ddsPkgs;
         List<IPackage> tmbPkgs;
+        List<string> objPaths;
+        List<string> ddsPaths;
+        List<string> tmbPaths;
 
         Item selectedItem;
         Image replacementForThumbs;
@@ -463,6 +466,8 @@ namespace ObjectCloner
             pleaseWait = new PleaseWait();
 
             MainForm_LoadFormSettings();
+
+            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_advanced, ObjectCloner.Properties.Settings.Default.AdvanceCloning);
 
             Diagnostics.Enabled = ObjectCloner.Properties.Settings.Default.Diagnostics;
             menuBarWidget1.Checked(MenuBarWidget.MB.MBS_diagnostics, Diagnostics.Enabled);
@@ -1169,6 +1174,127 @@ namespace ObjectCloner
 
         #region Tabs
         CatalogType tabType = 0;
+
+        static Dictionary<string, string> fieldToLabelMap;//(Type:)fieldname -> Label
+        static Dictionary<string, string> labelToFieldMap;//(Type:)Label -> fieldname
+        static Dictionary<string, string> otherFieldMap;
+        static List<flagField> flagFields;
+        static Dictionary<List<Type>, int> typeToLen = null;
+        void InitialiseMaps()
+        {
+            if (fieldToLabelMap == null)
+            {
+                fieldToLabelMap = new Dictionary<string, string>();
+                fieldToLabelMap.Add("Common:FireType", "Fire Type");
+                fieldToLabelMap.Add("Common:IsStealable", "Stealable");
+                fieldToLabelMap.Add("Common:IsReposessable", "Reposessable");
+                fieldToLabelMap.Add("Common:IsPlaceableOnRoof", "Placeable On Roof");
+                fieldToLabelMap.Add("Common:IsVisibleInWorldBuilder", "Visible In World Builder");
+                fieldToLabelMap.Add("ObjectCatalogResource:MoodletGiven", "Moodlet Given");
+                fieldToLabelMap.Add("ObjectCatalogResource:MoodletScore", "Moodlet Score");
+                fieldToLabelMap.Add("ObjectCatalogResource:TopicRatings", "Topic/Ratings");
+                fieldToLabelMap.Add("TerrainPaintBrushCatalogResource:Category", "Category");
+            }
+            if (labelToFieldMap == null)
+            {
+                labelToFieldMap = new Dictionary<string, string>();
+                labelToFieldMap.Add("Common:Fire Type", "FireType");
+                labelToFieldMap.Add("Common:Stealable", "IsStealable");
+                labelToFieldMap.Add("Common:Reposessable", "IsReposessable");
+                labelToFieldMap.Add("Common:Placeable On Roof", "IsPlaceableOnRoof");
+                labelToFieldMap.Add("Common:Visible In World Builder", "IsVisibleInWorldBuilder");
+                labelToFieldMap.Add("ObjectCatalogResource:Moodlet Given", "MoodletGiven");
+                labelToFieldMap.Add("ObjectCatalogResource:Moodlet Score", "MoodletScore");
+                labelToFieldMap.Add("ObjectCatalogResource:Topic/Ratings", "TopicRatings");
+                labelToFieldMap.Add("TerrainPaintBrushCatalogResource:Category", "Category");
+            }
+            if (otherFieldMap == null)
+            {
+                otherFieldMap = new Dictionary<string, string>();
+            }
+            if (flagFields == null)
+            {
+                flagFields = new List<flagField>(new flagField[] {
+                    new flagField(tlpUnknown8, "ObjectTypeFlags", 32, 0),
+                    new flagField(tlpUnknown9, "WallPlacementFlags", 32, 0),
+                    new flagField(tlpUnknown10, "MovementFlags", 32, 0),
+                    new flagField(tlpRoomSort, "RoomCategoryFlags", 32, 0),
+                    new flagField(tlpRoomSubLow, "RoomSubCategoryFlags", 32, 0),
+                    new flagField(tlpRoomSubHigh, "RoomSubCategoryFlags", 64, 32),
+                    new flagField(tlpFuncSort, "FunctionCategoryFlags", 32, 0),
+                    new flagField(tlpFuncSubLow, "FunctionSubCategoryFlags", 32, 0),
+                    new flagField(tlpFuncSubHigh, "FunctionSubCategoryFlags", 64, 32),
+                    new flagField(tlpBuildSort, "BuildCategoryFlags", 32, 0),
+                });
+            }
+            if (typeToLen == null)
+            {
+                typeToLen = new Dictionary<List<Type>, int>();
+                typeToLen.Add(new List<Type>(new Type[] { typeof(sbyte), typeof(byte), }), 2 + 2);
+                typeToLen.Add(new List<Type>(new Type[] { typeof(bool), typeof(char), typeof(short), typeof(ushort), }), 2 + 4);
+                typeToLen.Add(new List<Type>(new Type[] { typeof(float), }), 8);
+                typeToLen.Add(new List<Type>(new Type[] { typeof(int), typeof(uint), }), 2 + 8);
+                typeToLen.Add(new List<Type>(new Type[] { typeof(double), }), 16);
+                typeToLen.Add(new List<Type>(new Type[] { typeof(long), typeof(ulong), }), 2 + 16);
+                typeToLen.Add(new List<Type>(new Type[] { typeof(decimal), typeof(DateTime), typeof(string), typeof(object), }), 30);
+            }
+        }
+
+        struct flagField
+        {
+            public TableLayoutPanel tlp;
+            public string field;
+            public int length;
+            public int offset;
+            public flagField(TableLayoutPanel tlp, string field, int length, int offset) { this.tlp = tlp; this.field = field; this.length = length; this.offset = offset; }
+        }
+        struct ResField
+        {
+            public IContentFields res;
+            public string field;
+            public ResField(IContentFields res, string field) { this.res = res; this.field = field; }
+        }
+        ResField mapResField(Dictionary<string, string> map, ResField resField)
+        {
+            ResField result;
+            if (map.ContainsKey("Common:" + resField.field))
+                result.res = resField.res["CommonBlock"].Value as AApiVersionedFields;
+            else
+                result.res = resField.res;
+            string lookup = result.res.GetType().Name + ":" + resField.field;
+            result.field = map.ContainsKey(lookup) ? map[lookup]
+                : map.ContainsKey(resField.field) ? map[resField.field]
+                : resField.field;
+            return result;
+        }
+        ResField fieldToLabel(ResField field) { return mapResField(fieldToLabelMap, field); }
+        ResField labelToField(ResField label) { return mapResField(labelToFieldMap, label); }
+
+        string GetTGIBlockListContentField(Type t, string field)
+        {
+            System.Reflection.PropertyInfo pi = t.GetProperty(field);
+            foreach (Attribute attr in pi.GetCustomAttributes(typeof(TGIBlockListContentFieldAttribute), true))
+                return (attr as TGIBlockListContentFieldAttribute).TGIBlockListContentField;
+            return null;
+        }
+        bool HasTGIBlockListContentFieldAttribute(Type t, string field) { return GetTGIBlockListContentField(t, field) != null; }
+
+        int getFieldLength(Type t)
+        {
+            InitialiseMaps();
+
+            foreach (List<Type> tt in typeToLen.Keys)
+                if (tt.Contains(typeof(Enum).IsAssignableFrom(t) ? Enum.GetUnderlyingType(t) : t))
+                    return typeToLen[tt];
+            return 30;
+        }
+
+        void IterateTLP(TableLayoutPanel tlp, Action<Label, Control> action)
+        {
+            for (int i = 1; i < tlp.RowCount - 1; i++)
+                action((Label)tlp.GetControlFromPosition(0, i), tlp.GetControlFromPosition(1, i));
+        }
+
         void InitialiseTabs(CatalogType resourceType)
         {
             if (tabType == resourceType) return;
@@ -1207,108 +1333,13 @@ namespace ObjectCloner
             }
             finally { this.Text = appWas; Application.UseWaitCursor = false; Application.DoEvents(); }
         }
-
-        Dictionary<string, string> detailsFieldMap;//(Type:)Label -> fieldname
-        Dictionary<string, string> detailsFieldMapReverse;//(Type:)fieldname -> Label
-        void InitialiseDetailsTab(IResource catlg)
-        {
-            List<string> detailsTabFields = new List<string>();//fieldname
-            List<string> detailsTabCommonFields = new List<string>();//fieldname
-            List<string> fields = AApiVersionedFields.GetContentFields(0, catlg.GetType());
-            detailsFieldMap = new Dictionary<string, string>();
-            detailsFieldMapReverse = new Dictionary<string, string>();
-            detailsFieldMap.Add("ObjectCatalogResource:Fire Type", "FireType");
-            detailsFieldMap.Add("ObjectCatalogResource:Stealable?", "IsStealable");
-            detailsFieldMap.Add("ObjectCatalogResource:Reposessable?", "IsReposessable");
-            detailsFieldMap.Add("ObjectCatalogResource:In-World Editable?", "InWorldEditable");
-            detailsFieldMap.Add("ObjectCatalogResource:Moodlet Given", "MoodletGiven");
-            detailsFieldMap.Add("ObjectCatalogResource:Moodlet Score", "MoodletScore");
-            detailsFieldMap.Add("ObjectCatalogResource:Slot Placement", "SlotPlacementFlags");
-            detailsFieldMap.Add("TerrainPaintBrushCatalogResource:Category", "Category");
-            detailsFieldMapReverse.Add("ObjectCatalogResource:FireType", "Fire Type");
-            detailsFieldMapReverse.Add("ObjectCatalogResource:IsStealable", "Stealable?");
-            detailsFieldMapReverse.Add("ObjectCatalogResource:IsReposessable", "Reposessable?");
-            detailsFieldMapReverse.Add("ObjectCatalogResource:InWorldEditable", "In-World Editable?");
-            detailsFieldMapReverse.Add("ObjectCatalogResource:MoodletGiven", "Moodlet Given");
-            detailsFieldMapReverse.Add("ObjectCatalogResource:MoodletScore", "Moodlet Score");
-            detailsFieldMap.Add("ObjectCatalogResource:SlotPlacementFlags", "Slot Placement");
-            detailsFieldMapReverse.Add("TerrainPaintBrushCatalogResource:Category", "Category");
-
-            while (tlpObjectDetail.RowCount > 2)
-            {
-                Control c = tlpObjectDetail.GetControlFromPosition(0, tlpObjectDetail.RowCount - 2);
-                tlpObjectDetail.Controls.Remove(c);
-                c = tlpObjectDetail.GetControlFromPosition(1, tlpObjectDetail.RowCount - 2);
-                tlpObjectDetail.Controls.Remove(c);
-                tlpObjectDetail.RowCount--;
-            }
-
-            List<string> excludeFields = new List<string>(new string[] {
-                "AsBytes", "Stream", "Value", "Count", "IsReadOnly",
-                "Version", "IsScriptEnabled", "Levels",
-                "Materials", "CommonBlock", "MTDoors",  "TGIBlocks",
-            });
-            foreach (string field in fields)
-            {
-                if (field.StartsWith("Unknown")) { }
-                else /**/if (field.StartsWith("MaterialGrouping")) { }
-                else if (field.EndsWith("Flags")) { }
-                else if (field.Contains("Index")) { }
-                else if (field.EndsWith("Reader")) { }
-                else if (excludeFields.Contains(field)) { }
-                else if (field.Contains("Hash")) { }
-                else if (field.Contains("Cutout")) { }
-                else detailsTabFields.Add(field);
-            }
-
-            Dictionary<string, Type> types = AApiVersionedFields.GetContentFieldTypes(0, catlg.GetType());
-            foreach (string field in detailsTabFields)
-            {
-                if (detailsFieldMapReverse.ContainsKey(catlg.GetType().Name + ":" + field))
-                    CreateField(tlpObjectDetail, types[field], detailsFieldMapReverse[catlg.GetType().Name + ":" + field], true);
-                else if ((catlg as AResource).ContentFields.Contains("TGIBlocks") && field.Contains("Index"))
-                    CreateField(tlpObjectDetail, field);
-                else if (types[field].Equals(typeof(AResource.TGIBlock))) { }
-                else
-                    CreateField(tlpObjectDetail, types[field], field, true);
-            }
-        }
-
-        struct flagField
-        {
-            public TableLayoutPanel tlp;
-            public string field;
-            public int length;
-            public int offset;
-            public flagField(TableLayoutPanel tlp, string field, int length, int offset) { this.tlp = tlp; this.field = field; this.length = length; this.offset = offset; }
-        }
-        List<flagField> flagFields;
+        void InitialiseDetailsTab(IResource catlg) { InitialiseMaps(); InitialiseTabTLP(catlg, tlpObjectDetail, labelToFieldMap.Values); }
+        void InitialiseOtherTab(IResource objd) { InitialiseMaps(); InitialiseTabTLP(objd, tlpOther, otherFieldMap.Keys); }
         void InitialiseFlagTabs(IResource objd)
         {
-            flagFields = new List<flagField>(new flagField[] {
-                new flagField(tlpUnknown8, "ObjectTypeFlags", 32, 0),
-                new flagField(tlpUnknown9, "WallPlacementFlags", 32, 0),
-                new flagField(tlpUnknown10, "MovementFlags", 32, 0),
-                new flagField(tlpRoomSort, "RoomCategoryFlags", 32, 0),
-                new flagField(tlpRoomSubLow, "RoomSubCategoryFlags", 32, 0),
-                new flagField(tlpRoomSubHigh, "RoomSubCategoryFlags", 64, 32),
-                new flagField(tlpFuncSort, "FunctionCategoryFlags", 32, 0),
-                new flagField(tlpFuncSubLow, "FunctionSubCategoryFlags", 32, 0),
-                new flagField(tlpFuncSubHigh, "FunctionSubCategoryFlags", 64, 32),
-                new flagField(tlpBuildSort, "BuildCategoryFlags", 32, 0),
-            });
-            foreach (flagField ff in flagFields)
-            {
-                while (ff.tlp.RowCount > 2)
-                {
-                    for (int i = 0; i < ff.tlp.ColumnCount; i++)
-                    {
-                        Control c = ff.tlp.GetControlFromPosition(i, ff.tlp.RowCount - 2);
-                        ff.tlp.Controls.Remove(c);
-                    }
-                    ff.tlp.RowCount--;
-                }
-            }
+            InitialiseMaps();
+            flagFields.ForEach(ff => InitialiseTLP(ff.tlp));
+
             foreach (flagField ff in flagFields)
             {
                 Application.DoEvents();
@@ -1329,161 +1360,111 @@ namespace ObjectCloner
             }
         }
 
-        Dictionary<string, string> otherFieldMap;
-        void InitialiseOtherTab(IResource objd)
+        void InitialiseTLP(TableLayoutPanel tlp)
         {
-            while (tlpOther.RowCount > 2)
+            while (tlp.RowCount > 2)
             {
-                Control c = tlpOther.GetControlFromPosition(0, tlpOther.RowCount - 2);
-                tlpOther.Controls.Remove(c);
-                c = tlpOther.GetControlFromPosition(1, tlpOther.RowCount - 2);
-                tlpOther.Controls.Remove(c);
-                tlpOther.RowCount--;
-            }
-
-            otherFieldMap = new Dictionary<string, string>();
-            Dictionary<string, Type> types = AApiVersionedFields.GetContentFieldTypes(0, objd.GetType());
-            foreach (string field in otherFieldMap.Keys)
-                CreateField(tlpOther, types[otherFieldMap[field]], field, true);
-        }
-
-        static Dictionary<List<Type>, int> typeToLen = null;
-        static void setTypeToLen()
-        {
-            typeToLen = new Dictionary<List<Type>, int>();
-            typeToLen.Add(new List<Type>(new Type[] { typeof(sbyte), typeof(byte), }), 2 + 2);
-            typeToLen.Add(new List<Type>(new Type[] { typeof(bool), typeof(char), typeof(short), typeof(ushort), }), 2 + 4);
-            typeToLen.Add(new List<Type>(new Type[] { typeof(float), }), 8);
-            typeToLen.Add(new List<Type>(new Type[] { typeof(int), typeof(uint), }), 2 + 8);
-            typeToLen.Add(new List<Type>(new Type[] { typeof(double), }), 16);
-            typeToLen.Add(new List<Type>(new Type[] { typeof(long), typeof(ulong), }), 2 + 16);
-            typeToLen.Add(new List<Type>(new Type[] { typeof(decimal), typeof(DateTime), typeof(string), typeof(object), }), 30);
-        }
-        void CreateField(TableLayoutPanel target, Type t, string field) { CreateField(target, t, field, false); }
-        void CreateField(TableLayoutPanel target, Type t, string field, bool validate)
-        {
-            if (typeToLen == null) setTypeToLen();
-
-            foreach (List<Type> tt in typeToLen.Keys)
-                if (tt.Contains(typeof(Enum).IsAssignableFrom(t) ? Enum.GetUnderlyingType(t) : t))
+                for (int i = 0; i < tlp.ColumnCount; i++)
                 {
-                    CreateField(target, field, typeToLen[tt], validate ? t : null);
-                    return;
+                    Control c = tlp.GetControlFromPosition(i, tlp.RowCount - 2);
+                    tlp.Controls.Remove(c);
                 }
-
-            CreateField(target, field, 30, validate ? t : null);
+                tlp.RowCount--;
+            }
         }
-
-        void CreateField(TableLayoutPanel tlp, string name, int len, Type validate)
+        void InitialiseTabTLP(IResource res, TableLayoutPanel tlp, IEnumerable<String> fields)
         {
-            tlp.RowCount++;
-            tlp.RowStyles.Insert(tlp.RowCount - 2, new RowStyle(SizeType.AutoSize));
+            InitialiseTLP(tlp);
+
+            foreach (string field in fields)
+            {
+                ResField resField = new ResField(res, field);
+                ResField resLabel = fieldToLabel(resField);
+                if (AApiVersionedFields.GetContentFields(0, resLabel.res.GetType()).Contains(field))
+                    CreateField(tlp, resField, true);
+            }
+        }
+        void CreateField(TableLayoutPanel target, ResField resField) { CreateField(target, resField, false); }
+        void CreateField(TableLayoutPanel target, ResField resField, bool validate)
+        {
+            ResField resLabel = fieldToLabel(resField);
+            Type type = AApiVersionedFields.GetContentFieldTypes(0, resLabel.res.GetType())[resField.field];
+
+            target.RowCount++;
+            target.RowStyles.Insert(target.RowCount - 2, new RowStyle(SizeType.AutoSize));
 
             Label lb = new Label();
             lb.Anchor = AnchorStyles.Right;
             lb.AutoSize = true;
-            lb.Name = "lb" + name;
-            lb.TabIndex = tlp.RowCount * 2;
-            lb.Text = name;
-            tlp.Controls.Add(lb, 0, tlp.RowCount - 2);
+            lb.Name = "lb" + resField.field;
+            lb.TabIndex = target.RowCount * 2;
+            lb.Text = resLabel.field;
+            target.Controls.Add(lb, 0, target.RowCount - 2);
 
-            if (name.Equals("TopicRatings"))
+            if (HasTGIBlockListContentFieldAttribute(resLabel.res.GetType(), resField.field))
+            {
+                TGIBlockCombo tbc = new TGIBlockCombo();
+                tbc.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+                tbc.Name = "tbc" + resField.field;
+                tbc.Enabled = false;
+                tbc.Margin = new Padding(3, 0, 0, 0);
+                tbc.ShowEdit = false;
+                tbc.TabIndex = target.RowCount * 2 + 1;
+                tbc.Tag = true;
+                tbc.Width = (int)target.ColumnStyles[1].Width;
+                target.Controls.Add(tbc, 1, target.RowCount - 2);
+            }
+            else if (resField.field.Equals("TopicRatings"))
             {
                 CustomControls.TopicRatings tr = new CustomControls.TopicRatings();
                 tr.Anchor = AnchorStyles.Left;
-                tr.Name = "tr" + name;
+                tr.Name = "tr" + resField.field;
                 tr.ReadOnly = true;
-                tr.TabIndex = tlp.RowCount * 2 + 1;
-                tr.Tag = true;
-                tlp.Controls.Add(tr, 1, tlp.RowCount - 2);
+                tr.TabIndex = target.RowCount * 2 + 1;
+                if (validate) tr.Tag = true;
+                target.Controls.Add(tr, 1, target.RowCount - 2);
             }
-            else if (typeof(Enum).IsAssignableFrom(validate))
+            else if (typeof(Enum).IsAssignableFrom(type))
             {
                 CustomControls.EnumTextBox etb = new CustomControls.EnumTextBox();
-                etb.EnumType = validate;
+                etb.EnumType = type;
                 etb.Anchor = AnchorStyles.Left;
-                etb.Name = "etb" + name;
+                etb.Name = "etb" + resField.field;
                 etb.ReadOnly = true;
-                etb.TabIndex = tlp.RowCount * 2 + 1;
-                etb.Tag = true;
-                tlp.Controls.Add(etb, 1, tlp.RowCount - 2);
+                etb.TabIndex = target.RowCount * 2 + 1;
+                if (validate) etb.Tag = true;
+                target.Controls.Add(etb, 1, target.RowCount - 2);
             }
-            else if (typeof(Boolean).Equals(validate))
+            else if (typeof(Boolean).Equals(type))
             {
                 CheckBox ckb = new CheckBox();
                 ckb.Anchor = AnchorStyles.Left;
-                ckb.Name = "ckb" + name;
-                ckb.Enabled = false;
-                ckb.TabIndex = tlp.RowCount * 2 + 1;
-                ckb.Tag = true;
-                tlp.Controls.Add(ckb, 1, tlp.RowCount - 2);
+                ckb.AutoCheck = false;
+                ckb.Name = "ckb" + resField.field;
+                ckb.TabIndex = target.RowCount * 2 + 1;
+                if (validate) ckb.Tag = true;
+                target.Controls.Add(ckb, 1, target.RowCount - 2);
             }
             else
             {
                 Label x = new Label();
                 x.AutoSize = true;
-                x.Text = "".PadLeft(len, 'X');
+                x.Text = "".PadLeft(getFieldLength(type), 'X');
 
                 TextBox tb = new TextBox();
                 tb.Anchor = AnchorStyles.Left;
-                tb.Name = "tb" + name;
+                tb.Name = "tb" + resField.field;
                 tb.ReadOnly = true;
                 tb.Size = new Size(x.PreferredWidth + 6, x.PreferredHeight + 6);
-                tb.TabIndex = tlp.RowCount * 2 + 1;
-                if (validate != null)
+                tb.TabIndex = target.RowCount * 2 + 1;
+                if (validate)
                 {
                     tb.Validating += new CancelEventHandler(tb_Validating);
-                    tb.Tag = validate;
+                    tb.Tag = true;
                 }
-                tlp.Controls.Add(tb, 1, tlp.RowCount - 2);
+                target.Controls.Add(tb, 1, target.RowCount - 2);
             }
         }
-        void tb_Validating(object sender, CancelEventArgs e)
-        {
-            TextBox tb = sender as TextBox;
-            Type t = tb.Tag as Type;
-            if (t == null) return;
-
-            try { object val = tb_Value(tb, t); }
-            catch { e.Cancel = true; }
-
-            if (e.Cancel) tb.SelectAll();
-        }
-        object tb_Value(TextBox tb, Type t)
-        {
-            if (t == typeof(Single) || t == typeof(Boolean) || !tb.Text.StartsWith("0x"))
-                return Convert.ChangeType(tb.Text, t);
-            else
-                return Convert.ChangeType(UInt64.Parse(tb.Text.Substring(2), System.Globalization.NumberStyles.HexNumber), t);
-        }
-        object etb_Value(CustomControls.EnumTextBox etb) { return Enum.ToObject(etb.EnumType, etb.Value); }
-        object tr_Value(CustomControls.TopicRatings tr) { return tr.Value; }
-
-        void CreateField(TableLayoutPanel tlp, string name)
-        {
-            tlp.RowCount++;
-            tlp.RowStyles.Insert(tlp.RowCount - 2, new RowStyle(SizeType.AutoSize));
-
-            Label lb = new Label();
-            lb.Anchor = AnchorStyles.Right;
-            lb.AutoSize = true;
-            lb.Name = "lb" + name;
-            lb.TabIndex = tlp.RowCount * 2;
-            lb.Text = name;
-            tlp.Controls.Add(lb, 0, tlp.RowCount - 2);
-
-            TGIBlockCombo tbc = new TGIBlockCombo();
-            tbc.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            tbc.Name = "tbc" + name;
-            tbc.Enabled = false;
-            tbc.Margin = new Padding(3, 0 , 0, 0);
-            tbc.ShowEdit = false;
-            tbc.TabIndex = tlp.RowCount * 2 + 1;
-            tbc.Tag = true;
-            tbc.Width = (int)tlp.ColumnStyles[1].Width;
-            tlp.Controls.Add(tbc, 1, tlp.RowCount - 2);
-        }
-
         void CreateField(flagField ff, string name, CheckBox[] acbk, int i)
         {
             ff.tlp.RowStyles.Insert(i + 1, new RowStyle(SizeType.AutoSize));
@@ -1494,12 +1475,6 @@ namespace ObjectCloner
             acbk[i].Name = "cb" + name;
             acbk[i].Text = name;
             acbk[i].TabIndex = ff.tlp.RowCount;
-        }
-
-        void IterateTLP(TableLayoutPanel tlp, Action<Label, Control> action)
-        {
-            for (int i = 1; i < tlp.RowCount - 1; i++)
-                action((Label)tlp.GetControlFromPosition(0, i), tlp.GetControlFromPosition(1, i));
         }
 
         void ClearTabs()
@@ -1528,27 +1503,31 @@ namespace ObjectCloner
             lbThumbTGI.Text = "";
             tbResourceName.Text = "";
             tbObjName.Text = "";
+            tbNameGUID.Text = "";
             tbCatlgName.Text = "";
             tbObjDesc.Text = "";
+            tbDescGUID.Text = "";
             tbCatlgDesc.Text = "";
             ckbCopyToAll.Checked = false;
             tbPrice.Text = "";
             tbProductStatus.Text = "";
+            tbPackage.Text = "";
         }
         void clearDetails() { IterateTLP(tlpObjectDetail, clearTLP); }
+        void clearOther() { IterateTLP(tlpOther, clearTLP); }
         void clearFlags()
         {
             foreach (flagField ff in flagFields)
                 foreach (Control c in ff.tlp.Controls)
                     if (c is CheckBox) ((CheckBox)c).Checked = false;
         }
-        void clearOther() { IterateTLP(tlpOther, clearTLP); }
         void clearTLP(Label l, Control c)
         {
-            if (c is TextBox) ((TextBox)c).Text = "";
-            else if (c is CustomControls.EnumTextBox) (c as CustomControls.EnumTextBox).Clear();
-            else if (c is CustomControls.TopicRatings) (c as CustomControls.TopicRatings).Clear();
-            else if (c is TGIBlockCombo) ((TGIBlockCombo)c).SelectedIndex = -1;
+            if (c is TGIBlockCombo) { TGIBlockCombo tbc = c as TGIBlockCombo; tbc.SelectedIndex = -1; }
+            else if (c is CustomControls.TopicRatings) { CustomControls.TopicRatings tr = c as CustomControls.TopicRatings; tr.Clear(); tr.ReadOnly = true; }
+            else if (c is CustomControls.EnumTextBox) { CustomControls.EnumTextBox etb = c as CustomControls.EnumTextBox; etb.Clear(); etb.ReadOnly = true; }
+            else if (c is CheckBox) { CheckBox ckb = c as CheckBox; ckb.AutoCheck = ckb.Checked = false; }
+            else if (c is TextBox) { TextBox tb = c as TextBox; tb.Text = ""; tb.ReadOnly = true; }
         }
 
         void FillTabs(Item item)
@@ -1595,13 +1574,15 @@ namespace ObjectCloner
             tbCatlgDesc.Text = English[(ulong)common["DescGUID"].Value];
             tbPrice.Text = common["Price"].Value + "";
             tbProductStatus.Text = "0x" + ((byte)common["BuildBuyProductStatusFlags"].Value).ToString("X2");
+            tbPackage.Text = objPaths[objPkgs.IndexOf(item.Package)];
         }
-        void fillDetails(Item objd) { IterateTLP(tlpObjectDetail, (l, c) => fillControl(objd, l, c, detailsFieldMap)); }
-        void fillFlags(Item objd)
+        void fillDetails(Item item) { IterateTLP(tlpObjectDetail, (l, c) => fillControl(item, l, c)); }
+        void fillOther(Item item) { IterateTLP(tlpOther, (l, c) => fillControl(item, l, c)); }
+        void fillFlags(Item item)
         {
             foreach (flagField ff in flagFields)
             {
-                ulong field = getFlags(objd.Resource as AResource, ff.field);
+                ulong field = getFlags(item.Resource as AResource, ff.field);
                 for (int i = 1; i < ff.tlp.RowCount - 1; i++)
                 {
                     ulong value = (ulong)Math.Pow(2, ff.offset + i - 1);
@@ -1610,19 +1591,22 @@ namespace ObjectCloner
                 }
             }
         }
-        void fillOther(Item objd) { IterateTLP(tlpOther, (l, c) => fillControl(objd, l, c, otherFieldMap)); }
-        void fillControl(Item objd, Label lb, Control c, Dictionary<string, string> fieldMap)
-        {
-            string field = fieldMap.ContainsKey(objd.Resource.GetType().Name + ":" + lb.Text) ? fieldMap[objd.Resource.GetType().Name + ":" + lb.Text] : lb.Text;
-            if (!objd.Resource.ContentFields.Contains(field)) return;
-            TypedValue tv = objd.Resource[field];
 
-            if (c is CustomControls.EnumTextBox)
+        void fillControl(Item item, Label lb, Control c)
+        {
+            ResField resField = labelToField(new ResField(item.Resource, lb.Text));
+
+            if (!resField.res.ContentFields.Contains(resField.field)) return;//Leave field empty and readonly if not present
+
+            TypedValue tv = resField.res[resField.field];
+
+            if (c is TGIBlockCombo)
             {
-                CustomControls.EnumTextBox etb = c as CustomControls.EnumTextBox;
-                etb.EnumType = tv.Type;
-                etb.Value = Convert.ToUInt64(tv.Value);
-                etb.ReadOnly = false;
+                AResource.TGIBlockList tgiBlocks = item.Resource["TGIBlocks"].Value as AResource.TGIBlockList;
+                TGIBlockCombo tbc = c as TGIBlockCombo;
+                tbc.TGIBlocks = tgiBlocks;
+                int index = (int)(uint)tv.Value;
+                tbc.SelectedIndex = index >= 0 && index < tgiBlocks.Count ? index : -1;
             }
             else if (c is CustomControls.TopicRatings)
             {
@@ -1630,24 +1614,24 @@ namespace ObjectCloner
                 tr.GetType().GetProperty("Value").SetValue(tr, tv.Value, new object[] { });
                 tr.ReadOnly = false;
             }
+            else if (c is CustomControls.EnumTextBox)
+            {
+                CustomControls.EnumTextBox etb = c as CustomControls.EnumTextBox;
+                etb.EnumType = tv.Type;
+                etb.Value = Convert.ToUInt64(tv.Value);
+                etb.ReadOnly = false;
+            }
             else if (c is CheckBox)
             {
                 CheckBox ckb = c as CheckBox;
                 ckb.Checked = (Boolean)tv.Value;
+                ckb.AutoCheck = true;
             }
             else if (c is TextBox)
             {
                 TextBox tb = c as TextBox;
                 tb.Text = tv;
-                tb.ReadOnly = tb.Tag == null;
-            }
-            else if (c is TGIBlockCombo)
-            {
-                AResource.TGIBlockList tgiBlocks = objd.Resource["TGIBlocks"].Value as AResource.TGIBlockList;
-                TGIBlockCombo tbc = c as TGIBlockCombo;
-                tbc.TGIBlocks = tgiBlocks;
-                int index = (int)(uint)tv.Value;
-                tbc.SelectedIndex = index >= 0 && index < tgiBlocks.Count ? index : -1;
+                tb.ReadOnly = c.Tag == null;
             }
         }
 
@@ -1690,7 +1674,8 @@ namespace ObjectCloner
             tbCatlgName.BackColor = tbPrice.BackColor;
             tbCatlgDesc.BackColor = tbPrice.BackColor;
         }
-        void tabEnableDetails(bool enabled) { IterateTLP(tlpObjectDetail, (l, c) => { if (c.Tag != null || c is CheckBox) c.Enabled = enabled; }); }
+        void tabEnableDetails(bool enabled) { IterateTLP(tlpObjectDetail, (l, c) => { if (c.Tag != null) c.Enabled = enabled; }); }
+        void tabEnableOther(bool enabled) { IterateTLP(tlpOther, (l, c) => { if (c.Tag != null) c.Enabled = enabled; }); }
         void tabEnableFlags(bool enabled)
         {
             foreach (flagField ff in flagFields)
@@ -1702,7 +1687,18 @@ namespace ObjectCloner
                 }
             }
         }
-        void tabEnableOther(bool enabled) { IterateTLP(tlpOther, (l, c) => { if (c.Tag != null || c is CheckBox) c.Enabled = enabled; }); }
+
+        void tb_Validating(object sender, CancelEventArgs e)
+        {
+            TextBox tb = sender as TextBox;
+            Type t = tb.Tag as Type;
+            if (t == null) return;
+
+            try { object val = tb_Value(tb, t); }
+            catch { e.Cancel = true; }
+
+            if (e.Cancel) tb.SelectAll();
+        }
 
         ulong getFlags(AApiVersionedFields owner, string field)
         {
@@ -1723,6 +1719,46 @@ namespace ObjectCloner
             }
             return res;
         }
+
+        void UpdateItem(Item item, Label lb, Control c)
+        {
+            if (c.Tag == null) return;//skip if read only
+            ResField resField = labelToField(new ResField(item.Resource, lb.Text));
+
+            if (!resField.res.ContentFields.Contains(resField.field)) return;//skip if not present
+
+            TypedValue tvOld = resField.res[resField.field];
+
+            if (c is TGIBlockCombo)
+            {
+                resField.res[resField.field] = new TypedValue(tvOld.Type, Convert.ChangeType((c as TGIBlockCombo).SelectedIndex, tvOld.Type), "X");
+            }
+            else if (c is CustomControls.TopicRatings)
+            {
+                resField.res[resField.field] = new TypedValue(tvOld.Type, tr_Value(c as CustomControls.TopicRatings), "X");
+            }
+            else if (c is CustomControls.EnumTextBox)
+            {
+                resField.res[resField.field] = new TypedValue(tvOld.Type, etb_Value(c as CustomControls.EnumTextBox), "X");
+            }
+            else if (c is CheckBox)
+            {
+                resField.res[resField.field] = new TypedValue(tvOld.Type, (c as CheckBox).Checked, "X");
+            }
+            else if (c is TextBox)
+            {
+                resField.res[resField.field] = new TypedValue(tvOld.Type, tb_Value(c as TextBox, tvOld.Type), "X");
+            }
+        }
+        object tb_Value(TextBox tb, Type t)
+        {
+            if (t == typeof(Single) || t == typeof(Boolean) || !tb.Text.StartsWith("0x"))
+                return Convert.ChangeType(tb.Text, t);
+            else
+                return Convert.ChangeType(UInt64.Parse(tb.Text.Substring(2), System.Globalization.NumberStyles.HexNumber), t);
+        }
+        object etb_Value(CustomControls.EnumTextBox etb) { return Enum.ToObject(etb.EnumType, etb.Value); }
+        object tr_Value(CustomControls.TopicRatings tr) { return tr.Value; }
         void setFlags(AApiVersionedFields owner, string field, ulong value)
         {
             Type t = AApiVersionedFields.GetContentFieldTypes(0, owner.GetType())[field];
@@ -1737,7 +1773,7 @@ namespace ObjectCloner
         bool haveLoaded = false;
         bool loading = false;
         bool isFix = false;
-        Dictionary<uint, Item> CTPTBrushIndexToPair;
+        Dictionary<UInt64, Item> CTPTBrushIndexToPair;
         void StartLoading(CatalogType resourceType, bool setIsFix)
         {
             if (haveLoaded) return;
@@ -1748,7 +1784,7 @@ namespace ObjectCloner
 
             waitingToDisplayObjects = true;
             objectChooser.Items.Clear();
-            CTPTBrushIndexToPair = new Dictionary<uint, Item>();
+            CTPTBrushIndexToPair = new Dictionary<UInt64, Item>();
 
             this.LoadingComplete -= new EventHandler<BoolEventArgs>(MainForm_LoadingComplete);
             this.LoadingComplete += new EventHandler<BoolEventArgs>(MainForm_LoadingComplete);
@@ -1825,9 +1861,13 @@ namespace ObjectCloner
                 byte status = (byte)item.Resource["CommonBlock.BuildBuyProductStatusFlags"].Value;
                 if ((status & 0x01) == 0) // do not list
                 {
-                    uint brushIndex = (uint)item.Resource["BrushIndex"].Value;
-                    CTPTBrushIndexToPair.Add(brushIndex - 1, item);
-                    return;
+                    //int brushIndex = ("" + item.Resource["BrushTexture"]).GetHashCode();
+                    UInt64 brushIndex = (UInt64)item.Resource["CommonBlock.NameGUID"].Value;
+                    if (!CTPTBrushIndexToPair.ContainsKey(brushIndex))//Try to leave one behind...
+                    {
+                        CTPTBrushIndexToPair.Add(brushIndex, item);
+                        return;
+                    }
                 }
             }
             ListViewItem lvi = new ListViewItem();
@@ -2374,6 +2414,7 @@ namespace ObjectCloner
         ulong nameGUID, newNameGUID;
         ulong descGUID, newDescGUID;
 
+
         void StartFixing()
         {
             Dictionary<IResourceKey, Item> rkToItemAdded = new Dictionary<IResourceKey,Item>();
@@ -2442,35 +2483,7 @@ namespace ObjectCloner
                                 commonBlock["PngInstance"] = new TypedValue(typeof(ulong), oldToNew[PngInstance]);
 
                             if (tabControl1.TabPages.Contains(tpDetail))
-                            {
-                                for (int i = 1; i < tlpObjectDetail.RowCount - 1; i++)
-                                {
-                                    Label lb = (Label)tlpObjectDetail.GetControlFromPosition(0, i);
-                                    Control c = tlpObjectDetail.GetControlFromPosition(1, i);
-                                    if (c.Tag == null) continue;
-
-                                    string field = detailsFieldMap.ContainsKey(item.Resource.GetType().Name + ":" + lb.Text) ?
-                                        detailsFieldMap[item.Resource.GetType().Name + ":" + lb.Text] : lb.Text;
-                                    TypedValue tvOld = item.Resource[field];
-
-                                    if (c is CheckBox)
-                                    {
-                                        item.Resource[field] = new TypedValue(tvOld.Type, (c as CheckBox).Checked, "X");
-                                    }
-                                    else if (c is CustomControls.EnumTextBox)
-                                    {
-                                        item.Resource[field] = new TypedValue(tvOld.Type, etb_Value(c as CustomControls.EnumTextBox), "X");
-                                    }
-                                    else if (c is CustomControls.TopicRatings)
-                                    {
-                                        item.Resource[field] = new TypedValue(tvOld.Type, tr_Value(c as CustomControls.TopicRatings), "X");
-                                    }
-                                    else if (c is TextBox)
-                                    {
-                                        item.Resource[field] = new TypedValue(tvOld.Type, tb_Value(c as TextBox, tvOld.Type), "X");
-                                    }
-                                }
-                            }
+                                IterateTLP(tlpObjectDetail, (l, c) => UpdateItem(item, l, c));
 
                             #region Selected OBJD only
                             if (selectedItem.CType == CatalogType.CatalogObject)//Selected OBJD only
@@ -2487,22 +2500,7 @@ namespace ObjectCloner
                                 if (tlpOther.Visible)
                                 {
                                     for (int i = 1; i < tlpOther.RowCount - 1; i++)
-                                    {
-                                        Label lb = (Label)tlpOther.GetControlFromPosition(0, i);
-                                        TextBox tb = (TextBox)tlpOther.GetControlFromPosition(1, i);
-                                        if (tb.Tag == null) continue;
-
-                                        TypedValue tvOld = item.Resource[otherFieldMap[lb.Text]];
-
-                                        ulong u = Convert.ToUInt64(tb.Text, tb.Text.StartsWith("0x") ? 16 : 10);
-                                        object val;
-                                        if (typeof(Enum).IsAssignableFrom(tvOld.Type))
-                                            val = Enum.ToObject(tvOld.Type, u);
-                                        else
-                                            val = Convert.ChangeType(u, tvOld.Type);
-
-                                        item.Resource[otherFieldMap[lb.Text]] = new TypedValue(tvOld.Type, val);
-                                    }
+                                        IterateTLP(tlpOther, (l, c) => UpdateItem(item, l, c));
                                 }
                             }
                             #endregion
@@ -2517,9 +2515,9 @@ namespace ObjectCloner
                                 byte status = (byte)commonBlock["BuildBuyProductStatusFlags"].Value;
                                 uint brushIndex = FNV32.GetHash(UniqueObject) << 1;
                                 if ((status & 0x01) != 0)
-                                    item.Resource["BrushIndex"] = new TypedValue(typeof(uint), brushIndex);
+                                    item.Resource["CommonBlock.UISortPriority"] = new TypedValue(typeof(uint), brushIndex);
                                 else
-                                    item.Resource["BrushIndex"] = new TypedValue(typeof(uint), brushIndex + 1);
+                                    item.Resource["CommonBlock.UISortPriority"] = new TypedValue(typeof(uint), brushIndex + 1);
                             }
                             #endregion
 
@@ -2679,7 +2677,7 @@ namespace ObjectCloner
                 if ((new List<string>(new string[] { "Stream", "AsBytes", "Value", })).Contains(f)) continue;
 
                 Type t = AApiVersionedFields.GetContentFieldTypes(0, field.GetType())[f];
-                if (!t.IsClass || t.Equals(typeof(string)) || t.Equals(typeof(Boolset))) continue;
+                if (!t.IsClass || t.Equals(typeof(string))) continue;
                 if (t.IsArray && (!t.GetElementType().IsClass || t.GetElementType().Equals(typeof(string)))) continue;
 
                 if (typeof(IEnumerable).IsAssignableFrom(t))
@@ -2782,7 +2780,7 @@ namespace ObjectCloner
                 if ((new List<string>(new string[] { "Stream", "AsBytes", "Value", })).Contains(f)) continue;
 
                 Type t = AApiVersionedFields.GetContentFieldTypes(0, field.GetType())[f];
-                if (!t.IsClass || t.Equals(typeof(string)) || t.Equals(typeof(Boolset))) continue;
+                if (!t.IsClass || t.Equals(typeof(string))) continue;
                 if (t.IsArray && (!t.GetElementType().IsClass || t.GetElementType().Equals(typeof(string)))) continue;
 
                 if (typeof(IEnumerable).IsAssignableFrom(t))
@@ -2909,6 +2907,7 @@ namespace ObjectCloner
             currentCatalogType = 0;
             currentPackage = filename;
             tmbPkgs = ddsPkgs = objPkgs = new List<IPackage>(new IPackage[] { pkg, });
+            tmbPaths = ddsPaths = objPaths = new List<string>(new string[] { filename, });
 
             mode = Mode.Fix;
             fileNewOpen(type, type != 0);
@@ -2956,9 +2955,9 @@ namespace ObjectCloner
             if (currentCatalogType != resourceType)
             {
                 ClosePkg();
-                setList(out objPkgs, ini_fb0);
-                setList(out ddsPkgs, ini_fb2);
-                setList(out tmbPkgs, ini_tmb);
+                setList(out objPkgs, out objPaths, ini_fb0);
+                setList(out ddsPkgs, out ddsPaths, ini_fb2);
+                setList(out tmbPkgs, out tmbPaths, ini_tmb);
                 currentCatalogType = resourceType;
             }
 
@@ -2977,14 +2976,15 @@ namespace ObjectCloner
             return true;
         }
         bool doCheckPackageLists() { return ini_fb0 != null && ini_fb2 != null && ini_tmb != null && ini_fb0.Count > 0; }
-        void setList(out List<IPackage> pkgs, List<string> paths)
+        void setList(out List<IPackage> pkgs, out List<string> outPaths, List<string> inPaths)
         {
             pkgs = new List<IPackage>();
+            outPaths = new List<string>();
 
-            if (paths == null) return;
-            foreach (string file in paths)
+            if (inPaths == null) return;
+            foreach (string file in inPaths)
                 if (File.Exists(file))
-                    try { pkgs.Add(s3pi.Package.Package.OpenPackage(0, file)); }
+                    try { pkgs.Add(s3pi.Package.Package.OpenPackage(0, file)); outPaths.Add(file); }
                     catch { }
         }
         #endregion
@@ -3079,9 +3079,9 @@ namespace ObjectCloner
             if (!CheckInstallDirs()) return;
 
             ClosePkg();
-            setList(out objPkgs, ini_fb0);
-            setList(out ddsPkgs, ini_fb2);
-            setList(out tmbPkgs, ini_tmb);
+            setList(out objPkgs, out objPaths, ini_fb0);
+            setList(out ddsPkgs, out ddsPaths, ini_fb2);
+            setList(out tmbPkgs, out tmbPaths, ini_tmb);
             currentCatalogType = 0;
 
             searchPane = new Search(objPkgs, updateProgress);
@@ -3102,10 +3102,18 @@ namespace ObjectCloner
                     case MenuBarWidget.MB.MBS_sims3Folder: settingsGameFolders(); break;
                     case MenuBarWidget.MB.MBS_userName: settingsUserName(); break;
                     case MenuBarWidget.MB.MBS_updates: settingsAutomaticUpdates(); break;
+                    case MenuBarWidget.MB.MBS_advanced: settingsAdvancedCloning(); break;
                     case MenuBarWidget.MB.MBS_diagnostics: settingsDiagnostics(); break;
                 }
             }
             finally { this.Enabled = true; }
+        }
+
+        private void settingsAdvancedCloning()
+        {
+            Application.DoEvents();
+            ObjectCloner.Properties.Settings.Default.AdvanceCloning = !ObjectCloner.Properties.Settings.Default.AdvanceCloning;
+            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_advanced, ObjectCloner.Properties.Settings.Default.AdvanceCloning);
         }
 
         private void settingsGameFolders()
@@ -3298,17 +3306,25 @@ namespace ObjectCloner
                     OBJD_Steps(stepList, out lastStepInChain); break;
                 case CatalogType.ModularResource:
                     MDLR_Steps(stepList, out lastStepInChain); break;
-                case CatalogType.CatalogFence:
-                case CatalogType.CatalogStairs:
-                case CatalogType.CatalogRailing:
-                case CatalogType.CatalogRoofPattern:
-                    Common_Steps(stepList, out lastStepInChain); break;
+                case CatalogType.CatalogTerrainGeometryBrush:
+                case CatalogType.CatalogTerrainWaterBrush:
+                    brush_Steps(stepList, out lastStepInChain); break;
                 case CatalogType.CatalogTerrainPaintBrush:
                     CTPT_Steps(stepList, out lastStepInChain); break;
                 case CatalogType.CatalogFireplace:
                     CFIR_Steps(stepList, out lastStepInChain); break;
                 case CatalogType.CatalogWallFloorPattern:
                     CWAL_Steps(stepList, out lastStepInChain); break;
+                case CatalogType.CatalogFence:
+                case CatalogType.CatalogStairs:
+                case CatalogType.CatalogRailing:
+                case CatalogType.CatalogRoofPattern:
+                case CatalogType.CatalogFoundation:
+                case CatalogType.CatalogWall:
+                case CatalogType.CatalogRoofStyle:
+                    Common_Steps(stepList, out lastStepInChain); break;
+                case CatalogType.CatalogProxyProduct:
+                    CPRX_Steps(stepList, out lastStepInChain); break;
             }
             lastInChain = stepList == null ? -1 : (stepList.IndexOf(lastStepInChain) + 1);
         }
@@ -3397,14 +3413,12 @@ namespace ObjectCloner
             }
         }
 
-        void CTPT_Steps(List<Step> stepList, out Step lastStepInChain)
+        void brush_Steps(List<Step> stepList, out Step lastStepInChain)
         {
             lastStepInChain = None;
             if (isClone || cloneFixOptions.IsRenumber)
             {
                 stepList.AddRange(new Step[] {
-                    CTPT_addPair,
-                    CTPT_addBrushTexture,
                     //CTPT_addBrushShape if NOT default resources only
                 });
                 if (cloneFixOptions.IsDefaultOnly)
@@ -3413,12 +3427,24 @@ namespace ObjectCloner
                 else
                 {
                     //stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpTGIs);// Causes problems for CSTR and doesn't help for others
-                    stepList.Insert(stepList.IndexOf(SlurpThumbnails), CTPT_addBrushShape);
+                    stepList.Insert(stepList.IndexOf(SlurpThumbnails), brush_addBrushShape);
                     //stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinXML);//No VPXYs in here
                     //stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinMTST);//No VPXYs in here
                 }
                 if (cloneFixOptions.IsIncludeThumbnails || (!isClone && cloneFixOptions.IsRenumber))
                     stepList.Add(SlurpThumbnails);
+            }
+        }
+
+        void CTPT_Steps(List<Step> stepList, out Step lastStepInChain)
+        {
+            brush_Steps(stepList, out lastStepInChain);
+            if (isClone || cloneFixOptions.IsRenumber)
+            {
+                stepList.InsertRange(0, new Step[] {
+                    CTPT_addPair,
+                    CTPT_addBrushTexture,
+                });
             }
         }
 
@@ -3463,6 +3489,24 @@ namespace ObjectCloner
             }
         }
 
+        void CPRX_Steps(List<Step> stepList, out Step lastStepInChain)
+        {
+            lastStepInChain = None;
+            if (isClone || cloneFixOptions.IsRenumber)
+            {
+                stepList.AddRange(new Step[] {
+                });
+                if (cloneFixOptions.IsDefaultOnly)
+                {
+                }
+                else
+                {
+                }
+                if (cloneFixOptions.IsIncludeThumbnails || (!isClone && cloneFixOptions.IsRenumber))
+                    stepList.Add(SlurpThumbnails);
+            }
+        }
+
         Dictionary<Step, string> StepText;
         void SetStepText()
         {
@@ -3482,7 +3526,7 @@ namespace ObjectCloner
 
             StepText.Add(CTPT_addPair, "Add the other brush in pair");
             StepText.Add(CTPT_addBrushTexture, "Add Brush Texture");
-            StepText.Add(CTPT_addBrushShape, "Add Brush Shape");
+            StepText.Add(brush_addBrushShape, "Add Brush Shape");
 
             StepText.Add(Catlg_addVPXYs, "Add VPXY resources");
             StepText.Add(VPXYs_SlurpRKs, "VPXY-referenced resources");
@@ -3620,14 +3664,15 @@ namespace ObjectCloner
 
         void CTPT_addPair()
         {
-            uint brushIndex = (uint)selectedItem.Resource["BrushIndex"].Value;
+            //int brushIndex = ("" + selectedItem.Resource["BrushTexture"]).GetHashCode();
+            UInt64 brushIndex = (UInt64)selectedItem.Resource["CommonBlock.NameGUID"].Value;
             if (CTPTBrushIndexToPair.ContainsKey(brushIndex))
                 Add("ctpt_pair", CTPTBrushIndexToPair[brushIndex].RequestedRK);
             else
                 Diagnostics.Show(String.Format("CTPT {0} BrushIndex {1} not found", selectedItem.RequestedRK, brushIndex), "No ctpt_pair item");
         }
         void CTPT_addBrushTexture() { Add("ctpt_BrushTexture", (AResource.TGIBlock)selectedItem.Resource["BrushTexture"].Value); }
-        void CTPT_addBrushShape() { Add("ctpt_BrushShape", (AResource.TGIBlock)selectedItem.Resource["BrushShape"].Value); }
+        void brush_addBrushShape() { Add("brush_ProfileTexture", (AResource.TGIBlock)selectedItem.Resource["ProfileTexture"].Value); }
 
         void VPXYs_SlurpRKs()
         {

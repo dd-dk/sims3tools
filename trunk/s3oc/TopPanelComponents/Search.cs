@@ -34,26 +34,26 @@ namespace ObjectCloner.TopPanelComponents
         static string[] ctNames = new string[]
         {
             "Any",
-            "Normal objects",
-            "Fences",
+
+            "Fence",
             "Stairs",
-            "Stair railings",
-            "Terrain Paintbrushes",
-            "Wall/floor patterns",
-            "Roof patterns",
+            "Proxy Product",
+            "Terrain Geometry Brush",
+
+            "Railing",
+            "Terrain Paint Brush",
+            "Fireplace",
+            "Terrain Water Brush",
+
+            "Foundation",
+            "Normal Object",
+            "Wall/Floor Pattern",
+            "Wall",
+
+            "Roof Style",
+            "Modular Resource",
+            "Roof Pattern",
         };
-        static CatalogType[] act = new CatalogType[]
-        {
-            0,
-            CatalogType.CatalogObject,
-            CatalogType.CatalogFence,
-            CatalogType.CatalogStairs,
-            CatalogType.CatalogRailing,
-            CatalogType.CatalogTerrainPaintBrush,
-            CatalogType.CatalogWall,
-            CatalogType.CatalogRoofPattern,
-        };
-        static List<CatalogType> lct = new List<CatalogType>(act);
         #endregion
 
         List<IPackage> objPkgs;
@@ -90,6 +90,12 @@ namespace ObjectCloner.TopPanelComponents
                 , listView1.Columns[2].Width
                 , listView1.Columns[3].Width
                 );/**/
+        }
+
+        static Item ItemForTGIBlock0(List<IPackage> pkgs, Item item)
+        {
+            IResourceKey rk = ((AResource.TGIBlockList)item.Resource["TGIBlocks"].Value)[0];
+            return new Item(pkgs, rk);
         }
 
         #region Search thread
@@ -130,31 +136,31 @@ namespace ObjectCloner.TopPanelComponents
         void Add(Item item)
         {
             if (!this.IsHandleCreated) return;
-            if (item.CType == CatalogType.ModularResource)
-                return;
+
             if (item.CType == CatalogType.CatalogTerrainPaintBrush && ((byte)item.Resource["CommonBlock.BuildBuyProductStatusFlags"].Value & 0x01) == 0)
                 return; // do not list
 
-            ListViewItem lvi = new ListViewItem();
-            if (item.Resource != null)
+            Item ctlg = item.RequestedRK.ResourceType == (uint)CatalogType.ModularResource ? ItemForTGIBlock0(objPkgs, item) : item;
+            string name;
+            if (ctlg.Resource != null)
             {
-                string objdtag = item.Resource["CommonBlock.Name"];
-                lvi.Text = (objdtag.IndexOf(':') < 0) ? objdtag : objdtag.Substring(objdtag.LastIndexOf(':') + 1);
+                name = ctlg.Resource["CommonBlock.Name"];
+                name = (name.IndexOf(':') < 0) ? name : name.Substring(name.LastIndexOf(':') + 1);
             }
             else
             {
-                string s = item.Exception.Message;
-                for (Exception ex = item.Exception.InnerException; ex != null; ex = ex.InnerException) s += "  " + ex.Message;
-                lvi.Text = s;
+                name = ctlg.Exception.Message;
+                for (Exception ex = ctlg.Exception.InnerException; ex != null; ex = ex.InnerException) name += "  " + ex.Message;
             }
+
             List<string> exts;
             string tag = "";
             if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + item.RequestedRK.ResourceType.ToString("X8"), out exts)) tag = exts[0];
             else tag = "UNKN";
-            lvi.SubItems.AddRange(new string[] { tag, item.RGVsn, "" + (AResourceKey)item.RequestedRK, });
-            lvi.Tag = item;
 
-            listView1.Items.Add(lvi);
+            listView1.Items.Add(new ListViewItem(new string[] {
+                name, tag, item.RGVsn, "" + (AResourceKey)item.RequestedRK,
+            }) { Tag = item });
         }
 
         event EventHandler<MainForm.BoolEventArgs> SearchComplete;
@@ -262,7 +268,7 @@ namespace ObjectCloner.TopPanelComponents
                             {
                                 seen.Add(lrie[i]);
                                 Item item = new Item(new RIE(pkg, lrie[i]));
-                                if (Match(item))
+                                if (Match(lrie[i].ResourceType == (uint)CatalogType.ModularResource ? ItemForTGIBlock0(objPkgs, item) : item))
                                 {
                                     Add(item);
                                     hits++;
@@ -285,7 +291,7 @@ namespace ObjectCloner.TopPanelComponents
             IList<IResourceIndexEntry> Find(IPackage pkg)
             {
                 if (criteria.catalogType == 0)
-                    return pkg.FindAll(rie => lct.Contains((CatalogType)rie.ResourceType));
+                    return pkg.FindAll(rie => Enum.IsDefined(typeof(CatalogType), rie.ResourceType));
                 else
                     return pkg.FindAll(rie => criteria.catalogType == (CatalogType)rie.ResourceType);
             }
@@ -325,7 +331,7 @@ namespace ObjectCloner.TopPanelComponents
                 (ckbResourceName.Checked || ckbCatalogDesc.Checked || ckbCatalogName.Checked || ckbObjectDesc.Checked || ckbObjectName.Checked);
         }
 
-        public CatalogType SelectedCatalogType { get { return cbCatalogType.SelectedIndex > -1 ? act[cbCatalogType.SelectedIndex] : 0; } }
+        public CatalogType SelectedCatalogType { get { return cbCatalogType.SelectedIndex > 0 ? ((CatalogType[])Enum.GetValues(typeof(CatalogType)))[cbCatalogType.SelectedIndex - 1] : 0; } }
 
         public ListView.ListViewItemCollection Items { get { return listView1.Items; } }
 

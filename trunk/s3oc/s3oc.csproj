@@ -40,44 +40,44 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="s3pi.CatalogResource, Version=1009.7.19.33908, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="s3pi.CatalogResource">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.CatalogResource.dll</HintPath>
     </Reference>
-    <Reference Include="s3pi.CustomForms, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="s3pi.CustomForms">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
     </Reference>
-    <Reference Include="s3pi.Extensions, Version=907.4.11.19808, Culture=neutral, PublicKeyToken=80159b679e88de38, processorArchitecture=MSIL">
+    <Reference Include="s3pi.Extensions">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="s3pi.GenericRCOLResource, Version=907.12.15.26089, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="s3pi.GenericRCOLResource">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.GenericRCOLResource.dll</HintPath>
     </Reference>
-    <Reference Include="s3pi.Interfaces, Version=906.27.10.17894, Culture=neutral, PublicKeyToken=596917de85953130, processorArchitecture=MSIL">
+    <Reference Include="s3pi.Interfaces">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="s3pi.ObjKeyResource, Version=908.23.16.27521, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="s3pi.ObjKeyResource">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.ObjKeyResource.dll</HintPath>
     </Reference>
-    <Reference Include="s3pi.Package, Version=908.23.16.27523, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="s3pi.Package">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.Package.dll</HintPath>
     </Reference>
-    <Reference Include="s3pi.WrapperDealer, Version=906.27.10.17895, Culture=neutral, PublicKeyToken=27f8fcb7ad5fda58, processorArchitecture=MSIL">
+    <Reference Include="s3pi.WrapperDealer">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.WrapperDealer.dll</HintPath>
     </Reference>
-    <Reference Include="SemWeb, Version=1.0.6.4, Culture=neutral, PublicKeyToken=3e1051c7e190e42e, processorArchitecture=MSIL">
+    <Reference Include="SemWeb">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\semweb-1.0.6.4\bin\SemWeb.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Custom, Version=906.27.10.17894, Culture=neutral, PublicKeyToken=dbb438eea69badfa, processorArchitecture=MSIL">
+    <Reference Include="System.Custom">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\System.Custom.dll</HintPath>
     </Reference>
@@ -138,7 +138,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

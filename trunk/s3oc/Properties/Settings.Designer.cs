@@ -238,5 +238,17 @@ namespace ObjectCloner.Properties {
                 this["PersistentLocation"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AdvanceCloning {
+            get {
+                return ((bool)(this["AdvanceCloning"]));
+            }
+            set {
+                this["AdvanceCloning"] = value;
+            }
+        }
     }
 }
