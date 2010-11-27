@@ -89,12 +89,12 @@ namespace s3pe_VPXY_Resource_Editor
 
             FillPartsTLP();
 
-            nudLowerX.Value = new Decimal(vpxy.BoundingBox[0]);
-            nudLowerY.Value = new Decimal(vpxy.BoundingBox[1]);
-            nudLowerZ.Value = new Decimal(vpxy.BoundingBox[2]);
-            nudUpperX.Value = new Decimal(vpxy.BoundingBox[3]);
-            nudUpperY.Value = new Decimal(vpxy.BoundingBox[4]);
-            nudUpperZ.Value = new Decimal(vpxy.BoundingBox[5]);
+            nudLowerX.Value = new Decimal(vpxy.Bounds.Min.X);
+            nudLowerY.Value = new Decimal(vpxy.Bounds.Min.Y);
+            nudLowerZ.Value = new Decimal(vpxy.Bounds.Min.Z);
+            nudUpperX.Value = new Decimal(vpxy.Bounds.Max.X);
+            nudUpperY.Value = new Decimal(vpxy.Bounds.Max.Y);
+            nudUpperZ.Value = new Decimal(vpxy.Bounds.Max.Z);
 
             tbcFTPT.Enabled = ckbModular.Checked = vpxy.Modular;
             tbcFTPT.TGIBlocks = vpxy.TGIBlocks;
@@ -558,15 +558,14 @@ namespace s3pe_VPXY_Resource_Editor
 
         private void nud_ValueChanged(object sender, EventArgs e)
         {
-            NumericUpDown nud = sender as NumericUpDown;
-            int i = lnud.IndexOf(nud);
-            float[] bb = vpxy.BoundingBox;
-
-            //gah - rounding errors...
-            if (nud.Value != new Decimal(bb[i]))
+            switch (lnud.IndexOf(sender as NumericUpDown))
             {
-                bb[i] = Decimal.ToSingle(nud.Value);
-                vpxy.BoundingBox = bb;
+                case 0: vpxy.Bounds.Min.X = Decimal.ToSingle(nudLowerX.Value); break;
+                case 1: vpxy.Bounds.Min.Y = Decimal.ToSingle(nudLowerY.Value); break;
+                case 2: vpxy.Bounds.Min.Z = Decimal.ToSingle(nudLowerZ.Value); break;
+                case 3: vpxy.Bounds.Max.X = Decimal.ToSingle(nudUpperX.Value); break;
+                case 4: vpxy.Bounds.Max.Y = Decimal.ToSingle(nudUpperY.Value); break;
+                case 5: vpxy.Bounds.Max.Z = Decimal.ToSingle(nudUpperZ.Value); break;
             }
         }
 
