@@ -188,14 +188,14 @@ namespace S3PIDemoFE
         }
         MemoryStream TextEdit(IResourceKey key, IResource res)
         {
-            return s3pi.DemoPlugins.DemoPlugins.Edit(key, res,
+            return s3pi.Helpers.HelperManager.Edit(key, res,
                 S3PIDemoFE.Properties.Settings.Default.TextEditorCmd,
                 S3PIDemoFE.Properties.Settings.Default.TextEditorWantsQuotes,
                 S3PIDemoFE.Properties.Settings.Default.TextEditorIgnoreTS);
         }
         MemoryStream HexEdit(IResourceKey key, IResource res)
         {
-            return s3pi.DemoPlugins.DemoPlugins.Edit(key, res,
+            return s3pi.Helpers.HelperManager.Edit(key, res,
                 S3PIDemoFE.Properties.Settings.Default.HexEditorCmd,
                 S3PIDemoFE.Properties.Settings.Default.HexEditorWantsQuotes,
                 S3PIDemoFE.Properties.Settings.Default.HexEditorIgnoreTS);

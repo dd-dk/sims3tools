@@ -172,8 +172,7 @@ namespace S3PIDemoFE
                 displayResourceNames = value;
 
                 if (pkg != null && displayResourceNames) nameMap_ResourceChanged(null, null);
-                if (listView1.Columns.Count == 0) return;
-                listView1.Columns[0].Width = displayResourceNames ? listView1.Columns[0].Width == 0 ? (columnWidths.Length > 0 && columnWidths[0] >= 0 ? columnWidths[0] : 80) : listView1.Columns[0].Width : 0;
+                else setResourceNameWidth();
             }
         }
 
@@ -470,10 +469,7 @@ namespace S3PIDemoFE
             {
                 lookup = new Dictionary<IResourceIndexEntry, ListViewItem>();
                 if (resourceList == null) return;
-                listView1.Columns[0].Width = !displayResourceNames ? 0 : (
-                    (listView1.Columns[0].Width != 0) ? listView1.Columns[0].Width : (
-                    (columnWidths.Length > 0 && columnWidths[0] >= 0) ? columnWidths[0] : 80
-                    ));
+                //??setResourceNameWidth();
 
                 if (pb != null)
                 {
@@ -631,7 +627,7 @@ namespace S3PIDemoFE
                     Application.DoEvents();
                 }
             }
-            listView1.Columns[0].Width = displayResourceNames ? listView1.Columns[0].Width == 0 ? 80 : listView1.Columns[0].Width : 0;
+            setResourceNameWidth();
             listView1.Enabled = true;
 
             pbLabel.Text = oldLabel;
@@ -643,6 +639,15 @@ namespace S3PIDemoFE
             }
 
             Application.DoEvents();
+        }
+
+        void setResourceNameWidth()
+        {
+            if (listView1.Columns.Count == 0) return;
+            if (!displayResourceNames) { listView1.Columns[0].Width = 0; return; }
+            if (listView1.Columns[0].Width != 0) return;
+            if (columnWidths.Length > 0 && columnWidths[0] >= 0) { listView1.Columns[0].Width = columnWidths[0]; return; }
+            listView1.Columns[0].Width = 80;
         }
 
         string ResourceTag(IResourceIndexEntry rie)
@@ -752,7 +757,7 @@ namespace S3PIDemoFE
         private void pkg_ResourceIndexInvalidated(object sender, EventArgs e)
         {
             nameMap = null;
-            CreateNameMap();
+            nameMap_ResourceChanged(null, null); //CreateNameMap();
             resourceList = pkg == null ? null : filter == null ? pkg.GetResourceList : FilteredList();
             UpdateList();
         }
