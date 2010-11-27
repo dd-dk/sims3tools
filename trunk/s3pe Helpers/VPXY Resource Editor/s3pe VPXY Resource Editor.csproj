@@ -91,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\s3pe.ico" />
+    <None Include="s3pe_VPXYResourceEditor.helper" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\s3pi\build\bin\Release\Extensions.txt">
