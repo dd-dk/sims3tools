@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B5014C7C-C273-4CAA-BED3-0AA12D44CAAB}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>S3SA_DLL_ExpImp</RootNamespace>
+    <AssemblyName>S3SADLLExpImp</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="s3pi.CustomForms">
+      <HintPath>..\..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Helpers">
+      <HintPath>..\..\s3pi\build\bin\Release\s3pi.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Interfaces">
+      <HintPath>..\..\s3pi\build\bin\Release\s3pi.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.ScriptResource">
+      <HintPath>..\..\s3pi\build\bin\Release\s3pi.ScriptResource.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Settings">
+      <HintPath>..\..\s3pi\build\bin\Release\s3pi.Settings.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Custom">
+      <HintPath>..\..\s3pi\build\bin\Release\System.Custom.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyVersion.cs" />
+    <Compile Include="Import.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Import.Designer.cs">
+      <DependentUpon>Import.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Export.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Export.Designer.cs">
+      <DependentUpon>Export.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Export.resx">
+      <DependentUpon>Export.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Import.resx">
+      <DependentUpon>Import.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="S3SADLLExport.helper" />
+    <Content Include="S3SADLLImport.helper" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>set mydate=%25date: =0%25
+set dd=%25mydate:~0,2%25
+set mm=%25mydate:~3,2%25
+set yy=%25mydate:~8,2%25
+set mytime=%25time: =0%25
+set h=%25mytime:~0,2%25
+set version="%25yy%25%25mm%25.%25dd%25.%25h%25%25m%25.*"
+
+(echo using System.Reflection;
+echo using System.Runtime.CompilerServices;
+echo using System.Runtime.InteropServices;
+echo /*"*/ [assembly: AssemblyVersion(%25version%25)] /*"*/
+)&gt;"$(ProjectDir)Properties\AssemblyVersion.cs"</PreBuildEvent>
+  </PropertyGroup>
+</Project>
