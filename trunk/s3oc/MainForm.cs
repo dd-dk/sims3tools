@@ -2441,13 +2441,12 @@ namespace ObjectCloner
                         if (item.RequestedRK.Equals(selectedItem.RequestedRK)//Selected CatlgItem
                             || selectedItem.CType == CatalogType.ModularResource//all MDLR OBJDs
                             || selectedItem.CType == CatalogType.CatalogTerrainPaintBrush//both CTPTs
-                            || item.RequestedRK.Equals(catlgItem.RequestedRK)//0th CFIR OBJD
+                            || (selectedItem.CType == CatalogType.CatalogFireplace && item.RequestedRK.Equals(catlgItem.RequestedRK))//0th CFIR OBJD
                             )
                         {
                             commonBlock["NameGUID"] = new TypedValue(typeof(ulong), newNameGUID);
                             commonBlock["DescGUID"] = new TypedValue(typeof(ulong), newDescGUID);
                             commonBlock["Price"] = new TypedValue(typeof(float), float.Parse(tbPrice.Text));
-                            commonBlock["BuildBuyProductStatusFlags"] = new TypedValue(commonBlock["BuildBuyProductStatusFlags"].Type, Convert.ToByte(tbProductStatus.Text, tbProductStatus.Text.StartsWith("0x") ? 16 : 10));
 
                             if (cloneFixOptions.IsRenumber)
                             {
@@ -2457,8 +2456,21 @@ namespace ObjectCloner
                         }
                         #endregion
 
+                        if (item.RequestedRK.Equals(selectedItem.RequestedRK)//Selected CatlgItem
+                            || (selectedItem.CType == CatalogType.ModularResource && item.RequestedRK.Equals(catlgItem.RequestedRK))//0th MDLR OBJD
+                            //-- only selected CTPT
+                            //-- none of the OBJDs for CFIR
+                            )
+                        {
+                            commonBlock["BuildBuyProductStatusFlags"] = new TypedValue(commonBlock["BuildBuyProductStatusFlags"].Type, Convert.ToByte(tbProductStatus.Text, tbProductStatus.Text.StartsWith("0x") ? 16 : 10));
+                        }
+
                         #region Selected CatlgItem; 0th OBJD from MDLR or CFIR
-                        if (item.RequestedRK.Equals(selectedItem.RequestedRK) || item.RequestedRK.Equals(catlgItem.RequestedRK))//Selected CatlgItem; 0th OBJD from MDLR or CFIR
+                        if (item.RequestedRK.Equals(selectedItem.RequestedRK)//Selected CatlgItem
+                            || (selectedItem.CType == CatalogType.ModularResource && item.RequestedRK.Equals(catlgItem.RequestedRK))//0th MDLR OBJD
+                            //-- only selected CTPT
+                            || (selectedItem.CType == CatalogType.CatalogFireplace && item.RequestedRK.Equals(catlgItem.RequestedRK))//0th CFIR OBJD
+                            )
                         {
                             ulong PngInstance = (ulong)commonBlock["PngInstance"].Value;
                             bool isPng = PngInstance != 0;
