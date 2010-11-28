@@ -435,16 +435,20 @@
       <Link>Helpers\s3pe_OBJKResourceEditor.helper</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\s3pe Helpers\S3SA DLL ExpImp\S3SADLLExpImp.helper">
-      <Link>Helpers\S3SADLLExpImp.helper</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="..\s3pe Helpers\STBL Resource Editor\STBLResourceEditor.helper">
       <Link>Helpers\s3pe_STBLResourceEditor.helper</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\s3pe Helpers\VPXY Resource Editor\VPXYResourceEditor.helper">
       <Link>Helpers\s3pe_VPXYResourceEditor.helper</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pe Helpers\S3SA DLL ExpImp\S3SADLLExport.helper">
+      <Link>Helpers\S3SADLLExport.helper</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pe Helpers\S3SA DLL ExpImp\S3SADLLImport.helper">
+      <Link>Helpers\S3SADLLImport.helper</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Resources\s3pe.ico" />
