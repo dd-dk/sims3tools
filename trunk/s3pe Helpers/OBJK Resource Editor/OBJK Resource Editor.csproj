@@ -96,6 +96,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="OBJKResourceEditor.helper" />
     <None Include="Resources\s3pe.ico" />
   </ItemGroup>
   <ItemGroup>
