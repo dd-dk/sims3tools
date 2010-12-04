@@ -36,25 +36,21 @@ namespace S3Translate
         public SettingsDialog()
         {
             InitializeComponent();
+            this.ClientSize = new Size(tableLayoutPanel1.Bounds.Width, tableLayoutPanel1.Bounds.Height);
+
             cmbSourceLang.DataSource = Form1.locales.AsReadOnly();
+            try { cmbSourceLang.SelectedIndex = Settings.Default.SourceLocale; }
+            catch (Exception) { cmbSourceLang.SelectedIndex = 0; }
+
             cmbTargetLang.DataSource = Form1.locales.AsReadOnly();
-            try
-            {
-                cmbSourceLang.SelectedIndex = Settings.Default.SourceLocale;
-                cmbTargetLang.SelectedIndex = Settings.Default.UserLocale;
-            }
-            catch (Exception){}
+            try { cmbTargetLang.SelectedIndex = Settings.Default.UserLocale; }
+            catch (Exception) { cmbTargetLang.SelectedIndex = 0; }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Close();
-        }
-
-        private void SettingsDialog_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            Settings.Default.SourceLocale = (byte)cmbSourceLang.SelectedIndex;
-            Settings.Default.UserLocale = (byte)cmbTargetLang.SelectedIndex;
+            if (cmbSourceLang.SelectedIndex >= 0) Settings.Default.SourceLocale = (byte)cmbSourceLang.SelectedIndex;
+            if (cmbTargetLang.SelectedIndex >= 0) Settings.Default.UserLocale = (byte)cmbTargetLang.SelectedIndex;
             Settings.Default.Save();
         }
     }
