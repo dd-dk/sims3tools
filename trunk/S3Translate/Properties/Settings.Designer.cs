@@ -46,5 +46,29 @@ namespace S3Translate.Properties {
                 this["SourceLocale"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AutoCommit {
+            get {
+                return ((bool)(this["AutoCommit"]));
+            }
+            set {
+                this["AutoCommit"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LicenceAccepted {
+            get {
+                return ((bool)(this["LicenceAccepted"]));
+            }
+            set {
+                this["LicenceAccepted"] = value;
+            }
+        }
     }
 }

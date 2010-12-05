@@ -8,5 +8,11 @@
     <Setting Name="SourceLocale" Type="System.Byte" Scope="User">
       <Value Profile="(Default)">255</Value>
     </Setting>
+    <Setting Name="AutoCommit" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="LicenceAccepted" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
