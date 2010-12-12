@@ -119,6 +119,7 @@ namespace S3PIDemoFE
 
             int defaultWidth = 4 * System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Width / 5;
             int defaultHeight = 4 * System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Height / 5;
+            this.ClientSize = new Size(defaultWidth, defaultHeight);//needed to correctly work out the following
             int defaultSplitterDistance1 = splitContainer1.ClientSize.Height - (splitContainer1.Panel2MinSize + splitContainer1.SplitterWidth + 4);
             int defaultSplitterDistance2 = (int)(splitContainer2.ClientSize.Width / 2);
 
