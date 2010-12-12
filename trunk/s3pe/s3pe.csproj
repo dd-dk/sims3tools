@@ -100,6 +100,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ForceFocus.cs" />
     <Compile Include="Import\ExperimentalDBCWarning.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -451,6 +452,7 @@
       <Link>Helpers\S3SADLLImport.helper</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="app.config" />
     <None Include="Resources\s3pe.ico" />
     <Content Include="s3peUpdate.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
