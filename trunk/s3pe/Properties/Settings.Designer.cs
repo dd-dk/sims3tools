@@ -96,7 +96,7 @@ namespace S3PIDemoFE.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
         public int FormWindowState {
             get {
                 return ((int)(this["FormWindowState"]));
