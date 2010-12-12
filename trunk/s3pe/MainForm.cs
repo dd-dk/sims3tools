@@ -24,8 +24,6 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows.Forms;
 using s3pi.Interfaces;
 using s3pi.Package;
@@ -114,52 +112,52 @@ namespace S3PIDemoFE
 
         void MainForm_LoadFormSettings()
         {
-            int h = S3PIDemoFE.Properties.Settings.Default.PersistentHeight;
-            if (h == -1) h = 4 * System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Height / 5;
-
-            int w = S3PIDemoFE.Properties.Settings.Default.PersistentWidth;
-            if (w == -1) w = 4 * System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Width / 5;
-            this.ClientSize = new Size(w, h);
-
-            Point xy = S3PIDemoFE.Properties.Settings.Default.PersistentLocation;
-            if (xy.X == -1 && xy.Y == -1)
-                this.StartPosition = FormStartPosition.CenterScreen;
-            else
-            {
-                this.StartPosition = FormStartPosition.Manual;
-                this.Location = xy;
-            }
-
             FormWindowState s =
                 Enum.IsDefined(typeof(FormWindowState), S3PIDemoFE.Properties.Settings.Default.FormWindowState)
                 ? (FormWindowState)S3PIDemoFE.Properties.Settings.Default.FormWindowState
-                : FormWindowState.Normal;
-            this.WindowState = s;
+                : FormWindowState.Minimized;
 
-            int s1 = S3PIDemoFE.Properties.Settings.Default.Splitter1Position;
-            if (s1 >= splitContainer1.Panel1MinSize)
-                splitContainer1.SplitterDistance = s1;
+            int defaultWidth = 4 * System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Width / 5;
+            int defaultHeight = 4 * System.Windows.Forms.Screen.PrimaryScreen.WorkingArea.Height / 5;
+            int defaultSplitterDistance1 = splitContainer1.ClientSize.Height - (splitContainer1.Panel2MinSize + splitContainer1.SplitterWidth + 4);
+            int defaultSplitterDistance2 = (int)(splitContainer2.ClientSize.Width / 2);
 
-            int s2 = S3PIDemoFE.Properties.Settings.Default.Splitter2Position;
-            if (s2 > splitContainer2.Panel1MinSize)
-                splitContainer2.SplitterDistance = s2;
+            if (s == FormWindowState.Minimized)
+            {
+                this.ClientSize = new Size(defaultWidth, defaultHeight);
+                splitContainer1.SplitterDistance = defaultSplitterDistance1;
+                splitContainer2.SplitterDistance = defaultSplitterDistance2;
+                this.StartPosition = FormStartPosition.CenterScreen;
+                this.WindowState = FormWindowState.Normal;
+            }
+            else
+            {
+                // these mustn't be negative
+
+                int w = S3PIDemoFE.Properties.Settings.Default.PersistentWidth;
+                int h = S3PIDemoFE.Properties.Settings.Default.PersistentHeight;
+                this.ClientSize = new Size(w < 0 ? defaultWidth : w, h < 0 ? defaultHeight : h);
+
+                int s1 = S3PIDemoFE.Properties.Settings.Default.Splitter1Position;
+                splitContainer1.SplitterDistance = s1 < 0 ? defaultSplitterDistance1 : s1;
+
+                int s2 = S3PIDemoFE.Properties.Settings.Default.Splitter2Position;
+                splitContainer2.SplitterDistance = s2 < 0 ? defaultSplitterDistance2 : s2;
+
+                // everything else assumed valid -- any problems, use the iconise/exit/run trick to fix
+                
+                this.StartPosition = FormStartPosition.Manual;
+                this.Location = S3PIDemoFE.Properties.Settings.Default.PersistentLocation;
+                this.WindowState = s;
+            }
         }
 
         void MainForm_SaveSettings(object sender, EventArgs e)
         {
-            if (this.WindowState == FormWindowState.Normal)
-            {
-                S3PIDemoFE.Properties.Settings.Default.PersistentLocation = this.Location;
-                S3PIDemoFE.Properties.Settings.Default.PersistentHeight = this.ClientSize.Height;
-                S3PIDemoFE.Properties.Settings.Default.PersistentWidth = this.ClientSize.Width;
-            }
-            else
-            {
-                S3PIDemoFE.Properties.Settings.Default.PersistentLocation = new Point(-1, -1);
-                S3PIDemoFE.Properties.Settings.Default.PersistentHeight = -1;
-                S3PIDemoFE.Properties.Settings.Default.PersistentWidth = -1;
-            }
             S3PIDemoFE.Properties.Settings.Default.FormWindowState = (int)this.WindowState;
+            S3PIDemoFE.Properties.Settings.Default.PersistentHeight = this.ClientSize.Height;
+            S3PIDemoFE.Properties.Settings.Default.PersistentWidth = this.ClientSize.Width;
+            S3PIDemoFE.Properties.Settings.Default.PersistentLocation = this.Location;
             S3PIDemoFE.Properties.Settings.Default.Splitter1Position = splitContainer1.SplitterDistance;
             S3PIDemoFE.Properties.Settings.Default.Splitter2Position = splitContainer2.SplitterDistance;
 
@@ -1870,94 +1868,5 @@ namespace S3PIDemoFE
             }
         }
         #endregion
-    }
-    public static class ForceFocus
-    {
-        //Win32 API calls necesary to raise an unowned processs main window
-
-        [DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
-        [DllImport("user32.dll")]
-        private static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
-        [DllImport("user32.dll")]
-        private static extern bool IsIconic(IntPtr hWnd);
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr lpdwProcessId);
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
-        [DllImport("user32.dll")]
-        private static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
-        [DllImport("user32.dll")]
-        static extern bool BringWindowToTop(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, Int32 nMaxCount);
-        [DllImport("user32.dll")]
-        private static extern int GetWindowThreadProcessId(IntPtr hWnd, ref Int32 lpdwProcessId);
-        [DllImport("User32.dll")]
-        private static extern IntPtr GetParent(IntPtr hWnd);
-
-        private const int SW_HIDE = 0;
-        private const int SW_SHOWNORMAL = 1;
-        private const int SW_NORMAL = 1;
-        private const int SW_SHOWMINIMIZED = 2;
-        private const int SW_SHOWMAXIMIZED = 3;
-        private const int SW_MAXIMIZE = 3;
-        private const int SW_SHOWNOACTIVATE = 4;
-        private const int SW_SHOW = 5;
-        private const int SW_MINIMIZE = 6;
-        private const int SW_SHOWMINNOACTIVE = 7;
-        private const int SW_SHOWNA = 8;
-        private const int SW_RESTORE = 9;
-        private const int SW_SHOWDEFAULT = 10;
-        private const int SW_MAX = 10;
-
-        private const uint SPI_GETFOREGROUNDLOCKTIMEOUT = 0x2000;
-        private const uint SPI_SETFOREGROUNDLOCKTIMEOUT = 0x2001;
-        private const int SPIF_SENDCHANGE = 0x2;
-
-        /// <summary>
-        /// Ensure the given <seealso cref="Form"/> has focus.
-        /// </summary>
-        /// <param name="theForm"><seealso cref="Form"/> to take focus.</param>
-        public static void Focus(Form theForm)
-        {
-            IntPtr hWnd = theForm.Handle;
-
-            ShowWindowAsync(hWnd, SW_SHOW);
-
-            SetForegroundWindow(hWnd);
-
-            // Code from Karl E. Peterson, www.mvps.org/vb/sample.htm
-            // Converted to Delphi by Ray Lischner
-            // Published in The Delphi Magazine 55, page 16
-            // Converted to C# by Kevin Gale
-            IntPtr foregroundWindow = GetForegroundWindow();
-            IntPtr Dummy = IntPtr.Zero;
-
-            uint foregroundThreadId = GetWindowThreadProcessId(foregroundWindow, Dummy);
-            uint thisThreadId = GetWindowThreadProcessId(hWnd, Dummy);
-
-            if (AttachThreadInput(thisThreadId, foregroundThreadId, true))
-            {
-                BringWindowToTop(hWnd); // IE 5.5 related hack
-                SetForegroundWindow(hWnd);
-                AttachThreadInput(thisThreadId, foregroundThreadId, false);
-            }
-
-            if (GetForegroundWindow() != hWnd)
-            {
-                // Code by Daniel P. Stasinski
-                // Converted to C# by Kevin Gale
-                IntPtr Timeout = IntPtr.Zero;
-                SystemParametersInfo(SPI_GETFOREGROUNDLOCKTIMEOUT, 0, Timeout, 0);
-                SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, Dummy, SPIF_SENDCHANGE);
-                BringWindowToTop(hWnd); // IE 5.5 related hack
-                SetForegroundWindow(hWnd);
-                SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, Timeout, SPIF_SENDCHANGE);
-            }
-        }
     }
 }
