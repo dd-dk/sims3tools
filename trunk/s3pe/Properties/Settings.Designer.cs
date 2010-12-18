@@ -132,7 +132,7 @@ namespace S3PIDemoFE.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool Sort {
             get {
                 return ((bool)(this["Sort"]));
@@ -156,7 +156,7 @@ namespace S3PIDemoFE.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool UseNames {
             get {
                 return ((bool)(this["UseNames"]));
@@ -180,7 +180,7 @@ namespace S3PIDemoFE.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool UseTags {
             get {
                 return ((bool)(this["UseTags"]));
@@ -263,7 +263,7 @@ namespace S3PIDemoFE.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
         public short AutoChoice {
             get {
                 return ((short)(this["AutoChoice"]));

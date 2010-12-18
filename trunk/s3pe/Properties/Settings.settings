@@ -30,19 +30,19 @@
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="Sort" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="HexOnly" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="UseNames" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="HexRowsize" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">16</Value>
     </Setting>
     <Setting Name="UseTags" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="ColumnWidths" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -63,7 +63,7 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="AutoChoice" Type="System.Int16" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">2</Value>
     </Setting>
     <Setting Name="Splitter1Position" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">-1</Value>
