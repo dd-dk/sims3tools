@@ -305,7 +305,7 @@ namespace ObjectCloner.TopPanelComponents
                 if (criteria.catalogDesc && MatchCatalogDesc(item)) return true;
                 return false;
             }
-            bool MatchResourceName(Item item) { if (nameMap[item.RequestedRK.Instance].Trim().ToLowerInvariant().Contains(criteria.text)) return true; return false; }
+            bool MatchResourceName(Item item) { return nameMap != null && nameMap.ContainsKey(item.RequestedRK.Instance) && nameMap[item.RequestedRK.Instance].Trim().ToLowerInvariant().Contains(criteria.text); }
             bool MatchObjectName(Item item) { return ((string)item.Resource["CommonBlock.Name"].Value).Trim().ToLowerInvariant().Contains(criteria.text); }
             bool MatchObjectDesc(Item item) { return ((string)item.Resource["CommonBlock.Desc"].Value).Trim().ToLowerInvariant().Contains(criteria.text); }
             bool MatchCatalogName(Item item) { return MatchStbl((ulong)item.Resource["CommonBlock.NameGUID"].Value); }
