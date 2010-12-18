@@ -3352,6 +3352,7 @@ namespace ObjectCloner
                     OBJD_getOBKJ,
                     // OBJD_addOBJKref if default resources only
                     OBJK_SlurpTGIs,
+                    OBJK_getSPT2,
                     OBJK_getVPXY,
                     Catlg_addVPXYs,
 
@@ -3532,6 +3533,7 @@ namespace ObjectCloner
             StepText.Add(OBJD_SlurpDDSes, "OBJD-referenced resources");
             StepText.Add(Catlg_SlurpRKs, "Catalog object-referenced resources");
             StepText.Add(OBJK_SlurpTGIs, "OBJK-referenced resources");
+            StepText.Add(OBJK_getSPT2, "Find OBJK-referenced SPT2");
             StepText.Add(OBJK_getVPXY, "Find OBJK-referenced VPXY");
 
             StepText.Add(Catlg_getVPXY, "Find VPXYs in the Catalog Resource TGIBlockList");
@@ -3626,6 +3628,31 @@ namespace ObjectCloner
                 Add("clone.tubmask", ltgi[(int)(uint)selectedItem.Resource["FloorCutoutDDSIndex"].Value]);
         }
         void OBJK_SlurpTGIs() { SlurpRKsFromField("objk", (AResource)objkItem.Resource); }
+        void OBJK_getSPT2()
+        {
+            if (((ObjKeyResource.ObjKeyResource)objkItem.Resource).Components.FindAll(x => x.Element == ObjKeyResource.ObjKeyResource.Component.Tree).Count == 0) return;
+
+            List<Item> spt2Items = new List<Item>();
+
+            string s = "";
+            AResource.TGIBlockList tgibl = ((ObjKeyResource.ObjKeyResource)objkItem.Resource).TGIBlocks;
+            foreach (var rk in tgibl.FindAll(x => x.ResourceType == 0x00B552EA))//_SPT
+            {
+                Item spt2 = new Item(new RIE(objPkgs, new RK(rk) { ResourceType = 0x021D7E8C }));//SPT2
+                if (spt2.SpecificRK != null && spt2.Resource != null)
+                    spt2Items.Add(spt2);//SPT2
+                else
+                    s += String.Format("OBJK {0} -> _SPT -> SPT2 {1}: not found\n", (IResourceKey)objkItem.SpecificRK, spt2.RequestedRK);
+            }
+            Diagnostics.Show(s, "Missing SPT2s");
+            if (spt2Items.Count == 0)
+            {
+                Diagnostics.Show(String.Format("OBJK {0} with a Tree Component has no SPT2 items", (IResourceKey)selectedItem.SpecificRK), "No SPT2 items");
+            }
+
+            //add SPT2s
+            for (int i = 0; i < spt2Items.Count; i++) Add("spt2[" + i + "]", spt2Items[i].RequestedRK);
+        }
         void OBJK_getVPXY()
         {
             int index = -1;
@@ -3643,9 +3670,9 @@ namespace ObjectCloner
             vpxyKinItems = new List<Item>();
 
             string s = "";
-            foreach (IResourceKey rk in (IList<AResource.TGIBlock>)objkItem.Resource["TGIBlocks"].Value)
+            AResource.TGIBlockList tgibl = ((ObjKeyResource.ObjKeyResource)objkItem.Resource).TGIBlocks;
+            foreach (IResourceKey rk in tgibl.FindAll(x => x.ResourceType == 0x736884F1))//VPXY
             {
-                if (rk.ResourceType != 0x736884F1) continue;
                 Item vpxy = new Item(new RIE(objPkgs, rk));
                 if (vpxy.SpecificRK != null && vpxy.Resource != null)
                     vpxyItems.Add(vpxy);
