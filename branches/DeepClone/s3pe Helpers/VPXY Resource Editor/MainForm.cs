@@ -109,7 +109,7 @@ namespace s3pe_VPXY_Resource_Editor
             try
             {
                 ClearLinkedPartsTLP(true);
-                AResource.CountedTGIBlockList ltgib = new AResource.CountedTGIBlockList(null);
+                CountedTGIBlockList ltgib = new CountedTGIBlockList(null);
                 vpxy.Entries.Clear();
                 int count = 0;
                 byte count00 = 1;
@@ -366,7 +366,7 @@ namespace s3pe_VPXY_Resource_Editor
 
         private void btnTGIEditor_Click(object sender, EventArgs e)
         {
-            AResource.CountedTGIBlockList tgiBlocksCopy = new AResource.CountedTGIBlockList(null, vpxy.TGIBlocks);
+            CountedTGIBlockList tgiBlocksCopy = new CountedTGIBlockList(null, vpxy.TGIBlocks);
             DialogResult dr = TGIBlockListEditor.Show(tgiBlocksCopy);
             if (dr != DialogResult.OK) return;
             vpxy.TGIBlocks.Clear();
