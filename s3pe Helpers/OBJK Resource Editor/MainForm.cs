@@ -74,7 +74,7 @@ namespace s3pe_OBJK_Resource_Editor
         {
             objk = new ObjKeyResource.ObjKeyResource(0, data);
 
-            foreach (AResource.TGIBlock tgi in objk.TGIBlocks)
+            foreach (TGIBlock tgi in objk.TGIBlocks)
                 tgis.Add(tgi);
 
             InitialiseTable();
