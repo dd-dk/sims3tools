@@ -1481,8 +1481,8 @@ namespace S3PIDemoFE
             {
                 switch (contentFields.IndexOf(index))
                 {
-                    case 0: return new TypedValue(entry.Key.GetType(), entry.Key);
-                    case 1: return new TypedValue(entry.Value.GetType(), entry.Value);
+                    case 0: return new TypedValue(entry.Key.GetType(), entry.Key, "X");
+                    case 1: return new TypedValue(entry.Value.GetType(), entry.Value, "X");
                     default: throw new IndexOutOfRangeException();
                 }
             }
