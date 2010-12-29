@@ -40,8 +40,10 @@ namespace S3PIDemoFE
         static List<string> ddsResources = new List<string>(new string[] {
             "0x00B2D882", "0x8FFB80F6",
         });
+        static string myName;
         static MainForm()
         {
+            myName = Path.GetFileNameWithoutExtension(Application.ExecutablePath);
             foreach (string s in unwantedFields) fields.Remove(s);
             //fields.Sort(byElementPriority);
 
@@ -67,7 +69,6 @@ namespace S3PIDemoFE
             return xPrio.CompareTo(yPrio);
         }
 
-        const string myName = "s3pe";
         public MainForm()
         {
             InitializeComponent();
