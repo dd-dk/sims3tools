@@ -464,9 +464,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="DDSPreviewWidget\DDSPreviewWidget.csproj">
+    <ProjectReference Include="DDSPreviewWidget\DDSPreviewWidget-x86.csproj">
       <Project>{92EB2F4A-193C-4122-9BBD-5B728A12D25A}</Project>
-      <Name>DDSPreviewWidget</Name>
+      <Name>DDSPreviewWidget-x86</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
