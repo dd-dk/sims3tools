@@ -47,7 +47,6 @@ pushd ..
 7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" s3pe
 popd
 
-
 xcopy "..\%viewDDS%\*" "bin\%ConfigurationName%" /s /i /y
 pushd bin\%ConfigurationName%
 echo %suffix% >%TargetName%-Version.txt
@@ -83,6 +82,10 @@ for %%f in (*) do echo Delete $INSTDIR\%%f
 pushd HelpFiles
 for %%f in (*) do echo Delete $INSTDIR\HelpFiles\%%f
 echo RmDir HelpFiles
+popd
+pushd Helpers
+for %%f in (*) do echo Delete $INSTDIR\Helpers\%%f
+echo RmDir Helpers
 popd
 ) > UNINST.LOG
 attrib +r +h UNINST.LOG
