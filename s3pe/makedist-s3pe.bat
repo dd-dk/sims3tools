@@ -75,6 +75,7 @@ echo SetOutPath $INSTDIR\Helpers
 for %%f in (*) do echo File /a Helpers\%%f
 echo SetOutPath $INSTDIR
 popd
+dir /-c "..\%base%-%suffix%" | find " bytes" | for /f "tokens=3" %%f in ('find /v " free"') do @echo StrCpy $0 %%f
 ) > ..\INSTFILES.txt
 
 (
@@ -121,6 +122,7 @@ echo SetOutPath $INSTDIR\Helpers
 for %%f in (*) do echo File /a Helpers\%%f
 echo SetOutPath $INSTDIR
 popd
+dir /-c "..\%base%-%suffix%-x64" | find " bytes" | for /f "tokens=3" %%f in ('find /v " free"') do @echo StrCpy $0 %%f
 ) > ..\INSTFILES.txt
 
 (
