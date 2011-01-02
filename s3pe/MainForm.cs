@@ -695,8 +695,6 @@ namespace S3PIDemoFE
             IResourceIndexEntry rie = NewResource(ir, null, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, ir.Compress);
             if (rie == null) return;
 
-            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie);
-            CurrentPackage.ReplaceResource(rie, res);
             browserWidget1.Add(rie);
 
             if (ir.UseName && ir.ResourceName != null && ir.ResourceName.Length > 0)
