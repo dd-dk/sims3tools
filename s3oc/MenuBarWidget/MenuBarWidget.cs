@@ -49,7 +49,7 @@ namespace ObjectCloner
                 //Tools
                 searchToolStripMenuItem,
                 //Settings
-                gameFoldersToolStripMenuItem, userNameToopStripMenuItem, automaticUpdateCheckToolStripMenuItem,
+                gameFoldersToolStripMenuItem, userNameToopStripMenuItem, langSearchToolStripMenuItem, automaticUpdateCheckToolStripMenuItem,
                 advancedCloningToolStripMenuItem,
                 diagnosticsToolStripMenuItem,
                 //Help
@@ -95,7 +95,7 @@ namespace ObjectCloner
             MBV_tiles, MBV_largeIcons, MBV_smallIcons, MBV_list, MBV_detailedList,
             MBV_icons,
             MBT_search,
-            MBS_sims3Folder, MBS_userName, MBS_updates, MBS_advanced, MBS_diagnostics,
+            MBS_sims3Folder, MBS_userName, MBS_langSearch, MBS_updates, MBS_advanced, MBS_diagnostics,
             MBH_contents, MBH_about, MBH_update, MBH_warranty, MBH_licence,
         }
 

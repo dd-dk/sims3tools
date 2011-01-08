@@ -61,7 +61,9 @@
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameFoldersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.userNameToopStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.langSearchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.automaticUpdateCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.advancedCloningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.diagnosticsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -71,7 +73,6 @@
             this.checkForUpdateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.advancedCloningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SuspendLayout();
             // 
             // fileToolStripMenuItem
@@ -335,6 +336,7 @@
             this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.gameFoldersToolStripMenuItem,
             this.userNameToopStripMenuItem,
+            this.langSearchToolStripMenuItem,
             this.automaticUpdateCheckToolStripMenuItem,
             this.advancedCloningToolStripMenuItem,
             this.toolStripSeparator3,
@@ -357,6 +359,13 @@
             this.userNameToopStripMenuItem.Size = new System.Drawing.Size(192, 22);
             this.userNameToopStripMenuItem.Text = "Creator &Name...";
             this.userNameToopStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
+            // langSearchToolStripMenuItem
+            // 
+            this.langSearchToolStripMenuItem.Name = "langSearchToolStripMenuItem";
+            this.langSearchToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.langSearchToolStripMenuItem.Text = "Search &hard for strings";
+            this.langSearchToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // automaticUpdateCheckToolStripMenuItem
             // 
@@ -500,5 +509,6 @@
         private System.Windows.Forms.ToolStripMenuItem automaticUpdateCheckToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem checkForUpdateToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem advancedCloningToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem langSearchToolStripMenuItem;
     }
 }

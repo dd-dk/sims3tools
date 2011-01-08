@@ -250,5 +250,17 @@ namespace ObjectCloner.Properties {
                 this["AdvanceCloning"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LangSearch {
+            get {
+                return ((bool)(this["LangSearch"]));
+            }
+            set {
+                this["LangSearch"] = value;
+            }
+        }
     }
 }

@@ -38,7 +38,8 @@ namespace ObjectCloner
     {
         #region Static bits
         static string myName = "s3oc";
-        static bool disableCompression;
+        static bool LangSearch = false;
+        static bool disableCompression = false;
         static Dictionary<View, MenuBarWidget.MB> viewMap;
         static List<View> viewMapKeys;
         static List<MenuBarWidget.MB> viewMapValues;
@@ -467,12 +468,13 @@ namespace ObjectCloner
 
             MainForm_LoadFormSettings();
 
+            LangSearch = ObjectCloner.Properties.Settings.Default.LangSearch;
+            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_langSearch, LangSearch);
+
             menuBarWidget1.Checked(MenuBarWidget.MB.MBS_advanced, ObjectCloner.Properties.Settings.Default.AdvanceCloning);
 
             Diagnostics.Enabled = ObjectCloner.Properties.Settings.Default.Diagnostics;
             menuBarWidget1.Checked(MenuBarWidget.MB.MBS_diagnostics, Diagnostics.Enabled);
-
-            disableCompression = false;
 
             SetStepText();
 
@@ -807,7 +809,7 @@ namespace ObjectCloner
         delegate void Callback(byte lang);
         static Item findStblFor(IList<IPackage> objPkgs, ulong guid, Callback callBack = null)
         {
-            for (byte i = 0; i < 0x17; i++) { if (callBack != null) callBack(i); Item res = findStblFor(objPkgs, guid, i); if (res != null) return res; }
+            for (byte i = 0; i < (LangSearch ? 0x17 : 0x01); i++) { if (callBack != null) callBack(i); Item res = findStblFor(objPkgs, guid, i); if (res != null) return res; }
             return null;
         }
 
@@ -2330,13 +2332,14 @@ namespace ObjectCloner
 
             private Item findStblFor(ulong guid)
             {
+                byte limit = (byte)(ObjectCloner.Properties.Settings.Default.LangSearch ? 0x17 : 0x01);
                 try
                 {
-                    updateProgress(false, "", true, 0x17, true, 0);
-                    for (byte i = 0; i < 0x17; i++) { updateProgress(false, "", false, -1, true, i); Item res = findStblFor(guid, i); if (res != null) return res; }
+                    updateProgress(false, "", true, limit, true, 0);
+                    for (byte i = 0; i < limit; i++) { updateProgress(false, "", false, -1, true, i); Item res = findStblFor(guid, i); if (res != null) return res; }
                     return null;
                 }
-                finally { updateProgress(false, "", false, 0, true, 0x17); }
+                finally { updateProgress(false, "", false, 0, true, limit); }
             }
 
             private Item findStblFor(ulong guid, byte lang)
@@ -3325,19 +3328,13 @@ namespace ObjectCloner
                 {
                     case MenuBarWidget.MB.MBS_sims3Folder: settingsGameFolders(); break;
                     case MenuBarWidget.MB.MBS_userName: settingsUserName(); break;
+                    case MenuBarWidget.MB.MBS_langSearch: settingsLangSearch(); break;
                     case MenuBarWidget.MB.MBS_updates: settingsAutomaticUpdates(); break;
                     case MenuBarWidget.MB.MBS_advanced: settingsAdvancedCloning(); break;
                     case MenuBarWidget.MB.MBS_diagnostics: settingsDiagnostics(); break;
                 }
             }
             finally { this.Enabled = true; }
-        }
-
-        private void settingsAdvancedCloning()
-        {
-            Application.DoEvents();
-            ObjectCloner.Properties.Settings.Default.AdvanceCloning = !ObjectCloner.Properties.Settings.Default.AdvanceCloning;
-            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_advanced, ObjectCloner.Properties.Settings.Default.AdvanceCloning);
         }
 
         private void settingsGameFolders()
@@ -3368,9 +3365,23 @@ namespace ObjectCloner
             ObjectCloner.Properties.Settings.Default.CreatorName = cn.Value;
         }
 
+        private void settingsLangSearch()
+        {
+            Application.DoEvents();
+            ObjectCloner.Properties.Settings.Default.LangSearch = LangSearch = !LangSearch;
+            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_langSearch, LangSearch);
+        }
+
         private void settingsAutomaticUpdates()
         {
             AutoUpdate.Checker.AutoUpdateChoice = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_updates);
+        }
+
+        private void settingsAdvancedCloning()
+        {
+            Application.DoEvents();
+            ObjectCloner.Properties.Settings.Default.AdvanceCloning = !ObjectCloner.Properties.Settings.Default.AdvanceCloning;
+            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_advanced, ObjectCloner.Properties.Settings.Default.AdvanceCloning);
         }
 
         private void settingsDiagnostics()
