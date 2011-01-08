@@ -1157,7 +1157,7 @@ namespace S3PIDemoFE
                 IDictionaryCTD ctd = value as IDictionaryCTD;
                 IDictionary id = (IDictionary)ctd.Value;
 
-                if (typeof(string).Equals(destinationType)) return id == null ? "(null)" : "(Dictionary: " + id.Count + ")";
+                if (typeof(string).Equals(destinationType)) return id == null ? "(null)" : "(Dictionary: 0x" + id.Count.ToString("X") + ")";
                 return base.ConvertTo(context, culture, value, destinationType);
             }
         }
