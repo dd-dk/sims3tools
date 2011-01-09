@@ -37,6 +37,9 @@ namespace S3PIDemoFE
         static List<string> unwantedFields = new List<string>(new string[] {
             "Stream",
         });
+        static List<string> unwantedFilterFields = new List<string>(new string[] {
+            "Chunkoffset", "Filesize", "Memsize", "Unknown2",
+        });
         static List<string> ddsResources = new List<string>(new string[] {
             "0x00B2D882", "0x8FFB80F6",
         });
@@ -81,9 +84,9 @@ namespace S3PIDemoFE
             browserWidget1.ContextMenuStrip = menuBarWidget1.browserWidgetContextMenuStrip;
 
             List<string> filterFields = new List<string>(fields);
-            filterFields.Remove("Chunkoffset");
-            filterFields.Remove("Filesize");
-            filterFields.Remove("Memsize");
+            foreach (string f in unwantedFilterFields)
+                filterFields.Remove(f);
+            filterFields.Insert(0, "Tag");
             filterFields.Insert(0, "Name");
             resourceFilterWidget1.BrowserWidget = browserWidget1;
             resourceFilterWidget1.Fields = filterFields;
