@@ -41,15 +41,16 @@ namespace ObjectCloner
                 //Cloning -- These must be in order of enum CatalogType by value:
                 cfenToolStripMenuItem, cstrToolStripMenuItem, cprxToolStripMenuItem, cttlToolStripMenuItem,
                 cralToolStripMenuItem, ctptToolStripMenuItem, cfirToolStripMenuItem, cwatToolStripMenuItem,
+                ccfpToolStripMenuItem,
                 cfndToolStripMenuItem, objdToolStripMenuItem, cwalToolStripMenuItem, cwstToolStripMenuItem,
                 crstToolStripMenuItem, mdlrToolStripMenuItem, crmtToolStripMenuItem,
                 //View
                 tilesToolStripMenuItem, largeIconsToolStripMenuItem, smallIconsToolStripMenuItem, listToolStripMenuItem, detailedListToolStripMenuItem,
                 iconsToolStripMenuItem,
                 //Tools
-                searchToolStripMenuItem,
+                searchToolStripMenuItem, tgiSearchToolStripMenuItem,
                 //Settings
-                gameFoldersToolStripMenuItem, userNameToopStripMenuItem, automaticUpdateCheckToolStripMenuItem,
+                gameFoldersToolStripMenuItem, userNameToopStripMenuItem, langSearchToolStripMenuItem, automaticUpdateCheckToolStripMenuItem,
                 advancedCloningToolStripMenuItem,
                 diagnosticsToolStripMenuItem,
                 //Help
@@ -65,6 +66,7 @@ namespace ObjectCloner
         void advancedCloningToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
             cprxToolStripMenuItem.Visible = cttlToolStripMenuItem.Visible =
+            ccfpToolStripMenuItem.Visible =
             cwatToolStripMenuItem.Visible =
             cfndToolStripMenuItem.Visible = cwstToolStripMenuItem.Visible =
             crstToolStripMenuItem.Visible = advancedCloningToolStripMenuItem.Checked;
@@ -90,12 +92,13 @@ namespace ObjectCloner
             MBF_open = 0, MBF_exit,
             MBC_cfen, MBC_cstr, MBC_cprx, MBC_cttl,
             MBC_cral, MBC_ctpt, MBC_cfir, MBC_cwat,
+            MBC_ccfp,
             MBC_cfnd, MBC_objd, MBC_cwal, MBC_cwst,
             MBC_crst, MBC_mdlr, MBC_crmt,
             MBV_tiles, MBV_largeIcons, MBV_smallIcons, MBV_list, MBV_detailedList,
             MBV_icons,
-            MBT_search,
-            MBS_sims3Folder, MBS_userName, MBS_updates, MBS_advanced, MBS_diagnostics,
+            MBT_search, MBT_tgiSearch,
+            MBS_sims3Folder, MBS_userName, MBS_langSearch, MBS_updates, MBS_advanced, MBS_diagnostics,
             MBH_contents, MBH_about, MBH_update, MBH_warranty, MBH_licence,
         }
 

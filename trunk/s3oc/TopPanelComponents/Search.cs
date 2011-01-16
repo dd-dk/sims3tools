@@ -45,10 +45,12 @@ namespace ObjectCloner.TopPanelComponents
             "Fireplace",
             "Terrain Water Brush",
 
+            "Fountain / Pool",
+
             "Foundation",
             "Normal Object",
             "Wall/Floor Pattern",
-            "Wall",
+            "Wall Style",
 
             "Roof Style",
             "Modular Resource",
@@ -94,7 +96,7 @@ namespace ObjectCloner.TopPanelComponents
 
         static Item ItemForTGIBlock0(List<IPackage> pkgs, Item item)
         {
-            IResourceKey rk = ((AResource.TGIBlockList)item.Resource["TGIBlocks"].Value)[0];
+            IResourceKey rk = ((TGIBlockList)item.Resource["TGIBlocks"].Value)[0];
             return new Item(pkgs, rk);
         }
 

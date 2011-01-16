@@ -58,10 +58,13 @@
             this.iconsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tgiSearchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameFoldersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.userNameToopStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.langSearchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.automaticUpdateCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.advancedCloningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.diagnosticsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -71,7 +74,7 @@
             this.checkForUpdateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.advancedCloningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ccfpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SuspendLayout();
             // 
             // fileToolStripMenuItem
@@ -120,6 +123,7 @@
             this.crmtToolStripMenuItem,
             this.cprxToolStripMenuItem,
             this.cttlToolStripMenuItem,
+            this.ccfpToolStripMenuItem,
             this.cwatToolStripMenuItem,
             this.cfndToolStripMenuItem,
             this.cwstToolStripMenuItem,
@@ -224,6 +228,13 @@
             this.cttlToolStripMenuItem.Text = "Terrain geometry brush";
             this.cttlToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
             // 
+            // ccfpToolStripMenuItem
+            // 
+            this.ccfpToolStripMenuItem.Name = "ccfpToolStripMenuItem";
+            this.ccfpToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.ccfpToolStripMenuItem.Text = "Fountain / Pool";
+            this.ccfpToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
+            // 
             // cwatToolStripMenuItem
             // 
             this.cwatToolStripMenuItem.Name = "cwatToolStripMenuItem";
@@ -317,7 +328,8 @@
             // toolsToolStripMenuItem
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.searchToolStripMenuItem});
+            this.searchToolStripMenuItem,
+            this.tgiSearchToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.toolsToolStripMenuItem.Text = "&Tools";
@@ -326,15 +338,23 @@
             // searchToolStripMenuItem
             // 
             this.searchToolStripMenuItem.Name = "searchToolStripMenuItem";
-            this.searchToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.searchToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
             this.searchToolStripMenuItem.Text = "&Search";
             this.searchToolStripMenuItem.Click += new System.EventHandler(this.tsMBT_Click);
+            // 
+            // tgiSearchToolStripMenuItem
+            // 
+            this.tgiSearchToolStripMenuItem.Name = "tgiSearchToolStripMenuItem";
+            this.tgiSearchToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.tgiSearchToolStripMenuItem.Text = "Find Resource &Key";
+            this.tgiSearchToolStripMenuItem.Click += new System.EventHandler(this.tsMBT_Click);
             // 
             // settingsToolStripMenuItem
             // 
             this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.gameFoldersToolStripMenuItem,
             this.userNameToopStripMenuItem,
+            this.langSearchToolStripMenuItem,
             this.automaticUpdateCheckToolStripMenuItem,
             this.advancedCloningToolStripMenuItem,
             this.toolStripSeparator3,
@@ -357,6 +377,13 @@
             this.userNameToopStripMenuItem.Size = new System.Drawing.Size(192, 22);
             this.userNameToopStripMenuItem.Text = "Creator &Name...";
             this.userNameToopStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
+            // langSearchToolStripMenuItem
+            // 
+            this.langSearchToolStripMenuItem.Name = "langSearchToolStripMenuItem";
+            this.langSearchToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.langSearchToolStripMenuItem.Text = "Search &hard for strings";
+            this.langSearchToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // automaticUpdateCheckToolStripMenuItem
             // 
@@ -466,6 +493,7 @@
         private System.Windows.Forms.ToolStripMenuItem cstrToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cprxToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cttlToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ccfpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cralToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ctptToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cfirToolStripMenuItem;
@@ -500,5 +528,7 @@
         private System.Windows.Forms.ToolStripMenuItem automaticUpdateCheckToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem checkForUpdateToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem advancedCloningToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem langSearchToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem tgiSearchToolStripMenuItem;
     }
 }

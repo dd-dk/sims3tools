@@ -250,5 +250,41 @@ namespace ObjectCloner.Properties {
                 this["AdvanceCloning"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool LangSearch {
+            get {
+                return ((bool)(this["LangSearch"]));
+            }
+            set {
+                this["LangSearch"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CustomContent {
+            get {
+                return ((string)(this["CustomContent"]));
+            }
+            set {
+                this["CustomContent"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool CCEnabled {
+            get {
+                return ((bool)(this["CCEnabled"]));
+            }
+            set {
+                this["CCEnabled"] = value;
+            }
+        }
     }
 }
