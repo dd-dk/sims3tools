@@ -45,10 +45,12 @@ namespace ObjectCloner.TopPanelComponents
             "Fireplace",
             "Terrain Water Brush",
 
+            "Fountain / Pool",
+
             "Foundation",
             "Normal Object",
             "Wall/Floor Pattern",
-            "Wall",
+            "Wall Style",
 
             "Roof Style",
             "Modular Resource",

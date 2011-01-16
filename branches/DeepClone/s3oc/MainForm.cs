@@ -454,6 +454,7 @@ namespace ObjectCloner
         private ObjectCloner.TopPanelComponents.PleaseWait pleaseWait;
         private ObjectCloner.TopPanelComponents.CloneFixOptions cloneFixOptions;
         private ObjectCloner.TopPanelComponents.Search searchPane;
+        private ObjectCloner.TopPanelComponents.TGISearch tgiSearchPane;
 
         public MainForm()
         {
@@ -659,6 +660,7 @@ namespace ObjectCloner
                 thumTypes.Add(0x04ED4BB2, new uint[] { 0x05B1B524, 0x05B1B525, 0x05B1B526, }); //Catalog Terrain Paint Brush
                 thumTypes.Add(0x04F3CC01, new uint[] { 0x05B17698, 0x05B17699, 0x05B1769A, }); //Catalog Fireplace
                 thumTypes.Add(0x060B390C, thumTypes[0x319E4F1D]); //Catalog Terrain Water Brush
+                thumTypes.Add(0x0A36F07A, thumTypes[0x319E4F1D]); //Catalog Fountain Pool
                 thumTypes.Add(0x316C78F2, thumTypes[0x319E4F1D]); //Catalog Foundation
                 thumTypes.Add(0x515CA4CD, new uint[] { 0x0589DC44, 0x0589DC45, 0x0589DC46, }); //Catalog Wall/Floor Pattern
                 thumTypes.Add(0x9151E6BC, new uint[] { 0x00000000, 0x00000000, 0x00000000, }); //Catalog Wall -- doesn't have any
@@ -838,7 +840,7 @@ namespace ObjectCloner
             return stbl == null ? null : (stbl.Resource as IDictionary<ulong, string>)[guid];
         }
 
-        class NameMap
+        public class NameMap
         {
             Item latest;
             List<IDictionary<ulong, string>> namemaps;
@@ -887,6 +889,37 @@ namespace ObjectCloner
 
         #region LeftPanelComponents
 
+        private void DisplayTGISearch()
+        {
+            /*
+            tgiSearchPane.SelectedIndexChanged -= new EventHandler<Search.SelectedIndexChangedEventArgs>(tgiSearchPane_SelectedIndexChanged);
+            tgiSearchPane.SelectedIndexChanged += new EventHandler<Search.SelectedIndexChangedEventArgs>(tgiSearchPane_SelectedIndexChanged);
+            tgiSearchPane.ItemActivate -= new EventHandler<Search.ItemActivateEventArgs>(tgiSearchPane_ItemActivate);
+            tgiSearchPane.ItemActivate += new EventHandler<Search.ItemActivateEventArgs>(tgiSearchPane_ItemActivate);
+            /**/
+
+            this.AcceptButton = btnStart;
+            this.CancelButton = null;
+
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBC, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBT, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
+
+            lbTGISearch.Visible = true;
+            lbSearch.Visible = false;
+            lbUseMenu.Visible = false;
+            lbSelectOptions.Visible = false;
+            btnStart.Visible = true;
+            btnStart.Enabled = false;
+
+            StopWait();
+            splitContainer1.Panel1.Controls.Clear();
+            splitContainer1.Panel1.Controls.Add(tgiSearchPane);
+            tgiSearchPane.Dock = DockStyle.Fill;
+            tgiSearchPane.Focus();
+        }
+
         private void DisplaySearch()
         {
             searchPane.SelectedIndexChanged -= new EventHandler<Search.SelectedIndexChangedEventArgs>(searchPane_SelectedIndexChanged);
@@ -902,6 +935,7 @@ namespace ObjectCloner
             menuBarWidget1.Enable(MenuBarWidget.MD.MBT, true);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
 
+            lbTGISearch.Visible = false;
             lbSearch.Visible = true;
             lbUseMenu.Visible = false;
             lbSelectOptions.Visible = false;
@@ -928,6 +962,7 @@ namespace ObjectCloner
             menuBarWidget1.Enable(MenuBarWidget.MD.MBT, true);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
 
+            lbTGISearch.Visible = false;
             lbSearch.Visible = false;
             lbUseMenu.Visible = false;
             lbSelectOptions.Visible = false;
@@ -953,6 +988,7 @@ namespace ObjectCloner
         }
         private void DisplayOptions()
         {
+            lbTGISearch.Visible = false;
             lbSearch.Visible = false;
             lbUseMenu.Visible = false;
             lbSelectOptions.Visible = true;
@@ -995,6 +1031,7 @@ namespace ObjectCloner
             menuBarWidget1.Enable(MenuBarWidget.MD.MBT, true);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
 
+            lbTGISearch.Visible = false;
             lbSearch.Visible = false;
             lbUseMenu.Visible = true;
             lbSelectOptions.Visible = false;
@@ -2295,9 +2332,9 @@ namespace ObjectCloner
                                 Item newstbl = NewResource(target, new TGIBlock(0, null, 0x220557DA, stbl.RequestedRK.ResourceGroup, ((ulong)i << 56) | stblInstance));
                                 IDictionary<ulong, string> outstbl = newstbl.Resource as IDictionary<ulong, string>;
                                 if (oldName == null) oldName = findStblFor(nameGUID);
-                                outstbl.Add(nameGUID, oldName == null ? "" : (oldName.Resource as IDictionary<ulong, string>)[nameGUID]);
+                                if (!outstbl.ContainsKey(nameGUID)) outstbl.Add(nameGUID, oldName == null ? "" : (oldName.Resource as IDictionary<ulong, string>)[nameGUID]);
                                 if (oldDesc == null) oldDesc = findStblFor(descGUID);
-                                outstbl.Add(descGUID, oldDesc == null ? "" : (oldDesc.Resource as IDictionary<ulong, string>)[descGUID]);
+                                if (!outstbl.ContainsKey(descGUID)) outstbl.Add(descGUID, oldDesc == null ? "" : (oldDesc.Resource as IDictionary<ulong, string>)[descGUID]);
                                 if (!stopSaving) newstbl.Commit();
 
                                 if (!stopSaving) newnamemap.Add(newstbl.RequestedRK.Instance, String.Format(language_fmt, languages[i], i, stblInstance));
@@ -3214,6 +3251,39 @@ namespace ObjectCloner
                     try { pkgs.Add(s3pi.Package.Package.OpenPackage(0, file)); outPaths.Add(file); }
                     catch { }
         }
+
+        //Inge (15-01-2011): "Only ever looking *.package for custom content"
+        //static List<string> pkgPatterns = new List<string>(new string[] { "*.package", "*.dbc", "*.world", "*.nhd", });
+        static List<string> pkgPatterns = new List<string>(new string[] { "*.package", });
+        void setCCList(out List<IPackage> pkgs, out List<string> outPaths, string ccPath)
+        {
+            pkgs = new List<IPackage>();
+            outPaths = new List<string>();
+
+            if (ccPath == null || !Directory.Exists(ccPath)) return;
+
+            //Depth-first search
+            foreach (var dir in Directory.GetDirectories(ccPath))
+            {
+                List<IPackage> dirPkgs;
+                List<string> dirPaths;
+                setCCList(out dirPkgs, out dirPaths, dir);
+                if (dirPkgs != null && dirPkgs.Count > 0)
+                {
+                    pkgs.AddRange(dirPkgs);
+                    outPaths.AddRange(dirPaths);
+                }
+            }
+            foreach(string pattern in pkgPatterns)
+                foreach (var path in Directory.GetFiles(ccPath, pattern))
+                    try
+                    {
+                        IPackage pkg = s3pi.Package.Package.OpenPackage(0, path);
+                        pkgs.Add(pkg);
+                        outPaths.Add(path);
+                    }
+                    catch(InvalidDataException) { }
+        }
         #endregion
 
         #region View menu
@@ -3296,6 +3366,7 @@ namespace ObjectCloner
                 switch (mn.mn)
                 {
                     case MenuBarWidget.MB.MBT_search: toolsSearch(); break;
+                    case MenuBarWidget.MB.MBT_tgiSearch: toolsTGISearch(); break;
                 }
             }
             finally { this.Enabled = true; }
@@ -3314,6 +3385,31 @@ namespace ObjectCloner
             searchPane = new Search(objPkgs, updateProgress);
 
             DisplaySearch();
+        }
+
+        private void toolsTGISearch()
+        {
+            if (!CheckInstallDirs()) return;
+
+            ClosePkg();
+            setList(out objPkgs, out objPaths, ini_fb0);
+            setList(out ddsPkgs, out ddsPaths, ini_fb2);
+            setList(out tmbPkgs, out tmbPaths, ini_tmb);
+            currentCatalogType = 0;
+
+            List<List<IPackage>> pkgsList = new List<List<IPackage>>(new List<IPackage>[] { objPkgs, ddsPkgs, tmbPkgs, });
+            List<List<string>> pathsList = new List<List<string>>(new List<string>[] { objPaths, ddsPaths, tmbPaths, });
+            if (ObjectCloner.Properties.Settings.Default.CCEnabled)
+            {
+                List<IPackage> ccPkgs;
+                List<string> ccPaths;
+                setCCList(out ccPkgs, out ccPaths, ObjectCloner.Properties.Settings.Default.CustomContent);
+                pkgsList.Add(ccPkgs);
+                pathsList.Add(ccPaths);
+            }
+            tgiSearchPane = new TGISearch(pkgsList, pathsList, updateProgress, NMap);
+
+            DisplayTGISearch();
         }
         #endregion
 
@@ -3537,113 +3633,43 @@ namespace ObjectCloner
 
             switch (item.CType)
             {
-                case CatalogType.CatalogObject:
-                    OBJD_Steps(stepList, out lastStepInChain); break;
-                case CatalogType.ModularResource:
-                    MDLR_Steps(stepList, out lastStepInChain); break;
+                case CatalogType.CatalogProxyProduct:
+                case CatalogType.CatalogFountainPool:
+                case CatalogType.CatalogFoundation:
+                case CatalogType.CatalogWallStyle:
+                case CatalogType.CatalogRoofStyle:
+                    ThumbnailsOnly_Steps(stepList, out lastStepInChain); break;
                 case CatalogType.CatalogTerrainGeometryBrush:
                 case CatalogType.CatalogTerrainWaterBrush:
                     brush_Steps(stepList, out lastStepInChain); break;
                 case CatalogType.CatalogTerrainPaintBrush:
                     CTPT_Steps(stepList, out lastStepInChain); break;
-                case CatalogType.CatalogFireplace:
-                    CFIR_Steps(stepList, out lastStepInChain); break;
-                case CatalogType.CatalogWallFloorPattern:
-                    CWAL_Steps(stepList, out lastStepInChain); break;
+
                 case CatalogType.CatalogFence:
                 case CatalogType.CatalogStairs:
                 case CatalogType.CatalogRailing:
                 case CatalogType.CatalogRoofPattern:
-                case CatalogType.CatalogFoundation:
-                case CatalogType.CatalogWall:
-                case CatalogType.CatalogRoofStyle:
-                    Common_Steps(stepList, out lastStepInChain); break;
-                case CatalogType.CatalogProxyProduct:
-                    CPRX_Steps(stepList, out lastStepInChain); break;
+                    CatlgHasVPXY_Steps(stepList, out lastStepInChain); break;
+                case CatalogType.CatalogObject:
+                    OBJD_Steps(stepList, out lastStepInChain); break;
+                case CatalogType.CatalogWallFloorPattern:
+                    CWAL_Steps(stepList, out lastStepInChain); break;
+
+                case CatalogType.CatalogFireplace:
+                    CFIR_Steps(stepList, out lastStepInChain); break;
+                case CatalogType.ModularResource:
+                    MDLR_Steps(stepList, out lastStepInChain); break;
             }
             lastInChain = stepList == null ? -1 : (stepList.IndexOf(lastStepInChain) + 1);
         }
 
-        void OBJD_Steps(List<Step> stepList, out Step lastStepInChain)
+        void ThumbnailsOnly_Steps(List<Step> stepList, out Step lastStepInChain)
         {
             lastStepInChain = None;
             if (isCreateNewPackage || cloneFixOptions.IsRenumber)
             {
                 stepList.AddRange(new Step[] {
-                    // either OBJD_SlurpDDSes or Catlg_SlurpTGIs
-                    OBJD_removeRefdOBJDs,
-                    OBJD_getOBKJ,
-                    // OBJD_addOBJKref if default resources only
-                    OBJK_SlurpTGIs,
-                    OBJK_getSPT2,
-                    OBJK_getVPXY,
-                    Catlg_addVPXYs,
-
-                    VPXYs_SlurpRKs,
-                    // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default resources only
-                    VPXYs_getMODLs,
-                    VPXYs_getKinXML,
-                    VPXYs_getKinMTST,
-                    VPXYKin_SlurpRKs,
-
-                    MODLs_SlurpRKs,
-                    MODLs_SlurpMLODs,
-                    MODLs_SlurpTXTCs,
                 });
-                lastStepInChain = MODLs_SlurpTXTCs;
-                if (!isFix && mode == Mode.FromGame)
-                {
-                    stepList.Insert(stepList.IndexOf(OBJD_getOBKJ), OBJD_setFallback);
-                }
-                if (cloneFixOptions.IsDefaultOnly)
-                {
-                    stepList.Insert(stepList.IndexOf(OBJD_removeRefdOBJDs), OBJD_SlurpDDSes);
-                    stepList.Insert(stepList.IndexOf(OBJK_SlurpTGIs), OBJD_addOBJKref);
-                }
-                else
-                {
-                    stepList.Insert(stepList.IndexOf(OBJD_removeRefdOBJDs), Catlg_SlurpRKs);
-                }
-                if (cloneFixOptions.IsIncludeThumbnails || (!isCreateNewPackage && cloneFixOptions.IsRenumber))
-                    stepList.Add(SlurpThumbnails);
-            }
-            lastStepInChain = MODLs_SlurpTXTCs;
-        }
-
-        void MDLR_Steps(List<Step> stepList, out Step lastStepInChain)
-        {
-            stepList.AddRange(new Step[] { Item_findObjds, setupObjdStepList, Modular_Main, });
-            lastStepInChain = None;
-        }
-
-        void Common_Steps(List<Step> stepList, out Step lastStepInChain)
-        {
-            lastStepInChain = None;
-            if (isCreateNewPackage || cloneFixOptions.IsRenumber)
-            {
-                stepList.AddRange(new Step[] {
-                    Catlg_getVPXY,
-                    Catlg_addVPXYs,
-
-                    VPXYs_SlurpRKs,
-                    // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default resources only
-                    VPXYs_getMODLs,
-                    VPXYs_getKinXML,
-                    VPXYs_getKinMTST,
-                    VPXYKin_SlurpRKs,
-
-                    MODLs_SlurpRKs,
-                    MODLs_SlurpMLODs,
-                    MODLs_SlurpTXTCs,
-                });
-                lastStepInChain = MODLs_SlurpTXTCs;
-                if (cloneFixOptions.IsDefaultOnly)
-                {
-                }
-                else
-                {
-                    //stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpTGIs);// Causes problems for CSTR and doesn't help for others
-                }
                 if (cloneFixOptions.IsIncludeThumbnails || (!isCreateNewPackage && cloneFixOptions.IsRenumber))
                     stepList.Add(SlurpThumbnails);
             }
@@ -3651,24 +3677,16 @@ namespace ObjectCloner
 
         void brush_Steps(List<Step> stepList, out Step lastStepInChain)
         {
-            lastStepInChain = None;
+            ThumbnailsOnly_Steps(stepList, out lastStepInChain);
             if (isCreateNewPackage || cloneFixOptions.IsRenumber)
             {
-                stepList.AddRange(new Step[] {
-                    //CTPT_addBrushShape if NOT default resources only
-                });
                 if (cloneFixOptions.IsDefaultOnly)
                 {
                 }
                 else
                 {
-                    //stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpTGIs);// Causes problems for CSTR and doesn't help for others
-                    stepList.Insert(stepList.IndexOf(SlurpThumbnails), brush_addBrushShape);
-                    //stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinXML);//No VPXYs in here
-                    //stepList.Insert(stepList.IndexOf(SlurpThumbnails), VPXYs_getKinMTST);//No VPXYs in here
+                    stepList.Insert(0, brush_addBrushShape);
                 }
-                if (cloneFixOptions.IsIncludeThumbnails || (!isCreateNewPackage && cloneFixOptions.IsRenumber))
-                    stepList.Add(SlurpThumbnails);
             }
         }
 
@@ -3684,15 +3702,7 @@ namespace ObjectCloner
             }
         }
 
-        void CFIR_Steps(List<Step> stepList, out Step lastStepInChain)
-        {
-            stepList.AddRange(new Step[] { Item_findObjds, setupObjdStepList, Modular_Main, });
-            if (cloneFixOptions.IsIncludeThumbnails || (!isCreateNewPackage && cloneFixOptions.IsRenumber))
-                stepList.Add(SlurpThumbnails);
-            lastStepInChain = None;
-        }
-
-        void CWAL_Steps(List<Step> stepList, out Step lastStepInChain)
+        void CatlgHasVPXY_Steps(List<Step> stepList, out Step lastStepInChain)
         {
             lastStepInChain = None;
             if (isCreateNewPackage || cloneFixOptions.IsRenumber)
@@ -3702,7 +3712,7 @@ namespace ObjectCloner
                     Catlg_addVPXYs,
 
                     VPXYs_SlurpRKs,
-                    // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default textures only
+                    // VPXYs_getKinXML, VPXYs_getKinMTST if NOT default resources only
                     VPXYs_getMODLs,
                     VPXYs_getKinXML,
                     VPXYs_getKinMTST,
@@ -3719,28 +3729,69 @@ namespace ObjectCloner
                 else
                 {
                     stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpRKs);
-                }
-                if (cloneFixOptions.IsIncludeThumbnails || (!isCreateNewPackage && cloneFixOptions.IsRenumber))
-                    stepList.Add(CWAL_SlurpThumbnails);
-            }
-        }
-
-        void CPRX_Steps(List<Step> stepList, out Step lastStepInChain)
-        {
-            lastStepInChain = None;
-            if (isCreateNewPackage || cloneFixOptions.IsRenumber)
-            {
-                stepList.AddRange(new Step[] {
-                });
-                if (cloneFixOptions.IsDefaultOnly)
-                {
-                }
-                else
-                {
+                    stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_removeRefdCatlgs);
                 }
                 if (cloneFixOptions.IsIncludeThumbnails || (!isCreateNewPackage && cloneFixOptions.IsRenumber))
                     stepList.Add(SlurpThumbnails);
             }
+        }
+
+        void OBJD_Steps(List<Step> stepList, out Step lastStepInChain)
+        {
+            CatlgHasVPXY_Steps(stepList, out lastStepInChain);
+            if (isCreateNewPackage || cloneFixOptions.IsRenumber)
+            {
+                stepList.Remove(Catlg_getVPXY);
+                stepList.InsertRange(0, new Step[] {
+                    // OBJD_setFallback if cloning from game
+                    OBJD_getOBJK,
+                    // OBJD_addOBJKref and OBJD_SlurpDDSes if default resources only
+                    OBJK_SlurpRKs,
+                    OBJK_getSPT2,
+                    OBJK_getVPXY,
+                });
+                if (!isFix && mode == Mode.FromGame)
+                {
+                    stepList.Insert(0, OBJD_setFallback);
+                }
+                if (cloneFixOptions.IsDefaultOnly)
+                {
+                    stepList.InsertRange(stepList.IndexOf(OBJK_SlurpRKs), new Step[] {
+                        OBJD_addOBJKref,
+                        OBJD_SlurpDDSes,
+                    });
+                }
+                else
+                {
+                }
+            }
+        }
+
+        void CWAL_Steps(List<Step> stepList, out Step lastStepInChain)
+        {
+            CatlgHasVPXY_Steps(stepList, out lastStepInChain);
+            if (isCreateNewPackage || cloneFixOptions.IsRenumber)
+            {
+                if (cloneFixOptions.IsIncludeThumbnails || (!isCreateNewPackage && cloneFixOptions.IsRenumber))
+                {
+                    stepList.Remove(SlurpThumbnails);
+                    stepList.Add(CWAL_SlurpThumbnails);
+                }
+            }
+        }
+
+        void CFIR_Steps(List<Step> stepList, out Step lastStepInChain)
+        {
+            stepList.AddRange(new Step[] { Item_findObjds, setupObjdStepList, Modular_Main, });
+            if (cloneFixOptions.IsIncludeThumbnails || (!isCreateNewPackage && cloneFixOptions.IsRenumber))
+                stepList.Add(SlurpThumbnails);//For the CFIR itself
+            lastStepInChain = None;
+        }
+
+        void MDLR_Steps(List<Step> stepList, out Step lastStepInChain)
+        {
+            stepList.AddRange(new Step[] { Item_findObjds, setupObjdStepList, Modular_Main, });
+            lastStepInChain = None;
         }
 
         Dictionary<Step, string> StepText;
@@ -3748,18 +3799,17 @@ namespace ObjectCloner
         {
             StepText = new Dictionary<Step, string>();
             StepText.Add(Item_addSelf, "Add selected item");
+            StepText.Add(Catlg_SlurpRKs, "Catalog object-referenced resources");
+            StepText.Add(Catlg_removeRefdCatlgs, "Remove referenced CatalogResources");
+            StepText.Add(Catlg_getVPXY, "Find VPXYs in the Catalog Resource TGIBlockList");
 
             StepText.Add(OBJD_setFallback, "Set fallback TGI");
-            StepText.Add(OBJD_removeRefdOBJDs, "Remove referenced OBJDs");
-            StepText.Add(OBJD_getOBKJ, "Find OBJK");
+            StepText.Add(OBJD_getOBJK, "Find OBJK");
             StepText.Add(OBJD_addOBJKref, "Add OBJK");
-            StepText.Add(OBJD_SlurpDDSes, "OBJD-referenced resources");
-            StepText.Add(Catlg_SlurpRKs, "Catalog object-referenced resources");
-            StepText.Add(OBJK_SlurpTGIs, "OBJK-referenced resources");
+            StepText.Add(OBJD_SlurpDDSes, "OBJD-referenced DDSes");
+            StepText.Add(OBJK_SlurpRKs, "OBJK-referenced resources");
             StepText.Add(OBJK_getSPT2, "Find OBJK-referenced SPT2");
             StepText.Add(OBJK_getVPXY, "Find OBJK-referenced VPXY");
-
-            StepText.Add(Catlg_getVPXY, "Find VPXYs in the Catalog Resource TGIBlockList");
 
             StepText.Add(CTPT_addPair, "Add the other brush in pair");
             StepText.Add(CTPT_addBrushTexture, "Add Brush Texture");
@@ -3774,16 +3824,33 @@ namespace ObjectCloner
             StepText.Add(MODLs_SlurpRKs, "MODL-referenced resources");
             StepText.Add(MODLs_SlurpMLODs, "MLOD-referenced resources");
             StepText.Add(MODLs_SlurpTXTCs, "TXTC-referenced resources");
-            StepText.Add(SlurpThumbnails, "Add thumbnails");
-            StepText.Add(CWAL_SlurpThumbnails, "Add thumbnails");
 
             StepText.Add(Item_findObjds, "Find OBJDs from MDLR/CFIR");
             StepText.Add(setupObjdStepList, "Get the OBJD step list");
             StepText.Add(Modular_Main, "Drive the modular process");
+
+            StepText.Add(SlurpThumbnails, "Add thumbnails");
+            StepText.Add(CWAL_SlurpThumbnails, "Add thumbnails");
         }
 
         void Item_addSelf() { Add("clone", selectedItem.RequestedRK); }
         void Catlg_SlurpRKs() { SlurpRKsFromField("clone", (AResource)selectedItem.Resource); }
+
+        // Any interdependency between catalog resource is handled like CFIR (for complex ones) or CTPT (for simple ones)
+        void Catlg_removeRefdCatlgs()
+        {
+            IList<TGIBlock> ltgi = (IList<TGIBlock>)selectedItem.Resource["TGIBlocks"].Value;
+            foreach (AResourceKey rk in ltgi)
+            {
+                if (Enum.IsDefined(typeof(CatalogType), rk.ResourceType) && rk.Instance != selectedItem.RequestedRK.Instance)
+                {
+                    int i = new List<IResourceKey>(rkLookup.Values).IndexOf(rk);
+                    if (i >= 0)
+                        rkLookup.Remove(new List<string>(rkLookup.Keys)[i]);
+                }
+            }
+        }
+
         void Catlg_getVPXY()
         {
             vpxyItems = new List<Item>();
@@ -3806,7 +3873,6 @@ namespace ObjectCloner
                 stepNum = lastInChain;
             }
         }
-        void Catlg_addVPXYs() { for (int i = 0; i < vpxyItems.Count; i++) Add("vpxy[" + i + "]", vpxyItems[i].RequestedRK); }
 
         #region OBJD Steps
         void OBJD_setFallback()
@@ -3822,7 +3888,7 @@ namespace ObjectCloner
                 selectedItem.Commit();
             }
         }
-        void OBJD_getOBKJ()
+        void OBJD_getOBJK()
         {
             uint index = (uint)selectedItem.Resource["OBJKIndex"].Value;
             IList<TGIBlock> ltgi = (IList<TGIBlock>)selectedItem.Resource["TGIBlocks"].Value;
@@ -3849,7 +3915,7 @@ namespace ObjectCloner
             if (selectedItem.Resource.ContentFields.Contains("FloorCutoutDDSIndex"))
                 Add("clone.tubmask", ltgi[(int)(uint)selectedItem.Resource["FloorCutoutDDSIndex"].Value]);
         }
-        void OBJK_SlurpTGIs() { SlurpRKsFromField("objk", (AResource)objkItem.Resource); }
+        void OBJK_SlurpRKs() { SlurpRKsFromField("objk", (AResource)objkItem.Resource); }
         void OBJK_getSPT2()
         {
             if (((ObjKeyResource.ObjKeyResource)objkItem.Resource).Components.FindAll(x => x.Element == ObjKeyResource.ObjKeyResource.Component.Tree).Count == 0) return;
@@ -3908,19 +3974,6 @@ namespace ObjectCloner
                 stepNum = lastInChain;
             }
         }
-        void OBJD_removeRefdOBJDs()
-        {
-            IList<TGIBlock> ltgi = (IList<TGIBlock>)selectedItem.Resource["TGIBlocks"].Value;
-            foreach (AResourceKey rk in ltgi)
-            {
-                if (rk.ResourceType == (uint)CatalogType.CatalogObject && rk.Instance != selectedItem.RequestedRK.Instance)
-                {
-                    int i = new List<IResourceKey>(rkLookup.Values).IndexOf(rk);
-                    if (i >= 0)
-                        rkLookup.Remove(new List<string>(rkLookup.Keys)[i]);
-                }
-            }
-        }
         #endregion
 
         void CTPT_addPair()
@@ -3935,6 +3988,7 @@ namespace ObjectCloner
         void CTPT_addBrushTexture() { Add("ctpt_BrushTexture", (TGIBlock)selectedItem.Resource["BrushTexture"].Value); }
         void brush_addBrushShape() { Add("brush_ProfileTexture", (TGIBlock)selectedItem.Resource["ProfileTexture"].Value); }
 
+        void Catlg_addVPXYs() { for (int i = 0; i < vpxyItems.Count; i++) Add("vpxy[" + i + "]", vpxyItems[i].RequestedRK); }
         void VPXYs_SlurpRKs()
         {
             for (int i = 0; i < vpxyItems.Count; i++)
@@ -4040,6 +4094,7 @@ namespace ObjectCloner
             }
             Diagnostics.Show(s, "No TXTC items");
         }
+
 
         List<Item> objdList;
         void Item_findObjds()

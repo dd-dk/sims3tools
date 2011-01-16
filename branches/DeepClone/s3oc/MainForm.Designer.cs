@@ -34,6 +34,7 @@
             this.tlpTask = new System.Windows.Forms.TableLayoutPanel();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.lbSearch = new System.Windows.Forms.Label();
+            this.lbTGISearch = new System.Windows.Forms.Label();
             this.lbUseMenu = new System.Windows.Forms.Label();
             this.lbSelectOptions = new System.Windows.Forms.Label();
             this.btnStart = new System.Windows.Forms.Button();
@@ -209,6 +210,7 @@
             this.flowLayoutPanel1.AutoSize = true;
             this.flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flowLayoutPanel1.Controls.Add(this.lbSearch);
+            this.flowLayoutPanel1.Controls.Add(this.lbTGISearch);
             this.flowLayoutPanel1.Controls.Add(this.lbUseMenu);
             this.flowLayoutPanel1.Controls.Add(this.lbSelectOptions);
             this.flowLayoutPanel1.Controls.Add(this.btnStart);
@@ -225,10 +227,21 @@
             this.lbSearch.Margin = new System.Windows.Forms.Padding(0);
             this.lbSearch.Name = "lbSearch";
             this.lbSearch.Size = new System.Drawing.Size(219, 26);
-            this.lbSearch.TabIndex = 2;
+            this.lbSearch.TabIndex = 1;
             this.lbSearch.Text = "Enter the search criteria and click \"Search\"\r\nthen select an item and click \"Clon" +
                 "e or Fix...\"";
             this.lbSearch.Visible = false;
+            // 
+            // lbTGISearch
+            // 
+            this.lbTGISearch.AutoSize = true;
+            this.lbTGISearch.Location = new System.Drawing.Point(0, 0);
+            this.lbTGISearch.Margin = new System.Windows.Forms.Padding(0);
+            this.lbTGISearch.Name = "lbTGISearch";
+            this.lbTGISearch.Size = new System.Drawing.Size(219, 26);
+            this.lbTGISearch.TabIndex = 1;
+            this.lbTGISearch.Text = "Enter the search criteria and click \"Search\".";
+            this.lbTGISearch.Visible = false;
             // 
             // lbUseMenu
             // 
@@ -1391,6 +1404,7 @@
         private System.Windows.Forms.TableLayoutPanel tlpBuildSort;
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.Label lbSearch;
+        private System.Windows.Forms.Label lbTGISearch;
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.TextBox tbResourceName;
         private System.Windows.Forms.Label label23;

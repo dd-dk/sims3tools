@@ -88,7 +88,7 @@
             // 
             // ContentCategoryFlags
             // 
-            this.ContentCategoryFlags.Text = "Cont. Cat.";
+            this.ContentCategoryFlags.Text = "EP/SP";
             this.ContentCategoryFlags.Width = 59;
             // 
             // TGI

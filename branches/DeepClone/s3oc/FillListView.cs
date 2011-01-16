@@ -140,10 +140,12 @@ namespace ObjectCloner
         CatalogFireplace = 0x04F3CC01,
         CatalogTerrainWaterBrush = 0x060B390C,
 
+        CatalogFountainPool = 0x0A36F07A,
+
         CatalogFoundation = 0x316C78F2,
         CatalogObject = 0x319E4F1D,
         CatalogWallFloorPattern = 0x515CA4CD,
-        CatalogWall = 0x9151E6BC,
+        CatalogWallStyle = 0x9151E6BC,
 
         CatalogRoofStyle = 0x91EDBD3E,
         ModularResource = 0xCF9A4ACE,
@@ -265,11 +267,15 @@ namespace ObjectCloner
             get
             {
                 if (this.SpecificRK == null) return "";
-                byte rgVersion = (byte)(this.SpecificRK.ResourceGroup >> 27);
-                if (rgVersion == 0) return "";
-                if (!MainForm.RGVersionLookup.ContainsKey(rgVersion)) return "Unk";
-                return MainForm.RGVersionLookup[rgVersion];
+                return EPSP((byte)(this.SpecificRK.ResourceGroup >> 27));
             }
+        }
+
+        public static string EPSP(byte rgVersion)
+        {
+            if (rgVersion == 0) return "";
+            if (!MainForm.RGVersionLookup.ContainsKey(rgVersion)) return "Unk";
+            return MainForm.RGVersionLookup[rgVersion];
         }
 
         public void Commit() { myrie.SpecificPkg.ReplaceResource(myrie.SpecificRK, Resource); }

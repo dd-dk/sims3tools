@@ -33,6 +33,9 @@ namespace ObjectCloner.SettingsForms
         {
             InitializeComponent();
 
+            btnCCEdit.Enabled = ckbCustomContent.Checked = ObjectCloner.Properties.Settings.Default.CCEnabled;
+            tbCCFolder.Text = ObjectCloner.Properties.Settings.Default.CustomContent;
+
             Size size = this.Size;
             Size sizeTLP = tlpGameFolders.Size;
 
@@ -64,6 +67,7 @@ namespace ObjectCloner.SettingsForms
 
                 btnEdit.Anchor = AnchorStyles.None;
                 btnEdit.AutoSize = true;
+                btnEdit.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
                 btnEdit.Enabled = sims3.Enabled;
                 btnEdit.Text = "Edit";
                 btnEdit.Click += new EventHandler(btnEdit_Click);
@@ -122,6 +126,17 @@ namespace ObjectCloner.SettingsForms
 
         }
 
+        private void btnCCEdit_Click(object sender, EventArgs e)
+        {
+            string path = ObjectCloner.Properties.Settings.Default.CustomContent;
+            if (path == null) path = Environment.GetEnvironmentVariable("USERPROFILE");
+            folderBrowserDialog1.SelectedPath = path;
+            DialogResult dr = folderBrowserDialog1.ShowDialog();
+            if (dr != DialogResult.OK) return;
+
+            tbCCFolder.Text = ObjectCloner.Properties.Settings.Default.CustomContent = folderBrowserDialog1.SelectedPath;
+        }
+
         private void btnReset_Click(object sender, EventArgs e)
         {
             foreach (MainForm.S3ocSims3 sims3 in MainForm.lS3ocSims3)
@@ -131,6 +146,11 @@ namespace ObjectCloner.SettingsForms
             }
             DialogResult = DialogResult.Retry;
             Close();
+        }
+
+        private void ckbCustomContent_CheckedChanged(object sender, EventArgs e)
+        {
+            btnCCEdit.Enabled = ObjectCloner.Properties.Settings.Default.CCEnabled = ckbCustomContent.Checked;
         }
     }
 }
