@@ -1,7 +1,6 @@
 ;!include "MUI.nsh"
 !include "FileAssociation.nsh"
 
-!define PROGRAM_NAME "Sims3 Package Editor"
 !define tla "s3pe"
 !ifndef INSTFILES
   !error "Caller didn't define INSTFILES"
@@ -10,9 +9,6 @@
   !error "Caller didn't define UNINSTFILES"
 !endif
 
-XPStyle on
-SetCompressor /SOLID LZMA
-
 Var wasInUse
 Var wantAll
 Var wantSM
@@ -20,15 +16,30 @@ Var wantAssoc
 Var wantSendTo
 Var delSettings
 
-Name "${PROGRAM_NAME}"
-InstallDir $PROGRAMFILES\${tla}
-!define EXE ${tla}.exe
+!ifdef X64
+  InstallDir "$PROGRAMFILES64\${tla} (x64)"
+  !define PROGRAM_NAME "s3pe - Sims3 Package Editor (x64)"
+  !define INSTREGKEY "${tla} (x64)"
+  !define SMDIR "$SMPROGRAMS\${tla} (x64)"
+  !define EXE ${tla}-x64.exe
+  !define LNK "${tla} (x64).lnk"
+!else
+  InstallDir $PROGRAMFILES\${tla}
+  !define PROGRAM_NAME "s3pe - Sims3 Package Editor"
+  !define INSTREGKEY "${tla}"
+  !define SMDIR "$SMPROGRAMS\${tla}"
+  !define EXE ${tla}.exe
+  !define LNK "${tla}.lnk"
+!endif
 
+SetCompressor /SOLID LZMA
+XPStyle on
+Name "${PROGRAM_NAME}"
 AddBrandingImage top 0
 Icon Resources\${tla}.ico
 UninstallIcon Resources\${tla}.ico
 
-; Request application privileges for Windows Vista
+; Request application privileges for Windows Vista and above
 RequestExecutionLevel admin
 
 LicenseData "gpl-3.0.txt"
@@ -67,35 +78,43 @@ Section
 gotAll:  
 
   SetOutPath $INSTDIR
-  ; Write the installation path into the registry
-  WriteRegStr HKLM Software\s3pi\${tla} "InstallDir" "$INSTDIR"
   
-  ; Write the uninstall keys for Windows
-  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}" "DisplayName" "${PROGRAM_NAME}"
-  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}" "UninstallString" '"$INSTDIR\uninst-${tla}.exe"'
-  WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}" "NoModify" 1
-  WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}" "NoRepair" 1
+  !include ${INSTFILES}
+  IntOp $0 $0 / 1024
 
   WriteUninstaller uninst-${tla}.exe
   
-  !include ${INSTFILES}
+  ; Write the uninstall keys for Windows
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "DisplayIcon" "$INSTDIR\${EXE}"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "DisplayName" "${PROGRAM_NAME}"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "DisplayVersion" "${VSN}"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "HelpLink" "http://dino.drealm.info/den/denforum/index.php?board=19.0"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation" "$INSTDIR"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "Publisher" "Peter L Jones"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "UninstallString" '"$INSTDIR\uninst-${tla}.exe"'
+  ; $0 is set in ${INSTFILES} by the batch file...
+  WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "EstimatedSize" $0
+  WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "NoModify" 1
+  WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "NoRepair" 1
 
   StrCmp "Y" $wantSM wantSM noWantSM
 wantSM:
-  CreateDirectory "$SMPROGRAMS\${tla}"
-  CreateShortCut "$SMPROGRAMS\${tla}\${tla}.lnk" "$INSTDIR\${EXE}" "" "" "" SW_SHOWNORMAL "" "${PROGRAM_NAME}"
-  CreateShortCut "$SMPROGRAMS\${tla}\Uninstall.lnk" "$INSTDIR\uninst-${tla}.exe" "" "" "" SW_SHOWNORMAL "" "Uninstall"
-  CreateShortCut "$SMPROGRAMS\${tla}\${tla}-Version.lnk" "$INSTDIR\${tla}-Version.txt" "" "" "" SW_SHOWNORMAL "" "Show version"
+  CreateDirectory "${SMDIR}"
+  CreateShortCut "${SMDIR}\${LNK}" "$INSTDIR\${EXE}" "" "" "" SW_SHOWNORMAL "" "${PROGRAM_NAME}"
+  CreateShortCut "${SMDIR}\Uninstall.lnk" "$INSTDIR\uninst-${tla}.exe" "" "" "" SW_SHOWNORMAL "" "Uninstall"
+  CreateShortCut "${SMDIR}\${tla}-Version.lnk" "$INSTDIR\${tla}-Version.txt" "" "" "" SW_SHOWNORMAL "" "Show version"
 noWantSM:
 
   StrCmp "Y" $wantAssoc wantAssoc noWantAssoc
 wantAssoc:
   ${registerExtension} "$INSTDIR\${EXE}" ".package" "Sims3 package"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "RemoveAssociation" "Y"
 noWantAssoc:
 
   StrCmp "Y" $wantSendTo wantSendTo noWantSendTo
 wantSendTo:
   CreateShortCut "$SENDTO\Import to Sims3 package.lnk" "$INSTDIR\${EXE}" "-import" "" "" SW_SHOWNORMAL "" "Import files to a new Sims3 package"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "RemoveSendTo" "Y"
 noWantSendTo:
 
 SectionEnd
@@ -112,12 +131,12 @@ FunctionEnd
 
 Function GetInstDir
   Push $0
-  ReadRegStr $0 HKLM Software\s3pi\${tla} "InstallDir"
+  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
   StrCmp $0 "" NotInstalledLM
   StrCpy $INSTDIR $0
   Goto InstDirDone
 NotInstalledLM:
-  ReadRegStr $R0 HKCU Software\s3pi\${tla} "InstallDir"
+  ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
   StrCmp $0 "" InstDirDone
   StrCpy $INSTDIR $0
 InstDirDone:
@@ -147,10 +166,10 @@ InUse:
 FunctionEnd
 
 Function CheckOldVersion
-  ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}" "UninstallString"
+  ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "UninstallString"
   StrCmp $R0 "" NotInstalledCU Installed
 NotInstalledCU:
-  ReadRegStr $R0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}" "UninstallString"
+  ReadRegStr $R0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "UninstallString"
   StrCmp $R0 "" NotInstalled
 Installed:
   MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
@@ -165,6 +184,83 @@ FunctionEnd
 
 
 
+Function un.onGUIInit
+  Call un.GetInstDir
+  Call un.CheckInUse
+  Call un.GetWantAssoc
+  Call un.GetWantSendTo
+FunctionEnd
+
+Function un.GetInstDir
+  Push $0
+  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
+  StrCmp $0 "" NotInstalledLM
+  StrCpy $INSTDIR $0
+  Goto InstDirDone
+NotInstalledLM:
+  ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
+  StrCmp $0 "" NoInstDir
+  StrCpy $INSTDIR $0
+  Goto InstDirDone
+
+NoInstDir:
+  MessageBox MB_OK|MB_ICONSTOP "Cannot find Install Location."
+  Abort
+  
+InstDirDone:
+  Pop $0
+FunctionEnd
+
+Function un.CheckInUse
+  StrCpy $wasInUse 0
+
+  IfFileExists "$INSTDIR" Exists
+  MessageBox MB_OK|MB_ICONSTOP "Cannot find $INSTDIR to uninstall."
+  Abort
+Exists:
+  ClearErrors
+  FileOpen $0 "$INSTDIR\${EXE}" a
+  IfErrors InUse
+  FileClose $0
+  Return
+InUse:
+  StrCpy $wasInUse 1
+
+  MessageBox MB_RETRYCANCEL|MB_ICONQUESTION \
+    "${EXE} is running.$\r$\nPlease close it and retry.$\r$\n$INSTDIR\${EXE}" \
+    IDRETRY Exists
+
+  MessageBox MB_OK|MB_ICONSTOP "Cannot continue to install if ${EXE} is running."
+  Abort
+FunctionEnd
+
+Function un.GetWantAssoc
+  Push $0
+  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "RemoveAssociation"
+  StrCmp $0 "" NotWantAssocLM
+  StrCpy $wantAssoc $0
+  Goto WantAssocDone
+NotWantAssocLM:
+  ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "RemoveAssociation"
+  StrCmp $0 "" WantAssocDone
+  StrCpy $wantAssoc $0
+WantAssocDone:
+  Pop $0
+FunctionEnd
+
+Function un.GetWantSendTo
+  Push $0
+  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "RemoveSendTo"
+  StrCmp $0 "" NotWantSendToLM
+  StrCpy $wantSendTo $0
+  Goto WantSendToDone
+NotWantSendToLM:
+  ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "RemoveSendTo"
+  StrCmp $0 "" WantSendToDone
+  StrCpy $wantSendTo $0
+WantSendToDone:
+  Pop $0
+FunctionEnd
 
 UninstPage uninstConfirm
 PageEx un.components
@@ -180,18 +276,26 @@ Section "Uninstall"
   SetShellVarContext all
   ClearErrors
   Push $0
-  ReadRegStr $0 HKCU Software\s3pi\${tla} "InstallDir"
+  ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
   Pop $0
   IfErrors notCU
   SetShellVarContext current
 notCU:  
 
-  DeleteRegKey SHCTX Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}
+  DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}"
   DeleteRegKey SHCTX Software\s3pi\${tla}
 
-  RMDir /r "$SMPROGRAMS\${tla}"
-  Delete "$SENDTO\Import to Sims3 package.lnk"
+  RMDir /r "${SMDIR}"
+
+  StrCmp "Y" $wantAssoc wantAssoc noWantAssoc
+wantAssoc:
   ${unregisterExtension} ".package" "Sims3 package"
+noWantAssoc:
+
+  StrCmp "Y" $wantSendTo wantSendTo noWantSendTo
+wantSendTo:
+  Delete "$SENDTO\Import to Sims3 package.lnk"
+noWantSendTo:
 
   !include ${UNINSTFILES}
   Delete $INSTDIR\uninst-${tla}.exe

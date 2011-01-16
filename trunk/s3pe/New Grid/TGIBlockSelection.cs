@@ -44,7 +44,7 @@ namespace S3PIDemoFE
             this.field = field;
             this.tgiBlockList = tgiBlockList;
 
-            tgiBlockCombo1.TGIBlocks = this.owner[this.tgiBlockList].Value as AResource.DependentList<AResource.TGIBlock>;
+            tgiBlockCombo1.TGIBlocks = this.owner[this.tgiBlockList].Value as DependentList<TGIBlock>;
             tgiBlockCombo1.SelectedIndex = Convert.ToInt32(this.owner[this.field].Value);
         }
 

@@ -37,11 +37,16 @@ namespace S3PIDemoFE
         static List<string> unwantedFields = new List<string>(new string[] {
             "Stream",
         });
+        static List<string> unwantedFilterFields = new List<string>(new string[] {
+            "Chunkoffset", "Filesize", "Memsize", "Unknown2",
+        });
         static List<string> ddsResources = new List<string>(new string[] {
             "0x00B2D882", "0x8FFB80F6",
         });
+        static string myName;
         static MainForm()
         {
+            myName = Path.GetFileNameWithoutExtension(Application.ExecutablePath);
             foreach (string s in unwantedFields) fields.Remove(s);
             //fields.Sort(byElementPriority);
 
@@ -67,7 +72,6 @@ namespace S3PIDemoFE
             return xPrio.CompareTo(yPrio);
         }
 
-        const string myName = "s3pe";
         public MainForm()
         {
             InitializeComponent();
@@ -80,9 +84,9 @@ namespace S3PIDemoFE
             browserWidget1.ContextMenuStrip = menuBarWidget1.browserWidgetContextMenuStrip;
 
             List<string> filterFields = new List<string>(fields);
-            filterFields.Remove("Chunkoffset");
-            filterFields.Remove("Filesize");
-            filterFields.Remove("Memsize");
+            foreach (string f in unwantedFilterFields)
+                filterFields.Remove(f);
+            filterFields.Insert(0, "Tag");
             filterFields.Insert(0, "Name");
             resourceFilterWidget1.BrowserWidget = browserWidget1;
             resourceFilterWidget1.Fields = filterFields;
@@ -694,8 +698,6 @@ namespace S3PIDemoFE
             IResourceIndexEntry rie = NewResource(ir, null, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, ir.Compress);
             if (rie == null) return;
 
-            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie);
-            CurrentPackage.ReplaceResource(rie, res);
             browserWidget1.Add(rie);
 
             if (ir.UseName && ir.ResourceName != null && ir.ResourceName.Length > 0)

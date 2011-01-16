@@ -53,6 +53,9 @@ namespace S3PIDemoFE.Filter
             }
         }
 
+        static List<string> nonRIEFields = new List<string>(new string[] {
+            "Name", "Tag",
+        });
         void SetFields()
         {
             Dictionary<string, Type> cft = AApiVersionedFields.GetContentFieldTypes(0, typeof(AResourceIndexEntry));
@@ -71,11 +74,11 @@ namespace S3PIDemoFE.Filter
                     tlpResourceInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 133));
                 else if (fields[i] == "Instance")
                     tlpResourceInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 150));
-                else if (i > 3)
+                else if (i > 4 || fields[i] == "Tag")
                     tlpResourceInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 75));
                 else
                     tlpResourceInfo.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-                FilterField ff = new FilterField(fields[i] != "Name");
+                FilterField ff = new FilterField(!nonRIEFields.Contains(fields[i]));
                 ff.Name = fields[i];
                 ff.Dock = DockStyle.Fill;
                 ff.Checked = false;
@@ -164,7 +167,7 @@ namespace S3PIDemoFE.Filter
         {
             if (ie == null || values == null) return;
             foreach (string s in fields)
-                values[s].Value = new Regex(s.Equals("Name") ? bw.ResourceName(ie) : ie[s].ToString("X"));
+                values[s].Value = new Regex(s.Equals("Name") ? bw.ResourceName(ie) : s.Equals("Tag") ? bw.ResourceTag(ie) : ie[s].ToString("X"));
         }
 
         private void btnSet_Click(object sender, EventArgs e)

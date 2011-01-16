@@ -177,7 +177,7 @@ namespace S3PIDemoFE
         delegate MemoryStream Editor(IResourceKey key, IResource res);
         private byte[] Edit(byte[] data, Editor editor)
         {
-            IResourceKey rk = new AResource.TGIBlock(0, null);
+            IResourceKey rk = new TGIBlock(0, null);
             IResource res = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x00000000");
             res.Stream.Position = 0;
             new BinaryWriter(res.Stream).Write(data);

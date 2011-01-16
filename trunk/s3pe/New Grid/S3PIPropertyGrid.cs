@@ -331,7 +331,7 @@ namespace S3PIDemoFE
 
                         if (isCollection(fieldType))
                         {
-                            if (GetGenericType(fieldType) == typeof(AResource.TGIBlock))
+                            if (GetGenericType(fieldType) == typeof(TGIBlock))
                                 return typeof(TGIBlockListCTD);
 
                             return typeof(ICollectionAApiVersionedFieldsCTD);
@@ -1157,7 +1157,7 @@ namespace S3PIDemoFE
                 IDictionaryCTD ctd = value as IDictionaryCTD;
                 IDictionary id = (IDictionary)ctd.Value;
 
-                if (typeof(string).Equals(destinationType)) return id == null ? "(null)" : "(Dictionary: " + id.Count + ")";
+                if (typeof(string).Equals(destinationType)) return id == null ? "(null)" : "(Dictionary: 0x" + id.Count.ToString("X") + ")";
                 return base.ConvertTo(context, culture, value, destinationType);
             }
         }
@@ -1215,7 +1215,7 @@ namespace S3PIDemoFE
                 }
 
                 TGIBlockListCTD ctd = value as TGIBlockListCTD;
-                AResource.DependentList<AResource.TGIBlock> list = ctd.owner[ctd.field].Value as AResource.DependentList<AResource.TGIBlock>;
+                DependentList<TGIBlock> list = ctd.owner[ctd.field].Value as DependentList<TGIBlock>;
 
                 ui.Items = list;
                 DialogResult dr = edSvc.ShowDialog(ui);
@@ -1239,7 +1239,7 @@ namespace S3PIDemoFE
             public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
             {
                 TGIBlockListCTD ctd = value as TGIBlockListCTD;
-                AResource.DependentList<AResource.TGIBlock> list = ctd.owner[ctd.field].Value as AResource.DependentList<AResource.TGIBlock>;
+                DependentList<TGIBlock> list = ctd.owner[ctd.field].Value as DependentList<TGIBlock>;
 
                 if (typeof(string).Equals(destinationType)) return list == null ? "(null)" : "(TGI Blocks: 0x" + list.Count.ToString("X") + ")";
                 return base.ConvertTo(context, culture, value, destinationType);
@@ -1481,8 +1481,8 @@ namespace S3PIDemoFE
             {
                 switch (contentFields.IndexOf(index))
                 {
-                    case 0: return new TypedValue(entry.Key.GetType(), entry.Key);
-                    case 1: return new TypedValue(entry.Value.GetType(), entry.Value);
+                    case 0: return new TypedValue(entry.Key.GetType(), entry.Key, "X");
+                    case 1: return new TypedValue(entry.Value.GetType(), entry.Value, "X");
                     default: throw new IndexOutOfRangeException();
                 }
             }
@@ -1516,7 +1516,7 @@ namespace S3PIDemoFE
         #endregion
     }
 
-    public class AsKVPList : AResource.DependentList<AsKVP>
+    public class AsKVPList : DependentList<AsKVP>
     {
         Type keyType;
         Type valueType;

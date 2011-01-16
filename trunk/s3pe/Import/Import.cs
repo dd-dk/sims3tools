@@ -70,10 +70,11 @@ namespace S3PIDemoFE
                 if (dr != DialogResult.OK) return;
 
                 ImportBatch ib = new ImportBatch(importPackagesDialog.FileNames, ImportBatch.Mode.package);
+                ib.UseNames = true;
                 dr = ib.ShowDialog();
                 if (dr != DialogResult.OK) return;
 
-                importPackagesCommon(ib.Batch, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, importPackagesDialog.Title);
+                importPackagesCommon(ib.Batch, ib.UseNames, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, importPackagesDialog.Title);
             }
             finally { this.Enabled = true; }
         }
@@ -123,30 +124,14 @@ namespace S3PIDemoFE
                 DialogResult dr = importPackagesDialog.ShowDialog();
                 if (dr != DialogResult.OK) return;
 
-                importPackagesCommon(importPackagesDialog.FileNames, true, DuplicateHandling.allow, allowList, importPackagesDialog.Title);
+                importPackagesCommon(importPackagesDialog.FileNames, true, true, DuplicateHandling.allow, allowList, importPackagesDialog.Title);
 
                 browserWidget1.Visible = false;
                 lbProgress.Text = "Doing DBC clean up...";
 
                 Application.DoEvents();
                 DateTime now = DateTime.UtcNow;
-                IList<IResourceIndexEntry> lrie = CurrentPackage.FindAll(x => nmapList.Contains(x.ResourceType));
-                if (lrie.Count > 1)
-                {
-                    IResourceIndexEntry newRie = NewResource(lrie[0], null, DuplicateHandling.allow, true);
-                    IDictionary<ulong, string> newNmap = (IDictionary<ulong, string>)s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, newRie);
-                    foreach (IResourceIndexEntry rie in lrie)
-                    {
-                        IDictionary<ulong, string> oldNmap = (IDictionary<ulong, string>)s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie);
-                        foreach (var kvp in oldNmap) if (!newNmap.ContainsKey(kvp.Key)) newNmap.Add(kvp);
-                        rie.IsDeleted = true;
-                        if (now.AddMilliseconds(100) < DateTime.UtcNow) { Application.DoEvents(); now = DateTime.UtcNow; }
-                    }
-                    CurrentPackage.ReplaceResource(newRie, (IResource)newNmap);
-                    browserWidget1.Add(newRie);
-                }
-
-                lrie = dupsOnly(CurrentPackage.FindAll(x => stblList.Contains(x.ResourceType)));
+                IList<IResourceIndexEntry> lrie = dupsOnly(CurrentPackage.FindAll(x => stblList.Contains(x.ResourceType)));
                 foreach (IResourceIndexEntry dup in lrie)
                 {
                     IList<IResourceIndexEntry> ldups = CurrentPackage.FindAll(rie => ((IResourceKey)dup).Equals(rie));
@@ -189,10 +174,11 @@ namespace S3PIDemoFE
             return res;
         }
 
-        private void importPackagesCommon(string[] packageList, bool compress, DuplicateHandling dups, List<uint> dupsList, string title)
+
+        private void importPackagesCommon(string[] packageList, bool useNames, bool compress, DuplicateHandling dups, List<uint> dupsList, string title)
         {
-            bool useNames = controlPanel1.UseNames;
-            int autoState = controlPanel1.AutoOff ? 0 : controlPanel1.AutoHex ? 1 : 2;
+            bool CPuseNames = controlPanel1.UseNames;
+            int CPautoState = controlPanel1.AutoOff ? 0 : controlPanel1.AutoHex ? 1 : 2;
             DateTime now = DateTime.UtcNow;
 
             bool autoSave = false;
@@ -241,15 +227,23 @@ namespace S3PIDemoFE
                         progressBar1.Maximum = lrie.Count;
                         foreach (IResourceIndexEntry rie in lrie)
                         {
-                            DuplicateHandling dupThis = dupsList == null || dupsList.Contains(rie.ResourceType) ? dups
-                                : dups == DuplicateHandling.allow ? DuplicateHandling.replace : DuplicateHandling.reject;
-                            myDataFormat impres;
-                            impres.tgin = rie as AResourceIndexEntry;
-                            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, imppkg, rie, true);
-                            impres.data = res.AsBytes;
-                            importStream(impres, false, false, compress, dupThis);
-                            progressBar1.Value++;
-                            if (now.AddMilliseconds(100) < DateTime.UtcNow) { Application.DoEvents(); now = DateTime.UtcNow; }
+                            if (rie.ResourceType == 0x0166038C)//NMAP
+                            {
+                                if (useNames) foreach (var kvp in s3pi.WrapperDealer.WrapperDealer.GetResource(0, imppkg, rie) as IDictionary<ulong, string>)
+                                        browserWidget1.ResourceName(kvp.Key, kvp.Value, true, false);
+                            }
+                            else
+                            {
+                                DuplicateHandling dupThis = dupsList == null || dupsList.Contains(rie.ResourceType) ? dups
+                                    : dups == DuplicateHandling.allow ? DuplicateHandling.replace : DuplicateHandling.reject;
+                                myDataFormat impres;
+                                impres.tgin = rie as AResourceIndexEntry;
+                                IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, imppkg, rie, true);
+                                impres.data = res.AsBytes;
+                                importStream(impres, false, false, compress, dupThis);
+                                progressBar1.Value++;
+                                if (now.AddMilliseconds(100) < DateTime.UtcNow) { Application.DoEvents(); now = DateTime.UtcNow; }
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -264,8 +258,8 @@ namespace S3PIDemoFE
             finally
             {
                 lbProgress.Text = "";
-                controlPanel1.UseNames = useNames;
-                switch (autoState)
+                controlPanel1.UseNames = CPuseNames;
+                switch (CPautoState)
                 {
                     case 0: controlPanel1.AutoOff = true; break;
                     case 1: controlPanel1.AutoHex = true; break;
@@ -354,7 +348,7 @@ namespace S3PIDemoFE
                 try
                 {
                     this.Enabled = false;
-                    importPackagesCommon(new string[] { ir.Filename, }, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, title);
+                    importPackagesCommon(new string[] { ir.Filename, }, ir.UseName, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, title);
                 }
                 finally { this.Enabled = true; }
             }
@@ -413,7 +407,7 @@ namespace S3PIDemoFE
                 this.Enabled = false;
 
                 if (pkgList.Count > 0)
-                    importPackagesCommon(pkgList.ToArray(), ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, title);
+                    importPackagesCommon(pkgList.ToArray(), ib.UseNames, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, title);
 
                 bool nmOK = true;
                 foreach (string filename in resList)
@@ -464,7 +458,7 @@ namespace S3PIDemoFE
 
         bool importFile(string filename, TGIN tgin, bool useName, bool rename, bool compress, DuplicateHandling dups)
         {
-            IResourceKey rk = (AResource.TGIBlock)tgin;
+            IResourceKey rk = (TGIBlock)tgin;
             string resName = tgin.ResName;
             bool nmOK = true;
             MemoryStream ms = new MemoryStream();
@@ -487,7 +481,7 @@ namespace S3PIDemoFE
             if (useName && data.tgin.ResName != null && data.tgin.ResName.Length > 0)
                 browserWidget1.ResourceName(data.tgin.ResInstance, data.tgin.ResName, true, rename);
 
-            IResourceIndexEntry rie = NewResource((AResource.TGIBlock)data.tgin, new MemoryStream(data.data), dups, compress);
+            IResourceIndexEntry rie = NewResource((TGIBlock)data.tgin, new MemoryStream(data.data), dups, compress);
             if (rie != null) browserWidget1.Add(rie);
         }
     }

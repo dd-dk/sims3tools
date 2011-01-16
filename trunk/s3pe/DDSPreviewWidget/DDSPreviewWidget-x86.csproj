@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{92EB2F4A-193C-4122-9BBD-5B728A12D25A}</ProjectGuid>
@@ -61,7 +61,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="SlimDX, Version=2.0.10.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\SlimDX SDK (June 2010)\Bin\net20\x64\SlimDX.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\SlimDX SDK (June 2010)\Bin\net20\x86\SlimDX.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SlimDX.Wpf">

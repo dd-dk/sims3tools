@@ -7,7 +7,7 @@ set src=%TargetName%-Source
 set viewDDS=s3pe Helpers\ViewDDS\bin\ViewDDS
 
 set out=S:\Sims3\Tools\s3pe\
-set helpFolder=%out%\HelpFiles
+set helpFolder=%out%HelpFiles
 
 set mydate=%date: =0%
 set dd=%mydate:~0,2%
@@ -47,14 +47,13 @@ pushd ..
 7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" s3pe
 popd
 
-
 xcopy "..\%viewDDS%\*" "bin\%ConfigurationName%" /s /i /y
 pushd bin\%ConfigurationName%
 echo %suffix% >%TargetName%-Version.txt
 attrib +r %TargetName%-Version.txt
 del /f /q HelpFiles
 xcopy "%helpFolder%\*" HelpFiles /s /i /y
-7za a -r -t7z -mx9 -ms -xr!.?* -xr!*vshost* -xr!*.Config %pdb% "%out%%base%_%suffix%.7z" *
+7za a -r -t7z -mx9 -ms -xr!x64 -xr!.?* -xr!*vshost* -xr!*.Config %pdb% "%out%%base%_%suffix%.7z" *
 del /f %TargetName%-Version.txt
 del /f /q HelpFiles
 popd
@@ -75,6 +74,58 @@ echo SetOutPath $INSTDIR\Helpers
 for %%f in (*) do echo File /a Helpers\%%f
 echo SetOutPath $INSTDIR
 popd
+dir /-c "..\%base%-%suffix%" | find " bytes" | for /f "tokens=3" %%f in ('find /v " free"') do @echo StrCpy $0 %%f
+) > ..\INSTFILES.txt
+
+(
+for %%f in (*) do echo Delete $INSTDIR\%%f
+pushd HelpFiles
+for %%f in (*) do echo Delete $INSTDIR\HelpFiles\%%f
+echo RmDir HelpFiles
+popd
+pushd Helpers
+for %%f in (*) do echo Delete $INSTDIR\Helpers\%%f
+echo RmDir Helpers
+popd
+) > UNINST.LOG
+attrib +r +h UNINST.LOG
+popd
+
+"%MAKENSIS%" "/DINSTFILES=INSTFILES.txt" "/DUNINSTFILES=UNINST.LOG" "/DVSN=%suffix%" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%.exe"
+
+rmdir /s/q %base%-%suffix%
+del INSTFILES.txt
+
+rem --- x64 packaging ---
+if not exist bin\%ConfigurationName%\x64 goto nox64
+xcopy "..\%viewDDS%\*" "bin\%ConfigurationName%\x64" /s /i /y
+pushd bin\%ConfigurationName%\x64
+echo %suffix% >%TargetName%-Version.txt
+attrib +r %TargetName%-Version.txt
+del /f /q HelpFiles
+xcopy "%helpFolder%\*" HelpFiles /s /i /y
+7za a -r -t7z -mx9 -ms -xr!x64 -xr!.?* -xr!*vshost* -xr!*.Config %pdb% "%out%%base%_%suffix%-x64.7z" *
+del /f %TargetName%-Version.txt
+del /f /q HelpFiles
+popd
+for %%I in (..\%viewDDS%\*) do del "bin\%ConfigurationName%\x64\%%~nxI"
+
+7za x -o"%base%-%suffix%-x64" "%out%%base%_%suffix%-x64.7z"
+pushd "%base%-%suffix%-x64"
+(
+echo !cd %base%-%suffix%-x64
+for %%f in (*) do echo File /a %%f
+pushd HelpFiles
+echo SetOutPath $INSTDIR\HelpFiles
+for %%f in (*) do echo File /a HelpFiles\%%f
+echo SetOutPath $INSTDIR
+popd
+pushd Helpers
+echo SetOutPath $INSTDIR\Helpers
+for %%f in (*) do echo File /a Helpers\%%f
+echo SetOutPath $INSTDIR
+popd
+dir /-c "..\%base%-%suffix%-x64" | find " bytes" | for /f "tokens=3" %%f in ('find /v " free"') do @echo StrCpy $0 %%f
 ) > ..\INSTFILES.txt
 
 (
@@ -87,10 +138,13 @@ popd
 attrib +r +h UNINST.LOG
 popd
 
-"%MAKENSIS%" "/DINSTFILES=INSTFILES.txt" "/DUNINSTFILES=UNINST.LOG" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%.exe"
+"%MAKENSIS%" "/DINSTFILES=INSTFILES.txt" "/DUNINSTFILES=UNINST.LOG" "/DVSN=%suffix%" "/DX64" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%-x64.exe"
 
-:done:
-rmdir /s/q %base%-%suffix%
+rmdir /s/q %base%-%suffix%-x64
 del INSTFILES.txt
+
+
+:nox64:
+
 :noNSIS:
 pause

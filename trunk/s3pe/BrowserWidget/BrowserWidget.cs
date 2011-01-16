@@ -106,7 +106,7 @@ namespace S3PIDemoFE
             if (nameMap == null) CreateNameMap();
             if (nameMap == null || nameMap.Count == 0 && create)
             {
-                IResourceIndexEntry rie = pkg.AddResource(new AResource.TGIBlock(0, null, 0x0166038C, 0, 0), null, false);
+                IResourceIndexEntry rie = pkg.AddResource(new TGIBlock(0, null, 0x0166038C, 0, 0), null, false);
                 if (rie != null) Add(rie);
                 CreateNameMap();
                 if (nameMap == null)
@@ -650,7 +650,7 @@ namespace S3PIDemoFE
             listView1.Columns[0].Width = 80;
         }
 
-        string ResourceTag(IResourceIndexEntry rie)
+        public string ResourceTag(IResourceIndexEntry rie)
         {
             string key = rie["ResourceType"];
             if (s3pi.Extensions.ExtList.Ext.ContainsKey(key)) return s3pi.Extensions.ExtList.Ext[key][0];
@@ -779,7 +779,7 @@ namespace S3PIDemoFE
                 {
                     if (++i % 100 == 0) { pb.Value += 100; Application.DoEvents(); }
                     foreach (var kvp in filter)
-                        if (!kvp.Value.IsMatch(kvp.Key.Equals("Name") ? ResourceName(value) : value[kvp.Key].ToString("X"))) return false;
+                        if (!kvp.Value.IsMatch(kvp.Key.Equals("Name") ? ResourceName(value) : kvp.Key.Equals("Tag") ? ResourceTag(value) : value[kvp.Key].ToString("X"))) return false;
                     return true;
                 });
             }

@@ -47,7 +47,7 @@ namespace S3PIDemoFE
         {
             this.mode = mode;
             this.AllowDrop = this.mode == Mode.file;
-            importSettings1[S3PIDemoFE.Import.ImportSettings.ImportSettingsControl.UseName] = this.mode != Mode.package;
+            //importSettings1[S3PIDemoFE.Import.ImportSettings.ImportSettingsControl.UseName] = this.mode != Mode.package;
         }
 
         public ImportBatch(string[] batch, Mode mode) : this(mode) { addDrop(batch); }
@@ -65,7 +65,7 @@ namespace S3PIDemoFE
 
         public bool Compress { get { return importSettings1.Compress; } }
 
-        public bool UseNames { get { return importSettings1.UseName; } }
+        public bool UseNames { get { return importSettings1.UseName; } set { importSettings1.UseName = value; } }
 
         public bool Rename { get { return importSettings1.AllowRename; } }
 
