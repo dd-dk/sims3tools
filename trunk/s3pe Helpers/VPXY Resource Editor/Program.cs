@@ -36,7 +36,7 @@ namespace s3pe_VPXY_Resource_Editor
 #if DEBUG
             if (args.Length == 0)
             {
-                AResource.TGIBlock tgib = new AResource.TGIBlock(0, null, "ITG", 0x736884F1, 0, 0);
+                TGIBlock tgib = new TGIBlock(0, null, "ITG", 0x736884F1, 0, 0);
                 ARCOLBlock rcol = GenericRCOLResourceHandler.CreateRCOLBlock(0, null, 0x736884F1);
                 GenericRCOLResource.ChunkEntry ce = new GenericRCOLResource.ChunkEntry(0, null, tgib, rcol);
                 GenericRCOLResource grr = new GenericRCOLResource(0, null);
