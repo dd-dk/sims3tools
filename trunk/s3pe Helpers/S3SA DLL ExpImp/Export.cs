@@ -62,7 +62,7 @@ namespace S3SA_DLL_ExpImp
             byte[] data = new byte[s3sa.Assembly.BaseStream.Length];
             s3sa.Assembly.BaseStream.Read(data, 0, data.Length);
 
-            FileStream fs = new FileStream(sfdExport.FileName, FileMode.OpenOrCreate, FileAccess.Write);
+            FileStream fs = new FileStream(sfdExport.FileName, FileMode.Create, FileAccess.Write);
             fs.Write(data, 0, data.Length);
             fs.Close();
 
