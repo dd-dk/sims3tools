@@ -1,0 +1,6 @@
+ResourceType: 0x01661233
+Label: From s3asc
+Command: S3AscExpImp
+Arguments: /import "{}"
+Desc: Import the MODL from s3asc format
+

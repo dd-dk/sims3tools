@@ -1,0 +1,6 @@
+ResourceType: 0x01661233
+Label: To s3asc
+Command: S3AscExpImp
+Arguments: /export "{}"
+ReadOnly: yes
+Desc: Export the MODL to s3asc format
