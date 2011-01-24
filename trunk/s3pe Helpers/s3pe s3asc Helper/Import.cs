@@ -112,7 +112,7 @@ namespace s3ascHelper
                                     if (vrtfRK == null) vrtfRK = GenericRCOLResource.ChunkReference.GetKey(modlResource, mlod.Meshes[m].ScaleOffsetIndex);
                                     if (vrtfRK == null) vrtfRK = new TGIBlock(0, null, 0, 0,
                                         System.Security.Cryptography.FNV64.GetHash(DateTime.UtcNow.ToString() + fnMesh));
-                                    vrtfRK.ResourceType = 0x01D0E723;
+                                    vrtfRK = new TGIBlock(0, null, vrtfRK) { ResourceType = vrtf.ResourceType, };
                                 }
                                 ReplaceChunk(mlod.Meshes[m], "VertexFormatIndex", vrtfRK, vrtf);
                                 if (vrtf == null)//need a default VRTF
@@ -122,8 +122,7 @@ namespace s3ascHelper
                                 IResourceKey skinRK = GenericRCOLResource.ChunkReference.GetKey(modlResource, mlod.Meshes[m].SkinControllerIndex);
                                 if (skinRK == null && skin != null)//no RK but imported a SKIN, so generate key
                                 {
-                                    skinRK = new TGIBlock(0, null, vrtfRK);
-                                    skinRK.ResourceType = 0x01D0E76B;
+                                    skinRK = new TGIBlock(0, null, vrtfRK) { ResourceType = skin.ResourceType, };
                                 }
                                 ReplaceChunk(mlod.Meshes[m], "SkinControllerIndex", skinRK, skin);
 
@@ -137,18 +136,22 @@ namespace s3ascHelper
                                 IResourceKey vbufRK = GenericRCOLResource.ChunkReference.GetKey(modlResource, mlod.Meshes[m].VertexBufferIndex);
                                 if (vbufRK == null && vbuf != null)//no RK but imported a VBUF, so generate key
                                 {
-                                    vbufRK = GenericRCOLResource.ChunkReference.GetKey(modlResource, lodEntry.ModelLodIndex);
-                                    vbufRK.ResourceType = 0x01D0E6FB;
+                                    vbufRK = new TGIBlock(0, null, GenericRCOLResource.ChunkReference.GetKey(modlResource, lodEntry.ModelLodIndex))
+                                    {
+                                        ResourceType = vbuf.ResourceType,
+                                    };
                                 }
                                 Update_SwizzleInfo(swizRef, vrtf, vbuf, m);
                                 ReplaceChunk(mlod.Meshes[m], "VertexBufferIndex", vbufRK, vbuf);
 
                                 IBUF ibuf = Import_IBUF(r, mlod.Meshes[m]);
                                 IResourceKey ibufRK = GenericRCOLResource.ChunkReference.GetKey(modlResource, mlod.Meshes[m].IndexBufferIndex);
-                                if (ibufRK != null && ibuf != null)//no RK but imported a IBUF, so generate key
+                                if (ibufRK == null && ibuf != null)//no RK but imported a IBUF, so generate key
                                 {
-                                    ibufRK = GenericRCOLResource.ChunkReference.GetKey(modlResource, lodEntry.ModelLodIndex);
-                                    ibufRK.ResourceType = 0x01D0E70F;
+                                    ibufRK = new TGIBlock(0, null, GenericRCOLResource.ChunkReference.GetKey(modlResource, lodEntry.ModelLodIndex))
+                                    {
+                                        ResourceType = ibuf.ResourceType,
+                                    };
                                 }
                                 ReplaceChunk(mlod.Meshes[m], "IndexBufferIndex", ibufRK, ibuf);
 
