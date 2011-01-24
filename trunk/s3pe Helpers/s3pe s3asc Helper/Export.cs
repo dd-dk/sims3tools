@@ -97,19 +97,9 @@ namespace s3ascHelper
                                 Export_SKIN(w, GenericRCOLResource.ChunkReference.GetBlock(modlResource, mlod.Meshes[m].SkinControllerIndex) as SKIN, mlod.Meshes[m]);
                                 Export_VBUF(w, GenericRCOLResource.ChunkReference.GetBlock(modlResource, mlod.Meshes[m].VertexBufferIndex) as VBUF, vrtf, mlod.Meshes[m]);
                                 Export_IBUF(w, GenericRCOLResource.ChunkReference.GetBlock(modlResource, mlod.Meshes[m].IndexBufferIndex) as IBUF, mlod.Meshes[m]);
-                                
-                                // Export Geostates here
-                                if (mlod.Meshes[m].GeometryStates.Count > 0)
-                                {
-                                    w.WriteLine(";");
-                                    w.WriteLine("; Extended format: GeoStates");
-                                    w.WriteLine(";");
 
-                                    w.WriteLine(string.Format("geos {0}", mlod.Meshes[m].GeometryStates.Count));
-                                    for (int g = 0; g < mlod.Meshes[m].GeometryStates.Count; g++)
-                                    {
-                                    }
-                                }
+                                //For backward compatibility, these come after the IBUFs
+                                Export_MeshGeoStates(w, mlod.Meshes[m]);
 
                                 fsMesh.Close();
                             }
@@ -255,6 +245,25 @@ namespace s3ascHelper
             {
                 w.WriteLine(string.Format("{0} {1} {2} {3}", i, indices[i * 3 + 0], indices[i * 3 + 1], indices[i * 3 + 2]));
                 if (wait < DateTime.UtcNow) { this.pb.Value = i; wait = DateTime.UtcNow.AddSeconds(0.1); Application.DoEvents(); }
+            }
+
+            w.Flush();
+        }
+
+        void Export_MeshGeoStates(StreamWriter w, MLOD.Mesh mesh)
+        {
+            if (mesh.GeometryStates.Count <= 0) return;
+
+            w.WriteLine(";");
+            w.WriteLine("; Extended format: GeoStates");
+            w.WriteLine(";");
+
+            w.WriteLine(string.Format("geos {0}", mesh.GeometryStates.Count));
+
+            for (int g = 0; g < mesh.GeometryStates.Count; g++)
+            {
+                MLOD.GeometryState s = mesh.GeometryStates[g];
+                w.WriteLine(string.Format("{0} {1:X8} {2} {3} {4} {5}", g, s.Name, s.StartIndex, s.MinVertexIndex, s.VertexCount, s.PrimitiveCount));
             }
 
             w.Flush();

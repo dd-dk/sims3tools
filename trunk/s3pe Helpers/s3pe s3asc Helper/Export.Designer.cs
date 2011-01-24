@@ -38,7 +38,7 @@
             this.sfdExport.DefaultExt = "dll";
             this.sfdExport.FileName = "*.dll";
             this.sfdExport.Filter = "S3Asc base files|*_filebase.s3asc|All files|*.*";
-            this.sfdExport.Title = "Export .Net Assembly";
+            this.sfdExport.Title = "Export to s3asc";
             // 
             // label1
             // 
