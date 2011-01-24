@@ -38,7 +38,7 @@
             this.ofdImport.DefaultExt = "dll";
             this.ofdImport.FileName = "*.dll";
             this.ofdImport.Filter = "S3Asc base files|*.s3asc|All files|*.*";
-            this.ofdImport.Title = "Import .Net Assembly";
+            this.ofdImport.Title = "Import from s3asc";
             // 
             // pb
             // 
