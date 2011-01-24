@@ -125,7 +125,7 @@ namespace s3ascHelper
             w.WriteLine(string.Format("vrtf {0} {1}", vrtf.Layouts.Count, vrtf.Stride));
 
             DateTime wait = DateTime.UtcNow;
-            this.label1.Text = "Import VRTF...";
+            this.label1.Text = "Export VRTF...";
             this.pb.Value = 0;
             this.pb.Maximum = vrtf.Layouts.Count;
             for (int i = 0; i < vrtf.Layouts.Count; i++)
@@ -146,7 +146,7 @@ namespace s3ascHelper
             w.WriteLine(string.Format("skin {0}", skin.Bones.Count));
 
             DateTime wait = DateTime.UtcNow;
-            this.label1.Text = "Import VRTF...";
+            this.label1.Text = "Export SKIN...";
             this.pb.Value = 0;
             this.pb.Maximum = skin.Bones.Count;
             for (int i = 0; i < skin.Bones.Count; i++)
@@ -178,7 +178,7 @@ namespace s3ascHelper
             w.WriteLine(string.Format("vbuf {0}", av.Length));
 
             DateTime wait = DateTime.UtcNow;
-            this.label1.Text = "Import VRTF...";
+            this.label1.Text = "Export VBUF...";
             this.pb.Value = 0;
             this.pb.Maximum = av.Length;
             for (int i = 0; i < av.Length; i++)
@@ -232,18 +232,20 @@ namespace s3ascHelper
         {
             if (ibuf == null) { w.WriteLine("; ibuf is null"); w.WriteLine("ibuf 0"); return; }
 
-            Int32[] indices = ibuf.GetIndices(mesh);
-
-            int faces = indices.Length / 3;
+            int sizePerPrimitive = MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType);
+            int faces = ibuf.Buffer.Length / sizePerPrimitive;
             w.WriteLine(string.Format("ibuf {0}", faces));
 
             DateTime wait = DateTime.UtcNow;
-            this.label1.Text = "Import VRTF...";
+            this.label1.Text = "Export IBUF...";
             this.pb.Value = 0;
             this.pb.Maximum = faces;
             for (int i = 0; i < faces; i++)
             {
-                w.WriteLine(string.Format("{0} {1} {2} {3}", i, indices[i * 3 + 0], indices[i * 3 + 1], indices[i * 3 + 2]));
+                w.Write(string.Format("{0}", i));
+                for (int j = 0; j < sizePerPrimitive; j++)
+                    w.Write(string.Format(" {0}", ibuf.Buffer[i * 3 + j]));
+                w.WriteLine();
                 if (wait < DateTime.UtcNow) { this.pb.Value = i; wait = DateTime.UtcNow.AddSeconds(0.1); Application.DoEvents(); }
             }
 
