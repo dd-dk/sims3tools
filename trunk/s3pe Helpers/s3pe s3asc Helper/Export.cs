@@ -39,11 +39,11 @@ namespace s3ascHelper
             sfdExport.Filter = Program.Filter;
         }
 
-        GenericRCOLResource modlResource;
+        GenericRCOLResource rcolResource;
         public Export(Stream s)
             : this()
         {
-            modlResource = new GenericRCOLResource(0, s);
+            rcolResource = new GenericRCOLResource(0, s);
             Application.DoEvents();
         }
 
@@ -65,47 +65,23 @@ namespace s3ascHelper
 
                 FileStream fs = new FileStream(Path.Combine(folder, string.Format("{0}_filebase.s3asc", filebase)), FileMode.Create, FileAccess.Write);
 
-                foreach (var chunk in modlResource.ChunkEntries.FindAll(x => x.RCOLBlock.ResourceType == 0x01661233))
+                if (rcolResource.ChunkEntries[0].TGIBlock.ResourceType == 0x01661233)
                 {
-                    var modl = chunk.RCOLBlock as MODL;
+                    var modl = rcolResource.ChunkEntries[0].RCOLBlock as MODL;
                     foreach (var lodEntry in modl.Entries)
                     {
                         if (lodEntry.ModelLodIndex.RefType != GenericRCOLResource.ReferenceType.Public
                             && lodEntry.ModelLodIndex.RefType != GenericRCOLResource.ReferenceType.Private) continue;
 
-                        var mlod = GenericRCOLResource.ChunkReference.GetBlock(modlResource, lodEntry.ModelLodIndex) as MLOD;
+                        var mlod = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, lodEntry.ModelLodIndex) as MLOD;
 
-
-                        for (int m = 0; m < mlod.Meshes.Count; m++)
-                        {
-                            string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.s3ascg", filebase, m));
-                            using (FileStream fsMesh = new FileStream(fnMesh, FileMode.Create, FileAccess.Write))
-                            {
-                                StreamWriter w = new StreamWriter(fsMesh);
-
-                                if (mlod.Meshes[m].GeometryStates.Count > 0)
-                                {
-                                    w.WriteLine(";");
-                                    w.WriteLine("; Extended format: GeoStates follow IBUF");
-                                    w.WriteLine(";");
-                                }
-
-                                VRTF vrtf = GenericRCOLResource.ChunkReference.GetBlock(modlResource, mlod.Meshes[m].VertexFormatIndex) as VRTF;
-                                if (vrtf != null) Export_VRTF(w, vrtf);
-                                else vrtf = VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
-
-                                Export_SKIN(w, GenericRCOLResource.ChunkReference.GetBlock(modlResource, mlod.Meshes[m].SkinControllerIndex) as SKIN, mlod.Meshes[m]);
-                                Export_VBUF(w, GenericRCOLResource.ChunkReference.GetBlock(modlResource, mlod.Meshes[m].VertexBufferIndex) as VBUF, vrtf, mlod.Meshes[m]);
-                                Export_IBUF(w, GenericRCOLResource.ChunkReference.GetBlock(modlResource, mlod.Meshes[m].IndexBufferIndex) as IBUF, mlod.Meshes[m]);
-
-                                //For backward compatibility, these come after the IBUFs
-                                Export_MeshGeoStates(w, mlod.Meshes[m]);
-
-                                fsMesh.Close();
-                            }
-                            Application.DoEvents();
-                        }
+                        Export_MLOD(mlod, folder, filebase);
                     }
+                }
+                else if (rcolResource.ChunkEntries[0].TGIBlock.ResourceType == 0x01D10F34)
+                {
+                    var mlod = rcolResource.ChunkEntries[0].RCOLBlock as MLOD;
+                    Export_MLOD(mlod, folder, filebase);
                 }
 
                 fs.Close();
@@ -116,6 +92,39 @@ namespace s3ascHelper
             }
             catch (Exception ex) { CopyableMessageBox.IssueException(ex); }
             finally { this.Close(); }
+        }
+
+        void Export_MLOD(MLOD mlod, string folder, string filebase)
+        {
+            for (int m = 0; m < mlod.Meshes.Count; m++)
+            {
+                string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.s3ascg", filebase, m));
+                using (FileStream fsMesh = new FileStream(fnMesh, FileMode.Create, FileAccess.Write))
+                {
+                    StreamWriter w = new StreamWriter(fsMesh);
+
+                    if (mlod.Meshes[m].GeometryStates.Count > 0)
+                    {
+                        w.WriteLine(";");
+                        w.WriteLine("; Extended format: GeoStates follow IBUF");
+                        w.WriteLine(";");
+                    }
+
+                    VRTF vrtf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexFormatIndex) as VRTF;
+                    if (vrtf != null) Export_VRTF(w, vrtf);
+                    else vrtf = VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
+
+                    Export_SKIN(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].SkinControllerIndex) as SKIN, mlod.Meshes[m]);
+                    Export_VBUF(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexBufferIndex) as VBUF, vrtf, mlod.Meshes[m]);
+                    Export_IBUF(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].IndexBufferIndex) as IBUF, mlod.Meshes[m]);
+
+                    //For backward compatibility, these come after the IBUFs
+                    Export_MeshGeoStates(w, mlod.Meshes[m]);
+
+                    fsMesh.Close();
+                }
+                Application.DoEvents();
+            }
         }
 
         void Export_VRTF(StreamWriter w, VRTF vrtf)

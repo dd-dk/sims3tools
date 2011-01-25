@@ -38,11 +38,11 @@ namespace s3ascHelper
             ofdImport.Filter = Program.Filter;
         }
 
-        GenericRCOLResource modlResource;
+        GenericRCOLResource rcolResource;
         public Import(Stream s)
             : this()
         {
-            modlResource = new GenericRCOLResource(0, s);
+            rcolResource = new GenericRCOLResource(0, s);
             Application.DoEvents();
         }
 
@@ -74,93 +74,25 @@ namespace s3ascHelper
 
                 try
                 {
-                    var lmodl = modlResource.ChunkEntries.FindAll(x => x.RCOLBlock.ResourceType == 0x01661233);
-                    if (lmodl.Count != 1)
-                    {
-                        CopyableMessageBox.Show(string.Format("Found {0} MODLs and don't kwait what to do!", lmodl.Count),
-                            "Help!", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
-                        Environment.ExitCode = 1;
-                        return;
-                    }
-
                     // to avoid destroying the internal references it's important to preserve the order of the chunks,
                     // otherwise, all the references need identifying and updating
 
-                    var modl = lmodl[0].RCOLBlock as MODL;
-                    foreach (var lodEntry in modl.Entries)
+                    if (rcolResource.ChunkEntries[0].TGIBlock.ResourceType == 0x01661233)
                     {
-                        if (lodEntry.ModelLodIndex.RefType != GenericRCOLResource.ReferenceType.Public
-                            && lodEntry.ModelLodIndex.RefType != GenericRCOLResource.ReferenceType.Private) continue;
-
-                        var mlod = GenericRCOLResource.ChunkReference.GetBlock(modlResource, lodEntry.ModelLodIndex) as MLOD;
-
-                        int m = 0;
-                        while (true)
+                        var modl = rcolResource.ChunkEntries[0].RCOLBlock as MODL;
+                        foreach (var lodEntry in modl.Entries)
                         {
-                            string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.s3ascg", filebase, m));
-                            if (!File.Exists(fnMesh)) break;
+                            if (lodEntry.ModelLodIndex.RefType != GenericRCOLResource.ReferenceType.Public
+                                && lodEntry.ModelLodIndex.RefType != GenericRCOLResource.ReferenceType.Private) continue;
 
-                            using (FileStream fsMesh = new FileStream(fnMesh, FileMode.Open, FileAccess.Read))
-                            {
-                                StreamReader r = new StreamReader(fsMesh);
-
-                                VRTF vrtf = Import_VRTF(r);
-                                IResourceKey vrtfRK = GenericRCOLResource.ChunkReference.GetKey(modlResource, mlod.Meshes[m].VertexFormatIndex);
-                                if (vrtfRK == null && vrtf != null)
-                                {
-                                    vrtfRK = GenericRCOLResource.ChunkReference.GetKey(modlResource, mlod.Meshes[m].SkinControllerIndex);
-                                    if (vrtfRK == null) vrtfRK = GenericRCOLResource.ChunkReference.GetKey(modlResource, mlod.Meshes[m].ScaleOffsetIndex);
-                                    if (vrtfRK == null) vrtfRK = new TGIBlock(0, null, 0, 0,
-                                        System.Security.Cryptography.FNV64.GetHash(DateTime.UtcNow.ToString() + fnMesh));
-                                    vrtfRK = new TGIBlock(0, null, vrtfRK) { ResourceType = vrtf.ResourceType, };
-                                }
-                                ReplaceChunk(mlod.Meshes[m], "VertexFormatIndex", vrtfRK, vrtf);
-                                if (vrtf == null)//need a default VRTF
-                                    vrtf = VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
-
-                                SKIN skin = Import_SKIN(r, mlod.Meshes[m]);
-                                IResourceKey skinRK = GenericRCOLResource.ChunkReference.GetKey(modlResource, mlod.Meshes[m].SkinControllerIndex);
-                                if (skinRK == null && skin != null)//no RK but imported a SKIN, so generate key
-                                {
-                                    skinRK = new TGIBlock(0, null, vrtfRK) { ResourceType = skin.ResourceType, };
-                                }
-                                ReplaceChunk(mlod.Meshes[m], "SkinControllerIndex", skinRK, skin);
-
-                                //Save the existing SwizzleInfo chunk reference
-                                GenericRCOLResource.ChunkReference swizRef = new GenericRCOLResource.ChunkReference(0, null, 0);
-                                VBUF vbufTemp = GenericRCOLResource.ChunkReference.GetBlock(modlResource, mlod.Meshes[m].VertexBufferIndex) as VBUF;
-                                if (vbufTemp != null)
-                                    swizRef = new GenericRCOLResource.ChunkReference(0, null, vbufTemp.SwizzleInfo);
-
-                                VBUF vbuf = Import_VBUF(r, vrtf, mlod.Meshes[m]);
-                                IResourceKey vbufRK = GenericRCOLResource.ChunkReference.GetKey(modlResource, mlod.Meshes[m].VertexBufferIndex);
-                                if (vbufRK == null && vbuf != null)//no RK but imported a VBUF, so generate key
-                                {
-                                    vbufRK = new TGIBlock(0, null, GenericRCOLResource.ChunkReference.GetKey(modlResource, lodEntry.ModelLodIndex))
-                                    {
-                                        ResourceType = vbuf.ResourceType,
-                                    };
-                                }
-                                Update_SwizzleInfo(swizRef, vrtf, vbuf, m);
-                                ReplaceChunk(mlod.Meshes[m], "VertexBufferIndex", vbufRK, vbuf);
-
-                                IBUF ibuf = Import_IBUF(r, mlod.Meshes[m]);
-                                IResourceKey ibufRK = GenericRCOLResource.ChunkReference.GetKey(modlResource, mlod.Meshes[m].IndexBufferIndex);
-                                if (ibufRK == null && ibuf != null)//no RK but imported a IBUF, so generate key
-                                {
-                                    ibufRK = new TGIBlock(0, null, GenericRCOLResource.ChunkReference.GetKey(modlResource, lodEntry.ModelLodIndex))
-                                    {
-                                        ResourceType = ibuf.ResourceType,
-                                    };
-                                }
-                                ReplaceChunk(mlod.Meshes[m], "IndexBufferIndex", ibufRK, ibuf);
-
-                                Import_MeshGeoStates(r, mlod.Meshes[m]);
-
-                                fsMesh.Close();
-                                m++;
-                            }
+                            var mlod = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, lodEntry.ModelLodIndex) as MLOD;
+                            Import_MLOD(mlod, folder, filebase, GenericRCOLResource.ChunkReference.GetKey(rcolResource, lodEntry.ModelLodIndex));
                         }
+                    }
+                    else if (rcolResource.ChunkEntries[0].TGIBlock.ResourceType == 0x01D10F34)
+                    {
+                        var mlod = rcolResource.ChunkEntries[0].RCOLBlock as MLOD;
+                        Import_MLOD(mlod, folder, filebase, rcolResource.ChunkEntries[0].TGIBlock);
                     }
                 }
                 catch (Exception ex)
@@ -171,27 +103,92 @@ namespace s3ascHelper
 
                 Environment.ExitCode = 0;
 
-                result = (byte[])modlResource.AsBytes.Clone();
+                result = (byte[])rcolResource.AsBytes.Clone();
                 Application.DoEvents();
             }
             finally { this.Close(); }
         }
 
-        //find the chunk, replace the chunk, perhaps create or remove the reference
-        void ReplaceChunk(MLOD.Mesh mesh, string field, IResourceKey rk, ARCOLBlock rcol)
+        void Import_MLOD(MLOD mlod, string folder, string filebase, IResourceKey mlodRK)
         {
-            ARCOLBlock current = GenericRCOLResource.ChunkReference.GetBlock(modlResource, (GenericRCOLResource.ChunkReference)mesh[field].Value) as ARCOLBlock;
-            if (current != null && rcol != null) // replacing is easy
+            int m = 0;
+            while (true)
             {
-                if (current.Tag != rcol.Tag)
-                    throw new Exception(string.Format("mesh field {0} is '{1}' but replacement is '{2}'.", field, current.Tag, rcol.Tag));
-                current.Data = rcol.Data;
-                rcol = current;
+                string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.s3ascg", filebase, m));
+                if (!File.Exists(fnMesh)) break;
+
+                using (FileStream fsMesh = new FileStream(fnMesh, FileMode.Open, FileAccess.Read))
+                {
+                    StreamReader r = new StreamReader(fsMesh);
+
+                    VRTF vrtf = Import_VRTF(r);
+                    IResourceKey vrtfRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].VertexFormatIndex);
+                    if (vrtfRK == null && vrtf != null)
+                    {
+                        vrtfRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].SkinControllerIndex);
+                        if (vrtfRK == null) vrtfRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].ScaleOffsetIndex);
+                        if (vrtfRK == null) vrtfRK = new TGIBlock(0, null, 0, 0,
+                            System.Security.Cryptography.FNV64.GetHash(DateTime.UtcNow.ToString() + fnMesh));
+                        vrtfRK = new TGIBlock(0, null, vrtfRK) { ResourceType = vrtf.ResourceType, };
+                    }
+                    ReplaceChunk(mlod.Meshes[m], "VertexFormatIndex", vrtfRK, vrtf);
+                    if (vrtf == null)//need a default VRTF
+                        vrtf = VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
+
+                    SKIN skin = Import_SKIN(r, mlod.Meshes[m]);
+                    IResourceKey skinRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].SkinControllerIndex);
+                    if (skinRK == null && skin != null)//no RK but imported a SKIN, so generate key
+                    {
+                        skinRK = new TGIBlock(0, null, vrtfRK) { ResourceType = skin.ResourceType, };
+                    }
+                    ReplaceChunk(mlod.Meshes[m], "SkinControllerIndex", skinRK, skin);
+
+                    //Save the existing SwizzleInfo chunk reference
+                    GenericRCOLResource.ChunkReference swizRef = new GenericRCOLResource.ChunkReference(0, null, 0);
+                    VBUF vbufTemp = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexBufferIndex) as VBUF;
+                    if (vbufTemp != null)
+                        swizRef = new GenericRCOLResource.ChunkReference(0, null, vbufTemp.SwizzleInfo);
+
+                    VBUF vbuf = Import_VBUF(r, vrtf, mlod.Meshes[m]);
+                    IResourceKey vbufRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].VertexBufferIndex);
+                    if (vbufRK == null && vbuf != null)//no RK but imported a VBUF, so generate key
+                    {
+                        vbufRK = new TGIBlock(0, null, mlodRK) { ResourceType = vbuf.ResourceType, };
+                    }
+                    Update_SwizzleInfo(swizRef, vrtf, vbuf, m);
+                    ReplaceChunk(mlod.Meshes[m], "VertexBufferIndex", vbufRK, vbuf);
+
+                    IBUF ibuf = Import_IBUF(r, mlod.Meshes[m]);
+                    IResourceKey ibufRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].IndexBufferIndex);
+                    if (ibufRK == null && ibuf != null)//no RK but imported a IBUF, so generate key
+                    {
+                        ibufRK = new TGIBlock(0, null, mlodRK) { ResourceType = ibuf.ResourceType, };
+                    }
+                    ReplaceChunk(mlod.Meshes[m], "IndexBufferIndex", ibufRK, ibuf);
+
+                    Import_MeshGeoStates(r, mlod.Meshes[m]);
+
+                    fsMesh.Close();
+                    m++;
+                }
+            }
+        }
+
+        //find the chunk, replace the chunk, perhaps create or remove the reference
+        void ReplaceChunk(MLOD.Mesh mesh, string field, IResourceKey rk, ARCOLBlock block)
+        {
+            ARCOLBlock current = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, (GenericRCOLResource.ChunkReference)mesh[field].Value) as ARCOLBlock;
+            if (current != null && block != null) // replacing is easy
+            {
+                if (current.Tag != block.Tag)
+                    throw new Exception(string.Format("mesh field {0} is '{1}' but replacement is '{2}'.", field, current.Tag, block.Tag));
+                current.Data = block.Data;
+                block = current;
             }
             else if (current == null) // adding is okay
             {
-                modlResource.ChunkEntries.Add(rk, rcol);
-                mesh[field] = new TypedValue(typeof(GenericRCOLResource.ChunkReference), GenericRCOLResource.ChunkReference.CreateReference(modlResource, rk), "X");
+                rcolResource.ChunkEntries.Add(rk, block);
+                mesh[field] = new TypedValue(typeof(GenericRCOLResource.ChunkReference), GenericRCOLResource.ChunkReference.CreateReference(rcolResource, rk), "X");
             }
             else // deleting is not allowed - we can only null the reference, not remove the chunk
             {
@@ -209,7 +206,7 @@ namespace s3ascHelper
 
         VRTF Import_VRTF(StreamReader r)
         {
-            VRTF vrtf = new VRTF(modlResource.RequestedApiVersion, null) { Version = 2, Layouts = new VRTF.VertexElementLayoutList(null), };
+            VRTF vrtf = new VRTF(rcolResource.RequestedApiVersion, null) { Version = 2, Layouts = new VRTF.VertexElementLayoutList(null), };
 
             string tagLine = ReadLine(r);
             string[] split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
@@ -255,7 +252,7 @@ namespace s3ascHelper
 
         SKIN Import_SKIN(StreamReader r, MLOD.Mesh mesh)
         {
-            SKIN skin = new SKIN(modlResource.RequestedApiVersion, null) { Version = 0, Bones = new SKIN.BoneList(null), };
+            SKIN skin = new SKIN(rcolResource.RequestedApiVersion, null) { Version = 0, Bones = new SKIN.BoneList(null), };
             mesh.JointReferences = new UIntList(null);
 
             string tagLine = ReadLine(r);
@@ -304,7 +301,7 @@ namespace s3ascHelper
 
         VBUF Import_VBUF(StreamReader r, VRTF vrtf, MLOD.Mesh mesh)
         {
-            VBUF vbuf = new VBUF(modlResource.RequestedApiVersion, null) { Version = 0x00000101, Flags = VBUF.FormatFlags.None, SwizzleInfo = new GenericRCOLResource.ChunkReference(0, null, 0), };
+            VBUF vbuf = new VBUF(rcolResource.RequestedApiVersion, null) { Version = 0x00000101, Flags = VBUF.FormatFlags.None, SwizzleInfo = new GenericRCOLResource.ChunkReference(0, null, 0), };
 
             string tagLine = ReadLine(r);
             string[] split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
@@ -403,7 +400,7 @@ namespace s3ascHelper
 
         IBUF Import_IBUF(StreamReader r, MLOD.Mesh mesh)
         {
-            IBUF ibuf = new IBUF(modlResource.RequestedApiVersion, null) { Version = 2, Flags = IBUF.FormatFlags.DifferencedIndices, DisplayListUsage = 0, };
+            IBUF ibuf = new IBUF(rcolResource.RequestedApiVersion, null) { Version = 2, Flags = IBUF.FormatFlags.DifferencedIndices, DisplayListUsage = 0, };
 
             string tagLine = ReadLine(r);
             string[] split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);

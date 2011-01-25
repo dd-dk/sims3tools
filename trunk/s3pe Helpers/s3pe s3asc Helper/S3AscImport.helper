@@ -1,4 +1,4 @@
-ResourceType: 0x01661233
+ResourceType: 0x01661233 0x01D10F34
 Label: From s3asc
 Command: S3AscExpImp
 Arguments: /import "{}"
