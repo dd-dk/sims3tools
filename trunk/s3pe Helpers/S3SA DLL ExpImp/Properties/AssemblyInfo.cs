@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("S3SA DLL ExpImp")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("s3pe s3asc Helper")]
+[assembly: AssemblyDescription("s3pe's own s3asc Export/Import tool")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyCompany("Peter L Jones")]
 [assembly: AssemblyProduct("S3SA DLL ExpImp")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2010")]
+[assembly: AssemblyCopyright("Copyright © 2011  Peter L Jones  Released under the GPL 3.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
