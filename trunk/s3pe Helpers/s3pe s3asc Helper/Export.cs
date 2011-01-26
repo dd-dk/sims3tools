@@ -111,8 +111,8 @@ namespace s3ascHelper
                     }
 
                     VRTF vrtf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexFormatIndex) as VRTF;
-                    if (vrtf != null) Export_VRTF(w, vrtf);
-                    else vrtf = VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
+                    Export_VRTF(w, vrtf);
+                    if (vrtf == null) vrtf = VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
 
                     Export_SKIN(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].SkinControllerIndex) as SKIN, mlod.Meshes[m]);
                     Export_VBUF(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexBufferIndex) as VBUF, vrtf, mlod.Meshes[m]);
