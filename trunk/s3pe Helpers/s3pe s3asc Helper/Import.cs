@@ -210,7 +210,7 @@ namespace s3ascHelper
 
             string tagLine = ReadLine(r);
             string[] split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
-            if (split.Length!=3)
+            if (split.Length != 3)
                 throw new InvalidDataException("Invalid tag line read for 'vrtf'.");
             if (split[0] != "vrtf")
                 throw new InvalidDataException("Expected line tag 'vrtf' not found.");
@@ -252,7 +252,7 @@ namespace s3ascHelper
 
         SKIN Import_SKIN(StreamReader r, MLOD.Mesh mesh)
         {
-            SKIN skin = new SKIN(rcolResource.RequestedApiVersion, null) { Version = 0, Bones = new SKIN.BoneList(null), };
+            SKIN skin = new SKIN(rcolResource.RequestedApiVersion, null) { Version = 1, Bones = new SKIN.BoneList(null), };
             mesh.JointReferences = new UIntList(null);
 
             string tagLine = ReadLine(r);
