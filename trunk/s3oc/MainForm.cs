@@ -2567,7 +2567,7 @@ namespace ObjectCloner
                         if (rk.ResourceType == 0x220557DA)//STBL
                         {
                             if (!langMap.ContainsKey(rk.Instance & 0x00FFFFFFFFFFFFFF))
-                                langMap.Add(rk.Instance & 0x00FFFFFFFFFFFFFF, (CreateInstance() << 8) >> 8);
+                                langMap.Add(rk.Instance & 0x00FFFFFFFFFFFFFF, CreateInstance() & 0x00FFFFFFFFFFFFFF);
                             oldToNew.Add(rk.Instance, rk.Instance & 0xFF00000000000000 | langMap[rk.Instance & 0x00FFFFFFFFFFFFFF]);
                         }
                         else if (cloneFixOptions.Is32bitIIDs &&
@@ -2799,7 +2799,7 @@ namespace ObjectCloner
                             }
                         #endregion
                     }
-                    else if (item.SpecificRK.ResourceType == 0x220557DA)
+                    else if (item.SpecificRK.ResourceType == 0x220557DA)//STBL
                     {
                         if (itemName != null) dirty |= UpdateStbl(tbCatlgName.Text, nameGUID, item, newNameGUID);
                         if (itemDesc != null) dirty |= UpdateStbl(tbCatlgDesc.Text, descGUID, item, newDescGUID);
@@ -2941,30 +2941,24 @@ namespace ObjectCloner
 
         private bool UpdateStbl(string value, ulong guid, Item item, ulong newGuid)
         {
-            try
+            Item srcStbl = findStblFor(objPkgs, guid, (byte)(item.SpecificRK.Instance >> 56));
+
+            Application.DoEvents();
+            if (srcStbl != null)
             {
-                updateProgress(true, "Updating STBL...", true, 0x17, true, 0);
-                Application.DoEvents();
-                Item srcStbl = findStblFor(objPkgs, guid, x => { updateProgress(true, "Updating STBL...", false, 0, true, x); Application.DoEvents(); });
-                updateProgress(true, "Updating STBL...", true, -1, false, 0);
-                Application.DoEvents();
-                if (srcStbl != null)
+                if ((item.SpecificRK.Instance & 0x00FFFFFFFFFFFFFF) == (srcStbl.SpecificRK.Instance & 0x00FFFFFFFFFFFFFF))
                 {
-                    if ((item.SpecificRK.Instance & 0x00FFFFFFFFFFFFFF) == (srcStbl.SpecificRK.Instance & 0x00FFFFFFFFFFFFFF))
-                    {
-                        IDictionary<ulong, string> stbl = (IDictionary<ulong, string>)item.Resource;
+                    IDictionary<ulong, string> stbl = (IDictionary<ulong, string>)item.Resource;
 
-                        string text = "";
-                        if (stbl.ContainsKey(guid)) { text = stbl[guid]; stbl.Remove(guid); }
-                        if (ckbCopyToAll.Checked || item.SpecificRK.Instance >> 56 == 0x00) text = value;
-                        if (text != "") stbl.Add(newGuid, text);
+                    string text = "";
+                    if (stbl.ContainsKey(guid)) { text = stbl[guid]; stbl.Remove(guid); }
+                    if (ckbCopyToAll.Checked || item.SpecificRK.Instance >> 56 == 0x00) text = value;
+                    if (text != "") stbl.Add(newGuid, text);
 
-                        return true;
-                    }
+                    return true;
                 }
-                return false;
             }
-            finally { updateProgress(true, "", false, 0, false, 0); Application.DoEvents(); }
+            return false;
         }
 
         private void PadStbls(string value, ulong guid, ulong newGuid)
@@ -4114,7 +4108,7 @@ namespace ObjectCloner
         }
 
         List<Step> objdSteps;
-        void setupObjdStepList() { SetStepList(objdList[0], out objdSteps); }
+        void setupObjdStepList() { if (objdList.Count > 0) SetStepList(objdList[0], out objdSteps); }
 
         void Modular_Main()
         {
