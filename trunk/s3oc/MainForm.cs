@@ -450,7 +450,6 @@ namespace ObjectCloner
         Dictionary<string, IResourceKey> rkLookup = null;
 
         private ObjectCloner.TopPanelComponents.ObjectChooser objectChooser;
-        private ObjectCloner.TopPanelComponents.ResourceList resourceList;
         private ObjectCloner.TopPanelComponents.PleaseWait pleaseWait;
         private ObjectCloner.TopPanelComponents.CloneFixOptions cloneFixOptions;
         private ObjectCloner.TopPanelComponents.Search searchPane;
@@ -464,7 +463,6 @@ namespace ObjectCloner
             objectChooser = new ObjectChooser();
             objectChooser.SelectedIndexChanged += new EventHandler(objectChooser_SelectedIndexChanged);
             objectChooser.ItemActivate += new EventHandler(objectChooser_ItemActivate);
-            resourceList = new ResourceList();
             pleaseWait = new PleaseWait();
 
             MainForm_LoadFormSettings();
@@ -1188,7 +1186,6 @@ namespace ObjectCloner
                 }
 
                 stepNum = 0;
-                resourceList.Clear();
                 rkLookup = new Dictionary<string, IResourceKey>();
                 while (stepNum < stepList.Count)
                 {
@@ -1578,14 +1575,19 @@ namespace ObjectCloner
 
                 Item catlg = (item.CType == CatalogType.ModularResource) ? ItemForTGIBlock0(item) : item;
 
-                fillOverview(catlg);
-                if (tabControl1.Contains(tpDetail))
-                    fillDetails(catlg);
-                if (item.CType == CatalogType.CatalogObject)
+                if (catlg.SpecificRK != null)
                 {
-                    fillFlags(catlg);
-                    fillOther(catlg);
+                    fillOverview(catlg);
+                    if (tabControl1.Contains(tpDetail))
+                        fillDetails(catlg);
+                    if (item.CType == CatalogType.CatalogObject)
+                    {
+                        fillFlags(catlg);
+                        fillOther(catlg);
+                    }
                 }
+                else
+                    fillOverviewNoTGI0(item);
             }
             finally { this.Text = appWas; Application.UseWaitCursor = false; Application.DoEvents(); }
             TabEnable(false);
@@ -1595,6 +1597,12 @@ namespace ObjectCloner
         string itemDesc = null;
         void fillOverview(Item item)
         {
+            lbThumbTGI.Font = new Font(lbThumbTGI.Font, FontStyle.Regular);
+            tbObjName.Font = tbNameGUID.Font =
+            tbCatlgName.Font = tbObjDesc.Font = tbDescGUID.Font =
+            tbCatlgDesc.Font = tbPrice.Font = tbProductStatus.Font =
+                new Font(tbObjName.Font, FontStyle.Regular);
+
             AApiVersionedFields common = item.Resource["CommonBlock"].Value as AApiVersionedFields;
             pictureBox1.Image = getImage(THUM.THUMSize.large, item);
             lbThumbTGI.Text = (AResourceKey)getImageRK(THUM.THUMSize.large, item);
@@ -1627,6 +1635,24 @@ namespace ObjectCloner
             tbProductStatus.Text = "0x" + ((byte)common["BuildBuyProductStatusFlags"].Value).ToString("X2");
             tbPackage.Text = objPaths[objPkgs.IndexOf(item.Package)];
         }
+        const string noData = "(No data available)";
+        void fillOverviewNoTGI0(Item item)
+        {
+            tbResourceName.Text = NMap[item.RequestedRK.Instance];
+            tbPackage.Text = objPaths[objPkgs.IndexOf(item.Package)];
+
+            tpMain.Tag = noData;
+            lbThumbTGI.Text = tbObjName.Text = tbNameGUID.Text =
+            tbCatlgName.Text = tbObjDesc.Text = tbDescGUID.Text =
+            tbCatlgDesc.Text = tbPrice.Text = tbProductStatus.Text =
+                noData;
+            lbThumbTGI.Font = new Font(lbThumbTGI.Font, FontStyle.Italic);
+            tbObjName.Font = tbNameGUID.Font =
+            tbCatlgName.Font = tbObjDesc.Font = tbDescGUID.Font =
+            tbCatlgDesc.Font = tbPrice.Font = tbProductStatus.Font =
+                new Font(tbObjName.Font, FontStyle.Italic);
+        }
+
         void fillDetails(Item item) { IterateTLP(tlpObjectDetail, (l, c) => fillControl(item, l, c)); }
         void fillOther(Item item) { IterateTLP(tlpOther, (l, c) => fillControl(item, l, c)); }
         void fillFlags(Item item)
@@ -1716,14 +1742,13 @@ namespace ObjectCloner
         }
         void tabEnableOverview(bool enabled)
         {
+            enabled &= !((string)tpMain.Tag == noData);
             btnReplThumb.Enabled = enabled;
             tbCatlgName.ReadOnly = !enabled || itemName == null;
             tbCatlgDesc.ReadOnly = !enabled || itemDesc == null;
             ckbCopyToAll.Enabled = enabled;
             tbPrice.ReadOnly = !enabled;
             tbProductStatus.ReadOnly = !enabled;
-            tbCatlgName.BackColor = tbPrice.BackColor;
-            tbCatlgDesc.BackColor = tbPrice.BackColor;
         }
         void tabEnableDetails(bool enabled) { IterateTLP(tlpObjectDetail, (l, c) => { if (c.Tag != null) c.Enabled = enabled; }); }
         void tabEnableOther(bool enabled) { IterateTLP(tlpOther, (l, c) => { if (c.Tag != null) c.Enabled = enabled; }); }
@@ -1927,7 +1952,11 @@ namespace ObjectCloner
             if (item.Resource != null)
             {
                 string objdtag;
-                if (item.CType == CatalogType.ModularResource) objdtag = ItemForTGIBlock0(item).Resource["CommonBlock.Name"];
+                if (item.CType == CatalogType.ModularResource)
+                {
+                    Item objd0 = ItemForTGIBlock0(item);
+                    objdtag = objd0.SpecificRK != null ? objd0.Resource["CommonBlock.Name"] : "";
+                }
                 else objdtag = item.Resource["CommonBlock.Name"];
                 lvi.Text = (objdtag.IndexOf(':') < 0) ? objdtag : objdtag.Substring(objdtag.LastIndexOf(':') + 1);
             }
@@ -2298,51 +2327,54 @@ namespace ObjectCloner
                     updateProgress(true, "Finding string tables...", true, 0, true, 0);
 
                     Item catlgItem = selectedItem;
-                    if (catlgItem.CType == CatalogType.ModularResource || catlgItem.CType == CatalogType.CatalogFireplace)
+                    if (catlgItem.CType == CatalogType.ModularResource)
                     {
                         TGIBlock tgib = ((TGIBlockList)catlgItem.Resource["TGIBlocks"].Value)[0];
                         catlgItem = new Item(objPkgs, tgib);
                     }
 
-                    ulong nameGUID = (ulong)catlgItem.Resource["CommonBlock.NameGUID"].Value;
-                    ulong descGUID = (ulong)catlgItem.Resource["CommonBlock.DescGUID"].Value;
-
-                    Item stbl = findStblFor(nameGUID);
-                    if (stbl == null)
-                        stbl = findStblFor(descGUID);
-
-                    if (stbl == null)
-                        updateProgress(true, "No string tables found!", true, 0, false, 0);
-                    else
+                    if (catlgItem.SpecificRK != null)
                     {
-                        ulong stblInstance = stbl.RequestedRK.Instance & (ulong)(zeroSTBLIID ? 0x00FFFFFFFFFF0000 : 0x00FFFFFFFFFFFFFF);
-                        i = 0;
-                        freq = 1;// Math.Max(1, lrie.Count / 10);
-                        updateProgress(true, "Creating string tables extracts... 0%", true, 0x17, true, i);
+                        ulong nameGUID = (ulong)catlgItem.Resource["CommonBlock.NameGUID"].Value;
+                        ulong descGUID = (ulong)catlgItem.Resource["CommonBlock.DescGUID"].Value;
 
-                        while (i < 0x17)
+                        Item stbl = findStblFor(nameGUID);
+                        if (stbl == null)
+                            stbl = findStblFor(descGUID);
+
+                        if (stbl == null)
+                            updateProgress(true, "No string tables found!", true, 0, false, 0);
+                        else
                         {
-                            if (stopSaving) return;
-                            try
-                            {
-                                Item oldName = findStblFor(nameGUID, (byte)i);
-                                Item oldDesc = findStblFor(descGUID, (byte)i);
-                                if (oldName == null && oldDesc == null && !padSTBLs) continue;
+                            ulong stblInstance = stbl.RequestedRK.Instance & (ulong)(zeroSTBLIID ? 0x00FFFFFFFFFF0000 : 0x00FFFFFFFFFFFFFF);
+                            i = 0;
+                            freq = 1;// Math.Max(1, lrie.Count / 10);
+                            updateProgress(true, "Creating string tables extracts... 0%", true, 0x17, true, i);
 
-                                Item newstbl = NewResource(target, new TGIBlock(0, null, 0x220557DA, stbl.RequestedRK.ResourceGroup, ((ulong)i << 56) | stblInstance));
-                                IDictionary<ulong, string> outstbl = newstbl.Resource as IDictionary<ulong, string>;
-                                if (oldName == null) oldName = findStblFor(nameGUID);
-                                if (!outstbl.ContainsKey(nameGUID)) outstbl.Add(nameGUID, oldName == null ? "" : (oldName.Resource as IDictionary<ulong, string>)[nameGUID]);
-                                if (oldDesc == null) oldDesc = findStblFor(descGUID);
-                                if (!outstbl.ContainsKey(descGUID)) outstbl.Add(descGUID, oldDesc == null ? "" : (oldDesc.Resource as IDictionary<ulong, string>)[descGUID]);
-                                if (!stopSaving) newstbl.Commit();
-
-                                if (!stopSaving) newnamemap.Add(newstbl.RequestedRK.Instance, String.Format(language_fmt, languages[i], i, stblInstance));
-                            }
-                            finally
+                            while (i < 0x17)
                             {
-                                if (++i % freq == 0)
-                                    updateProgress(true, "Creating string tables extracts... " + i * 100 / 0x17 + "%", true, 0x17, true, i);
+                                if (stopSaving) return;
+                                try
+                                {
+                                    Item oldName = findStblFor(nameGUID, (byte)i);
+                                    Item oldDesc = findStblFor(descGUID, (byte)i);
+                                    if (oldName == null && oldDesc == null && !padSTBLs) continue;
+
+                                    Item newstbl = NewResource(target, new TGIBlock(0, null, 0x220557DA, stbl.RequestedRK.ResourceGroup, ((ulong)i << 56) | stblInstance));
+                                    IDictionary<ulong, string> outstbl = newstbl.Resource as IDictionary<ulong, string>;
+                                    if (oldName == null) oldName = findStblFor(nameGUID);
+                                    if (!outstbl.ContainsKey(nameGUID)) outstbl.Add(nameGUID, oldName == null ? "" : (oldName.Resource as IDictionary<ulong, string>)[nameGUID]);
+                                    if (oldDesc == null) oldDesc = findStblFor(descGUID);
+                                    if (!outstbl.ContainsKey(descGUID)) outstbl.Add(descGUID, oldDesc == null ? "" : (oldDesc.Resource as IDictionary<ulong, string>)[descGUID]);
+                                    if (!stopSaving) newstbl.Commit();
+
+                                    if (!stopSaving) newnamemap.Add(newstbl.RequestedRK.Instance, String.Format(language_fmt, languages[i], i, stblInstance));
+                                }
+                                finally
+                                {
+                                    if (++i % freq == 0)
+                                        updateProgress(true, "Creating string tables extracts... " + i * 100 / 0x17 + "%", true, 0x17, true, i);
+                                }
                             }
                         }
                     }
@@ -2590,22 +2622,23 @@ namespace ObjectCloner
             if (selectedItem.CType == CatalogType.ModularResource)
                 catlgItem = ItemForTGIBlock0(catlgItem);
 
-            nameGUID = (ulong)catlgItem.Resource["CommonBlock.NameGUID"].Value;
-            descGUID = (ulong)catlgItem.Resource["CommonBlock.DescGUID"].Value;
-
-            if (cloneFixOptions.IsRenumber)
+            if (catlgItem.SpecificRK != null)
             {
-                newNameGUID = FNV64.GetHash("CatalogObjects/Name:" + UniqueObject);
-                newDescGUID = FNV64.GetHash("CatalogObjects/Description:" + UniqueObject);
-            }
-            else
-            {
-                newNameGUID = nameGUID;
-                newDescGUID = descGUID;
+                nameGUID = (ulong)catlgItem.Resource["CommonBlock.NameGUID"].Value;
+                descGUID = (ulong)catlgItem.Resource["CommonBlock.DescGUID"].Value;
+
+                if (cloneFixOptions.IsRenumber)
+                {
+                    newNameGUID = FNV64.GetHash("CatalogObjects/Name:" + UniqueObject);
+                    newDescGUID = FNV64.GetHash("CatalogObjects/Description:" + UniqueObject);
+                }
+                else
+                {
+                    newNameGUID = nameGUID;
+                    newDescGUID = descGUID;
+                }
             }
 
-
-            resourceList.Clear();
             if (cloneFixOptions.IsRenumber)
             {
                 foreach (var kvp in rkToItem)
@@ -2613,22 +2646,8 @@ namespace ObjectCloner
                     TGIN oldN = (AResourceKey)kvp.Key;
                     TGIN newN = (AResourceKey)kvp.Key;
                     newN.ResInstance = oldToNew[kvp.Key.Instance];
-                    string s = String.Format("Old: {0} --> New: {1}", "" + oldN, "" + newN);
-                    resourceList.Add(s);
                 }
-
-                resourceList.Add("Old NameGUID: 0x" + nameGUID.ToString("X16") + " --> New NameGUID: 0x" + newNameGUID.ToString("X16"));
-                resourceList.Add("Old DescGUID: 0x" + descGUID.ToString("X16") + " --> New DescGUID: 0x" + newDescGUID.ToString("X16"));
-                resourceList.Add("Old ObjName: \"" + catlgItem.Resource["CommonBlock.Name"] + "\" --> New Name: \"CatalogObjects/Name:" + UniqueObject + "\"");
-                resourceList.Add("Old ObjDesc: \"" + catlgItem.Resource["CommonBlock.Desc"] + "\" --> New Desc: \"CatalogObjects/Description:" + UniqueObject + "\"");
             }
-
-            if (itemName != null) resourceList.Add("Old CatlgName: \"" + itemName + "\" --> New CatlgName: \"" + tbCatlgName.Text + "\"");
-            if (itemDesc != null) resourceList.Add("Old CatlgDesc: \"" + itemDesc + "\" --> New CatlgDesc: \"" + tbCatlgDesc.Text + "\"");
-            resourceList.Add("Old Price: " + catlgItem.Resource["CommonBlock.Price"] + " --> New Price: " + float.Parse(tbPrice.Text));
-            resourceList.Add("Old Product Status: 0x" + ((byte)catlgItem.Resource["CommonBlock.BuildBuyProductStatusFlags"].Value).ToString("X2") + " --> New Product Status: " + tbProductStatus.Text);
-            if (PngInstance != 0 && cloneFixOptions.IsRenumber)
-                resourceList.Add("Old PngInstance: " + selectedItem.Resource["CommonBlock.PngInstance"] + " --> New PngInstance: 0x" + oldToNew[PngInstance].ToString("X16"));
         }
 
         int numNewInstances = 0;
@@ -3001,15 +3020,7 @@ namespace ObjectCloner
 
 
         #region Fetch resources
-        private void Add(string key, IResourceKey referencedRK)
-        {
-            if (resourceList.Count % 100 == 0) Application.DoEvents();
-            rkLookup.Add(key, referencedRK);
-
-            TGIN tgin = (AResourceKey)referencedRK;
-            tgin.ResName = key;
-            resourceList.Add(tgin);
-        }
+        private void Add(string key, IResourceKey referencedRK) { rkLookup.Add(key, referencedRK); }
 
         private void SlurpRKsFromRK(string key, IResourceKey rk)
         {
