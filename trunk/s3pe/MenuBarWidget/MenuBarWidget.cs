@@ -51,6 +51,7 @@ namespace S3PIDemoFE
                 addToolStripMenuItem, resCopyToolStripMenuItem1, resPasteToolStripMenuItem1, duplicateToolStripMenuItem, replaceToolStripMenuItem,
                 compressedToolStripMenuItem, deletedToolStripMenuItem, detailsToolStripMenuItem,
                 fromFileToolStripMenuItem, fromPackageToolStripMenuItem, asDBCToolStripMenuItem, toFileToolStripMenuItem, toPackageToolStripMenuItem,
+                hexEditorToolStripMenuItem, textEditorToolStripMenuItem,
                 //Tools
                 fNVHashToolStripMenuItem, searchToolStripMenuItem,
                 //Settings
@@ -64,6 +65,7 @@ namespace S3PIDemoFE
                 bwcmAdd, bwcmCopy, bwcmPaste, bwcmDuplicate, bwcmReplace,
                 bwcmCompressed, bwcmDeleted, bwcmDetails,
                 bwcmFromFile, bwcmFromPackage, bwcmAsDBC, bwcmToFile, bwcmToPackage,
+                bwcmHexEditor, bwcmTextEditor,
             });
             UpdateMRUList();
             UpdateBookmarks();
@@ -96,6 +98,7 @@ namespace S3PIDemoFE
             MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_replace,
             MBR_compressed, MBR_isdeleted, MBR_details,
             MBR_importResources, MBR_importPackages, MBR_importAsDBC, MBR_exportResources, MBR_exportToPackage,
+            MBR_hexEditor, MBR_textEditor,
             MBT_fnvHash, MBT_search,
             MBS_updates, MBS_bookmarks, MBS_externals, MBS_wrappers, MBS_previewDDS, MBS_saveSettings,
             MBH_contents, MBH_about, MBH_update, MBH_warranty, MBH_licence,
@@ -106,6 +109,7 @@ namespace S3PIDemoFE
             MBR_add = (int)MB.MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_replace,
             MBR_compressed, MBR_isdeleted, MBR_details,
             MBR_importResources, MBR_importPackages, MBR_importAsDBC, MBR_exportResources, MBR_exportToPackage,
+            MBR_hexEditor, MBR_textEditor,
         }
 
         bool isCMSBW(MB mn) { return (mn >= MB.MBR_add && mn < MB.MBT_fnvHash); }
@@ -161,7 +165,64 @@ namespace S3PIDemoFE
         private void tsCMSBW_Click(object sender, EventArgs e) { OnMBResource_Click(sender, (MB)(cmsBW.IndexOf(sender as ToolStripMenuItem)) + (int)MB.MBR_add); }
 
 
+        static string resourceHelperPrefix = "resourceHelper";
+        static string contentHelperPrefix = "bwcmHelper";
+        private void ClearHelpers(ToolStripItemCollection dropdown, ToolStripItem tss, string prefix)
+        {
+            int i = dropdown.IndexOf(tss) + 1;
+            while (true)
+            {
+                if (i >= dropdown.Count) break;
+                if (!dropdown[i].Name.StartsWith(prefix)) break;
+                dropdown.RemoveAt(i);
+            }
+        }
+        public void ClearHelpers()
+        {
+            ClearHelpers(resourceToolStripMenuItem.DropDownItems, textEditorToolStripMenuItem, resourceHelperPrefix);
+            ClearHelpers(browserWidgetContextMenuStrip.Items, bwcmTextEditor, contentHelperPrefix);
+        }
 
+        private void AddHelper(ToolStripItemCollection dropdown, ToolStripItem tss, string prefix, int helper, string value)
+        {
+            ToolStripMenuItem tsiHelper = new ToolStripMenuItem(value, null, tsHelper_Click) { Name = prefix + helper, Tag = helper, };
+            int i = dropdown.IndexOf(tss);
+            while (true)
+            {
+                i++;
+                if (i >= dropdown.Count) break;
+                if (!dropdown[i].Name.StartsWith(prefix)) break;
+            }
+            dropdown.Insert(i, tsiHelper);
+        }
+        public void AddHelper(int helper, string value)
+        {
+            AddHelper(resourceToolStripMenuItem.DropDownItems, tsSepHelpers, "tsHelper", helper, value);
+            AddHelper(browserWidgetContextMenuStrip.Items, bwcmSepHelpers, "bwcmHelper", helper, value);
+        }
+
+        private void SetHelpers(ToolStripItemCollection dropdown, ToolStripItem tss, string prefix, IEnumerable<s3pi.Helpers.HelperManager.Helper> helpers)
+        {
+            int i = dropdown.IndexOf(tss);
+            int j = 0;
+            foreach (var helper in helpers)
+            {
+                ToolStripMenuItem tsiHelper = new ToolStripMenuItem(helper.label, null, tsHelper_Click) { Name = prefix + j, Tag = j, };
+                dropdown.Insert(++i, tsiHelper);
+            }
+        }
+        public void SetHelpers(IEnumerable<s3pi.Helpers.HelperManager.Helper> helpers)
+        {
+            ClearHelpers();
+            SetHelpers(resourceToolStripMenuItem.DropDownItems, textEditorToolStripMenuItem, resourceHelperPrefix, helpers);
+            SetHelpers(browserWidgetContextMenuStrip.Items, bwcmTextEditor, contentHelperPrefix, helpers);
+        }
+
+        public class HelperClickEventArgs : EventArgs { public readonly int helper; public HelperClickEventArgs(int helper) { this.helper = helper; } }
+        public delegate void HelperClickEventHandler(object sender, HelperClickEventArgs helper);
+        public event HelperClickEventHandler HelperClick;
+        protected void OnHelperClick(object sender, int i) { if (HelperClick != null) HelperClick(sender, new HelperClickEventArgs(i)); }
+        private void tsHelper_Click(object sender, EventArgs e) { OnHelperClick(sender, (int)((sender as ToolStripMenuItem).Tag)); }
 
 
         public void AddRecentFile(string value)

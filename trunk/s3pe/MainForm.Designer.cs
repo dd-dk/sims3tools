@@ -271,6 +271,7 @@
             this.menuBarWidget1.MBTools_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBTools_Click);
             this.menuBarWidget1.MBSettings_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBSettings_Click);
             this.menuBarWidget1.MBHelp_Click += new S3PIDemoFE.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBHelp_Click);
+            this.menuBarWidget1.HelperClick += new S3PIDemoFE.MenuBarWidget.HelperClickEventHandler(this.menuBarWidget1_HelperClick);
             this.menuBarWidget1.MRUClick += new S3PIDemoFE.MenuBarWidget.MRUClickEventHandler(this.menuBarWidget1_MRUClick);
             this.menuBarWidget1.BookmarkClick += new S3PIDemoFE.MenuBarWidget.BookmarkClickEventHandler(this.menuBarWidget1_BookmarkClick);
             // 
