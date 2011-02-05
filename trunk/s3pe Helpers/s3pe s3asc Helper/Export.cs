@@ -119,12 +119,27 @@ namespace s3ascHelper
                     Export_IBUF(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].IndexBufferIndex) as IBUF, mlod.Meshes[m]);
 
                     //For backward compatibility, these come after the IBUFs
-                    Export_MeshGeoStates(w, mlod.Meshes[m]);
+                    Export_MeshGeoStates(w, vrtf, mlod, mlod.Meshes[m]);
 
                     fsMesh.Close();
                 }
                 Application.DoEvents();
             }
+        }
+
+        void Export_MeshGeoStates(StreamWriter w, VRTF vrtf, MLOD mlod, MLOD.Mesh mesh)
+        {
+            if (mesh.GeometryStates.Count <= 0) return;
+
+            Export_GEOS(w, mesh);
+
+            for (int g = 0; g < mesh.GeometryStates.Count; g++)
+            {
+                Export_VBUF(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mesh.VertexBufferIndex) as VBUF, vrtf, mesh, g);
+                Export_IBUF(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mesh.IndexBufferIndex) as IBUF, mesh, vrtf, g);
+            }
+
+            w.Flush();
         }
 
         void Export_VRTF(StreamWriter w, VRTF vrtf)
@@ -185,7 +200,24 @@ namespace s3ascHelper
             s3piwrappers.Vertex[] av = vbuf.GetVertices(mesh, vrtf);
 
             w.WriteLine(string.Format("vbuf {0}", av.Length));
+            Export_VBUF_Common(w, av, vrtf);
+        }
 
+        void Export_VBUF(StreamWriter w, VBUF vbuf, VRTF vrtf, MLOD.Mesh mesh, int geoStateIndex)
+        {
+            if (vbuf == null) { w.WriteLine("; vbuf is null for geoState"); w.WriteLine(string.Format("vbuf {0} 0 0", geoStateIndex)); return; }
+
+            MLOD.GeometryState geoState = mesh.GeometryStates[geoStateIndex];
+            s3piwrappers.Vertex[] av = vbuf.GetVertices(mesh, vrtf, geoState);
+
+            w.WriteLine(string.Format("vbuf {0} {1} {2}", geoStateIndex, geoState.MinVertexIndex, geoState.VertexCount));
+            if (geoState.MinVertexIndex + geoState.VertexCount <= mesh.MinVertexIndex + mesh.VertexCount) return;
+
+            Export_VBUF_Common(w, av, vrtf);
+        }
+
+        void Export_VBUF_Common(StreamWriter w, s3piwrappers.Vertex[] av, VRTF vrtf)
+        {
             DateTime wait = DateTime.UtcNow;
             this.label1.Text = "Export VBUF...";
             this.pb.Value = 0;
@@ -241,10 +273,25 @@ namespace s3ascHelper
         {
             if (ibuf == null) { w.WriteLine("; ibuf is null"); w.WriteLine("ibuf 0"); return; }
 
-            int sizePerPrimitive = MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType);
-            int faces = ibuf.Buffer.Length / sizePerPrimitive;
-            w.WriteLine(string.Format("ibuf {0}", faces));
+            w.WriteLine(string.Format("ibuf {0}", mesh.PrimitiveCount));
+            Export_IBUF_Common(w, ibuf.GetIndices(mesh), MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType), mesh.PrimitiveCount);
+        }
 
+        void Export_IBUF(StreamWriter w, IBUF ibuf, MLOD.Mesh mesh, VRTF vrtf, int geoStateIndex)
+        {
+            if (ibuf == null) { w.WriteLine("; ibuf is null for geoState"); w.WriteLine(string.Format("ibuf {0} 0 0", geoStateIndex)); return; }
+
+            int sizePerPrimitive = MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType);
+            MLOD.GeometryState geoState = mesh.GeometryStates[geoStateIndex];
+            
+            w.WriteLine(string.Format("ibuf {0} {1} {2}", geoStateIndex, geoState.StartIndex, geoState.PrimitiveCount));
+            if (geoState.StartIndex + geoState.PrimitiveCount * sizePerPrimitive <= mesh.StartIndex + mesh.PrimitiveCount * sizePerPrimitive) return;
+
+            Export_IBUF_Common(w, ibuf.GetIndices(mesh, vrtf, geoStateIndex), sizePerPrimitive, geoState.PrimitiveCount);
+        }
+
+        void Export_IBUF_Common(StreamWriter w, int[] indices, int sizePerPrimitive, int faces)
+        {
             DateTime wait = DateTime.UtcNow;
             this.label1.Text = "Export IBUF...";
             this.pb.Value = 0;
@@ -253,7 +300,7 @@ namespace s3ascHelper
             {
                 w.Write(string.Format("{0}", i));
                 for (int j = 0; j < sizePerPrimitive; j++)
-                    w.Write(string.Format(" {0}", ibuf.Buffer[i * 3 + j]));
+                    w.Write(string.Format(" {0}", indices[i * sizePerPrimitive + j]));
                 w.WriteLine();
                 if (wait < DateTime.UtcNow) { this.pb.Value = i; wait = DateTime.UtcNow.AddSeconds(0.1); Application.DoEvents(); }
             }
@@ -261,10 +308,8 @@ namespace s3ascHelper
             w.Flush();
         }
 
-        void Export_MeshGeoStates(StreamWriter w, MLOD.Mesh mesh)
+        void Export_GEOS(StreamWriter w, MLOD.Mesh mesh)
         {
-            if (mesh.GeometryStates.Count <= 0) return;
-
             w.WriteLine(";");
             w.WriteLine("; Extended format: GeoStates");
             w.WriteLine(";");
@@ -274,10 +319,8 @@ namespace s3ascHelper
             for (int g = 0; g < mesh.GeometryStates.Count; g++)
             {
                 MLOD.GeometryState s = mesh.GeometryStates[g];
-                w.WriteLine(string.Format("{0} {1:X8} {2} {3} {4} {5}", g, s.Name, s.StartIndex, s.MinVertexIndex, s.VertexCount, s.PrimitiveCount));
+                w.WriteLine(string.Format("{0} {1:X8}", g, s.Name));
             }
-
-            w.Flush();
         }
     }
 }

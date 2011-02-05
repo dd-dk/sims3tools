@@ -121,6 +121,7 @@ namespace s3ascHelper
                 {
                     StreamReader r = new StreamReader(fsMesh);
 
+                    #region Import VRTF
                     VRTF vrtf = Import_VRTF(r);
                     IResourceKey vrtfRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].VertexFormatIndex);
                     if (vrtfRK == null && vrtf != null)
@@ -134,7 +135,9 @@ namespace s3ascHelper
                     ReplaceChunk(mlod.Meshes[m], "VertexFormatIndex", vrtfRK, vrtf);
                     if (vrtf == null)//need a default VRTF
                         vrtf = VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
+                    #endregion
 
+                    #region Import SKIN
                     SKIN skin = Import_SKIN(r, mlod.Meshes[m]);
                     IResourceKey skinRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].SkinControllerIndex);
                     if (skinRK == null && skin != null)//no RK but imported a SKIN, so generate key
@@ -142,31 +145,36 @@ namespace s3ascHelper
                         skinRK = new TGIBlock(0, null, vrtfRK) { ResourceType = skin.ResourceType, };
                     }
                     ReplaceChunk(mlod.Meshes[m], "SkinControllerIndex", skinRK, skin);
+                    #endregion
 
+                    #region Import VBUF
                     //Save the existing SwizzleInfo chunk reference
-                    GenericRCOLResource.ChunkReference swizRef = new GenericRCOLResource.ChunkReference(0, null, 0);
-                    VBUF vbufTemp = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexBufferIndex) as VBUF;
-                    if (vbufTemp != null)
-                        swizRef = new GenericRCOLResource.ChunkReference(0, null, vbufTemp.SwizzleInfo);
-
-                    VBUF vbuf = Import_VBUF(r, vrtf, mlod.Meshes[m]);
+                    VBUF vbuf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexBufferIndex) as VBUF;
+                    if (vbuf == null)
+                        vbuf = new VBUF(rcolResource.RequestedApiVersion, null) { Version = 0x00000101, Flags = VBUF.FormatFlags.None, SwizzleInfo = new GenericRCOLResource.ChunkReference(0, null, 0), };
+                    Import_VBUF(r, mlod, m, vrtf, vbuf);
                     IResourceKey vbufRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].VertexBufferIndex);
-                    if (vbufRK == null && vbuf != null)//no RK but imported a VBUF, so generate key
+                    if (vbufRK == null)//means we created the VBUF: create a RK and add it
                     {
                         vbufRK = new TGIBlock(0, null, mlodRK) { ResourceType = vbuf.ResourceType, };
+                        ReplaceChunk(mlod.Meshes[m], "VertexBufferIndex", vbufRK, vbuf);
                     }
-                    Update_SwizzleInfo(swizRef, vrtf, vbuf, m);
-                    ReplaceChunk(mlod.Meshes[m], "VertexBufferIndex", vbufRK, vbuf);
+                    #endregion
 
-                    IBUF ibuf = Import_IBUF(r, mlod.Meshes[m]);
+                    #region Import IBUF
+                    IBUF ibuf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].IndexBufferIndex) as IBUF;
+                    if (ibuf == null)
+                        ibuf = new IBUF(rcolResource.RequestedApiVersion, null) { Version = 2, Flags = IBUF.FormatFlags.DifferencedIndices, DisplayListUsage = 0, };
+                    Import_IBUF(r, mlod, mlod.Meshes[m], ibuf);
                     IResourceKey ibufRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].IndexBufferIndex);
-                    if (ibufRK == null && ibuf != null)//no RK but imported a IBUF, so generate key
+                    if (ibufRK == null)//means we created the IBUF: create a RK and add it
                     {
                         ibufRK = new TGIBlock(0, null, mlodRK) { ResourceType = ibuf.ResourceType, };
+                        ReplaceChunk(mlod.Meshes[m], "IndexBufferIndex", ibufRK, ibuf);
                     }
-                    ReplaceChunk(mlod.Meshes[m], "IndexBufferIndex", ibufRK, ibuf);
+                    #endregion
 
-                    Import_MeshGeoStates(r, mlod.Meshes[m]);
+                    Import_MeshGeoStates(r, mlod, mlod.Meshes[m], vrtf, vbuf, ibuf);
 
                     fsMesh.Close();
                     m++;
@@ -174,34 +182,42 @@ namespace s3ascHelper
             }
         }
 
+        void Import_MeshGeoStates(StreamReader r, MLOD mlod, MLOD.Mesh mesh, VRTF vrtf, VBUF vbuf, IBUF ibuf)
+        {
+            MLOD.GeometryStateList oldGeos = new MLOD.GeometryStateList(null, mesh.GeometryStates);
+            Import_GEOS(r, mesh);
+            if (mesh.GeometryStates.Count <= 0) return;
+
+            for (int g = 0; g < mesh.GeometryStates.Count; g++)
+            {
+                Import_VBUF(r, mlod, mesh, g, vrtf, vbuf);
+                Import_IBUF(r, mlod, mesh, g, vrtf, ibuf);
+            }
+        }
+
         //find the chunk, replace the chunk, perhaps create or remove the reference
         void ReplaceChunk(MLOD.Mesh mesh, string field, IResourceKey rk, ARCOLBlock block)
         {
             ARCOLBlock current = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, (GenericRCOLResource.ChunkReference)mesh[field].Value) as ARCOLBlock;
-            if (current != null && block != null) // replacing is easy
+            if (block != null)
             {
-                if (current.Tag != block.Tag)
-                    throw new Exception(string.Format("mesh field {0} is '{1}' but replacement is '{2}'.", field, current.Tag, block.Tag));
-                current.Data = block.Data;
-                block = current;
-            }
-            else if (current == null) // adding is okay
-            {
-                rcolResource.ChunkEntries.Add(rk, block);
-                mesh[field] = new TypedValue(typeof(GenericRCOLResource.ChunkReference), GenericRCOLResource.ChunkReference.CreateReference(rcolResource, rk), "X");
+                if (current != null) // replacing is easy
+                {
+                    if (current.Tag != block.Tag)
+                        throw new Exception(string.Format("mesh field {0} is '{1}' but replacement is '{2}'.", field, current.Tag, block.Tag));
+                    current.Data = block.Data;
+                    block = current;
+                }
+                else // adding is okay
+                {
+                    rcolResource.ChunkEntries.Add(rk, block);
+                    mesh[field] = new TypedValue(typeof(GenericRCOLResource.ChunkReference), GenericRCOLResource.ChunkReference.CreateReference(rcolResource, rk), "X");
+                }
             }
             else // deleting is not allowed - we can only null the reference, not remove the chunk
             {
                 mesh[field] = new TypedValue(typeof(GenericRCOLResource.ChunkReference), new GenericRCOLResource.ChunkReference(0, null, 0), "X");
             }
-        }
-
-        void Update_SwizzleInfo(GenericRCOLResource.ChunkReference swizRef, VRTF vrtf, VBUF vbuf, int m)
-        {
-            vbuf.SwizzleInfo = new GenericRCOLResource.ChunkReference(0, null, swizRef);
-            /*
-            VBSI swiz = new VBSI(0, null) { Data = ((ARCOLBlock)GenericRCOLResource.ChunkReference.GetBlock(modlResource, swizRef)).Data };
-            /**/
         }
 
         VRTF Import_VRTF(StreamReader r)
@@ -299,9 +315,9 @@ namespace s3ascHelper
             return skin;
         }
 
-        VBUF Import_VBUF(StreamReader r, VRTF vrtf, MLOD.Mesh mesh)
+        void Import_VBUF(StreamReader r, MLOD mlod, int meshIndex, VRTF vrtf, VBUF vbuf)
         {
-            VBUF vbuf = new VBUF(rcolResource.RequestedApiVersion, null) { Version = 0x00000101, Flags = VBUF.FormatFlags.None, SwizzleInfo = new GenericRCOLResource.ChunkReference(0, null, 0), };
+            MLOD.Mesh mesh = mlod.Meshes[meshIndex];
 
             string tagLine = ReadLine(r);
             string[] split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
@@ -313,6 +329,46 @@ namespace s3ascHelper
             if (!int.TryParse(split[1], out count))
                 throw new InvalidDataException("'vbuf' line has invalid count.");
 
+            s3piwrappers.Vertex[] vertices = Import_VBUF_Common(r, mesh, count, vrtf);
+            vbuf.SetVertices(mlod, meshIndex, vrtf, vertices);
+        }
+
+        void Import_VBUF(StreamReader r, MLOD mlod, MLOD.Mesh mesh, int geoStateIndex, VRTF vrtf, VBUF vbuf)
+        {
+            //w.WriteLine(string.Format("vbuf {0} {1} {2}", geoStateIndex, mesh.GeometryStates[geoStateIndex].MinVertexIndex, mesh.GeometryStates[geoStateIndex].VertexCount));
+            string tagLine = ReadLine(r);
+            string[] split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
+            if (split.Length != 4)
+                throw new InvalidDataException(string.Format("Invalid tag line read for geoState {0} 'vbuf'.", geoStateIndex));
+            if (split[0] != "vbuf")
+                throw new InvalidDataException("Expected line tag 'vbuf' not found.");
+            int lineIndex;
+            if (!int.TryParse(split[1], out lineIndex))
+                throw new InvalidDataException(string.Format("geoState {0} 'vbuf' line has invalid geoStateIndex.", geoStateIndex));
+            if (lineIndex != geoStateIndex)
+                throw new InvalidDataException(string.Format("geoState {0} 'vbuf' line has incorrect geoStateIndex value {1}.", geoStateIndex, lineIndex));
+            int minVertexIndex;
+            if (!int.TryParse(split[2], out minVertexIndex))
+                throw new InvalidDataException(string.Format("geoState {0} 'vbuf' line has invalid MinVertexIndex.", geoStateIndex));
+            int vertexCount;
+            if (!int.TryParse(split[3], out vertexCount))
+                throw new InvalidDataException(string.Format("geoState {0} 'vbuf' line has invalid VertexCount.", geoStateIndex));
+
+            if (minVertexIndex + vertexCount <= mesh.MinVertexIndex + mesh.VertexCount)
+            {
+                mesh.GeometryStates[geoStateIndex].MinVertexIndex = minVertexIndex;
+                mesh.GeometryStates[geoStateIndex].VertexCount = vertexCount;
+                return;
+            }
+
+            if (minVertexIndex != mesh.GeometryStates[geoStateIndex].MinVertexIndex)
+                throw new InvalidDataException(string.Format("geoState {0} 'vbuf' line has unexpected MinVertexIndex {1}; expected {2}.", geoStateIndex, minVertexIndex, mesh.GeometryStates[geoStateIndex].MinVertexIndex));
+            s3piwrappers.Vertex[] vertices = Import_VBUF_Common(r, mesh, vertexCount, vrtf);
+            vbuf.SetVertices(mlod, mesh, geoStateIndex, vrtf, vertices);
+        }
+
+        s3piwrappers.Vertex[] Import_VBUF_Common(StreamReader r, MLOD.Mesh mesh, int count, VRTF vrtf)
+        {
             if (vrtf == null) vrtf = mesh.IsShadowCaster ? VRTF.CreateDefaultForSunShadow() : VRTF.CreateDefaultForDropShadow();
             s3piwrappers.Vertex[] vertices = new s3piwrappers.Vertex[count];
             int uvLength = vrtf.Layouts.FindAll(x => x.Usage == VRTF.ElementUsage.UV).Count;
@@ -331,7 +387,7 @@ namespace s3ascHelper
 
                 foreach (var layout in vrtf.Layouts)
                 {
-                    split = r.ReadLine().Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] split = r.ReadLine().Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
                     if (split.Length < 2)
                         throw new InvalidDataException(string.Format("'vbuf' line {0} has invalid format.", line));
                     int index;
@@ -393,15 +449,11 @@ namespace s3ascHelper
                 if (wait.AddSeconds(0.1) < DateTime.UtcNow) { this.pb.Value = v; wait = DateTime.UtcNow; Application.DoEvents(); }
             }
 
-            vbuf.SetVertices(vrtf, vertices);
-
-            return vbuf;
+            return vertices;
         }
 
-        IBUF Import_IBUF(StreamReader r, MLOD.Mesh mesh)
+        void Import_IBUF(StreamReader r, MLOD mlod, MLOD.Mesh mesh, IBUF ibuf)
         {
-            IBUF ibuf = new IBUF(rcolResource.RequestedApiVersion, null) { Version = 2, Flags = IBUF.FormatFlags.DifferencedIndices, DisplayListUsage = 0, };
-
             string tagLine = ReadLine(r);
             string[] split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
             if (split.Length != 2)
@@ -412,7 +464,48 @@ namespace s3ascHelper
             if (!int.TryParse(split[1], out count))
                 throw new InvalidDataException("'ibuf' line has invalid count.");
 
-            Int32[] indices = new Int32[count * 3];
+            Int32[] indices = Import_IBUF_Common(r, MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType), count);
+            ibuf.SetIndices(mlod, mesh, indices);
+        }
+
+        void Import_IBUF(StreamReader r, MLOD mlod, MLOD.Mesh mesh, int geoStateIndex, VRTF vrtf, IBUF ibuf)
+        {
+            //w.WriteLine(string.Format("ibuf {0} {1} {2}", geoStateIndex, mesh.GeometryStates[geoStateIndex].StartIndex, mesh.GeometryStates[geoStateIndex].PrimitiveCount));
+            string tagLine = ReadLine(r);
+            string[] split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
+            if (split.Length != 4)
+                throw new InvalidDataException("Invalid tag line read for 'ibuf'.");
+            if (split[0] != "ibuf")
+                throw new InvalidDataException("Expected line tag 'ibuf' not found.");
+            int lineIndex;
+            if (!int.TryParse(split[1], out lineIndex))
+                throw new InvalidDataException(string.Format("geoState {0} 'ibuf' line has invalid geoStateIndex.", geoStateIndex));
+            if (lineIndex != geoStateIndex)
+                throw new InvalidDataException(string.Format("geoState {0} 'ibuf' line has incorrect geoStateIndex value {1}.", geoStateIndex, lineIndex));
+            int startIndex;
+            if (!int.TryParse(split[2], out startIndex))
+                throw new InvalidDataException(string.Format("geoState {0} 'ibuf' line has invalid StartIndex.", geoStateIndex));
+            int primitiveCount;
+            if (!int.TryParse(split[3], out primitiveCount))
+                throw new InvalidDataException(string.Format("geoState {0} 'ibuf' line has invalid PrimitiveCount.", geoStateIndex));
+
+            int sizePerPrimitive = MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType);
+            if (startIndex + primitiveCount * sizePerPrimitive <= mesh.StartIndex + mesh.PrimitiveCount * sizePerPrimitive)
+            {
+                mesh.GeometryStates[geoStateIndex].StartIndex = startIndex;
+                mesh.GeometryStates[geoStateIndex].PrimitiveCount = primitiveCount;
+                return;
+            }
+
+            if (startIndex != mesh.GeometryStates[geoStateIndex].StartIndex)
+                throw new InvalidDataException(string.Format("geoState {0} 'ibuf' line has unexpected StartIndex {1}; expected {2}.", geoStateIndex, startIndex, mesh.GeometryStates[geoStateIndex].StartIndex));
+            Int32[] indices = Import_IBUF_Common(r, MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType), primitiveCount);
+            ibuf.SetIndices(mlod, mesh, geoStateIndex, indices);
+        }
+
+        Int32[] Import_IBUF_Common(StreamReader r, int sizePerPrimitive, int count)
+        {
+            Int32[] indices = new Int32[count * sizePerPrimitive];
 
             DateTime wait = DateTime.UtcNow;
             this.label1.Text = "Import IBUF...";
@@ -420,7 +513,7 @@ namespace s3ascHelper
             this.pb.Maximum = count;
             for (int i = 0; i < count; i++)
             {
-                split = r.ReadLine().Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
+                string[] split = r.ReadLine().Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
                 if (split.Length != 4)
                     throw new InvalidDataException(string.Format("'ibuf' line {0} has invalid format.", i));
                 int index;
@@ -429,29 +522,29 @@ namespace s3ascHelper
                 if (index != i)
                     throw new InvalidDataException(string.Format("'ibuf' line {0} has incorrect line index value {1}.", i, index));
                 Int32[] values = StringToArray<Int32>.Convert(split, 1);
-                if (values.Length != 3)
+                if (values.Length != sizePerPrimitive)
                     throw new InvalidDataException(string.Format("'ibuf' line {0} has incorrect number of Int32 values {1}.", i, values.Length));
 
                 for (int j = 0; j < values.Length; j++)
-                    indices[i * 3 + j] = values[j];
+                    indices[i * sizePerPrimitive + j] = values[j];
 
                 if (wait.AddSeconds(0.1) < DateTime.UtcNow) { this.pb.Value = i; wait = DateTime.UtcNow; Application.DoEvents(); }
             }
 
-            ibuf.Buffer = indices;
-
-            return ibuf;
+            return indices;
         }
 
-        void Import_MeshGeoStates(StreamReader r, MLOD.Mesh mesh)
+        void Import_GEOS(StreamReader r, MLOD.Mesh mesh)
         {
-            mesh.GeometryStates = new MLOD.GeometryStateList(null);
-
-            if (r.EndOfStream) return;
+            if (r.EndOfStream)
+            {
+                mesh.GeometryStates = new MLOD.GeometryStateList(null);
+                return;
+            }
 
             string tagLine = ReadLine(r);
             string[] split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
-            if (split.Length < 1 || split[0] != "geos")
+            if (split.Length != 2 || split[0] != "geos")
                 return;
             int count;
             if (!int.TryParse(split[1], out count))
@@ -461,10 +554,16 @@ namespace s3ascHelper
             this.label1.Text = "Import MeshGeoStates...";
             this.pb.Value = 0;
             this.pb.Maximum = count;
+
+            int sizePerPrimitive = MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType);
+            int lastMinVertexIndex = mesh.MinVertexIndex;
+            int lastVertexCount = 0;
+            int lastStartIndex = mesh.PrimitiveCount * MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType);
+            int lastPrimitiveCount = 0;
             for (int g = 0; g < count; g++)
             {
                 split = r.ReadLine().Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
-                if (split.Length != 6)
+                if (split.Length != 2)
                     throw new InvalidDataException(string.Format("'geos' line {0} has invalid format.", g));
                 int index;
                 if (!int.TryParse(split[0], out index))
@@ -474,18 +573,32 @@ namespace s3ascHelper
                 uint name;
                 if (!uint.TryParse(split[1], System.Globalization.NumberStyles.HexNumber, null, out name))
                     throw new InvalidDataException(string.Format("'geos' line {0} has invalid name hash.", g));
-                Int32[] values = StringToArray<Int32>.Convert(split, 2);
-                if (values.Length != 4)
-                    throw new InvalidDataException(string.Format("'geos' line {0} has incorrect number of Int32 values {1}.", g, values.Length));
+                /*
+                int minVertexIndex;
+                if (!int.TryParse(split[2], out minVertexIndex))
+                    throw new InvalidDataException(string.Format("'geos' line {0} has invalid MinVertexIndex.", g));
+                int vertexCount;
+                if (!int.TryParse(split[3], out vertexCount))
+                    throw new InvalidDataException(string.Format("'geos' line {0} has invalid VertexCount.", g));
+                /**/
 
-                mesh.GeometryStates.Add(new MLOD.GeometryState(0, null)
+                if (g < mesh.GeometryStates.Count)
                 {
-                    Name = name,
-                    StartIndex = values[0],
-                    MinVertexIndex = values[1],
-                    VertexCount = values[2],
-                    PrimitiveCount = values[3],
-                });
+                    mesh.GeometryStates[g].Name = name;
+                    lastMinVertexIndex = mesh.GeometryStates[g].MinVertexIndex;
+                    lastVertexCount = mesh.GeometryStates[g].VertexCount;
+                    lastStartIndex = mesh.GeometryStates[g].StartIndex;
+                    lastPrimitiveCount = mesh.GeometryStates[g].PrimitiveCount;
+                }
+                else
+                    mesh.GeometryStates.Add(new MLOD.GeometryState(0, null)
+                    {
+                        Name = name,
+                        MinVertexIndex = lastMinVertexIndex + lastVertexCount,
+                        VertexCount = 0,
+                        StartIndex = lastStartIndex + lastPrimitiveCount * sizePerPrimitive,
+                        PrimitiveCount = 0,
+                    });
 
                 if (wait.AddSeconds(0.1) < DateTime.UtcNow) { this.pb.Value = g; wait = DateTime.UtcNow; Application.DoEvents(); }
             }
