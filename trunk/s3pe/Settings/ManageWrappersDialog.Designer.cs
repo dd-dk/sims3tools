@@ -32,20 +32,28 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.lvWrappers = new System.Windows.Forms.ListView();
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chaTag = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chaType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chaWrapper = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chaFile = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.lvDisabled = new System.Windows.Forms.ListView();
-            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chdTag = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chdType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chdWrapper = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chdFile = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnDisable = new System.Windows.Forms.Button();
             this.btnEnable = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.chaTitle = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chaDescription = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chaCompany = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chaProduct = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chdTitle = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chdDescription = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chdCompany = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chdProduct = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -99,10 +107,14 @@
             // lvWrappers
             // 
             this.lvWrappers.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader3,
-            this.columnHeader4});
+            this.chaTag,
+            this.chaType,
+            this.chaWrapper,
+            this.chaFile,
+            this.chaTitle,
+            this.chaDescription,
+            this.chaCompany,
+            this.chaProduct});
             this.lvWrappers.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lvWrappers.FullRowSelect = true;
             this.lvWrappers.HideSelection = false;
@@ -117,29 +129,33 @@
             this.lvWrappers.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.lv_ColumnClick);
             this.lvWrappers.SelectedIndexChanged += new System.EventHandler(this.lvWrappers_SelectedIndexChanged);
             // 
-            // columnHeader1
+            // chaTag
             // 
-            this.columnHeader1.Text = "Tag";
+            this.chaTag.Text = "Tag";
             // 
-            // columnHeader2
+            // chaType
             // 
-            this.columnHeader2.Text = "Type";
+            this.chaType.Text = "Type";
             // 
-            // columnHeader3
+            // chaWrapper
             // 
-            this.columnHeader3.Text = "Wrapper";
+            this.chaWrapper.Text = "Wrapper";
             // 
-            // columnHeader4
+            // chaFile
             // 
-            this.columnHeader4.Text = "File";
+            this.chaFile.Text = "File";
             // 
             // lvDisabled
             // 
             this.lvDisabled.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader5,
-            this.columnHeader6,
-            this.columnHeader7,
-            this.columnHeader8});
+            this.chdTag,
+            this.chdType,
+            this.chdWrapper,
+            this.chdFile,
+            this.chdTitle,
+            this.chdDescription,
+            this.chdCompany,
+            this.chdProduct});
             this.lvDisabled.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lvDisabled.FullRowSelect = true;
             this.lvDisabled.HideSelection = false;
@@ -154,21 +170,21 @@
             this.lvDisabled.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.lv_ColumnClick);
             this.lvDisabled.SelectedIndexChanged += new System.EventHandler(this.lvWrappers_SelectedIndexChanged);
             // 
-            // columnHeader5
+            // chdTag
             // 
-            this.columnHeader5.Text = "Tag";
+            this.chdTag.Text = "Tag";
             // 
-            // columnHeader6
+            // chdType
             // 
-            this.columnHeader6.Text = "Type";
+            this.chdType.Text = "Type";
             // 
-            // columnHeader7
+            // chdWrapper
             // 
-            this.columnHeader7.Text = "Wrapper";
+            this.chdWrapper.Text = "Wrapper";
             // 
-            // columnHeader8
+            // chdFile
             // 
-            this.columnHeader8.Text = "File";
+            this.chdFile.Text = "File";
             // 
             // panel1
             // 
@@ -227,6 +243,38 @@
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
+            // chaTitle
+            // 
+            this.chaTitle.Text = "Title";
+            // 
+            // chaDescription
+            // 
+            this.chaDescription.Text = "Description";
+            // 
+            // chaCompany
+            // 
+            this.chaCompany.Text = "Company";
+            // 
+            // chaProduct
+            // 
+            this.chaProduct.Text = "Product";
+            // 
+            // chdTitle
+            // 
+            this.chdTitle.Text = "Title";
+            // 
+            // chdDescription
+            // 
+            this.chdDescription.Text = "Description";
+            // 
+            // chdCompany
+            // 
+            this.chdCompany.Text = "Company";
+            // 
+            // chdProduct
+            // 
+            this.chdProduct.Text = "Product";
+            // 
             // ManageWrappersDialog
             // 
             this.AcceptButton = this.btnOK;
@@ -253,19 +301,27 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ListView lvWrappers;
-        private System.Windows.Forms.ColumnHeader columnHeader1;
-        private System.Windows.Forms.ColumnHeader columnHeader2;
-        private System.Windows.Forms.ColumnHeader columnHeader3;
-        private System.Windows.Forms.ColumnHeader columnHeader4;
+        private System.Windows.Forms.ColumnHeader chaTag;
+        private System.Windows.Forms.ColumnHeader chaType;
+        private System.Windows.Forms.ColumnHeader chaWrapper;
+        private System.Windows.Forms.ColumnHeader chaFile;
         private System.Windows.Forms.ListView lvDisabled;
-        private System.Windows.Forms.ColumnHeader columnHeader5;
-        private System.Windows.Forms.ColumnHeader columnHeader6;
-        private System.Windows.Forms.ColumnHeader columnHeader7;
-        private System.Windows.Forms.ColumnHeader columnHeader8;
+        private System.Windows.Forms.ColumnHeader chdTag;
+        private System.Windows.Forms.ColumnHeader chdType;
+        private System.Windows.Forms.ColumnHeader chdWrapper;
+        private System.Windows.Forms.ColumnHeader chdFile;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button btnDisable;
         private System.Windows.Forms.Button btnEnable;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.ColumnHeader chaTitle;
+        private System.Windows.Forms.ColumnHeader chaDescription;
+        private System.Windows.Forms.ColumnHeader chaCompany;
+        private System.Windows.Forms.ColumnHeader chaProduct;
+        private System.Windows.Forms.ColumnHeader chdTitle;
+        private System.Windows.Forms.ColumnHeader chdDescription;
+        private System.Windows.Forms.ColumnHeader chdCompany;
+        private System.Windows.Forms.ColumnHeader chdProduct;
     }
 }

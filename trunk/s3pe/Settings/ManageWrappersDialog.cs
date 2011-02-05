@@ -55,7 +55,11 @@ namespace S3PIDemoFE.Settings
                 string tag = getTag(kvp.Key);
                 string wrapper = kvp.Value.Name;
                 string file = System.IO.Path.GetFileName(kvp.Value.Assembly.Location);
-                ListViewItem lvi = new ListViewItem(new string[] { tag, kvp.Key, wrapper, file, });
+                string title = GetAttrValue(kvp.Value.Assembly, typeof(System.Reflection.AssemblyTitleAttribute), "Title");
+                string description = GetAttrValue(kvp.Value.Assembly, typeof(System.Reflection.AssemblyDescriptionAttribute), "Description");
+                string company = GetAttrValue(kvp.Value.Assembly, typeof(System.Reflection.AssemblyCompanyAttribute), "Company");
+                string product = GetAttrValue(kvp.Value.Assembly, typeof(System.Reflection.AssemblyProductAttribute), "Product");
+                ListViewItem lvi = new ListViewItem(new string[] { tag, kvp.Key, wrapper, file, title, description, company, product, });
                 lvi.Tag = kvp;
                 lv.Items.Add(lvi);
             }
@@ -64,6 +68,14 @@ namespace S3PIDemoFE.Settings
             if (lv.Items.Count > 0)
                 lv.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             lv.EndUpdate();
+        }
+
+        string GetAttrValue(System.Reflection.Assembly assy, Type attrType, string field)
+        {
+            object[] ary = assy.GetCustomAttributes(attrType, false);
+            if (ary == null || ary.Length != 1) return "(not set)";
+            object value = attrType.InvokeMember(field, System.Reflection.BindingFlags.GetProperty, null, ary[0], new object[] { });
+            return value == null ? "(not set)" : (string)value;
         }
 
         string getTag(string key)
