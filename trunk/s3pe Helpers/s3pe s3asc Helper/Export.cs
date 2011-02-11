@@ -111,8 +111,9 @@ namespace s3ascHelper
                     }
 
                     VRTF vrtf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexFormatIndex) as VRTF;
-                    Export_VRTF(w, vrtf);
-                    if (vrtf == null) vrtf = VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
+                    bool isDefault = vrtf == null;
+                    if (isDefault) vrtf = VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
+                    Export_VRTF(w, vrtf, isDefault);
 
                     Export_SKIN(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].SkinControllerIndex) as SKIN, mlod.Meshes[m]);
                     Export_VBUF(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexBufferIndex) as VBUF, vrtf, mlod.Meshes[m]);
@@ -142,9 +143,9 @@ namespace s3ascHelper
             w.Flush();
         }
 
-        void Export_VRTF(StreamWriter w, VRTF vrtf)
+        void Export_VRTF(StreamWriter w, VRTF vrtf, bool isDefault)
         {
-            if (vrtf == null) { w.WriteLine("; vrtf is null"); w.WriteLine("vrtf 0 0"); return; }
+            if (isDefault) w.WriteLine(";;-marker: vrtf is default for mesh");
 
             w.WriteLine(string.Format("vrtf {0} {1}", vrtf.Layouts.Count, vrtf.Stride));
 

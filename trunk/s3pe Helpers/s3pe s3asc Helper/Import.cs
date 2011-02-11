@@ -122,7 +122,10 @@ namespace s3ascHelper
                     StreamReader r = new StreamReader(fsMesh);
 
                     #region Import VRTF
+                    VRTF defaultForMesh = VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
                     VRTF vrtf = Import_VRTF(r);
+                    if (vrtf.Equals(defaultForMesh))
+                        vrtf = null;
                     IResourceKey vrtfRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].VertexFormatIndex);
                     if (vrtfRK == null && vrtf != null)
                     {
@@ -134,7 +137,7 @@ namespace s3ascHelper
                     }
                     ReplaceChunk(mlod.Meshes[m], "VertexFormatIndex", vrtfRK, vrtf);
                     if (vrtf == null)//need a default VRTF
-                        vrtf = VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
+                        vrtf = defaultForMesh;
                     #endregion
 
                     #region Import SKIN
@@ -223,9 +226,21 @@ namespace s3ascHelper
         VRTF Import_VRTF(StreamReader r)
         {
             VRTF vrtf = new VRTF(rcolResource.RequestedApiVersion, null) { Version = 2, Layouts = new VRTF.VertexElementLayoutList(null), };
+            bool isDefault = false;
 
             string tagLine = ReadLine(r);
-            string[] split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
+            string[] split;
+            /*
+            if (tagLine.StartsWith(";;-marker: "))
+            {
+                split = tagLine.Split(new char[] { ' ', }, 2, StringSplitOptions.RemoveEmptyEntries);
+                if (split[1] != "vrtf is default for mesh")
+                    throw new InvalidDataException("Unexpected marker comment read before 'vrtf'.");
+                isDefault = true;
+                tagLine = ReadLine(r);
+            }
+            /**/
+            split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
             if (split.Length != 3)
                 throw new InvalidDataException("Invalid tag line read for 'vrtf'.");
             if (split[0] != "vrtf")
@@ -263,7 +278,9 @@ namespace s3ascHelper
                 if (wait < DateTime.UtcNow) { this.pb.Value = l; wait = DateTime.UtcNow.AddSeconds(0.1); Application.DoEvents(); }
             }
 
-            return vrtf;
+
+
+            return /*isDefault ? null :/**/ vrtf;
         }
 
         SKIN Import_SKIN(StreamReader r, MLOD.Mesh mesh)
@@ -625,6 +642,6 @@ namespace s3ascHelper
             }
         }
 
-        string ReadLine(StreamReader r) { string l = r.ReadLine(); while (l.StartsWith(";") && !r.EndOfStream) l = r.ReadLine(); return l; }
+        string ReadLine(StreamReader r) { string l = r.ReadLine(); while (l.StartsWith(";") /*&& !l.StartsWith(";;-marker: ")/**/ && !r.EndOfStream) l = r.ReadLine(); return l; }
     }
 }
