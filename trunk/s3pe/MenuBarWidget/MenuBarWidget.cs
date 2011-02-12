@@ -207,7 +207,7 @@ namespace S3PIDemoFE
             int j = 0;
             foreach (var helper in helpers)
             {
-                ToolStripMenuItem tsiHelper = new ToolStripMenuItem(helper.label, null, tsHelper_Click) { Name = prefix + j, Tag = j, };
+                ToolStripMenuItem tsiHelper = new ToolStripMenuItem(helper.label, null, tsHelper_Click) { Name = prefix + j, Tag = j++, };
                 dropdown.Insert(++i, tsiHelper);
             }
         }
