@@ -122,10 +122,14 @@ namespace s3ascHelper
                     StreamReader r = new StreamReader(fsMesh);
 
                     #region Import VRTF
+                    bool isDefaultVRTF = false;
                     VRTF defaultForMesh = VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
                     VRTF vrtf = Import_VRTF(r);
                     if (vrtf.Equals(defaultForMesh))
+                    {
+                        isDefaultVRTF = true;
                         vrtf = null;
+                    }
                     IResourceKey vrtfRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].VertexFormatIndex);
                     if (vrtfRK == null && vrtf != null)
                     {
@@ -155,7 +159,7 @@ namespace s3ascHelper
                     VBUF vbuf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexBufferIndex) as VBUF;
                     if (vbuf == null)
                         vbuf = new VBUF(rcolResource.RequestedApiVersion, null) { Version = 0x00000101, Flags = VBUF.FormatFlags.None, SwizzleInfo = new GenericRCOLResource.ChunkReference(0, null, 0), };
-                    Import_VBUF(r, mlod, m, vrtf, vbuf);
+                    Import_VBUF(r, mlod, m, vrtf, isDefaultVRTF, vbuf);
                     IResourceKey vbufRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].VertexBufferIndex);
                     if (vbufRK == null)//means we created the VBUF: create a RK and add it
                     {
@@ -177,7 +181,7 @@ namespace s3ascHelper
                     }
                     #endregion
 
-                    Import_MeshGeoStates(r, mlod, mlod.Meshes[m], vrtf, vbuf, ibuf);
+                    Import_MeshGeoStates(r, mlod, mlod.Meshes[m], vrtf, isDefaultVRTF, vbuf, ibuf);
 
                     fsMesh.Close();
                     m++;
@@ -185,7 +189,7 @@ namespace s3ascHelper
             }
         }
 
-        void Import_MeshGeoStates(StreamReader r, MLOD mlod, MLOD.Mesh mesh, VRTF vrtf, VBUF vbuf, IBUF ibuf)
+        void Import_MeshGeoStates(StreamReader r, MLOD mlod, MLOD.Mesh mesh, VRTF vrtf, bool isDefaultVRTF, VBUF vbuf, IBUF ibuf)
         {
             MLOD.GeometryStateList oldGeos = new MLOD.GeometryStateList(null, mesh.GeometryStates);
             Import_GEOS(r, mesh);
@@ -193,7 +197,7 @@ namespace s3ascHelper
 
             for (int g = 0; g < mesh.GeometryStates.Count; g++)
             {
-                Import_VBUF(r, mlod, mesh, g, vrtf, vbuf);
+                Import_VBUF(r, mlod, mesh, g, vrtf, isDefaultVRTF, vbuf);
                 Import_IBUF(r, mlod, mesh, g, vrtf, ibuf);
             }
         }
@@ -226,20 +230,9 @@ namespace s3ascHelper
         VRTF Import_VRTF(StreamReader r)
         {
             VRTF vrtf = new VRTF(rcolResource.RequestedApiVersion, null) { Version = 2, Layouts = new VRTF.VertexElementLayoutList(null), };
-            bool isDefault = false;
 
             string tagLine = ReadLine(r);
             string[] split;
-            /*
-            if (tagLine.StartsWith(";;-marker: "))
-            {
-                split = tagLine.Split(new char[] { ' ', }, 2, StringSplitOptions.RemoveEmptyEntries);
-                if (split[1] != "vrtf is default for mesh")
-                    throw new InvalidDataException("Unexpected marker comment read before 'vrtf'.");
-                isDefault = true;
-                tagLine = ReadLine(r);
-            }
-            /**/
             split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
             if (split.Length != 3)
                 throw new InvalidDataException("Invalid tag line read for 'vrtf'.");
@@ -278,9 +271,7 @@ namespace s3ascHelper
                 if (wait < DateTime.UtcNow) { this.pb.Value = l; wait = DateTime.UtcNow.AddSeconds(0.1); Application.DoEvents(); }
             }
 
-
-
-            return /*isDefault ? null :/**/ vrtf;
+            return vrtf;
         }
 
         SKIN Import_SKIN(StreamReader r, MLOD.Mesh mesh)
@@ -332,7 +323,7 @@ namespace s3ascHelper
             return skin;
         }
 
-        void Import_VBUF(StreamReader r, MLOD mlod, int meshIndex, VRTF vrtf, VBUF vbuf)
+        void Import_VBUF(StreamReader r, MLOD mlod, int meshIndex, VRTF vrtf, bool isDefaultVRTF, VBUF vbuf)
         {
             MLOD.Mesh mesh = mlod.Meshes[meshIndex];
 
@@ -346,11 +337,11 @@ namespace s3ascHelper
             if (!int.TryParse(split[1], out count))
                 throw new InvalidDataException("'vbuf' line has invalid count.");
 
-            s3piwrappers.Vertex[] vertices = Import_VBUF_Common(r, mesh, count, vrtf);
+            s3piwrappers.Vertex[] vertices = Import_VBUF_Common(r, mesh, count, vrtf, isDefaultVRTF);
             vbuf.SetVertices(mlod, meshIndex, vrtf, vertices);
         }
 
-        void Import_VBUF(StreamReader r, MLOD mlod, MLOD.Mesh mesh, int geoStateIndex, VRTF vrtf, VBUF vbuf)
+        void Import_VBUF(StreamReader r, MLOD mlod, MLOD.Mesh mesh, int geoStateIndex, VRTF vrtf, bool isDefaultVRTF, VBUF vbuf)
         {
             //w.WriteLine(string.Format("vbuf {0} {1} {2}", geoStateIndex, mesh.GeometryStates[geoStateIndex].MinVertexIndex, mesh.GeometryStates[geoStateIndex].VertexCount));
             string tagLine = ReadLine(r);
@@ -380,13 +371,12 @@ namespace s3ascHelper
 
             if (minVertexIndex != mesh.GeometryStates[geoStateIndex].MinVertexIndex)
                 throw new InvalidDataException(string.Format("geoState {0} 'vbuf' line has unexpected MinVertexIndex {1}; expected {2}.", geoStateIndex, minVertexIndex, mesh.GeometryStates[geoStateIndex].MinVertexIndex));
-            s3piwrappers.Vertex[] vertices = Import_VBUF_Common(r, mesh, vertexCount, vrtf);
+            s3piwrappers.Vertex[] vertices = Import_VBUF_Common(r, mesh, vertexCount, vrtf, isDefaultVRTF);
             vbuf.SetVertices(mlod, mesh, geoStateIndex, vrtf, vertices);
         }
 
-        s3piwrappers.Vertex[] Import_VBUF_Common(StreamReader r, MLOD.Mesh mesh, int count, VRTF vrtf)
+        s3piwrappers.Vertex[] Import_VBUF_Common(StreamReader r, MLOD.Mesh mesh, int count, VRTF vrtf, bool isDefaultVRTF)
         {
-            if (vrtf == null) vrtf = mesh.IsShadowCaster ? VRTF.CreateDefaultForSunShadow() : VRTF.CreateDefaultForDropShadow();
             s3piwrappers.Vertex[] vertices = new s3piwrappers.Vertex[count];
             int uvLength = vrtf.Layouts.FindAll(x => x.Usage == VRTF.ElementUsage.UV).Count;
 
@@ -422,43 +412,44 @@ namespace s3ascHelper
                     {
                         case (byte)VRTF.ElementUsage.Position:
                             float[] Position = StringToArray<Single>.Convert(split, 2);
-                            if (Position.Length != VRTF.FloatCountFromFormat(layout.Format))
+                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, Position.Length))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
                             vertex.Position = Position;
                             break;
                         case (byte)VRTF.ElementUsage.Normal:
                             float[] Normal = StringToArray<Single>.Convert(split, 2);
-                            if (Normal.Length != VRTF.FloatCountFromFormat(layout.Format))
+                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, Normal.Length))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
                             vertex.Normal = Normal;
                             break;
                         case (byte)VRTF.ElementUsage.UV:
                             float[] UV = StringToArray<Single>.Convert(split, 2);
-                            if (UV.Length != VRTF.FloatCountFromFormat(layout.Format))
+                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, UV.Length))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
                             vertex.UV[nUV++] = UV;
                             break;
                         case (byte)VRTF.ElementUsage.BlendIndex:
                             byte[] BlendIndex = StringToArray<Byte>.Convert(split, 2);
-                            if (BlendIndex.Length != VRTF.ByteSizeFromFormat(layout.Format))
+                            if (!(BlendIndex.Length == VRTF.ByteSizeFromFormat(layout.Format) || (isDefaultVRTF && BlendIndex.Length + 1 == VRTF.ByteSizeFromFormat(layout.Format))))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
                             break;
                         case (byte)VRTF.ElementUsage.BlendWeight:
                             float[] BlendWeight = StringToArray<Single>.Convert(split, 2);
-                            if (BlendWeight.Length != VRTF.FloatCountFromFormat(layout.Format))
+                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, BlendWeight.Length))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
                             break;
                         case (byte)VRTF.ElementUsage.Tangent:
                             float[] Tangent = StringToArray<Single>.Convert(split, 2);
-                            if (Tangent.Length != VRTF.FloatCountFromFormat(layout.Format))
+                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, Tangent.Length))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
                             break;
                         case (byte)VRTF.ElementUsage.Colour:
                             float[] Colour = StringToArray<Single>.Convert(split, 2);
-                            if (Colour.Length != VRTF.FloatCountFromFormat(layout.Format))
+                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, Colour.Length))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
                             break;
                     }
+                    line++;
                 }
                 vertices[v] = vertex;
                 if (nUV != uvLength)
@@ -640,6 +631,12 @@ namespace s3ascHelper
                 }
                 return res;
             }
+        }
+
+        static bool CheckFloatCount(VRTF.ElementFormat format, bool isDefaultVRTF, int length)
+        {
+            return length == VRTF.FloatCountFromFormat(format) ||
+                (isDefaultVRTF && length + 1 == VRTF.FloatCountFromFormat(format));
         }
 
         string ReadLine(StreamReader r) { string l = r.ReadLine(); while (l.StartsWith(";") /*&& !l.StartsWith(";;-marker: ")/**/ && !r.EndOfStream) l = r.ReadLine(); return l; }
