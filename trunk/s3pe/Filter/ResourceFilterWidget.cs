@@ -167,7 +167,7 @@ namespace S3PIDemoFE.Filter
         {
             if (ie == null || values == null) return;
             foreach (string s in fields)
-                values[s].Value = new Regex(s.Equals("Name") ? bw.ResourceName(ie) : s.Equals("Tag") ? bw.ResourceTag(ie) : ie[s].ToString("X"));
+                values[s].Value = new Regex(s.Equals("Name") ? bw.ResourceName(ie).MakeSafe() : s.Equals("Tag") ? bw.ResourceTag(ie) : ie[s].ToString("X"));
         }
 
         private void btnSet_Click(object sender, EventArgs e)
@@ -177,5 +177,13 @@ namespace S3PIDemoFE.Filter
         }
 
         private void bw_ListUpdated(object sender, EventArgs e) { lbCount.Text = (sender as BrowserWidget).Count.ToString(); }
+    }
+
+    static class Extension
+    {
+        public static string MakeSafe(this string value)
+        {
+            return value.Replace(@"\", @"\\");
+        }
     }
 }
