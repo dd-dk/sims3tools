@@ -45,8 +45,9 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.ckbClone = new System.Windows.Forms.CheckBox();
-            this.ckbDefault = new System.Windows.Forms.CheckBox();
+            this.ckbDeepClone = new System.Windows.Forms.CheckBox();
             this.ckbExclCommon = new System.Windows.Forms.CheckBox();
+            this.ckbIncludePresets = new System.Windows.Forms.CheckBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.tlpCustomise = new System.Windows.Forms.TableLayoutPanel();
             this.label2 = new System.Windows.Forms.Label();
@@ -65,7 +66,7 @@
             this.ckbCompress.Checked = true;
             this.ckbCompress.CheckState = System.Windows.Forms.CheckState.Checked;
             this.tlpOptions.SetColumnSpan(this.ckbCompress, 2);
-            this.ckbCompress.Location = new System.Drawing.Point(35, 441);
+            this.ckbCompress.Location = new System.Drawing.Point(35, 452);
             this.ckbCompress.Name = "ckbCompress";
             this.ckbCompress.Size = new System.Drawing.Size(121, 17);
             this.ckbCompress.TabIndex = 6;
@@ -193,7 +194,7 @@
             this.tlpOptions.SetColumnSpan(this.flowLayoutPanel1, 2);
             this.flowLayoutPanel1.Controls.Add(this.btnCancel);
             this.flowLayoutPanel1.Controls.Add(this.btnStart);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(150, 464);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(150, 475);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Size = new System.Drawing.Size(162, 29);
             this.flowLayoutPanel1.TabIndex = 7;
@@ -222,7 +223,7 @@
             // 
             this.ckbThumbs.AutoSize = true;
             this.tlpOptions.SetColumnSpan(this.ckbThumbs, 2);
-            this.ckbThumbs.Location = new System.Drawing.Point(35, 195);
+            this.ckbThumbs.Location = new System.Drawing.Point(35, 206);
             this.ckbThumbs.Name = "ckbThumbs";
             this.ckbThumbs.Size = new System.Drawing.Size(114, 17);
             this.ckbThumbs.TabIndex = 4;
@@ -233,7 +234,7 @@
             // 
             this.ckbPadSTBLs.AutoSize = true;
             this.tlpOptions.SetColumnSpan(this.ckbPadSTBLs, 2);
-            this.ckbPadSTBLs.Location = new System.Drawing.Point(35, 172);
+            this.ckbPadSTBLs.Location = new System.Drawing.Point(35, 183);
             this.ckbPadSTBLs.Name = "ckbPadSTBLs";
             this.ckbPadSTBLs.Size = new System.Drawing.Size(153, 17);
             this.ckbPadSTBLs.TabIndex = 3;
@@ -246,7 +247,7 @@
             this.label1.AutoSize = true;
             this.tlpOptions.SetColumnSpan(this.label1, 2);
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(262, 19);
+            this.label1.Location = new System.Drawing.Point(262, 7);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(50, 13);
             this.label1.TabIndex = 1;
@@ -258,9 +259,9 @@
             this.groupBox1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tlpOptions.SetColumnSpan(this.groupBox1, 2);
             this.groupBox1.Controls.Add(this.tableLayoutPanel1);
-            this.groupBox1.Location = new System.Drawing.Point(35, 47);
+            this.groupBox1.Location = new System.Drawing.Point(35, 35);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(199, 107);
+            this.groupBox1.Size = new System.Drawing.Size(199, 130);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Make clone";
@@ -273,16 +274,17 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.Controls.Add(this.ckbClone, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.ckbDefault, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.ckbDeepClone, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.ckbExclCommon, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.ckbIncludePresets, 1, 3);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(6, 19);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 3;
+            this.tableLayoutPanel1.RowCount = 4;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(187, 69);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(187, 92);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // ckbClone
@@ -297,16 +299,15 @@
             this.ckbClone.UseVisualStyleBackColor = true;
             this.ckbClone.CheckedChanged += new System.EventHandler(this.ckbClone_CheckedChanged);
             // 
-            // ckbDefault
+            // ckbDeepClone
             // 
-            this.ckbDefault.AutoSize = true;
-            this.ckbDefault.Location = new System.Drawing.Point(27, 26);
-            this.ckbDefault.Name = "ckbDefault";
-            this.ckbDefault.Size = new System.Drawing.Size(131, 17);
-            this.ckbDefault.TabIndex = 2;
-            this.ckbDefault.Text = "Default resources only";
-            this.ckbDefault.UseVisualStyleBackColor = true;
-            this.ckbDefault.CheckedChanged += new System.EventHandler(this.ckbDefault_CheckedChanged);
+            this.ckbDeepClone.AutoSize = true;
+            this.ckbDeepClone.Location = new System.Drawing.Point(27, 26);
+            this.ckbDeepClone.Name = "ckbDeepClone";
+            this.ckbDeepClone.Size = new System.Drawing.Size(81, 17);
+            this.ckbDeepClone.TabIndex = 2;
+            this.ckbDeepClone.Text = "Deep clone";
+            this.ckbDeepClone.UseVisualStyleBackColor = true;
             // 
             // ckbExclCommon
             // 
@@ -317,6 +318,18 @@
             this.ckbExclCommon.TabIndex = 3;
             this.ckbExclCommon.Text = "Exclude Common Resource";
             this.ckbExclCommon.UseVisualStyleBackColor = true;
+            this.ckbExclCommon.Visible = false;
+            // 
+            // ckbIncludePresets
+            // 
+            this.ckbIncludePresets.AutoSize = true;
+            this.ckbIncludePresets.Location = new System.Drawing.Point(27, 72);
+            this.ckbIncludePresets.Name = "ckbIncludePresets";
+            this.ckbIncludePresets.Size = new System.Drawing.Size(131, 17);
+            this.ckbIncludePresets.TabIndex = 3;
+            this.ckbIncludePresets.Text = "Include Preset Images";
+            this.ckbIncludePresets.UseVisualStyleBackColor = true;
+            this.ckbIncludePresets.Visible = false;
             // 
             // groupBox2
             // 
@@ -324,7 +337,7 @@
             this.groupBox2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tlpOptions.SetColumnSpan(this.groupBox2, 2);
             this.groupBox2.Controls.Add(this.tlpCustomise);
-            this.groupBox2.Location = new System.Drawing.Point(35, 230);
+            this.groupBox2.Location = new System.Drawing.Point(35, 241);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(277, 193);
             this.groupBox2.TabIndex = 5;
@@ -403,7 +416,7 @@
         private System.Windows.Forms.CheckBox ckbClone;
         private System.Windows.Forms.CheckBox ckbPadSTBLs;
         private System.Windows.Forms.CheckBox ckbThumbs;
-        private System.Windows.Forms.CheckBox ckbDefault;
+        private System.Windows.Forms.CheckBox ckbDeepClone;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Button btnStart;
@@ -414,5 +427,6 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.CheckBox ckbExclCommon;
+        private System.Windows.Forms.CheckBox ckbIncludePresets;
     }
 }

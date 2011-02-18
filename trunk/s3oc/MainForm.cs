@@ -55,6 +55,11 @@ namespace ObjectCloner
             "SPA_MX", "SWE_SE", "THA_TH",
         };
 
+        static string[] complateOverrideVariables = new string[] {
+            "Multiplier", "Mask", "Specular", "Overlay",
+            "Stencil A", "Stencil B", "Stencil C", "Stencil D",
+        };
+
         static Image defaultThumbnail =
             Image.FromFile(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Resources/defaultThumbnail.png"),
             true).GetThumbnailImage(256, 256, gtAbort, IntPtr.Zero);
@@ -2177,7 +2182,7 @@ namespace ObjectCloner
             SaveList sl = new SaveList(this,
                 searchPane == null ? objectChooser.SelectedItems[0].Tag as Item
                 : searchPane.SelectedItem.Tag as Item, rkLookup, objPkgs, ddsPkgs, tmbPkgs,
-                saveFileDialog1.FileName, isPadSTBLs, mode == Mode.FromGame, cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
+                saveFileDialog1.FileName, isPadSTBLs, mode == Mode.FromGame, null, //cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
                 updateProgress, stopSaving, OnSavingComplete);
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
@@ -3685,12 +3690,12 @@ namespace ObjectCloner
             ThumbnailsOnly_Steps(stepList, out lastStepInChain);
             if (isCreateNewPackage || cloneFixOptions.IsRenumber)
             {
-                if (cloneFixOptions.IsDefaultOnly)
+                if (cloneFixOptions.IsDeepClone)
                 {
+                    stepList.Insert(0, brush_addBrushShape);
                 }
                 else
                 {
-                    stepList.Insert(0, brush_addBrushShape);
                 }
             }
         }
@@ -3725,16 +3730,17 @@ namespace ObjectCloner
 
                     MODLs_SlurpRKs,
                     MODLs_SlurpMLODs,
-                    MODLs_SlurpTXTCs,
                 });
-                lastStepInChain = MODLs_SlurpTXTCs;
-                if (cloneFixOptions.IsDefaultOnly)
-                {
-                }
-                else
+                lastStepInChain = MODLs_SlurpMLODs;
+                if (cloneFixOptions.IsDeepClone)
                 {
                     stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_SlurpRKs);
                     stepList.Insert(stepList.IndexOf(Catlg_getVPXY), Catlg_removeRefdCatlgs);
+                    stepList.Add(MODLs_SlurpTXTCs);
+                    lastStepInChain = MODLs_SlurpTXTCs;
+                }
+                else
+                {
                 }
                 if (cloneFixOptions.IsIncludeThumbnails || (!isCreateNewPackage && cloneFixOptions.IsRenumber))
                     stepList.Add(SlurpThumbnails);
@@ -3759,15 +3765,16 @@ namespace ObjectCloner
                 {
                     stepList.Insert(0, OBJD_setFallback);
                 }
-                if (cloneFixOptions.IsDefaultOnly)
+                if (cloneFixOptions.IsDeepClone)
                 {
-                    stepList.InsertRange(stepList.IndexOf(OBJK_SlurpRKs), new Step[] {
-                        OBJD_addOBJKref,
-                        OBJD_SlurpDDSes,
-                    });
                 }
                 else
                 {
+                    stepList.InsertRange(stepList.IndexOf(OBJK_SlurpRKs), new Step[] {
+                        OBJD_addOBJKref,
+                        OBJD_IncludePresets,
+                        OBJD_SlurpDDSes,
+                    });
                 }
             }
         }
@@ -3809,6 +3816,7 @@ namespace ObjectCloner
             StepText.Add(Catlg_getVPXY, "Find VPXYs in the Catalog Resource TGIBlockList");
 
             StepText.Add(OBJD_setFallback, "Set fallback TGI");
+            StepText.Add(OBJD_IncludePresets, "Include Preset Images");
             StepText.Add(OBJD_getOBJK, "Find OBJK");
             StepText.Add(OBJD_addOBJKref, "Add OBJK");
             StepText.Add(OBJD_SlurpDDSes, "OBJD-referenced DDSes");
@@ -3891,6 +3899,23 @@ namespace ObjectCloner
                 selectedItem.Resource["FallbackIndex"] = new TypedValue(typeof(uint), (uint)tgiBlocks.Count, "X");
                 tgiBlocks.Add("TGI", selectedItem.RequestedRK.ResourceType, selectedItem.RequestedRK.ResourceGroup, selectedItem.RequestedRK.Instance);
                 selectedItem.Commit();
+            }
+        }
+        void OBJD_IncludePresets()
+        {
+            int i = 0;
+            CatalogResource.CatalogResource.MaterialList materials = selectedItem.Resource["Materials"].Value as CatalogResource.CatalogResource.MaterialList;
+            foreach (var material in materials)
+            {
+                i++;
+                foreach (var complateOverride in material.MaterialBlock.ComplateOverrides)
+                {
+                    if (complateOverrideVariables.Contains(complateOverride.VariableName))
+                    {
+                        IResourceKey rk = material.TGIBlocks[(Byte)complateOverride["TGIIndex"].Value];
+                        Add("objd" + complateOverride.VariableName + i, rk);
+                    }
+                }
             }
         }
         void OBJD_getOBJK()
@@ -4078,6 +4103,8 @@ namespace ObjectCloner
             }
             Diagnostics.Show(s, "No MLOD items");
         }
+
+        //This slurps all the RKs out of the TXTCs so the references get pulled in
         void MODLs_SlurpTXTCs()
         {
             int k = 0;
@@ -4216,6 +4243,11 @@ namespace ObjectCloner
             TabEnable(true);
             DisplayOptions();
         }
+    }
+
+    static class Extensions
+    {
+        public static bool Contains(this IEnumerable<string> haystack, string needle) { foreach (var x in haystack) if (x.Equals(needle)) return true; return false; }
     }
 
     static class Diagnostics

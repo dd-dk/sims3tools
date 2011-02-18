@@ -55,8 +55,9 @@ namespace ObjectCloner.TopPanelComponents
 
         public string UniqueName { get { return tbUniqueName.Text; } set { tbUniqueName.Text = value; } }
         public bool IsClone { get { return ckbClone.Checked; } }
-        public bool IsDefaultOnly { get { return ckbDefault.Checked; } }
-        public bool IsExcludeCommon { get { return ckbExclCommon.Checked; } }
+        public bool IsDeepClone { get { return ckbDeepClone.Checked; } }
+        //public bool IsExcludeCommon { get { return ckbExclCommon.Checked; } }
+        //public bool IsIncludePresets { get { return ckbIncludePresets.Checked; } }
         public bool IsPadSTBLs { get { return ckbPadSTBLs.Checked; } }
         public bool IsIncludeThumbnails { get { return ckbThumbs.Checked; } }
         public bool IsRenumber { get { return ckbRenumber.Checked; } }
@@ -68,12 +69,8 @@ namespace ObjectCloner.TopPanelComponents
 
         private void ckbClone_CheckedChanged(object sender, EventArgs e)
         {
-            ckbDefault.Checked = ckbExclCommon.Checked = ckbDefault.Enabled = ckbExclCommon.Enabled = !ckbClone.Enabled && ckbClone.Checked;
-        }
-
-        private void ckbDefault_CheckedChanged(object sender, EventArgs e)
-        {
-            ckbExclCommon.Checked = ckbDefault.Checked;
+            ckbDeepClone.Enabled = !ckbClone.Enabled && ckbClone.Checked;
+            if (!ckbDeepClone.Enabled) ckbDeepClone.Checked = false;
         }
 
         private void ckbRenumber_CheckedChanged(object sender, EventArgs e)
