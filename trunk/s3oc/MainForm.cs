@@ -1754,6 +1754,8 @@ namespace ObjectCloner
             ckbCopyToAll.Enabled = enabled;
             tbPrice.ReadOnly = !enabled;
             tbProductStatus.ReadOnly = !enabled;
+            tbCatlgName.BackColor = tbCatlgName.ReadOnly ? SystemColors.Control : SystemColors.Window;
+            tbCatlgDesc.BackColor = tbCatlgDesc.ReadOnly ? SystemColors.Control : SystemColors.Window;
         }
         void tabEnableDetails(bool enabled) { IterateTLP(tlpObjectDetail, (l, c) => { if (c.Tag != null) c.Enabled = enabled; }); }
         void tabEnableOther(bool enabled) { IterateTLP(tlpOther, (l, c) => { if (c.Tag != null) c.Enabled = enabled; }); }
