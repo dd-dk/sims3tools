@@ -701,6 +701,7 @@ namespace S3PIDemoFE
             if (rie == null) return;
 
             browserWidget1.Add(rie);
+            package.ReplaceResource(rie, resource);//Ensure there's an actual resource in the package
 
             if (ir.UseName && ir.ResourceName != null && ir.ResourceName.Length > 0)
                 browserWidget1.ResourceName(ir.Instance, ir.ResourceName, true, ir.AllowRename);
