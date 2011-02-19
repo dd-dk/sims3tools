@@ -116,6 +116,7 @@
             // 
             // btnTGIEditor
             // 
+            this.btnTGIEditor.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnTGIEditor.AutoSize = true;
             this.btnTGIEditor.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnTGIEditor.Location = new System.Drawing.Point(12, 514);
