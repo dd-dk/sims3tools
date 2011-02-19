@@ -125,11 +125,11 @@ namespace s3pe_VPXY_Resource_Editor
                         VPXY.Entry00 e00 = c.Tag as VPXY.Entry00;
                         if (e00.TGIIndexes.Count <= 0) continue;
                         e00.EntryID = count00++;
-                        foreach (var elem in e00.TGIIndexes)
+                        e00.TGIIndexes.ForEach(elem =>
                         {
-                            ltgib.Add(vpxy.TGIBlocks[elem.Val]);
-                            elem.Val = count++;
-                        }
+                            ltgib.Add(vpxy.TGIBlocks[elem]);
+                            elem = count++;
+                        });
                         if (e00.TGIIndexes.Count > 0)
                             vpxy.Entries.Add(e00);
                     }
