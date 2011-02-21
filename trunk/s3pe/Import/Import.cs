@@ -107,8 +107,8 @@ namespace S3PIDemoFE
         {
             if (!shownIt)
             {
-                DialogResult maty = new ExperimentalDBCWarning().ShowDialog();
-                if (maty != System.Windows.Forms.DialogResult.OK) return;
+                //DialogResult maty = new ExperimentalDBCWarning().ShowDialog();
+                //if (maty != System.Windows.Forms.DialogResult.OK) return;
                 shownIt = true;
             }
 
