@@ -219,6 +219,7 @@ namespace S3PIDemoFE
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.Size = new System.Drawing.Size(247, 25);
             this.tableLayoutPanel2.TabIndex = 13;
+            this.tableLayoutPanel2.Visible = false;
             // 
             // btnHelper1
             // 
