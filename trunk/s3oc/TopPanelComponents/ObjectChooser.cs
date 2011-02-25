@@ -244,7 +244,18 @@ namespace ObjectCloner.TopPanelComponents
         public int SelectedIndex { get { return listView1.SelectedIndices.Count == 1 ? listView1.SelectedIndices[0] : -1; } set { listView1.SelectedIndices.Clear(); if (value >= 0 && value < listView1.Items.Count)listView1.SelectedIndices.Add(value); } }
 
         public event EventHandler ItemActivate;
-        protected void OnItemActivate(object sender, EventArgs e) { if (ItemActivate != null)ItemActivate(sender, e); }
+        protected void OnItemActivate(object sender, EventArgs e) { if (ItemActivate != null) ItemActivate(sender, e); }
         private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(sender, e); }
+
+        private void omCopyRK_Click(object sender, EventArgs e)
+        {
+            if (SelectedItem != null && SelectedItem.Tag as Item != null)
+                Clipboard.SetText((SelectedItem.Tag as Item).SpecificRK + "");
+        }
+
+        private void ocContextMenu_Opening(object sender, CancelEventArgs e)
+        {
+            omCopyRK.Enabled = SelectedItem != null;
+        }
     }
 }

@@ -395,5 +395,16 @@ namespace ObjectCloner.TopPanelComponents
         {
             btnSearch.Enabled = haveCriteria();
         }
+
+        private void scmCopyRK_Click(object sender, EventArgs e)
+        {
+            if (SelectedItem != null && SelectedItem.Tag as Item != null)
+                Clipboard.SetText((SelectedItem.Tag as Item).SpecificRK + "");
+        }
+
+        private void searchContextMenu_Opening(object sender, CancelEventArgs e)
+        {
+            scmCopyRK.Enabled = SelectedIndexChanged != null;
+        }
     }
 }

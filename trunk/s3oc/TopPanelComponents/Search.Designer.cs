@@ -28,11 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.listView1 = new System.Windows.Forms.ListView();
             this.catlgName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.TagID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.ContentCategoryFlags = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.TGI = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.searchContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.scmCopyRK = new System.Windows.Forms.ToolStripMenuItem();
             this.tlpSearch = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.cbCatalogType = new System.Windows.Forms.ComboBox();
@@ -49,6 +52,7 @@
             this.tbText = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
+            this.searchContextMenu.SuspendLayout();
             this.tlpSearch.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tlpWhere.SuspendLayout();
@@ -62,6 +66,7 @@
             this.ContentCategoryFlags,
             this.TGI});
             this.tlpSearch.SetColumnSpan(this.listView1, 4);
+            this.listView1.ContextMenuStrip = this.searchContextMenu;
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.FullRowSelect = true;
             this.listView1.HideSelection = false;
@@ -95,6 +100,23 @@
             // 
             this.TGI.Text = "Resource Key";
             this.TGI.Width = 138;
+            // 
+            // searchContextMenu
+            // 
+            this.searchContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.scmCopyRK});
+            this.searchContextMenu.Name = "searchContextMenu";
+            this.searchContextMenu.Size = new System.Drawing.Size(155, 48);
+            this.searchContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.searchContextMenu_Opening);
+            // 
+            // scmCopyRK
+            // 
+            this.scmCopyRK.Enabled = false;
+            this.scmCopyRK.Name = "scmCopyRK";
+            this.scmCopyRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.scmCopyRK.Size = new System.Drawing.Size(154, 22);
+            this.scmCopyRK.Text = "&Copy RK";
+            this.scmCopyRK.Click += new System.EventHandler(this.scmCopyRK_Click);
             // 
             // tlpSearch
             // 
@@ -317,6 +339,7 @@
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "Search";
             this.Size = new System.Drawing.Size(391, 308);
+            this.searchContextMenu.ResumeLayout(false);
             this.tlpSearch.ResumeLayout(false);
             this.tlpSearch.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
@@ -349,6 +372,8 @@
         private System.Windows.Forms.ComboBox cbCatalogType;
         private System.Windows.Forms.Button btnSearch;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.ContextMenuStrip searchContextMenu;
+        private System.Windows.Forms.ToolStripMenuItem scmCopyRK;
 
     }
 }

@@ -118,7 +118,7 @@ namespace ObjectCloner.TopPanelComponents
             }
             else
             {
-                listView1.Enabled = tlpTGIValues.Enabled = false;
+                tgiSearchContextMenu.Enabled = listView1.Enabled = tlpTGIValues.Enabled = false;
                 btnSearch.Text = "&Stop";
                 StartSearch();
             }
@@ -288,7 +288,7 @@ namespace ObjectCloner.TopPanelComponents
 
             listView1.Items.Add(new ListViewItem(new string[] {
                 name, tag, Item.EPSP((byte)(rk.ResourceGroup >> 27)), "" + (AResourceKey)rk, path,
-            }) { });
+            }) { Tag = rk, });
         }
 
         Thread searchThread;
@@ -362,7 +362,7 @@ namespace ObjectCloner.TopPanelComponents
 
             updateProgressCB(true, "", true, -1, false, 0);
 
-            listView1.Enabled = tlpTGIValues.Enabled = true;
+            tgiSearchContextMenu.Enabled = listView1.Enabled = tlpTGIValues.Enabled = true;
             btnSearch.Text = "&Search";
         }
 
@@ -463,6 +463,31 @@ namespace ObjectCloner.TopPanelComponents
 
             void searchComplete(bool complete) { Thread.Sleep(0); if (control.IsHandleCreated) control.BeginInvoke(searchCompleteCB, new object[] { complete, }); }
             #endregion
+        }
+
+        private void tgiSearchContextMenu_Opening(object sender, CancelEventArgs e)
+        {
+            tgisCopyRK.Enabled = listView1.SelectedItems.Count == 1 && listView1.SelectedItems[0].Tag as AResourceKey != null;
+
+            IResourceKey rk;
+            tgisPasteRK.Enabled = Clipboard.ContainsText() && RK.TryParse(Clipboard.GetText(), out rk);
+        }
+
+        private void tgisCopyRK_Click(object sender, EventArgs e)
+        {
+            if (listView1.SelectedItems[0] != null && listView1.SelectedItems[0].Tag as AResourceKey != null)
+                Clipboard.SetText((listView1.SelectedItems[0].Tag as AResourceKey) + "");
+        }
+
+        private void tgisPasteRK_Click(object sender, EventArgs e)
+        {
+            IResourceKey rk;
+            if (RK.TryParse(Clipboard.GetText(), out rk))
+            {
+                cbResourceType.Value = rk.ResourceType;
+                tbResourceGroup.Text = "0x" + rk.ResourceGroup.ToString("X8");
+                tbInstance.Text = "0x" + rk.Instance.ToString("X16");
+            }
         }
     }
 }

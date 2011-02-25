@@ -175,6 +175,33 @@ namespace ObjectCloner
                 .CompareTo(((rk.ResourceType == 0x736884F1 && rk.Instance >> 32 == 0) ? rk.Instance & 0x07FFFFFF : rk.Instance));
         }
 
+        public static IResourceKey Parse(string value)
+        {
+            IResourceKey result;
+            if (!TryParse(value, out result)) throw new ArgumentException();
+            return result;
+        }
+        public static bool TryParse(string value, out IResourceKey result)
+        {
+            result = new RK();
+
+            string[] tgi = value.Split('-');
+            if (tgi.Length != 3) return false;
+            foreach (var x in tgi) if (!x.StartsWith("0x")) return false;
+
+            uint tg;
+            if (!uint.TryParse(tgi[0].Substring(2), System.Globalization.NumberStyles.HexNumber, null, out tg)) return false;
+            result.ResourceType = tg;
+            if (!uint.TryParse(tgi[1].Substring(2), System.Globalization.NumberStyles.HexNumber, null, out tg)) return false;
+            result.ResourceGroup = tg;
+
+            ulong i;
+            if (!ulong.TryParse(tgi[2].Substring(2), System.Globalization.NumberStyles.HexNumber, null, out i)) return false;
+            result.Instance = i;
+
+            return true;
+        }
+
         public new bool Equals(IResourceKey rk) { return this.Compare(rk) == 0; }
     }
 

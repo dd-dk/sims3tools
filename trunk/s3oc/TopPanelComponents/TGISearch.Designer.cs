@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.listView1 = new System.Windows.Forms.ListView();
             this.catlgName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -35,6 +36,8 @@
             this.ContentCategoryFlags = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.TGI = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.Path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.tgiSearchContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tgisPasteRK = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
             this.tlpTGIValues = new System.Windows.Forms.TableLayoutPanel();
             this.label2 = new System.Windows.Forms.Label();
@@ -47,7 +50,9 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.btnSearch = new System.Windows.Forms.Button();
+            this.tgisCopyRK = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
+            this.tgiSearchContextMenu.SuspendLayout();
             this.tlpTGIValues.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -81,6 +86,7 @@
             this.TGI,
             this.Path});
             this.tableLayoutPanel1.SetColumnSpan(this.listView1, 4);
+            this.listView1.ContextMenuStrip = this.tgiSearchContextMenu;
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.FullRowSelect = true;
             this.listView1.HideSelection = false;
@@ -119,6 +125,23 @@
             // 
             this.Path.Text = "Path";
             this.Path.Width = 250;
+            // 
+            // tgiSearchContextMenu
+            // 
+            this.tgiSearchContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tgisCopyRK,
+            this.tgisPasteRK});
+            this.tgiSearchContextMenu.Name = "tgiSearchContextMenu";
+            this.tgiSearchContextMenu.Size = new System.Drawing.Size(156, 70);
+            this.tgiSearchContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.tgiSearchContextMenu_Opening);
+            // 
+            // tgisPasteRK
+            // 
+            this.tgisPasteRK.Name = "tgisPasteRK";
+            this.tgisPasteRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
+            this.tgisPasteRK.Size = new System.Drawing.Size(155, 22);
+            this.tgisPasteRK.Text = "&Paste RK";
+            this.tgisPasteRK.Click += new System.EventHandler(this.tgisPasteRK_Click);
             // 
             // label1
             // 
@@ -268,6 +291,14 @@
             this.btnSearch.UseVisualStyleBackColor = true;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
+            // tgisCopyRK
+            // 
+            this.tgisCopyRK.Name = "tgisCopyRK";
+            this.tgisCopyRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.tgisCopyRK.Size = new System.Drawing.Size(155, 22);
+            this.tgisCopyRK.Text = "&Copy RK";
+            this.tgisCopyRK.Click += new System.EventHandler(this.tgisCopyRK_Click);
+            // 
             // TGISearch
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -277,6 +308,7 @@
             this.Size = new System.Drawing.Size(550, 179);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
+            this.tgiSearchContextMenu.ResumeLayout(false);
             this.tlpTGIValues.ResumeLayout(false);
             this.tlpTGIValues.PerformLayout();
             this.ResumeLayout(false);
@@ -304,5 +336,8 @@
         private System.Windows.Forms.Button btnSearch;
         private System.Windows.Forms.TableLayoutPanel tlpTGIValues;
         private System.Windows.Forms.ColumnHeader Path;
+        private System.Windows.Forms.ContextMenuStrip tgiSearchContextMenu;
+        private System.Windows.Forms.ToolStripMenuItem tgisPasteRK;
+        private System.Windows.Forms.ToolStripMenuItem tgisCopyRK;
     }
 }
