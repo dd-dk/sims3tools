@@ -3755,7 +3755,7 @@ namespace ObjectCloner
             if (isCreateNewPackage || cloneFixOptions.IsRenumber)
             {
                 stepList.Remove(Catlg_getVPXY);
-                stepList.InsertRange(0, new Step[] {
+                stepList.InsertRange(stepList.IndexOf(Catlg_addVPXYs), new Step[] {
                     // OBJD_setFallback if cloning from game
                     OBJD_getOBJK,
                     // OBJD_addOBJKref and OBJD_SlurpDDSes if default resources only
