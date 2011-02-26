@@ -37,6 +37,7 @@
             this.TGI = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.Path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tgiSearchContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tgisCopyRK = new System.Windows.Forms.ToolStripMenuItem();
             this.tgisPasteRK = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
             this.tlpTGIValues = new System.Windows.Forms.TableLayoutPanel();
@@ -50,7 +51,6 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.btnSearch = new System.Windows.Forms.Button();
-            this.tgisCopyRK = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.tgiSearchContextMenu.SuspendLayout();
             this.tlpTGIValues.SuspendLayout();
@@ -135,8 +135,18 @@
             this.tgiSearchContextMenu.Size = new System.Drawing.Size(156, 70);
             this.tgiSearchContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.tgiSearchContextMenu_Opening);
             // 
+            // tgisCopyRK
+            // 
+            this.tgisCopyRK.Enabled = false;
+            this.tgisCopyRK.Name = "tgisCopyRK";
+            this.tgisCopyRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.tgisCopyRK.Size = new System.Drawing.Size(155, 22);
+            this.tgisCopyRK.Text = "&Copy RK";
+            this.tgisCopyRK.Click += new System.EventHandler(this.tgisCopyRK_Click);
+            // 
             // tgisPasteRK
             // 
+            this.tgisPasteRK.Enabled = false;
             this.tgisPasteRK.Name = "tgisPasteRK";
             this.tgisPasteRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
             this.tgisPasteRK.Size = new System.Drawing.Size(155, 22);
@@ -290,14 +300,6 @@
             this.btnSearch.Text = "Search";
             this.btnSearch.UseVisualStyleBackColor = true;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
-            // 
-            // tgisCopyRK
-            // 
-            this.tgisCopyRK.Name = "tgisCopyRK";
-            this.tgisCopyRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.tgisCopyRK.Size = new System.Drawing.Size(155, 22);
-            this.tgisCopyRK.Text = "&Copy RK";
-            this.tgisCopyRK.Click += new System.EventHandler(this.tgisCopyRK_Click);
             // 
             // TGISearch
             // 
