@@ -118,7 +118,7 @@
             // 
             // TGI
             // 
-            this.TGI.Text = "Resource Key";
+            this.TGI.Text = "ResourceKey";
             this.TGI.Width = 138;
             // 
             // Path
@@ -132,7 +132,7 @@
             this.tgisCopyRK,
             this.tgisPasteRK});
             this.tgiSearchContextMenu.Name = "tgiSearchContextMenu";
-            this.tgiSearchContextMenu.Size = new System.Drawing.Size(156, 70);
+            this.tgiSearchContextMenu.Size = new System.Drawing.Size(209, 70);
             this.tgiSearchContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.tgiSearchContextMenu_Opening);
             // 
             // tgisCopyRK
@@ -140,8 +140,8 @@
             this.tgisCopyRK.Enabled = false;
             this.tgisCopyRK.Name = "tgisCopyRK";
             this.tgisCopyRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.tgisCopyRK.Size = new System.Drawing.Size(155, 22);
-            this.tgisCopyRK.Text = "&Copy RK";
+            this.tgisCopyRK.Size = new System.Drawing.Size(208, 22);
+            this.tgisCopyRK.Text = "&Copy ResourceKey";
             this.tgisCopyRK.Click += new System.EventHandler(this.tgisCopyRK_Click);
             // 
             // tgisPasteRK
@@ -149,8 +149,8 @@
             this.tgisPasteRK.Enabled = false;
             this.tgisPasteRK.Name = "tgisPasteRK";
             this.tgisPasteRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
-            this.tgisPasteRK.Size = new System.Drawing.Size(155, 22);
-            this.tgisPasteRK.Text = "&Paste RK";
+            this.tgisPasteRK.Size = new System.Drawing.Size(208, 22);
+            this.tgisPasteRK.Text = "&Paste ResourceKey";
             this.tgisPasteRK.Click += new System.EventHandler(this.tgisPasteRK_Click);
             // 
             // label1

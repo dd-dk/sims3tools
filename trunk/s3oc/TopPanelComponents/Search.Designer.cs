@@ -98,7 +98,7 @@
             // 
             // TGI
             // 
-            this.TGI.Text = "Resource Key";
+            this.TGI.Text = "ResourceKey";
             this.TGI.Width = 138;
             // 
             // searchContextMenu
@@ -106,7 +106,7 @@
             this.searchContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.scmCopyRK});
             this.searchContextMenu.Name = "searchContextMenu";
-            this.searchContextMenu.Size = new System.Drawing.Size(155, 48);
+            this.searchContextMenu.Size = new System.Drawing.Size(208, 48);
             this.searchContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.searchContextMenu_Opening);
             // 
             // scmCopyRK
@@ -114,8 +114,8 @@
             this.scmCopyRK.Enabled = false;
             this.scmCopyRK.Name = "scmCopyRK";
             this.scmCopyRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.scmCopyRK.Size = new System.Drawing.Size(154, 22);
-            this.scmCopyRK.Text = "&Copy RK";
+            this.scmCopyRK.Size = new System.Drawing.Size(207, 22);
+            this.scmCopyRK.Text = "&Copy ResourceKey";
             this.scmCopyRK.Click += new System.EventHandler(this.scmCopyRK_Click);
             // 
             // tlpSearch

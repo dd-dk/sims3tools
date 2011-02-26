@@ -44,6 +44,7 @@
             this.crmtToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cprxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cttlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ccfpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cwatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cfndToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cwstToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -74,7 +75,6 @@
             this.checkForUpdateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ccfpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SuspendLayout();
             // 
             // fileToolStripMenuItem
@@ -338,15 +338,15 @@
             // searchToolStripMenuItem
             // 
             this.searchToolStripMenuItem.Name = "searchToolStripMenuItem";
-            this.searchToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.searchToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.searchToolStripMenuItem.Text = "&Search";
             this.searchToolStripMenuItem.Click += new System.EventHandler(this.tsMBT_Click);
             // 
             // tgiSearchToolStripMenuItem
             // 
             this.tgiSearchToolStripMenuItem.Name = "tgiSearchToolStripMenuItem";
-            this.tgiSearchToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
-            this.tgiSearchToolStripMenuItem.Text = "Find Resource &Key";
+            this.tgiSearchToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.tgiSearchToolStripMenuItem.Text = "Find Resource&Key";
             this.tgiSearchToolStripMenuItem.Click += new System.EventHandler(this.tsMBT_Click);
             // 
             // settingsToolStripMenuItem

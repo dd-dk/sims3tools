@@ -134,7 +134,7 @@ namespace ObjectCloner.TopPanelComponents
                 "Name: {0}\n"+
                 "Tag: {1}\n"+
                 "EP/SP: {2}\n"+
-                "Resource Key: {3}\n"+
+                "ResourceKey: {3}\n"+
                 "Path: {4}",
                 lvi.SubItems[0].Text, lvi.SubItems[1].Text, lvi.SubItems[2].Text, lvi.SubItems[3].Text, lvi.SubItems[4].Text
                 ),

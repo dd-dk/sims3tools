@@ -77,7 +77,7 @@
             // 
             // TGI
             // 
-            this.TGI.Text = "Resource Key";
+            this.TGI.Text = "ResourceKey";
             this.TGI.Width = 246;
             // 
             // ocContextMenu
@@ -85,7 +85,7 @@
             this.ocContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.omCopyRK});
             this.ocContextMenu.Name = "ocContextMenu";
-            this.ocContextMenu.Size = new System.Drawing.Size(155, 48);
+            this.ocContextMenu.Size = new System.Drawing.Size(208, 48);
             this.ocContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.ocContextMenu_Opening);
             // 
             // omCopyRK
@@ -93,8 +93,8 @@
             this.omCopyRK.Enabled = false;
             this.omCopyRK.Name = "omCopyRK";
             this.omCopyRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.omCopyRK.Size = new System.Drawing.Size(154, 22);
-            this.omCopyRK.Text = "&Copy RK";
+            this.omCopyRK.Size = new System.Drawing.Size(207, 22);
+            this.omCopyRK.Text = "&Copy ResourceKey";
             this.omCopyRK.Click += new System.EventHandler(this.omCopyRK_Click);
             // 
             // ObjectChooser
