@@ -34,7 +34,7 @@ namespace ObjectCloner.TopPanelComponents
             InitializeComponent();
         }
 
-        public CloneFixOptions(Form form, bool mustClone, bool allow32bitIIDs)
+        public CloneFixOptions(Form form, bool mustClone, bool allow32bitIIDs, bool shouldPad)
             : this()
         {
             if (mustClone)
@@ -48,6 +48,7 @@ namespace ObjectCloner.TopPanelComponents
             tbUniqueName.Enabled = ckbRenumber.Checked;
             ckb32bitIIDs.Enabled = ckbRenumber.Checked && allow32bitIIDs;
             ckbRenumber.Checked = mustClone;
+            ckbPadSTBLs.Checked = shouldPad;
 
             form.AcceptButton = btnStart;
             form.CancelButton = btnCancel;

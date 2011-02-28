@@ -550,6 +550,7 @@ namespace ObjectCloner
 
         void ClosePkg()
         {
+            nmap = null;
             thumb = null;
             haveLoaded = false;
             if (currentPackage != "")
@@ -1000,7 +1001,7 @@ namespace ObjectCloner
             if (searchPane != null)
                 mode = Mode.FromGame;
 
-            cloneFixOptions = new CloneFixOptions(this, mode == Mode.FromGame, hasOBJDs());
+            cloneFixOptions = new CloneFixOptions(this, mode == Mode.FromGame, hasOBJDs(), itemName == null || itemDesc == null);
             cloneFixOptions.CancelClicked += new EventHandler(cloneFixOptions_CancelClicked);
             cloneFixOptions.StartClicked += new EventHandler(cloneFixOptions_StartClicked);
 
@@ -1749,8 +1750,8 @@ namespace ObjectCloner
         {
             enabled &= !((string)tpMain.Tag == noData);
             btnReplThumb.Enabled = enabled;
-            tbCatlgName.ReadOnly = !enabled || itemName == null;
-            tbCatlgDesc.ReadOnly = !enabled || itemDesc == null;
+            tbCatlgName.ReadOnly = !enabled;// || itemName == null;
+            tbCatlgDesc.ReadOnly = !enabled;// || itemDesc == null;
             ckbCopyToAll.Enabled = enabled;
             tbPrice.ReadOnly = !enabled;
             tbProductStatus.ReadOnly = !enabled;
@@ -2223,7 +2224,7 @@ namespace ObjectCloner
                 waitingForSavePackage = false;
                 if (e.arg)
                 {
-                    isPadSTBLs = false;
+                    //isPadSTBLs = false;
                     isCreateNewPackage = false;
                     fileReOpenToFix(saveFileDialog1.FileName, selectedItem.CType);
                 }
@@ -2345,15 +2346,15 @@ namespace ObjectCloner
                         ulong nameGUID = (ulong)catlgItem.Resource["CommonBlock.NameGUID"].Value;
                         ulong descGUID = (ulong)catlgItem.Resource["CommonBlock.DescGUID"].Value;
 
-                        Item stbl = findStblFor(nameGUID);
-                        if (stbl == null)
-                            stbl = findStblFor(descGUID);
+                        Item nameStbl = findStblFor(nameGUID);
+                        Item descStbl = findStblFor(descGUID);
 
-                        if (stbl == null)
+                        if (nameStbl == null && descStbl == null)
                             updateProgress(true, "No string tables found!", true, 0, false, 0);
                         else
                         {
-                            ulong stblInstance = stbl.RequestedRK.Instance & (ulong)(zeroSTBLIID ? 0x00FFFFFFFFFF0000 : 0x00FFFFFFFFFFFFFF);
+                            uint stblGroup = (nameStbl != null ? nameStbl : descStbl).RequestedRK.ResourceGroup;
+                            ulong stblInstance = (nameStbl != null ? nameStbl : descStbl).RequestedRK.Instance & (ulong)(zeroSTBLIID ? 0x00FFFFFFFFFF0000 : 0x00FFFFFFFFFFFFFF);
                             i = 0;
                             freq = 1;// Math.Max(1, lrie.Count / 10);
                             updateProgress(true, "Creating string tables extracts... 0%", true, 0x17, true, i);
@@ -2367,14 +2368,24 @@ namespace ObjectCloner
                                     Item oldDesc = findStblFor(descGUID, (byte)i);
                                     if (oldName == null && oldDesc == null && !padSTBLs) continue;
 
-                                    Item newstbl = NewResource(target, new TGIBlock(0, null, 0x220557DA, stbl.RequestedRK.ResourceGroup, ((ulong)i << 56) | stblInstance));
+                                    Item newstbl = NewResource(target, new TGIBlock(0, null, 0x220557DA, stblGroup, ((ulong)i << 56) | stblInstance));
                                     IDictionary<ulong, string> outstbl = newstbl.Resource as IDictionary<ulong, string>;
-                                    if (oldName == null) oldName = findStblFor(nameGUID);
-                                    if (!outstbl.ContainsKey(nameGUID)) outstbl.Add(nameGUID, oldName == null ? "" : (oldName.Resource as IDictionary<ulong, string>)[nameGUID]);
-                                    if (oldDesc == null) oldDesc = findStblFor(descGUID);
-                                    if (!outstbl.ContainsKey(descGUID)) outstbl.Add(descGUID, oldDesc == null ? "" : (oldDesc.Resource as IDictionary<ulong, string>)[descGUID]);
-                                    if (!stopSaving) newstbl.Commit();
 
+                                    if (!outstbl.ContainsKey(nameGUID))
+                                    {
+                                        if (oldName == null) oldName = nameStbl;
+                                        if (oldName != null || padSTBLs)
+                                            outstbl.Add(nameGUID, oldName == null ? "" : (oldName.Resource as IDictionary<ulong, string>)[nameGUID]);
+                                    }
+
+                                    if (!outstbl.ContainsKey(descGUID))
+                                    {
+                                        if (oldDesc == null) oldDesc = descStbl;
+                                        if (oldDesc != null || padSTBLs)
+                                            outstbl.Add(descGUID, oldDesc == null ? "" : (oldDesc.Resource as IDictionary<ulong, string>)[descGUID]);
+                                    }
+                                    
+                                    if (!stopSaving) newstbl.Commit();
                                     if (!stopSaving) newnamemap.Add(newstbl.RequestedRK.Instance, String.Format(language_fmt, languages[i], i, stblInstance));
                                 }
                                 finally
@@ -2827,8 +2838,8 @@ namespace ObjectCloner
                     }
                     else if (item.SpecificRK.ResourceType == 0x220557DA)//STBL
                     {
-                        if (itemName != null) dirty |= UpdateStbl(tbCatlgName.Text, nameGUID, item, newNameGUID);
-                        if (itemDesc != null) dirty |= UpdateStbl(tbCatlgDesc.Text, descGUID, item, newDescGUID);
+                        dirty |= UpdateStbl(tbCatlgName.Text, nameGUID, item, newNameGUID);
+                        dirty |= UpdateStbl(tbCatlgDesc.Text, descGUID, item, newDescGUID);
                     }
                     else if (item.SpecificRK.ResourceType == 0x0333406C)
                     {
@@ -2845,8 +2856,8 @@ namespace ObjectCloner
 
                 if (isPadSTBLs)
                 {
-                    if (itemName != null) PadStbls(tbCatlgName.Text, nameGUID, newNameGUID);
-                    if (itemDesc != null) PadStbls(tbCatlgDesc.Text, descGUID, newDescGUID);
+                    PadStbls(tbCatlgName.Text, nameGUID, newNameGUID);
+                    PadStbls(tbCatlgDesc.Text, descGUID, newDescGUID);
                     NMap.Commit();
                 }
 
@@ -2967,24 +2978,15 @@ namespace ObjectCloner
 
         private bool UpdateStbl(string value, ulong guid, Item item, ulong newGuid)
         {
-            Item srcStbl = findStblFor(objPkgs, guid, (byte)(item.SpecificRK.Instance >> 56));
+            IDictionary<ulong, string> stbl = (IDictionary<ulong, string>)item.Resource;
+            if (!stbl.ContainsKey(guid)) return false;
+            
+            string text = stbl[guid];
+            stbl.Remove(guid);
+            if (ckbCopyToAll.Checked || item.SpecificRK.Instance >> 56 == 0x00) text = value;
+            if (text != "") stbl.Add(newGuid, text);
 
-            Application.DoEvents();
-            if (srcStbl != null)
-            {
-                if ((item.SpecificRK.Instance & 0x00FFFFFFFFFFFFFF) == (srcStbl.SpecificRK.Instance & 0x00FFFFFFFFFFFFFF))
-                {
-                    IDictionary<ulong, string> stbl = (IDictionary<ulong, string>)item.Resource;
-
-                    string text = "";
-                    if (stbl.ContainsKey(guid)) { text = stbl[guid]; stbl.Remove(guid); }
-                    if (ckbCopyToAll.Checked || item.SpecificRK.Instance >> 56 == 0x00) text = value;
-                    if (text != "") stbl.Add(newGuid, text);
-
-                    return true;
-                }
-            }
-            return false;
+            return true;
         }
 
         private void PadStbls(string value, ulong guid, ulong newGuid)
@@ -2993,35 +2995,44 @@ namespace ObjectCloner
             {
                 updateProgress(true, "Padding STBLs...", true, 0x17, true, 0);
                 Application.DoEvents();
-                Item oldStbl = findStblFor(objPkgs, guid, x => { updateProgress(true, "Padding STBL...", false, 0, true, x); Application.DoEvents(); });
-                updateProgress(true, "Padding STBL...", true, -1, false, 0);
-                Application.DoEvents();
-                if (oldStbl != null)
+
+                List<ulong> stbls = new List<ulong>();
+                new List<IResourceIndexEntry>(objPkgs[0].FindAll(x => x.ResourceType == 0x220557DA))
+                    .ConvertAll<ulong>(x => { return x.Instance & 0x00FFFFFFFFFFFFFF; })
+                    .ForEach(x => { if (!stbls.Contains(x)) stbls.Add(x); });
+
+                IResourceKey newRK = new RK(new TGIBlock(0, null, 0x220557DA, 0, stbls.Count == 0 ? CreateInstance() & 0x00FFFFFFFFFFFFFF : stbls[0]));
+
+                for (byte lang = 0; lang < 0x17; lang++)
                 {
-                    IResourceKey newRK = new RK(oldStbl.SpecificRK);
-                    for (byte lang = 0; lang < 0x17; lang++)
-                        if (findStblFor(objPkgs, guid, lang) == null)
-                        {
-                            newRK.Instance = (newRK.Instance & 0x00FFFFFFFFFFFFFF) | ((ulong)lang << 56);
-                            Item newstbl = new Item(objPkgs, newRK);
-                            if (newstbl.SpecificRK == null)
-                            {
-                                RIE rie = new RIE(objPkgs[0], objPkgs[0].AddResource(newRK, null, true));
-                                newstbl = new Item(rie);
-                            }
-                            IDictionary<ulong, string> outstbl = (IDictionary<ulong, string>)newstbl.Resource;
-                            outstbl.Add(newGuid, value);
-                            newstbl.Commit();
-
-                            if (NMap != null && NMap.map != null && !NMap.map.ContainsKey(newRK.Instance))
-                                NMap.map.Add(newRK.Instance, String.Format(language_fmt, languages[lang], lang, newRK.Instance & 0x00FFFFFFFFFFFFFF));
-
-                            if (!rkToItem.ContainsKey(newRK))
-                                rkToItem.Add(newRK, newstbl);
-                        }
+                    if (findStblFor(objPkgs, guid, lang) == null)
+                        CreateSTBL(newRK, newGuid, value, lang);
+                    updateProgress(false, "", false, -1, true, lang);
                 }
             }
-            finally { updateProgress(true, "", false, 0, false, 0); Application.DoEvents(); }
+            finally { updateProgress(true, "", true, -1, false, 0); Application.DoEvents(); }
+        }
+
+        void CreateSTBL(IResourceKey newRK, ulong newGuid, string value, byte lang)
+        {
+            newRK.Instance = (newRK.Instance & 0x00FFFFFFFFFFFFFF) | ((ulong)lang << 56);
+            Item newstbl = new Item(objPkgs, newRK);
+            if (newstbl.SpecificRK == null)
+            {
+                RIE rie = new RIE(objPkgs[0], objPkgs[0].AddResource(newRK, null, true));
+                newstbl = new Item(rie);
+            }
+            IDictionary<ulong, string> stbl = (IDictionary<ulong, string>)newstbl.Resource;
+
+            if (!stbl.ContainsKey(newGuid)) stbl.Add(newGuid, value);
+
+            newstbl.Commit();
+
+            if (NMap != null && NMap.map != null && !NMap.map.ContainsKey(newRK.Instance))
+                NMap.map.Add(newRK.Instance, String.Format(language_fmt, languages[lang], lang, newRK.Instance & 0x00FFFFFFFFFFFFFF));
+
+            if (!rkToItem.ContainsKey(newRK))
+                rkToItem.Add(newRK, newstbl);
         }
         #endregion
 
