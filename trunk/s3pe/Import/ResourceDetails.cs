@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
+using System.Security.Cryptography;
 using System.Windows.Forms;
 using s3pi.Extensions;
 using s3pi.Interfaces;
@@ -37,7 +38,7 @@ namespace S3PIDemoFE
         {
             InitializeComponent();
             this.Icon = ((System.Drawing.Icon)(new ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
-            tbName.Enabled = UseName = useName;
+            tlpName.Enabled = UseName = useName;
             lbFilename.Visible = tbFilename.Visible = displayFilename;
         }
         public ResourceDetails(bool useName, bool displayFilename, IResourceKey rk)
@@ -131,12 +132,22 @@ namespace S3PIDemoFE
 
         private void ckbUseName_CheckedChanged(object sender, EventArgs e)
         {
-            tbName.Enabled = importSettings1.UseName;
+            tlpName.Enabled = importSettings1.UseName;
         }
 
         private void tbName_TextChanged(object sender, EventArgs e)
         {
             if (btnOK.Enabled) UpdateTGIN();
+        }
+
+        private void btnFNV64_Click(object sender, EventArgs e)
+        {
+            tbInstance.Text = "0x" + FNV64.GetHash(tbName.Text).ToString("X16");
+        }
+
+        private void btnFNV32_Click(object sender, EventArgs e)
+        {
+            tbInstance.Text = "0x" + FNV32.GetHash(tbName.Text).ToString("X16");
         }
 
         private void tbFilename_DragOver(object sender, DragEventArgs e)

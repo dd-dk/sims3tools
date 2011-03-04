@@ -41,8 +41,12 @@
             this.lbFilename = new System.Windows.Forms.Label();
             this.tbFilename = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.tlpName = new System.Windows.Forms.TableLayoutPanel();
             this.tbName = new System.Windows.Forms.TextBox();
+            this.btnFNV64 = new System.Windows.Forms.Button();
+            this.btnFNV32 = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
+            this.tlpName.SuspendLayout();
             this.SuspendLayout();
             // 
             // importSettings1
@@ -51,9 +55,10 @@
             this.importSettings1.AutoSize = true;
             this.importSettings1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tableLayoutPanel1.SetColumnSpan(this.importSettings1, 2);
+            this.importSettings1.Compress = true;
             this.importSettings1.Location = new System.Drawing.Point(3, 82);
             this.importSettings1.Name = "importSettings1";
-            this.importSettings1.Size = new System.Drawing.Size(333, 52);
+            this.importSettings1.Size = new System.Drawing.Size(480, 52);
             this.importSettings1.TabIndex = 9;
             this.importSettings1.UseNameChanged += new System.EventHandler(this.ckbUseName_CheckedChanged);
             // 
@@ -62,7 +67,7 @@
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnOK.Enabled = false;
-            this.btnOK.Location = new System.Drawing.Point(276, 201);
+            this.btnOK.Location = new System.Drawing.Point(423, 204);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 2;
@@ -74,7 +79,7 @@
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(195, 201);
+            this.btnCancel.Location = new System.Drawing.Point(342, 204);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 3;
@@ -99,8 +104,8 @@
             this.tableLayoutPanel1.Controls.Add(this.lbFilename, 0, 5);
             this.tableLayoutPanel1.Controls.Add(this.tbFilename, 1, 5);
             this.tableLayoutPanel1.Controls.Add(this.label4, 0, 4);
-            this.tableLayoutPanel1.Controls.Add(this.tbName, 1, 4);
             this.tableLayoutPanel1.Controls.Add(this.importSettings1, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.tlpName, 1, 4);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 12);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 7;
@@ -112,7 +117,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(339, 183);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(486, 186);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // label3
@@ -150,7 +155,7 @@
             this.cbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.cbType.Location = new System.Drawing.Point(58, 3);
             this.cbType.Name = "cbType";
-            this.cbType.Size = new System.Drawing.Size(278, 21);
+            this.cbType.Size = new System.Drawing.Size(425, 21);
             this.cbType.TabIndex = 2;
             this.cbType.Value = ((uint)(0u));
             this.cbType.ValidChanged += new System.EventHandler(this.cbType_ValidChanged);
@@ -160,7 +165,7 @@
             this.tbGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tbGroup.Location = new System.Drawing.Point(58, 30);
             this.tbGroup.Name = "tbGroup";
-            this.tbGroup.Size = new System.Drawing.Size(278, 20);
+            this.tbGroup.Size = new System.Drawing.Size(425, 20);
             this.tbGroup.TabIndex = 4;
             this.tbGroup.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.tbGroup.TextChanged += new System.EventHandler(this.tbTGI_TextChanged);
@@ -170,7 +175,7 @@
             this.tbInstance.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tbInstance.Location = new System.Drawing.Point(58, 56);
             this.tbInstance.Name = "tbInstance";
-            this.tbInstance.Size = new System.Drawing.Size(278, 20);
+            this.tbInstance.Size = new System.Drawing.Size(425, 20);
             this.tbInstance.TabIndex = 6;
             this.tbInstance.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.tbInstance.TextChanged += new System.EventHandler(this.tbTGI_TextChanged);
@@ -179,7 +184,7 @@
             // 
             this.lbFilename.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.lbFilename.AutoSize = true;
-            this.lbFilename.Location = new System.Drawing.Point(3, 166);
+            this.lbFilename.Location = new System.Drawing.Point(3, 169);
             this.lbFilename.Name = "lbFilename";
             this.lbFilename.Size = new System.Drawing.Size(49, 13);
             this.lbFilename.TabIndex = 12;
@@ -190,10 +195,10 @@
             this.tbFilename.AllowDrop = true;
             this.tbFilename.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tbFilename.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tbFilename.Location = new System.Drawing.Point(58, 166);
+            this.tbFilename.Location = new System.Drawing.Point(58, 169);
             this.tbFilename.Name = "tbFilename";
             this.tbFilename.ReadOnly = true;
-            this.tbFilename.Size = new System.Drawing.Size(278, 13);
+            this.tbFilename.Size = new System.Drawing.Size(425, 13);
             this.tbFilename.TabIndex = 12;
             this.tbFilename.DragDrop += new System.Windows.Forms.DragEventHandler(this.tbFilename_DragDrop);
             this.tbFilename.DragOver += new System.Windows.Forms.DragEventHandler(this.tbFilename_DragOver);
@@ -202,21 +207,63 @@
             // 
             this.label4.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(17, 143);
+            this.label4.Location = new System.Drawing.Point(17, 145);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(35, 13);
             this.label4.TabIndex = 10;
             this.label4.Text = "Name";
             // 
+            // tlpName
+            // 
+            this.tlpName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tlpName.AutoSize = true;
+            this.tlpName.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tlpName.ColumnCount = 3;
+            this.tlpName.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpName.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpName.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpName.Controls.Add(this.tbName, 0, 0);
+            this.tlpName.Controls.Add(this.btnFNV64, 1, 0);
+            this.tlpName.Controls.Add(this.btnFNV32, 2, 0);
+            this.tlpName.Enabled = false;
+            this.tlpName.Location = new System.Drawing.Point(55, 137);
+            this.tlpName.Margin = new System.Windows.Forms.Padding(0);
+            this.tlpName.Name = "tlpName";
+            this.tlpName.RowCount = 1;
+            this.tlpName.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpName.Size = new System.Drawing.Size(431, 29);
+            this.tlpName.TabIndex = 11;
+            // 
             // tbName
             // 
             this.tbName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbName.Enabled = false;
-            this.tbName.Location = new System.Drawing.Point(58, 140);
+            this.tbName.Location = new System.Drawing.Point(3, 4);
             this.tbName.Name = "tbName";
-            this.tbName.Size = new System.Drawing.Size(278, 20);
-            this.tbName.TabIndex = 11;
+            this.tbName.Size = new System.Drawing.Size(263, 20);
+            this.tbName.TabIndex = 1;
             this.tbName.TextChanged += new System.EventHandler(this.tbName_TextChanged);
+            // 
+            // btnFNV64
+            // 
+            this.btnFNV64.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnFNV64.Location = new System.Drawing.Point(272, 3);
+            this.btnFNV64.Name = "btnFNV64";
+            this.btnFNV64.Size = new System.Drawing.Size(75, 23);
+            this.btnFNV64.TabIndex = 2;
+            this.btnFNV64.Text = "FNV&64";
+            this.btnFNV64.UseVisualStyleBackColor = true;
+            this.btnFNV64.Click += new System.EventHandler(this.btnFNV64_Click);
+            // 
+            // btnFNV32
+            // 
+            this.btnFNV32.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnFNV32.Location = new System.Drawing.Point(353, 3);
+            this.btnFNV32.Name = "btnFNV32";
+            this.btnFNV32.Size = new System.Drawing.Size(75, 23);
+            this.btnFNV32.TabIndex = 3;
+            this.btnFNV32.Text = "FNV&32";
+            this.btnFNV32.UseVisualStyleBackColor = true;
+            this.btnFNV32.Click += new System.EventHandler(this.btnFNV32_Click);
             // 
             // ResourceDetails
             // 
@@ -224,7 +271,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(363, 236);
+            this.ClientSize = new System.Drawing.Size(510, 239);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
@@ -234,6 +281,8 @@
             this.Text = "Resource Details";
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
+            this.tlpName.ResumeLayout(false);
+            this.tlpName.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -254,5 +303,8 @@
         private System.Windows.Forms.TextBox tbName;
         private S3PIDemoFE.Import.ImportSettings importSettings1;
         private System.Windows.Forms.ResourceTypeCombo cbType;
+        private System.Windows.Forms.TableLayoutPanel tlpName;
+        private System.Windows.Forms.Button btnFNV64;
+        private System.Windows.Forms.Button btnFNV32;
     }
 }
