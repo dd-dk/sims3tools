@@ -420,7 +420,7 @@ namespace ObjectCloner.TopPanelComponents
                         for (int j = 0; j < pkgs.Count; j++)
                         {
                             IPackage pkg = pkgs[j];
-                            string path = paths[j];
+                            string path = String.Format("{0} ({1}[{2}])", paths[j], new string[] { "obj", "dds", "tmb", "cc", }[i], j);
 
                             if (stopSearch) return;
 

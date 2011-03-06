@@ -68,6 +68,7 @@
             this.advancedCloningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.diagnosticsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loggingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
@@ -317,12 +318,14 @@
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(153, 6);
+            this.toolStripSeparator1.Visible = false;
             // 
             // iconsToolStripMenuItem
             // 
             this.iconsToolStripMenuItem.Name = "iconsToolStripMenuItem";
             this.iconsToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
             this.iconsToolStripMenuItem.Text = "Show &Thumbnails";
+            this.iconsToolStripMenuItem.Visible = false;
             this.iconsToolStripMenuItem.Click += new System.EventHandler(this.tsMBV_Click);
             // 
             // toolsToolStripMenuItem
@@ -358,7 +361,8 @@
             this.automaticUpdateCheckToolStripMenuItem,
             this.advancedCloningToolStripMenuItem,
             this.toolStripSeparator3,
-            this.diagnosticsToolStripMenuItem});
+            this.diagnosticsToolStripMenuItem,
+            this.loggingToolStripMenuItem});
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
             this.settingsToolStripMenuItem.Size = new System.Drawing.Size(58, 20);
             this.settingsToolStripMenuItem.Text = "&Settings";
@@ -410,6 +414,13 @@
             this.diagnosticsToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
             this.diagnosticsToolStripMenuItem.Text = "&Diagnostics";
             this.diagnosticsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
+            // loggingToolStripMenuItem
+            // 
+            this.loggingToolStripMenuItem.Name = "loggingToolStripMenuItem";
+            this.loggingToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.loggingToolStripMenuItem.Text = "&Logging";
+            this.loggingToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -530,5 +541,6 @@
         private System.Windows.Forms.ToolStripMenuItem advancedCloningToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem langSearchToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem tgiSearchToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loggingToolStripMenuItem;
     }
 }

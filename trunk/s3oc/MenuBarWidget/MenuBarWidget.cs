@@ -1,5 +1,5 @@
 ﻿/***************************************************************************
- *  Copyright (C) 2009 by Peter L Jones                                    *
+ *  Copyright (C) 2011 by Peter L Jones                                    *
  *  pljones@users.sf.net                                                   *
  *                                                                         *
  *  This file is part of the Sims 3 Package Interface (s3pi)               *
@@ -52,7 +52,7 @@ namespace ObjectCloner
                 //Settings
                 gameFoldersToolStripMenuItem, userNameToopStripMenuItem, langSearchToolStripMenuItem, automaticUpdateCheckToolStripMenuItem,
                 advancedCloningToolStripMenuItem,
-                diagnosticsToolStripMenuItem,
+                diagnosticsToolStripMenuItem, loggingToolStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, checkForUpdateToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
@@ -98,7 +98,7 @@ namespace ObjectCloner
             MBV_tiles, MBV_largeIcons, MBV_smallIcons, MBV_list, MBV_detailedList,
             MBV_icons,
             MBT_search, MBT_tgiSearch,
-            MBS_sims3Folder, MBS_userName, MBS_langSearch, MBS_updates, MBS_advanced, MBS_diagnostics,
+            MBS_sims3Folder, MBS_userName, MBS_langSearch, MBS_updates, MBS_advanced, MBS_popups, MBS_logging,
             MBH_contents, MBH_about, MBH_update, MBH_warranty, MBH_licence,
         }
 

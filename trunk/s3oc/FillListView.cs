@@ -185,7 +185,7 @@ namespace ObjectCloner
         {
             result = new RK();
 
-            string[] tgi = value.Split('-');
+            string[] tgi = value.Trim().ToLower().Split('-');
             if (tgi.Length != 3) return false;
             foreach (var x in tgi) if (!x.StartsWith("0x")) return false;
 
@@ -248,6 +248,16 @@ namespace ObjectCloner
                 }
             return arie;
         }
+
+        public string LongName
+        {
+            get
+            {
+                string key = "0x" + specificRK.ResourceType.ToString("X8");
+                List<string> exts = s3pi.Extensions.ExtList.Ext.ContainsKey(key) ? s3pi.Extensions.ExtList.Ext[key] : new List<string>();
+                return String.Format("{0}-{1} from {2}", exts.Count > 0 ? exts[0] : "UNKN", specificRK, MainForm.PathForPackage(searchList, specificPkg, true));
+            }
+        }
     }
 
     public class Item
@@ -306,5 +316,7 @@ namespace ObjectCloner
         }
 
         public void Commit() { myrie.SpecificPkg.ReplaceResource(myrie.SpecificRK, Resource); }
+
+        public string LongName { get { return myrie.LongName; } }
     }
 }
