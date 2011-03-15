@@ -32,11 +32,12 @@ namespace s3ascHelper
 {
     public partial class Export : Form, s3pi.Helpers.IRunHelper
     {
+        MyProgressBar mpb;
         public Export()
         {
             InitializeComponent();
+            mpb = new MyProgressBar(label1, pb);
             sfdExport.FileName = string.Format("{0}_filebase.s3asc", Program.Filename);
-            sfdExport.Filter = Program.Filter;
         }
 
         GenericRCOLResource rcolResource;
@@ -67,6 +68,7 @@ namespace s3ascHelper
 
                 if (rcolResource.ChunkEntries[0].TGIBlock.ResourceType == 0x01661233)
                 {
+                    this.Text = "Export MODL...";
                     var modl = rcolResource.ChunkEntries[0].RCOLBlock as MODL;
                     foreach (var lodEntry in modl.Entries)
                     {
@@ -80,6 +82,7 @@ namespace s3ascHelper
                 }
                 else if (rcolResource.ChunkEntries[0].TGIBlock.ResourceType == 0x01D10F34)
                 {
+                    this.Text = "Export MLOD...";
                     var mlod = rcolResource.ChunkEntries[0].RCOLBlock as MLOD;
                     Export_MLOD(mlod, folder, filebase);
                 }
@@ -149,17 +152,15 @@ namespace s3ascHelper
 
             w.WriteLine(string.Format("vrtf {0} {1}", vrtf.Layouts.Count, vrtf.Stride));
 
-            DateTime wait = DateTime.UtcNow;
-            this.label1.Text = "Export VRTF...";
-            this.pb.Value = 0;
-            this.pb.Maximum = vrtf.Layouts.Count;
+            mpb.Init("Export VRTF...", vrtf.Layouts.Count);
             for (int i = 0; i < vrtf.Layouts.Count; i++)
             {
                 var l = vrtf.Layouts[i];
                 w.WriteLine(string.Format("{0} {1} {2} {3} {4}", i, (byte)l.Usage, l.UsageIndex, (byte)l.Format, l.Offset));
-                if (wait < DateTime.UtcNow) { this.pb.Value = i; wait = DateTime.UtcNow.AddSeconds(0.1); Application.DoEvents(); }
+                mpb.Value++;
             }
             w.Flush();
+            mpb.Done();
         }
 
         void Export_SKIN(StreamWriter w, SKIN skin, MLOD.Mesh mesh)
@@ -170,28 +171,20 @@ namespace s3ascHelper
 
             w.WriteLine(string.Format("skin {0}", skin.Bones.Count));
 
-            DateTime wait = DateTime.UtcNow;
-            this.label1.Text = "Export SKIN...";
-            this.pb.Value = 0;
-            this.pb.Maximum = skin.Bones.Count;
-            for (int i = 0; i < skin.Bones.Count; i++)
+            mpb.Init("Export SKIN...", skin.Bones.Count);
+            int i = 0;
+            foreach (var bone in skin.Bones)
             {
-                var bone = skin.Bones[mesh.JointReferences[i]];
-                if (bone == null)
-                {
-                    w.WriteLine(string.Format("; Bone for Joint 0x{0:X8} not found", mesh.JointReferences[i]));
-                    w.WriteLine(string.Format("{0} {1:X8} 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0", i, bone.NameHash));
-                    continue;
-                }
                 w.WriteLine(string.Format("{0} {1:X8} {2:F6} {3:F6} {4:F6} {5:F6} {6:F6} {7:F6} {8:F6} {9:F6} {10:F6} {11:F6} {12:F6} {13:F6}",
-                    i,
+                    i++,
                     bone.NameHash,
                     bone.InverseBindPose.Right.X, bone.InverseBindPose.Right.Y, bone.InverseBindPose.Right.Z, bone.InverseBindPose.Translate.X,
                     bone.InverseBindPose.Up.X, bone.InverseBindPose.Up.Y, bone.InverseBindPose.Up.Z, bone.InverseBindPose.Translate.Y,
                     bone.InverseBindPose.Back.X, bone.InverseBindPose.Back.Y, bone.InverseBindPose.Back.Z, bone.InverseBindPose.Translate.Z));
-                if (wait < DateTime.UtcNow) { this.pb.Value = i; wait = DateTime.UtcNow.AddSeconds(0.1); Application.DoEvents(); }
+                mpb.Value++;
             }
             w.Flush();
+            mpb.Done();
         }
 
         void Export_VBUF(StreamWriter w, VBUF vbuf, VRTF vrtf, MLOD.Mesh mesh)
@@ -219,10 +212,7 @@ namespace s3ascHelper
 
         void Export_VBUF_Common(StreamWriter w, s3piwrappers.Vertex[] av, VRTF vrtf)
         {
-            DateTime wait = DateTime.UtcNow;
-            this.label1.Text = "Export VBUF...";
-            this.pb.Value = 0;
-            this.pb.Maximum = av.Length;
+            mpb.Init("Export VBUF...", av.Length);
             for (int i = 0; i < av.Length; i++)
             {
                 s3piwrappers.Vertex v = av[i];
@@ -263,11 +253,12 @@ namespace s3ascHelper
                             break;
                     }
                     w.WriteLine();
-                    if (wait < DateTime.UtcNow) { this.pb.Value = i; wait = DateTime.UtcNow.AddSeconds(0.1); Application.DoEvents(); }
+                    mpb.Value++;
                 }
             }
 
             w.Flush();
+            mpb.Done();
         }
 
         void Export_IBUF(StreamWriter w, IBUF ibuf, MLOD.Mesh mesh)
@@ -293,20 +284,18 @@ namespace s3ascHelper
 
         void Export_IBUF_Common(StreamWriter w, int[] indices, int sizePerPrimitive, int faces)
         {
-            DateTime wait = DateTime.UtcNow;
-            this.label1.Text = "Export IBUF...";
-            this.pb.Value = 0;
-            this.pb.Maximum = faces;
+            mpb.Init("Export IBUF...", faces);
             for (int i = 0; i < faces; i++)
             {
                 w.Write(string.Format("{0}", i));
                 for (int j = 0; j < sizePerPrimitive; j++)
                     w.Write(string.Format(" {0}", indices[i * sizePerPrimitive + j]));
                 w.WriteLine();
-                if (wait < DateTime.UtcNow) { this.pb.Value = i; wait = DateTime.UtcNow.AddSeconds(0.1); Application.DoEvents(); }
+                mpb.Value++;
             }
 
             w.Flush();
+            mpb.Done();
         }
 
         void Export_GEOS(StreamWriter w, MLOD.Mesh mesh)

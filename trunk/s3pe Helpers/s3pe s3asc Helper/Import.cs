@@ -31,11 +31,12 @@ namespace s3ascHelper
 {
     public partial class Import : Form, s3pi.Helpers.IRunHelper
     {
+        MyProgressBar mpb;
         public Import()
         {
             InitializeComponent();
+            mpb = new MyProgressBar(label1, pb);
             ofdImport.FileName = string.Format("{0}_filebase.s3asc", Program.Filename);
-            ofdImport.Filter = Program.Filter;
         }
 
         GenericRCOLResource rcolResource;
@@ -249,10 +250,7 @@ namespace s3ascHelper
 
             vrtf.Stride = stride;
 
-            DateTime wait = DateTime.UtcNow.AddSeconds(0.1);
-            this.label1.Text = "Import VRTF...";
-            this.pb.Value = 0;
-            this.pb.Maximum = count;
+            mpb.Init("Import VRTF...", count);
             for (int l = 0; l < count; l++)
             {
                 split = r.ReadLine().Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
@@ -263,13 +261,14 @@ namespace s3ascHelper
                     throw new InvalidDataException(string.Format("'vrtf' line {0} has invalid line index.", l));
                 if (index != l)
                     throw new InvalidDataException(string.Format("'vrtf' line {0} has incorrect line index value {1}.", l, index));
-                byte[] values = StringToArray<Byte>.Convert(split, 1);
+                byte[] values = split.Cast<byte>(1);
                 if (values.Length != 4)
                     throw new InvalidDataException(string.Format("'vrtf' line {0} has incorrect number of byte values {1}.", l, values.Length));
 
                 vrtf.Layouts.Add((VRTF.ElementFormat)values[2], values[3], (VRTF.ElementUsage)values[0], values[1]);
-                if (wait < DateTime.UtcNow) { this.pb.Value = l; wait = DateTime.UtcNow.AddSeconds(0.1); Application.DoEvents(); }
+                mpb.Value++;
             }
+            mpb.Done();
 
             return vrtf;
         }
@@ -277,7 +276,6 @@ namespace s3ascHelper
         SKIN Import_SKIN(StreamReader r, MLOD.Mesh mesh)
         {
             SKIN skin = new SKIN(rcolResource.RequestedApiVersion, null) { Version = 1, Bones = new SKIN.BoneList(null), };
-            mesh.JointReferences = new UIntList(null);
 
             string tagLine = ReadLine(r);
             string[] split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
@@ -289,10 +287,9 @@ namespace s3ascHelper
             if (!int.TryParse(split[1], out count))
                 throw new InvalidDataException("'skin' line has invalid count.");
 
-            DateTime wait = DateTime.UtcNow;
-            this.label1.Text = "Import SKIN...";
-            this.pb.Value = 0;
-            this.pb.Maximum = count;
+            if (count == 0) return null;
+
+            mpb.Init("Import SKIN...", count);
             for (int b = 0; b < count; b++)
             {
                 split = r.ReadLine().Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
@@ -306,7 +303,7 @@ namespace s3ascHelper
                 uint name;
                 if (!uint.TryParse(split[1], System.Globalization.NumberStyles.HexNumber, null, out name))
                     throw new InvalidDataException(string.Format("'skin' line {0} has invalid name hash.", b));
-                float[] values = StringToArray<Single>.Convert(split, 2);
+                float[] values = split.Cast<Single>(2);
                 if (values.Length != 12)
                     throw new InvalidDataException(string.Format("'skin' line {0} has incorrect number of float values {1}.", b, values.Length));
 
@@ -315,10 +312,10 @@ namespace s3ascHelper
                 bone.InverseBindPose.Up.X = values[4]; bone.InverseBindPose.Up.Y = values[5]; bone.InverseBindPose.Up.Z = values[6]; bone.InverseBindPose.Translate.Y = values[7];
                 bone.InverseBindPose.Back.X = values[8]; bone.InverseBindPose.Back.Y = values[9]; bone.InverseBindPose.Back.Z = values[10]; bone.InverseBindPose.Translate.Z = values[11];
 
-                mesh.JointReferences.Add(name);
                 skin.Bones.Add(bone);
-                if (wait.AddSeconds(0.1) < DateTime.UtcNow) { this.pb.Value = b; wait = DateTime.UtcNow; Application.DoEvents(); }
+                mpb.Value++;
             }
+            mpb.Done();
 
             return skin;
         }
@@ -381,11 +378,8 @@ namespace s3ascHelper
             int uvLength = vrtf.Layouts.FindAll(x => x.Usage == VRTF.ElementUsage.UV).Count;
 
             int line = 0;
-            DateTime wait = DateTime.UtcNow;
 
-            this.label1.Text = "Import VBUF...";
-            this.pb.Value = 0;
-            this.pb.Maximum = count;
+            mpb.Init("Import VBUF...", count);
             for (int v = 0; v < count; v++)
             {
                 s3piwrappers.Vertex vertex = new s3piwrappers.Vertex();
@@ -411,40 +405,40 @@ namespace s3ascHelper
                     switch (usage)
                     {
                         case (byte)VRTF.ElementUsage.Position:
-                            float[] Position = StringToArray<Single>.Convert(split, 2);
+                            float[] Position = split.Cast<Single>(2);
                             if (!CheckFloatCount(layout.Format, isDefaultVRTF, Position.Length))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
                             vertex.Position = Position;
                             break;
                         case (byte)VRTF.ElementUsage.Normal:
-                            float[] Normal = StringToArray<Single>.Convert(split, 2);
+                            float[] Normal = split.Cast<Single>(2);
                             if (!CheckFloatCount(layout.Format, isDefaultVRTF, Normal.Length))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
                             vertex.Normal = Normal;
                             break;
                         case (byte)VRTF.ElementUsage.UV:
-                            float[] UV = StringToArray<Single>.Convert(split, 2);
+                            float[] UV = split.Cast<Single>(2);
                             if (!CheckFloatCount(layout.Format, isDefaultVRTF, UV.Length))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
                             vertex.UV[nUV++] = UV;
                             break;
                         case (byte)VRTF.ElementUsage.BlendIndex:
-                            byte[] BlendIndex = StringToArray<Byte>.Convert(split, 2);
+                            byte[] BlendIndex = split.Cast<byte>(2);
                             if (!(BlendIndex.Length == VRTF.ByteSizeFromFormat(layout.Format) || (isDefaultVRTF && BlendIndex.Length + 1 == VRTF.ByteSizeFromFormat(layout.Format))))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
                             break;
                         case (byte)VRTF.ElementUsage.BlendWeight:
-                            float[] BlendWeight = StringToArray<Single>.Convert(split, 2);
+                            float[] BlendWeight = split.Cast<Single>(2);
                             if (!CheckFloatCount(layout.Format, isDefaultVRTF, BlendWeight.Length))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
                             break;
                         case (byte)VRTF.ElementUsage.Tangent:
-                            float[] Tangent = StringToArray<Single>.Convert(split, 2);
+                            float[] Tangent = split.Cast<Single>(2);
                             if (!CheckFloatCount(layout.Format, isDefaultVRTF, Tangent.Length))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
                             break;
                         case (byte)VRTF.ElementUsage.Colour:
-                            float[] Colour = StringToArray<Single>.Convert(split, 2);
+                            float[] Colour = split.Cast<Single>(2);
                             if (!CheckFloatCount(layout.Format, isDefaultVRTF, Colour.Length))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
                             break;
@@ -454,8 +448,9 @@ namespace s3ascHelper
                 vertices[v] = vertex;
                 if (nUV != uvLength)
                     throw new InvalidDataException(string.Format("'vbuf' vertex {0} read {1} UV lines, expected {2}.", v, nUV, uvLength));
-                if (wait.AddSeconds(0.1) < DateTime.UtcNow) { this.pb.Value = v; wait = DateTime.UtcNow; Application.DoEvents(); }
+                mpb.Value++;
             }
+            mpb.Done();
 
             return vertices;
         }
@@ -515,10 +510,7 @@ namespace s3ascHelper
         {
             Int32[] indices = new Int32[count * sizePerPrimitive];
 
-            DateTime wait = DateTime.UtcNow;
-            this.label1.Text = "Import IBUF...";
-            this.pb.Value = 0;
-            this.pb.Maximum = count;
+            mpb.Init("Import IBUF...", count);
             for (int i = 0; i < count; i++)
             {
                 string[] split = r.ReadLine().Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
@@ -529,15 +521,16 @@ namespace s3ascHelper
                     throw new InvalidDataException(string.Format("'ibuf' line {0} has invalid line index.", i));
                 if (index != i)
                     throw new InvalidDataException(string.Format("'ibuf' line {0} has incorrect line index value {1}.", i, index));
-                Int32[] values = StringToArray<Int32>.Convert(split, 1);
+                Int32[] values = split.Cast<int>(1);
                 if (values.Length != sizePerPrimitive)
                     throw new InvalidDataException(string.Format("'ibuf' line {0} has incorrect number of Int32 values {1}.", i, values.Length));
 
                 for (int j = 0; j < values.Length; j++)
                     indices[i * sizePerPrimitive + j] = values[j];
 
-                if (wait.AddSeconds(0.1) < DateTime.UtcNow) { this.pb.Value = i; wait = DateTime.UtcNow; Application.DoEvents(); }
+                mpb.Value++;
             }
+            mpb.Done();
 
             return indices;
         }
@@ -609,27 +602,6 @@ namespace s3ascHelper
                     });
 
                 if (wait.AddSeconds(0.1) < DateTime.UtcNow) { this.pb.Value = g; wait = DateTime.UtcNow; Application.DoEvents(); }
-            }
-        }
-
-        static class StringToArray<T>
-        {
-            public static T[] Convert(string[] s, int pos)
-            {
-                System.Reflection.MethodInfo mi = typeof(T).GetMethod("TryParse", new Type[] { typeof(string), typeof(T).MakeByRefType(), });
-                if (mi == null)
-                    throw new InvalidOperationException("No TryParse for " + typeof(T).Name);
-
-                T[] res = new T[s.Length - pos];
-                for (int i = pos; i < s.Length; i++)
-                {
-                    // because simple types are not reference types, this doesn't work except as the test
-                    if (!(bool)mi.Invoke(null, new object[] { s[i], res[i - pos], }))
-                        throw new InvalidDataException("Invalid value");
-                    // so need to invoke Parse to get the value back
-                    res[i - pos] = (T)typeof(T).InvokeMember("Parse", System.Reflection.BindingFlags.InvokeMethod, null, null, new object[] { s[i], });
-                }
-                return res;
             }
         }
 

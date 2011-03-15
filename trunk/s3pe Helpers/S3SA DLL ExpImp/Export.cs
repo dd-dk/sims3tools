@@ -31,9 +31,11 @@ namespace S3SA_DLL_ExpImp
 {
     public partial class Export : Form, s3pi.Helpers.IRunHelper
     {
+        MyProgressBar mpb;
         public Export()
         {
             InitializeComponent();
+            mpb = new MyProgressBar(label1, pb);
         }
 
         ScriptResource.ScriptResource s3sa;
@@ -41,33 +43,35 @@ namespace S3SA_DLL_ExpImp
             : this()
         {
             s3sa = new ScriptResource.ScriptResource(0, s);
+            sfdExport.FileName = Program.getAssemblyName(s3sa);
             Application.DoEvents();
         }
 
 
         public byte[] Result { get { return null; } }
 
-        private void Export_Load(object sender, EventArgs e)
+        private void Export_Shown(object sender, EventArgs e)
         {
-            Application.DoEvents();
-
-            sfdExport.FileName = Program.getAssemblyName(s3sa);
-            DialogResult dr = sfdExport.ShowDialog();
-            if (dr != DialogResult.OK)
+            try
             {
-                Environment.ExitCode = 1;
-                this.Close();
+                DialogResult dr = sfdExport.ShowDialog();
+                if (dr != DialogResult.OK)
+                {
+                    return;
+                }
+
+                mpb.Init("Export assembly...", (int)s3sa.Assembly.BaseStream.Length);
+                byte[] data = new byte[s3sa.Assembly.BaseStream.Length];
+                s3sa.Assembly.BaseStream.Read(data, 0, data.Length);
+
+                using (FileStream fs = new FileStream(sfdExport.FileName, FileMode.Create, FileAccess.Write))
+                {
+                    fs.Write(data, 0, data.Length);
+                }
+
+                mpb.Done();
             }
-
-            byte[] data = new byte[s3sa.Assembly.BaseStream.Length];
-            s3sa.Assembly.BaseStream.Read(data, 0, data.Length);
-
-            FileStream fs = new FileStream(sfdExport.FileName, FileMode.Create, FileAccess.Write);
-            fs.Write(data, 0, data.Length);
-            fs.Close();
-
-            Application.DoEvents();
-            this.Close();
+            finally { this.Close(); }
         }
     }
 }

@@ -28,26 +28,19 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.ofdImport = new System.Windows.Forms.OpenFileDialog();
             this.pb = new System.Windows.Forms.ProgressBar();
             this.label1 = new System.Windows.Forms.Label();
+            this.ofdImport = new System.Windows.Forms.OpenFileDialog();
             this.SuspendLayout();
-            // 
-            // ofdImport
-            // 
-            this.ofdImport.DefaultExt = "dll";
-            this.ofdImport.FileName = "*.dll";
-            this.ofdImport.Filter = "S3Asc base files|*.s3asc|All files|*.*";
-            this.ofdImport.Title = "Import from s3asc";
             // 
             // pb
             // 
-            this.pb.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.pb.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.pb.Location = new System.Drawing.Point(12, 25);
             this.pb.Name = "pb";
-            this.pb.Size = new System.Drawing.Size(268, 23);
-            this.pb.TabIndex = 0;
+            this.pb.Size = new System.Drawing.Size(132, 23);
+            this.pb.TabIndex = 1;
             // 
             // label1
             // 
@@ -55,20 +48,26 @@
             this.label1.Location = new System.Drawing.Point(12, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(70, 13);
-            this.label1.TabIndex = 1;
+            this.label1.TabIndex = 0;
             this.label1.Text = "Please wait...";
+            // 
+            // ofdImport
+            // 
+            this.ofdImport.DefaultExt = "s3asc";
+            this.ofdImport.FileName = "*_filebase.s3asc";
+            this.ofdImport.Filter = "S3Asc base files|*.s3asc|All files|*.*";
+            this.ofdImport.Title = "Import from s3asc";
             // 
             // Import
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(292, 64);
-            this.Controls.Add(this.label1);
+            this.ClientSize = new System.Drawing.Size(156, 60);
             this.Controls.Add(this.pb);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Controls.Add(this.label1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Name = "Import";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Import MODL";
+            this.Text = "Import...";
             this.Shown += new System.EventHandler(this.Import_Shown);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -77,9 +76,8 @@
 
         #endregion
 
-        private System.Windows.Forms.OpenFileDialog ofdImport;
         private System.Windows.Forms.ProgressBar pb;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.OpenFileDialog ofdImport;
     }
 }
-

@@ -35,8 +35,8 @@
             // 
             // sfdExport
             // 
-            this.sfdExport.DefaultExt = "dll";
-            this.sfdExport.FileName = "*.dll";
+            this.sfdExport.DefaultExt = "s3asc";
+            this.sfdExport.FileName = "*_filebase.s3asc";
             this.sfdExport.Filter = "S3Asc base files|*_filebase.s3asc|All files|*.*";
             this.sfdExport.Title = "Export to s3asc";
             // 
@@ -46,29 +46,28 @@
             this.label1.Location = new System.Drawing.Point(12, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(70, 13);
-            this.label1.TabIndex = 3;
+            this.label1.TabIndex = 0;
             this.label1.Text = "Please wait...";
             // 
             // pb
             // 
-            this.pb.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.pb.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.pb.Location = new System.Drawing.Point(12, 25);
             this.pb.Name = "pb";
-            this.pb.Size = new System.Drawing.Size(268, 23);
-            this.pb.TabIndex = 2;
+            this.pb.Size = new System.Drawing.Size(132, 23);
+            this.pb.TabIndex = 1;
             // 
             // Export
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(292, 61);
-            this.Controls.Add(this.label1);
+            this.ClientSize = new System.Drawing.Size(156, 60);
             this.Controls.Add(this.pb);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Controls.Add(this.label1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Name = "Export";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Export MODL";
+            this.Text = "Export";
             this.Shown += new System.EventHandler(this.Export_Shown);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -82,4 +81,3 @@
         private System.Windows.Forms.ProgressBar pb;
     }
 }
-

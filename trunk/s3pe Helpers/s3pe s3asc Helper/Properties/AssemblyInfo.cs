@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("s3pe's own s3asc Export/Import tool")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Peter L Jones")]
-[assembly: AssemblyProduct("S3SA DLL ExpImp")]
+[assembly: AssemblyProduct("s3pe s3asc Helper")]
 [assembly: AssemblyCopyright("Copyright © 2011  Peter L Jones  Released under the GPL 3.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("3aaece20-3049-4435-a379-89e6c85d122c")]
+[assembly: Guid("238c5315-2013-49ad-b137-68ea8a14b497")]
 
 // Version information for an assembly consists of the following four values:
 //

@@ -1,5 +1,5 @@
 ﻿/***************************************************************************
- *  Copyright (C) 2010 by Peter L Jones                                    *
+ *  Copyright (C) 2011 by Peter L Jones                                    *
  *  pljones@users.sf.net                                                   *
  *                                                                         *
  *  This file is part of the Sims 3 Package Interface (s3pi)               *
@@ -18,59 +18,21 @@
  *  along with s3pi.  If not, see <http://www.gnu.org/licenses/>.          *
  ***************************************************************************/
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.IO;
 using System.Windows.Forms;
-using s3pi.Interfaces;
-using ScriptResource;
 
 namespace S3SA_DLL_ExpImp
 {
-    public partial class Import : Form, s3pi.Helpers.IRunHelper
+    public class MyProgressBar
     {
-        MyProgressBar mpb;
-        public Import()
-        {
-            InitializeComponent();
-            mpb = new MyProgressBar(label1, pb);
-        }
+        Label l;
+        ProgressBar pb;
+        DateTime wait;
+        public MyProgressBar(Label l, ProgressBar pb) { this.l = l; this.pb = pb; }
 
-        ScriptResource.ScriptResource s3sa;
-        public Import(Stream s)
-            : this()
-        {
-            s3sa = new ScriptResource.ScriptResource(0, s);
-            ofdImport.FileName = Program.getAssemblyName(s3sa);
-            Application.DoEvents();
-        }
-
-        byte[] result = null;
-        public byte[] Result { get { return result; } }
-
-        private void Import_Shown(object sender, EventArgs e)
-        {
-            try
-            {
-                DialogResult dr = ofdImport.ShowDialog();
-                if (dr != DialogResult.OK)
-                {
-                    return;
-                }
-
-                using (FileStream fs = new FileStream(ofdImport.FileName, FileMode.Open, FileAccess.Read))
-                {
-                    mpb.Init("Import assembly...", (int)fs.Length);
-                    s3sa.Assembly = new BinaryReader(fs);
-                }
-
-                result = (byte[])s3sa.AsBytes.Clone();
-                Environment.ExitCode = 0;
-
-                mpb.Done();
-            }
-            finally { this.Close(); }
-        }
+        public void Init(string label, int max) { l.Text = label; pb.Value = 0; pb.Maximum = max; wait = DateTime.UtcNow.AddSeconds(0.1); Application.DoEvents(); }
+        public int Value { get { return pb.Value; } set { if (wait < DateTime.UtcNow) { pb.Value = value; wait = DateTime.UtcNow.AddSeconds(0.1); Application.DoEvents(); } } }
+        public void Done() { pb.Value = pb.Maximum; l.Text = ""; }
     }
 }

@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("s3pe s3asc Helper")]
-[assembly: AssemblyDescription("s3pe's own s3asc Export/Import tool")]
+[assembly: AssemblyTitle("S3SA DLL ExpImp")]
+[assembly: AssemblyDescription("S3SA Assembly Export/Import helper")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Peter L Jones")]
 [assembly: AssemblyProduct("S3SA DLL ExpImp")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("3aaece20-3049-4435-a379-89e6c85d122c")]
+[assembly: Guid("63bc5e79-1dd4-4c66-b439-9947bcadabf8")]
 
 // Version information for an assembly consists of the following four values:
 //

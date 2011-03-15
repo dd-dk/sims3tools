@@ -28,8 +28,28 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.pb = new System.Windows.Forms.ProgressBar();
+            this.label1 = new System.Windows.Forms.Label();
             this.ofdImport = new System.Windows.Forms.OpenFileDialog();
             this.SuspendLayout();
+            // 
+            // pb
+            // 
+            this.pb.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.pb.Location = new System.Drawing.Point(12, 25);
+            this.pb.Name = "pb";
+            this.pb.Size = new System.Drawing.Size(132, 23);
+            this.pb.TabIndex = 1;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(12, 9);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(70, 13);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Please wait...";
             // 
             // ofdImport
             // 
@@ -42,17 +62,22 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(292, 273);
+            this.ClientSize = new System.Drawing.Size(156, 60);
+            this.Controls.Add(this.pb);
+            this.Controls.Add(this.label1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Name = "Import";
-            this.Text = "Form1";
-            this.Load += new System.EventHandler(this.Import_Load);
+            this.Text = "Import assembly";
+            this.Shown += new System.EventHandler(this.Import_Shown);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
+        private System.Windows.Forms.ProgressBar pb;
+        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.OpenFileDialog ofdImport;
     }
 }
-

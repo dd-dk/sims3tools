@@ -27,10 +27,6 @@ namespace s3ascHelper
 {
     static class Program
     {
-        public const string Filter = "S3Asc base files|*_filebase.s3asc|All files|*.*";
-        static string filename;
-        public static string Filename { get { return filename; } }
-
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -53,7 +49,7 @@ namespace s3ascHelper
 
             args = largs.ToArray();
 
-            filename = (args.Length > 0 ? Path.GetFileNameWithoutExtension(args[args.Length - 1]) : "*");
+            Filename = (args.Length > 0 ? Path.GetFileNameWithoutExtension(args[args.Length - 1]) : "*");
 
 #if DEBUG
             if (args.Length == 0)
@@ -70,5 +66,7 @@ namespace s3ascHelper
 
             return s3pi.Helpers.RunHelper.Run(export ? typeof(Export) : typeof(Import), args);
         }
+
+        public static string Filename { get; private set; }
     }
 }
