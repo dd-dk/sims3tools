@@ -1808,7 +1808,7 @@ namespace S3PIDemoFE
 
         void setHelpers()
         {
-            helpers = new s3pi.Helpers.HelperManager(browserWidget1.SelectedResource, resource);
+            helpers = new s3pi.Helpers.HelperManager(browserWidget1.SelectedResource, resource, browserWidget1.ResourceName(browserWidget1.SelectedResource));
             if (S3PIDemoFE.Properties.Settings.Default.DisabledHelpers != null)
                 foreach (string id in S3PIDemoFE.Properties.Settings.Default.DisabledHelpers)
                 {

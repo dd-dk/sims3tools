@@ -302,6 +302,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\s3pe Helpers\CLIP exportAsNewName\bin\Release\CLIPexportAsNewName.exe">
+      <Link>CLIPexportAsNewName.exe</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\s3pe Helpers\OBJK Resource Editor\bin\Release\OBJKResourceEditor.exe">
       <Link>OBJKResourceEditor.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -435,6 +439,10 @@
       <Link>Helpers\S3SADLLImport.helper</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="..\s3pe Helpers\CLIP exportAsNewName\CLIPexportAsNewName.helper">
+      <Link>Helpers\CLIPexportAsNewName.helper</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\s3pe.ico" />
     <Content Include="s3peUpdate.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
