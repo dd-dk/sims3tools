@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SearchForm));
             this.btnClose = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
@@ -57,16 +58,24 @@
             this.label17 = new System.Windows.Forms.Label();
             this.label18 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
+            this.searchContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyResourceKeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pasteResourceKeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.label2 = new System.Windows.Forms.Label();
+            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+            this.ckbFilter = new System.Windows.Forms.CheckBox();
+            this.cbType = new System.Windows.Forms.ResourceTypeCombo();
             this.tableLayoutPanel1.SuspendLayout();
-            this.statusStrip1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
+            this.searchContextMenuStrip.SuspendLayout();
+            this.tableLayoutPanel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnClose
             // 
             this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnClose.Location = new System.Drawing.Point(714, 420);
+            this.btnClose.Location = new System.Drawing.Point(714, 424);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(75, 23);
             this.btnClose.TabIndex = 5;
@@ -132,20 +141,22 @@
             this.lbxHits.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.lbxHits.ContextMenuStrip = this.searchContextMenuStrip;
             this.lbxHits.FormattingEnabled = true;
             this.lbxHits.IntegralHeight = false;
-            this.lbxHits.Location = new System.Drawing.Point(12, 136);
+            this.lbxHits.Location = new System.Drawing.Point(12, 182);
             this.lbxHits.Name = "lbxHits";
             this.lbxHits.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbxHits.Size = new System.Drawing.Size(777, 278);
+            this.lbxHits.Size = new System.Drawing.Size(777, 236);
             this.lbxHits.TabIndex = 2;
             this.lbxHits.SelectedIndexChanged += new System.EventHandler(this.lbxHits_SelectedIndexChanged);
+            this.lbxHits.DoubleClick += new System.EventHandler(this.lbxHits_DoubleClick);
             // 
             // btnCopy
             // 
             this.btnCopy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnCopy.Enabled = false;
-            this.btnCopy.Location = new System.Drawing.Point(12, 420);
+            this.btnCopy.Location = new System.Drawing.Point(12, 424);
             this.btnCopy.Name = "btnCopy";
             this.btnCopy.Size = new System.Drawing.Size(75, 23);
             this.btnCopy.TabIndex = 3;
@@ -157,7 +168,7 @@
             // 
             this.btnGo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnGo.Enabled = false;
-            this.btnGo.Location = new System.Drawing.Point(93, 420);
+            this.btnGo.Location = new System.Drawing.Point(93, 424);
             this.btnGo.Name = "btnGo";
             this.btnGo.Size = new System.Drawing.Size(75, 23);
             this.btnGo.TabIndex = 4;
@@ -167,7 +178,7 @@
             // 
             // statusStrip1
             // 
-            this.statusStrip1.Location = new System.Drawing.Point(0, 446);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 450);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(801, 22);
             this.statusStrip1.TabIndex = 6;
@@ -194,6 +205,7 @@
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel2.ContextMenuStrip = this.searchContextMenuStrip;
             this.tableLayoutPanel2.Controls.Add(this.label3, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.label4, 0, 1);
             this.tableLayoutPanel2.Controls.Add(this.label5, 1, 1);
@@ -219,6 +231,7 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(481, 80);
             this.tableLayoutPanel2.TabIndex = 9;
             // 
@@ -383,14 +396,94 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "in \"file order\" (little endian) or \"integer order\" (big endian).";
             // 
+            // searchContextMenuStrip
+            // 
+            this.searchContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyResourceKeyToolStripMenuItem,
+            this.pasteResourceKeyToolStripMenuItem});
+            this.searchContextMenuStrip.Name = "searchContextMenuStrip";
+            this.searchContextMenuStrip.Size = new System.Drawing.Size(215, 48);
+            this.searchContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.searchContextMenuStrip_Opening);
+            // 
+            // copyResourceKeyToolStripMenuItem
+            // 
+            this.copyResourceKeyToolStripMenuItem.Name = "copyResourceKeyToolStripMenuItem";
+            this.copyResourceKeyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.copyResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.copyResourceKeyToolStripMenuItem.Text = "&Copy TGIs";
+            this.copyResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.copyResourceKeyToolStripMenuItem_Click);
+            // 
+            // pasteResourceKeyToolStripMenuItem
+            // 
+            this.pasteResourceKeyToolStripMenuItem.Name = "pasteResourceKeyToolStripMenuItem";
+            this.pasteResourceKeyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
+            this.pasteResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.pasteResourceKeyToolStripMenuItem.Text = "&Paste Resource Type";
+            this.pasteResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.pasteResourceKeyToolStripMenuItem_Click);
+            // 
+            // label2
+            // 
+            this.label2.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label2.AutoSize = true;
+            this.tableLayoutPanel3.SetColumnSpan(this.label2, 2);
+            this.label2.Location = new System.Drawing.Point(3, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(261, 13);
+            this.label2.TabIndex = 1;
+            this.label2.Text = "Use the Resource Type filter below to limit the search:";
+            // 
+            // tableLayoutPanel3
+            // 
+            this.tableLayoutPanel3.AutoSize = true;
+            this.tableLayoutPanel3.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tableLayoutPanel3.ColumnCount = 2;
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel3.ContextMenuStrip = this.searchContextMenuStrip;
+            this.tableLayoutPanel3.Controls.Add(this.cbType, 1, 1);
+            this.tableLayoutPanel3.Controls.Add(this.ckbFilter, 0, 1);
+            this.tableLayoutPanel3.Controls.Add(this.label2, 0, 0);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(12, 136);
+            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
+            this.tableLayoutPanel3.RowCount = 2;
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(372, 40);
+            this.tableLayoutPanel3.TabIndex = 11;
+            // 
+            // ckbFilter
+            // 
+            this.ckbFilter.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbFilter.AutoSize = true;
+            this.ckbFilter.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.ckbFilter.Location = new System.Drawing.Point(3, 18);
+            this.ckbFilter.Name = "ckbFilter";
+            this.ckbFilter.Size = new System.Drawing.Size(81, 17);
+            this.ckbFilter.TabIndex = 0;
+            this.ckbFilter.Text = "Enable filter";
+            this.ckbFilter.UseVisualStyleBackColor = true;
+            this.ckbFilter.CheckedChanged += new System.EventHandler(this.ckbFilter_CheckedChanged);
+            // 
+            // cbType
+            // 
+            this.cbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbType.Enabled = false;
+            this.cbType.Location = new System.Drawing.Point(90, 16);
+            this.cbType.Name = "cbType";
+            this.cbType.Size = new System.Drawing.Size(279, 21);
+            this.cbType.TabIndex = 3;
+            this.cbType.Value = ((uint)(0u));
+            // 
             // SearchForm
             // 
             this.AcceptButton = this.btnSearch;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnClose;
-            this.ClientSize = new System.Drawing.Size(801, 468);
+            this.ClientSize = new System.Drawing.Size(801, 472);
+            this.ContextMenuStrip = this.searchContextMenuStrip;
             this.Controls.Add(this.tableLayoutPanel2);
+            this.Controls.Add(this.tableLayoutPanel3);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.btnGo);
             this.Controls.Add(this.btnCopy);
@@ -403,10 +496,11 @@
             this.Text = "Package Search";
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
+            this.searchContextMenuStrip.ResumeLayout(false);
+            this.tableLayoutPanel3.ResumeLayout(false);
+            this.tableLayoutPanel3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -442,5 +536,12 @@
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ContextMenuStrip searchContextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem copyResourceKeyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pasteResourceKeyToolStripMenuItem;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
+        private System.Windows.Forms.CheckBox ckbFilter;
+        private System.Windows.Forms.ResourceTypeCombo cbType;
     }
 }

@@ -58,12 +58,40 @@ namespace S3PIDemoFE.Tools
         IPackage pkg;
         public IPackage CurrentPackage { get { return pkg; } set { pkg = value; } }
 
-        string fromRIE(IResourceIndexEntry rie) { return "0x" + rie.ResourceType.ToString("X8") + " 0x" + rie.ResourceGroup.ToString("X8") + " 0x" + rie.Instance.ToString("X16"); }
+        string fromRIE(IResourceIndexEntry rie) { return (rie as AResourceKey) + ""; }
+
+        public static IResourceKey Parse(string value)
+        {
+            IResourceKey result;
+            if (!TryParse(value, out result)) throw new ArgumentException();
+            return result;
+        }
+        public static bool TryParse(string value, out IResourceKey result)
+        {
+            result = (AResourceKey)new s3pi.Extensions.TGIN();
+
+            string[] tgi = value.Trim().ToLower().Split('-');
+            if (tgi.Length != 3) return false;
+            foreach (var x in tgi) if (!x.StartsWith("0x")) return false;
+
+            uint tg;
+            if (!uint.TryParse(tgi[0].Substring(2), System.Globalization.NumberStyles.HexNumber, null, out tg)) return false;
+            result.ResourceType = tg;
+            if (!uint.TryParse(tgi[1].Substring(2), System.Globalization.NumberStyles.HexNumber, null, out tg)) return false;
+            result.ResourceGroup = tg;
+
+            ulong i;
+            if (!ulong.TryParse(tgi[2].Substring(2), System.Globalization.NumberStyles.HexNumber, null, out i)) return false;
+            result.Instance = i;
+
+            return true;
+        }
 
         #region Search thread
         List<IResourceIndexEntry> lrie;
         Thread searchThread;
         bool searching;
+        static uint resourceType;
         void StartSearch()
         {
             lrie = new List<IResourceIndexEntry>();
@@ -116,7 +144,10 @@ namespace S3PIDemoFE.Tools
                 }
             }
 
-            SearchThread st = new SearchThread(this, pkg, target, Add, updateProgress, stopSearch, OnSearchComplete);
+            resourceType = cbType.Value;
+            SearchThread st = new SearchThread(this, pkg,
+                x => ckbFilter.Checked ? x.ResourceType == resourceType : true,
+                target, Add, updateProgress, stopSearch, OnSearchComplete);
 
             searchThread = new Thread(new ThreadStart(st.Search));
             searching = true;
@@ -188,17 +219,19 @@ namespace S3PIDemoFE.Tools
         {
             SearchForm form;
             IPackage pkg;
+            Predicate<IResourceIndexEntry> match;
             byte[] pattern;
             AddCallBack addCB;
             updateProgressCallback updateProgressCB;
             stopSearchCallback stopSearchCB;
             searchCompleteCallback searchCompleteCB;
 
-            public SearchThread(SearchForm form, IPackage pkg, byte[] pattern,
+            public SearchThread(SearchForm form, IPackage pkg, Predicate<IResourceIndexEntry> match, byte[] pattern,
                 AddCallBack addCB, updateProgressCallback updateProgressCB, stopSearchCallback stopSearchCB, searchCompleteCallback searchCompleteCB)
             {
                 this.form = form;
                 this.pkg = pkg;
+                this.match = match;
                 this.pattern = (byte[])pattern.Clone();
                 this.addCB = addCB;
                 this.updateProgressCB = updateProgressCB;
@@ -212,7 +245,7 @@ namespace S3PIDemoFE.Tools
                 try
                 {
                     updateProgress(true, "Retrieving resource index...", true, 0, true, 0);
-                    IList<IResourceIndexEntry> lrie = pkg.GetResourceList;
+                    IList<IResourceIndexEntry> lrie = pkg.FindAll(match);
                     if (stopSearch) return;
 
                     updateProgress(true, "Starting search... 0%", true, lrie.Count, true, 0);
@@ -299,13 +332,40 @@ namespace S3PIDemoFE.Tools
 
         private void btnCopy_Click(object sender, EventArgs e)
         {
-            string s = "";
-            foreach (int i in lbxHits.SelectedIndices) s += fromRIE(lrie[i]) + "\n";
-            //s = s.TrimEnd('\n');
-            Clipboard.SetText(s);
+            System.Text.StringBuilder s = new System.Text.StringBuilder();
+            foreach (int i in lbxHits.SelectedIndices) s.AppendLine(fromRIE(lrie[i]));
+            Clipboard.SetText(s.ToString());
+        }
+
+        private void ckbFilter_CheckedChanged(object sender, EventArgs e) { cbType.Enabled = ckbFilter.Checked; }
+
+        private void searchContextMenuStrip_Opening(object sender, CancelEventArgs e)
+        {
+            copyResourceKeyToolStripMenuItem.Enabled = lbxHits.SelectedItems.Count > 0;
+
+            IResourceKey rk;
+            pasteResourceKeyToolStripMenuItem.Enabled = Clipboard.ContainsText() && TryParse(Clipboard.GetText(), out rk);
+        }
+
+        private void copyResourceKeyToolStripMenuItem_Click(object sender, EventArgs e) { btnCopy_Click(sender, e); }
+
+        private void pasteResourceKeyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            IResourceKey rk;
+            if (TryParse(Clipboard.GetText(), out rk))
+            {
+                cbType.Value = rk.ResourceType;
+                //tbResourceGroup.Text = "0x" + rk.ResourceGroup.ToString("X8");
+                //tbInstance.Text = "0x" + rk.Instance.ToString("X16");
+            }
         }
 
         private void btnGo_Click(object sender, EventArgs e)
+        {
+            OnGo(this, new GoEventArgs(lrie[lbxHits.SelectedIndex]));
+        }
+
+        private void lbxHits_DoubleClick(object sender, EventArgs e)
         {
             OnGo(this, new GoEventArgs(lrie[lbxHits.SelectedIndex]));
         }
