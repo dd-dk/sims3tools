@@ -150,6 +150,8 @@ namespace S3PIDemoFE
             tbInstance.Text = "0x" + FNV32.GetHash(tbName.Text).ToString("X16");
         }
 
+        private void btnCopy_Click(object sender, EventArgs e) { Clipboard.SetText(((AResourceKey)details) + ""); }
+
         private void tbFilename_DragOver(object sender, DragEventArgs e)
         {
             if ((new List<string>(e.Data.GetFormats())).Contains("FileDrop"))

@@ -45,6 +45,7 @@
             this.tbName = new System.Windows.Forms.TextBox();
             this.btnFNV64 = new System.Windows.Forms.Button();
             this.btnFNV32 = new System.Windows.Forms.Button();
+            this.btnCopy = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.tlpName.SuspendLayout();
             this.SuspendLayout();
@@ -265,6 +266,17 @@
             this.btnFNV32.UseVisualStyleBackColor = true;
             this.btnFNV32.Click += new System.EventHandler(this.btnFNV32_Click);
             // 
+            // btnCopy
+            // 
+            this.btnCopy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnCopy.Location = new System.Drawing.Point(12, 204);
+            this.btnCopy.Name = "btnCopy";
+            this.btnCopy.Size = new System.Drawing.Size(75, 23);
+            this.btnCopy.TabIndex = 4;
+            this.btnCopy.Text = "&Copy TGI";
+            this.btnCopy.UseVisualStyleBackColor = true;
+            this.btnCopy.Click += new System.EventHandler(this.btnCopy_Click);
+            // 
             // ResourceDetails
             // 
             this.AcceptButton = this.btnOK;
@@ -272,6 +284,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(510, 239);
+            this.Controls.Add(this.btnCopy);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
@@ -306,5 +319,6 @@
         private System.Windows.Forms.TableLayoutPanel tlpName;
         private System.Windows.Forms.Button btnFNV64;
         private System.Windows.Forms.Button btnFNV32;
+        private System.Windows.Forms.Button btnCopy;
     }
 }
