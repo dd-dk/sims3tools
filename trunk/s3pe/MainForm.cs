@@ -587,12 +587,9 @@ namespace S3PIDemoFE
         {
             Application.DoEvents();
             bool enable = resException == null && resource != null;
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBE_copy, enable
-                && ((pnAuto.Controls[0] is RichTextBox && (pnAuto.Controls[0] as RichTextBox).SelectedText.Length > 0)
-                || (pnAuto.Controls[0] is HexWidget && (pnAuto.Controls[0] as HexWidget).SelectedText.Length > 0))
-                );
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBE_float, enable);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBE_ote, enable);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBE_copy, enable && canCopy());
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBE_float, enable && canFloat());
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBE_ote, enable && canOTE());
         }
 
         private void menuBarWidget1_MBEdit_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
@@ -611,9 +608,24 @@ namespace S3PIDemoFE
             finally { this.Enabled = true; }
         }
 
+        bool canCopy()
+        {
+            if (pnAuto.Controls.Count != 1) return false;
+            if (pnAuto.Controls[0] is RichTextBox) return (pnAuto.Controls[0] as RichTextBox).SelectedText.Length > 0;
+            if (pnAuto.Controls[0] is HexWidget) return (pnAuto.Controls[0] as HexWidget).SelectedText.Length > 0;
+            if (pnAuto.Controls[0] is PictureBox) return (pnAuto.Controls[0] as PictureBox).Image != null;
+            return false;
+        }
         private void editCopy()
         {
             if (pnAuto.Controls.Count != 1) return;
+
+            if (pnAuto.Controls[0] is PictureBox && (pnAuto.Controls[0] as PictureBox).Image != null)
+            {
+                Clipboard.SetImage((pnAuto.Controls[0] as PictureBox).Image);
+                return;
+            }
+
             string selectedText = "";
             if (pnAuto.Controls[0] is RichTextBox) selectedText = (pnAuto.Controls[0] as RichTextBox).SelectedText;
             else if (pnAuto.Controls[0] is HexWidget) selectedText = (pnAuto.Controls[0] as HexWidget).SelectedText;
@@ -626,14 +638,27 @@ namespace S3PIDemoFE
             Clipboard.SetText(s.ToString(), TextDataFormat.UnicodeText);
         }
 
+        bool canFloat()
+        {
+            return true;
+        }
         private void editFloat()
         {
             if (!controlPanel1.HexOnly && controlPanel1.AutoValue) controlPanel1_ValueClick(null, EventArgs.Empty);
             else controlPanel1_HexClick(null, EventArgs.Empty);
         }
 
+        bool canOTE()
+        {
+            if (!hasTextEditor) return false;
+            if (pnAuto.Controls.Count != 1) return false;
+            if (pnAuto.Controls[0] is RichTextBox) return true;
+            else if (pnAuto.Controls[0] is HexWidget) return true;
+            return false;
+        }
         private void editOTE()
         {
+            if (!hasTextEditor) return;
             if (pnAuto.Controls.Count != 1) return;
 
             string text = "";
