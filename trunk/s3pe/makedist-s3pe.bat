@@ -4,7 +4,7 @@ set ConfigurationName=Release
 set base=%TargetName%
 rem -%ConfigurationName%
 set src=%TargetName%-Source
-set viewDDS=s3pe Helpers\ViewDDS\bin\ViewDDS
+set viewDDS=s3pe Helpers\ViewDDS\HelperApp\bin\ViewDDS
 
 set out=S:\Sims3\Tools\s3pe\
 set helpFolder=%out%HelpFiles
