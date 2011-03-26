@@ -28,6 +28,7 @@ using System.Windows.Forms;
 using s3pi.Interfaces;
 using s3pi.Package;
 using s3pi.Extensions;
+using System.Text;
 
 namespace S3PIDemoFE
 {
@@ -44,9 +45,11 @@ namespace S3PIDemoFE
             "0x00B2D882", "0x8FFB80F6",
         });
         static string myName;
+        static string tempName;
         static MainForm()
         {
             myName = Path.GetFileNameWithoutExtension(Application.ExecutablePath);
+            tempName = "s3pe-" + System.Security.Cryptography.FNV64.GetHash(DateTime.UtcNow.ToString("O")).ToString("X16") + "-";
             foreach (string s in unwantedFields) fields.Remove(s);
             //fields.Sort(byElementPriority);
 
@@ -178,6 +181,8 @@ namespace S3PIDemoFE
             if (CurrentPackage != null) { e.Cancel = true; this.Enabled = true; return; }
 
             saveSettings();
+
+            cleanUpTemp();
         }
 
         private void MainForm_PackageFilenameChanged(object sender, EventArgs e)
@@ -218,9 +223,11 @@ namespace S3PIDemoFE
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_saveCopyAs, enable);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_close, enable);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_bookmarkCurrent, enable);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBE, enable);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBR, enable);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_add, enable);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBT_search, enable);
+            editDropDownOpening();
             resourceDropDownOpening();
         }
 
@@ -576,7 +583,17 @@ namespace S3PIDemoFE
         #endregion
 
         #region Edit menu
-        private void editDropDownOpening() { }
+        private void editDropDownOpening()
+        {
+            Application.DoEvents();
+            bool enable = resException == null && resource != null;
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBE_copy, enable
+                && ((pnAuto.Controls[0] is RichTextBox && (pnAuto.Controls[0] as RichTextBox).SelectedText.Length > 0)
+                || (pnAuto.Controls[0] is HexWidget && (pnAuto.Controls[0] as HexWidget).SelectedText.Length > 0))
+                );
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBE_float, enable);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBE_ote, enable);
+        }
 
         private void menuBarWidget1_MBEdit_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
         {
@@ -586,19 +603,98 @@ namespace S3PIDemoFE
                 Application.DoEvents();
                 switch (mn.mn)
                 {
-                    case MenuBarWidget.MB.MBE_cut: editCut(); break;
                     case MenuBarWidget.MB.MBE_copy: editCopy(); break;
-                    case MenuBarWidget.MB.MBE_paste: editPaste(); break;
+                    case MenuBarWidget.MB.MBE_float: editFloat(); break;
+                    case MenuBarWidget.MB.MBE_ote: editOTE(); break;
                 }
             }
             finally { this.Enabled = true; }
         }
 
-        private void editCut() { }
+        private void editCopy()
+        {
+            if (pnAuto.Controls.Count != 1) return;
+            string selectedText = "";
+            if (pnAuto.Controls[0] is RichTextBox) selectedText = (pnAuto.Controls[0] as RichTextBox).SelectedText;
+            else if (pnAuto.Controls[0] is HexWidget) selectedText = (pnAuto.Controls[0] as HexWidget).SelectedText;
+            else return;
+            if (selectedText.Length == 0) return;
 
-        private void editCopy() { }
+            System.Text.StringBuilder s = new StringBuilder();
+            TextReader t = new StringReader(selectedText);
+            for (var line = t.ReadLine(); line != null; line = t.ReadLine()) s.AppendLine(line);
+            Clipboard.SetText(s.ToString(), TextDataFormat.UnicodeText);
+        }
 
-        private void editPaste() { }
+        private void editFloat()
+        {
+            if (!controlPanel1.HexOnly && controlPanel1.AutoValue) controlPanel1_ValueClick(null, EventArgs.Empty);
+            else controlPanel1_HexClick(null, EventArgs.Empty);
+        }
+
+        private void editOTE()
+        {
+            if (pnAuto.Controls.Count != 1) return;
+
+            string text = "";
+            if (pnAuto.Controls[0] is RichTextBox) { text = (pnAuto.Controls[0] as RichTextBox).Text; }
+            else if (pnAuto.Controls[0] is HexWidget) { text = (pnAuto.Controls[0] as HexWidget).Text; }
+            else return;
+
+            System.Text.StringBuilder s = new StringBuilder();
+            TextReader t = new StringReader(text);
+            for (var line = t.ReadLine(); line != null; line = t.ReadLine()) s.AppendLine(line);
+            text = s.ToString();
+
+            UTF8Encoding utf8 = new UTF8Encoding();
+            UnicodeEncoding unicode = new UnicodeEncoding();
+            byte[] utf8Bytes = Encoding.Convert(unicode, utf8, unicode.GetBytes(text));
+
+            string command = S3PIDemoFE.Properties.Settings.Default.TextEditorCmd;
+            string filename = String.Format("{0}{1}{2}.txt", Path.GetTempPath(), tempName, System.Security.Cryptography.FNV64.GetHash(DateTime.UtcNow.ToString("O")).ToString("X16"));
+            using (BinaryWriter w = new BinaryWriter(new FileStream(filename, FileMode.Create), Encoding.UTF8))
+            {
+                w.Write(utf8Bytes);
+                w.Close();
+            }
+            File.SetAttributes(filename, FileAttributes.ReadOnly | FileAttributes.Temporary);
+
+            System.Diagnostics.Process p = new System.Diagnostics.Process();
+
+            p.StartInfo.FileName = command;
+            p.StartInfo.Arguments = filename;
+            p.StartInfo.UseShellExecute = false;
+            p.Exited += new EventHandler(p_Exited);
+            p.EnableRaisingEvents = true;
+
+            try { p.Start(); }
+            catch (Exception ex)
+            {
+                CopyableMessageBox.IssueException(ex, String.Format("Application failed to start:\n{0}\n{1}", command, filename), "Launch failed");
+                File.SetAttributes(filename, FileAttributes.Normal);
+                File.Delete(filename);
+                return;
+            }
+        }
+
+        void p_Exited(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process p = sender as System.Diagnostics.Process;
+            File.SetAttributes(p.StartInfo.Arguments, FileAttributes.Normal);
+            File.Delete(p.StartInfo.Arguments);
+
+            MakeFormVisible();
+        }
+
+        void cleanUpTemp()
+        {
+            foreach (var file in Directory.GetFiles(Path.GetTempPath(), String.Format("{0}*.txt", tempName)))
+                try {
+                    File.SetAttributes(file, FileAttributes.Normal);
+                    File.Delete(file);
+                }
+                catch { }
+        }
         #endregion
 
         #region Resource menu
@@ -1252,17 +1348,6 @@ namespace S3PIDemoFE
         {
             if (!S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview && !ddsEnableWarningIssued)
             {
-                Type type = null;
-                try { type = GetDDSWidgetType(); }
-                catch { type = null; }
-                if (type == null)
-                {
-                    CopyableMessageBox.Show("The DDS Preview feature is disabled as the\ns3pe.DDSPreviewWidget.dll cannot be loaded.\n"
-                        , "Enable DDS Preview",
-                        CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
-                    return;
-                }
-
                 ddsEnableWarningIssued = true;
                 if (CopyableMessageBox.Show("The DDS Preview feature is in early testing.\n" + "Please save your work frequently if you enable it.\n" +
                     "\nClick OK to continue or Cancel to leave the feature disabled.", "Enable DDS Preview",
@@ -1576,11 +1661,13 @@ namespace S3PIDemoFE
                     HexWidget hw = new HexWidget();
                     hw.Dock = DockStyle.Fill;
                     hw.Resource = resource;
+                    hw.ContextMenuStrip = menuBarWidget1.textPreviewContextMenuStrip;
                     pnAuto.Controls.Add(hw);
                 }
-                else if (controlPanel1.AutoValue && !controlPanel1.HexOnly)
+                else if (!controlPanel1.HexOnly && controlPanel1.AutoValue && hasValueContentField())
                 {
                     Control c = getValueControl();
+                    c.ContextMenuStrip = menuBarWidget1.textPreviewContextMenuStrip;
                     if (c != null)
                         pnAuto.Controls.Add(c);
                 }
@@ -1667,18 +1754,26 @@ namespace S3PIDemoFE
         {
             if (!(sender as Form).IsDisposed) (sender as Form).Dispose();
         }
-        
-        Type GetDDSWidgetType()
-        {
-            string folder = Path.GetDirectoryName(this.GetType().Assembly.Location);
-            string assemblyName = Path.Combine(folder, "s3pe.DDSPreviewWidget.dll");
-            if (!File.Exists(assemblyName)) return null;
-            Assembly assy = Assembly.LoadFile(assemblyName);
-            Type ddsWidget = assy.GetType("S3PIDemoFE.DDSWidget.DDSWidget");
-            if (ddsWidget == null || !ddsWidget.IsSubclassOf(typeof(Control))) return null;
-            return ddsWidget;
-        }
 
+        class DDSControl
+        {
+            static bool channel1 = true, channel2 = true, channel3 = true, channel4 = true;
+            DDSPanel.DDSPanel control;
+            public DDSControl()
+            {
+                control = new DDSPanel.DDSPanel() { Fit = true, Channel1 = channel1, Channel2 = channel2, Channel3 = channel3, Channel4 = channel4 };
+                control.Channel1Changed += new EventHandler(control_Channel1Changed);
+                control.Channel2Changed += new EventHandler(control_Channel2Changed);
+                control.Channel3Changed += new EventHandler(control_Channel3Changed);
+                control.Channel4Changed += new EventHandler(control_Channel4Changed);
+            }
+            void control_Channel1Changed(object sender, EventArgs e) { channel1 = control.Channel1; }
+            void control_Channel2Changed(object sender, EventArgs e) { channel2 = control.Channel2; }
+            void control_Channel3Changed(object sender, EventArgs e) { channel3 = control.Channel3; }
+            void control_Channel4Changed(object sender, EventArgs e) { channel4 = control.Channel4; }
+
+            public DDSPanel.DDSPanel Control { get { return control; } }
+        }
         Control getValueControl()
         {
             Control res = null;
@@ -1686,30 +1781,9 @@ namespace S3PIDemoFE
             {
                 try
                 {
-                    Type ddsWidget = GetDDSWidgetType();
-                    if (ddsWidget == null) return null;
-                    ConstructorInfo ctor = ddsWidget.GetConstructor(new Type[] { });
-                    if (ctor == null) return null;
-                    PropertyInfo pi = ddsWidget.GetProperty("DDS");
-                    if (pi == null) return null;
-
-                    object dds = ctor.Invoke(new object[] { });
-                    pi.SetValue(dds, resource.Stream, null);
-                    res = (Control)dds;
-                }
-                catch (DDSWidget.DDSException e)
-                {
-                    if (!ddsFailedWarningIssued)
-                    {
-                        ddsFailedWarningIssued = true;
-                        ddsEnableWarningIssued = false;
-                        CopyableMessageBox.IssueException(e, "DDS Preview failed:\n" + e.Message + "\n\nDDS Preview has been disabled\n"
-                            + "You can prevent preview and suppress this message\nby removing s3pe.DDSPreviewWidget.dll from the s3pe folder\n"
-                            , "Cannot preview DDS");
-                        S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview = false;
-                        menuBarWidget1.Checked(MenuBarWidget.MB.MBS_previewDDS, S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview);
-                    }
-                    return null;
+                    DDSControl dds = new DDSControl();
+                    dds.Control.DDSLoad(resource.Stream);
+                    res = (Control)dds.Control;
                 }
                 catch(Exception e)
                 {
@@ -1718,7 +1792,6 @@ namespace S3PIDemoFE
                         ddsFailedWarningIssued = true;
                         ddsEnableWarningIssued = false;
                         CopyableMessageBox.IssueException(e, "DDS Preview failed:\n" + e.Message + "\n\nDDS Preview has been disabled\n"
-                            + "You can prevent preview and suppress this message\nby removing s3pe.DDSPreviewWidget.dll from the s3pe folder\n"
                             , "Cannot preview DDS");
                         S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview = false;
                         menuBarWidget1.Checked(MenuBarWidget.MB.MBS_previewDDS, S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview);
@@ -1893,8 +1966,6 @@ namespace S3PIDemoFE
             finally { this.Enabled = true; }
         }
 
-        void MakeFormVisible() { try { ForceFocus.Focus(this); } catch { } }
-
         void afterEdit(MemoryStream ms)
         {
             if (ms != null)
@@ -1908,6 +1979,8 @@ namespace S3PIDemoFE
                 if (rie != null) browserWidget1.Add(rie);
             }
         }
+
+        void MakeFormVisible() { try { ForceFocus.Focus(this); } catch { } }
         #endregion
     }
 }

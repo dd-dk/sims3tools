@@ -28,7 +28,7 @@ namespace S3PIDemoFE
 {
     public partial class MenuBarWidget : UserControl
     {
-        List<ToolStripMenuItem> tsMD, tsMB, cmsBW;
+        List<ToolStripMenuItem> tsMD, tsMB, cmsTP, cmsBW;
 
         public MenuBarWidget()
         {
@@ -46,7 +46,7 @@ namespace S3PIDemoFE
                 setMaxRecentToolStripMenuItem, bookmarkCurrentToolStripMenuItem, setMaxBookmarksToolStripMenuItem,
                 exitToolStripMenuItem,
                 //Edit
-                editCutToolStripMenuItem, editCopyToolStripMenuItem, editPasteToolStripMenuItem,
+                editCopyToolStripMenuItem, editFloatToolStripMenuItem, editOTEToolStripMenuItem,
                 //Resource
                 addToolStripMenuItem, resCopyToolStripMenuItem1, resPasteToolStripMenuItem1, duplicateToolStripMenuItem, replaceToolStripMenuItem,
                 compressedToolStripMenuItem, deletedToolStripMenuItem, detailsToolStripMenuItem,
@@ -59,6 +59,10 @@ namespace S3PIDemoFE
                 manageWrappersToolStripMenuItem, enableDDSPreviewToolStripMenuItem, saveSettingsToolStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, checkForUpdateToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
+            });
+            cmsTP = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
+                //TextPreviewContextMenuStrip
+                tpcmCopy, tpcmFloat, tpcmOTE,
             });
             cmsBW = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //BrowserWidgetContextMenuStrip
@@ -94,7 +98,7 @@ namespace S3PIDemoFE
             MBF_new = 0, MBF_open, MBF_save, MBF_saveAs, MBF_saveCopyAs, MBF_close,
             MBF_setMaxRecent, MBF_bookmarkCurrent, MBF_setMaxBookmarks,
             MBF_exit,
-            MBE_cut, MBE_copy, MBE_paste,
+            MBE_copy, MBE_float, MBE_ote,
             MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_replace,
             MBR_compressed, MBR_isdeleted, MBR_details,
             MBR_importResources, MBR_importPackages, MBR_importAsDBC, MBR_exportResources, MBR_exportToPackage,
@@ -104,7 +108,12 @@ namespace S3PIDemoFE
             MBH_contents, MBH_about, MBH_update, MBH_warranty, MBH_licence,
         }
 
-        public enum CMS
+        public enum CMS_TP
+        {
+            MBE_copy = (int)MB.MBE_copy, MBE_float, MBE_ote,
+        }
+
+        public enum CMS_BW
         {
             MBR_add = (int)MB.MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_replace,
             MBR_compressed, MBR_isdeleted, MBR_details,
@@ -112,20 +121,26 @@ namespace S3PIDemoFE
             MBR_hexEditor, MBR_textEditor,
         }
 
+        bool isCMSTP(MB mn) { return (mn >= MB.MBE_copy && mn < MB.MBR_add); }
         bool isCMSBW(MB mn) { return (mn >= MB.MBR_add && mn < MB.MBT_fnvHash); }
         public void Enable(MD mn, bool state) { tsMD[(int)mn].Enabled = state; if (mn == MD.MBR) browserWidgetContextMenuStrip.Enabled = state; }
-        public void Enable(MB mn, bool state) { tsMB[(int)mn].Enabled = state; if (isCMSBW(mn)) cmsBW[(int)mn - (int)CMS.MBR_add].Enabled = state; }
+        public void Enable(MB mn, bool state)
+        {
+            tsMB[(int)mn].Enabled = state;
+            if (isCMSTP(mn)) cmsTP[(int)mn - (int)CMS_TP.MBE_copy].Enabled = state;
+            if (isCMSBW(mn)) cmsBW[(int)mn - (int)CMS_BW.MBR_add].Enabled = state;
+        }
         public void Checked(MB mn, bool state)
         {
             tsMB[(int)mn].Checked = state;
             tsMB[(int)mn].CheckState = state ? CheckState.Checked : CheckState.Unchecked;
             if (isCMSBW(mn))
             {
-                cmsBW[(int)mn - (int)CMS.MBR_add].Checked = state;
-                cmsBW[(int)mn - (int)CMS.MBR_add].CheckState = state ? CheckState.Checked : CheckState.Unchecked;
+                cmsBW[(int)mn - (int)CMS_BW.MBR_add].Checked = state;
+                cmsBW[(int)mn - (int)CMS_BW.MBR_add].CheckState = state ? CheckState.Checked : CheckState.Unchecked;
             }
         }
-        public void Indeterminate(MB mn) { tsMB[(int)mn].CheckState = CheckState.Indeterminate; if (isCMSBW(mn)) cmsBW[(int)mn - (int)CMS.MBR_add].CheckState = CheckState.Indeterminate; ; }
+        public void Indeterminate(MB mn) { tsMB[(int)mn].CheckState = CheckState.Indeterminate; if (isCMSBW(mn)) cmsBW[(int)mn - (int)CMS_BW.MBR_add].CheckState = CheckState.Indeterminate; ; }
         public bool IsChecked(MB mn) { return tsMB[(int)mn].Checked; }
 
         public class MBDropDownOpeningEventArgs : EventArgs { public readonly MD mn; public MBDropDownOpeningEventArgs(MD mn) { this.mn = mn; } }
@@ -133,6 +148,7 @@ namespace S3PIDemoFE
         public event MBDropDownOpeningEventHandler MBDropDownOpening;
         protected void OnMBDropDownOpening(object sender, MD mn) { if (MBDropDownOpening != null) MBDropDownOpening(sender, new MBDropDownOpeningEventArgs(mn)); }
         private void tsMD_DropDownOpening(object sender, EventArgs e) { OnMBDropDownOpening(sender, (MD)tsMD.IndexOf(sender as ToolStripMenuItem)); }
+        private void cmsTP_Opening(object sender, CancelEventArgs e) { OnMBDropDownOpening(sender, MD.MBE); }
         private void cmsBW_Opening(object sender, CancelEventArgs e) { OnMBDropDownOpening(sender, MD.MBR); }
 
         public class MBClickEventArgs : EventArgs { public readonly MB mn; public MBClickEventArgs(MB mn) { this.mn = mn; } }
@@ -162,6 +178,7 @@ namespace S3PIDemoFE
         protected void OnMBHelp_Click(object sender, MB mn) { if (MBHelp_Click != null) MBHelp_Click(sender, new MBClickEventArgs(mn)); }
         private void tsMBH_Click(object sender, EventArgs e) { OnMBHelp_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
 
+        private void tsCMSTP_Click(object sender, EventArgs e) { OnMBEdit_Click(sender, (MB)(cmsTP.IndexOf(sender as ToolStripMenuItem)) + (int)MB.MBE_copy); }
         private void tsCMSBW_Click(object sender, EventArgs e) { OnMBResource_Click(sender, (MB)(cmsBW.IndexOf(sender as ToolStripMenuItem)) + (int)MB.MBR_add); }
 
 

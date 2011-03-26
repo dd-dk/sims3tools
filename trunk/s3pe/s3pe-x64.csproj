@@ -41,6 +41,10 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DDSPanel">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pe Helpers\ViewDDS\DDSPanel\bin\Release\DDSPanel.dll</HintPath>
+    </Reference>
     <Reference Include="s3pi.CustomForms">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
@@ -318,6 +322,14 @@
       <Link>STBLResourceEditor.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\s3pe Helpers\ViewDDS\DDSPanel\squishinterface_Win32.dll">
+      <Link>squishinterface_Win32.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pe Helpers\ViewDDS\DDSPanel\squishinterface_x64.dll">
+      <Link>squishinterface_x64.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\s3pe Helpers\VPXY Resource Editor\bin\Release\VPXYResourceEditor.exe">
       <Link>VPXYResourceEditor.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -453,12 +465,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="DDSPreviewWidget\DDSPreviewWidget-x64.csproj">
-      <Project>{A5DBA1AA-4BA9-4B81-9754-BDA77EAA39A4}</Project>
-      <Name>DDSPreviewWidget-x64</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

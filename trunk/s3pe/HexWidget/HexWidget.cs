@@ -107,5 +107,11 @@ namespace S3PIDemoFE
             }
             finally { this.Enabled = res != null; }
         }
+
+        public override ContextMenuStrip ContextMenuStrip { get { return richTextBox1.ContextMenuStrip; } set { richTextBox1.ContextMenuStrip = value; } }
+
+        public override string Text { get { return richTextBox1.Text; } }
+
+        public string SelectedText { get { return richTextBox1.SelectedText; } }
     }
 }
