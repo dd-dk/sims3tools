@@ -104,6 +104,21 @@ namespace s3ascHelper
                 string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.s3ascg", filebase, m));
                 using (FileStream fsMesh = new FileStream(fnMesh, FileMode.Create, FileAccess.Write))
                 {
+                    // need to get the MATD for this mesh, following any MTST chain
+                    MATD matd = GetMATDforMesh(mlod.Meshes[m].MaterialIndex);
+                    float uvScale = 1f / 32767f;
+                    if (matd != null)
+                    {
+                        MATD.ShaderData data = (matd.Version < 0x0103 ? matd.Mtrl.SData : matd.Mtnf.SData).Find(x => x.Field == MATD.FieldType.UVScales);
+                        if (data != null)
+                        {
+                            if (data is MATD.ElementFloat) { uvScale = (data as MATD.ElementFloat).Data; }
+                            else if (data is MATD.ElementFloat2) { uvScale = (data as MATD.ElementFloat2).Data0; }
+                            else if (data is MATD.ElementFloat3) { uvScale = (data as MATD.ElementFloat3).Data0; }
+                            else if (data is MATD.ElementFloat4) { uvScale = (data as MATD.ElementFloat4).Data0; }
+                        }
+                    }
+
                     StreamWriter w = new StreamWriter(fsMesh);
 
                     if (mlod.Meshes[m].GeometryStates.Count > 0)
@@ -119,11 +134,11 @@ namespace s3ascHelper
                     Export_VRTF(w, vrtf, isDefault);
 
                     Export_SKIN(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].SkinControllerIndex) as SKIN, mlod.Meshes[m]);
-                    Export_VBUF(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexBufferIndex) as VBUF, vrtf, mlod.Meshes[m]);
+                    Export_VBUF(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexBufferIndex) as VBUF, vrtf, uvScale, mlod.Meshes[m]);
                     Export_IBUF(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].IndexBufferIndex) as IBUF, mlod.Meshes[m]);
 
                     //For backward compatibility, these come after the IBUFs
-                    Export_MeshGeoStates(w, vrtf, mlod, mlod.Meshes[m]);
+                    Export_MeshGeoStates(w, vrtf, uvScale, mlod, mlod.Meshes[m]);
 
                     fsMesh.Close();
                 }
@@ -131,7 +146,15 @@ namespace s3ascHelper
             }
         }
 
-        void Export_MeshGeoStates(StreamWriter w, VRTF vrtf, MLOD mlod, MLOD.Mesh mesh)
+        MATD GetMATDforMesh(GenericRCOLResource.ChunkReference reference)
+        {
+            IRCOLBlock materialRef = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, reference);
+            if (materialRef is MATD) return materialRef as MATD;
+            if (materialRef is MTST) return GetMATDforMesh((materialRef as MTST).Index);
+            return null;
+        }
+
+        void Export_MeshGeoStates(StreamWriter w, VRTF vrtf, float uvScale, MLOD mlod, MLOD.Mesh mesh)
         {
             if (mesh.GeometryStates.Count <= 0) return;
 
@@ -139,7 +162,7 @@ namespace s3ascHelper
 
             for (int g = 0; g < mesh.GeometryStates.Count; g++)
             {
-                Export_VBUF(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mesh.VertexBufferIndex) as VBUF, vrtf, mesh, g);
+                Export_VBUF(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mesh.VertexBufferIndex) as VBUF, vrtf, uvScale, mesh, g);
                 Export_IBUF(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mesh.IndexBufferIndex) as IBUF, mesh, vrtf, g);
             }
 
@@ -187,22 +210,22 @@ namespace s3ascHelper
             mpb.Done();
         }
 
-        void Export_VBUF(StreamWriter w, VBUF vbuf, VRTF vrtf, MLOD.Mesh mesh)
+        void Export_VBUF(StreamWriter w, VBUF vbuf, VRTF vrtf, float uvScale, MLOD.Mesh mesh)
         {
             if (vbuf == null) { w.WriteLine("; vbuf is null"); w.WriteLine("vbuf 0"); return; }
 
-            s3piwrappers.Vertex[] av = vbuf.GetVertices(mesh, vrtf);
+            s3piwrappers.Vertex[] av = vbuf.GetVertices(mesh, vrtf, uvScale);
 
             w.WriteLine(string.Format("vbuf {0}", av.Length));
             Export_VBUF_Common(w, av, vrtf);
         }
 
-        void Export_VBUF(StreamWriter w, VBUF vbuf, VRTF vrtf, MLOD.Mesh mesh, int geoStateIndex)
+        void Export_VBUF(StreamWriter w, VBUF vbuf, VRTF vrtf, float uvScale, MLOD.Mesh mesh, int geoStateIndex)
         {
             if (vbuf == null) { w.WriteLine("; vbuf is null for geoState"); w.WriteLine(string.Format("vbuf {0} 0 0", geoStateIndex)); return; }
 
             MLOD.GeometryState geoState = mesh.GeometryStates[geoStateIndex];
-            s3piwrappers.Vertex[] av = vbuf.GetVertices(mesh, vrtf, geoState);
+            s3piwrappers.Vertex[] av = vbuf.GetVertices(mesh, vrtf, geoState, uvScale);
 
             w.WriteLine(string.Format("vbuf {0} {1} {2}", geoStateIndex, geoState.MinVertexIndex, geoState.VertexCount));
             if (geoState.MinVertexIndex + geoState.VertexCount <= mesh.MinVertexIndex + mesh.VertexCount) return;

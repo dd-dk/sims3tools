@@ -120,6 +120,21 @@ namespace s3ascHelper
 
                 using (FileStream fsMesh = new FileStream(fnMesh, FileMode.Open, FileAccess.Read))
                 {
+                    // need to get the MATD for this mesh, following any MTST chain
+                    MATD matd = GetMATDforMesh(mlod.Meshes[m].MaterialIndex);
+                    float uvScale = 1f / 32767f;
+                    if (matd != null)
+                    {
+                        MATD.ShaderData data = (matd.Version < 0x0103 ? matd.Mtrl.SData : matd.Mtnf.SData).Find(x => x.Field == MATD.FieldType.UVScales);
+                        if (data != null)
+                        {
+                            if (data is MATD.ElementFloat) { uvScale = (data as MATD.ElementFloat).Data; }
+                            else if (data is MATD.ElementFloat2) { uvScale = (data as MATD.ElementFloat2).Data0; }
+                            else if (data is MATD.ElementFloat3) { uvScale = (data as MATD.ElementFloat3).Data0; }
+                            else if (data is MATD.ElementFloat4) { uvScale = (data as MATD.ElementFloat4).Data0; }
+                        }
+                    }
+
                     StreamReader r = new StreamReader(fsMesh);
 
                     #region Import VRTF
@@ -160,7 +175,7 @@ namespace s3ascHelper
                     VBUF vbuf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexBufferIndex) as VBUF;
                     if (vbuf == null)
                         vbuf = new VBUF(rcolResource.RequestedApiVersion, null) { Version = 0x00000101, Flags = VBUF.FormatFlags.None, SwizzleInfo = new GenericRCOLResource.ChunkReference(0, null, 0), };
-                    Import_VBUF(r, mlod, m, vrtf, isDefaultVRTF, vbuf);
+                    Import_VBUF(r, mlod, m, vrtf, isDefaultVRTF, uvScale, vbuf);
                     IResourceKey vbufRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].VertexBufferIndex);
                     if (vbufRK == null)//means we created the VBUF: create a RK and add it
                     {
@@ -182,7 +197,7 @@ namespace s3ascHelper
                     }
                     #endregion
 
-                    Import_MeshGeoStates(r, mlod, mlod.Meshes[m], vrtf, isDefaultVRTF, vbuf, ibuf);
+                    Import_MeshGeoStates(r, mlod, mlod.Meshes[m], vrtf, isDefaultVRTF, uvScale, vbuf, ibuf);
 
                     fsMesh.Close();
                     m++;
@@ -190,7 +205,15 @@ namespace s3ascHelper
             }
         }
 
-        void Import_MeshGeoStates(StreamReader r, MLOD mlod, MLOD.Mesh mesh, VRTF vrtf, bool isDefaultVRTF, VBUF vbuf, IBUF ibuf)
+        MATD GetMATDforMesh(GenericRCOLResource.ChunkReference reference)
+        {
+            IRCOLBlock materialRef = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, reference);
+            if (materialRef is MATD) return materialRef as MATD;
+            if (materialRef is MTST) return GetMATDforMesh((materialRef as MTST).Index);
+            return null;
+        }
+
+        void Import_MeshGeoStates(StreamReader r, MLOD mlod, MLOD.Mesh mesh, VRTF vrtf, bool isDefaultVRTF, float uvScale, VBUF vbuf, IBUF ibuf)
         {
             MLOD.GeometryStateList oldGeos = new MLOD.GeometryStateList(null, mesh.GeometryStates);
             Import_GEOS(r, mesh);
@@ -198,7 +221,7 @@ namespace s3ascHelper
 
             for (int g = 0; g < mesh.GeometryStates.Count; g++)
             {
-                Import_VBUF(r, mlod, mesh, g, vrtf, isDefaultVRTF, vbuf);
+                Import_VBUF(r, mlod, mesh, g, vrtf, isDefaultVRTF, uvScale, vbuf);
                 Import_IBUF(r, mlod, mesh, g, vrtf, ibuf);
             }
         }
@@ -320,7 +343,7 @@ namespace s3ascHelper
             return skin;
         }
 
-        void Import_VBUF(StreamReader r, MLOD mlod, int meshIndex, VRTF vrtf, bool isDefaultVRTF, VBUF vbuf)
+        void Import_VBUF(StreamReader r, MLOD mlod, int meshIndex, VRTF vrtf, bool isDefaultVRTF, float uvScale, VBUF vbuf)
         {
             MLOD.Mesh mesh = mlod.Meshes[meshIndex];
 
@@ -335,10 +358,10 @@ namespace s3ascHelper
                 throw new InvalidDataException("'vbuf' line has invalid count.");
 
             s3piwrappers.Vertex[] vertices = Import_VBUF_Common(r, mesh, count, vrtf, isDefaultVRTF);
-            vbuf.SetVertices(mlod, meshIndex, vrtf, vertices);
+            vbuf.SetVertices(mlod, meshIndex, vrtf, vertices, uvScale);
         }
 
-        void Import_VBUF(StreamReader r, MLOD mlod, MLOD.Mesh mesh, int geoStateIndex, VRTF vrtf, bool isDefaultVRTF, VBUF vbuf)
+        void Import_VBUF(StreamReader r, MLOD mlod, MLOD.Mesh mesh, int geoStateIndex, VRTF vrtf, bool isDefaultVRTF, float uvScale, VBUF vbuf)
         {
             //w.WriteLine(string.Format("vbuf {0} {1} {2}", geoStateIndex, mesh.GeometryStates[geoStateIndex].MinVertexIndex, mesh.GeometryStates[geoStateIndex].VertexCount));
             string tagLine = ReadLine(r);
@@ -369,7 +392,7 @@ namespace s3ascHelper
             if (minVertexIndex != mesh.GeometryStates[geoStateIndex].MinVertexIndex)
                 throw new InvalidDataException(string.Format("geoState {0} 'vbuf' line has unexpected MinVertexIndex {1}; expected {2}.", geoStateIndex, minVertexIndex, mesh.GeometryStates[geoStateIndex].MinVertexIndex));
             s3piwrappers.Vertex[] vertices = Import_VBUF_Common(r, mesh, vertexCount, vrtf, isDefaultVRTF);
-            vbuf.SetVertices(mlod, mesh, geoStateIndex, vrtf, vertices);
+            vbuf.SetVertices(mlod, mesh, geoStateIndex, vrtf, vertices, uvScale);
         }
 
         s3piwrappers.Vertex[] Import_VBUF_Common(StreamReader r, MLOD.Mesh mesh, int count, VRTF vrtf, bool isDefaultVRTF)
@@ -423,24 +446,28 @@ namespace s3ascHelper
                             vertex.UV[nUV++] = UV;
                             break;
                         case (byte)VRTF.ElementUsage.BlendIndex:
-                            byte[] BlendIndex = split.Cast<byte>(2);
-                            if (!(BlendIndex.Length == VRTF.ByteSizeFromFormat(layout.Format) || (isDefaultVRTF && BlendIndex.Length + 1 == VRTF.ByteSizeFromFormat(layout.Format))))
+                            byte[] BlendIndices = split.Cast<byte>(2);
+                            if (!(BlendIndices.Length == VRTF.ByteSizeFromFormat(layout.Format) || (isDefaultVRTF && BlendIndices.Length + 1 == VRTF.ByteSizeFromFormat(layout.Format))))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
+                            vertex.BlendIndices = BlendIndices;
                             break;
                         case (byte)VRTF.ElementUsage.BlendWeight:
-                            float[] BlendWeight = split.Cast<Single>(2);
-                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, BlendWeight.Length))
+                            float[] BlendWeights = split.Cast<Single>(2);
+                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, BlendWeights.Length))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
+                            vertex.BlendWeights = BlendWeights;
                             break;
                         case (byte)VRTF.ElementUsage.Tangent:
-                            float[] Tangent = split.Cast<Single>(2);
-                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, Tangent.Length))
+                            float[] Tangents = split.Cast<Single>(2);
+                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, Tangents.Length))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
+                            vertex.Tangents = Tangents;
                             break;
                         case (byte)VRTF.ElementUsage.Colour:
-                            float[] Colour = split.Cast<Single>(2);
-                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, Colour.Length))
+                            float[] Color = split.Cast<Single>(2);
+                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, Color.Length))
                                 throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
+                            vertex.Color = Color;
                             break;
                     }
                     line++;
