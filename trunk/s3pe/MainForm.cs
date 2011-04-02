@@ -936,16 +936,15 @@ namespace S3PIDemoFE
 
         private void resourceReplace()
         {
-            if (browserWidget1.SelectedResource as AResourceIndexEntry == null) return;
-
-            TGIN tgin = browserWidget1.SelectedResource as AResourceIndexEntry;
+            IResourceIndexEntry rie = browserWidget1.SelectedResource;
+            if (rie == null) return;
 
             List<string> ext;
-            string resType = "0x" + tgin.ResType.ToString("X8");
+            string resType = "0x" + rie.ResourceType.ToString("X8");
             if (s3pi.Extensions.ExtList.Ext.ContainsKey(resType)) ext = s3pi.Extensions.ExtList.Ext[resType];
             else ext = s3pi.Extensions.ExtList.Ext["*"];
 
-            replaceResourceDialog.Filter = ext[0] + " by type|S3_" + tgin.ResType.ToString("X8") + "*.*" +
+            replaceResourceDialog.Filter = ext[0] + " by type|S3_" + rie.ResourceType.ToString("X8") + "*.*" +
                 "|" + ext[0] + " by ext|*" + ext[ext.Count - 1] +
                 "|All files|*.*";
             int i = S3PIDemoFE.Properties.Settings.Default.ResourceReplaceFilterIndex;
@@ -955,10 +954,10 @@ namespace S3PIDemoFE
             if (dr != DialogResult.OK) return;
             S3PIDemoFE.Properties.Settings.Default.ResourceReplaceFilterIndex = replaceResourceDialog.FilterIndex - 1;
 
-            BinaryReader br;
+            IResource res;
             try
             {
-                br = new BinaryReader(new FileStream(replaceResourceDialog.FileName, FileMode.Open));
+                res = ReadResource(replaceResourceDialog.FileName);
             }
             catch (Exception ex)
             {
@@ -968,14 +967,7 @@ namespace S3PIDemoFE
 
             // Reload the resource we just replaced as there's no way to get a changed trigger from it
             SuspendLayout();
-            IResourceIndexEntry rie = browserWidget1.SelectedResource;
-            IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, rie, true);
             browserWidget1.SelectedResource = null;
-
-            res.Stream.Position = 0;
-            res.Stream.SetLength(br.BaseStream.Length);
-            res.Stream.Write(br.ReadBytes((int)br.BaseStream.Length), 0, (int)br.BaseStream.Length);
-            br.Close();
 
             package.ReplaceResource(rie, res);
             resourceIsDirty = controlPanel1.CommitEnabled = false;
@@ -1023,6 +1015,20 @@ namespace S3PIDemoFE
             IsPackageDirty = true;
 
             return rie;
+        }
+
+        private IResource ReadResource(string filename)
+        {
+            MemoryStream ms = new MemoryStream();
+            using (BinaryReader br = new BinaryReader(new FileStream(filename, FileMode.Open)))
+            {
+                ms.Write(br.ReadBytes((int)br.BaseStream.Length), 0, (int)br.BaseStream.Length);
+                br.Close();
+            }
+
+            IResource rres = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "*");
+            ConstructorInfo ci = rres.GetType().GetConstructor(new Type[] { typeof(int), typeof(Stream), });
+            return (IResource)ci.Invoke(new object[] { (int)0, ms, });
         }
 
         private void resourceExport()
