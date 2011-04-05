@@ -51,6 +51,7 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.tlpCustomise = new System.Windows.Forms.TableLayoutPanel();
             this.label2 = new System.Windows.Forms.Label();
+            this.ckbKeepSTBLIIDs = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel5.SuspendLayout();
             this.tlpOptions.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
@@ -66,7 +67,7 @@
             this.ckbCompress.Checked = true;
             this.ckbCompress.CheckState = System.Windows.Forms.CheckState.Checked;
             this.tlpOptions.SetColumnSpan(this.ckbCompress, 2);
-            this.ckbCompress.Location = new System.Drawing.Point(35, 452);
+            this.ckbCompress.Location = new System.Drawing.Point(35, 481);
             this.ckbCompress.Name = "ckbCompress";
             this.ckbCompress.Size = new System.Drawing.Size(121, 17);
             this.ckbCompress.TabIndex = 6;
@@ -77,7 +78,7 @@
             // 
             this.tbUniqueName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tlpCustomise.SetColumnSpan(this.tbUniqueName, 2);
-            this.tbUniqueName.Location = new System.Drawing.Point(3, 132);
+            this.tbUniqueName.Location = new System.Drawing.Point(3, 155);
             this.tbUniqueName.Name = "tbUniqueName";
             this.tbUniqueName.Size = new System.Drawing.Size(259, 20);
             this.tbUniqueName.TabIndex = 5;
@@ -92,13 +93,14 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel5.Controls.Add(this.ckb32bitIIDs, 0, 1);
             this.tableLayoutPanel5.Controls.Add(this.label23, 1, 0);
+            this.tableLayoutPanel5.Controls.Add(this.ckbKeepSTBLIIDs, 0, 2);
             this.tableLayoutPanel5.Location = new System.Drawing.Point(27, 77);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
-            this.tableLayoutPanel5.RowCount = 2;
+            this.tableLayoutPanel5.RowCount = 3;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(162, 36);
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(162, 59);
             this.tableLayoutPanel5.TabIndex = 3;
             // 
             // ckb32bitIIDs
@@ -185,7 +187,7 @@
             this.tlpOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOptions.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOptions.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tlpOptions.Size = new System.Drawing.Size(348, 515);
+            this.tlpOptions.Size = new System.Drawing.Size(348, 550);
             this.tlpOptions.TabIndex = 0;
             // 
             // flowLayoutPanel1
@@ -194,7 +196,7 @@
             this.tlpOptions.SetColumnSpan(this.flowLayoutPanel1, 2);
             this.flowLayoutPanel1.Controls.Add(this.btnCancel);
             this.flowLayoutPanel1.Controls.Add(this.btnStart);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(150, 475);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(150, 504);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Size = new System.Drawing.Size(162, 29);
             this.flowLayoutPanel1.TabIndex = 7;
@@ -223,7 +225,7 @@
             // 
             this.ckbThumbs.AutoSize = true;
             this.tlpOptions.SetColumnSpan(this.ckbThumbs, 2);
-            this.ckbThumbs.Location = new System.Drawing.Point(35, 206);
+            this.ckbThumbs.Location = new System.Drawing.Point(35, 212);
             this.ckbThumbs.Name = "ckbThumbs";
             this.ckbThumbs.Size = new System.Drawing.Size(114, 17);
             this.ckbThumbs.TabIndex = 4;
@@ -234,7 +236,7 @@
             // 
             this.ckbPadSTBLs.AutoSize = true;
             this.tlpOptions.SetColumnSpan(this.ckbPadSTBLs, 2);
-            this.ckbPadSTBLs.Location = new System.Drawing.Point(35, 183);
+            this.ckbPadSTBLs.Location = new System.Drawing.Point(35, 189);
             this.ckbPadSTBLs.Name = "ckbPadSTBLs";
             this.ckbPadSTBLs.Size = new System.Drawing.Size(153, 17);
             this.ckbPadSTBLs.TabIndex = 3;
@@ -247,7 +249,7 @@
             this.label1.AutoSize = true;
             this.tlpOptions.SetColumnSpan(this.label1, 2);
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(262, 7);
+            this.label1.Location = new System.Drawing.Point(262, 13);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(50, 13);
             this.label1.TabIndex = 1;
@@ -259,7 +261,7 @@
             this.groupBox1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tlpOptions.SetColumnSpan(this.groupBox1, 2);
             this.groupBox1.Controls.Add(this.tableLayoutPanel1);
-            this.groupBox1.Location = new System.Drawing.Point(35, 35);
+            this.groupBox1.Location = new System.Drawing.Point(35, 41);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(199, 130);
             this.groupBox1.TabIndex = 2;
@@ -337,9 +339,9 @@
             this.groupBox2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tlpOptions.SetColumnSpan(this.groupBox2, 2);
             this.groupBox2.Controls.Add(this.tlpCustomise);
-            this.groupBox2.Location = new System.Drawing.Point(35, 241);
+            this.groupBox2.Location = new System.Drawing.Point(35, 247);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(277, 193);
+            this.groupBox2.Size = new System.Drawing.Size(277, 216);
             this.groupBox2.TabIndex = 5;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Make object unique";
@@ -365,7 +367,7 @@
             this.tlpCustomise.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpCustomise.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpCustomise.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tlpCustomise.Size = new System.Drawing.Size(265, 155);
+            this.tlpCustomise.Size = new System.Drawing.Size(265, 178);
             this.tlpCustomise.TabIndex = 0;
             // 
             // label2
@@ -373,11 +375,22 @@
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label2.AutoSize = true;
             this.tlpCustomise.SetColumnSpan(this.label2, 2);
-            this.label2.Location = new System.Drawing.Point(3, 116);
+            this.label2.Location = new System.Drawing.Point(3, 139);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(258, 13);
             this.label2.TabIndex = 4;
             this.label2.Text = "Unique name (used as internal name and hash seed):";
+            // 
+            // ckbKeepSTBLIIDs
+            // 
+            this.ckbKeepSTBLIIDs.AutoSize = true;
+            this.tableLayoutPanel5.SetColumnSpan(this.ckbKeepSTBLIIDs, 2);
+            this.ckbKeepSTBLIIDs.Location = new System.Drawing.Point(3, 39);
+            this.ckbKeepSTBLIIDs.Name = "ckbKeepSTBLIIDs";
+            this.ckbKeepSTBLIIDs.Size = new System.Drawing.Size(139, 17);
+            this.ckbKeepSTBLIIDs.TabIndex = 3;
+            this.ckbKeepSTBLIIDs.Text = "Keep original STBL IIDs";
+            this.ckbKeepSTBLIIDs.UseVisualStyleBackColor = false;
             // 
             // CloneFixOptions
             // 
@@ -385,7 +398,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tlpOptions);
             this.Name = "CloneFixOptions";
-            this.Size = new System.Drawing.Size(348, 515);
+            this.Size = new System.Drawing.Size(348, 550);
             this.tableLayoutPanel5.ResumeLayout(false);
             this.tableLayoutPanel5.PerformLayout();
             this.tlpOptions.ResumeLayout(false);
@@ -428,5 +441,6 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.CheckBox ckbExclCommon;
         private System.Windows.Forms.CheckBox ckbIncludePresets;
+        private System.Windows.Forms.CheckBox ckbKeepSTBLIIDs;
     }
 }

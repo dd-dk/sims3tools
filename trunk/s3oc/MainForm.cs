@@ -2212,7 +2212,7 @@ namespace ObjectCloner
             SaveList sl = new SaveList(this,
                 searchPane == null ? objectChooser.SelectedItems[0].Tag as Item
                 : searchPane.SelectedItem.Tag as Item, rkLookup, objPkgs, ddsPkgs, tmbPkgs,
-                saveFileDialog1.FileName, isPadSTBLs, mode == Mode.FromGame, null, //cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
+                saveFileDialog1.FileName, isPadSTBLs, false/*mode == Mode.FromGame/**/, null, //cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
                 updateProgress, stopSaving, OnSavingComplete);
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
@@ -2603,10 +2603,8 @@ namespace ObjectCloner
             }
 
             // We need to process STBLs
-            IList<IResourceIndexEntry> lstblrie = objPkgs[0].FindAll(rie => rie.ResourceType == 0x220557DA);
-            foreach (IResourceIndexEntry rie in lstblrie)
-                if (!rkToItem.ContainsKey(rie))
-                    rkToItem.Add(rie, new Item(new RIE(objPkgs[0], rie)));
+            foreach (IResourceIndexEntry rie in objPkgs[0].FindAll(rie => rie.ResourceType == 0x220557DA && !rkToItem.ContainsKey(rie)))
+                rkToItem.Add(rie, new Item(new RIE(objPkgs[0], rie)));
 
             // We may also need to process RCOL internal chunks and NameMaps but only if we're renumbering
             if (cloneFixOptions.IsRenumber)
@@ -2644,12 +2642,12 @@ namespace ObjectCloner
             if (selectedItem.CType != CatalogType.ModularResource)
                 PngInstance = (ulong)selectedItem.Resource["CommonBlock.PngInstance"].Value;
 
-            if (cloneFixOptions.IsRenumber)
+            if (cloneFixOptions.IsRenumber || !cloneFixOptions.IsKeepSTBLIIDs)
             {
                 // Generate new numbers for everything we've decided to renumber
 
                 // Renumber the PNGInstance we're referencing
-                if (PngInstance != 0)
+                if (cloneFixOptions.IsRenumber && PngInstance != 0)
                     oldToNew.Add(PngInstance, CreateInstance());
 
                 Dictionary<ulong, ulong> langMap = new Dictionary<ulong, ulong>();
@@ -2657,26 +2655,30 @@ namespace ObjectCloner
                     if (!oldToNew.ContainsKey(kvp.Value.SpecificRK.Instance))//Only generate a new IID once per resource in the package
                     {
                         IResourceKey rk = kvp.Value.SpecificRK;
-                        if (rk.ResourceType == 0x220557DA)//STBL
+                        if (rk.ResourceType == 0x220557DA)//STBL - we got here, so we're renumbering it!
                         {
                             if (!langMap.ContainsKey(rk.Instance & 0x00FFFFFFFFFFFFFF))
                                 langMap.Add(rk.Instance & 0x00FFFFFFFFFFFFFF, CreateInstance() & 0x00FFFFFFFFFFFFFF);
                             oldToNew.Add(rk.Instance, rk.Instance & 0xFF00000000000000 | langMap[rk.Instance & 0x00FFFFFFFFFFFFFF]);
                         }
-                        else if (cloneFixOptions.Is32bitIIDs &&
+                        else if (cloneFixOptions.IsRenumber)
+                        {
+                            if (cloneFixOptions.Is32bitIIDs &&
                                 (rk.ResourceType == (uint)CatalogType.CatalogObject || rk.ResourceType == 0x02DC343F))//OBJD&OBJK
-                            oldToNew.Add(rk.Instance, CreateInstance32());
-                        else
-                            oldToNew.Add(rk.Instance, CreateInstance());
+                                oldToNew.Add(rk.Instance, CreateInstance32());
+                            else
+                                oldToNew.Add(rk.Instance, CreateInstance());
+                        }
                     }
-                foreach (IResourceKey rk in rkToItem.Keys)//Requested RK
-                    if (!oldToNew.ContainsKey(rk.Instance))//Find those references we don't have new IIDs for
-                    {
-                        if (rk.ResourceType == 0x736884F1 && rk.Instance >> 32 == 0)//Either it's a request for a VPXY using version...
-                            oldToNew.Add(rk.Instance, oldToNew[rkToItem[rk].SpecificRK.Instance]);//So add the new number for that resource
-                        else//Or it's an RCOL chunk that needs a new IID...
-                            oldToNew.Add(rk.Instance, CreateInstance());//So renumber it
-                    }
+                if (cloneFixOptions.IsRenumber)
+                    foreach (IResourceKey rk in rkToItem.Keys)//Requested RK
+                        if (!oldToNew.ContainsKey(rk.Instance))//Find those references we don't have new IIDs for
+                        {
+                            if (rk.ResourceType == 0x736884F1 && rk.Instance >> 32 == 0)//Either it's a request for a VPXY using version...
+                                oldToNew.Add(rk.Instance, oldToNew[rkToItem[rk].SpecificRK.Instance]);//So add the new number for that resource
+                            else//Or it's an RCOL chunk that needs a new IID...
+                                oldToNew.Add(rk.Instance, CreateInstance());//So renumber it
+                        }
             }
 
             Item catlgItem = selectedItem;
@@ -2697,16 +2699,6 @@ namespace ObjectCloner
                 {
                     newNameGUID = nameGUID;
                     newDescGUID = descGUID;
-                }
-            }
-
-            if (cloneFixOptions.IsRenumber)
-            {
-                foreach (var kvp in rkToItem)
-                {
-                    TGIN oldN = (AResourceKey)kvp.Key;
-                    TGIN newN = (AResourceKey)kvp.Key;
-                    newN.ResInstance = oldToNew[kvp.Key.Instance];
                 }
             }
         }
@@ -3719,7 +3711,6 @@ namespace ObjectCloner
         Item objkItem;
         List<Item> vpxyItems;
         List<Item> modlItems;
-        List<Item> vpxyKinItems;
         
         delegate void Step();
         List<Step> stepList;
@@ -3822,9 +3813,9 @@ namespace ObjectCloner
 
                     VPXYs_SlurpRKs,
                     VPXYs_getMODLs,
-                    VPXYs_getKinXML,
                     VPXYs_getKinMTST,
-                    VPXYKin_SlurpRKs,
+                    VPXYs_getKinXML,
+                    VPXYKinMTST_SlurpRKs,
 
                     MODLs_SlurpRKs,
                     MODLs_SlurpMLODs,
@@ -3835,6 +3826,9 @@ namespace ObjectCloner
                     stepList.InsertRange(stepList.IndexOf(Catlg_getVPXYs), new Step[] {
                         Catlg_SlurpRKs,
                         Catlg_removeRefdCatlgs,
+                    });
+                    stepList.InsertRange(stepList.IndexOf(VPXYs_getKinMTST), new Step[] {
+                        VPXYKinXML_SlurpRKs,
                     });
                     stepList.Add(MODLs_SlurpTXTCs);
                     lastStepInChain = MODLs_SlurpTXTCs;
@@ -3873,7 +3867,7 @@ namespace ObjectCloner
                 {
                     stepList.InsertRange(stepList.IndexOf(OBJK_SlurpRKs), new Step[] {
                         OBJD_addOBJKref,
-                        OBJD_IncludePresets,
+                        Catlg_IncludePresets,
                         OBJD_SlurpDDSes,
                     });
                 }
@@ -3886,6 +3880,15 @@ namespace ObjectCloner
             CatlgHasVPXY_Steps(stepList, out lastStepInChain);
             if (isCreateNewPackage || cloneFixOptions.IsRenumber)
             {
+                if (isDeepClone)
+                {
+                }
+                else
+                {
+                    stepList.InsertRange(stepList.IndexOf(Catlg_getVPXYs), new Step[] {
+                        Catlg_IncludePresets,
+                    });
+                }
                 if (cloneFixOptions.IsIncludeThumbnails || (!isCreateNewPackage && cloneFixOptions.IsRenumber))
                 {
                     stepList.Remove(SlurpThumbnails);
@@ -3920,7 +3923,7 @@ namespace ObjectCloner
             StepText.Add(Catlg_getVPXYs, "Find VPXYs in the Catalog Resource TGIBlockList");
 
             StepText.Add(OBJD_setFallback, "Set fallback TGI");
-            StepText.Add(OBJD_IncludePresets, "Include Preset Images");
+            StepText.Add(Catlg_IncludePresets, "Include Preset Images");
             StepText.Add(OBJD_getOBJK, "Find OBJK");
             StepText.Add(OBJD_addOBJKref, "Add OBJK");
             StepText.Add(OBJD_SlurpDDSes, "OBJD-referenced DDSes");
@@ -3934,9 +3937,10 @@ namespace ObjectCloner
 
             StepText.Add(Catlg_addVPXYs, "Add VPXY resources");
             StepText.Add(VPXYs_SlurpRKs, "VPXY-referenced resources");
-            StepText.Add(VPXYs_getKinXML, "Preset XML (same instance as VPXY)");
             StepText.Add(VPXYs_getKinMTST, "MTST (same instance as VPXY)");
-            StepText.Add(VPXYKin_SlurpRKs, "Find Preset XML and MTST referenced resources");
+            StepText.Add(VPXYs_getKinXML, "Preset XML (same instance as VPXY)");
+            StepText.Add(VPXYKinMTST_SlurpRKs, "Find MTST referenced resources");
+            StepText.Add(VPXYKinXML_SlurpRKs, "Find Preset XML referenced resources");
             StepText.Add(VPXYs_getMODLs, "Find VPXY-referenced MODLs");
             StepText.Add(MODLs_SlurpRKs, "MODL-referenced resources");
             StepText.Add(MODLs_SlurpMLODs, "MLOD-referenced resources");
@@ -3983,7 +3987,6 @@ namespace ObjectCloner
         {
             Diagnostics.Log("Catlg_getVPXYs");
             vpxyItems = new List<Item>();
-            vpxyKinItems = new List<Item>();
 
             string s = "";
             foreach (IResourceKey rk in (TGIBlockList)selectedItem.Resource["TGIBlocks"].Value)
@@ -4017,24 +4020,6 @@ namespace ObjectCloner
                 tgiBlocks.Add("TGI", selectedItem.RequestedRK.ResourceType, selectedItem.RequestedRK.ResourceGroup, selectedItem.RequestedRK.Instance);
                 selectedItem.Commit();
                 Diagnostics.Log("OBJD_setFallback: FallbackIndex: 0x" + (tgiBlocks.Count - 1).ToString("X2") + ", Resourcekey: " + tgiBlocks[tgiBlocks.Count - 1]);
-            }
-        }
-        void OBJD_IncludePresets()
-        {
-            Diagnostics.Log("OBJD_IncludePresets");
-            int i = 0;
-            CatalogResource.CatalogResource.MaterialList materials = selectedItem.Resource["Materials"].Value as CatalogResource.CatalogResource.MaterialList;
-            foreach (var material in materials)
-            {
-                i++;
-                foreach (var complateOverride in material.MaterialBlock.ComplateOverrides)
-                {
-                    if (complateOverrideVariables.Contains(complateOverride.VariableName))
-                    {
-                        IResourceKey rk = material.TGIBlocks[(Byte)complateOverride["TGIIndex"].Value];
-                        Add("objd" + complateOverride.VariableName + i, rk);
-                    }
-                }
             }
         }
         void OBJD_getOBJK()
@@ -4114,7 +4099,6 @@ namespace ObjectCloner
             }
 
             vpxyItems = new List<Item>();
-            vpxyKinItems = new List<Item>();
 
             string s = "";
             TGIBlockList tgibl = ((ObjKeyResource.ObjKeyResource)objkItem.Resource).TGIBlocks;
@@ -4154,7 +4138,26 @@ namespace ObjectCloner
         void CTPT_addBrushTexture() { Diagnostics.Log("CTPT_addBrushTexture"); Add("ctpt_BrushTexture", (TGIBlock)selectedItem.Resource["BrushTexture"].Value); }
         void brush_addBrushShape() { Diagnostics.Log("brush_addBrushShape"); Add("brush_ProfileTexture", (TGIBlock)selectedItem.Resource["ProfileTexture"].Value); }
 
+        void Catlg_IncludePresets()
+        {
+            Diagnostics.Log("Catlg_IncludePresets");
+            int i = 0;
+            System.Collections.IEnumerable materials = (System.Collections.IEnumerable)selectedItem.Resource["Materials"].Value;
+            foreach (CatalogResource.CatalogResource.Material material in materials)
+            {
+                i++;
+                foreach (var complateOverride in material.MaterialBlock.ComplateOverrides)
+                {
+                    if (complateOverrideVariables.Contains(complateOverride.VariableName))
+                    {
+                        IResourceKey rk = material.TGIBlocks[(Byte)complateOverride["TGIIndex"].Value];
+                        Add("preset" + i + "_" + complateOverride.VariableName, rk);
+                    }
+                }
+            }
+        }
         void Catlg_addVPXYs() { Diagnostics.Log("Catlg_addVPXYs"); for (int i = 0; i < vpxyItems.Count; i++) Add("vpxy[" + i + "]", vpxyItems[i].RequestedRK); }
+
         void VPXYs_SlurpRKs()
         {
             Diagnostics.Log("VPXYs_SlurpRKs");
@@ -4164,40 +4167,35 @@ namespace ObjectCloner
                 SlurpRKsFromField("vpxy[" + i + "]", vpxyChunk);
             }
         }
-        void VPXYs_getKinXML()
+        void VPXYs_getKinMTST() { Diagnostics.Log("VPXYs_getKinMTST"); VPXYs_getKin(isKinMTST, "VPXYs_getKinMTST", 0x02019972, "mtst"); }
+        void VPXYs_getKinXML() { Diagnostics.Log("VPXYs_getKinXML"); VPXYs_getKin(isKinXML, "VPXYs_getKinXML", 0x0333406C, "PresetXML"); }
+        void VPXYKinMTST_SlurpRKs() { Diagnostics.Log("VPXYKinMTST_SlurpRKs"); VPXYKin_SlurpRKs(isKinMTST, "mtst"); }
+        void VPXYKinXML_SlurpRKs() { Diagnostics.Log("VPXYKinXML_SlurpRKs"); VPXYKin_SlurpRKs(isKinXML, "PresetXML"); }
+        delegate bool MatchKin(IResourceIndexEntry rie, ulong instance);
+        bool isKinMTST(IResourceIndexEntry rie, ulong inst) { return rie.ResourceType == 0x02019972 && rie.Instance == inst; }
+        bool isKinXML(IResourceIndexEntry rie, ulong inst) { return rie.ResourceType == 0x0333406C && rie.Instance == inst; }
+        void VPXYs_getKin(MatchKin match, string log, uint type, string suffix)
         {
-            Diagnostics.Log("VPXYs_getKinXML");
             for (int i = 0; i < vpxyItems.Count; i++)
             {
-                Diagnostics.Log(String.Format("VPXYs_getKinXML: 0x{0:X8}-*-0x{1:X16}", 0x0333406C, vpxyItems[i].SpecificRK.Instance));
-                SlurpKindred("vpxy[" + i + "].PresetXML", objPkgs, rie => rie.ResourceType == 0x0333406C && rie.Instance == vpxyItems[i].SpecificRK.Instance);
+                Diagnostics.Log(String.Format(log + ": 0x{0:X8}-*-0x{1:X16}", type, vpxyItems[i].SpecificRK.Instance));
+                SlurpKindred("vpxy[" + i + "]." + suffix, objPkgs, rie => match(rie, vpxyItems[i].SpecificRK.Instance));
             }
         }
-        void VPXYs_getKinMTST()
+        void VPXYKin_SlurpRKs(MatchKin match, string prefix)
         {
-            Diagnostics.Log("VPXYs_getKinMTST");
-            for (int i = 0; i < vpxyItems.Count; i++)
-            {
-                Diagnostics.Log(String.Format("VPXYs_getKinMTST: 0x{0:X8}-*-0x{1:X16}", 0x02019972, vpxyItems[i].SpecificRK.Instance));
-                SlurpKindred("vpxy[" + i + "].mtst", objPkgs, rie => rie.ResourceType == 0x02019972 && rie.Instance == vpxyItems[i].SpecificRK.Instance);
-            }
-        }
-        void VPXYKin_SlurpRKs()
-        {
-            Diagnostics.Log("VPXYKin_SlurpRKs");
             int i = 0;
-            foreach(Item item in vpxyKinItems)
-            {
-                if (item.RequestedRK.ResourceType == (uint)0x0333406C)
-                {
-                    SlurpRKsFromXML("PresetXML[" + i + "]", item);
-                }
-                else
-                {
-                    SlurpRKsFromField("mtst[" + i + "]", item.Resource as AApiVersionedFields);
-                }
-                i++;
-            }
+            foreach (var vpxyItem in vpxyItems)
+                foreach (var pkg in objPkgs)
+                    foreach (var rk in pkg.FindAll(rie => match(rie, vpxyItem.SpecificRK.Instance)))
+                    {
+                        Item item = new Item(new RIE(pkg, rk));
+                        if (item.Resource != null)
+                        {
+                            SlurpRKsFromField(prefix + "[" + i + "]", item.Resource as AApiVersionedFields);
+                            i++;
+                        }
+                    }
         }
         void VPXYs_getMODLs()
         {
@@ -4229,6 +4227,7 @@ namespace ObjectCloner
             }
             Diagnostics.Show(s, "No MODL items");
         }
+
         void MODLs_SlurpRKs() { Diagnostics.Log("MODLs_SlurpRKs"); for (int i = 0; i < modlItems.Count; i++) SlurpRKsFromField("modl[" + i + "]", (AResource)modlItems[i].Resource); }
         void MODLs_SlurpMLODs()
         {

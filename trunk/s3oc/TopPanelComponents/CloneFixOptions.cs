@@ -44,10 +44,10 @@ namespace ObjectCloner.TopPanelComponents
             }
             ckbClone_CheckedChanged(null, EventArgs.Empty);
 
-            this.allow32bitIIDs = allow32bitIIDs;
-            tbUniqueName.Enabled = ckbRenumber.Checked;
-            ckb32bitIIDs.Enabled = ckbRenumber.Checked && allow32bitIIDs;
             ckbRenumber.Checked = mustClone;
+            this.allow32bitIIDs = allow32bitIIDs;
+            ckbRenumber_CheckedChanged(null, EventArgs.Empty);
+
             ckbPadSTBLs.Checked = shouldPad;
 
             form.AcceptButton = btnStart;
@@ -63,6 +63,7 @@ namespace ObjectCloner.TopPanelComponents
         public bool IsIncludeThumbnails { get { return ckbThumbs.Checked; } }
         public bool IsRenumber { get { return ckbRenumber.Checked; } }
         public bool Is32bitIIDs { get { return ckb32bitIIDs.Checked; } }
+        public bool IsKeepSTBLIIDs { get { return ckbKeepSTBLIIDs.Checked; } }
         public bool IsCompress { get { return ckbCompress.Checked; } }
 
         public event EventHandler CancelClicked;
@@ -79,6 +80,8 @@ namespace ObjectCloner.TopPanelComponents
             tbUniqueName.Enabled = ckbRenumber.Checked;
             ckb32bitIIDs.Enabled = ckbRenumber.Checked && allow32bitIIDs;
             ckb32bitIIDs.Checked = false;
+            ckbKeepSTBLIIDs.Enabled = !ckbRenumber.Checked;
+            ckbKeepSTBLIIDs.Checked = false;
         }
 
         private void btnCancel_Click(object sender, EventArgs e) { if (CancelClicked != null) CancelClicked(this, EventArgs.Empty); }
