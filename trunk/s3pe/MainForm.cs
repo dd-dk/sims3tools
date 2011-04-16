@@ -1788,20 +1788,28 @@ namespace S3PIDemoFE
 
         class DDSControl
         {
-            static bool channel1 = true, channel2 = true, channel3 = true, channel4 = true;
+            static bool channel1 = true, channel2 = true, channel3 = true, channel4 = true, invertch4 = false;
             DDSPanel.DDSPanel control;
             public DDSControl()
             {
-                control = new DDSPanel.DDSPanel() { Fit = true, Channel1 = channel1, Channel2 = channel2, Channel3 = channel3, Channel4 = channel4 };
+                control = new DDSPanel.DDSPanel()
+                {
+                    Fit = true,
+                    Channel1 = channel1, Channel2 = channel2, Channel3 = channel3, Channel4 = channel4,
+                    InvertCh4 = invertch4,
+                    Margin = new Padding(3),
+                };
                 control.Channel1Changed += new EventHandler(control_Channel1Changed);
                 control.Channel2Changed += new EventHandler(control_Channel2Changed);
                 control.Channel3Changed += new EventHandler(control_Channel3Changed);
                 control.Channel4Changed += new EventHandler(control_Channel4Changed);
+                control.InvertCh4Changed += new EventHandler(control_InvertCh4Changed);
             }
             void control_Channel1Changed(object sender, EventArgs e) { channel1 = control.Channel1; }
             void control_Channel2Changed(object sender, EventArgs e) { channel2 = control.Channel2; }
             void control_Channel3Changed(object sender, EventArgs e) { channel3 = control.Channel3; }
             void control_Channel4Changed(object sender, EventArgs e) { channel4 = control.Channel4; }
+            void control_InvertCh4Changed(object sender, EventArgs e) { invertch4 = control.InvertCh4; }
 
             public DDSPanel.DDSPanel Control { get { return control; } }
         }
