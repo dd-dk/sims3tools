@@ -32,6 +32,8 @@ namespace DDSPanel
         public bool Channel3 { get { return ckbB.Checked; } set { ckbB.Checked = value; OnChanged(Channel3Changed); } }
         [DefaultValue(true), Description("Display channel 4 as Alpha")]
         public bool Channel4 { get { return ckbA.Checked; } set { ckbA.Checked = value; OnChanged(Channel4Changed); } }
+        [DefaultValue(false), Description("Invert channel 4 values")]
+        public bool InvertCh4 { get { return ckbI.Checked; } set { ckbI.Checked = value; OnChanged(InvertCh4Changed); } }
 
         [DefaultValue(true), Description("Show the Channel Selection check boxes")]
         public bool ShowChannelSelector { get { return flowLayoutPanel1.Visible; } set { flowLayoutPanel1.Visible = value; pictureBox1.Image = doResize(); OnChanged(ShowChannelSelectorChanged); } }
@@ -48,6 +50,8 @@ namespace DDSPanel
         public event EventHandler Channel3Changed;
         [Description("Raised to indicate Channel4 value changed")]
         public event EventHandler Channel4Changed;
+        [Description("Raised to indicate InvertCh4 value changed")]
+        public event EventHandler InvertCh4Changed;
         [Description("Raised to indicate ShowChannelSelector value changed")]
         public event EventHandler ShowChannelSelectorChanged;
 
@@ -83,7 +87,7 @@ namespace DDSPanel
             {
                 this.Enabled = false;
                 Application.UseWaitCursor = true;
-                image = ddsFile.Image(ckbR.Checked, ckbG.Checked, ckbB.Checked, ckbA.Checked);
+                image = ddsFile.Image(ckbR.Checked, ckbG.Checked, ckbB.Checked, ckbA.Checked, ckbI.Checked);
                 pictureBox1.Image = doResize();
             }
             finally { this.Enabled = true; Application.UseWaitCursor = false; }
@@ -94,6 +98,7 @@ namespace DDSPanel
                 if (sender == ckbG) Channel2 = ckbG.Checked;
                 if (sender == ckbB) Channel3 = ckbB.Checked;
                 if (sender == ckbA) Channel4 = ckbA.Checked;
+                if (sender == ckbI) InvertCh4 = ckbI.Checked;
             }
         }
 

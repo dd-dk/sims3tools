@@ -38,6 +38,7 @@
             this.ckbG = new System.Windows.Forms.CheckBox();
             this.ckbB = new System.Windows.Forms.CheckBox();
             this.ckbA = new System.Windows.Forms.CheckBox();
+            this.ckbI = new System.Windows.Forms.CheckBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -60,7 +61,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(329, 200);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(379, 157);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // panel1
@@ -70,13 +71,16 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.panel1.AutoScroll = true;
             this.panel1.Controls.Add(this.pictureBox1);
-            this.panel1.Location = new System.Drawing.Point(3, 32);
+            this.panel1.Location = new System.Drawing.Point(0, 29);
+            this.panel1.Margin = new System.Windows.Forms.Padding(0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(323, 165);
+            this.panel1.Size = new System.Drawing.Size(379, 128);
             this.panel1.TabIndex = 2;
             // 
             // pictureBox1
             // 
+            this.pictureBox1.BackColor = System.Drawing.SystemColors.Control;
+            this.pictureBox1.BackgroundImage = global::DDSPanel.Properties.Resources.checkerboard;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox1.Name = "pictureBox1";
@@ -93,9 +97,11 @@
             this.flowLayoutPanel1.Controls.Add(this.ckbG);
             this.flowLayoutPanel1.Controls.Add(this.ckbB);
             this.flowLayoutPanel1.Controls.Add(this.ckbA);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
+            this.flowLayoutPanel1.Controls.Add(this.ckbI);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 3);
+            this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(320, 23);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(379, 23);
             this.flowLayoutPanel1.TabIndex = 0;
             // 
             // label1
@@ -164,6 +170,18 @@
             this.ckbA.UseVisualStyleBackColor = true;
             this.ckbA.CheckedChanged += new System.EventHandler(this.ckb_CheckedChanged);
             // 
+            // ckbI
+            // 
+            this.ckbI.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbI.AutoSize = true;
+            this.ckbI.Location = new System.Drawing.Point(323, 3);
+            this.ckbI.Name = "ckbI";
+            this.ckbI.Size = new System.Drawing.Size(53, 17);
+            this.ckbI.TabIndex = 5;
+            this.ckbI.Text = "Invert";
+            this.ckbI.UseVisualStyleBackColor = true;
+            this.ckbI.CheckedChanged += new System.EventHandler(this.ckb_CheckedChanged);
+            // 
             // timer1
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
@@ -173,8 +191,9 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "DDSPanel";
-            this.Size = new System.Drawing.Size(329, 200);
+            this.Size = new System.Drawing.Size(379, 157);
             this.Resize += new System.EventHandler(this.DDSPanel_Resize);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
@@ -198,5 +217,6 @@
         private System.Windows.Forms.CheckBox ckbB;
         private System.Windows.Forms.CheckBox ckbA;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.CheckBox ckbI;
     }
 }

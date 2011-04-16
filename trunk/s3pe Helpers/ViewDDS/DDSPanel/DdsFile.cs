@@ -328,26 +328,9 @@ namespace DdsFileTypePlugin
 			m_header = new DdsHeader();
 		}
 
-        public Image Image()
+        public Image Image(bool red = true, bool green = true, bool blue = true, bool alpha = false, bool invert = false)
         {
-            return this.Image(true, true, true, false);
-        }
-        public Image Image(bool red)
-        {
-            return this.Image(true, false, false, false);
-        }
-        public Image Image(bool red, bool green)
-        {
-            return this.Image(true, true, false, false);
-        }
-        public Image Image(bool red, bool green, bool blue)
-        {
-            return this.Image(true, true, true, false);
-        }
-
-        public Image Image(bool red, bool green, bool blue, bool alpha)
-        {
-            Bitmap bitmap = new Bitmap(this.GetWidth(), this.GetHeight());
+            Bitmap bitmap = new Bitmap(this.GetWidth(), this.GetHeight(), System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
             byte[] readPixelData = this.GetPixelData();
 
@@ -368,7 +351,8 @@ namespace DdsFileTypePlugin
                     if (alpha) { 
                         calpha = readPixelData[readPixelOffset + 3];
                         // Inverse the alpha
-                        calpha = (255 - calpha);
+                        if (invert)
+                            calpha = (255 - calpha);
                     }
 
                     if (alpha)
