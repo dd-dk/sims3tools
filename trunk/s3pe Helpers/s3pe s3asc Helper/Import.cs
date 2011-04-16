@@ -326,6 +326,8 @@ namespace s3ascHelper
                 uint name;
                 if (!uint.TryParse(split[1], System.Globalization.NumberStyles.HexNumber, null, out name))
                     throw new InvalidDataException(string.Format("'skin' line {0} has invalid name hash.", b));
+                if (name != mesh.JointReferences[b])
+                    throw new InvalidDataException(string.Format("'skin' line {0} name 0x{1:X8} does not match mesh joint reference 0x{2:X8}.", b, name, mesh.JointReferences[b]));
                 float[] values = split.Cast<Single>(2);
                 if (values.Length != 12)
                     throw new InvalidDataException(string.Format("'skin' line {0} has incorrect number of float values {1}.", b, values.Length));
@@ -358,7 +360,9 @@ namespace s3ascHelper
                 throw new InvalidDataException("'vbuf' line has invalid count.");
 
             s3piwrappers.Vertex[] vertices = Import_VBUF_Common(r, mesh, count, vrtf, isDefaultVRTF);
+            mpb.Init("Import VBUF...", 0);
             vbuf.SetVertices(mlod, meshIndex, vrtf, vertices, uvScale);
+            mpb.Done();
         }
 
         void Import_VBUF(StreamReader r, MLOD mlod, MLOD.Mesh mesh, int geoStateIndex, VRTF vrtf, bool isDefaultVRTF, float uvScale, VBUF vbuf)
@@ -392,7 +396,9 @@ namespace s3ascHelper
             if (minVertexIndex != mesh.GeometryStates[geoStateIndex].MinVertexIndex)
                 throw new InvalidDataException(string.Format("geoState {0} 'vbuf' line has unexpected MinVertexIndex {1}; expected {2}.", geoStateIndex, minVertexIndex, mesh.GeometryStates[geoStateIndex].MinVertexIndex));
             s3piwrappers.Vertex[] vertices = Import_VBUF_Common(r, mesh, vertexCount, vrtf, isDefaultVRTF);
+            mpb.Init("Import VBUF...", 0);
             vbuf.SetVertices(mlod, mesh, geoStateIndex, vrtf, vertices, uvScale);
+            mpb.Done();
         }
 
         s3piwrappers.Vertex[] Import_VBUF_Common(StreamReader r, MLOD.Mesh mesh, int count, VRTF vrtf, bool isDefaultVRTF)
@@ -428,22 +434,13 @@ namespace s3ascHelper
                     switch (usage)
                     {
                         case (byte)VRTF.ElementUsage.Position:
-                            float[] Position = split.Cast<Single>(2);
-                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, Position.Length))
-                                throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
-                            vertex.Position = Position;
+                            vertex.Position = GetFloats(layout.Format, isDefaultVRTF, line, split.Cast<Single>(2));
                             break;
                         case (byte)VRTF.ElementUsage.Normal:
-                            float[] Normal = split.Cast<Single>(2);
-                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, Normal.Length))
-                                throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
-                            vertex.Normal = Normal;
+                            vertex.Normal = GetFloats(layout.Format, isDefaultVRTF, line, split.Cast<Single>(2));
                             break;
                         case (byte)VRTF.ElementUsage.UV:
-                            float[] UV = split.Cast<Single>(2);
-                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, UV.Length))
-                                throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
-                            vertex.UV[nUV++] = UV;
+                            vertex.UV[nUV++] = GetFloats(layout.Format, isDefaultVRTF, line, split.Cast<Single>(2));
                             break;
                         case (byte)VRTF.ElementUsage.BlendIndex:
                             byte[] BlendIndices = split.Cast<byte>(2);
@@ -452,22 +449,13 @@ namespace s3ascHelper
                             vertex.BlendIndices = BlendIndices;
                             break;
                         case (byte)VRTF.ElementUsage.BlendWeight:
-                            float[] BlendWeights = split.Cast<Single>(2);
-                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, BlendWeights.Length))
-                                throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
-                            vertex.BlendWeights = BlendWeights;
+                            vertex.BlendWeights = GetFloats(layout.Format, isDefaultVRTF, line, split.Cast<Single>(2));
                             break;
                         case (byte)VRTF.ElementUsage.Tangent:
-                            float[] Tangents = split.Cast<Single>(2);
-                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, Tangents.Length))
-                                throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
-                            vertex.Tangents = Tangents;
+                            vertex.Tangents = GetFloats(layout.Format, isDefaultVRTF, line, split.Cast<Single>(2));
                             break;
                         case (byte)VRTF.ElementUsage.Colour:
-                            float[] Color = split.Cast<Single>(2);
-                            if (!CheckFloatCount(layout.Format, isDefaultVRTF, Color.Length))
-                                throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
-                            vertex.Color = Color;
+                            vertex.Color = GetFloats(layout.Format, isDefaultVRTF, line, split.Cast<Single>(2));
                             break;
                     }
                     line++;
@@ -632,9 +620,17 @@ namespace s3ascHelper
             }
         }
 
+        static float[] GetFloats(VRTF.ElementFormat format, bool isDefaultVRTF, int line, float[] source)
+        {
+            if (!CheckFloatCount(format, isDefaultVRTF, source.Length))
+                throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect format.", line));
+            float[] res = new float[VRTF.FloatCountFromFormat(format)];
+            Array.Copy(source, res, Math.Min(source.Length, res.Length));
+            return res;
+        }
         static bool CheckFloatCount(VRTF.ElementFormat format, bool isDefaultVRTF, int length)
         {
-            return length == VRTF.FloatCountFromFormat(format) ||
+            return true || length == VRTF.FloatCountFromFormat(format) ||
                 (isDefaultVRTF && length + 1 == VRTF.FloatCountFromFormat(format));
         }
 

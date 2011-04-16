@@ -196,7 +196,7 @@ namespace s3ascHelper
 
             mpb.Init("Export SKIN...", skin.Bones.Count);
             int i = 0;
-            foreach (var bone in skin.Bones)
+            foreach (var bone in mesh.JointReferences.ConvertAll<SKIN.Bone>(x => skin.Bones[x]))
             {
                 w.WriteLine(string.Format("{0} {1:X8} {2:F6} {3:F6} {4:F6} {5:F6} {6:F6} {7:F6} {8:F6} {9:F6} {10:F6} {11:F6} {12:F6} {13:F6}",
                     i++,
@@ -220,6 +220,10 @@ namespace s3ascHelper
             Export_VBUF_Common(w, av, vrtf);
         }
 
+        bool geosIsContained(MLOD.GeometryState geoState, MLOD.Mesh mesh)
+        {
+            return geoState.MinVertexIndex + geoState.VertexCount <= mesh.MinVertexIndex + mesh.VertexCount;
+        }
         void Export_VBUF(StreamWriter w, VBUF vbuf, VRTF vrtf, float uvScale, MLOD.Mesh mesh, int geoStateIndex)
         {
             if (vbuf == null) { w.WriteLine("; vbuf is null for geoState"); w.WriteLine(string.Format("vbuf {0} 0 0", geoStateIndex)); return; }
@@ -227,8 +231,9 @@ namespace s3ascHelper
             MLOD.GeometryState geoState = mesh.GeometryStates[geoStateIndex];
             s3piwrappers.Vertex[] av = vbuf.GetVertices(mesh, vrtf, geoState, uvScale);
 
+            if (geosIsContained(geoState, mesh)) w.WriteLine("; vbuf is contained within main mesh");
             w.WriteLine(string.Format("vbuf {0} {1} {2}", geoStateIndex, geoState.MinVertexIndex, geoState.VertexCount));
-            if (geoState.MinVertexIndex + geoState.VertexCount <= mesh.MinVertexIndex + mesh.VertexCount) return;
+            if (geosIsContained(geoState, mesh)) return;
 
             Export_VBUF_Common(w, av, vrtf);
         }
