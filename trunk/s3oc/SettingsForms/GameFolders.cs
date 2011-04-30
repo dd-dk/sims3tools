@@ -28,7 +28,56 @@ namespace ObjectCloner.SettingsForms
 {
     public partial class GameFolders : Form
     {
-        private Dictionary<int, MainForm.S3ocSims3> dS3ocSims3 = new Dictionary<int, MainForm.S3ocSims3>();
+        static Dictionary<string, string> gameDirs = new Dictionary<string, string>();
+        static GameFolders()
+        {
+            gameDirs = new Dictionary<string, string>();
+            foreach (string s in ObjectCloner.Properties.Settings.Default.InstallDirs.Split(';'))
+            {
+                string[] p = s.Split(new char[] { '=' }, 2);
+                if (S3ocSims3.byName(p[0]) != null && Directory.Exists(p[1]))
+                    gameDirs.Add(p[0], p[1]);
+            }
+        }
+
+        static void Save()
+        {
+            string value = "";
+            foreach (var kvp in gameDirs)
+                value += ";" + kvp.Key + "=" + kvp.Value;
+            ObjectCloner.Properties.Settings.Default.InstallDirs = value.TrimStart(';');
+            FileTable.Reset();
+        }
+
+        static GameFolders _gameFolders = null;
+        static GameFolders gameFolders { get { if (_gameFolders == null) _gameFolders = new GameFolders(); return _gameFolders; } }
+        public string this[S3ocSims3 key]
+        {
+            get { return gameDirs.ContainsKey(key.subjectName) ? gameDirs[key.subjectName] : key.hasDefaultInstallDir; }
+            private set
+            {
+                if (safeGetFullPath(gameDirs.ContainsKey(key.subjectName) ? gameDirs[key.subjectName] : null) == safeGetFullPath(value)) return;
+
+                if (gameDirs.ContainsKey(key.subjectName))
+                {
+                    if (safeGetFullPath(key.hasDefaultInstallDir) == safeGetFullPath(value))
+                        gameDirs.Remove(key.subjectName);
+                    else
+                        gameDirs[key.subjectName] = value == null ? "" : value;
+                }
+                else
+                    gameDirs.Add(key.subjectName, value);
+                Save();
+            }
+        }
+        static string safeGetFullPath(string value) { return value == null ? null : Path.GetFullPath(value); }
+
+        public static bool IsEnabled(S3ocSims3 sims3) { return EPsDisabled.IsDisabled(sims3.subjectName) ? false : sims3.isSuppressed < 1; }
+
+        public static void SetEnabled(S3ocSims3 sims3, bool value) { if (sims3.isSuppressed == 0) EPsDisabled.Disable(sims3.subjectName, !value); }
+
+
+        private Dictionary<int, S3ocSims3> dS3ocSims3 = new Dictionary<int, S3ocSims3>();
         public GameFolders()
         {
             InitializeComponent();
@@ -39,7 +88,7 @@ namespace ObjectCloner.SettingsForms
             Size size = this.Size;
             Size sizeTLP = tlpGameFolders.Size;
 
-            foreach (MainForm.S3ocSims3 sims3 in MainForm.lS3ocSims3)
+            foreach (S3ocSims3 sims3 in s3ocTTL.lS3ocSims3)
             {
                 dS3ocSims3.Add(tlpGameFolders.RowCount - 2, sims3);
 
@@ -58,17 +107,17 @@ namespace ObjectCloner.SettingsForms
                 ckbEnabled.Anchor = AnchorStyles.None;
                 ckbEnabled.AutoSize = true;
                 ckbEnabled.Visible = sims3.isSuppressed == 0;
-                ckbEnabled.Checked = sims3.Enabled;
+                ckbEnabled.Checked = IsEnabled(sims3);
                 ckbEnabled.CheckedChanged += new EventHandler(ckbEnabled_CheckedChanged);
 
                 tbInstFolder.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-                tbInstFolder.Text = (sims3.InstallDir == null) ? "(not set)" : sims3.InstallDir;
+                tbInstFolder.Text = this[sims3] == null ? "(not set)" : this[sims3];
                 tbInstFolder.ReadOnly = true;
 
                 btnEdit.Anchor = AnchorStyles.None;
                 btnEdit.AutoSize = true;
                 btnEdit.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-                btnEdit.Enabled = sims3.Enabled;
+                btnEdit.Enabled = IsEnabled(sims3);
                 btnEdit.Text = "Edit";
                 btnEdit.Click += new EventHandler(btnEdit_Click);
 
@@ -81,7 +130,7 @@ namespace ObjectCloner.SettingsForms
             this.Size = new Size(size.Width, size.Height - sizeTLP.Height + tlpGameFolders.Size.Height);
         }
 
-        MainForm.S3ocSims3 S3ocSims3FromControl(Control c)
+        S3ocSims3 S3ocSims3FromControl(Control c)
         {
             int row = tlpGameFolders.GetCellPosition(c).Row - 1;
             if (!dS3ocSims3.ContainsKey(row)) return null;
@@ -90,31 +139,31 @@ namespace ObjectCloner.SettingsForms
 
         void ckbEnabled_CheckedChanged(object sender, EventArgs e)
         {
-            MainForm.S3ocSims3 sims3 = S3ocSims3FromControl((Control)sender);
+            S3ocSims3 sims3 = S3ocSims3FromControl((Control)sender);
             if (sims3 == null) return;
 
-            sims3.Enabled = !sims3.Enabled;
+            SetEnabled(sims3, !IsEnabled(sims3));
 
             Button btn = tlpGameFolders.GetControlFromPosition(3, tlpGameFolders.GetCellPosition((Control)sender).Row) as Button;
-            if (btn != null) btn.Enabled = sims3.Enabled;
+            if (btn != null) btn.Enabled = IsEnabled(sims3);
         }
 
         void btnEdit_Click(object sender, EventArgs e)
         {
-            MainForm.S3ocSims3 sims3 = S3ocSims3FromControl((Control)sender);
+            S3ocSims3 sims3 = S3ocSims3FromControl((Control)sender);
             if (sims3 == null) return;
 
-            folderBrowserDialog1.SelectedPath = sims3.InstallDir == null ? "" : sims3.InstallDir;
+            folderBrowserDialog1.SelectedPath = this[sims3] == null ? "" : this[sims3];
             DialogResult dr = folderBrowserDialog1.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            sims3.InstallDir = folderBrowserDialog1.SelectedPath;
+            this[sims3] = folderBrowserDialog1.SelectedPath;
 
             TextBox tb = tlpGameFolders.GetControlFromPosition(2, tlpGameFolders.GetCellPosition((Control)sender).Row) as TextBox;
-            tb.Text = (sims3.InstallDir == null) ? "(not set)" : sims3.InstallDir;
+            tb.Text = this[sims3] == null ? "(not set)" : this[sims3];
             tb.BackColor = SystemColors.Control;
 
-            List<string> files = MainForm.iniGetPath(sims3, null);
+            List<string> files = IsEnabled(sims3) ? s3ocTTL.GetPath(this[sims3], sims3, null) : null;
             foreach(string file in files)
                 if (!File.Exists(file))
                 {
@@ -139,10 +188,10 @@ namespace ObjectCloner.SettingsForms
 
         private void btnReset_Click(object sender, EventArgs e)
         {
-            foreach (MainForm.S3ocSims3 sims3 in MainForm.lS3ocSims3)
+            foreach (S3ocSims3 sims3 in s3ocTTL.lS3ocSims3)
             {
-                sims3.Enabled = sims3.isSuppressed == 0;
-                sims3.InstallDir = sims3.hasDefaultInstallDir;
+                SetEnabled(sims3, sims3.isSuppressed == 0);
+                this[sims3] = sims3.hasDefaultInstallDir;
             }
             DialogResult = DialogResult.Retry;
             Close();

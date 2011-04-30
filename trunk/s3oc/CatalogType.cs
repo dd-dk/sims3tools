@@ -1,5 +1,5 @@
 ﻿/***************************************************************************
- *  Copyright (C) 2009 by Peter L Jones                                    *
+ *  Copyright (C) 2011 by Peter L Jones                                    *
  *  pljones@users.sf.net                                                   *
  *                                                                         *
  *  This file is part of the Sims 3 Package Interface (s3pi)               *
@@ -18,26 +18,31 @@
  *  along with s3pi.  If not, see <http://www.gnu.org/licenses/>.          *
  ***************************************************************************/
 using System;
-using System.ComponentModel;
-using System.Windows.Forms;
+using System.Collections.Generic;
 
-namespace ObjectCloner.TopPanelComponents
+namespace ObjectCloner
 {
-    public partial class PleaseWait : UserControl
+    public enum CatalogType : uint
     {
-        public PleaseWait()
-        {
-            InitializeComponent();
-        }
-        public string Label { get { return label1.Text; } set { label1.Text = value; } }
+        CatalogFence = 0x0418FE2A,
+        CatalogStairs = 0x049CA4CD,
+        CatalogProxyProduct = 0x04AC5D93,
+        CatalogTerrainGeometryBrush = 0x04B30669,
 
-        public static string DoWait(Control control, string Label = "Please wait...")
-        {
-            PleaseWait pw = new PleaseWait() { Dock = DockStyle.Fill, Label = Label, Name = "pleaseWait1", };
-            control.Controls.Add(pw);
-            return pw.Name;
-        }
+        CatalogRailing = 0x04C58103,
+        CatalogTerrainPaintBrush = 0x04ED4BB2,
+        CatalogFireplace = 0x04F3CC01,
+        CatalogTerrainWaterBrush = 0x060B390C,
 
-        public static void StopWait(Control control, string Key = "pleaseWait1") { control.Controls.RemoveByKey(Key); }
+        CatalogFountainPool = 0x0A36F07A,
+
+        CatalogFoundation = 0x316C78F2,
+        CatalogObject = 0x319E4F1D,
+        CatalogWallFloorPattern = 0x515CA4CD,
+        CatalogWallStyle = 0x9151E6BC,
+
+        CatalogRoofStyle = 0x91EDBD3E,
+        ModularResource = 0xCF9A4ACE,
+        CatalogRoofPattern = 0xF1EDBD86,
     }
 }

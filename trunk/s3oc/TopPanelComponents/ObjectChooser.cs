@@ -22,22 +22,47 @@ using System.Collections.Generic;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
+using s3pi.Interfaces;
 
 namespace ObjectCloner.TopPanelComponents
 {
     public partial class ObjectChooser : UserControl
     {
+
         ListViewColumnSorter lvwColumnSorter;
+
+        MainForm.updateProgressCallback updateProgressCB;
+        MainForm.listViewAddCallBack listViewAddCB;
+        public CatalogType ResourceType { get; private set; }
+        bool isFix;
+
         public ObjectChooser()
         {
             InitializeComponent();
             lvwColumnSorter = new ListViewColumnSorter();
             this.listView1.ListViewItemSorter = lvwColumnSorter;
             ObjectChooser_LoadListViewSettings();
+            this.Load += new EventHandler(ObjectChooser_Load);
         }
 
-        public void ObjectChooser_LoadListViewSettings()
+        public ObjectChooser(MainForm.updateProgressCallback updateProgressCB, MainForm.listViewAddCallBack listViewAddCB, CatalogType resourceType, bool isFix)
+            : this()
+        {
+            ResourceType = resourceType;
+            this.updateProgressCB = updateProgressCB;
+            this.listViewAddCB = listViewAddCB;
+            this.isFix = isFix;
+        }
+
+        void ObjectChooser_Load(object sender, EventArgs e)
+        {
+            if (filling) { AbortFilling(false); }//this can never happen
+            StartFilling();
+        }
+
+        void ObjectChooser_LoadListViewSettings()
         {
             string cw = ObjectCloner.Properties.Settings.Default.ColumnWidths;
             string[] cws = cw == null ? new string[] { } : cw.Split(':');
@@ -48,7 +73,7 @@ namespace ObjectCloner.TopPanelComponents
             listView1.Columns[2].Width = cws.Length > 2 && int.TryParse(cws[2], out w) && w > 0 ? w : (this.listView1.Width - 32) / 6;
             listView1.Columns[3].Width = cws.Length > 3 && int.TryParse(cws[3], out w) && w > 0 ? w : (this.listView1.Width - 32) / 3;
         }
-        public void ObjectChooser_SaveSettings()
+        public void ObjectChooser_SaveListViewSettings()
         {
             lvwColumnSorter.ListViewColumnSorter_SaveSettings();
             ObjectCloner.Properties.Settings.Default.ColumnWidths = string.Format("{0}:{1}:{2}:{3}"
@@ -57,6 +82,39 @@ namespace ObjectCloner.TopPanelComponents
                 , listView1.Columns[2].Width
                 , listView1.Columns[3].Width
                 );
+        }
+
+
+        public ListViewItem SelectedItem { get { return listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0] : null; } set { listView1.SelectedItems.Clear(); if (listView1.Items.Contains(value)) try { value.Selected = true; } catch { } } }
+
+        #region Occurs whenever the 'SelectedIndex' for the Object Chooser changes
+        [Browsable(true)]
+        [Category("Action")]
+        [Description("Occurs whenever the 'SelectedIndex' for the Object Chooser changes")]
+        public event EventHandler<MainForm.SelectedIndexChangedEventArgs> SelectedIndexChanged;
+        protected virtual void OnSelectedIndexChanged(object sender, MainForm.SelectedIndexChangedEventArgs e) { if (SelectedIndexChanged != null) SelectedIndexChanged(sender, e); }
+        #endregion
+
+        #region Occurs when an item is actived
+        [Browsable(true)]
+        [Category("Action")]
+        [Description("Occurs when an item is actived")]
+        public event EventHandler<MainForm.ItemActivateEventArgs> ItemActivate;
+        protected virtual void OnItemActivate(object sender, MainForm.ItemActivateEventArgs e) { if (ItemActivate != null) ItemActivate(sender, e); }
+        #endregion
+
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e) { OnSelectedIndexChanged(sender, new MainForm.SelectedIndexChangedEventArgs(sender as ListView)); }
+        private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(sender, new MainForm.ItemActivateEventArgs(sender as ListView)); }
+
+        private void omCopyRK_Click(object sender, EventArgs e)
+        {
+            if (SelectedItem != null && SelectedItem.Tag as SpecificResource != null)
+                Clipboard.SetText((SelectedItem.Tag as SpecificResource).ResourceIndexEntry + "");
+        }
+
+        private void ocContextMenu_Opening(object sender, CancelEventArgs e)
+        {
+            omCopyRK.Enabled = SelectedItem != null;
         }
 
         #region ListViewColumnSorter
@@ -123,7 +181,7 @@ namespace ObjectCloner.TopPanelComponents
 
                 // Compare the two items
                 if (ColumnToSort == 3)
-                    compareResult = (listviewX.Tag as Item).RequestedRK.Compare((listviewY.Tag as Item).RequestedRK);
+                    compareResult = (listviewX.Tag as SpecificResource).RequestedRK.CompareTo((listviewY.Tag as SpecificResource).RequestedRK);
                 else
                     compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
 
@@ -207,55 +265,171 @@ namespace ObjectCloner.TopPanelComponents
         }
         #endregion
 
-        public event EventHandler SelectedIndexChanged;
-        protected void OnSelectedIndexChanged(object sender, EventArgs e) { if (SelectedIndexChanged != null) SelectedIndexChanged(sender, e); }
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e) { OnSelectedIndexChanged(sender, e); }
+        #region FillThread
+        bool filling = false;
+        Thread fillThread;
 
-        public View View
+        void StartFilling()
         {
-            get { return listView1.View; }
-            set { listView1.View = value; }
+            Diagnostics.Log(String.Format("StartFilling ResourceType: {0}", ResourceType));
+            listView1.Visible = false;
+            if (!isFix)
+            {
+                PleaseWait.DoWait(this, "Please wait, loading object catalog...");
+            }
+            listView1.Items.Clear();
+
+            FillThread ft = new FillThread(this, ResourceType, Add, updateProgressCB, stopFilling, OnFillingComplete);
+            FillingComplete += new EventHandler<MainForm.BoolEventArgs>(ObjectChooser_FillingComplete);
+
+            fillThread = new Thread(new ThreadStart(ft.Fill));
+            filling = true;
+            fillThread.Start();
         }
 
-        public ImageList SmallImageList
+        void ObjectChooser_FillingComplete(object sender, MainForm.BoolEventArgs e)
         {
-            get { return listView1.SmallImageList; }
-            set { listView1.SmallImageList = value; }
+            Diagnostics.Log(String.Format("ObjectChooser_FillingComplete {0}", e.arg));
+            filling = false;
+            while (fillThread != null && fillThread.IsAlive)
+                fillThread.Join(100);
+            fillThread = null;
+
+            updateProgressCB(true, "", true, -1, false, 0);
+            if (!isFix)
+            {
+                PleaseWait.StopWait(this);
+            }
+            listView1.Visible = !isFix;
+
+
+
+            if (e.arg)
+            {
+                if (listView1.Items.Count > 0) { SelectedItem = listView1.Items[0]; if (!isFix) { SelectedItem.EnsureVisible(); listView1.Focus(); } }
+                if (isFix && listView1.Items.Count == 1) listView1_ItemActivate(listView1, EventArgs.Empty);
+            }
         }
 
-        public ImageList LargeImageList
+        public void AbortFilling(bool abort)
         {
-            get { return listView1.LargeImageList; }
-            set { listView1.LargeImageList = value; }
+            Diagnostics.Log(String.Format("AbortFilling {0}", abort));
+            if (abort)
+            {
+                if (fillThread != null) fillThread.Abort();
+                filling = false;
+                while (fillThread != null && fillThread.IsAlive)
+                    fillThread.Join(100);
+                fillThread = null;
+            }
+            else
+            {
+                if (!filling) ObjectChooser_FillingComplete(null, new MainForm.BoolEventArgs(false));
+                else filling = false;
+            }
         }
 
-        public ListView.ListViewItemCollection Items
+        delegate void AddCallBack(SpecificResource item);
+        void Add(SpecificResource item)
         {
-            get { return listView1.Items; }
+            if (!this.IsHandleCreated || this.IsDisposed) return;
+            listViewAddCB(item, listView1);
         }
 
-        public ListView.SelectedListViewItemCollection SelectedItems
+        public event EventHandler<MainForm.BoolEventArgs> FillingComplete;
+        public delegate void fillingCompleteCallback(bool complete);
+        public void OnFillingComplete(bool complete) { if (FillingComplete != null) { FillingComplete(this, new MainForm.BoolEventArgs(complete)); } }
+
+        public delegate bool stopFillingCallback();
+        private bool stopFilling() { return !filling; }
+
+        class FillThread
         {
-            get { return listView1.SelectedItems; }
+
+            CatalogType resourceType;
+            Control control;
+            AddCallBack addCB;
+            MainForm.updateProgressCallback updateProgressCB;
+            stopFillingCallback stopFillingCB;
+            fillingCompleteCallback fillingCompleteCB;
+
+            public FillThread(Control objectChooser, CatalogType resourceType
+                , AddCallBack createListViewItemCB
+                , MainForm.updateProgressCallback updateProgressCB
+                , stopFillingCallback stopFillingCB
+                , fillingCompleteCallback fillingCompleteCB
+                )
+            {
+                this.control = objectChooser;
+                this.resourceType = resourceType;
+                this.addCB = createListViewItemCB;
+                this.updateProgressCB = updateProgressCB;
+                this.stopFillingCB = stopFillingCB;
+                this.fillingCompleteCB = fillingCompleteCB;
+            }
+
+
+            public void Fill()
+            {
+                bool complete = false;
+                bool abort = false;
+                try
+                {
+                    updateProgress(true, "Please wait, searching for objects...", true, -1, false, 0);
+
+                    List<SpecificResource> lres = new List<SpecificResource>();
+                    updateProgress(true, "Please wait, finding objects... 0%", true, FileTable.fb0.Count, true, 0);
+                    int i = 0;
+                    foreach (PathPackageTuple ppt in FileTable.fb0)
+                    {
+                        if (stopFilling) return;
+
+                        List<SpecificResource> matches;
+                        if (resourceType != 0)
+                            matches = ppt.FindAll(rie => rie.ResourceType == (uint)resourceType && !lres.Exists(sr => rie.Instance == sr.ResourceIndexEntry.Instance));
+                        else
+                            matches = ppt.FindAll(rie => Enum.IsDefined(typeof(CatalogType), rie.ResourceType) && !lres.Exists(sr => rie.Instance == sr.ResourceIndexEntry.Instance));
+                        if (stopFilling) return;
+
+                        lres.AddRange(matches);
+                        updateProgress(true, "Please wait, finding objects... " + i * 100 / FileTable.fb0.Count + "%", false, -1, true, i);
+                    }
+
+                    updateProgress(true, "Please wait, loading objects... 0%", true, lres.Count, true, 0);
+                    int freq = Math.Max(1, lres.Count / 50);
+                    i = 0;
+                    foreach (SpecificResource res in lres)
+                    {
+                        if (stopFilling) return;
+
+                        Add(res);
+
+                        if (++i % freq == 0)
+                            updateProgress(true, "Please wait, loading objects... " + i * 100 / lres.Count + "%", false, -1, true, i);
+                    }
+                    complete = true;
+                }
+                catch (ThreadAbortException) { abort = true; Thread.Sleep(0); }
+                finally
+                {
+                    if (!abort)
+                    {
+                        updateProgress(true, "Search ended", true, -1, false, 0);
+                        fillingComplete(complete);
+                    }
+                }
+            }
+
+            #region Callbacks
+            void Add(SpecificResource sr) { Thread.Sleep(0); if (control.IsHandleCreated && !control.IsDisposed) control.Invoke(addCB, new object[] { sr, }); }
+
+            void updateProgress(bool changeText, string text, bool changeMax, int max, bool changeValue, int value) { Thread.Sleep(0); if (control.IsHandleCreated && !control.IsDisposed) control.Invoke(updateProgressCB, new object[] { changeText, text, changeMax, max, changeValue, value, }); }
+
+            bool stopFilling { get { Thread.Sleep(0); return !(control.IsHandleCreated && !control.IsDisposed) || (bool)control.Invoke(stopFillingCB); } }
+
+            void fillingComplete(bool complete) { Thread.Sleep(0); if (control.IsHandleCreated && !control.IsDisposed) control.BeginInvoke(fillingCompleteCB, new object[] { complete, }); }
+            #endregion
         }
-
-        public ListViewItem SelectedItem { get { return listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0] : null; } set { listView1.SelectedItems.Clear(); if (listView1.Items.Contains(value)) value.Selected = true; } }
-
-        public int SelectedIndex { get { return listView1.SelectedIndices.Count == 1 ? listView1.SelectedIndices[0] : -1; } set { listView1.SelectedIndices.Clear(); if (value >= 0 && value < listView1.Items.Count)listView1.SelectedIndices.Add(value); } }
-
-        public event EventHandler ItemActivate;
-        protected void OnItemActivate(object sender, EventArgs e) { if (ItemActivate != null) ItemActivate(sender, e); }
-        private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(sender, e); }
-
-        private void omCopyRK_Click(object sender, EventArgs e)
-        {
-            if (SelectedItem != null && SelectedItem.Tag as Item != null)
-                Clipboard.SetText((SelectedItem.Tag as Item).SpecificRK + "");
-        }
-
-        private void ocContextMenu_Opening(object sender, CancelEventArgs e)
-        {
-            omCopyRK.Enabled = SelectedItem != null;
-        }
+        #endregion
     }
 }

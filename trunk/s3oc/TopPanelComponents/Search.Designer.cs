@@ -48,10 +48,12 @@
             this.ckbObjectDesc = new System.Windows.Forms.CheckBox();
             this.ckbCatalogName = new System.Windows.Forms.CheckBox();
             this.ckbCatalogDesc = new System.Windows.Forms.CheckBox();
+            this.ckbUseCC = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.tbText = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
+            this.Path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.searchContextMenu.SuspendLayout();
             this.tlpSearch.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -64,18 +66,19 @@
             this.catlgName,
             this.TagID,
             this.ContentCategoryFlags,
-            this.TGI});
+            this.TGI,
+            this.Path});
             this.tlpSearch.SetColumnSpan(this.listView1, 4);
             this.listView1.ContextMenuStrip = this.searchContextMenu;
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.FullRowSelect = true;
             this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(0, 161);
+            this.listView1.Location = new System.Drawing.Point(0, 184);
             this.listView1.Margin = new System.Windows.Forms.Padding(0);
             this.listView1.MultiSelect = false;
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(391, 145);
-            this.listView1.TabIndex = 7;
+            this.listView1.Size = new System.Drawing.Size(800, 114);
+            this.listView1.TabIndex = 8;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
             this.listView1.ItemActivate += new System.EventHandler(this.listView1_ItemActivate);
@@ -84,29 +87,29 @@
             // catlgName
             // 
             this.catlgName.Text = "Name";
-            this.catlgName.Width = 45;
+            this.catlgName.Width = 160;
             // 
             // TagID
             // 
             this.TagID.Text = "Tag";
-            this.TagID.Width = 32;
+            this.TagID.Width = 64;
             // 
             // ContentCategoryFlags
             // 
             this.ContentCategoryFlags.Text = "EP/SP";
-            this.ContentCategoryFlags.Width = 59;
+            this.ContentCategoryFlags.Width = 64;
             // 
             // TGI
             // 
             this.TGI.Text = "ResourceKey";
-            this.TGI.Width = 138;
+            this.TGI.Width = 192;
             // 
             // searchContextMenu
             // 
             this.searchContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.scmCopyRK});
             this.searchContextMenu.Name = "searchContextMenu";
-            this.searchContextMenu.Size = new System.Drawing.Size(208, 48);
+            this.searchContextMenu.Size = new System.Drawing.Size(205, 26);
             this.searchContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.searchContextMenu_Opening);
             // 
             // scmCopyRK
@@ -114,7 +117,7 @@
             this.scmCopyRK.Enabled = false;
             this.scmCopyRK.Name = "scmCopyRK";
             this.scmCopyRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.scmCopyRK.Size = new System.Drawing.Size(207, 22);
+            this.scmCopyRK.Size = new System.Drawing.Size(204, 22);
             this.scmCopyRK.Text = "&Copy ResourceKey";
             this.scmCopyRK.Click += new System.EventHandler(this.scmCopyRK_Click);
             // 
@@ -142,7 +145,8 @@
             this.tlpSearch.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpSearch.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tlpSearch.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 2F));
-            this.tlpSearch.Size = new System.Drawing.Size(391, 308);
+            this.tlpSearch.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tlpSearch.Size = new System.Drawing.Size(800, 300);
             this.tlpSearch.TabIndex = 1;
             // 
             // tableLayoutPanel1
@@ -155,11 +159,11 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.Controls.Add(this.cbCatalogType, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.btnSearch, 1, 0);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(100, 129);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(100, 152);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(286, 29);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(695, 29);
             this.tableLayoutPanel1.TabIndex = 6;
             // 
             // cbCatalogType
@@ -169,17 +173,18 @@
             this.cbCatalogType.FormattingEnabled = true;
             this.cbCatalogType.Location = new System.Drawing.Point(3, 4);
             this.cbCatalogType.Name = "cbCatalogType";
-            this.cbCatalogType.Size = new System.Drawing.Size(199, 21);
-            this.cbCatalogType.TabIndex = 1;
+            this.cbCatalogType.Size = new System.Drawing.Size(608, 21);
+            this.cbCatalogType.TabIndex = 6;
             // 
             // btnSearch
             // 
             this.btnSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSearch.Location = new System.Drawing.Point(208, 3);
+            this.btnSearch.Enabled = false;
+            this.btnSearch.Location = new System.Drawing.Point(617, 3);
             this.btnSearch.Name = "btnSearch";
             this.btnSearch.Size = new System.Drawing.Size(75, 23);
-            this.btnSearch.TabIndex = 2;
-            this.btnSearch.Text = "Search";
+            this.btnSearch.TabIndex = 7;
+            this.btnSearch.Text = "&Search";
             this.btnSearch.UseVisualStyleBackColor = true;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
@@ -190,9 +195,6 @@
             this.tlpWhere.ColumnCount = 2;
             this.tlpWhere.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpWhere.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tlpWhere.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tlpWhere.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tlpWhere.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlpWhere.Controls.Add(this.ckbResourceName, 0, 0);
             this.tlpWhere.Controls.Add(this.rb1English, 0, 3);
             this.tlpWhere.Controls.Add(this.rb1All, 1, 3);
@@ -200,14 +202,16 @@
             this.tlpWhere.Controls.Add(this.ckbObjectDesc, 1, 1);
             this.tlpWhere.Controls.Add(this.ckbCatalogName, 0, 2);
             this.tlpWhere.Controls.Add(this.ckbCatalogDesc, 1, 2);
+            this.tlpWhere.Controls.Add(this.ckbUseCC, 0, 4);
             this.tlpWhere.Location = new System.Drawing.Point(100, 31);
             this.tlpWhere.Name = "tlpWhere";
-            this.tlpWhere.RowCount = 4;
+            this.tlpWhere.RowCount = 5;
             this.tlpWhere.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpWhere.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpWhere.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpWhere.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpWhere.Size = new System.Drawing.Size(205, 92);
+            this.tlpWhere.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpWhere.Size = new System.Drawing.Size(205, 115);
             this.tlpWhere.TabIndex = 4;
             // 
             // ckbResourceName
@@ -294,6 +298,18 @@
             this.ckbCatalogDesc.UseVisualStyleBackColor = true;
             this.ckbCatalogDesc.CheckedChanged += new System.EventHandler(this.ckb_CheckedChanged);
             // 
+            // ckbUseCC
+            // 
+            this.ckbUseCC.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ckbUseCC.AutoSize = true;
+            this.tlpWhere.SetColumnSpan(this.ckbUseCC, 2);
+            this.ckbUseCC.Location = new System.Drawing.Point(3, 95);
+            this.ckbUseCC.Name = "ckbUseCC";
+            this.ckbUseCC.Size = new System.Drawing.Size(137, 17);
+            this.ckbUseCC.TabIndex = 8;
+            this.ckbUseCC.Text = "Include custom content";
+            this.ckbUseCC.UseVisualStyleBackColor = true;
+            // 
             // label1
             // 
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -309,7 +325,7 @@
             this.tbText.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tbText.Location = new System.Drawing.Point(100, 5);
             this.tbText.Name = "tbText";
-            this.tbText.Size = new System.Drawing.Size(286, 20);
+            this.tbText.Size = new System.Drawing.Size(695, 20);
             this.tbText.TabIndex = 2;
             this.tbText.TextChanged += new System.EventHandler(this.tbText_TextChanged);
             // 
@@ -317,7 +333,7 @@
             // 
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(5, 70);
+            this.label2.Location = new System.Drawing.Point(5, 82);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(89, 13);
             this.label2.TabIndex = 3;
@@ -327,18 +343,23 @@
             // 
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(19, 137);
+            this.label3.Location = new System.Drawing.Point(19, 160);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(75, 13);
             this.label3.TabIndex = 5;
             this.label3.Text = "Kind of object:";
+            // 
+            // Path
+            // 
+            this.Path.Text = "Path";
+            this.Path.Width = 296;
             // 
             // Search
             // 
             this.Controls.Add(this.tlpSearch);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "Search";
-            this.Size = new System.Drawing.Size(391, 308);
+            this.Size = new System.Drawing.Size(800, 300);
             this.searchContextMenu.ResumeLayout(false);
             this.tlpSearch.ResumeLayout(false);
             this.tlpSearch.PerformLayout();
@@ -374,6 +395,8 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.ContextMenuStrip searchContextMenu;
         private System.Windows.Forms.ToolStripMenuItem scmCopyRK;
+        private System.Windows.Forms.CheckBox ckbUseCC;
+        private System.Windows.Forms.ColumnHeader Path;
 
     }
 }

@@ -87,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutoUpdate.cs" />
+    <Compile Include="CatalogType.cs" />
     <Compile Include="CustomControls\EnumTextBox.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -105,18 +106,24 @@
     <Compile Include="CustomControls\TopicRatings.Designer.cs">
       <DependentUpon>TopicRatings.cs</DependentUpon>
     </Compile>
-    <Compile Include="FillListView.cs" />
+    <Compile Include="Diagnostics.cs" />
+    <Compile Include="NameMap.cs" />
+    <Compile Include="RK.cs" />
+    <Compile Include="SettingsForms\EPsDisabled.cs" />
+    <Compile Include="FileTable.cs" />
     <Compile Include="MenuBarWidget\MenuBarWidget.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="MenuBarWidget\MenuBarWidget.designer.cs">
       <DependentUpon>MenuBarWidget.cs</DependentUpon>
     </Compile>
+    <Compile Include="PathPackageTuple.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="s3ocTTL.cs" />
     <Compile Include="SettingsForms\GameFolders.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -138,6 +145,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SpecificResource.cs" />
+    <Compile Include="STBLHandler.cs" />
+    <Compile Include="THUM.cs" />
     <Compile Include="TopPanelComponents\TGISearch.cs">
       <SubType>UserControl</SubType>
     </Compile>

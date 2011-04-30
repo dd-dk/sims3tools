@@ -30,34 +30,87 @@ namespace ObjectCloner.TopPanelComponents
 {
     public partial class TGISearch : UserControl
     {
+
         ListViewColumnSorter lvwColumnSorter;
 
-        List<List<IPackage>> pkgLists;
-        List<List<string>> pathLists;
         MainForm.updateProgressCallback updateProgressCB;
-        MainForm.NameMap nameMap;
+
+
+
 
         public TGISearch()
         {
             InitializeComponent();
             lvwColumnSorter = new ListViewColumnSorter();
-            listView1.ListViewItemSorter = lvwColumnSorter;
-
+            this.listView1.ListViewItemSorter = lvwColumnSorter;
             cbResourceType.Value = 0;
             tbResourceGroup.Text = "0x00000000";
             tbInstance.Text = "0x0000000000000000";
+            ckbUseCC.Enabled = ObjectCloner.Properties.Settings.Default.CCEnabled;
         }
 
-        public TGISearch(List<List<IPackage>> pkgLists, List<List<string>> pathLists, MainForm.updateProgressCallback updateProgressCB, MainForm.NameMap nameMap)
+        public TGISearch(MainForm.updateProgressCallback updateProgressCB)
             : this()
         {
-            this.pkgLists = pkgLists;
-            this.pathLists = pathLists;
             this.updateProgressCB = updateProgressCB;
-            this.nameMap = nameMap;
         }
 
-        #region Search criteria event handlers
+
+
+
+
+
+
+
+
+
+
+
+
+
+        private void listView1_ItemActivate(object sender, EventArgs e)
+        {
+            if (listView1.SelectedItems.Count != 1) return;
+
+            ListViewItem lvi = listView1.SelectedItems[0];
+            
+            CopyableMessageBox.Show(String.Format(
+                "Name: {0}\n"+
+                "Tag: {1}\n"+
+                "EP/SP: {2}\n"+
+                "ResourceKey: {3}\n"+
+                "Path: {4}",
+                lvi.SubItems[0].Text, lvi.SubItems[1].Text, lvi.SubItems[2].Text, lvi.SubItems[3].Text, lvi.SubItems[4].Text
+                ),
+                "Selected item");
+        }
+
+        private void tgisCopyRK_Click(object sender, EventArgs e)
+        {
+            if (listView1.SelectedItems[0] != null && listView1.SelectedItems[0].Tag as AResourceKey != null)
+                Clipboard.SetText((listView1.SelectedItems[0].Tag as AResourceKey) + "");
+        }
+
+        private void tgisPasteRK_Click(object sender, EventArgs e)
+        {
+            IResourceKey rk;
+            if (RK.TryParse(Clipboard.GetText(), out rk))
+            {
+                cbResourceType.Value = rk.ResourceType;
+                tbResourceGroup.Text = "0x" + rk.ResourceGroup.ToString("X8");
+                tbInstance.Text = "0x" + rk.Instance.ToString("X16");
+            }
+        }
+
+        private void tgiSearchContextMenu_Opening(object sender, CancelEventArgs e)
+        {
+            tgisCopyRK.Enabled = listView1.SelectedItems.Count == 1 && listView1.SelectedItems[0].Tag as AResourceKey != null;
+
+            IResourceKey rk;
+            tgisPasteRK.Enabled = Clipboard.ContainsText() && RK.TryParse(Clipboard.GetText(), out rk);
+        }
+
+        #region Search controls
         private void ckbResourceType_CheckedChanged(object sender, EventArgs e)
         {
             cbResourceType.Enabled = !ckbResourceType.Checked;
@@ -108,38 +161,33 @@ namespace ObjectCloner.TopPanelComponents
                 if (!ulong.TryParse(s, out instance)) e.Cancel = true;
             }
         }
-        #endregion
 
         private void btnSearch_Click(object sender, EventArgs e)
         {
             if (searching)
             {
-                AbortSearch();
+                AbortTGISearch(false);
             }
             else
             {
+                tlpSearch.Visible = false;
+                if (FileTable.UseCustomContent != ckbUseCC.Checked)
+                {
+                    FileTable.UseCustomContent = ckbUseCC.Checked;
+                    NameMap.Reset();
+                    THUM.Reset();
+                    STBLHandler.Reset();
+                }
+                if (!MainForm.CheckInstallDirs(this))
+                    return;
+                tlpSearch.Visible = true;
+                
                 tgiSearchContextMenu.Enabled = listView1.Enabled = tlpTGIValues.Enabled = false;
                 btnSearch.Text = "&Stop";
-                StartSearch();
+                StartTGISearch();
             }
         }
-
-        private void listView1_ItemActivate(object sender, EventArgs e)
-        {
-            if (listView1.SelectedItems.Count != 1) return;
-
-            ListViewItem lvi = listView1.SelectedItems[0];
-            
-            CopyableMessageBox.Show(String.Format(
-                "Name: {0}\n"+
-                "Tag: {1}\n"+
-                "EP/SP: {2}\n"+
-                "ResourceKey: {3}\n"+
-                "Path: {4}",
-                lvi.SubItems[0].Text, lvi.SubItems[1].Text, lvi.SubItems[2].Text, lvi.SubItems[3].Text, lvi.SubItems[4].Text
-                ),
-                "Selected item");
-        }
+        #endregion
 
         #region ListViewColumnSorter
         /// <summary>
@@ -273,38 +321,85 @@ namespace ObjectCloner.TopPanelComponents
         }
         #endregion
 
-        delegate void AddCallBack(IResourceKey rk, string path);
-        void Add(IResourceKey rk, string path)
-        {
-            if (!this.IsHandleCreated) return;
+        #region TGI Search Thread
+        bool searching;
+        Thread searchThread;
 
-            string name = nameMap[rk.Instance];
+        void StartTGISearch()
+        {
+            Diagnostics.Log("StartTGISearch");
+
+            listView1.Items.Clear();
+
+            TGISearchThread st = new TGISearchThread(this, GetCriteria(), Add, updateProgressCB, stopSearch, OnSearchComplete);
+            SearchComplete += new EventHandler<MainForm.BoolEventArgs>(TGISearch_SearchComplete);
+
+            searchThread = new Thread(new ThreadStart(st.Search));
+            searching = true;
+            searchThread.Start();
+        }
+
+        void TGISearch_SearchComplete(object sender, MainForm.BoolEventArgs e)
+        {
+            Diagnostics.Log(String.Format("TGISearch_SearchComplete {0}", e.arg));
+            searching = false;
+            while (searchThread != null && searchThread.IsAlive)
+                searchThread.Join(100);
+            searchThread = null;
+
+            updateProgressCB(true, "", true, -1, false, 0);
+
+            tgiSearchContextMenu.Enabled = listView1.Enabled = tlpTGIValues.Enabled = true;
+            btnSearch.Text = "&Search";
+
+
+
+
+
+
+        }
+
+        public void AbortTGISearch(bool abort)
+        {
+            if (abort)
+            {
+                if (searchThread != null) searchThread.Abort();
+                searching = false;
+                while (searchThread != null && searchThread.IsAlive)
+                    searchThread.Join(100);
+                searchThread = null;
+            }
+            else
+            {
+                if (!searching) TGISearch_SearchComplete(null, new MainForm.BoolEventArgs(false));
+                else searching = false;
+            }
+        }
+
+        delegate void AddCallBack(SpecificResource res);
+        void Add(SpecificResource res)
+        {
+            if (!this.IsHandleCreated || this.IsDisposed) return;
+
+            string name = NameMap.NMap[res.ResourceIndexEntry.Instance];
             if (name == null) name = "";
 
             List<string> exts;
             string tag = "";
-            if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + rk.ResourceType.ToString("X8"), out exts)) tag = exts[0];
+            if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + res.ResourceIndexEntry.ResourceType.ToString("X8"), out exts)) tag = exts[0];
             else tag = "UNKN";
 
             listView1.Items.Add(new ListViewItem(new string[] {
-                name, tag, Item.EPSP((byte)(rk.ResourceGroup >> 27)), "" + (AResourceKey)rk, path,
-            }) { Tag = rk, });
+                name, tag, res.RGVsn, "" + (AResourceKey)res.ResourceIndexEntry, res.PathPackage.Path + " (" + res.PPSource + ")",
+            }) { Tag = res, });
         }
-
-        Thread searchThread;
-        bool searching = false;
-        public delegate bool stopSearchCallback();
-        private bool stopSearch() { return !searching; }
 
         event EventHandler<MainForm.BoolEventArgs> SearchComplete;
         delegate void searchCompleteCallback(bool complete);
         void OnSearchComplete(bool complete) { if (SearchComplete != null) { SearchComplete(this, new MainForm.BoolEventArgs(complete)); } }
 
-        private void AbortSearch()
-        {
-            if (!searching) OnSearchComplete(false); // Should never happen
-            else searching = false;
-        }
+        public delegate bool stopSearchCallback();
+        private bool stopSearch() { return !searching; }
 
         TGISearchThread.Criteria GetCriteria()
         {
@@ -340,32 +435,6 @@ namespace ObjectCloner.TopPanelComponents
             return criteria;
         }
 
-        private void StartSearch()
-        {
-            listView1.Items.Clear();
-
-            TGISearchThread st = new TGISearchThread(this, GetCriteria(), pkgLists, pathLists,
-                Add, updateProgressCB, stopSearch, OnSearchComplete);
-            SearchComplete += new EventHandler<MainForm.BoolEventArgs>(TGISearch_SearchComplete);
-
-            searchThread = new Thread(new ThreadStart(st.Search));
-            searching = true;
-            searchThread.Start();
-        }
-
-        void TGISearch_SearchComplete(object sender, MainForm.BoolEventArgs e)
-        {
-            searching = false;
-            while (searchThread != null && searchThread.IsAlive)
-                searchThread.Join(100);
-            searchThread = null;
-
-            updateProgressCB(true, "", true, -1, false, 0);
-
-            tgiSearchContextMenu.Enabled = listView1.Enabled = tlpTGIValues.Enabled = true;
-            btnSearch.Text = "&Search";
-        }
-
         class TGISearchThread
         {
             public struct Criteria
@@ -380,19 +449,15 @@ namespace ObjectCloner.TopPanelComponents
 
             Control control;
             Criteria criteria;
-            List<List<IPackage>> pkgLists;
-            List<List<string>> pathLists;
             AddCallBack addCB;
             MainForm.updateProgressCallback updateProgressCB;
             stopSearchCallback stopSearchCB;
             searchCompleteCallback searchCompleteCB;
-            public TGISearchThread(Control control, Criteria criteria, List<List<IPackage>> pkgLists, List<List<string>> pathLists,
+            public TGISearchThread(Control control, Criteria criteria,
                 AddCallBack addCB, MainForm.updateProgressCallback updateProgressCB, stopSearchCallback stopSearchCB, searchCompleteCallback searchCompleteCB)
             {
                 this.control = control;
                 this.criteria = criteria;
-                this.pkgLists = pkgLists;
-                this.pathLists = pathLists;
                 this.addCB = addCB;
                 this.updateProgressCB = updateProgressCB;
                 this.stopSearchCB = stopSearchCB;
@@ -402,60 +467,45 @@ namespace ObjectCloner.TopPanelComponents
             public void Search()
             {
                 bool complete = false;
+                bool abort = false;
                 DateTime now = DateTime.UtcNow;
 
                 try
                 {
+                    List<List<PathPackageTuple>> pptLists = new List<List<PathPackageTuple>>(new List<PathPackageTuple>[] { FileTable.fb0, FileTable.dds, FileTable.tmb, });
                     int searchCount = 0;
                     int searched = 0;
 
-                    pkgLists.ForEach(pkgList => searchCount += pkgList.Count);
-                    updateProgress(true, "Searching " + searchCount + " packages... 0%", true, searchCount, true, 0);
+                    pptLists.ForEach(x => searchCount += x.Count);
+                    updateProgress(true, "Searching " + searchCount + " packages...", true, searchCount, true, 0);
 
-                    for (int i = 0; i < pkgLists.Count; i++)
-                    {
-                        List<IPackage> pkgs = pkgLists[i];
-                        List<string> paths = pathLists[i];
+                    pptLists.ForEach(ppts => ppts.ForEach(ppt => {
+                        if (stopSearch) return;
 
-                        for (int j = 0; j < pkgs.Count; j++)
-                        {
-                            IPackage pkg = pkgs[j];
-                            string path = String.Format("{0} ({1}[{2}])", paths[j], new string[] { "obj", "dds", "tmb", "cc", }[i], j);
+                        updateProgress(true, String.Format("Searching package {0} of {1}...", ++searched, searchCount), false, -1, true, searched);
 
-                            if (stopSearch) return;
-
-                            pkg.FindAll(rie =>
-                            {
-                                if (stopSearch) return false;
-
-                                bool match = true;
-                                if (match && criteria.useResourceType) match = rie.ResourceType.Equals(criteria.resourceType);
-                                if (match && criteria.useResourceGroup) match = rie.ResourceGroup.Equals(criteria.resourceGroup);
-                                if (match && criteria.useInstance) match = rie.Instance.Equals(criteria.instance);
-                                if (match)
-                                {
-                                    Add(rie, path);
-                                }
-                                return match;
-                            });
-
-                            if (now.AddMilliseconds(100) < DateTime.UtcNow)
-                                updateProgress(true, "Searching " + searchCount + " packages... " + (++searched * 100 / searchCount) + "%", false, -1, true, searched);
-                        }
-                    }
+                        ppt.FindAll(sr => !stopSearch
+                            && (!criteria.useResourceType || sr.ResourceType.Equals(criteria.resourceType))
+                            && (!criteria.useResourceGroup || sr.ResourceGroup.Equals(criteria.resourceGroup))
+                            && (!criteria.useInstance || sr.Instance.Equals(criteria.instance))
+                        ).ForEach(sr => Add(sr));
+                    }));
 
                     complete = true;
                 }
-                catch (ThreadInterruptedException) { }
+                catch (ThreadAbortException) { abort = true; }
                 finally
                 {
-                    updateProgress(true, "Search ended", true, -1, false, 0);
-                    searchComplete(complete);
+                    if (!abort)
+                    {
+                        updateProgress(true, "Search ended", true, -1, false, 0);
+                        searchComplete(complete);
+                    }
                 }
             }
 
             #region Callbacks
-            void Add(IResourceIndexEntry rie, string path) { Thread.Sleep(0); if (control.IsHandleCreated) control.Invoke(addCB, new object[] { rie, path, }); }
+            void Add(SpecificResource res) { Thread.Sleep(0); if (control.IsHandleCreated) control.Invoke(addCB, new object[] { res, }); }
 
             void updateProgress(bool changeText, string text, bool changeMax, int max, bool changeValue, int value) { Thread.Sleep(0); if (control.IsHandleCreated) control.Invoke(updateProgressCB, new object[] { changeText, text, changeMax, max, changeValue, value, }); }
 
@@ -464,30 +514,6 @@ namespace ObjectCloner.TopPanelComponents
             void searchComplete(bool complete) { Thread.Sleep(0); if (control.IsHandleCreated) control.BeginInvoke(searchCompleteCB, new object[] { complete, }); }
             #endregion
         }
-
-        private void tgiSearchContextMenu_Opening(object sender, CancelEventArgs e)
-        {
-            tgisCopyRK.Enabled = listView1.SelectedItems.Count == 1 && listView1.SelectedItems[0].Tag as AResourceKey != null;
-
-            IResourceKey rk;
-            tgisPasteRK.Enabled = Clipboard.ContainsText() && RK.TryParse(Clipboard.GetText(), out rk);
-        }
-
-        private void tgisCopyRK_Click(object sender, EventArgs e)
-        {
-            if (listView1.SelectedItems[0] != null && listView1.SelectedItems[0].Tag as AResourceKey != null)
-                Clipboard.SetText((listView1.SelectedItems[0].Tag as AResourceKey) + "");
-        }
-
-        private void tgisPasteRK_Click(object sender, EventArgs e)
-        {
-            IResourceKey rk;
-            if (RK.TryParse(Clipboard.GetText(), out rk))
-            {
-                cbResourceType.Value = rk.ResourceType;
-                tbResourceGroup.Text = "0x" + rk.ResourceGroup.ToString("X8");
-                tbInstance.Text = "0x" + rk.Instance.ToString("X16");
-            }
-        }
+        #endregion
     }
 }

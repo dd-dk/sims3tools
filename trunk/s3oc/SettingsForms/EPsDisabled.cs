@@ -1,5 +1,5 @@
 ﻿/***************************************************************************
- *  Copyright (C) 2009 by Peter L Jones                                    *
+ *  Copyright (C) 2011 by Peter L Jones                                    *
  *  pljones@users.sf.net                                                   *
  *                                                                         *
  *  This file is part of the Sims 3 Package Interface (s3pi)               *
@@ -18,26 +18,28 @@
  *  along with s3pi.  If not, see <http://www.gnu.org/licenses/>.          *
  ***************************************************************************/
 using System;
-using System.ComponentModel;
-using System.Windows.Forms;
+using System.Collections.Generic;
+using System.IO;
+using s3pi.Interfaces;
 
-namespace ObjectCloner.TopPanelComponents
+namespace ObjectCloner.SettingsForms
 {
-    public partial class PleaseWait : UserControl
+    public class EPsDisabled
     {
-        public PleaseWait()
-        {
-            InitializeComponent();
-        }
-        public string Label { get { return label1.Text; } set { label1.Text = value; } }
+        static List<string> ePsDisabled = new List<string>();
+        static EPsDisabled() { ePsDisabled = new List<string>(ObjectCloner.Properties.Settings.Default.EPsDisabled.Split(';')); }
 
-        public static string DoWait(Control control, string Label = "Please wait...")
-        {
-            PleaseWait pw = new PleaseWait() { Dock = DockStyle.Fill, Label = Label, Name = "pleaseWait1", };
-            control.Controls.Add(pw);
-            return pw.Name;
-        }
+        static void Save() { ObjectCloner.Properties.Settings.Default.EPsDisabled = String.Join(";", ePsDisabled.ToArray()); FileTable.Reset(); }
 
-        public static void StopWait(Control control, string Key = "pleaseWait1") { control.Controls.RemoveByKey(Key); }
+        public static bool IsDisabled(string value) { return ePsDisabled.Contains(value); }
+        public static void Disable(string value, bool disabled)
+        {
+            if (IsDisabled(value) == disabled) return;
+            if (disabled)
+                ePsDisabled.Add(value);
+            else
+                ePsDisabled.Remove(value);
+            Save();
+        }
     }
 }

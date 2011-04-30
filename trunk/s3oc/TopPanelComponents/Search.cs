@@ -22,58 +22,50 @@ using System.Collections.Generic;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
-using System.Windows.Forms;
 using System.Threading;
+using System.Windows.Forms;
 using s3pi.Interfaces;
 
 namespace ObjectCloner.TopPanelComponents
 {
     public partial class Search : UserControl
     {
-        #region Static bits
-        static string[] ctNames = new string[]
-        {
-            "Any",
 
-            "Fence",
-            "Stairs",
-            "Proxy Product",
-            "Terrain Geometry Brush",
+        ListViewColumnSorter lvwColumnSorter;
 
-            "Railing",
-            "Terrain Paint Brush",
-            "Fireplace",
-            "Terrain Water Brush",
-
-            "Fountain / Pool",
-
-            "Foundation",
-            "Normal Object",
-            "Wall/Floor Pattern",
-            "Wall Style",
-
-            "Roof Style",
-            "Modular Resource",
-            "Roof Pattern",
-        };
-        #endregion
-
-        List<IPackage> objPkgs;
         MainForm.updateProgressCallback updateProgressCB;
+        MainForm.listViewAddCallBack listViewAddCB;
 
-        public Search(List<IPackage> objPkgs, MainForm.updateProgressCallback updateProgressCB)
+
+
+        public Search()
         {
             InitializeComponent();
+            lvwColumnSorter = new ListViewColumnSorter();
+            this.listView1.ListViewItemSorter = lvwColumnSorter;
             Search_LoadListViewSettings();
-            cbCatalogType.Items.AddRange(ctNames);
+            cbCatalogType.Items.AddRange(new string[] {
+                "Any",
+                "Fence", "Stairs", "Proxy Product", "Terrain Geometry Brush",
+                "Railing", "Terrain Paint Brush", "Fireplace", "Terrain Water Brush",
+                "Fountain / Pool",
+                "Foundation", "Normal Object", "Wall/Floor Pattern", "Wall Style",
+                "Roof Style", "Modular Resource", "Roof Pattern",
+            });
             cbCatalogType.SelectedIndex = 0;
-            btnSearch.Enabled = false;
-
-            this.objPkgs = objPkgs;
-            this.updateProgressCB = updateProgressCB;
+            ckbUseCC.Enabled = ObjectCloner.Properties.Settings.Default.CCEnabled;
         }
 
-        public void Search_LoadListViewSettings()
+        public Search(MainForm.updateProgressCallback updateProgressCB, MainForm.listViewAddCallBack listViewAddCB)
+            : this()
+        {
+            this.updateProgressCB = updateProgressCB;
+            this.listViewAddCB = listViewAddCB;
+        }
+
+
+
+        void Search_LoadListViewSettings()
         {
             string cw = ObjectCloner.Properties.Settings.Default.ColumnWidths;
             string[] cws = cw == null ? new string[] { } : cw.Split(':');
@@ -84,30 +76,246 @@ namespace ObjectCloner.TopPanelComponents
             listView1.Columns[2].Width = cws.Length > 2 && int.TryParse(cws[2], out w) && w > 0 ? w : (this.listView1.Width - 32) / 6;
             listView1.Columns[3].Width = cws.Length > 3 && int.TryParse(cws[3], out w) && w > 0 ? w : (this.listView1.Width - 32) / 3;/**/
         }
-        public void Search_SaveSettings()
+
+
+
+        public ListViewItem SelectedItem { get { return listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0] : null; } set { listView1.SelectedItems.Clear(); if (listView1.Items.Contains(value)) try { value.Selected = true; } catch { } } }
+
+        #region Occurs whenever the 'SelectedIndex' for the Search Results changes
+        [Browsable(true)]
+        [Category("Action")]
+        [Description("Occurs whenever the 'SelectedIndex' for the Search Results changes")]
+        public event EventHandler<MainForm.SelectedIndexChangedEventArgs> SelectedIndexChanged;
+        protected virtual void OnSelectedIndexChanged(object sender, MainForm.SelectedIndexChangedEventArgs e) { if (SelectedIndexChanged != null) SelectedIndexChanged(sender, e); }
+        #endregion
+
+        #region Occurs when an item is actived
+        [Browsable(true)]
+        [Category("Action")]
+        [Description("Occurs when an item is actived")]
+        public event EventHandler<MainForm.ItemActivateEventArgs> ItemActivate;
+        protected virtual void OnItemActivate(object sender, MainForm.ItemActivateEventArgs e) { if (ItemActivate != null) ItemActivate(sender, e); }
+        #endregion
+
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e) { OnSelectedIndexChanged(sender, new MainForm.SelectedIndexChangedEventArgs(sender as ListView)); }
+        private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(sender, new MainForm.ItemActivateEventArgs(sender as ListView)); }
+
+        private void scmCopyRK_Click(object sender, EventArgs e)
         {
-            /*ObjectCloner.Properties.Settings.Default.ColumnWidths = string.Format("{0}:{1}:{2}:{3}"
-                , listView1.Columns[0].Width
-                , listView1.Columns[1].Width
-                , listView1.Columns[2].Width
-                , listView1.Columns[3].Width
-                );/**/
+            if (SelectedItem != null && SelectedItem.Tag as SpecificResource != null)
+                Clipboard.SetText((SelectedItem.Tag as SpecificResource).ResourceIndexEntry + "");
         }
 
-        static Item ItemForTGIBlock0(List<IPackage> pkgs, Item item)
+
+
+        private void searchContextMenu_Opening(object sender, CancelEventArgs e)
         {
-            IResourceKey rk = ((TGIBlockList)item.Resource["TGIBlocks"].Value)[0];
-            return new Item(pkgs, rk);
+            scmCopyRK.Enabled = SelectedItem != null;
         }
+
+        #region Search Controls
+        private void ckb_CheckedChanged(object sender, EventArgs e)
+        {
+            btnSearch.Enabled = haveCriteria();
+        }
+
+        private void tbText_TextChanged(object sender, EventArgs e)
+        {
+            btnSearch.Enabled = haveCriteria();
+        }
+
+        private void btnSearch_Click(object sender, EventArgs e)
+        {
+            tlpSearch.Visible = false;
+            if (FileTable.UseCustomContent != ckbUseCC.Checked)
+            {
+                FileTable.UseCustomContent = ckbUseCC.Checked;
+                NameMap.Reset();
+                THUM.Reset();
+                STBLHandler.Reset();
+            }
+            if (!MainForm.CheckInstallDirs(this))
+                return;
+            tlpSearch.Visible = true;
+
+            if (searching)
+                AbortSearch(false);
+            else
+            {
+                listView1.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = false;
+                btnSearch.Text = "&Stop";
+                StartSearch();
+            }
+        }
+
+        public CatalogType SelectedCatalogType { get { return cbCatalogType.SelectedIndex > 0 ? ((CatalogType[])Enum.GetValues(typeof(CatalogType)))[cbCatalogType.SelectedIndex - 1] : 0; } }
+
+        bool haveCriteria()
+        {
+            return tbText.Text.Length > 0 &&
+                (ckbResourceName.Checked || ckbCatalogDesc.Checked || ckbCatalogName.Checked || ckbObjectDesc.Checked || ckbObjectName.Checked);
+        }
+        #endregion
+
+        #region ListViewColumnSorter
+        /// <summary>
+        /// This class is an implementation of the 'IComparer' interface.
+        /// </summary>
+        public class ListViewColumnSorter : IComparer
+        {
+            /// <summary>
+            /// Specifies the column to be sorted
+            /// </summary>
+            private int ColumnToSort;
+            /// <summary>
+            /// Specifies the order in which to sort (i.e. 'Ascending').
+            /// </summary>
+            private SortOrder OrderOfSort;
+            /// <summary>
+            /// Case insensitive comparer object
+            /// </summary>
+            private CaseInsensitiveComparer ObjectCompare;
+
+            /// <summary>
+            /// Class constructor.  Initializes various elements
+            /// </summary>
+            public ListViewColumnSorter()
+            {
+                // Initialize the CaseInsensitiveComparer object
+                ObjectCompare = new CaseInsensitiveComparer();
+
+                ListViewColumnSorter_LoadSettings();
+            }
+
+            void ListViewColumnSorter_LoadSettings()
+            {
+                ColumnToSort = ObjectCloner.Properties.Settings.Default.ColumnToSort;
+
+                OrderOfSort = Enum.IsDefined(typeof(SortOrder), ObjectCloner.Properties.Settings.Default.SortOrder)
+                    ? (SortOrder)ObjectCloner.Properties.Settings.Default.SortOrder
+                    : SortOrder.None;
+            }
+
+            public void ListViewColumnSorter_SaveSettings()
+            {
+                ObjectCloner.Properties.Settings.Default.ColumnToSort = ColumnToSort;
+                ObjectCloner.Properties.Settings.Default.SortOrder = (int)OrderOfSort;
+            }
+
+            /// <summary>
+            /// This method is inherited from the IComparer interface.  It compares the two objects passed using a case insensitive comparison.
+            /// </summary>
+            /// <param name="x">First object to be compared</param>
+            /// <param name="y">Second object to be compared</param>
+            /// <returns>The result of the comparison. "0" if equal, negative if 'x' is less than 'y' and positive if 'x' is greater than 'y'</returns>
+            public int Compare(object x, object y)
+            {
+                if (ColumnToSort < 0 || ColumnToSort > ((ListViewItem)x).SubItems.Count) return 0;
+
+                int compareResult = 0;
+                ListViewItem listviewX, listviewY;
+
+                // Cast the objects to be compared to ListViewItem objects
+                listviewX = (ListViewItem)x;
+                listviewY = (ListViewItem)y;
+
+                // Compare the two items
+                if (ColumnToSort == 3)
+                    compareResult = (listviewX.Tag as SpecificResource).RequestedRK.CompareTo((listviewY.Tag as SpecificResource).RequestedRK);
+                else
+                    compareResult = ObjectCompare.Compare(listviewX.SubItems[ColumnToSort].Text, listviewY.SubItems[ColumnToSort].Text);
+
+                // Calculate correct return value based on object comparison
+                if (OrderOfSort == SortOrder.Ascending)
+                {
+                    // Ascending sort is selected, return normal result of compare operation
+                    return compareResult;
+                }
+                else if (OrderOfSort == SortOrder.Descending)
+                {
+                    // Descending sort is selected, return negative result of compare operation
+                    return (-compareResult);
+                }
+                else
+                {
+                    // Return '0' to indicate they are equal
+                    return 0;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the number of the column to which to apply the sorting operation (Defaults to '0').
+            /// </summary>
+            public int SortColumn
+            {
+                set
+                {
+                    ColumnToSort = value;
+                }
+                get
+                {
+                    return ColumnToSort;
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the order of sorting to apply (for example, 'Ascending' or 'Descending').
+            /// </summary>
+            public SortOrder Order
+            {
+                set
+                {
+                    OrderOfSort = value;
+                }
+                get
+                {
+                    return OrderOfSort;
+                }
+            }
+
+        }
+
+        private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            // Determine if clicked column is already the column that is being sorted.
+            if (e.Column == lvwColumnSorter.SortColumn)
+            {
+                // Reverse the current sort direction for this column.
+                if (lvwColumnSorter.Order == SortOrder.Ascending)
+                {
+                    lvwColumnSorter.Order = SortOrder.Descending;
+                }
+                else
+                {
+                    lvwColumnSorter.Order = SortOrder.Ascending;
+                }
+            }
+            else
+            {
+                // Set the column number that is to be sorted; default to ascending.
+                lvwColumnSorter.SortColumn = e.Column;
+                lvwColumnSorter.Order = SortOrder.Ascending;
+            }
+
+            // Perform the sort with these new sort options.
+            this.listView1.Sort();
+
+            if (listView1.SelectedIndices.Count > 0)
+                listView1.SelectedItems[0].EnsureVisible();
+        }
+        #endregion
 
         #region Search thread
         bool searching;
         Thread searchThread;
+
         void StartSearch()
         {
+            Diagnostics.Log("StartSearch");
+
             listView1.Items.Clear();
 
-            SearchThread st = new SearchThread(this, objPkgs, Add, updateProgressCB, stopSearch, OnSearchComplete);
+            SearchThread st = new SearchThread(this, Add, updateProgressCB, stopSearch, OnSearchComplete);
             SearchComplete += new EventHandler<MainForm.BoolEventArgs>(Search_SearchComplete);
 
             searchThread = new Thread(new ThreadStart(st.Search));
@@ -117,6 +325,7 @@ namespace ObjectCloner.TopPanelComponents
 
         void Search_SearchComplete(object sender, MainForm.BoolEventArgs e)
         {
+            Diagnostics.Log(String.Format("Search_SearchComplete {0}", e.arg));
             searching = false;
             while (searchThread != null && searchThread.IsAlive)
                 searchThread.Join(100);
@@ -126,43 +335,36 @@ namespace ObjectCloner.TopPanelComponents
 
             listView1.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = true;
             btnSearch.Text = "&Search";
+
+
+            
+            if (listView1.Items.Count > 0) { SelectedItem = listView1.Items[0]; SelectedItem.EnsureVisible(); listView1.Focus(); }
+
+
         }
 
-        void AbortSearch()
+        public void AbortSearch(bool abort)
         {
-            if (!searching) Search_SearchComplete(null, new MainForm.BoolEventArgs(false));
-            else searching = false;
-        }
-
-        delegate void AddCallBack(Item item);
-        void Add(Item item)
-        {
-            if (!this.IsHandleCreated) return;
-
-            if (item.CType == CatalogType.CatalogTerrainPaintBrush && ((byte)item.Resource["CommonBlock.BuildBuyProductStatusFlags"].Value & 0x01) == 0)
-                return; // do not list
-
-            Item ctlg = item.RequestedRK.ResourceType == (uint)CatalogType.ModularResource ? ItemForTGIBlock0(objPkgs, item) : item;
-            string name;
-            if (ctlg.Resource != null)
+            if (abort)
             {
-                name = ctlg.Resource["CommonBlock.Name"];
-                name = (name.IndexOf(':') < 0) ? name : name.Substring(name.LastIndexOf(':') + 1);
+                if (searchThread != null) searchThread.Abort();
+                searching = false;
+                while (searchThread != null && searchThread.IsAlive)
+                    searchThread.Join(100);
+                searchThread = null;
             }
             else
             {
-                name = ctlg.Exception.Message;
-                for (Exception ex = ctlg.Exception.InnerException; ex != null; ex = ex.InnerException) name += "  " + ex.Message;
+                if (!searching) Search_SearchComplete(null, new MainForm.BoolEventArgs(false));
+                else searching = false;
             }
+        }
 
-            List<string> exts;
-            string tag = "";
-            if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + item.RequestedRK.ResourceType.ToString("X8"), out exts)) tag = exts[0];
-            else tag = "UNKN";
-
-            listView1.Items.Add(new ListViewItem(new string[] {
-                name, tag, item.RGVsn, "" + (AResourceKey)item.RequestedRK,
-            }) { Tag = item });
+        delegate void AddCallBack(SpecificResource item);
+        void Add(SpecificResource item)
+        {
+            if (!this.IsHandleCreated || this.IsDisposed) return;
+            listViewAddCB(item, listView1);
         }
 
         event EventHandler<MainForm.BoolEventArgs> SearchComplete;
@@ -187,7 +389,6 @@ namespace ObjectCloner.TopPanelComponents
             }
             Criteria criteria;
             Control control;
-            List<IPackage> objPkgs;
             AddCallBack addCB;
             MainForm.updateProgressCallback updateProgressCB;
             stopSearchCallback stopSearchCB;
@@ -196,7 +397,7 @@ namespace ObjectCloner.TopPanelComponents
             IDictionary<ulong, string> nameMap = null;
             List<IDictionary<ulong, string>> stbls = null;
 
-            public SearchThread(Search searchPane, List<IPackage> objPkgs,
+            public SearchThread(Search searchPane,
                 AddCallBack addCB, MainForm.updateProgressCallback updateProgressCB, stopSearchCallback stopSearchCB, searchCompleteCallback searchCompleteCB)
             {
                 this.control = searchPane;
@@ -209,7 +410,6 @@ namespace ObjectCloner.TopPanelComponents
                 this.criteria.allLanguages = !searchPane.rb1English.Checked;
                 this.criteria.allLanguages = searchPane.rb1All.Checked;
                 this.criteria.catalogType = searchPane.SelectedCatalogType;
-                this.objPkgs = objPkgs;
                 this.addCB = addCB;
                 this.updateProgressCB = updateProgressCB;
                 this.stopSearchCB = stopSearchCB;
@@ -218,193 +418,110 @@ namespace ObjectCloner.TopPanelComponents
 
             public void Search()
             {
-                List<IResourceKey> seen = new List<IResourceKey>();
                 bool complete = false;
-                int hits = 0;
+                bool abort = false;
+                List<SpecificResource> lres = new List<SpecificResource>();
                 try
                 {
-                    for (int p = 0; p < objPkgs.Count; p++)
+                    updateProgress(true, "Searching...", true, FileTable.fb0.Count, true, 0);
+                    for (int p = 0; p < FileTable.fb0.Count; p++)
                     {
-                        IPackage pkg = objPkgs[p];
+                        if (stopSearch) return;
+                        PathPackageTuple ppt = FileTable.fb0[p];
 
-                        updateProgress(true, String.Format("Retrieving name map for package {0} of {1}...", p + 1, objPkgs.Count), true, -1, false, 0);
-                        IList<IResourceIndexEntry> lrie = pkg.FindAll(rie => rie.ResourceType == 0x0166038C);
-                        foreach (IResourceIndexEntry rie in lrie)
+                        #region Fetch name map
+                        if (criteria.resourceName)
                         {
-                            nameMap = new Item(new RIE(pkg, rie)).Resource as IDictionary<ulong, string>;
+                            updateProgress(true, String.Format("Retrieving name map for package {0} of {1}...", p + 1, FileTable.fb0.Count), false, -1, false, -1);
+                            SpecificResource sr = ppt.Find(rie => rie.ResourceType == 0x0166038C);
+                            nameMap = sr == null ? null : sr.Resource as IDictionary<ulong, string>;
                             if (stopSearch) return;
                         }
+                        #endregion
 
-                        stbls = new List<IDictionary<ulong, string>>();
-                        updateProgress(true, String.Format("Retrieving string tables for package {0} of {1}...", p + 1, objPkgs.Count), true, -1, false, 0);
-                        lrie = pkg.FindAll(rie => rie.ResourceType == 0x220557DA);
-                        if (criteria.allLanguages)
+                        #region Fetch STBLs
+                        if (criteria.catalogName || criteria.catalogDesc)
                         {
-                            foreach (IResourceIndexEntry rie in lrie)
-                            {
-                                stbls.Add(new Item(new RIE(pkg, rie)).Resource as IDictionary<ulong, string>);
-                                if (stopSearch) return;
-                            }
+                            updateProgress(true, String.Format("Retrieving string tables for package {0} of {1}...", p + 1, FileTable.fb0.Count), true, -1, false, 0);
+                            stbls = ppt.FindAll(rie => rie.ResourceType == 0x220557DA && (criteria.allLanguages || rie.Instance >> 56 == 0x00))
+                                .ConvertAll<IDictionary<ulong, string>>(sr => sr.Resource as IDictionary<ulong, string>);
+                            if (stopSearch) return;
                         }
-                        else
-                        {
-                            foreach (IResourceIndexEntry rie in lrie)
-                            {
-                                if (rie.Instance >> 56 == 0x00)
-                                    stbls.Add(new Item(new RIE(pkg, rie)).Resource as IDictionary<ulong, string>);
-                                if (stopSearch) return;
-                            }
-                        }
+                        #endregion
 
-                        updateProgress(true, String.Format("Retrieving resource list {0} of {1}...", p + 1, objPkgs.Count), true, -1, false, 0);
-                        lrie = Find(pkg);
+                        // Find the right type of resource to search
+                        updateProgress(true, String.Format("Retrieving resource list {0} of {1}...", p + 1, FileTable.fb0.Count), false, -1, false, -1);
+                        List<SpecificResource> lsr = Find(ppt);
                         if (stopSearch) return;
 
-                        updateProgress(true, "Starting search... 0%", true, lrie.Count, true, 0);
-                        int freq = Math.Max(1, lrie.Count / 100);
+                        // Find the matches
+                        updateProgress(true, String.Format("Finding matching resources {0} of {1}...", p + 1, FileTable.fb0.Count), false, -1, false, -1);
+                        List<SpecificResource> matches = lsr.FindAll(Match);
+                        if (stopSearch) return;
 
-                        for (int i = 0; i < lrie.Count; i++)
-                        {
-                            if (stopSearch) return;
-                            if (!seen.Exists(new RK(lrie[i]).Equals))
+                        // Avoid duplicates
+                        updateProgress(true, String.Format("De-duplicating matches {0} of {1}...", p + 1, FileTable.fb0.Count), false, -1, false, -1);
+                        lres = matches.FindAll(match =>
                             {
-                                seen.Add(lrie[i]);
-                                Item item = new Item(new RIE(pkg, lrie[i]));
-                                if (Match(lrie[i].ResourceType == (uint)CatalogType.ModularResource ? ItemForTGIBlock0(objPkgs, item) : item))
-                                {
-                                    Add(item);
-                                    hits++;
-                                }
+                                if (stopSearch) return false;
+                                if (lres.Exists(x => match.ResourceIndexEntry.Instance == x.ResourceIndexEntry.Instance)) return false;
+                                Add(match);
+                                return true;
                             }
-                            if (i % freq == 0)
-                                updateProgress(true, String.Format("[Hits {0}] Searching... {1}%", hits, i * 100 / lrie.Count), false, -1, true, i);
-                        }
+                        );
+
+                        updateProgress(false, "", false, -1, true, p + 1);
                     }
                     complete = true;
                 }
-                catch (ThreadInterruptedException) { }
+                catch (ThreadAbortException) { abort = true; }
                 finally
                 {
-                    updateProgress(true, "Search ended", true, -1, false, 0);
-                    searchComplete(complete);
+                    if (!abort)
+                    {
+                        updateProgress(true, "Search ended", true, -1, false, 0);
+                        searchComplete(complete);
+                    }
                 }
             }
 
-            IList<IResourceIndexEntry> Find(IPackage pkg)
+            #region Search criteria matching
+            List<SpecificResource> Find(PathPackageTuple ppt)
             {
                 if (criteria.catalogType == 0)
-                    return pkg.FindAll(rie => Enum.IsDefined(typeof(CatalogType), rie.ResourceType));
+                    return ppt.FindAll(rie => Enum.IsDefined(typeof(CatalogType), rie.ResourceType));
                 else
-                    return pkg.FindAll(rie => criteria.catalogType == (CatalogType)rie.ResourceType);
+                    return ppt.FindAll(rie => criteria.catalogType == (CatalogType)rie.ResourceType);
             }
 
-            bool Match(Item item)
+            bool Match(SpecificResource match)
             {
-                if (criteria.resourceName && MatchResourceName(item)) return true;
-                if (criteria.objectName && MatchObjectName(item)) return true;
-                if (criteria.objectDesc && MatchObjectDesc(item)) return true;
-                if (criteria.catalogName && MatchCatalogName(item)) return true;
-                if (criteria.catalogDesc && MatchCatalogDesc(item)) return true;
+                match = match.ResourceIndexEntry.ResourceType == (uint)CatalogType.ModularResource ? MainForm.ItemForTGIBlock0(match) : match;
+                if (criteria.resourceName && MatchResourceName(match)) return true;
+                if (criteria.objectName && MatchObjectName(match)) return true;
+                if (criteria.objectDesc && MatchObjectDesc(match)) return true;
+                if (criteria.catalogName && MatchCatalogName(match)) return true;
+                if (criteria.catalogDesc && MatchCatalogDesc(match)) return true;
                 return false;
             }
-            bool MatchResourceName(Item item) { return nameMap != null && nameMap.ContainsKey(item.RequestedRK.Instance) && nameMap[item.RequestedRK.Instance].Trim().ToLowerInvariant().Contains(criteria.text); }
-            bool MatchObjectName(Item item) { return ((string)item.Resource["CommonBlock.Name"].Value).Trim().ToLowerInvariant().Contains(criteria.text); }
-            bool MatchObjectDesc(Item item) { return ((string)item.Resource["CommonBlock.Desc"].Value).Trim().ToLowerInvariant().Contains(criteria.text); }
-            bool MatchCatalogName(Item item) { return MatchStbl((ulong)item.Resource["CommonBlock.NameGUID"].Value); }
-            bool MatchCatalogDesc(Item item) { return MatchStbl((ulong)item.Resource["CommonBlock.DescGUID"].Value); }
+            bool MatchResourceName(SpecificResource item) { return nameMap != null && nameMap.ContainsKey(item.ResourceIndexEntry.Instance) && nameMap[item.ResourceIndexEntry.Instance].Trim().ToLowerInvariant().Contains(criteria.text); }
+            bool MatchObjectName(SpecificResource item) { return ((string)item.Resource["CommonBlock.Name"].Value).Trim().ToLowerInvariant().Contains(criteria.text); }
+            bool MatchObjectDesc(SpecificResource item) { return ((string)item.Resource["CommonBlock.Desc"].Value).Trim().ToLowerInvariant().Contains(criteria.text); }
+            bool MatchCatalogName(SpecificResource item) { return MatchStbl((ulong)item.Resource["CommonBlock.NameGUID"].Value); }
+            bool MatchCatalogDesc(SpecificResource item) { return MatchStbl((ulong)item.Resource["CommonBlock.DescGUID"].Value); }
             bool MatchStbl(ulong guid) { foreach (var stbl in stbls) if (stbl.ContainsKey(guid) && stbl[guid].Trim().ToLowerInvariant().Contains(criteria.text)) return true; return false; }
+            #endregion
 
             #region Callbacks
-            void Add(Item item) { Thread.Sleep(0); if (control.IsHandleCreated) control.Invoke(addCB, new object[] { item, }); }
+            void Add(SpecificResource sr) { Thread.Sleep(0); if (control.IsHandleCreated && !control.IsDisposed) control.Invoke(addCB, new object[] { sr, }); }
 
-            void updateProgress(bool changeText, string text, bool changeMax, int max, bool changeValue, int value) { Thread.Sleep(0); if (control.IsHandleCreated) control.Invoke(updateProgressCB, new object[] { changeText, text, changeMax, max, changeValue, value, }); }
+            void updateProgress(bool changeText, string text, bool changeMax, int max, bool changeValue, int value) { Thread.Sleep(0); if (control.IsHandleCreated && !control.IsDisposed) control.Invoke(updateProgressCB, new object[] { changeText, text, changeMax, max, changeValue, value, }); }
 
-            bool stopSearch { get { Thread.Sleep(0); return !control.IsHandleCreated || (bool)control.Invoke(stopSearchCB); } }
+            bool stopSearch { get { Thread.Sleep(0); return !(control.IsHandleCreated && !control.IsDisposed) || (bool)control.Invoke(stopSearchCB); } }
 
-            void searchComplete(bool complete) { Thread.Sleep(0); if (control.IsHandleCreated) control.BeginInvoke(searchCompleteCB, new object[] { complete, }); }
+            void searchComplete(bool complete) { Thread.Sleep(0); if (control.IsHandleCreated && !control.IsDisposed) control.BeginInvoke(searchCompleteCB, new object[] { complete, }); }
             #endregion
         }
         #endregion
-
-
-        bool haveCriteria()
-        {
-            return tbText.Text.Length > 0 &&
-                (ckbResourceName.Checked || ckbCatalogDesc.Checked || ckbCatalogName.Checked || ckbObjectDesc.Checked || ckbObjectName.Checked);
-        }
-
-        public CatalogType SelectedCatalogType { get { return cbCatalogType.SelectedIndex > 0 ? ((CatalogType[])Enum.GetValues(typeof(CatalogType)))[cbCatalogType.SelectedIndex - 1] : 0; } }
-
-        public ListView.ListViewItemCollection Items { get { return listView1.Items; } }
-
-        public ListView.SelectedListViewItemCollection SelectedItems { get { return listView1.SelectedItems; } }
-
-        public ListViewItem SelectedItem { get { return listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0] : null; } set { listView1.SelectedItems.Clear(); if (listView1.Items.Contains(value)) value.Selected = true; } }
-
-        public int SelectedIndex { get { return listView1.SelectedIndices.Count == 1 ? listView1.SelectedIndices[0] : -1; } set { listView1.SelectedIndices.Clear(); if (value >= 0 && value < listView1.Items.Count)listView1.SelectedIndices.Add(value); } }
-
-
-        public abstract class ItemEventArgs : EventArgs
-        {
-            ListViewItem selectedItem = null;
-            public ItemEventArgs(ListView lv) { selectedItem = lv.SelectedItems.Count == 0 ? null : lv.SelectedItems[0]; }
-            public Item SelectedItem { get { return selectedItem == null ? null : selectedItem.Tag as Item; } }
-        }
-
-        #region Occurs when an item is actived
-        [Browsable(true)]
-        [Category("Action")]
-        [Description("Occurs when an item is actived")]
-        public event EventHandler<ItemActivateEventArgs> ItemActivate;
-        public class ItemActivateEventArgs : ItemEventArgs { public ItemActivateEventArgs(ListView lv) : base(lv) { } }
-        protected virtual void OnItemActivate(object sender, ItemActivateEventArgs e) { if (ItemActivate != null) ItemActivate(sender, e); }
-        #endregion
-
-        #region Occurs whenever the 'SelectedIndex' for the Search Results changes
-        [Browsable(true)]
-        [Category("Action")]
-        [Description("Occurs whenever the 'SelectedIndex' for the Search Results changes")]
-        public event EventHandler<SelectedIndexChangedEventArgs> SelectedIndexChanged;
-        public class SelectedIndexChangedEventArgs : ItemEventArgs { public SelectedIndexChangedEventArgs(ListView lv) : base(lv) { } }
-        protected virtual void OnSelectedIndexChanged(object sender, SelectedIndexChangedEventArgs e) { if (SelectedIndexChanged != null) SelectedIndexChanged(sender, e); }
-        #endregion
-
-
-
-        private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(sender, new ItemActivateEventArgs(sender as ListView)); }
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e) { OnSelectedIndexChanged(sender, new SelectedIndexChangedEventArgs(sender as ListView)); }
-
-        private void btnSearch_Click(object sender, EventArgs e)
-        {
-            if (searching)
-                AbortSearch();
-            else
-            {
-                listView1.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = false;
-                btnSearch.Text = "&Stop";
-                StartSearch();
-            }
-        }
-
-        private void ckb_CheckedChanged(object sender, EventArgs e)
-        {
-            btnSearch.Enabled = haveCriteria();
-        }
-
-        private void tbText_TextChanged(object sender, EventArgs e)
-        {
-            btnSearch.Enabled = haveCriteria();
-        }
-
-        private void scmCopyRK_Click(object sender, EventArgs e)
-        {
-            if (SelectedItem != null && SelectedItem.Tag as Item != null)
-                Clipboard.SetText((SelectedItem.Tag as Item).SpecificRK + "");
-        }
-
-        private void searchContextMenu_Opening(object sender, CancelEventArgs e)
-        {
-            scmCopyRK.Enabled = SelectedIndexChanged != null;
-        }
     }
 }

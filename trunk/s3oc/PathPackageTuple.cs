@@ -1,5 +1,5 @@
 ﻿/***************************************************************************
- *  Copyright (C) 2009 by Peter L Jones                                    *
+ *  Copyright (C) 2011 by Peter L Jones                                    *
  *  pljones@users.sf.net                                                   *
  *                                                                         *
  *  This file is part of the Sims 3 Package Interface (s3pi)               *
@@ -18,26 +18,35 @@
  *  along with s3pi.  If not, see <http://www.gnu.org/licenses/>.          *
  ***************************************************************************/
 using System;
-using System.ComponentModel;
-using System.Windows.Forms;
+using System.Collections.Generic;
+using System.IO;
+using s3pi.Interfaces;
 
-namespace ObjectCloner.TopPanelComponents
+namespace ObjectCloner
 {
-    public partial class PleaseWait : UserControl
+    public class PathPackageTuple
     {
-        public PleaseWait()
-        {
-            InitializeComponent();
-        }
-        public string Label { get { return label1.Text; } set { label1.Text = value; } }
+        public string Path { get; private set; }
+        public IPackage Package { get; private set; }
 
-        public static string DoWait(Control control, string Label = "Please wait...")
+        public PathPackageTuple(string path, bool readwrite = false) { Path = path; Package = s3pi.Package.Package.OpenPackage(0, path, readwrite); }
+
+        public SpecificResource AddResource(IResourceKey rk, Stream stream = null)
         {
-            PleaseWait pw = new PleaseWait() { Dock = DockStyle.Fill, Label = Label, Name = "pleaseWait1", };
-            control.Controls.Add(pw);
-            return pw.Name;
+            IResourceIndexEntry rie = Package.AddResource(rk, stream, true);
+            if (rie == null) return null;
+            return new SpecificResource(this, rie);
         }
 
-        public static void StopWait(Control control, string Key = "pleaseWait1") { control.Controls.RemoveByKey(Key); }
+        public SpecificResource Find(Predicate<IResourceIndexEntry> match)
+        {
+            IResourceIndexEntry rie = Package.Find(match);
+            return rie == null ? null : new SpecificResource(this, rie);
+        }
+
+        public List<SpecificResource> FindAll(Predicate<IResourceIndexEntry> match)
+        {
+            return Package.FindAll(match).ConvertAll<SpecificResource>(rie => new SpecificResource(this, rie));
+        }
     }
 }

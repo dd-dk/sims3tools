@@ -49,14 +49,6 @@
             this.cfndToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cwstToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.crstToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.largeIconsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.smallIconsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.listToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.detailedListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.iconsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tgiSearchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -264,70 +256,6 @@
             this.crstToolStripMenuItem.Text = "Roof Style";
             this.crstToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
             // 
-            // viewToolStripMenuItem
-            // 
-            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tilesToolStripMenuItem,
-            this.largeIconsToolStripMenuItem,
-            this.smallIconsToolStripMenuItem,
-            this.listToolStripMenuItem,
-            this.detailedListToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.iconsToolStripMenuItem});
-            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-            this.viewToolStripMenuItem.Size = new System.Drawing.Size(41, 20);
-            this.viewToolStripMenuItem.Text = "&View";
-            this.viewToolStripMenuItem.DropDownOpening += new System.EventHandler(this.tsMD_DropDownOpening);
-            // 
-            // tilesToolStripMenuItem
-            // 
-            this.tilesToolStripMenuItem.Name = "tilesToolStripMenuItem";
-            this.tilesToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
-            this.tilesToolStripMenuItem.Text = "&Tiles";
-            this.tilesToolStripMenuItem.Click += new System.EventHandler(this.tsMBV_Click);
-            // 
-            // largeIconsToolStripMenuItem
-            // 
-            this.largeIconsToolStripMenuItem.Name = "largeIconsToolStripMenuItem";
-            this.largeIconsToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
-            this.largeIconsToolStripMenuItem.Text = "L&arge Icons";
-            this.largeIconsToolStripMenuItem.Click += new System.EventHandler(this.tsMBV_Click);
-            // 
-            // smallIconsToolStripMenuItem
-            // 
-            this.smallIconsToolStripMenuItem.Name = "smallIconsToolStripMenuItem";
-            this.smallIconsToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
-            this.smallIconsToolStripMenuItem.Text = "S&mall Icons";
-            this.smallIconsToolStripMenuItem.Click += new System.EventHandler(this.tsMBV_Click);
-            // 
-            // listToolStripMenuItem
-            // 
-            this.listToolStripMenuItem.Name = "listToolStripMenuItem";
-            this.listToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
-            this.listToolStripMenuItem.Text = "&List";
-            this.listToolStripMenuItem.Click += new System.EventHandler(this.tsMBV_Click);
-            // 
-            // detailedListToolStripMenuItem
-            // 
-            this.detailedListToolStripMenuItem.Name = "detailedListToolStripMenuItem";
-            this.detailedListToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
-            this.detailedListToolStripMenuItem.Text = "&Detailed List";
-            this.detailedListToolStripMenuItem.Click += new System.EventHandler(this.tsMBV_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(153, 6);
-            this.toolStripSeparator1.Visible = false;
-            // 
-            // iconsToolStripMenuItem
-            // 
-            this.iconsToolStripMenuItem.Name = "iconsToolStripMenuItem";
-            this.iconsToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
-            this.iconsToolStripMenuItem.Text = "Show &Thumbnails";
-            this.iconsToolStripMenuItem.Visible = false;
-            this.iconsToolStripMenuItem.Click += new System.EventHandler(this.tsMBV_Click);
-            // 
             // toolsToolStripMenuItem
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -482,7 +410,6 @@
             this.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.cloningToolStripMenuItem,
-            this.viewToolStripMenuItem,
             this.toolsToolStripMenuItem,
             this.settingsToolStripMenuItem,
             this.helpToolStripMenuItem});
@@ -514,14 +441,6 @@
         private System.Windows.Forms.ToolStripMenuItem cwstToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem crstToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem crmtToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem tilesToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem largeIconsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem smallIconsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem listToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem detailedListToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripMenuItem iconsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;

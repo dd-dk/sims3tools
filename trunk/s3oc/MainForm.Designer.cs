@@ -1165,7 +1165,6 @@
             this.menuBarWidget1.MBDropDownOpening += new ObjectCloner.MenuBarWidget.MBDropDownOpeningEventHandler(this.menuBarWidget1_MBDropDownOpening);
             this.menuBarWidget1.MBFile_Click += new ObjectCloner.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBFile_Click);
             this.menuBarWidget1.MBCloning_Click += new ObjectCloner.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBCloning_Click);
-            this.menuBarWidget1.MBView_Click += new ObjectCloner.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBView_Click);
             this.menuBarWidget1.MBTools_Click += new ObjectCloner.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBTools_Click);
             this.menuBarWidget1.MBSettings_Click += new ObjectCloner.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBSettings_Click);
             this.menuBarWidget1.MBHelp_Click += new ObjectCloner.MenuBarWidget.MBClickEventHandler(this.menuBarWidget1_MBHelp_Click);
@@ -1267,7 +1266,6 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Object Cloner";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
-            this.Load += new System.EventHandler(this.MainForm_Load);
             this.toolStripContainer1.ContentPanel.ResumeLayout(false);
             this.toolStripContainer1.TopToolStripPanel.ResumeLayout(false);
             this.toolStripContainer1.TopToolStripPanel.PerformLayout();

@@ -32,6 +32,7 @@ namespace ObjectCloner.TopPanelComponents
         public CloneFixOptions()
         {
             InitializeComponent();
+            ckbRepair.Visible = false;
         }
 
         public CloneFixOptions(Form form, bool mustClone, bool allow32bitIIDs, bool shouldPad)
@@ -39,6 +40,8 @@ namespace ObjectCloner.TopPanelComponents
         {
             if (mustClone)
             {
+                ckbRepair.Enabled = false;
+                ckbRepair.Checked = false;
                 ckbClone.Enabled = false;
                 ckbClone.Checked = true;
             }
@@ -55,6 +58,7 @@ namespace ObjectCloner.TopPanelComponents
         }
 
         public string UniqueName { get { return tbUniqueName.Text; } set { tbUniqueName.Text = value; } }
+        public bool IsRepair { get { return ckbRepair.Checked; } }
         public bool IsClone { get { return ckbClone.Checked; } }
         public bool IsDeepClone { get { return ckbDeepClone.Checked; } }
         //public bool IsExcludeCommon { get { return ckbExclCommon.Checked; } }

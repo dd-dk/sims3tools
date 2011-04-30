@@ -30,407 +30,12 @@ using s3pi.Interfaces;
 using s3pi.Extensions;
 using s3pi.GenericRCOLResource;
 using ObjectCloner.TopPanelComponents;
-using SemWeb;
 
 namespace ObjectCloner
 {
     public partial class MainForm : Form
     {
-        #region Static bits
         static string myName = "s3oc";
-        static bool LangSearch = false;
-        static bool disableCompression = false;
-        static Dictionary<View, MenuBarWidget.MB> viewMap;
-        static List<View> viewMapKeys;
-        static List<MenuBarWidget.MB> viewMapValues;
-
-        static string language_fmt = "Strings_{0}_{1:x2}{2:x14}";
-        static string[] languages = new string[] {
-            "ENG_US", "CHI_CN", "CHI_TW", "CZE_CZ",
-            "DAN_DK", "DUT_NL", "FIN_FI", "FRE_FR",
-            "GER_DE", "GRE_GR", "HUN_HU", "ITA_IT",
-            "JAP_JP", "KOR_KR", "NOR_NO", "POL_PL",
-
-            "POR_PT", "POR_BR", "RUS_RU", "SPA_ES",
-            "SPA_MX", "SWE_SE", "THA_TH",
-        };
-
-        static string[] complateOverrideVariables = new string[] {
-            "Multiplier", "Mask", "Specular", "Overlay",
-            "Stencil A", "Stencil B", "Stencil C", "Stencil D",
-        };
-
-        static Image defaultThumbnail =
-            Image.FromFile(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Resources/defaultThumbnail.png"),
-            true).GetThumbnailImage(256, 256, gtAbort, IntPtr.Zero);
-
-        static Dictionary<string, List<string>> s3ocIni;
-        static MainForm()
-        {
-            viewMap = new Dictionary<View, MenuBarWidget.MB>();
-            viewMap.Add(View.Tile, MenuBarWidget.MB.MBV_tiles);
-            viewMap.Add(View.LargeIcon, MenuBarWidget.MB.MBV_largeIcons);
-            viewMap.Add(View.SmallIcon, MenuBarWidget.MB.MBV_smallIcons);
-            viewMap.Add(View.List, MenuBarWidget.MB.MBV_list);
-            viewMap.Add(View.Details, MenuBarWidget.MB.MBV_detailedList);
-            viewMapKeys = new List<View>(viewMap.Keys);
-            viewMapValues = new List<MenuBarWidget.MB>(viewMap.Values);
-
-            LoadIni();
-            LoadTTL();
-            LoadEPsDisabled();
-            LoadGameDirSettings();
-        }
-
-        static List<string> ePsDisabled = new List<string>();
-        private static void LoadEPsDisabled() { ePsDisabled = new List<string>(ObjectCloner.Properties.Settings.Default.EPsDisabled.Split(';')); }
-        private static void SaveEPsDisabled() { ObjectCloner.Properties.Settings.Default.EPsDisabled = String.Join(";", ePsDisabled.ToArray()); }
-
-        static Dictionary<string, string> gameDirs = new Dictionary<string, string>();
-        private static void LoadGameDirSettings()
-        {
-            gameDirs = new Dictionary<string, string>();
-            foreach (string s in ObjectCloner.Properties.Settings.Default.InstallDirs.Split(';'))
-            {
-                string[] p = s.Split(new char[] { '=' }, 2);
-                if (S3ocSims3.byName(p[0]) != null && Directory.Exists(p[1]))
-                    gameDirs.Add(p[0], p[1]);
-            }
-        }
-        private static void SaveGameDirSettings()
-        {
-            string value = "";
-            foreach (var kvp in gameDirs)
-                value += ";" + kvp.Key + "=" + kvp.Value;
-            ObjectCloner.Properties.Settings.Default.InstallDirs = value.TrimStart(';');
-        }
-
-        /// <summary>
-        /// This static method loads the old .ini file
-        /// </summary>
-        static void LoadIni()
-        {
-            s3ocIni = new Dictionary<string, List<string>>();
-            string file = Path.Combine(Path.GetDirectoryName(typeof(MainForm).Assembly.Location), "s3oc.ini");
-            if (File.Exists(file))
-            {
-                StreamReader sr = new StreamReader(file);
-                string s;
-                while ((s = sr.ReadLine()) != null)
-                {
-                    if (s.StartsWith("#") || s.StartsWith(";") || s.StartsWith("//") || s.Trim().Length == 0) continue;
-                    string[] t = s.Split(new char[] { ':' }, 2);
-                    if (t.Length != 2) continue;
-                    string key = t[0].Trim().ToLower();
-                    if (s3ocIni.ContainsKey(key)) continue;
-                    s3ocIni.Add(key, new List<string>());
-                    t = t[1].Split(',');
-                    foreach (string u in t) s3ocIni[key].Add(u.Trim());
-                }
-                sr.Close();
-            }
-        }
-
-        #region LoadTTL
-        static MemoryStore s3oc_ini = new MemoryStore();
-        static readonly string s3octerms = "http://sims3.drealm.info/s3octerms/1.0#";
-        static readonly string RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-        //static readonly string RDFS = "http://www.w3.org/2000/01/rdf-schema#";
-        static readonly Entity rdftype = RDF + "type";
-        static readonly Entity rdf_first = RDF + "first";
-        static readonly Entity rdf_rest = RDF + "rest";
-        static readonly Entity rdf_nil = RDF + "nil";
-        static readonly Entity typeResourceList = s3octerms + "ResourceList";
-        static readonly Entity predHasResource = s3octerms + "hasResource";
-        static readonly Entity subjectWin64 = s3octerms + "Win64";
-        static readonly Entity subjectWin32 = s3octerms + "Win32";
-        static readonly Entity typeMicrosoftOS = s3octerms + "MicrosoftOS";
-        static readonly Entity predHasProgramFiles = s3octerms + "hasProgramFiles";
-        static readonly Entity typeSims3 = s3octerms + "Sims3";
-        static readonly Entity predHasName = s3octerms + "hasName";
-        static readonly Entity predHasLongname = s3octerms + "hasLongname";
-        static readonly Entity predHasDefaultInstallDir = s3octerms + "hasDefaultInstallDir";
-        static readonly Entity predHasPriority = s3octerms + "hasPriority";
-        static readonly Entity predIsSuppressed = s3octerms + "isSuppressed";
-        static readonly Entity predHasPackages = s3octerms + "hasPackages";
-        static readonly Entity predHasRGVersion = s3octerms + "hasRGVersion";
-        static readonly Entity predIn = s3octerms + "in";
-        static readonly Entity predPackages = s3octerms + "packages";
-
-        public class S3ocSims3
-        {
-            public string subjectName;
-            public string hasName;
-            public string hasLongname;
-            public string hasDefaultInstallDir;
-            public int hasPriority;
-            public int hasRGVersion;
-            public int isSuppressed; // -1: not-allowed; 0: false; else true
-            public List<Entity> hasPackages = new List<Entity>();
-            public List<Entity> otherStatements = new List<Entity>();
-
-            public S3ocSims3(Entity Subject) { subjectName = Subject.Uri.Split(new char[] { '#' }, 2)[1]; }
-
-            public bool Enabled
-            {
-                get
-                {
-                    return ePsDisabled.Contains(subjectName) ? false : isSuppressed < 1;
-                }
-                set
-                {
-                    if (isSuppressed != 0 || Enabled == value) return;
-                    if (value)
-                        ePsDisabled.Remove(subjectName);
-                    else
-                        ePsDisabled.Add(subjectName);
-                    SaveEPsDisabled();
-                }
-            }
-            public string InstallDir
-            {
-                get
-                {
-                    return gameDirs.ContainsKey(subjectName) ? gameDirs[subjectName] : hasDefaultInstallDir;
-                }
-                set
-                {
-                    if (safeGetFullPath(InstallDir) == safeGetFullPath(value)) return;
-
-                    if (gameDirs.ContainsKey(subjectName))
-                    {
-                        if (safeGetFullPath(hasDefaultInstallDir) == safeGetFullPath(value))
-                            gameDirs.Remove(subjectName);
-                        else
-                            gameDirs[subjectName] = value == null ? "" : value;
-                    }
-                    else
-                        gameDirs.Add(subjectName, value);
-                    SaveGameDirSettings();
-                }
-            }
-            string safeGetFullPath(string value) { return value == null ? null : Path.GetFullPath(value); }
-
-            public List<string> getPackages(string type)
-            {
-                if (hasPackages == null) return null;
-                foreach (Entity e in hasPackages)
-                {
-
-                }
-                return null;
-            }
-
-            public Resource getOtherStatement(Entity Predicate)
-            {
-                if (otherStatements == null) return null;
-                foreach (Entity e in this.otherStatements)
-                    if (e.Equals(Predicate)) return rdfFetch(s3oc_ini, s3octerms + subjectName, Predicate);
-                return null;
-            }
-
-            public override string ToString() { return hasLongname; }
-
-            public static S3ocSims3 byName(string name)
-            {
-                foreach (S3ocSims3 sims3 in lS3ocSims3) if (sims3.subjectName.Equals(name)) return sims3;
-                return null;
-            }
-        }
-        public static List<Dictionary<String, TypedValue>> lS3ocResourceList = new List<Dictionary<String, TypedValue>>();
-        public static List<S3ocSims3> lS3ocSims3 = new List<S3ocSims3>();
-        public static Dictionary<byte, string> RGVersionLookup = new Dictionary<byte, string>();
-
-        /// <summary>
-        /// This static method loads the new Turtle resource definition file
-        /// </summary>
-        static void LoadTTL()
-        {
-            string iniFile = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "s3oc-ini.ttl");
-            s3oc_ini.Import(new N3Reader(iniFile));
-
-            lS3ocResourceList = new List<Dictionary<String, TypedValue>>();
-            foreach (Statement s in s3oc_ini.Select(new Statement(null, rdftype, typeResourceList)))
-            {
-                foreach (Statement t in s3oc_ini.Select(new Statement(s.Subject, predHasResource, null)))
-                {
-                    Entity e = t.Object as Entity;
-                    String[] predicates = new String[] { "T", "G", "I", };
-                    String[] keys = new String[] { "ResourceType", "ResourceGroup", "Instance", };
-                    Type[] types = new Type[] { typeof(uint), typeof(uint), typeof(ulong), };
-                    Dictionary<String, TypedValue> dict = new Dictionary<string, TypedValue>();
-
-                    for (int i = 0; i < predicates.Length; i++)
-                    {
-                        Literal l = rdfFetch(s3oc_ini, e, s3octerms + predicates[i]) as Literal;
-                        if (l == null) continue;
-                        ulong value = ulong.Parse((l.ParseValue() as String).Substring(2), System.Globalization.NumberStyles.HexNumber);
-                        dict.Add(keys[i], new TypedValue(types[i], Convert.ChangeType(value, types[i]), "X"));
-                    }
-                    lS3ocResourceList.Add(dict);
-                }
-            }
-
-            string prefix = null;
-            foreach (Statement s in s3oc_ini.Select(new Statement(subjectWin64, rdftype, typeMicrosoftOS)))
-            {
-                foreach (Statement t in s3oc_ini.Select(new Statement(s.Subject, predHasProgramFiles, null)))
-                {
-                    if (Directory.Exists(getString(t.Object)))
-                        prefix = getString(t.Object);
-                }
-            }
-            if (prefix == null)
-                foreach (Statement s in s3oc_ini.Select(new Statement(subjectWin32, rdftype, typeMicrosoftOS)))
-                {
-                    foreach (Statement t in s3oc_ini.Select(new Statement(s.Subject, predHasProgramFiles, null)))
-                    {
-                        if (Directory.Exists(getString(t.Object)))
-                            prefix = getString(t.Object);
-                    }
-                }
-            if (prefix == null)
-                prefix = "/";
-
-            lS3ocSims3 = new List<S3ocSims3>();
-            foreach (Statement s in s3oc_ini.Select(new Statement(null, rdftype, typeSims3)))
-            {
-                S3ocSims3 sims3 = new S3ocSims3(s.Subject);
-                lS3ocSims3.Add(sims3);
-                bool seenHasRGVersion = false;
-
-                foreach (Statement t in s3oc_ini.Select(new Statement(s.Subject, null, null)))
-                {
-                    if (t.Predicate.Equals(predHasName)) { sims3.hasName = getString(t.Object); continue; }
-                    if (t.Predicate.Equals(predHasLongname)) { sims3.hasLongname = getString(t.Object); continue; }
-                    if (t.Predicate.Equals(predHasDefaultInstallDir)) { sims3.hasDefaultInstallDir = getHasDefaultInstallDir(prefix, t.Object); continue; }
-                    if (t.Predicate.Equals(predHasPriority)) { sims3.hasPriority = getHasPriority(t.Object); continue; }
-                    if (t.Predicate.Equals(predHasRGVersion)) { sims3.hasRGVersion = getHasRGVersion(t.Object); seenHasRGVersion = true; continue; }
-                    if (t.Predicate.Equals(predIsSuppressed)) { sims3.isSuppressed = getIsSuppressed(t.Object); continue; }
-                    if (t.Predicate.Equals(predHasPackages)) { sims3.hasPackages.Add(t.Object as Entity); continue; }
-                    if (!sims3.otherStatements.Contains(t.Predicate))
-                        sims3.otherStatements.Add(t.Predicate);
-                }
-                if (seenHasRGVersion && sims3.hasRGVersion > 0) RGVersionLookup.Add((byte)sims3.hasRGVersion, sims3.hasName);
-            }
-            lS3ocSims3.Sort(reversePriority);
-        }
-        static int reversePriority(S3ocSims3 x, S3ocSims3 y) { return y.hasPriority.CompareTo(x.hasPriority); }
-
-        static string getString(Resource value)
-        {
-            if (value as Literal == null) return null;
-            object o = ((Literal)value).ParseValue();
-            if (!o.GetType().Equals(typeof(string))) return null;
-            return (!o.GetType().Equals(typeof(string))) ? null : (string)o;
-        }
-
-        static int getIsSuppressed(Resource value)
-        {
-            if (value as Literal == null) return 0;
-            object o = ((Literal)value).ParseValue();
-            if (!o.GetType().Equals(typeof(string))) return -1;
-            string s = (string)o;
-            if (s.Equals("not-allowed")) return -1;
-            if (s.Equals("false")) return 0;
-            return 1;
-        }
-
-        static int getHasPriority(Resource value)
-        {
-            if (value as Literal == null) return 0;
-            object o = ((Literal)value).ParseValue();
-            if (!o.GetType().Equals(typeof(Decimal))) return 0;
-            return Convert.ToInt32((Decimal)o);
-        }
-
-        static int getHasRGVersion(Resource value)
-        {
-            if (value as Literal == null) return 0;
-            object o = ((Literal)value).ParseValue();
-            if (!o.GetType().Equals(typeof(Decimal))) return 0;
-            return Convert.ToInt32((Decimal)o) & 0x1F;
-        }
-
-        static string getHasDefaultInstallDir(string prefix, Resource value)
-        {
-            string s = getString(value);
-            return (s == null || !Directory.Exists(prefix + s)) ? null : prefix + s;
-        }
-
-        static List<string> ini_fb0 { get { return iniGetPath("Objects"); } }
-        static List<string> ini_fb2 { get { return iniGetPath("Images"); } }
-        static List<string> ini_tmb { get { return iniGetPath("Thumbnails"); } }
-        static List<string> iniGetPath(string path)
-        {
-            List<string> res = new List<string>();
-            foreach (S3ocSims3 sims3 in lS3ocSims3)
-            {
-                if (!sims3.Enabled) continue;
-                foreach (string p in iniGetPath(sims3, path))
-                    if (File.Exists(p)) res.Add(p);
-            }
-            return res;
-        }
-
-        /// <summary>
-        /// Return the "raw" expanded list of a particular type - or all, if path is null
-        /// </summary>
-        /// <param name="sims3"></param>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        public static List<string> iniGetPath(S3ocSims3 sims3, string path)
-        {
-            if (!sims3.Enabled) return null;
-
-            List<string> res = new List<string>();
-
-            foreach (Entity e in sims3.hasPackages)
-            {
-                Resource r = rdfFetch(s3oc_ini, e, rdftype);
-                if (path != null) if (r == null || !r.Equals((Entity)(s3octerms + path))) continue;
-
-                Entity eList = rdfFetch(s3oc_ini, e, predPackages) as Entity;
-                if (eList == null) continue;
-
-                r = rdfFetch(s3oc_ini, e, predIn);
-                string subFolder = (r != null && r as Literal != null && ((Literal)r).ParseValue().GetType().Equals(typeof(string)))
-                    ? (string)((Literal)r).ParseValue() : "";
-
-                string prefix = Path.Combine(sims3.InstallDir == null ? "" : sims3.InstallDir, subFolder);
-                //if (prefix.Length > 0 && !Directory.Exists(prefix)) continue;
-
-                r = rdfFetch(s3oc_ini, eList, rdf_first);
-                while (r != null && r as Literal != null && ((Literal)r).ParseValue().GetType().Equals(typeof(string)))
-                {
-                    res.Add(Path.Combine(prefix, (string)((Literal)r).ParseValue()));
-                    eList = rdfFetch(s3oc_ini, eList, rdf_rest) as Entity;
-                    if (eList == null || eList == rdf_nil) break;
-                    r = rdfFetch(s3oc_ini, eList, rdf_first);
-                }
-            }
-            return res;
-        }
-
-        static Resource rdfFetch(Store store, Entity Subject, Entity Predicate)
-        {
-            foreach (Statement r in store.Select(new Statement(Subject, Predicate, null)))
-                return r.Object;
-            return null;
-        }
-
-#if DEBUG
-        class StatementPrinter : StatementSink
-        {
-            public bool Add(Statement assertion)
-            {
-                Console.WriteLine(assertion.ToString());
-                return true;
-            }
-        }
-#endif
-        #endregion
-        #endregion
 
         enum Mode
         {
@@ -440,19 +45,11 @@ namespace ObjectCloner
         }
         Mode mode = Mode.None;
 
-        View currentView;
-
-        static List<IPackage> objPkgs;
-        static List<IPackage> ddsPkgs;
-        static List<IPackage> tmbPkgs;
-        static List<string> objPaths;
-        static List<string> ddsPaths;
-        static List<string> tmbPaths;
-
-        Item selectedItem;
+        SpecificResource selectedItem;
         Image replacementForThumbs;
 
         Dictionary<string, IResourceKey> rkLookup = null;
+        Dictionary<UInt64, SpecificResource> CTPTBrushIndexToPair;
 
         private ObjectCloner.TopPanelComponents.ObjectChooser objectChooser;
         private ObjectCloner.TopPanelComponents.PleaseWait pleaseWait;
@@ -465,15 +62,11 @@ namespace ObjectCloner
             InitializeComponent();
 
             this.Text = myName;
-            objectChooser = new ObjectChooser();
-            objectChooser.SelectedIndexChanged += new EventHandler(objectChooser_SelectedIndexChanged);
-            objectChooser.ItemActivate += new EventHandler(objectChooser_ItemActivate);
             pleaseWait = new PleaseWait();
 
             MainForm_LoadFormSettings();
 
-            LangSearch = ObjectCloner.Properties.Settings.Default.LangSearch;
-            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_langSearch, LangSearch);
+            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_langSearch, STBLHandler.LangSearch);
 
             menuBarWidget1.Checked(MenuBarWidget.MB.MBS_advanced, ObjectCloner.Properties.Settings.Default.AdvanceCloning);
 
@@ -521,52 +114,53 @@ namespace ObjectCloner
                 splitContainer1.SplitterDistance = this.Width * w / 100;
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-            View view = Enum.IsDefined(typeof(View), ObjectCloner.Properties.Settings.Default.View)
-                ? viewMapKeys[ObjectCloner.Properties.Settings.Default.View]
-                : View.Details;
-            menuBarWidget1_MBView_Click(null, new MenuBarWidget.MBClickEventArgs(viewMap[view]));
-
-            menuBarWidget1.Checked(MenuBarWidget.MB.MBV_icons, ObjectCloner.Properties.Settings.Default.ShowThumbs);
-        }
-
+        static bool formClosing = false;
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             Diagnostics.Log("MainForm_FormClosing CloseReason: " + e.CloseReason);
-            AbortLoading(true);
-            AbortFetching(true);
-            AbortSaving(true);
+            formClosing = true;
             ClosePkg();
-
-            objectChooser.ObjectChooser_SaveSettings();
+            AbortSaving(true);
 
             ObjectCloner.Properties.Settings.Default.PersistentLocation = this.WindowState == FormWindowState.Normal ? this.Location : new Point(-1, -1);
             ObjectCloner.Properties.Settings.Default.PersistentHeight = this.WindowState == FormWindowState.Normal ? this.Height : -1;
             ObjectCloner.Properties.Settings.Default.PersistentWidth = this.WindowState == FormWindowState.Normal ? this.Width : -1;
             ObjectCloner.Properties.Settings.Default.Splitter1Width = splitContainer1.SplitterDistance * 100 / this.Width;
-            ObjectCloner.Properties.Settings.Default.ShowThumbs = menuBarWidget1.IsChecked(MenuBarWidget.MB.MBV_icons);
             ObjectCloner.Properties.Settings.Default.Save();
         }
 
         void ClosePkg()
         {
             Diagnostics.Log("ClosePkg");
-            nmap = null;
-            thumb = null;
-            haveLoaded = false;
-            if (currentPackage != "")
+
+            if (objectChooser != null)
             {
-                if (objPkgs.Count > 0) s3pi.Package.Package.ClosePackage(0, objPkgs[0]);
-                currentPackage = "";
-                ddsPkgs = tmbPkgs = objPkgs = null;
+                objectChooser.AbortFilling(true);
+                objectChooser.ObjectChooser_SaveListViewSettings();
+                objectChooser = null;
             }
-            else
+            if (searchPane != null)
             {
-                if (objPkgs != null) foreach (List<IPackage> lpkg in new List<IPackage>[] { objPkgs, tmbPkgs, ddsPkgs, })
-                        foreach (IPackage pkg in lpkg) s3pi.Package.Package.ClosePackage(0, pkg);
-                ddsPkgs = tmbPkgs = objPkgs = null;
+                searchPane.AbortSearch(true);
+                searchPane = null;
             }
+            if (tgiSearchPane != null)
+            {
+                tgiSearchPane.AbortTGISearch(true);
+                tgiSearchPane = null;
+            }
+
+            NameMap.Reset();
+            THUM.Reset();
+            STBLHandler.Reset();
+
+            if (FileTable.Current != null)
+            {
+                s3pi.Package.Package.ClosePackage(0, FileTable.Current.Package);
+                FileTable.Current = null;
+            }
+            FileTable.UseCustomContent = false;
+            FileTable.AppendFileTable = false;
         }
 
         #region Command Line
@@ -646,269 +240,127 @@ namespace ObjectCloner
         }
 
 
-        #region Thumbs
-        public class THUM
-        {
-            static Dictionary<uint, uint[]> thumTypes;
-            public static uint[] PNGTypes = new uint[] { 0x2E75C764, 0x2E75C765, 0x2E75C766, };
-            public static ushort[] thumSizes = new ushort[] { 32, 64, 128, };
-            static uint defType = 0x319E4F1D;
-            static THUM()
-            {
-                thumTypes=new Dictionary<uint,uint[]>();
-                thumTypes.Add(0x319E4F1D, new uint[] { 0x0580A2B4, 0x0580A2B5, 0x0580A2B6, }); //Catalog Object
-                thumTypes.Add(0xCF9A4ACE, new uint[] { 0x00000000, 0x00000000, 0x00000000, }); //Modular Resource
-                thumTypes.Add(0x0418FE2A, new uint[] { 0x2653E3C8, 0x2653E3C9, 0x2653E3CA, }); //Catalog Fence
-                thumTypes.Add(0x049CA4CD, new uint[] { 0x5DE9DBA0, 0x5DE9DBA1, 0x5DE9DBA2, }); //Catalog Stairs
-                thumTypes.Add(0x04AC5D93, thumTypes[0x319E4F1D]); //Catalog Proxy Product
-                thumTypes.Add(0x04B30669, thumTypes[0x319E4F1D]); //Catalog Terrain Geometry Brush
-                thumTypes.Add(0x04C58103, new uint[] { 0x2D4284F0, 0x2D4284F1, 0x2D4284F2, }); //Catalog Railing
-                thumTypes.Add(0x04ED4BB2, new uint[] { 0x05B1B524, 0x05B1B525, 0x05B1B526, }); //Catalog Terrain Paint Brush
-                thumTypes.Add(0x04F3CC01, new uint[] { 0x05B17698, 0x05B17699, 0x05B1769A, }); //Catalog Fireplace
-                thumTypes.Add(0x060B390C, thumTypes[0x319E4F1D]); //Catalog Terrain Water Brush
-                thumTypes.Add(0x0A36F07A, thumTypes[0x319E4F1D]); //Catalog Fountain Pool
-                thumTypes.Add(0x316C78F2, thumTypes[0x319E4F1D]); //Catalog Foundation
-                thumTypes.Add(0x515CA4CD, new uint[] { 0x0589DC44, 0x0589DC45, 0x0589DC46, }); //Catalog Wall/Floor Pattern
-                thumTypes.Add(0x9151E6BC, new uint[] { 0x00000000, 0x00000000, 0x00000000, }); //Catalog Wall -- doesn't have any
-                thumTypes.Add(0x91EDBD3E, thumTypes[0x319E4F1D]); //Catalog Roof Style
-                thumTypes.Add(0xF1EDBD86, thumTypes[0x319E4F1D]); //Catalog Roof Pattern
-            }
-            public enum THUMSize : int
-            {
-                small = 0,
-                medium,
-                large,
-                defSize = large,
-            }
-            List<IPackage> fb0Pkgs;//for PNGInstance
-            List<IPackage> tmbPkgs;//for ALLThumbnails
-            public THUM(List<IPackage> fb0Pkgs, List<IPackage> tmbPkgs) { this.fb0Pkgs = fb0Pkgs; this.tmbPkgs = tmbPkgs; }
-            public Image this[ulong instance] { get { return this[instance, THUMSize.defSize, false]; } }
-            public Image this[ulong instance, THUMSize size] { get { return this[instance, size, false]; } set { this[instance, size, false] = value; } }
-            public Image this[ulong instance, bool isPNGInstance] { get { return this[instance, THUMSize.defSize, isPNGInstance]; } }
-            public Image this[ulong instance, THUMSize size, bool isPNGInstance] { get { return this[defType, instance, size, isPNGInstance]; } set { this[defType, instance, size, isPNGInstance] = value; } }
-            public Image this[uint type, ulong instance] { get { return this[type, instance, THUMSize.defSize, false]; } }
-            public Image this[uint type, ulong instance, THUMSize size] { get { return this[type, instance, size, false]; } set { this[type, instance, size, false] = value; } }
-            public Image this[uint type, ulong instance, THUMSize size, bool isPNGInstance]
-            {
-                get
-                {
-                    Item item = getItem(isPNGInstance ? fb0Pkgs : tmbPkgs, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
-                    if (item != null && item.Resource != null)
-                        return Image.FromStream(item.Resource.Stream);
-                    return null;
-                }
-                set
-                {
-                    Item item = getItem(isPNGInstance ? fb0Pkgs : tmbPkgs, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
-                    if (item == null || item.Resource == null)
-                        throw new ArgumentException();
-
-                    Image thumb;
-                    thumb = value.GetThumbnailImage(thumSizes[(int)size], thumSizes[(int)size], gtAbort, System.IntPtr.Zero);
-                    thumb.Save(item.Resource.Stream, System.Drawing.Imaging.ImageFormat.Png);
-                    item.Commit();
-                }
-            }
-            bool gtAbort() { return false; }
-
-            public IResourceKey getRK(uint type, ulong instance, THUMSize size, bool isPNGInstance)
-            {
-                Item item = getItem(isPNGInstance ? fb0Pkgs : tmbPkgs, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
-                return item == null ? RK.NULL : item.RequestedRK;
-            }
-
-            public static IResourceKey getNewRK(uint type, ulong instance, THUMSize size, bool isPNGInstance)
-            {
-                TGIN tgin = new TGIN();
-                tgin.ResType = (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size];
-                tgin.ResGroup = (uint)(type == 0x515CA4CD ? 1 : 0);
-                tgin.ResInstance = instance;
-                return (AResourceKey)tgin;
-            }
-
-            static Item getItem(List<IPackage> pkgs, ulong instance, uint type)
-            {
-                if (type == 0x00000000) return null;
-                foreach (IPackage pkg in pkgs)
-                {
-                    List<IResourceIndexEntry> lrie = new List<IResourceIndexEntry>(pkg.FindAll(rie => rie.ResourceType == type && rie.Instance == instance));
-                    lrie.Sort(byGroup);
-                    foreach (IResourceIndexEntry rie in lrie)
-                        if (!new List<uint>(thumTypes[0x515CA4CD]).Contains(type) || (rie.ResourceGroup & 0x00FFFFFF) > 0)
-                            return new Item(new RIE(pkg, rie));
-                }
-                //return new Item(pkgs, new TGI(type, 0, instance));
-                return new Item(pkgs, RK.NULL);
-            }
-            static int byGroup(IResourceIndexEntry x, IResourceIndexEntry y) { return (x.ResourceGroup & 0x07FFFFFF).CompareTo(y.ResourceGroup & 0x07FFFFFF); }
-        }
-        THUM thumb;
-        THUM Thumb
-        {
-            get
-            {
-                if (thumb == null)
-                    thumb = new THUM(objPkgs, tmbPkgs);
-                return thumb;
-            }
-        }
-        Image getImage(THUM.THUMSize size, Item item)
-        {
-            if (item.CType == CatalogType.ModularResource)
-                return getImage(size, ItemForTGIBlock0(item));
-            else
-            {
-                ulong png = (item.Resource != null) ? (ulong)item.Resource["CommonBlock.PngInstance"].Value : 0;
-                return Thumb[item.RequestedRK.ResourceType, png != 0 ? png : item.RequestedRK.Instance, size, png != 0];
-            }
-        }
-        Image getLargestThumbOrDefault(Item item)
-        {
-            Image img = getImage(THUM.THUMSize.large, item);
-            if (img != null) return img;
-            img = getImage(THUM.THUMSize.medium, item);
-            if (img != null) return img;
-            img = getImage(THUM.THUMSize.small, item);
-            if (img != null) return img;
-            return defaultThumbnail;
-        }
-        IResourceKey getImageRK(THUM.THUMSize size, Item item)
-        {
-            if (item.CType == CatalogType.ModularResource)
-                return RK.NULL;
-            else
-            {
-                ulong png = (item.Resource != null) ? (ulong)item.Resource["CommonBlock.PngInstance"].Value : 0;
-                return Thumb.getRK(item.RequestedRK.ResourceType, png != 0 ? png : item.RequestedRK.Instance, size, png != 0);
-            }
-        }
-        static IResourceKey getNewRK(THUM.THUMSize size, Item item)
-        {
-            if (item.CType == CatalogType.ModularResource)
-                return RK.NULL;
-            else
-            {
-                ulong png = (item.Resource != null) ? (ulong)item.Resource["CommonBlock.PngInstance"].Value : 0;
-                return THUM.getNewRK(item.RequestedRK.ResourceType, png != 0 ? png : item.RequestedRK.Instance, size, png != 0);
-            }
-        }
-        IResourceKey makeImage(THUM.THUMSize size, Item item)
-        {
-            if (item.CType == CatalogType.ModularResource)
-                return RK.NULL;
-            else
-            {
-                IResourceKey rk = getImageRK(size, item);
-                if (rk.Equals(RK.NULL))
-                {
-                    rk = getNewRK(size, item);
-                    RIE rie = new RIE(objPkgs[0], objPkgs[0].AddResource(rk, null, true));
-                    Item thum = new Item(rie);
-                    defaultThumbnail.GetThumbnailImage(THUM.thumSizes[(int)size], THUM.thumSizes[(int)size], gtAbort, System.IntPtr.Zero).Save(thum.Resource.Stream, System.Drawing.Imaging.ImageFormat.Png);
-                    thum.Commit();
-                }
-                return rk;
-            }
-        }
-        #endregion
-
-
-        #region STBL Lookups
-        delegate void Callback(byte lang);
-        const ulong FNV64Blank = 0xCBF29CE484222325;
-        static Item findStblFor(IList<IPackage> objPkgs, ulong guid, Callback callBack = null)
-        {
-            if (guid == FNV64Blank) return null;
-
-            for (byte i = 0; i < (LangSearch ? 0x17 : 0x01); i++) { if (callBack != null) callBack(i); Item res = findStblFor(objPkgs, guid, i); if (res != null) return res; }
-            return null;
-        }
-
-        static Item findStblFor(IList<IPackage> objPkgs, ulong guid, byte lang)
-        {
-            if (guid == FNV64Blank) return null;
-
-            foreach (var pkg in objPkgs)
-            {
-                foreach (var rie in pkg.FindAll(x => x.ResourceType == 0x220557DA && x.Instance >> 56 == lang))
-                {
-                    Item item = new Item(new RIE(pkg, rie));
-                    if (item.SpecificRK == null) continue;
-                    if (item.Resource == null) continue;
-                    IDictionary<ulong, string> id = item.Resource as IDictionary<ulong, string>;
-                    if (id == null) continue;
-                    if (id.ContainsKey(guid)) return item;
-                }
-            }
-            return null;
-        }
-
-        static string StblLookup(IList<IPackage> objPkgs, ulong guid, int lang = -1, Callback callBack = null)
-        {
-            if (guid == FNV64Blank) return null;
-
-            Item stbl;
-            if (lang < 0 || lang >= 0x17) stbl = findStblFor(objPkgs, guid, callBack);
-            else stbl = findStblFor(objPkgs, guid, (byte)lang);
-            return stbl == null ? null : (stbl.Resource as IDictionary<ulong, string>)[guid];
-        }
-        #endregion
-
-        public class NameMap
-        {
-            Item latest;
-            List<IDictionary<ulong, string>> namemaps;
-            public NameMap(IList<IPackage> nameMapPkgs)
-            {
-                namemaps = new List<IDictionary<ulong, string>>();
-                foreach (IPackage pkg in nameMapPkgs)
-                {
-                    IList<IResourceIndexEntry> lrie = pkg.FindAll(rie => rie.ResourceType == 0x0166038C);
-                    if (lrie.Count > 0) latest = new Item(new RIE(pkg, lrie[0]));
-                    foreach (IResourceIndexEntry rie in lrie)
-                        namemaps.Add(new Item(new RIE(pkg, rie)).Resource as IDictionary<ulong, string>);
-                }
-            }
-            public string this[ulong instance]
-            {
-                get
-                {
-                    foreach (IDictionary<ulong, string> namemap in namemaps)
-                        if (namemap.ContainsKey(instance))
-                            return namemap[instance];
-                    return null;
-                }
-            }
-            public IResourceKey rk { get { return latest == null ? RK.NULL : latest.RequestedRK; } }
-            public IDictionary<ulong, string> map { get { return latest == null ? null : (IDictionary<ulong, string>)latest.Resource; } }
-            public void Commit() { latest.Commit(); }
-        }
-        NameMap nmap;
-        NameMap NMap
-        {
-            get
-            {
-                if (nmap == null)
-                    nmap = new NameMap(objPkgs);
-                return nmap;
-            }
-        }
-
-        Item ItemForTGIBlock0(Item item)
+        public static SpecificResource ItemForTGIBlock0(SpecificResource item)
         {
             IResourceKey rk = ((TGIBlockList)item.Resource["TGIBlocks"].Value)[0];
-            return new Item(objPkgs, rk);
+            return new SpecificResource(FileTable.fb0, rk);
         }
 
 
         #region LeftPanelComponents
+        public abstract class ItemEventArgs : EventArgs
+        {
+            ListViewItem selectedItem = null;
+            public ItemEventArgs(ListView lv) { selectedItem = lv.SelectedItems.Count == 0 ? null : lv.SelectedItems[0]; }
+            public SpecificResource SelectedItem { get { return selectedItem == null ? null : selectedItem.Tag as SpecificResource; } }
+        }
+        public class ItemActivateEventArgs : ItemEventArgs { public ItemActivateEventArgs(ListView lv) : base(lv) { } }
+        public class SelectedIndexChangedEventArgs : ItemEventArgs { public SelectedIndexChangedEventArgs(ListView lv) : base(lv) { } }
+
+        public delegate void listViewAddCallBack(SpecificResource sr, ListView listView);
+        public void ListViewAdd(SpecificResource sr, ListView listView)
+        {
+            #region CatalogTerrainPaintBrush pair
+            if (sr.CType == CatalogType.CatalogTerrainPaintBrush)
+            {
+                byte status = (byte)sr.Resource["CommonBlock.BuildBuyProductStatusFlags"].Value;
+                if ((status & 0x01) == 0) // do not list
+                {
+                    UInt64 brushIndex = (UInt64)sr.Resource["CommonBlock.NameGUID"].Value;
+                    if (!CTPTBrushIndexToPair.ContainsKey(brushIndex))//Try to leave one behind...
+                    {
+                        CTPTBrushIndexToPair.Add(brushIndex, sr);
+                        return;
+                    }
+                }
+            }
+            #endregion
+
+            string name;
+            SpecificResource ctlg = sr.ResourceIndexEntry.ResourceType == (uint)CatalogType.ModularResource ? ItemForTGIBlock0(sr) : sr;
+            if (ctlg.Resource != null)
+            {
+                name = ctlg.Resource["CommonBlock.Name"];
+                name = (name.IndexOf(':') < 0) ? name : name.Substring(name.LastIndexOf(':') + 1);
+            }
+            else
+            {
+                name = ctlg.Exception.Message;
+                for (Exception ex = ctlg.Exception.InnerException; ex != null; ex = ex.InnerException) name = ex.Message + "|  " + name;
+            }
+
+            List<string> exts;
+            string tag = "UNKN";
+            if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + sr.ResourceIndexEntry.ResourceType.ToString("X8"), out exts)) tag = exts[0];
+
+            listView.Items.Add(new ListViewItem(new string[] {
+                name, tag, sr.RGVsn, "" + (AResourceKey)sr.ResourceIndexEntry,
+                sr.PathPackage.Path + " (" + sr.PPSource + ")",
+            }) { Tag = sr });
+        }
+
+        private void DisplayListView(Control listView)
+        {
+            this.AcceptButton = btnStart;
+            this.CancelButton = null;
+
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBC, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBT, true);
+            menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
+
+            lbTGISearch.Visible = false;
+            lbSearch.Visible = listView == searchPane;
+            lbUseMenu.Visible = false;
+            lbSelectOptions.Visible = false;
+            btnStart.Visible = true;
+            btnStart.Enabled = false;
+
+            StopWait();
+            splitContainer1.Panel1.Controls.Clear();
+            splitContainer1.Panel1.Controls.Add(listView);
+            listView.Dock = DockStyle.Fill;
+            listView.Focus();
+        }
+
+        private void listView_SelectedIndexChanged(object sender, SelectedIndexChangedEventArgs e)
+        {
+            if (isFix) return;
+
+            replacementForThumbs = null;// might as well be here; needed after FillTabs, really.
+            rkLookup = null;//Indicate that we're not working on the same resource any more
+            if (formClosing || e.SelectedItem == null)
+            {
+                selectedItem = null;
+                ClearTabs();
+                btnStart.Enabled = false;
+            }
+            else
+            {
+                selectedItem = e.SelectedItem;
+                FillTabs(selectedItem);
+                btnStart.Enabled = true;
+            }
+        }
+        private void listView_ItemActivate(object sender, ItemActivateEventArgs e) { btnStart_Click(sender, EventArgs.Empty); }
+
+        private void DisplaySearch()
+        {
+            isFix = false;
+            Diagnostics.Log("DisplaySearch");
+            DisplayListView(searchPane);
+        }
+
+        private void DisplayObjectChooser()
+        {
+            Diagnostics.Log("DisplayObjectChooser");
+            DisplayListView(objectChooser);
+        }
 
         private void DisplayTGISearch()
         {
             Diagnostics.Log("DisplayTGISearch");
 
-            searchPane = null;
             this.AcceptButton = btnStart;
             this.CancelButton = null;
 
@@ -921,71 +373,13 @@ namespace ObjectCloner
             lbSearch.Visible = false;
             lbUseMenu.Visible = false;
             lbSelectOptions.Visible = false;
-            btnStart.Visible = true;
-            btnStart.Enabled = false;
+            btnStart.Visible = false;
 
             StopWait();
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(tgiSearchPane);
             tgiSearchPane.Dock = DockStyle.Fill;
             tgiSearchPane.Focus();
-        }
-
-        private void DisplaySearch()
-        {
-            Diagnostics.Log("DisplaySearch");
-            searchPane.SelectedIndexChanged -= new EventHandler<Search.SelectedIndexChangedEventArgs>(searchPane_SelectedIndexChanged);
-            searchPane.SelectedIndexChanged += new EventHandler<Search.SelectedIndexChangedEventArgs>(searchPane_SelectedIndexChanged);
-            searchPane.ItemActivate -= new EventHandler<Search.ItemActivateEventArgs>(searchPane_ItemActivate);
-            searchPane.ItemActivate += new EventHandler<Search.ItemActivateEventArgs>(searchPane_ItemActivate);
-
-            this.AcceptButton = btnStart;
-            this.CancelButton = null;
-
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true);
-            menuBarWidget1.Enable(MenuBarWidget.MD.MBC, true);
-            menuBarWidget1.Enable(MenuBarWidget.MD.MBT, true);
-            menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
-
-            lbTGISearch.Visible = false;
-            lbSearch.Visible = true;
-            lbUseMenu.Visible = false;
-            lbSelectOptions.Visible = false;
-            btnStart.Visible = true;
-            btnStart.Enabled = false;
-
-            StopWait();
-            splitContainer1.Panel1.Controls.Clear();
-            splitContainer1.Panel1.Controls.Add(searchPane);
-            searchPane.Dock = DockStyle.Fill;
-            searchPane.Focus();
-        }
-
-        bool waitingToDisplayObjects;
-        private void DisplayObjectChooser()
-        {
-            Diagnostics.Log("DisplayObjectChooser");
-            waitingToDisplayObjects = false;
-            searchPane = null;
-            this.AcceptButton = btnStart;
-            this.CancelButton = null;
-
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true);
-            menuBarWidget1.Enable(MenuBarWidget.MD.MBC, true);
-            menuBarWidget1.Enable(MenuBarWidget.MD.MBT, true);
-            menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
-
-            lbTGISearch.Visible = false;
-            lbSearch.Visible = false;
-            lbUseMenu.Visible = false;
-            lbSelectOptions.Visible = false;
-            btnStart.Visible = true;
-
-            StopWait();
-            splitContainer1.Panel1.Controls.Clear();
-            splitContainer1.Panel1.Controls.Add(objectChooser);
-            objectChooser.Dock = DockStyle.Fill;
-            objectChooser.Focus();
         }
 
         bool hasOBJDs()
@@ -1020,7 +414,7 @@ namespace ObjectCloner
                 string prefix = CreatorName;
                 prefix = (prefix != null) ? prefix + "_" : "";
                 cloneFixOptions.UniqueName = prefix + (searchPane == null ?
-                    objectChooser.SelectedItems[0].Text
+                    objectChooser.SelectedItem.Text
                     : searchPane.SelectedItem.Text);
             }
             else
@@ -1038,7 +432,6 @@ namespace ObjectCloner
         private void DisplayNothing()
         {
             Diagnostics.Log("DisplayNothing");
-            searchPane = null;
             this.AcceptButton = null;
             this.CancelButton = null;
 
@@ -1064,8 +457,7 @@ namespace ObjectCloner
             }
         }
 
-        private void DoWait() { DoWait("Please wait..."); }
-        private void DoWait(string waitText)
+        private void DoWait(string waitText = "Please wait...")
         {
             Diagnostics.Log(waitText);
 
@@ -1089,54 +481,11 @@ namespace ObjectCloner
         }
         #endregion
 
-        #region ObjectChooser
-        private void objectChooser_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            replacementForThumbs = null;// might as well be here; needed after FillTabs, really.
-            rkLookup = null;//Indicate that we're not working on the same resource any more
-            if (objectChooser.SelectedItems.Count == 0)
-            {
-                selectedItem = null;
-                ClearTabs();
-                btnStart.Enabled = false;
-            }
-            else
-            {
-                selectedItem = objectChooser.SelectedItems[0].Tag as Item;
-                FillTabs(selectedItem);
-                btnStart.Enabled = true;
-            }
-        }
-
-        void objectChooser_ItemActivate(object sender, EventArgs e) { btnStart_Click(sender, EventArgs.Empty); }
-        #endregion
-
-        #region Search
-        private void searchPane_SelectedIndexChanged(object sender, Search.SelectedIndexChangedEventArgs e)
-        {
-            replacementForThumbs = null;// might as well be here; needed after FillTabs, really.
-            rkLookup = null;//Indicate that we're not working on the same resource any more
-            if (e.SelectedItem == null)
-            {
-                selectedItem = null;
-                ClearTabs();
-                btnStart.Enabled = false;
-            }
-            else
-            {
-                selectedItem = e.SelectedItem;
-                FillTabs(selectedItem);
-                btnStart.Enabled = true;
-            }
-        }
-
-        private void searchPane_ItemActivate(object sender, Search.ItemActivateEventArgs e) { btnStart_Click(sender, EventArgs.Empty); }
-        #endregion
-
         #region CloneFixOptions
         bool isCreateNewPackage = false;
         bool isDeepClone = false;
         bool isPadSTBLs = false;
+        bool disableCompression = false;
         void cloneFixOptions_StartClicked(object sender, EventArgs e)
         {
             Diagnostics.Log("cloneFixOptions_StartClicked");
@@ -1146,6 +495,9 @@ namespace ObjectCloner
             isCreateNewPackage = cloneFixOptions.IsClone;
             isDeepClone = isFix || cloneFixOptions.IsDeepClone;
             isPadSTBLs = cloneFixOptions.IsPadSTBLs;
+
+            if (cloneFixOptions.IsRepair)
+                FileTable.AppendFileTable = true;
 
             if (isCreateNewPackage) CloneStart();
             else FixStart();
@@ -1202,8 +554,6 @@ namespace ObjectCloner
 
         void RunRKLookup()
         {
-            if (fetching) { AbortFetching(false); }
-
             DoWait("Please wait, tracking down resources...");
 
             if (rkLookup == null)
@@ -1229,6 +579,7 @@ namespace ObjectCloner
             }
         }
         #endregion
+
 
         #region Tabs
         CatalogType tabType = 0;
@@ -1588,7 +939,7 @@ namespace ObjectCloner
             else if (c is TextBox) { TextBox tb = c as TextBox; tb.Text = ""; tb.ReadOnly = true; }
         }
 
-        void FillTabs(Item item)
+        void FillTabs(SpecificResource item)
         {
             string appWas = this.Text;
             this.Text = myName + " [busy]";
@@ -1596,24 +947,28 @@ namespace ObjectCloner
             Application.DoEvents();
             try
             {
-                if (item.Resource == null)
+                if (formClosing || item.Resource == null)
                 {
                     ClearTabs();
                     return;
                 }
 
                 InitialiseTabs(item.CType);
+                if (formClosing) return;
 
-                Item catlg = (item.CType == CatalogType.ModularResource) ? ItemForTGIBlock0(item) : item;
+                SpecificResource catlg = (item.CType == CatalogType.ModularResource) ? ItemForTGIBlock0(item) : item;
 
-                if (catlg.SpecificRK != null)
+                if (catlg.ResourceIndexEntry != null)
                 {
                     fillOverview(catlg);
+                    if (formClosing) return;
                     if (tabControl1.Contains(tpDetail))
                         fillDetails(catlg);
+                    if (formClosing) return;
                     if (item.CType == CatalogType.CatalogObject)
                     {
                         fillFlags(catlg);
+                        if (formClosing) return;
                         fillOther(catlg);
                     }
                 }
@@ -1626,7 +981,7 @@ namespace ObjectCloner
 
         string itemName = null;
         string itemDesc = null;
-        void fillOverview(Item item)
+        void fillOverview(SpecificResource item)
         {
             lbThumbTGI.Font = new Font(lbThumbTGI.Font, FontStyle.Regular);
             tbObjName.Font = tbNameGUID.Font =
@@ -1635,42 +990,42 @@ namespace ObjectCloner
                 new Font(tbObjName.Font, FontStyle.Regular);
 
             AApiVersionedFields common = item.Resource["CommonBlock"].Value as AApiVersionedFields;
-            pictureBox1.Image = getImage(THUM.THUMSize.large, item);
-            lbThumbTGI.Text = (AResourceKey)getImageRK(THUM.THUMSize.large, item);
-            tbResourceName.Text = NMap[item.RequestedRK.Instance];
+            if (formClosing) return; else pictureBox1.Image = THUM.getImage(THUM.THUMSize.large, item);
+            if (formClosing) return; else lbThumbTGI.Text = (AResourceKey)THUM.getImageRK(THUM.THUMSize.large, item);
+            if (formClosing) return; else tbResourceName.Text = NameMap.NMap[item.RequestedRK.Instance];
             tbObjName.Text = common["Name"].Value + "";
             tbNameGUID.Text = common["NameGUID"] + "";
 
             try
             {
-                updateProgress(true, "Looking up NameGUID...", true, 0x17, true, 0);
+                if (formClosing) return; else updateProgress(true, "Looking up NameGUID...", true, 0x17, true, 0);
                 Application.DoEvents();
-                itemName = StblLookup(objPkgs, (ulong)common["NameGUID"].Value, -1, x => { updateProgress(false, "", false, 0, true, x); Application.DoEvents(); });
+                itemName = STBLHandler.StblLookup((ulong)common["NameGUID"].Value, -1, x => { if (formClosing) return; else updateProgress(false, "", false, 0, true, x); Application.DoEvents(); });
                 tbCatlgName.Text = itemName == null ? "" : itemName;
             }
-            finally { updateProgress(true, "", true, -1, false, 0); Application.DoEvents(); }
+            finally { if (!formClosing) updateProgress(true, "", true, -1, false, 0); Application.DoEvents(); }
 
             tbObjDesc.Text = common["Desc"].Value + "";
             tbDescGUID.Text = common["DescGUID"] + "";
 
             try
             {
-                updateProgress(true, "Looking up DescGUID...", true, 0x17, true, 0);
+                if (formClosing) return; else updateProgress(true, "Looking up DescGUID...", true, 0x17, true, 0);
                 Application.DoEvents();
-                itemDesc = StblLookup(objPkgs, (ulong)common["DescGUID"].Value, -1, x => { updateProgress(false, "", false, 0, true, x); Application.DoEvents(); });
+                itemDesc = STBLHandler.StblLookup((ulong)common["DescGUID"].Value, -1, x => { if (formClosing) return; else updateProgress(false, "", false, 0, true, x); Application.DoEvents(); });
                 tbCatlgDesc.Text = itemDesc == null ? "" : itemDesc;
             }
-            finally { updateProgress(true, "", true, -1, false, 0); Application.DoEvents(); }
+            finally { if (!formClosing) updateProgress(true, "", true, -1, false, 0); Application.DoEvents(); }
 
             tbPrice.Text = common["Price"].Value + "";
             tbProductStatus.Text = "0x" + ((byte)common["BuildBuyProductStatusFlags"].Value).ToString("X2");
-            tbPackage.Text = ObjPathForPackage(item.Package);
+            tbPackage.Text = item.PathPackage.Path;
         }
         const string noData = "(No data available)";
-        void fillOverviewNoTGI0(Item item)
+        void fillOverviewNoTGI0(SpecificResource item)
         {
-            tbResourceName.Text = NMap[item.RequestedRK.Instance];
-            tbPackage.Text = ObjPathForPackage(item.Package);
+            tbResourceName.Text = NameMap.NMap[item.RequestedRK.Instance];
+            tbPackage.Text = item.PathPackage.Path;
 
             tpMain.Tag = noData;
             lbThumbTGI.Text = tbObjName.Text = tbNameGUID.Text =
@@ -1684,15 +1039,16 @@ namespace ObjectCloner
                 new Font(tbObjName.Font, FontStyle.Italic);
         }
 
-        void fillDetails(Item item) { IterateTLP(tlpObjectDetail, (l, c) => fillControl(item, l, c)); }
-        void fillOther(Item item) { IterateTLP(tlpOther, (l, c) => fillControl(item, l, c)); }
-        void fillFlags(Item item)
+        void fillDetails(SpecificResource item) { IterateTLP(tlpObjectDetail, (l, c) => fillControl(item, l, c)); }
+        void fillOther(SpecificResource item) { IterateTLP(tlpOther, (l, c) => fillControl(item, l, c)); }
+        void fillFlags(SpecificResource item)
         {
             foreach (flagField ff in flagFields)
             {
                 ulong field = getFlags(item.Resource as AResource, ff.field);
                 for (int i = 1; i < ff.tlp.RowCount - 1; i++)
                 {
+                    if (formClosing) return;
                     ulong value = (ulong)Math.Pow(2, ff.offset + i - 1);
                     CheckBox cb = (CheckBox)ff.tlp.GetControlFromPosition(0, i);
                     cb.Checked = (field & value) != 0;
@@ -1700,8 +1056,10 @@ namespace ObjectCloner
             }
         }
 
-        void fillControl(Item item, Label lb, Control c)
+        void fillControl(SpecificResource item, Label lb, Control c)
         {
+            if (formClosing) return;
+
             ResField resField = labelToField(new ResField(item.Resource, lb.Text));
 
             if (!resField.res.ContentFields.Contains(resField.field)) return;//Leave field empty and readonly if not present
@@ -1743,12 +1101,13 @@ namespace ObjectCloner
             }
         }
 
-        void fillOverviewUpdateImage(Item item)
+        void fillOverviewUpdateImage(SpecificResource item)
         {
+            if (formClosing) return;
             if (pictureBox1.Image == null)
             {
-                pictureBox1.Image = getLargestThumbOrDefault(item).GetThumbnailImage(pictureBox1.Width, pictureBox1.Height, gtAbort, IntPtr.Zero);
-                lbThumbTGI.Text = (AResourceKey)getNewRK(THUM.THUMSize.large, item);
+                pictureBox1.Image = THUM.getLargestThumbOrDefault(item).GetThumbnailImage(pictureBox1.Width, pictureBox1.Height, gtAbort, IntPtr.Zero);
+                lbThumbTGI.Text = (AResourceKey)THUM.getNewRK(THUM.THUMSize.large, item);
             }
         }
 
@@ -1829,7 +1188,7 @@ namespace ObjectCloner
             return res;
         }
 
-        void UpdateItem(Item item, Label lb, Control c)
+        void UpdateItem(SpecificResource item, Label lb, Control c)
         {
             if (c.Tag == null) return;//skip if read only
             ResField resField = labelToField(new ResField(item.Resource, lb.Text));
@@ -1877,326 +1236,6 @@ namespace ObjectCloner
         #endregion
 
 
-        #region Loading thread
-        Thread loadThread;
-        bool haveLoaded = false;
-        bool loading = false;
-        bool isFix = false;
-        Dictionary<UInt64, Item> CTPTBrushIndexToPair;
-        void StartLoading(CatalogType resourceType, bool IsFixPass)
-        {
-            Diagnostics.Log(String.Format("StartLoading resourceType: {0}, IsFixPass: {1}", resourceType, IsFixPass));
-            if (haveLoaded) return;
-            if (loading) { AbortLoading(false); }
-            if (fetching) { AbortFetching(false); }
-
-            isFix = IsFixPass;
-
-            waitingToDisplayObjects = true;
-            objectChooser.Items.Clear();
-            CTPTBrushIndexToPair = new Dictionary<UInt64, Item>();
-
-            this.LoadingComplete -= new EventHandler<BoolEventArgs>(MainForm_LoadingComplete);
-            this.LoadingComplete += new EventHandler<BoolEventArgs>(MainForm_LoadingComplete);
-
-            FillListView flv = new FillListView(this, objPkgs, ddsPkgs, tmbPkgs, resourceType
-                , createListViewItem, updateProgress, stopLoading, OnLoadingComplete);
-
-            DoWait("Please wait, loading object catalog...");
-
-            loadThread = new Thread(new ThreadStart(flv.LoadPackage));
-            loading = true;
-            loadThread.Start();
-        }
-
-        void AbortLoading(bool abort)
-        {
-            waitingToDisplayObjects = false;
-            if (abort)
-            {
-                loading = false;
-                if (loadThread != null) loadThread.Abort();
-            }
-            else
-            {
-                if (!loading) MainForm_LoadingComplete(null, new BoolEventArgs(false));
-                else loading = false;
-            }
-        }
-
-        void MainForm_LoadingComplete(object sender, BoolEventArgs e)
-        {
-            Diagnostics.Log(String.Format("MainForm_LoadingComplete {0}", e.arg));
-            loading = false;
-            while (loadThread != null && loadThread.IsAlive)
-                loadThread.Join(100);
-            loadThread = null;
-
-            this.toolStripProgressBar1.Visible = false;
-            this.toolStripStatusLabel1.Visible = false;
-
-            if (e.arg)
-            {
-                haveLoaded = true;
-
-                if (waitingToDisplayObjects)
-                {
-                    if (!isFix || objectChooser.Items.Count != 1)
-                    {
-                        if (mode == Mode.FromGame && menuBarWidget1.IsChecked(MenuBarWidget.MB.MBV_icons))
-                        {
-                            //waitingForImages = true;
-                            //StartFetching();
-                        }
-
-                        if (objectChooser.Items.Count > 0) objectChooser.SelectedIndex = 0;
-                        DisplayObjectChooser();
-                    }
-                    else
-                        FixStart();
-                }
-            }
-            else
-            {
-                ClosePkg();
-                DisplayNothing();
-            }
-        }
-
-        Dictionary<int, int> LItoIMG32 = new Dictionary<int, int>();
-        Dictionary<int, int> LItoIMG64 = new Dictionary<int, int>();
-
-        public delegate void createListViewItemCallback(Item objd);
-        void createListViewItem(Item item)
-        {
-            if (item.CType ==  CatalogType.CatalogTerrainPaintBrush)
-            {
-                byte status = (byte)item.Resource["CommonBlock.BuildBuyProductStatusFlags"].Value;
-                if ((status & 0x01) == 0) // do not list
-                {
-                    //int brushIndex = ("" + item.Resource["BrushTexture"]).GetHashCode();
-                    UInt64 brushIndex = (UInt64)item.Resource["CommonBlock.NameGUID"].Value;
-                    if (!CTPTBrushIndexToPair.ContainsKey(brushIndex))//Try to leave one behind...
-                    {
-                        CTPTBrushIndexToPair.Add(brushIndex, item);
-                        return;
-                    }
-                }
-            }
-            ListViewItem lvi = new ListViewItem();
-            if (item.Resource != null)
-            {
-                string objdtag;
-                if (item.CType == CatalogType.ModularResource)
-                {
-                    Item objd0 = ItemForTGIBlock0(item);
-                    objdtag = objd0.SpecificRK != null ? objd0.Resource["CommonBlock.Name"] : "";
-                }
-                else objdtag = item.Resource["CommonBlock.Name"];
-                lvi.Text = (objdtag.IndexOf(':') < 0) ? objdtag : objdtag.Substring(objdtag.LastIndexOf(':') + 1);
-            }
-            else
-            {
-                string s = item.Exception.Message;
-                for (Exception ex = item.Exception.InnerException; ex != null; ex = ex.InnerException) s += "  " + ex.Message;
-                lvi.Text = s;
-            }
-            List<string> exts;
-            string tag = "";
-            if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + item.RequestedRK.ResourceType.ToString("X8"), out exts)) tag = exts[0];
-            else tag = "UNKN";
-            lvi.SubItems.AddRange(new string[] { tag, item.RGVsn, "" + (AResourceKey)item.RequestedRK, });
-            lvi.Tag = item;
-            objectChooser.Items.Add(lvi);
-        }
-
-        public delegate bool stopLoadingCallback();
-        private bool stopLoading() { return !loading; }
-
-        private event EventHandler<BoolEventArgs> LoadingComplete;
-        public delegate void loadingCompleteCallback(bool complete);
-        public void OnLoadingComplete(bool complete) { if (LoadingComplete != null) { LoadingComplete(this, new BoolEventArgs(complete)); } }
-
-        #endregion
-
-        #region Fetch Images thread
-        Thread fetchThread;
-        bool haveFetched = false;
-        bool fetching = false;
-        void StartFetching()
-        {
-            if (!haveLoaded) return;
-
-            objectChooser.SmallImageList = new ImageList();
-            objectChooser.SmallImageList.ImageSize = new System.Drawing.Size(32, 32);
-            LItoIMG32 = new Dictionary<int, int>();
-            objectChooser.LargeImageList = new ImageList();
-            objectChooser.LargeImageList.ImageSize = new System.Drawing.Size(64, 64);
-            LItoIMG64 = new Dictionary<int, int>();
-
-            this.FetchingComplete += new EventHandler<BoolEventArgs>(MainForm_FetchingComplete);
-
-            FetchImages fi = new FetchImages(this, objectChooser.Items.Count,
-                getItem, getImage, setImage, updateProgress, stopFetching, OnFetchingComplete);
-
-            fetchThread = new Thread(new ThreadStart(fi.Fetch));
-            fetching = true;
-            fetchThread.Start();
-        }
-
-        void AbortFetching(bool abort)
-        {
-            if (abort)
-            {
-                fetching = false;
-                if (fetchThread != null) fetchThread.Abort();
-            }
-            else
-            {
-                if (!fetching) MainForm_FetchingComplete(null, new BoolEventArgs(false));
-                else fetching = false;
-            }
-        }
-
-        bool waitingForImages;
-        void MainForm_FetchingComplete(object sender, BoolEventArgs e)
-        {
-            fetching = false;
-            while (fetchThread != null && fetchThread.IsAlive)
-                fetchThread.Join(100);
-            fetchThread = null;
-
-            this.toolStripProgressBar1.Visible = false;
-            this.toolStripStatusLabel1.Visible = false;
-
-            if (e.arg)
-            {
-                haveFetched = true;
-            }
-
-            if (waitingForImages)
-            {
-                waitingForImages = false;
-            }
-        }
-
-        public delegate bool stopFetchingCallback();
-        private bool stopFetching() { return !fetching; }
-
-        public delegate Item getItemCallback(int i);
-        private Item getItem(int i) { return objectChooser.Items[i].Tag as Item; }
-
-        public delegate Image getImageCallback(THUM.THUMSize size, Item item);
-
-        public delegate void setImageCallback(bool isSmall, int i, Image image);
-        private void setImage(bool isSmall, int i, Image image)
-        {
-            if (isSmall)
-            {
-                LItoIMG32.Add(i, objectChooser.SmallImageList.Images.Count);
-                objectChooser.SmallImageList.Images.Add(image);
-                if (currentView != View.Tile && currentView != View.LargeIcon)
-                    objectChooser.Items[i].ImageIndex = LItoIMG32[i];
-            }
-            else
-            {
-                LItoIMG64.Add(i, objectChooser.LargeImageList.Images.Count);
-                objectChooser.LargeImageList.Images.Add(image);
-                if (currentView == View.Tile || currentView == View.LargeIcon)
-                    objectChooser.Items[i].ImageIndex = LItoIMG64[i];
-            }
-        }
-
-        private event EventHandler<BoolEventArgs> FetchingComplete;
-        public delegate void fetchingCompleteCallback(bool complete);
-        public void OnFetchingComplete(bool complete) { if (FetchingComplete != null) { FetchingComplete(this, new BoolEventArgs(complete)); } }
-
-        class FetchImages
-        {
-            MainForm mainForm;
-            int count;
-            getItemCallback getItemCB;
-            getImageCallback getImageCB;
-            setImageCallback setImageCB;
-            updateProgressCallback updateProgressCB;
-            stopFetchingCallback stopFetchingCB;
-            fetchingCompleteCallback fetchingCompleteCB;
-
-            int imgcnt = 0;
-
-            public FetchImages(MainForm form, int count,
-                getItemCallback getItemCB, getImageCallback getImageCB, setImageCallback setImageCB,
-                updateProgressCallback updateProgressCB, stopFetchingCallback stopFetchingCB, fetchingCompleteCallback fetchingCompleteCB)
-            {
-                this.mainForm = form;
-                this.count = count;
-                this.getItemCB = getItemCB;
-                this.getImageCB = getImageCB;
-                this.setImageCB = setImageCB;
-                this.updateProgressCB = updateProgressCB;
-                this.stopFetchingCB = stopFetchingCB;
-                this.fetchingCompleteCB = fetchingCompleteCB;
-
-            }
-
-            public void Fetch()
-            {
-                updateProgress(true, "Please wait, loading thumbnails...", false, -1, false, -1);
-
-                bool complete = false;
-                try
-                {
-                    updateProgress(false, "", true, count, true, 0);
-                    int freq = Math.Max(1, count / 100);
-                    for (int i = 0; i < count; i++)
-                    {
-                        if (stopFetching) return;
-
-                        Item item = getItem(i);
-
-                        if (stopFetching) return;
-
-                        Image img = getImage(THUM.THUMSize.small, item);
-                        if (img != null) setImage(true, i, img);
-
-                        if (stopFetching) return;
-
-                        img = getImage(THUM.THUMSize.medium, item);
-                        if (img != null) setImage(false, i, img);
-
-                        if (stopFetching) return;
-
-                        if (i % freq == 0)
-                            updateProgress(true, String.Format("Please wait, loading thumbnails... {0}%", i * 100 / count), true, count, true, i);
-                    }
-                    complete = true;
-                }
-                catch (ThreadInterruptedException) { }
-                finally
-                {
-                    updateProgress(true, "Finished loading thumnails", true, count, true, count);
-                    fetchingComplete(complete);
-                }
-            }
-
-            Item getItem(int i) { Thread.Sleep(0); return (Item)(!mainForm.IsHandleCreated ? null : mainForm.Invoke(getItemCB, new object[] { i, })); }
-
-            Image getImage(THUM.THUMSize size, Item item) { Thread.Sleep(0); return (Image)(!mainForm.IsHandleCreated ? null : mainForm.Invoke(getImageCB, new object[] { size, item, })); }
-
-            void setImage(bool isSmall, int i, Image image) { imgcnt++; Thread.Sleep(0); if (mainForm.IsHandleCreated) mainForm.Invoke(setImageCB, new object[] { isSmall, i, image, }); }
-
-            void updateProgress(bool changeText, string text, bool changeMax, int max, bool changeValue, int value)
-            {
-                Thread.Sleep(0);
-                if (mainForm.IsHandleCreated) mainForm.Invoke(updateProgressCB, new object[] { changeText, text, changeMax, max, changeValue, value, });
-            }
-
-            bool stopFetching { get { Thread.Sleep(0); return !mainForm.IsHandleCreated || (bool)mainForm.Invoke(stopFetchingCB); } }
-
-            void fetchingComplete(bool complete) { Thread.Sleep(0); if (mainForm.IsHandleCreated) mainForm.BeginInvoke(fetchingCompleteCB, new object[] { complete, }); }
-        }
-        #endregion
-
         #region Saving thread
         Thread saveThread;
         bool saving = false;
@@ -2210,9 +1249,8 @@ namespace ObjectCloner
 
             DoWait("Please wait, creating your new package...");
             SaveList sl = new SaveList(this,
-                searchPane == null ? objectChooser.SelectedItems[0].Tag as Item
-                : searchPane.SelectedItem.Tag as Item, rkLookup, objPkgs, ddsPkgs, tmbPkgs,
-                saveFileDialog1.FileName, isPadSTBLs, false/*mode == Mode.FromGame/**/, null, //cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
+                selectedItem, rkLookup,
+                saveFileDialog1.FileName, disableCompression, isPadSTBLs, false/*mode == Mode.FromGame/**/, null, //cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
                 updateProgress, stopSaving, OnSavingComplete);
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
@@ -2243,6 +1281,7 @@ namespace ObjectCloner
             while (saveThread != null && saveThread.IsAlive)
                 saveThread.Join(100);
             saveThread = null;
+            FileTable.AppendFileTable = false;
 
             this.toolStripProgressBar1.Visible = false;
             this.toolStripStatusLabel1.Visible = false;
@@ -2277,29 +1316,25 @@ namespace ObjectCloner
         class SaveList
         {
             MainForm mainForm;
-            Item selectedItem;
+            SpecificResource selectedItem;
             Dictionary<string, IResourceKey> rkList;
-            List<IPackage> objPkgs;
-            List<IPackage> ddsPkgs;
-            List<IPackage> tmbPkgs;
             string outputPackage;
+            bool compress;
             bool padSTBLs;
             bool zeroSTBLIID;
             List<Dictionary<String, TypedValue>> commonResources;
             updateProgressCallback updateProgressCB;
             stopSavingCallback stopSavingCB;
             savingCompleteCallback savingCompleteCB;
-            public SaveList(MainForm form, Item catlgItem, Dictionary<string, IResourceKey> rkList, List<IPackage> objPkgs, List<IPackage> ddsPkgs, List<IPackage> tmbPkgs,
-                string outputPackage, bool padSTBLs, bool zeroSTBLIID, List<Dictionary<String, TypedValue>> commonResources,
+            public SaveList(MainForm form, SpecificResource catlgItem, Dictionary<string, IResourceKey> rkList,
+                string outputPackage, bool compress, bool padSTBLs, bool zeroSTBLIID, List<Dictionary<String, TypedValue>> commonResources,
                 updateProgressCallback updateProgressCB, stopSavingCallback stopSavingCB, savingCompleteCallback savingCompleteCB)
             {
                 this.mainForm = form;
                 this.selectedItem = catlgItem;
                 this.rkList = rkList;
-                this.objPkgs = objPkgs;
-                this.ddsPkgs = ddsPkgs;
-                this.tmbPkgs = tmbPkgs;
                 this.outputPackage = outputPackage;
+                this.compress = compress;
                 this.padSTBLs = padSTBLs;
                 this.zeroSTBLIID = zeroSTBLIID;
                 this.commonResources = commonResources;
@@ -2315,16 +1350,26 @@ namespace ObjectCloner
             // .\..\..\..\Thumbnails\ALLThumbnails.package
             public void SavePackage()
             {
+                bool complete = false;
+                PathPackageTuple target = null;
+
                 Diagnostics.Log("Creating output package...");
                 updateProgress(true, "Creating output package...", false, -1, false, -1);
-                IPackage target = s3pi.Package.Package.NewPackage(0);
+                try
+                {
+                    s3pi.Package.Package.NewPackage(0).SaveAs(outputPackage);
+                    target = new PathPackageTuple(outputPackage, true);//need to be able to write to it...
+                }
+                catch
+                {
+                    return;
+                }
 
                 updateProgress(true, "Please wait...", false, -1, false, -1);
 
-                bool complete = false;
-                NameMap fb0nm = new NameMap(objPkgs);
-                NameMap fb2nm = new NameMap(ddsPkgs);
-                Item newnmap = NewResource(target, fb0nm.rk == RK.NULL ? new TGIBlock(0, null, 0x0166038C, 0, selectedItem.RequestedRK.Instance) : fb0nm.rk);
+                NameMap fb0nm = new NameMap(FileTable.fb0);
+                NameMap ddsnm = new NameMap(FileTable.dds);
+                SpecificResource newnmap = target.AddResource(fb0nm.rk == RK.NULL ? new TGIBlock(0, null, 0x0166038C, 0, selectedItem.RequestedRK.Instance) : fb0nm.rk);
                 IDictionary<ulong, string> newnamemap = (IDictionary<ulong, string>)newnmap.Resource;
                 try
                 {
@@ -2340,13 +1385,16 @@ namespace ObjectCloner
 
                         if (!saved.Contains(kvp.Value) && !excludeResource(kvp.Value))
                         {
-                            List<IPackage> lpkg = (selectedItem.RequestedRK.ResourceType != 0x04ED4BB2 && kvp.Value.ResourceType == 0x00B2D882) ? ddsPkgs : kvp.Key.EndsWith("Thumb") ? tmbPkgs : objPkgs;
-                            NameMap nm = kvp.Value.ResourceType == 0x00B2D882 ? fb2nm : fb0nm;
+                            List<PathPackageTuple> lppt =
+                                (selectedItem.RequestedRK.ResourceType != 0x04ED4BB2 && kvp.Value.ResourceType == 0x00B2D882) ? FileTable.dds
+                                : kvp.Key.EndsWith("Thumb") ? FileTable.tmb
+                                : FileTable.fb0;
+                            NameMap nm = kvp.Value.ResourceType == 0x00B2D882 ? ddsnm : fb0nm;
 
-                            Item item = new Item(new RIE(lpkg, kvp.Value), true); // use default wrapper
-                            if (item.SpecificRK != null)
+                            SpecificResource item = new SpecificResource(lppt, kvp.Value, true); // use default wrapper
+                            if (item.ResourceIndexEntry != null)
                             {
-                                if (!stopSaving) target.AddResource(item.SpecificRK, item.Resource.Stream, true);
+                                if (!stopSaving) target.AddResource(item.ResourceIndexEntry, item.Resource.Stream);
                                 saved.Add(kvp.Value);
                                 Diagnostics.Log(String.Format("Cloned {0} ({1})", kvp.Key, item.LongName));
                                 lastSaved = kvp.Key;
@@ -2370,20 +1418,20 @@ namespace ObjectCloner
                     Diagnostics.Log("Finding string tables...");
                     updateProgress(true, "Finding string tables...", true, 0, true, 0);
 
-                    Item catlgItem = selectedItem;
+                    SpecificResource catlgItem = selectedItem;
                     if (catlgItem.CType == CatalogType.ModularResource)
                     {
                         TGIBlock tgib = ((TGIBlockList)catlgItem.Resource["TGIBlocks"].Value)[0];
-                        catlgItem = new Item(objPkgs, tgib);
+                        catlgItem = new SpecificResource(FileTable.fb0, tgib);
                     }
 
-                    if (catlgItem.SpecificRK != null)
+                    if (catlgItem.ResourceIndexEntry != null)
                     {
                         ulong nameGUID = (ulong)catlgItem.Resource["CommonBlock.NameGUID"].Value;
                         ulong descGUID = (ulong)catlgItem.Resource["CommonBlock.DescGUID"].Value;
 
-                        Item nameStbl = findStblFor(nameGUID);
-                        Item descStbl = findStblFor(descGUID);
+                        SpecificResource nameStbl = STBLHandler.findStblFor(nameGUID);
+                        SpecificResource descStbl = STBLHandler.findStblFor(descGUID);
 
                         if (nameStbl == null && descStbl == null)
                         {
@@ -2404,29 +1452,29 @@ namespace ObjectCloner
                                 if (stopSaving) return;
                                 try
                                 {
-                                    Item oldName = findStblFor(nameGUID, (byte)i);
-                                    Item oldDesc = findStblFor(descGUID, (byte)i);
+                                    SpecificResource oldName = STBLHandler.findStblFor(nameGUID, (byte)i);
+                                    SpecificResource oldDesc = STBLHandler.findStblFor(descGUID, (byte)i);
                                     if (oldName == null && oldDesc == null && !padSTBLs) continue;
 
-                                    Item newstbl = NewResource(target, new TGIBlock(0, null, 0x220557DA, stblGroup, ((ulong)i << 56) | stblInstance));
+                                    SpecificResource newstbl = target.AddResource(new TGIBlock(0, null, 0x220557DA, stblGroup, ((ulong)i << 56) | stblInstance));
                                     IDictionary<ulong, string> outstbl = newstbl.Resource as IDictionary<ulong, string>;
 
                                     if (!outstbl.ContainsKey(nameGUID))
                                     {
                                         if (oldName == null) oldName = nameStbl;
                                         if (oldName != null || padSTBLs)
-                                            outstbl.Add(nameGUID, oldName == null ? "" : (oldName.Resource as IDictionary<ulong, string>)[nameGUID]);
+                                            outstbl.Add(nameGUID, oldName == null || (oldName.Resource as IDictionary<ulong, string>) == null ? "" : (oldName.Resource as IDictionary<ulong, string>)[nameGUID]);
                                     }
 
                                     if (!outstbl.ContainsKey(descGUID))
                                     {
                                         if (oldDesc == null) oldDesc = descStbl;
                                         if (oldDesc != null || padSTBLs)
-                                            outstbl.Add(descGUID, oldDesc == null ? "" : (oldDesc.Resource as IDictionary<ulong, string>)[descGUID]);
+                                            outstbl.Add(descGUID, oldDesc == null || (oldDesc.Resource as IDictionary<ulong, string>) == null ? "" : (oldDesc.Resource as IDictionary<ulong, string>)[descGUID]);
                                     }
 
                                     if (!stopSaving) newstbl.Commit();
-                                    if (!stopSaving) newnamemap.Add(newstbl.RequestedRK.Instance, String.Format(language_fmt, languages[i], i, stblInstance));
+                                    if (!stopSaving) STBLHandler.AddSTBLToNameMap(newnamemap, (byte)i, newstbl.ResourceIndexEntry.Instance);
                                 }
                                 finally
                                 {
@@ -2444,55 +1492,20 @@ namespace ObjectCloner
 
                     Diagnostics.Log("Saving package: " + outputPackage);
                     updateProgress(true, "Saving package...", true, 0, true, 0);
-                    foreach (IResourceIndexEntry ie in target.GetResourceList) ie.Compressed = (ushort)(disableCompression ? 0x0000 : 0xffff);
+                    target.Package.GetResourceList.ForEach(rie => rie.Compressed = (ushort)(compress ? 0xffff : 0x0000));
                     try
                     {
-                        target.SaveAs(outputPackage);
+                        target.Package.SavePackage();
+                        s3pi.Package.Package.ClosePackage(0, target.Package);
                         complete = true;
                     }
                     catch (Exception e) { Diagnostics.Log(e.Message); }
                 }
-                catch (ThreadInterruptedException) { }
+                catch (ThreadAbortException) { }
                 finally
                 {
                     savingComplete(complete);
                 }
-            }
-
-            private Item findStblFor(ulong guid)
-            {
-                byte limit = (byte)(ObjectCloner.Properties.Settings.Default.LangSearch ? 0x17 : 0x01);
-                try
-                {
-                    updateProgress(false, "", true, limit, true, 0);
-                    for (byte i = 0; i < limit; i++) { updateProgress(false, "", false, -1, true, i); Item res = findStblFor(guid, i); if (res != null) return res; }
-                    return null;
-                }
-                finally { updateProgress(false, "", false, 0, true, limit); }
-            }
-
-            private Item findStblFor(ulong guid, byte lang)
-            {
-                foreach (var pkg in objPkgs)
-                {
-                    foreach (var rie in pkg.FindAll(x => x.ResourceType == 0x220557DA && x.Instance >> 56 == lang))
-                    {
-                        Item item = new Item(new RIE(pkg, rie));
-                        if (item.SpecificRK == null) continue;
-                        if (item.Resource == null) continue;
-                        IDictionary<ulong, string> id = item.Resource as IDictionary<ulong, string>;
-                        if (id == null) continue;
-                        if (id.ContainsKey(guid)) return item;
-                    }
-                }
-                return null;
-            }
-
-            Item NewResource(IPackage pkg, IResourceKey rk)
-            {
-                RIE rie = new RIE(pkg, pkg.AddResource(rk, null, true));
-                if (rie.SpecificRK == null) return null;
-                return new Item(rie);
             }
 
             void updateProgress(bool changeText, string text, bool changeMax, int max, bool changeValue, int value)
@@ -2537,7 +1550,7 @@ namespace ObjectCloner
         public delegate void updateProgressCallback(bool changeText, string text, bool changeMax, int max, bool changeValue, int value);
         void updateProgress(bool changeText, string text, bool changeMax, int max, bool changeValue, int value)
         {
-            if (!this.IsHandleCreated) return;
+            if (!this.IsHandleCreated || this.IsDisposed) return;
             if (changeText)
             {
                 toolStripStatusLabel1.Visible = text.Length > 0;
@@ -2582,7 +1595,7 @@ namespace ObjectCloner
             }
         }
 
-        Dictionary<IResourceKey, Item> rkToItem;
+        Dictionary<IResourceKey, SpecificResource> rkToItem;
         Dictionary<ulong, ulong> oldToNew;
         ulong nameGUID, newNameGUID;
         ulong descGUID, newDescGUID;
@@ -2590,27 +1603,27 @@ namespace ObjectCloner
         {
             Diagnostics.Log("GenerateNewIIDs");
             // A list of the TGIs we are going to renumber and the resource that "owns" them
-            rkToItem = new Dictionary<IResourceKey, Item>();
+            rkToItem = new Dictionary<IResourceKey, SpecificResource>();
 
             // We need to process anything we found in the previous steps
             foreach (var kvp in rkLookup)
             {
                 if (kvp.Value == RK.NULL) continue;
                 if (rkToItem.ContainsKey(kvp.Value)) continue; // seen this TGI before
-                Item item = new Item(objPkgs, kvp.Value);
-                if (item.SpecificRK == null) continue; // TGI is not a packed resource
+                SpecificResource item = new SpecificResource(FileTable.fb0, kvp.Value);
+                if (item.ResourceIndexEntry == null) continue; // TGI is not a packed resource
                 rkToItem.Add(kvp.Value, item);
             }
 
             // We need to process STBLs
-            foreach (IResourceIndexEntry rie in objPkgs[0].FindAll(rie => rie.ResourceType == 0x220557DA && !rkToItem.ContainsKey(rie)))
-                rkToItem.Add(rie, new Item(new RIE(objPkgs[0], rie)));
+            foreach (var sr in FileTable.Current.FindAll(rie => rie.ResourceType == 0x220557DA && !rkToItem.ContainsKey(rie)))
+                rkToItem.Add(sr.ResourceIndexEntry, sr);
 
             // We may also need to process RCOL internal chunks and NameMaps but only if we're renumbering
             if (cloneFixOptions.IsRenumber)
             {
                 //If there are internal chunk references not covered by the above, we also need to add them
-                Dictionary<IResourceKey, Item> rcolChunks = new Dictionary<IResourceKey, Item>();
+                Dictionary<IResourceKey, SpecificResource> rcolChunks = new Dictionary<IResourceKey, SpecificResource>();
                 foreach (var kvp in rkToItem)
                 {
                     if (!typeof(GenericRCOLResource).IsAssignableFrom(kvp.Value.Resource.GetType())) continue;
@@ -2626,17 +1639,15 @@ namespace ObjectCloner
                 foreach (var kvp in rcolChunks) rkToItem.Add(kvp.Key, kvp.Value);
 
                 // Add newest namemap
-                IList<IResourceIndexEntry> lnmaprie = objPkgs[0].FindAll(rie => rie.ResourceType == 0x0166038C);
-                foreach (IResourceIndexEntry rie in lnmaprie)
-                    if (!rkToItem.ContainsKey(rie))
-                        rkToItem.Add(rie, new Item(new RIE(objPkgs[0], rie)));
+                FileTable.Current.FindAll(rie => rie.ResourceType == 0x0166038C && !rkToItem.ContainsKey(rie))
+                    .ForEach(sr => rkToItem.Add(sr.ResourceIndexEntry, sr));
             }
 
             // A list to hold the new numbers
             oldToNew = new Dictionary<ulong, ulong>();
 
             if (cloneFixOptions.IsRenumber && selectedItem.CType == CatalogType.ModularResource)
-                oldToNew.Add(selectedItem.SpecificRK.Instance, FNV64.GetHash(UniqueObject));//MDLR needs its IID as a specific hash value
+                oldToNew.Add(selectedItem.ResourceIndexEntry.Instance, FNV64.GetHash(UniqueObject));//MDLR needs its IID as a specific hash value
 
             ulong PngInstance = 0;
             if (selectedItem.CType != CatalogType.ModularResource)
@@ -2652,9 +1663,9 @@ namespace ObjectCloner
 
                 Dictionary<ulong, ulong> langMap = new Dictionary<ulong, ulong>();
                 foreach (var kvp in rkToItem)
-                    if (!oldToNew.ContainsKey(kvp.Value.SpecificRK.Instance))//Only generate a new IID once per resource in the package
+                    if (!oldToNew.ContainsKey(kvp.Value.ResourceIndexEntry.Instance))//Only generate a new IID once per resource in the package
                     {
-                        IResourceKey rk = kvp.Value.SpecificRK;
+                        IResourceKey rk = kvp.Value.ResourceIndexEntry;
                         if (rk.ResourceType == 0x220557DA)//STBL - we got here, so we're renumbering it!
                         {
                             if (!langMap.ContainsKey(rk.Instance & 0x00FFFFFFFFFFFFFF))
@@ -2675,17 +1686,17 @@ namespace ObjectCloner
                         if (!oldToNew.ContainsKey(rk.Instance))//Find those references we don't have new IIDs for
                         {
                             if (rk.ResourceType == 0x736884F1 && rk.Instance >> 32 == 0)//Either it's a request for a VPXY using version...
-                                oldToNew.Add(rk.Instance, oldToNew[rkToItem[rk].SpecificRK.Instance]);//So add the new number for that resource
+                                oldToNew.Add(rk.Instance, oldToNew[rkToItem[rk].ResourceIndexEntry.Instance]);//So add the new number for that resource
                             else//Or it's an RCOL chunk that needs a new IID...
                                 oldToNew.Add(rk.Instance, CreateInstance());//So renumber it
                         }
             }
 
-            Item catlgItem = selectedItem;
+            SpecificResource catlgItem = selectedItem;
             if (selectedItem.CType == CatalogType.ModularResource)
                 catlgItem = ItemForTGIBlock0(catlgItem);
 
-            if (catlgItem.SpecificRK != null)
+            if (catlgItem.ResourceIndexEntry != null)
             {
                 nameGUID = (ulong)catlgItem.Resource["CommonBlock.NameGUID"].Value;
                 descGUID = (ulong)catlgItem.Resource["CommonBlock.DescGUID"].Value;
@@ -2714,17 +1725,18 @@ namespace ObjectCloner
 
             DoWait("Please wait, updating your package...");
 
-            Dictionary<IResourceKey, Item> rkToItemAdded = new Dictionary<IResourceKey, Item>();
+            Dictionary<IResourceKey, SpecificResource> rkToItemAdded = new Dictionary<IResourceKey, SpecificResource>();
 
-            Item catlgItem = (selectedItem.CType == CatalogType.ModularResource || selectedItem.CType == CatalogType.CatalogFireplace) ? ItemForTGIBlock0(selectedItem) : selectedItem;
-            //oldToNew = new Dictionary<ulong, ulong>();
+            SpecificResource catlgRes = (selectedItem.CType == CatalogType.ModularResource || selectedItem.CType == CatalogType.CatalogFireplace)
+                ? ItemForTGIBlock0(selectedItem) : selectedItem;
             try
             {
                 //Need to take a copy of the ResourceList as it can get modified, which messes up the enumerator
-                IList<IResourceIndexEntry> lirie = new List<IResourceIndexEntry>(objPkgs[0].GetResourceList);
-                foreach(IResourceIndexEntry irie in lirie)
+                List<SpecificResource> lsr =
+                    new List<SpecificResource>(FileTable.Current.Package.GetResourceList.ConvertAll<SpecificResource>(rie => new SpecificResource(FileTable.Current, rie)));
+
+                foreach (SpecificResource item in lsr)
                 {
-                    Item item = new Item(new RIE(objPkgs[0], irie));
                     bool dirty = false;
 
                     if ((item.RequestedRK.Equals(selectedItem.RequestedRK) && item.CType != CatalogType.ModularResource)//Selected CatlgItem
@@ -2739,7 +1751,7 @@ namespace ObjectCloner
                         if (item.RequestedRK.Equals(selectedItem.RequestedRK)//Selected CatlgItem
                             || selectedItem.CType == CatalogType.ModularResource//all MDLR OBJDs
                             || selectedItem.CType == CatalogType.CatalogTerrainPaintBrush//both CTPTs
-                            || (selectedItem.CType == CatalogType.CatalogFireplace && item.RequestedRK.Equals(catlgItem.RequestedRK))//0th CFIR OBJD
+                            || (selectedItem.CType == CatalogType.CatalogFireplace && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th CFIR OBJD
                             )
                         {
                             commonBlock["NameGUID"] = new TypedValue(typeof(ulong), newNameGUID);
@@ -2755,7 +1767,7 @@ namespace ObjectCloner
                         #endregion
 
                         if (item.RequestedRK.Equals(selectedItem.RequestedRK)//Selected CatlgItem
-                            || (selectedItem.CType == CatalogType.ModularResource && item.RequestedRK.Equals(catlgItem.RequestedRK))//0th MDLR OBJD
+                            || (selectedItem.CType == CatalogType.ModularResource && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th MDLR OBJD
                             //-- only selected CTPT
                             //-- none of the OBJDs for CFIR
                             )
@@ -2765,9 +1777,9 @@ namespace ObjectCloner
 
                         #region Selected CatlgItem; 0th OBJD from MDLR or CFIR
                         if (item.RequestedRK.Equals(selectedItem.RequestedRK)//Selected CatlgItem
-                            || (selectedItem.CType == CatalogType.ModularResource && item.RequestedRK.Equals(catlgItem.RequestedRK))//0th MDLR OBJD
+                            || (selectedItem.CType == CatalogType.ModularResource && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th MDLR OBJD
                             //-- only selected CTPT
-                            || (selectedItem.CType == CatalogType.CatalogFireplace && item.RequestedRK.Equals(catlgItem.RequestedRK))//0th CFIR OBJD
+                            || (selectedItem.CType == CatalogType.CatalogFireplace && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th CFIR OBJD
                             )
                         {
                             ulong PngInstance = (ulong)commonBlock["PngInstance"].Value;
@@ -2775,24 +1787,24 @@ namespace ObjectCloner
 
                             if (cloneFixOptions.IsIncludeThumbnails)
                             {
-                                Image img = replacementForThumbs != null ? replacementForThumbs : getLargestThumbOrDefault(item);
+                                Image img = replacementForThumbs != null ? replacementForThumbs : THUM.getLargestThumbOrDefault(item);
                                 ulong instance = isPng ? PngInstance : item.RequestedRK.Instance;
 
                                 //Ensure one of each size exists
                                 foreach (THUM.THUMSize size in new THUM.THUMSize[] { THUM.THUMSize.small, THUM.THUMSize.medium, THUM.THUMSize.large, })
                                 {
-                                    if (getImage(size, item) == null)
+                                    if (THUM.getImage(size, item) == null)
                                     {
                                         //Create missing thumbnail from default or replacement
-                                        IResourceKey rk = getNewRK(size, item);
-                                        RIE rie = new RIE(objPkgs[0], objPkgs[0].AddResource(rk, null, true));
-                                        rkToItemAdded.Add(rk, new Item(objPkgs, rk));
-                                        Thumb[item.RequestedRK.ResourceType, instance, size, isPng] = img;
+                                        IResourceKey rk = THUM.getNewRK(size, item);
+                                        SpecificResource thum = FileTable.Current.AddResource(rk);
+                                        rkToItemAdded.Add(rk, thum);
+                                        THUM.Thumb[item.RequestedRK.ResourceType, instance, size, isPng] = img;
                                     }
                                     else if (replacementForThumbs != null)
                                     {
                                         //Replace existing thumbnail
-                                        Thumb[item.RequestedRK.ResourceType, instance, size, isPng] = replacementForThumbs;
+                                        THUM.Thumb[item.RequestedRK.ResourceType, instance, size, isPng] = replacementForThumbs;
                                     }
                                 }
                             }
@@ -2858,7 +1870,7 @@ namespace ObjectCloner
                         dirty = true;
                         #endregion
                     }
-                    else if (item.SpecificRK.ResourceType == 0x0166038C)
+                    else if (item.ResourceIndexEntry.ResourceType == 0x0166038C)
                     {
                         #region NameMap
                         IDictionary<ulong, string> nm = (IDictionary<ulong, string>)item.Resource;
@@ -2871,12 +1883,12 @@ namespace ObjectCloner
                             }
                         #endregion
                     }
-                    else if (item.SpecificRK.ResourceType == 0x220557DA)//STBL
+                    else if (item.ResourceIndexEntry.ResourceType == 0x220557DA)//STBL
                     {
                         dirty |= UpdateStbl(tbCatlgName.Text, nameGUID, item, newNameGUID);
                         dirty |= UpdateStbl(tbCatlgDesc.Text, descGUID, item, newDescGUID);
                     }
-                    else if (item.SpecificRK.ResourceType == 0x0333406C)
+                    else if (item.ResourceIndexEntry.ResourceType == 0x0333406C)
                     {
                         dirty = UpdateRKsFromXML(item);
                     }
@@ -2893,22 +1905,22 @@ namespace ObjectCloner
                 {
                     PadStbls(tbCatlgName.Text, nameGUID, newNameGUID);
                     PadStbls(tbCatlgDesc.Text, descGUID, newDescGUID);
-                    NMap.Commit();
+                    NameMap.NMap.Commit();
                 }
 
                 foreach (var kvp in rkToItemAdded)
                     if (!rkToItem.ContainsKey(kvp.Key)) rkToItem.Add(kvp.Key, kvp.Value);
-                foreach (Item item in rkToItem.Values)
+                foreach (SpecificResource item in rkToItem.Values)
                 {
                     if (item.RequestedRK == RK.NULL) { continue; }
-                    else if (!oldToNew.ContainsKey(item.SpecificRK.Instance)) { continue; }
-                    else item.SpecificRK.Instance = oldToNew[item.SpecificRK.Instance];
+                    else if (!oldToNew.ContainsKey(item.ResourceIndexEntry.Instance)) { continue; }
+                    else item.ResourceIndexEntry.Instance = oldToNew[item.ResourceIndexEntry.Instance];
                 }
 
                 if (!disableCompression)
-                    foreach (IResourceIndexEntry ie in objPkgs[0].GetResourceList) ie.Compressed = 0xffff;
+                    FileTable.Current.Package.GetResourceList.ForEach(rie => rie.Compressed = 0xffff);
 
-                objPkgs[0].SavePackage();
+                FileTable.Current.Package.SavePackage();
             }
             finally
             {
@@ -2976,7 +1988,7 @@ namespace ObjectCloner
 
             return dirty;
         }
-        private bool UpdateRKsFromXML(Item item)
+        private bool UpdateRKsFromXML(SpecificResource item)
         {
             bool dirty = false;
             StreamReader sr = new StreamReader(item.Resource.Stream, true);
@@ -3012,14 +2024,14 @@ namespace ObjectCloner
             return dirty;
         }
 
-        private bool UpdateStbl(string value, ulong guid, Item item, ulong newGuid)
+        private bool UpdateStbl(string value, ulong guid, SpecificResource item, ulong newGuid)
         {
             IDictionary<ulong, string> stbl = (IDictionary<ulong, string>)item.Resource;
             if (!stbl.ContainsKey(guid)) return false;
             
             string text = stbl[guid];
             stbl.Remove(guid);
-            if (ckbCopyToAll.Checked || item.SpecificRK.Instance >> 56 == 0x00) text = value;
+            if (ckbCopyToAll.Checked || item.ResourceIndexEntry.Instance >> 56 == 0x00) text = value;
             if (text != "") stbl.Add(newGuid, text);
 
             return true;
@@ -3033,7 +2045,7 @@ namespace ObjectCloner
                 Application.DoEvents();
 
                 List<ulong> stbls = new List<ulong>();
-                new List<IResourceIndexEntry>(objPkgs[0].FindAll(x => x.ResourceType == 0x220557DA))
+                new List<IResourceIndexEntry>(FileTable.Current.Package.FindAll(x => x.ResourceType == 0x220557DA))
                     .ConvertAll<ulong>(x => { return x.Instance & 0x00FFFFFFFFFFFFFF; })
                     .ForEach(x => { if (!stbls.Contains(x)) stbls.Add(x); });
 
@@ -3041,7 +2053,7 @@ namespace ObjectCloner
 
                 for (byte lang = 0; lang < 0x17; lang++)
                 {
-                    if (findStblFor(objPkgs, guid, lang) == null)
+                    if (STBLHandler.findStblFor(guid, lang) == null)
                         CreateSTBL(newRK, newGuid, value, lang);
                     updateProgress(false, "", false, -1, true, lang);
                 }
@@ -3052,20 +2064,17 @@ namespace ObjectCloner
         void CreateSTBL(IResourceKey newRK, ulong newGuid, string value, byte lang)
         {
             newRK.Instance = (newRK.Instance & 0x00FFFFFFFFFFFFFF) | ((ulong)lang << 56);
-            Item newstbl = new Item(objPkgs, newRK);
-            if (newstbl.SpecificRK == null)
-            {
-                RIE rie = new RIE(objPkgs[0], objPkgs[0].AddResource(newRK, null, true));
-                newstbl = new Item(rie);
-            }
+            SpecificResource newstbl = new SpecificResource(FileTable.fb0, newRK);
+            if (newstbl.ResourceIndexEntry == null) newstbl = FileTable.Current.AddResource(newRK);
+
             IDictionary<ulong, string> stbl = (IDictionary<ulong, string>)newstbl.Resource;
 
             if (!stbl.ContainsKey(newGuid)) stbl.Add(newGuid, value);
 
             newstbl.Commit();
 
-            if (NMap != null && NMap.map != null && !NMap.map.ContainsKey(newRK.Instance))
-                NMap.map.Add(newRK.Instance, String.Format(language_fmt, languages[lang], lang, newRK.Instance & 0x00FFFFFFFFFFFFFF));
+            if (NameMap.NMap != null && NameMap.NMap.map != null && !NameMap.NMap.map.ContainsKey(newRK.Instance))
+                STBLHandler.AddSTBLToNameMap(NameMap.NMap.map, lang, newRK.Instance);
 
             if (!rkToItem.ContainsKey(newRK))
                 rkToItem.Add(newRK, newstbl);
@@ -3078,8 +2087,8 @@ namespace ObjectCloner
 
         private void SlurpRKsFromRK(string key, IResourceKey rk)
         {
-            Item item = new Item(objPkgs, rk);
-            if (item.SpecificRK != null) SlurpRKsFromField(key, (AResource)item.Resource);
+            SpecificResource item = new SpecificResource(FileTable.fb0, rk);
+            if (item.ResourceIndexEntry != null) SlurpRKsFromField(key, (AResource)item.Resource);
             else Diagnostics.Show(String.Format("RK {0} not found", key));
         }
         private void SlurpRKsFromField(string key, AApiVersionedFields field)
@@ -3132,7 +2141,7 @@ namespace ObjectCloner
                 }
             }
         }
-        private void SlurpRKsFromXML(string key, Item item)
+        private void SlurpRKsFromXML(string key, SpecificResource item)
         {
             int j = 0;
             StreamReader sr = new StreamReader(item.Resource.Stream, true);
@@ -3152,21 +2161,17 @@ namespace ObjectCloner
             }
         }
 
-        private void SlurpKindred(string key, IList<IPackage> pkgs, Predicate<IResourceIndexEntry> Match)
+        private void SlurpKindred(string key, Predicate<IResourceIndexEntry> Match)
         {
-            List<IResourceIndexEntry> seen = new List<IResourceIndexEntry>();
-            foreach (IPackage pkg in pkgs)
-            {
-                IList<IResourceIndexEntry> lrie = pkg.FindAll(Match);
-                int i = 0;
-                foreach (IResourceIndexEntry rie in lrie)
+            List<SpecificResource> seen = new List<SpecificResource>();
+            int i = 0;
+            foreach (var ppt in FileTable.fb0)
+                foreach (var sr in ppt.FindAll(x => Match(x) && !seen.Exists(s => new RK(x).Equals(s.ResourceIndexEntry))))
                 {
-                    if (seen.Exists(new RK(rie).Equals)) continue;
-                    seen.Add(rie);
-                    Add(key + "[" + i + "]", rie);
+                    seen.Add(sr);
+                    Add(key + "[" + i + "]", sr.ResourceIndexEntry);
                     i++;
                 }
-            }
         }
         #endregion
 
@@ -3174,11 +2179,11 @@ namespace ObjectCloner
         #region Menu Bar
         private void menuBarWidget1_MBDropDownOpening(object sender, MenuBarWidget.MBDropDownOpeningEventArgs mn)
         {
+            Diagnostics.Log(String.Format("menuBarWidget1_MBDropDownOpening mn: {0}", mn.mn));
             switch (mn.mn)
             {
                 case MenuBarWidget.MD.MBF: break;
                 case MenuBarWidget.MD.MBC: break;
-                case MenuBarWidget.MD.MBV: break;
                 case MenuBarWidget.MD.MBT: break;
                 case MenuBarWidget.MD.MBS: break;
                 case MenuBarWidget.MD.MBH: break;
@@ -3189,6 +2194,7 @@ namespace ObjectCloner
         #region File menu
         private void menuBarWidget1_MBFile_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
         {
+            Diagnostics.Log(String.Format("menuBarWidget1_MBFile_Click mn: {0}", mn.mn));
             try
             {
                 this.Enabled = false;
@@ -3202,10 +2208,10 @@ namespace ObjectCloner
             finally { this.Enabled = true; }
         }
 
-        string currentPackage = "";
         private void fileOpen()
         {
-            Diagnostics.Log("File->Open...");
+            Diagnostics.Log("fileOpen");
+
             openPackageDialog.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder == null || ObjectCloner.Properties.Settings.Default.LastSaveFolder.Length == 0
                 ? "" : ObjectCloner.Properties.Settings.Default.LastSaveFolder;
             openPackageDialog.FileName = "*.package";
@@ -3213,6 +2219,7 @@ namespace ObjectCloner
             if (dr != DialogResult.OK) return;
             ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(openPackageDialog.FileName);
 
+            //DoWait("Setting up folders...");
             mode = Mode.FromUser;
             fileReOpenToFix(openPackageDialog.FileName, 0);
         }
@@ -3220,11 +2227,13 @@ namespace ObjectCloner
         void fileReOpenToFix(string filename, CatalogType type)
         {
             Diagnostics.Log(String.Format("fileReOpenToFix filename: {0}, type: {1}", filename, type));
+
             ClosePkg();
-            IPackage pkg;
+            currentCatalogType = 0;
+
             try
             {
-                pkg = s3pi.Package.Package.OpenPackage(0, filename, true);
+                FileTable.Current = new PathPackageTuple(filename, true);
             }
             catch (Exception ex)
             {
@@ -3232,34 +2241,12 @@ namespace ObjectCloner
                 return;
             }
 
-            currentCatalogType = 0;
-            currentPackage = filename;
-            tmbPkgs = ddsPkgs = objPkgs = new List<IPackage>(new IPackage[] { pkg, });
-            tmbPaths = ddsPaths = objPaths = new List<string>(new string[] { filename, });
-            Diagnostics.Log(String.Format("Package {0} ({2}[{1}]) added.", filename, 0, "obj"));
-            Diagnostics.Log(String.Format("Package {0} ({2}[{1}]) added.", filename, 0, "dds"));
-            Diagnostics.Log(String.Format("Package {0} ({2}[{1}]) added.", filename, 0, "tmb"));
-
-            fileNewOpen(type, type != 0);
-        }
-
-        void fileNewOpen(CatalogType resourceType, bool IsFixPass)
-        {
-            Diagnostics.Log(String.Format("fileNewOpen resourceType: {0}, IsFixPass: {1}", resourceType, IsFixPass));
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, false);
-            menuBarWidget1.Enable(MenuBarWidget.MD.MBC, false);
-            menuBarWidget1.Enable(MenuBarWidget.MD.MBT, false);
-            menuBarWidget1.Enable(MenuBarWidget.MD.MBS, false);
-
-            if (!haveLoaded)
-                StartLoading(resourceType, IsFixPass);
-            else
-                DisplayObjectChooser();
+            LoadObjectChooser(type, type != 0);
         }
 
         private void fileExit()
         {
-            Diagnostics.Log("File->Exit");
+            Diagnostics.Log("fileExit");
             Application.Exit();
         }
         #endregion
@@ -3268,9 +2255,14 @@ namespace ObjectCloner
         CatalogType currentCatalogType = 0;
         private void menuBarWidget1_MBCloning_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
         {
-            Diagnostics.Log(String.Format("Clone->{0}", FromCloningMenuEntry(mn.mn)));
-            Application.DoEvents();
-            cloneType(FromCloningMenuEntry(mn.mn));
+            Diagnostics.Log(String.Format("menuBarWidget1_MBFile_Click mn: {0}", mn.mn));
+            try
+            {
+                this.Enabled = false;
+                Application.DoEvents();
+                cloneType(FromCloningMenuEntry(mn.mn));
+            }
+            finally { this.Enabled = true; }
         }
         CatalogType FromCloningMenuEntry(MenuBarWidget.MB menuEntry)
         {
@@ -3281,167 +2273,44 @@ namespace ObjectCloner
 
         private void cloneType(CatalogType resourceType)
         {
-            if (!CheckInstallDirs()) return;
+            Diagnostics.Log(String.Format("cloneType resourceType: {0}", resourceType));
 
+            mode = Mode.FromGame;
             if (currentCatalogType != resourceType)
             {
                 ClosePkg();
-                setList("obj", out objPkgs, out objPaths, ini_fb0);
-                setList("dds", out ddsPkgs, out ddsPaths, ini_fb2);
-                setList("tmb", out tmbPkgs, out tmbPaths, ini_tmb);
                 currentCatalogType = resourceType;
             }
+            FileTable.AppendFileTable = true;
 
-            mode = Mode.FromGame;
-            fileNewOpen(resourceType, false);
-        }
-
-        private bool CheckInstallDirs()
-        {
-            if (!doCheckPackageLists())
-            {
-                CopyableMessageBox.Show("Found no packages\nPlease check your Game Folder settings.", "No objects to clone",
-                    CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Stop);
-                return false;
-            }
-            return true;
-        }
-        bool doCheckPackageLists() { return ini_fb0 != null && ini_fb2 != null && ini_tmb != null && ini_fb0.Count > 0; }
-        void setList(string tag, out List<IPackage> pkgs, out List<string> outPaths, List<string> inPaths)
-        {
-            pkgs = new List<IPackage>();
-            outPaths = new List<string>();
-
-            if (inPaths == null) return;
-            foreach (string file in inPaths)
-                if (File.Exists(file))
-                    try
-                    {
-                        pkgs.Add(s3pi.Package.Package.OpenPackage(0, file));
-                        Diagnostics.Log(String.Format("Package {0} ({2}[{1}]) added.", file, outPaths.Count, tag));
-                        outPaths.Add(file);
-                    }
-                    catch { }
-                else
-                    Diagnostics.Log(String.Format("Package {0} not added (does not exist).  ({1})", file, tag));
-        }
-
-        public static string ObjPathForPackage(IPackage pkg, bool addIndex = false) { return PathForPackage(objPkgs, pkg, addIndex); }
-        public static string PathForPackage(List<IPackage> pkgs, IPackage pkg, bool addIndex = false)
-        {
-            List<string> paths;
-            string tag;
-            if (pkgs == ddsPkgs) { paths = ddsPaths; tag = "dds"; }
-            else if (pkgs == tmbPkgs) { paths = tmbPaths; tag = "tmb"; }
-            else { pkgs = objPkgs; paths = objPaths; tag = "obj"; }
-            int index = pkgs.IndexOf(pkg);
-            if (index < 0) return null;
-            return String.Format(addIndex ? "{0} ({2}[{1}])" : "{0}", paths[index], index, tag);
-        }
-
-        //Inge (15-01-2011): "Only ever looking *.package for custom content"
-        //static List<string> pkgPatterns = new List<string>(new string[] { "*.package", "*.dbc", "*.world", "*.nhd", });
-        static List<string> pkgPatterns = new List<string>(new string[] { "*.package", });
-        void setCCList(out List<IPackage> pkgs, out List<string> outPaths, string ccPath)
-        {
-            pkgs = new List<IPackage>();
-            outPaths = new List<string>();
-
-            if (ccPath == null || !Directory.Exists(ccPath)) return;
-
-            //Depth-first search
-            foreach (var dir in Directory.GetDirectories(ccPath))
-            {
-                List<IPackage> dirPkgs;
-                List<string> dirPaths;
-                setCCList(out dirPkgs, out dirPaths, dir);
-                if (dirPkgs != null && dirPkgs.Count > 0)
-                {
-                    pkgs.AddRange(dirPkgs);
-                    outPaths.AddRange(dirPaths);
-                }
-            }
-            foreach(string pattern in pkgPatterns)
-                foreach (var path in Directory.GetFiles(ccPath, pattern))
-                    try
-                    {
-                        IPackage pkg = s3pi.Package.Package.OpenPackage(0, path);
-                        pkgs.Add(pkg);
-                        outPaths.Add(path);
-                    }
-                    catch(InvalidDataException) { }
+            LoadObjectChooser(resourceType, false);
         }
         #endregion
 
-        #region View menu
-        private void menuBarWidget1_MBView_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
+        bool isFix = false;
+        void LoadObjectChooser(CatalogType resourceType, bool IsFixPass)
         {
-            try
+            Diagnostics.Log(String.Format("LoadObjectChooser resourceType: {0}, IsFixPass: {1}", resourceType, IsFixPass));
+
+            //if (!CheckInstallDirs()) return;
+
+            isFix = IsFixPass;
+
+            CTPTBrushIndexToPair = new Dictionary<ulong, SpecificResource>();
+            objectChooser = new ObjectChooser(updateProgress, ListViewAdd, resourceType, isFix);
+            if (isFix)
             {
-                this.Enabled = false;
-                Application.DoEvents();
-
-                switch (mn.mn)
-                {
-                    case MenuBarWidget.MB.MBV_tiles: viewSetView(mn.mn, LItoIMG64); break;
-                    case MenuBarWidget.MB.MBV_largeIcons: viewSetView(mn.mn, LItoIMG64); break;
-                    case MenuBarWidget.MB.MBV_smallIcons: viewSetView(mn.mn, LItoIMG32); break;
-                    case MenuBarWidget.MB.MBV_list: viewSetView(mn.mn, LItoIMG32); break;
-                    case MenuBarWidget.MB.MBV_detailedList: viewSetView(mn.mn, LItoIMG32); break;
-                    case MenuBarWidget.MB.MBV_icons: viewIcons(); break;
-                }
+                objectChooser.SelectedIndexChanged += new EventHandler<SelectedIndexChangedEventArgs>((sender, e) => selectedItem = e.SelectedItem);
+                objectChooser.ItemActivate += new EventHandler<ItemActivateEventArgs>((sender, e) => FixStart());
             }
-            finally { this.Enabled = true; }
-        }
-
-        private void viewSetView(MenuBarWidget.MB mn, Dictionary<int, int> imageMap)
-        {
-            if (menuBarWidget1.IsChecked(mn)) return;
-            if (viewMap.ContainsKey(currentView)) menuBarWidget1.Checked(viewMap[currentView], false);
-            menuBarWidget1.Checked(mn, true);
-
-            if (menuBarWidget1.IsChecked(MenuBarWidget.MB.MBV_icons) && (LItoIMG64.Count > 0 || LItoIMG32.Count > 0))
-                for (int i = 0; i < objectChooser.Items.Count; i++)
-                    objectChooser.Items[i].ImageIndex = imageMap.ContainsKey(i) ? imageMap[i] : -1;
-
-            ObjectCloner.Properties.Settings.Default.View = viewMapValues.IndexOf(mn);
-            currentView = viewMapKeys[ObjectCloner.Properties.Settings.Default.View];
-            objectChooser.View = currentView;
-        }
-
-        private void viewIcons()
-        {
-            menuBarWidget1.Checked(MenuBarWidget.MB.MBV_icons, !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBV_icons));
-            if (haveLoaded)
+            else
             {
-                if (menuBarWidget1.IsChecked(MenuBarWidget.MB.MBV_icons))
-                {
-                    if (waitingForImages) return;
-
-                    if (haveFetched)
-                    {
-                        if (LItoIMG64.Count > 0 || LItoIMG32.Count > 0)
-                        {
-                            Dictionary<int, int> imageMap = (currentView == View.Tile || currentView == View.LargeIcon) ? LItoIMG64 : LItoIMG32;
-                            for (int i = 0; i < objectChooser.Items.Count; i++)
-                                objectChooser.Items[i].ImageIndex = imageMap.ContainsKey(i) ? imageMap[i] : -1;
-                        }
-                    }
-                    else
-                    {
-                        waitingForImages = true;
-                        StartFetching();
-                    }
-                }
-                else
-                {
-                    AbortFetching(false);
-                    for (int i = 0; i < objectChooser.Items.Count; i++)
-                        objectChooser.Items[i].ImageIndex = -1;
-                }
+                objectChooser.SelectedIndexChanged += new EventHandler<SelectedIndexChangedEventArgs>(listView_SelectedIndexChanged);
+                objectChooser.ItemActivate += new EventHandler<ItemActivateEventArgs>(listView_ItemActivate);
             }
+
+            DisplayObjectChooser();
         }
-        #endregion
 
         #region Tools menu
         private void menuBarWidget1_MBTools_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
@@ -3461,41 +2330,29 @@ namespace ObjectCloner
 
         private void toolsSearch()
         {
-            if (!CheckInstallDirs()) return;
-
             ClosePkg();
-            setList("obj", out objPkgs, out objPaths, ini_fb0);
-            setList("dds", out ddsPkgs, out ddsPaths, ini_fb2);
-            setList("tmb", out tmbPkgs, out tmbPaths, ini_tmb);
             currentCatalogType = 0;
 
-            searchPane = new Search(objPkgs, updateProgress);
+            FileTable.UseCustomContent = ObjectCloner.Properties.Settings.Default.CCEnabled;
+            FileTable.AppendFileTable = true;
+
+            CTPTBrushIndexToPair = new Dictionary<ulong, SpecificResource>();
+            searchPane = new Search(updateProgress, ListViewAdd);
+            searchPane.SelectedIndexChanged += new EventHandler<SelectedIndexChangedEventArgs>(listView_SelectedIndexChanged);
+            searchPane.ItemActivate += new EventHandler<ItemActivateEventArgs>(listView_ItemActivate);
 
             DisplaySearch();
         }
 
         private void toolsTGISearch()
         {
-            if (!CheckInstallDirs()) return;
-
-            DoWait("Setting up folders...");
             ClosePkg();
-            setList("obj", out objPkgs, out objPaths, ini_fb0);
-            setList("dds", out ddsPkgs, out ddsPaths, ini_fb2);
-            setList("tmb", out tmbPkgs, out tmbPaths, ini_tmb);
             currentCatalogType = 0;
 
-            List<List<IPackage>> pkgsList = new List<List<IPackage>>(new List<IPackage>[] { objPkgs, ddsPkgs, tmbPkgs, });
-            List<List<string>> pathsList = new List<List<string>>(new List<string>[] { objPaths, ddsPaths, tmbPaths, });
-            if (ObjectCloner.Properties.Settings.Default.CCEnabled)
-            {
-                List<IPackage> ccPkgs;
-                List<string> ccPaths;
-                setCCList(out ccPkgs, out ccPaths, ObjectCloner.Properties.Settings.Default.CustomContent);
-                pkgsList.Add(ccPkgs);
-                pathsList.Add(ccPaths);
-            }
-            tgiSearchPane = new TGISearch(pkgsList, pathsList, updateProgress, NMap);
+            FileTable.UseCustomContent = ObjectCloner.Properties.Settings.Default.CCEnabled;
+            FileTable.AppendFileTable = true;
+
+            tgiSearchPane = new TGISearch(updateProgress);
 
             DisplayTGISearch();
         }
@@ -3528,13 +2385,12 @@ namespace ObjectCloner
             {
                 SettingsForms.GameFolders gf = new ObjectCloner.SettingsForms.GameFolders();
                 DialogResult dr = gf.ShowDialog();
-                if (dr != DialogResult.OK && dr!= DialogResult.Retry) return;
+                if (dr != DialogResult.OK && dr != DialogResult.Retry) return;
                 if (dr != DialogResult.Retry) break;
             }
             ClosePkg();
             currentCatalogType = 0;
             tabType = 0;
-            haveLoaded = false;
             DisplayNothing();
         }
 
@@ -3553,8 +2409,8 @@ namespace ObjectCloner
         private void settingsLangSearch()
         {
             Application.DoEvents();
-            ObjectCloner.Properties.Settings.Default.LangSearch = LangSearch = !LangSearch;
-            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_langSearch, LangSearch);
+            ObjectCloner.Properties.Settings.Default.LangSearch = !STBLHandler.LangSearch;
+            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_langSearch, STBLHandler.LangSearch);
         }
 
         private void settingsAutomaticUpdates()
@@ -3705,19 +2561,37 @@ namespace ObjectCloner
         }
         #endregion
 
+        public static bool CheckInstallDirs(Control control)
+        {
+            try
+            {
+                PleaseWait.DoWait(control, "Setting up folders...");
+                Application.DoEvents();
+                if (!FileTable.IsOK)
+                {
+                    CopyableMessageBox.Show("Found no packages\nPlease check your Game Folder settings.", "No objects to clone",
+                        CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Stop);
+                    return false;
+                }
+                bool loadedSTBLs = STBLHandler.IsOK;
+                bool loadedNMaps = NameMap.NMap != null && NameMap.NMap.map != null && NameMap.NMap.map.Count > 0;
+                return true;
+            }
+            finally { PleaseWait.StopWait(control); Application.DoEvents(); }
+        }
         #endregion
 
         #region Steps
-        Item objkItem;
-        List<Item> vpxyItems;
-        List<Item> modlItems;
+        SpecificResource objkItem;
+        List<SpecificResource> vpxyItems;
+        List<SpecificResource> modlItems;
         
         delegate void Step();
         List<Step> stepList;
         Step step;
         int stepNum;
         int lastInChain;
-        void SetStepList(Item item, out List<Step> stepList)
+        void SetStepList(SpecificResource item, out List<Step> stepList)
         {
             stepList = null;
 
@@ -3986,22 +2860,22 @@ namespace ObjectCloner
         void Catlg_getVPXYs()
         {
             Diagnostics.Log("Catlg_getVPXYs");
-            vpxyItems = new List<Item>();
+            vpxyItems = new List<SpecificResource>();
 
             string s = "";
             foreach (IResourceKey rk in (TGIBlockList)selectedItem.Resource["TGIBlocks"].Value)
             {
                 if (rk.ResourceType != 0x736884F1) continue;
-                Item vpxy = new Item(new RIE(objPkgs, rk));
+                SpecificResource vpxy = new SpecificResource(FileTable.fb0, rk);
                 if (vpxy.Resource != null)
                     vpxyItems.Add(vpxy);
                 else
-                    s += String.Format("Catalog Resource {0} -> RK {1}: not found\n", (IResourceKey)selectedItem.SpecificRK, rk);
+                    s += String.Format("Catalog Resource {0} -> RK {1}: not found\n", (IResourceKey)selectedItem.ResourceIndexEntry, rk);
             }
             Diagnostics.Show(s, "Missing VPXYs");
             if (vpxyItems.Count == 0)
             {
-                Diagnostics.Show(String.Format("Catalog Resource {0} has no VPXY items", (IResourceKey)selectedItem.SpecificRK), "No VPXY items");
+                Diagnostics.Show(String.Format("Catalog Resource {0} has no VPXY items", (IResourceKey)selectedItem.ResourceIndexEntry), "No VPXY items");
                 stepNum = lastInChain;
             }
         }
@@ -4028,10 +2902,10 @@ namespace ObjectCloner
             uint index = (uint)selectedItem.Resource["OBJKIndex"].Value;
             IList<TGIBlock> ltgi = (IList<TGIBlock>)selectedItem.Resource["TGIBlocks"].Value;
             TGIBlock objkTGI = ltgi[(int)index];
-            objkItem = new Item(objPkgs, objkTGI);
-            if (objkItem == null || objkItem.SpecificRK == null)
+            objkItem = new SpecificResource(FileTable.fb0, objkTGI);
+            if (objkItem == null || objkItem.ResourceIndexEntry == null)
             {
-                Diagnostics.Show(String.Format("OBJK {0} -> OBJK {1}: not found\n", (IResourceKey)selectedItem.SpecificRK, objkTGI), "Missing OBJK");
+                Diagnostics.Show(String.Format("OBJK {0} -> OBJK {1}: not found\n", (IResourceKey)selectedItem.ResourceIndexEntry, objkTGI), "Missing OBJK");
                 stepNum = lastInChain;
             }
             else
@@ -4061,24 +2935,24 @@ namespace ObjectCloner
             ObjKeyResource.ObjKeyResource objk = objkItem.Resource as ObjKeyResource.ObjKeyResource;
             if (objk.Components.FindAll(x => x.Element == ObjKeyResource.ObjKeyResource.Component.Tree).Count == 0) return;
 
-            List<Item> spt2Items = new List<Item>();
+            List<SpecificResource> spt2Items = new List<SpecificResource>();
 
             string s = "";
             foreach (var rk in objk.TGIBlocks.FindAll(x => x.ResourceType == 0x00B552EA))//_SPT
             {
-                Item spt2 = new Item(new RIE(objPkgs, new RK(rk) { ResourceType = 0x021D7E8C }));//SPT2
-                if (spt2.SpecificRK != null && spt2.Resource != null)
+                SpecificResource spt2 = new SpecificResource(FileTable.fb0, new RK(rk) { ResourceType = 0x021D7E8C });//SPT2
+                if (spt2.ResourceIndexEntry != null && spt2.Resource != null)
                 {
                     spt2Items.Add(spt2);//SPT2
                     Diagnostics.Log(String.Format("OBJK_getSPT2: Found {0}", spt2.LongName));
                 }
                 else
-                    s += String.Format("OBJK {0} -> _SPT -> SPT2 {1}: not found\n", (IResourceKey)objkItem.SpecificRK, spt2.RequestedRK);
+                    s += String.Format("OBJK {0} -> _SPT -> SPT2 {1}: not found\n", (IResourceKey)objkItem.ResourceIndexEntry, spt2.RequestedRK);
             }
             Diagnostics.Show(s, "Missing SPT2s");
             if (spt2Items.Count == 0)
             {
-                Diagnostics.Show(String.Format("OBJK {0} with a Tree Component has no SPT2 items", (IResourceKey)selectedItem.SpecificRK), "No SPT2 items");
+                Diagnostics.Show(String.Format("OBJK {0} with a Tree Component has no SPT2 items", (IResourceKey)selectedItem.ResourceIndexEntry), "No SPT2 items");
             }
 
             //add SPT2s
@@ -4093,12 +2967,12 @@ namespace ObjectCloner
 
             if (index == -1)
             {
-                Diagnostics.Show(String.Format("OBJK {0} has no modelKey", (IResourceKey)objkItem.SpecificRK), "Missing modelKey");
+                Diagnostics.Show(String.Format("OBJK {0} has no modelKey", (IResourceKey)objkItem.ResourceIndexEntry), "Missing modelKey");
                 stepNum = lastInChain;//Skip past the chain
                 return;
             }
 
-            vpxyItems = new List<Item>();
+            vpxyItems = new List<SpecificResource>();
 
             string s = "";
             TGIBlockList tgibl = ((ObjKeyResource.ObjKeyResource)objkItem.Resource).TGIBlocks;
@@ -4107,19 +2981,19 @@ namespace ObjectCloner
 
             foreach (IResourceKey rk in tgibl.FindAll(x => x.ResourceType == 0x736884F1))//VPXY
             {
-                Item vpxy = new Item(new RIE(objPkgs, rk));
-                if (vpxy.SpecificRK != null && vpxy.Resource != null)
+                SpecificResource vpxy = new SpecificResource(FileTable.fb0, rk);
+                if (vpxy.ResourceIndexEntry != null && vpxy.Resource != null)
                 {
                     vpxyItems.Add(vpxy);
                     Diagnostics.Log(String.Format("OBJK_getVPXYs: Looked up {0}: found {1}", rk, vpxy.LongName));
                 }
                 else
-                    s += String.Format("OBJK {0} -> RK {1}: not found\n", (IResourceKey)objkItem.SpecificRK, rk);
+                    s += String.Format("OBJK {0} -> RK {1}: not found\n", (IResourceKey)objkItem.ResourceIndexEntry, rk);
             }
             Diagnostics.Show(s, "Missing VPXYs");
             if (vpxyItems.Count == 0)
             {
-                Diagnostics.Show(String.Format("OBJK {0} has no VPXY items", (IResourceKey)selectedItem.SpecificRK), "No VPXY items");
+                Diagnostics.Show(String.Format("OBJK {0} has no VPXY items", (IResourceKey)selectedItem.ResourceIndexEntry), "No VPXY items");
                 stepNum = lastInChain;
             }
         }
@@ -4138,6 +3012,10 @@ namespace ObjectCloner
         void CTPT_addBrushTexture() { Diagnostics.Log("CTPT_addBrushTexture"); Add("ctpt_BrushTexture", (TGIBlock)selectedItem.Resource["BrushTexture"].Value); }
         void brush_addBrushShape() { Diagnostics.Log("brush_addBrushShape"); Add("brush_ProfileTexture", (TGIBlock)selectedItem.Resource["ProfileTexture"].Value); }
 
+        static string[] complateOverrideVariables = new string[] {
+            "Multiplier", "Mask", "Specular", "Overlay",
+            "Stencil A", "Stencil B", "Stencil C", "Stencil D",
+        };
         void Catlg_IncludePresets()
         {
             Diagnostics.Log("Catlg_IncludePresets");
@@ -4167,40 +3045,30 @@ namespace ObjectCloner
                 SlurpRKsFromField("vpxy[" + i + "]", vpxyChunk);
             }
         }
-        void VPXYs_getKinMTST() { Diagnostics.Log("VPXYs_getKinMTST"); VPXYs_getKin(isKinMTST, "VPXYs_getKinMTST", 0x02019972, "mtst"); }
-        void VPXYs_getKinXML() { Diagnostics.Log("VPXYs_getKinXML"); VPXYs_getKin(isKinXML, "VPXYs_getKinXML", 0x0333406C, "PresetXML"); }
-        void VPXYKinMTST_SlurpRKs() { Diagnostics.Log("VPXYKinMTST_SlurpRKs"); VPXYKin_SlurpRKs(isKinMTST, "mtst"); }
-        void VPXYKinXML_SlurpRKs() { Diagnostics.Log("VPXYKinXML_SlurpRKs"); VPXYKin_SlurpRKs(isKinXML, "PresetXML"); }
-        delegate bool MatchKin(IResourceIndexEntry rie, ulong instance);
-        bool isKinMTST(IResourceIndexEntry rie, ulong inst) { return rie.ResourceType == 0x02019972 && rie.Instance == inst; }
-        bool isKinXML(IResourceIndexEntry rie, ulong inst) { return rie.ResourceType == 0x0333406C && rie.Instance == inst; }
-        void VPXYs_getKin(MatchKin match, string log, uint type, string suffix)
+        void VPXYs_getKinMTST() { Diagnostics.Log("VPXYs_getKinMTST"); VPXYs_getKin("VPXYs_getKinMTST", 0x02019972, "mtst"); }
+        void VPXYs_getKinXML() { Diagnostics.Log("VPXYs_getKinXML"); VPXYs_getKin("VPXYs_getKinXML", 0x0333406C, "PresetXML"); }
+        void VPXYKinMTST_SlurpRKs() { Diagnostics.Log("VPXYKinMTST_SlurpRKs"); VPXYKin_SlurpRKs(0x02019972, "mtst"); }
+        void VPXYKinXML_SlurpRKs() { Diagnostics.Log("VPXYKinXML_SlurpRKs"); VPXYKin_SlurpRKs(0x0333406C, "PresetXML"); }
+        bool IsVPXYKin(IResourceKey rk, uint type) { return rk.ResourceType == type && vpxyItems.Exists(item => item.ResourceIndexEntry.Instance == rk.Instance); }
+        void VPXYs_getKin(string log, uint type, string suffix)
         {
             for (int i = 0; i < vpxyItems.Count; i++)
             {
-                Diagnostics.Log(String.Format(log + ": 0x{0:X8}-*-0x{1:X16}", type, vpxyItems[i].SpecificRK.Instance));
-                SlurpKindred("vpxy[" + i + "]." + suffix, objPkgs, rie => match(rie, vpxyItems[i].SpecificRK.Instance));
+                Diagnostics.Log(String.Format(log + ": 0x{0:X8}-*-0x{1:X16}", type, vpxyItems[i].ResourceIndexEntry.Instance));
+                SlurpKindred("vpxy[" + i + "]." + suffix, rie => IsVPXYKin(rie, type));
             }
         }
-        void VPXYKin_SlurpRKs(MatchKin match, string prefix)
+        void VPXYKin_SlurpRKs(uint type, string prefix)
         {
             int i = 0;
-            foreach (var vpxyItem in vpxyItems)
-                foreach (var pkg in objPkgs)
-                    foreach (var rk in pkg.FindAll(rie => match(rie, vpxyItem.SpecificRK.Instance)))
-                    {
-                        Item item = new Item(new RIE(pkg, rk));
-                        if (item.Resource != null)
-                        {
-                            SlurpRKsFromField(prefix + "[" + i + "]", item.Resource as AApiVersionedFields);
-                            i++;
-                        }
-                    }
+            foreach (var ppt in FileTable.fb0)
+                foreach (var item in ppt.FindAll(rie => IsVPXYKin(rie, type)).FindAll(sr => sr.Resource != null))
+                    SlurpRKsFromField(prefix + "[" + i++ + "]", item.Resource as AApiVersionedFields);
         }
         void VPXYs_getMODLs()
         {
             Diagnostics.Log("VPXYs_getMODLs");
-            modlItems = new List<Item>();
+            modlItems = new List<SpecificResource>();
             string s = "";
             for (int i = 0; i < vpxyItems.Count; i++)
             {
@@ -4213,7 +3081,7 @@ namespace ObjectCloner
                     {
                         TGIBlock tgib = vpxychunk.TGIBlocks[k];
                         if (tgib.ResourceType != 0x01661233) continue;
-                        Item modl = new Item(new RIE(objPkgs, tgib));
+                        SpecificResource modl = new SpecificResource(FileTable.fb0, tgib);
                         if (modl.Resource != null)
                         {
                             found = true;
@@ -4222,7 +3090,7 @@ namespace ObjectCloner
                         }
                     }
                     if (!found)
-                        s += String.Format("VPXY {0} (chunk {1}) has no MODL items\n", (IResourceKey)vpxyItems[i].SpecificRK, j);
+                        s += String.Format("VPXY {0} (chunk {1}) has no MODL items\n", (IResourceKey)vpxyItems[i].ResourceIndexEntry, j);
                 }
             }
             Diagnostics.Show(s, "No MODL items");
@@ -4247,7 +3115,7 @@ namespace ObjectCloner
                     found = true;
                 }
                 if (!found)
-                    s += String.Format("MODL {0} has no MLOD items\n", (IResourceKey)modlItems[i].SpecificRK);
+                    s += String.Format("MODL {0} has no MLOD items\n", (IResourceKey)modlItems[i].ResourceIndexEntry);
             }
             Diagnostics.Show(s, "No MLOD items");
         }
@@ -4271,22 +3139,22 @@ namespace ObjectCloner
                     found = true;
                 }
                 if (!found)
-                    s += String.Format("MODL {0} has no TXTC items\n", (IResourceKey)modlItems[i].SpecificRK);
+                    s += String.Format("MODL {0} has no TXTC items\n", (IResourceKey)modlItems[i].ResourceIndexEntry);
             }
             Diagnostics.Show(s, "No TXTC items");
         }
 
 
-        List<Item> objdList;
+        List<SpecificResource> objdList;
         void Item_findObjds()
         {
             Diagnostics.Log("Item_findObjds");
-            objdList = new List<Item>();
+            objdList = new List<SpecificResource>();
             string s = "";
             foreach (IResourceKey rk in (TGIBlockList)selectedItem.Resource["TGIBlocks"].Value)
             {
                 if (rk.ResourceType != 0x319E4F1D) continue;
-                Item objd = new Item(new RIE(objPkgs, rk));
+                SpecificResource objd = new SpecificResource(FileTable.fb0, rk);
                 if (objd.Resource != null)
                 {
                     objdList.Add(objd);
@@ -4304,7 +3172,7 @@ namespace ObjectCloner
         void Modular_Main()
         {
             Diagnostics.Log("Modular_Main");
-            Item realSelectedItem = selectedItem;
+            SpecificResource realSelectedItem = selectedItem;
             int realStepNum = stepNum;
             Step mdlrStep;
             Dictionary<string, IResourceKey> MDLRrkLookup = new Dictionary<string, IResourceKey>();
@@ -4338,7 +3206,7 @@ namespace ObjectCloner
             Diagnostics.Log("SlurpThumbnails");
             foreach (THUM.THUMSize size in new THUM.THUMSize[] { THUM.THUMSize.small, THUM.THUMSize.medium, THUM.THUMSize.large, })
             {
-                IResourceKey rk = getImageRK(size, selectedItem);
+                IResourceKey rk = THUM.getImageRK(size, selectedItem);
                 if (THUM.PNGTypes[(int)size] == rk.ResourceType)
                     Add(size + "PNG", rk);
                 else if (selectedItem.CType == CatalogType.CatalogRoofPattern)
@@ -4360,16 +3228,12 @@ namespace ObjectCloner
             {
                 int i = 0;
                 uint type = CWALThumbTypes[size];
-                foreach (IPackage pkg in tmbPkgs)
-                {
-                    IList<IResourceIndexEntry> lrie = pkg.FindAll(rie => rie.ResourceType == type && rie.Instance == selectedItem.RequestedRK.Instance);
-                    foreach (IResourceIndexEntry rie in lrie)
+                foreach (var ppt in FileTable.tmb)
+                    foreach (var sr in ppt.FindAll(rie => rie.ResourceType == type && rie.Instance == selectedItem.ResourceIndexEntry.Instance))
                     {
-                        RIE Rie = new RIE(pkg, rie);
-                        if (seen.Exists(Rie.RequestedRK.Equals)) continue;
-                        Add(size + "[" + i++ + "]Thumb", Rie.RequestedRK);
+                        if (seen.Exists(sr.ResourceIndexEntry.Equals)) continue;
+                        Add(size + "[" + i++ + "]Thumb", sr.RequestedRK);
                     }
-                }
             }
         }
         #endregion
@@ -4405,51 +3269,5 @@ namespace ObjectCloner
     static class Extensions
     {
         public static bool Contains(this IEnumerable<string> haystack, string needle) { foreach (var x in haystack) if (x.Equals(needle)) return true; return false; }
-    }
-
-    static class Diagnostics
-    {
-        static bool popups = false;
-        public static bool Popups { get { return popups; } set { popups = value; } }
-        public static void Show(string value, string title = "")
-        {
-            string msg = value.Trim('\n');
-            if (msg == "") return;
-            if (title == "")
-            {
-                System.Diagnostics.Debug.WriteLine(msg);
-                if (popups) CopyableMessageBox.Show(msg);
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine(String.Format("{0}: {1}", title, msg));
-                if (popups) CopyableMessageBox.Show(msg, title);
-            }
-            if (logging) Log(value);
-        }
-
-        static bool logging = false;
-        static StreamWriter logFile = null;
-        static void OpenLogFile()
-        {
-            string filename = String.Format(Path.GetTempPath() + "s3oc-{0}.log", DateTime.UtcNow.ToString("s").Replace(":", ""));
-            logFile = new StreamWriter(new FileStream(filename, FileMode.Create));
-        }
-        public static bool Logging
-        {
-            get { return logging; }
-            set
-            {
-                logging = value;
-                if (!logging) { if (logFile != null) { logFile.Close(); logFile = null; } }
-            }
-        }
-        public static void Log(string value)
-        {
-            string msg = value.Trim('\n');
-            if (msg == "") return;
-            if (!popups) System.Diagnostics.Debug.WriteLine(msg);
-            if (logging) { if (logFile == null) OpenLogFile(); logFile.WriteLine("{0}: {1}", DateTime.UtcNow.ToString("s"), msg); logFile.Flush(); }
-        }
     }
 }

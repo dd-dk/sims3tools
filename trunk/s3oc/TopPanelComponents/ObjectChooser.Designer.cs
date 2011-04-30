@@ -51,9 +51,10 @@
             this.listView1.FullRowSelect = true;
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(0, 0);
+            this.listView1.Margin = new System.Windows.Forms.Padding(0);
             this.listView1.MultiSelect = false;
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(852, 150);
+            this.listView1.Size = new System.Drawing.Size(800, 114);
             this.listView1.TabIndex = 1;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -64,28 +65,29 @@
             // catlgName
             // 
             this.catlgName.Text = "Name";
-            this.catlgName.Width = 275;
+            this.catlgName.Width = 160;
             // 
             // TagID
             // 
             this.TagID.Text = "Tag";
+            this.TagID.Width = 64;
             // 
             // ContentCategoryFlags
             // 
             this.ContentCategoryFlags.Text = "EP/SP";
-            this.ContentCategoryFlags.Width = 77;
+            this.ContentCategoryFlags.Width = 64;
             // 
             // TGI
             // 
             this.TGI.Text = "ResourceKey";
-            this.TGI.Width = 246;
+            this.TGI.Width = 192;
             // 
             // ocContextMenu
             // 
             this.ocContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.omCopyRK});
             this.ocContextMenu.Name = "ocContextMenu";
-            this.ocContextMenu.Size = new System.Drawing.Size(208, 48);
+            this.ocContextMenu.Size = new System.Drawing.Size(205, 26);
             this.ocContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.ocContextMenu_Opening);
             // 
             // omCopyRK
@@ -93,15 +95,16 @@
             this.omCopyRK.Enabled = false;
             this.omCopyRK.Name = "omCopyRK";
             this.omCopyRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.omCopyRK.Size = new System.Drawing.Size(207, 22);
+            this.omCopyRK.Size = new System.Drawing.Size(204, 22);
             this.omCopyRK.Text = "&Copy ResourceKey";
             this.omCopyRK.Click += new System.EventHandler(this.omCopyRK_Click);
             // 
             // ObjectChooser
             // 
             this.Controls.Add(this.listView1);
+            this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "ObjectChooser";
-            this.Size = new System.Drawing.Size(852, 150);
+            this.Size = new System.Drawing.Size(800, 114);
             this.ocContextMenu.ResumeLayout(false);
             this.ResumeLayout(false);
 

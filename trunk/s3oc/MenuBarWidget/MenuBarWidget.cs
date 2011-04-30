@@ -33,7 +33,7 @@ namespace ObjectCloner
         {
             InitializeComponent();
             tsMD = new List<ToolStripMenuItem>(new ToolStripMenuItem[]{
-                fileToolStripMenuItem, cloningToolStripMenuItem, viewToolStripMenuItem, settingsToolStripMenuItem, helpToolStripMenuItem,
+                fileToolStripMenuItem, cloningToolStripMenuItem, settingsToolStripMenuItem, helpToolStripMenuItem,
             });
             tsMB = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //File
@@ -44,9 +44,6 @@ namespace ObjectCloner
                 ccfpToolStripMenuItem,
                 cfndToolStripMenuItem, objdToolStripMenuItem, cwalToolStripMenuItem, cwstToolStripMenuItem,
                 crstToolStripMenuItem, mdlrToolStripMenuItem, crmtToolStripMenuItem,
-                //View
-                tilesToolStripMenuItem, largeIconsToolStripMenuItem, smallIconsToolStripMenuItem, listToolStripMenuItem, detailedListToolStripMenuItem,
-                iconsToolStripMenuItem,
                 //Tools
                 searchToolStripMenuItem, tgiSearchToolStripMenuItem,
                 //Settings
@@ -81,7 +78,6 @@ namespace ObjectCloner
         {
             MBF,
             MBC,
-            MBV,
             MBT,
             MBS,
             MBH,
@@ -95,8 +91,6 @@ namespace ObjectCloner
             MBC_ccfp,
             MBC_cfnd, MBC_objd, MBC_cwal, MBC_cwst,
             MBC_crst, MBC_mdlr, MBC_crmt,
-            MBV_tiles, MBV_largeIcons, MBV_smallIcons, MBV_list, MBV_detailedList,
-            MBV_icons,
             MBT_search, MBT_tgiSearch,
             MBS_sims3Folder, MBS_userName, MBS_langSearch, MBS_updates, MBS_advanced, MBS_popups, MBS_logging,
             MBH_contents, MBH_about, MBH_update, MBH_warranty, MBH_licence,
@@ -126,11 +120,6 @@ namespace ObjectCloner
         public event MBClickEventHandler MBCloning_Click;
         protected void OnMBCloning_Click(object sender, MB mn) { if (MBCloning_Click != null) MBCloning_Click(sender, new MBClickEventArgs(mn)); }
         private void tsMBC_Click(object sender, EventArgs e) { OnMBCloning_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
-
-        [Category("Action")]
-        public event MBClickEventHandler MBView_Click;
-        protected void OnMBView_Click(object sender, MB mn) { if (MBView_Click != null) MBView_Click(sender, new MBClickEventArgs(mn)); }
-        private void tsMBV_Click(object sender, EventArgs e) { OnMBView_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
 
         [Category("Action")]
         public event MBClickEventHandler MBTools_Click;
