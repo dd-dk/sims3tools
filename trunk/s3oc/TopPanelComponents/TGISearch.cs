@@ -181,8 +181,8 @@ namespace ObjectCloner.TopPanelComponents
                 if (!MainForm.CheckInstallDirs(this))
                     return;
                 tlpSearch.Visible = true;
-                
-                tgiSearchContextMenu.Enabled = listView1.Enabled = tlpTGIValues.Enabled = false;
+
+                ckbUseCC.Enabled = tgiSearchContextMenu.Enabled = listView1.Enabled = tlpTGIValues.Enabled = false;
                 btnSearch.Text = "&Stop";
                 StartTGISearch();
             }
@@ -349,7 +349,7 @@ namespace ObjectCloner.TopPanelComponents
 
             updateProgressCB(true, "", true, -1, false, 0);
 
-            tgiSearchContextMenu.Enabled = listView1.Enabled = tlpTGIValues.Enabled = true;
+            ckbUseCC.Enabled = tgiSearchContextMenu.Enabled = listView1.Enabled = tlpTGIValues.Enabled = true;
             btnSearch.Text = "&Search";
 
 
