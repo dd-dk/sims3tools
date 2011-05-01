@@ -24,7 +24,8 @@ using s3pi.Interfaces;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace ObjectCloner {
+namespace ObjectCloner
+{
     public class THUM
     {
         static Image defaultThumbnail =
@@ -164,7 +165,6 @@ namespace ObjectCloner {
         }
 
         static THUM thumb;
-        public static void Reset() { thumb = null; }
         public static THUM Thumb
         {
             get
