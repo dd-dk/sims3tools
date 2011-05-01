@@ -54,6 +54,7 @@ namespace ObjectCloner.TopPanelComponents
             });
             cbCatalogType.SelectedIndex = 0;
             ckbUseCC.Enabled = ObjectCloner.Properties.Settings.Default.CCEnabled;
+            ckbUseCC.Checked = ckbUseCC.Enabled && FileTable.UseCustomContent;
         }
 
         public Search(MainForm.updateProgressCallback updateProgressCB, MainForm.listViewAddCallBack listViewAddCB)
@@ -131,18 +132,12 @@ namespace ObjectCloner.TopPanelComponents
             else
             {
                 tlpSearch.Visible = false;
-                if (FileTable.UseCustomContent != ckbUseCC.Checked)
-                {
-                    FileTable.UseCustomContent = ckbUseCC.Checked;
-                    NameMap.Reset();
-                    THUM.Reset();
-                    STBLHandler.Reset();
-                }
+                MainForm.SetUseCC(ckbUseCC.Checked);
                 if (!MainForm.CheckInstallDirs(this))
                     return;
                 tlpSearch.Visible = true;
 
-                listView1.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = false;
+                listView1.Enabled = searchContextMenu.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = false;
                 btnSearch.Text = "&Stop";
                 StartSearch();
             }
@@ -333,10 +328,10 @@ namespace ObjectCloner.TopPanelComponents
 
             updateProgressCB(true, "", true, -1, false, 0);
 
-            listView1.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = true;
+            listView1.Enabled = searchContextMenu.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = true;
             btnSearch.Text = "&Search";
-
-
+            
+            
             
             if (listView1.Items.Count > 0) { SelectedItem = listView1.Items[0]; SelectedItem.EnsureVisible(); listView1.Focus(); }
 

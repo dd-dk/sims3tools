@@ -47,6 +47,7 @@ namespace ObjectCloner.TopPanelComponents
             tbResourceGroup.Text = "0x00000000";
             tbInstance.Text = "0x0000000000000000";
             ckbUseCC.Enabled = ObjectCloner.Properties.Settings.Default.CCEnabled;
+            ckbUseCC.Checked = ckbUseCC.Enabled && FileTable.UseCustomContent;
         }
 
         public TGISearch(MainForm.updateProgressCallback updateProgressCB)
@@ -165,28 +166,24 @@ namespace ObjectCloner.TopPanelComponents
         private void btnSearch_Click(object sender, EventArgs e)
         {
             if (searching)
-            {
                 AbortTGISearch(false);
-            }
             else
             {
                 tlpSearch.Visible = false;
-                if (FileTable.UseCustomContent != ckbUseCC.Checked)
-                {
-                    FileTable.UseCustomContent = ckbUseCC.Checked;
-                    NameMap.Reset();
-                    THUM.Reset();
-                    STBLHandler.Reset();
-                }
+                MainForm.SetUseCC(ckbUseCC.Checked);
                 if (!MainForm.CheckInstallDirs(this))
                     return;
                 tlpSearch.Visible = true;
 
-                ckbUseCC.Enabled = tgiSearchContextMenu.Enabled = listView1.Enabled = tlpTGIValues.Enabled = false;
+                listView1.Enabled = tgiSearchContextMenu.Enabled = ckbUseCC.Enabled = tlpTGIValues.Enabled = false;
                 btnSearch.Text = "&Stop";
                 StartTGISearch();
             }
         }
+
+
+
+
         #endregion
 
         #region ListViewColumnSorter
@@ -349,7 +346,7 @@ namespace ObjectCloner.TopPanelComponents
 
             updateProgressCB(true, "", true, -1, false, 0);
 
-            ckbUseCC.Enabled = tgiSearchContextMenu.Enabled = listView1.Enabled = tlpTGIValues.Enabled = true;
+            listView1.Enabled = tgiSearchContextMenu.Enabled = ckbUseCC.Enabled = tlpTGIValues.Enabled = true;
             btnSearch.Text = "&Search";
 
 

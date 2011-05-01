@@ -296,12 +296,8 @@ namespace ObjectCloner.TopPanelComponents
             fillThread = null;
 
             updateProgressCB(true, "", true, -1, false, 0);
-            if (!isFix)
-            {
-                PleaseWait.StopWait(this);
-            }
+            if (!isFix) PleaseWait.StopWait(this);
             listView1.Visible = !isFix;
-
 
 
             if (e.arg)
@@ -392,7 +388,7 @@ namespace ObjectCloner.TopPanelComponents
                         if (stopFilling) return;
 
                         lres.AddRange(matches);
-                        updateProgress(true, "Please wait, finding objects... " + i * 100 / FileTable.fb0.Count + "%", false, -1, true, i);
+                        updateProgress(true, "Please wait, finding objects... " + i * 100 / FileTable.fb0.Count + "%", false, -1, true, i++);
                     }
 
                     updateProgress(true, "Please wait, loading objects... 0%", true, lres.Count, true, 0);

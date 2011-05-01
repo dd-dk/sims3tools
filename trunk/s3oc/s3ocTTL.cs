@@ -28,7 +28,7 @@ namespace ObjectCloner
     public class s3ocTTL
     {
         static readonly string s3octerms = "http://sims3.drealm.info/s3octerms/1.0#";
-        public static MemoryStore s3oc_ini = new MemoryStore();
+        static MemoryStore s3oc_ini = new MemoryStore();
         #region Define entities
         static readonly string RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
         //static readonly string RDFS = "http://www.w3.org/2000/01/rdf-schema#";

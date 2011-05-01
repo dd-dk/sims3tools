@@ -116,8 +116,9 @@ namespace ObjectCloner
         {
             Diagnostics.Log("MainForm_FormClosing CloseReason: " + e.CloseReason);
             formClosing = true;
-            ClosePkg();
             AbortSaving(true);
+            Abort(true);
+            //CloseCurrent();//needed?
 
             ObjectCloner.Properties.Settings.Default.PersistentLocation = this.WindowState == FormWindowState.Normal ? this.Location : new Point(-1, -1);
             ObjectCloner.Properties.Settings.Default.PersistentHeight = this.WindowState == FormWindowState.Normal ? this.Height : -1;
@@ -126,39 +127,72 @@ namespace ObjectCloner
             ObjectCloner.Properties.Settings.Default.Save();
         }
 
-        void ClosePkg()
+        void Abort(bool abort)
         {
-            Diagnostics.Log("ClosePkg");
+            Diagnostics.Log("Abort abort:" + abort);
 
             if (objectChooser != null)
             {
-                objectChooser.AbortFilling(true);
+                objectChooser.AbortFilling(abort);
                 objectChooser.ObjectChooser_SaveListViewSettings();
                 objectChooser = null;
             }
             if (searchPane != null)
             {
-                searchPane.AbortSearch(true);
+                searchPane.AbortSearch(abort);
                 searchPane = null;
             }
             if (tgiSearchPane != null)
             {
-                tgiSearchPane.AbortTGISearch(true);
+                tgiSearchPane.AbortTGISearch(abort);
                 tgiSearchPane = null;
             }
+        }
 
-            NameMap.Reset();
-            THUM.Reset();
-            STBLHandler.Reset();
+        public static void CloseCurrent()
+        {
+            Diagnostics.Log("ClosePkg");
 
             if (FileTable.Current != null)
             {
                 s3pi.Package.Package.ClosePackage(0, FileTable.Current.Package);
                 FileTable.Current = null;
+                Reset();// pick up new NameMap / STBLs next time needed
             }
-            FileTable.UseCustomContent = false;
-            FileTable.AppendFileTable = false;
         }
+
+        public static void SetUseCC(bool value)
+        {
+            if (FileTable.UseCustomContent != value)
+            {
+                FileTable.UseCustomContent = value;
+                Reset();
+            }
+        }
+
+        public static void SetAppendEA(bool value)
+        {
+            if (FileTable.AppendFileTable != value)
+            {
+                FileTable.AppendFileTable = value;
+                Reset();
+            }
+        }
+
+        static void Reset()
+        {
+            NameMap.Reset();
+            STBLHandler.Reset();
+        }
+
+        void InitialiseFileTable()
+        {
+            Abort(false);
+            CloseCurrent();
+            SetUseCC(false);
+            SetAppendEA(true);
+        }
+
 
         #region Command Line
         delegate bool CmdLineCmd(ref List<string> cmdline);
@@ -323,7 +357,6 @@ namespace ObjectCloner
             btnStart.Visible = true;
             btnStart.Enabled = false;
 
-            ClearTabs();
             StopWait();
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(listView);
@@ -354,14 +387,19 @@ namespace ObjectCloner
 
         private void DisplaySearch()
         {
-            isFix = false;
             Diagnostics.Log("DisplaySearch");
+
+            isFix = false;
             DisplayListView(searchPane);
         }
 
         private void DisplayObjectChooser()
         {
             Diagnostics.Log("DisplayObjectChooser");
+
+            DoWait("Setting up folders...");
+            if (!CheckInstallDirs(splitContainer1.Panel1)) return;
+
             DisplayListView(objectChooser);
         }
 
@@ -383,7 +421,6 @@ namespace ObjectCloner
             lbSelectOptions.Visible = false;
             btnStart.Visible = false;
 
-            ClearTabs();
             StopWait();
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(tgiSearchPane);
@@ -523,7 +560,7 @@ namespace ObjectCloner
             isPadSTBLs = cloneFixOptions.IsPadSTBLs;
 
             if (cloneFixOptions.IsRepair)
-                FileTable.AppendFileTable = true;
+                SetAppendEA(true);//and go off and get the bits (out to a tmp pkg, re-open, fix to current name?)
 
             if (isCreateNewPackage) CloneStart();
             else FixStart();
@@ -742,8 +779,13 @@ namespace ObjectCloner
         }
         void InitialiseDetailsTab(IResource catlg) { InitialiseMaps(); InitialiseTabTLP(catlg, tlpObjectDetail, labelToFieldMap.Values); }
         void InitialiseOtherTab(IResource objd) { InitialiseMaps(); InitialiseTabTLP(objd, tlpOther, otherFieldMap.Keys); }
+
+        bool ffInitialised = false;
         void InitialiseFlagTabs(IResource objd)
         {
+            if (ffInitialised) return;
+            ffInitialised = true;
+
             InitialiseMaps();
             flagFields.ForEach(ff => InitialiseTLP(ff.tlp));
 
@@ -1276,8 +1318,8 @@ namespace ObjectCloner
             if (dr != DialogResult.OK) return;
             ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(openPackageDialog.FileName);
 
-            //DoWait("Setting up folders...");
             mode = Mode.FromUser;
+
             fileReOpenToFix(openPackageDialog.FileName, 0);
         }
 
@@ -1285,12 +1327,15 @@ namespace ObjectCloner
         {
             Diagnostics.Log(String.Format("fileReOpenToFix filename: {0}, type: {1}", filename, type));
 
-            ClosePkg();
-            currentCatalogType = 0;
+            Abort(true);
+            CloseCurrent();//not needed?
+            SetUseCC(false);
+            SetAppendEA(false);
 
             try
             {
                 FileTable.Current = new PathPackageTuple(filename, true);
+                Reset();// pick up new NameMap / STBLs next time needed
             }
             catch (Exception ex)
             {
@@ -1309,7 +1354,6 @@ namespace ObjectCloner
         #endregion
 
         #region Cloning menu
-        CatalogType currentCatalogType = 0;
         private void menuBarWidget1_MBCloning_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
         {
             Diagnostics.Log(String.Format("menuBarWidget1_MBFile_Click mn: {0}", mn.mn));
@@ -1317,7 +1361,12 @@ namespace ObjectCloner
             {
                 this.Enabled = false;
                 Application.DoEvents();
-                cloneType(FromCloningMenuEntry(mn.mn));
+
+                mode = Mode.FromGame;
+
+                InitialiseFileTable();
+
+                LoadObjectChooser(FromCloningMenuEntry(mn.mn), false);
             }
             finally { this.Enabled = true; }
         }
@@ -1327,29 +1376,12 @@ namespace ObjectCloner
             List<MenuBarWidget.MB> ml = new List<MenuBarWidget.MB>((MenuBarWidget.MB[])Enum.GetValues(typeof(MenuBarWidget.MB)));
             return ((CatalogType[])Enum.GetValues(typeof(CatalogType)))[ml.IndexOf(menuEntry) - ml.IndexOf(MenuBarWidget.MB.MBC_cfen)];
         }
-
-        private void cloneType(CatalogType resourceType)
-        {
-            Diagnostics.Log(String.Format("cloneType resourceType: {0}", resourceType));
-
-            mode = Mode.FromGame;
-            if (currentCatalogType != resourceType)
-            {
-                ClosePkg();
-                currentCatalogType = resourceType;
-            }
-            FileTable.AppendFileTable = true;
-
-            LoadObjectChooser(resourceType, false);
-        }
         #endregion
 
         bool isFix = false;
         void LoadObjectChooser(CatalogType resourceType, bool IsFixPass)
         {
             Diagnostics.Log(String.Format("LoadObjectChooser resourceType: {0}, IsFixPass: {1}", resourceType, IsFixPass));
-
-            //if (!CheckInstallDirs()) return;
 
             isFix = IsFixPass;
 
@@ -1362,6 +1394,7 @@ namespace ObjectCloner
             }
             else
             {
+                ClearTabs();
                 objectChooser.SelectedIndexChanged += new EventHandler<SelectedIndexChangedEventArgs>(listView_SelectedIndexChanged);
                 objectChooser.ItemActivate += new EventHandler<ItemActivateEventArgs>(listView_ItemActivate);
             }
@@ -1387,11 +1420,8 @@ namespace ObjectCloner
 
         private void toolsSearch()
         {
-            ClosePkg();
-            currentCatalogType = 0;
-
-            FileTable.UseCustomContent = ObjectCloner.Properties.Settings.Default.CCEnabled;
-            FileTable.AppendFileTable = true;
+            ClearTabs();
+            InitialiseFileTable();
 
             CTPTBrushIndexToPair = new Dictionary<ulong, SpecificResource>();
             searchPane = new Search(updateProgress, ListViewAdd);
@@ -1403,11 +1433,8 @@ namespace ObjectCloner
 
         private void toolsTGISearch()
         {
-            ClosePkg();
-            currentCatalogType = 0;
-
-            FileTable.UseCustomContent = ObjectCloner.Properties.Settings.Default.CCEnabled;
-            FileTable.AppendFileTable = true;
+            ClearTabs();
+            InitialiseFileTable();
 
             tgiSearchPane = new TGISearch(updateProgress);
 
@@ -1438,6 +1465,11 @@ namespace ObjectCloner
 
         private void settingsGameFolders()
         {
+            tabType = 0;
+            Reset();//needed!
+            Abort(true);
+            DisplayNothing();
+
             while (true)
             {
                 SettingsForms.GameFolders gf = new ObjectCloner.SettingsForms.GameFolders();
@@ -1445,10 +1477,7 @@ namespace ObjectCloner
                 if (dr != DialogResult.OK && dr != DialogResult.Retry) return;
                 if (dr != DialogResult.Retry) break;
             }
-            ClosePkg();
-            currentCatalogType = 0;
-            tabType = 0;
-            DisplayNothing();
+            FileTable.Reset();//needed!
         }
 
         private void settingsUserName()
@@ -1620,10 +1649,10 @@ namespace ObjectCloner
 
         public static bool CheckInstallDirs(Control control)
         {
+            Diagnostics.Log("CheckInstallDirs");
             try
             {
                 PleaseWait.DoWait(control, "Setting up folders...");
-                Application.DoEvents();
                 if (!FileTable.IsOK)
                 {
                     CopyableMessageBox.Show("Found no packages\nPlease check your Game Folder settings.", "No objects to clone",
@@ -1631,7 +1660,7 @@ namespace ObjectCloner
                     return false;
                 }
                 bool loadedSTBLs = STBLHandler.IsOK;
-                bool loadedNMaps = NameMap.NMap != null && NameMap.NMap.map != null && NameMap.NMap.map.Count > 0;
+                bool loadedNMaps = NameMap.IsOK;
                 return true;
             }
             finally { PleaseWait.StopWait(control); Application.DoEvents(); }
@@ -2801,7 +2830,7 @@ namespace ObjectCloner
                 StopWait();
             }
 
-            ClosePkg();
+            CloseCurrent();//needed
             Diagnostics.Log("...done..!");
             DisplayNothing();
             CopyableMessageBox.Show("OK", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
@@ -2998,7 +3027,6 @@ namespace ObjectCloner
             while (saveThread != null && saveThread.IsAlive)
                 saveThread.Join(100);
             saveThread = null;
-            FileTable.AppendFileTable = false;
 
             this.toolStripProgressBar1.Visible = false;
             this.toolStripStatusLabel1.Visible = false;

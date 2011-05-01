@@ -26,25 +26,11 @@ namespace ObjectCloner
 {
     public static class FileTable
     {
-        static FT _fb0 = new FT("Objects");
-        static FT _dds = new FT("Images");
-        static FT _tmb = new FT("Thumbnails");
+        public static PathPackageTuple Current { get; set; }
+
+        public static bool UseCustomContent { get; set; }
         static List<PathPackageTuple> cc = null;
-
-        public static List<PathPackageTuple> fb0 { get { return getList(_fb0.ppt); } }
-        public static List<PathPackageTuple> dds { get { return getList(_dds.ppt); } }
-        public static List<PathPackageTuple> tmb { get { return getList(_tmb.ppt); } }
         public static List<PathPackageTuple> CustomContent { get { if (cc == null) cc = ccGetList(ObjectCloner.Properties.Settings.Default.CustomContent); return cc; } }
-
-        static List<PathPackageTuple> getList(List<PathPackageTuple> which)
-        {
-            List<PathPackageTuple> res = new List<PathPackageTuple>();
-            if (Current != null) { res.Add(Current); }
-            if (UseCustomContent) { res.AddRange(CustomContent); }
-            if (AppendFileTable) { res.AddRange(which); }
-            return res.Count == 0 ? null : res;
-        }
-
         //Inge (15-01-2011): "Only ever looking *.package for custom content"
         //static List<string> pkgPatterns = new List<string>(new string[] { "*.package", "*.dbc", "*.world", "*.nhd", });
         static List<string> CCpkgPatterns = new List<string>(new string[] { "*.package", });
@@ -74,13 +60,29 @@ namespace ObjectCloner
             return ppts;
         }
 
+        public static bool AppendFileTable { get; set; }
+        static FT _fb0 = new FT("Objects");
+        static FT _dds = new FT("Images");
+        static FT _tmb = new FT("Thumbnails");
+        public static List<PathPackageTuple> fb0 { get { return getList(_fb0.ppt); } }
+        public static List<PathPackageTuple> dds { get { return getList(_dds.ppt); } }
+        public static List<PathPackageTuple> tmb { get { return getList(_tmb.ppt); } }
+
+        static List<PathPackageTuple> getList(List<PathPackageTuple> which)
+        {
+            List<PathPackageTuple> res = new List<PathPackageTuple>();
+            if (Current != null) { res.Add(Current); }
+            if (UseCustomContent) { res.AddRange(CustomContent); }
+            if (AppendFileTable) { res.AddRange(which); }
+            return res.Count == 0 ? null : res;
+        }
+
 
         public static void Reset()
         {
-            if (Current != null) s3pi.Package.Package.ClosePackage(0, Current.Package);
-            Current = null;
-            cc = null;
+            if (Current != null) { s3pi.Package.Package.ClosePackage(0, Current.Package); Current = null; }
             UseCustomContent = false;
+            cc = null;
             AppendFileTable = false;
             if (_fb0 != null) _fb0.Reset();
             if (_dds != null) _dds.Reset();
@@ -89,12 +91,6 @@ namespace ObjectCloner
             _dds = new FT("Images");
             _tmb = new FT("Thumbnails");
         }
-
-        public static PathPackageTuple Current { get; set; }
-
-        public static bool UseCustomContent { get; set; }
-
-        public static bool AppendFileTable { get; set; }
 
         public static bool IsOK { get { return fb0 != null && dds != null && tmb != null && fb0.Count > 0; } }
 
@@ -125,12 +121,11 @@ namespace ObjectCloner
 
         static List<string> iniGetPath(string path)
         {
-            SettingsForms.GameFolders gameFolders = new SettingsForms.GameFolders();
             List<string> res = new List<string>();
             foreach (S3ocSims3 sims3 in s3ocTTL.lS3ocSims3)
             {
                 if (!SettingsForms.GameFolders.IsEnabled(sims3)) continue;
-                foreach (string p in s3ocTTL.GetPath(gameFolders[sims3], sims3, path))
+                foreach (string p in s3ocTTL.GetPath(SettingsForms.GameFolders.gameFolders[sims3], sims3, path))
                     if (File.Exists(p)) res.Add(p);
             }
             return res;
