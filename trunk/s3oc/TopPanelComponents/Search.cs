@@ -126,22 +126,22 @@ namespace ObjectCloner.TopPanelComponents
 
         private void btnSearch_Click(object sender, EventArgs e)
         {
-            tlpSearch.Visible = false;
-            if (FileTable.UseCustomContent != ckbUseCC.Checked)
-            {
-                FileTable.UseCustomContent = ckbUseCC.Checked;
-                NameMap.Reset();
-                THUM.Reset();
-                STBLHandler.Reset();
-            }
-            if (!MainForm.CheckInstallDirs(this))
-                return;
-            tlpSearch.Visible = true;
-
             if (searching)
                 AbortSearch(false);
             else
             {
+                tlpSearch.Visible = false;
+                if (FileTable.UseCustomContent != ckbUseCC.Checked)
+                {
+                    FileTable.UseCustomContent = ckbUseCC.Checked;
+                    NameMap.Reset();
+                    THUM.Reset();
+                    STBLHandler.Reset();
+                }
+                if (!MainForm.CheckInstallDirs(this))
+                    return;
+                tlpSearch.Visible = true;
+
                 listView1.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = false;
                 btnSearch.Text = "&Stop";
                 StartSearch();
