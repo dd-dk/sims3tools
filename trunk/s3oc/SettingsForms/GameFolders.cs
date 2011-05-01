@@ -46,11 +46,10 @@ namespace ObjectCloner.SettingsForms
             foreach (var kvp in gameDirs)
                 value += ";" + kvp.Key + "=" + kvp.Value;
             ObjectCloner.Properties.Settings.Default.InstallDirs = value.TrimStart(';');
-            FileTable.Reset();
         }
 
         static GameFolders _gameFolders = null;
-        static GameFolders gameFolders { get { if (_gameFolders == null) _gameFolders = new GameFolders(); return _gameFolders; } }
+        public static GameFolders gameFolders { get { if (_gameFolders == null) _gameFolders = new GameFolders(); return _gameFolders; } }
         public string this[S3ocSims3 key]
         {
             get { return gameDirs.ContainsKey(key.subjectName) ? gameDirs[key.subjectName] : key.hasDefaultInstallDir; }
