@@ -29,7 +29,7 @@ namespace ObjectCloner.SettingsForms
         static List<string> ePsDisabled = new List<string>();
         static EPsDisabled() { ePsDisabled = new List<string>(ObjectCloner.Properties.Settings.Default.EPsDisabled.Split(';')); }
 
-        static void Save() { ObjectCloner.Properties.Settings.Default.EPsDisabled = String.Join(";", ePsDisabled.ToArray()); FileTable.Reset(); }
+        static void Save() { ObjectCloner.Properties.Settings.Default.EPsDisabled = String.Join(";", ePsDisabled.ToArray()); }
 
         public static bool IsDisabled(string value) { return ePsDisabled.Contains(value); }
         public static void Disable(string value, bool disabled)
