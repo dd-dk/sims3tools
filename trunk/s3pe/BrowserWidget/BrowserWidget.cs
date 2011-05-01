@@ -92,6 +92,7 @@ namespace S3PIDemoFE
             ListViewItem lvi = CreateItem(rie);
             if (lvi == null) return;
 
+            listView1.SuspendLayout();
             listView1.BeginUpdate();
             listView1.Items.Add(lvi);
             lookup.Add(rie, lvi);
@@ -99,6 +100,7 @@ namespace S3PIDemoFE
 
             if (rie.ResourceType == 0x0166038C) { ClearNameMap(); nameMap_ResourceChanged(null, null); }
             listView1.EndUpdate();
+            listView1.ResumeLayout();
         }
 
         public bool ResourceName(ulong instance, string resourceName, bool create, bool replace)
@@ -189,7 +191,9 @@ namespace S3PIDemoFE
                 displayResourceTags = value;
 
                 if (listView1.Columns.Count == 0) return;
+                listView1.BeginUpdate();
                 listView1.Columns[1].Width = displayResourceTags ? listView1.Columns[1].Width == 0 ? (columnWidths.Length > 1 && columnWidths[1] >= 0 ? columnWidths[1] : 50) : listView1.Columns[1].Width : 0;
+                listView1.EndUpdate();
             }
         }
 
@@ -421,30 +425,38 @@ namespace S3PIDemoFE
 
         void SetColumns()
         {
-            listView1.Columns.Clear();
-            if (fields == null) return;
-
-            ColumnHeader[] ach = new ColumnHeader[fields.Count + 2];
-            
-            ach[0] = new ColumnHeader();
-            ach[0].DisplayIndex = 0;
-            ach[0].Text = ach[0].Name = "Name";
-            ach[0].Width = displayResourceNames ? (columnWidths.Length > 0 && columnWidths[0] >= 0 ? columnWidths[0] : 80) : 0;
-            listView1.Columns.Add(ach[0]);
-
-            ach[1] = new ColumnHeader();
-            ach[1].DisplayIndex = 0;
-            ach[1].Text = ach[0].Name = "Tag";
-            ach[1].Width = displayResourceTags ? (columnWidths.Length > 1 && columnWidths[1] >= 0 ? columnWidths[1] : 50) : 0;
-            listView1.Columns.Add(ach[1]);
-            
-            for (int i = 2; i < ach.Length; i++)
+            try
             {
-                ach[i] = new ColumnHeader();
-                ach[i].DisplayIndex = i;
-                ach[i].Text = ach[i].Name = fields[i - 2].Replace("Resource", "");
-                ach[i].Width = columnWidths.Length > i && columnWidths[i] >= 0 ? columnWidths[i] : (ach[i].Text.Equals("Instance") ? 140 : 80);
-                listView1.Columns.Add(ach[i]);
+                listView1.BeginUpdate();
+                listView1.Columns.Clear();
+                if (fields == null) return;
+
+                ColumnHeader[] ach = new ColumnHeader[fields.Count + 2];
+
+                ach[0] = new ColumnHeader();
+                ach[0].DisplayIndex = 0;
+                ach[0].Text = ach[0].Name = "Name";
+                ach[0].Width = displayResourceNames ? (columnWidths.Length > 0 && columnWidths[0] >= 0 ? columnWidths[0] : 80) : 0;
+                listView1.Columns.Add(ach[0]);
+
+                ach[1] = new ColumnHeader();
+                ach[1].DisplayIndex = 0;
+                ach[1].Text = ach[0].Name = "Tag";
+                ach[1].Width = displayResourceTags ? (columnWidths.Length > 1 && columnWidths[1] >= 0 ? columnWidths[1] : 50) : 0;
+                listView1.Columns.Add(ach[1]);
+
+                for (int i = 2; i < ach.Length; i++)
+                {
+                    ach[i] = new ColumnHeader();
+                    ach[i].DisplayIndex = i;
+                    ach[i].Text = ach[i].Name = fields[i - 2].Replace("Resource", "");
+                    ach[i].Width = columnWidths.Length > i && columnWidths[i] >= 0 ? columnWidths[i] : (ach[i].Text.Equals("Instance") ? 140 : 80);
+                    listView1.Columns.Add(ach[i]);
+                }
+            }
+            finally
+            {
+                listView1.EndUpdate();
             }
         }
 
@@ -453,23 +465,25 @@ namespace S3PIDemoFE
             IResourceIndexEntry sie = (listView1.SelectedItems.Count == 0 ? null : listView1.SelectedItems[0].Tag) as IResourceIndexEntry;
             System.Collections.IComparer cmp = this.listView1.ListViewItemSorter;
 
-            Application.UseWaitCursor = true;
-            listView1.BeginUpdate();
-            listView1.ListViewItemSorter = null;
-            listView1.Enabled = false;
-
-            pbLabel.Text = "Clear resource list...";
-            Application.DoEvents();
-            listView1.Items.Clear();
-
-            pbLabel.Text = "Updating resource list...";
-            Application.DoEvents();
-            List<ListViewItem> llvi = new List<ListViewItem>();
+            bool vis = listView1.Visible;
             try
             {
+                Application.UseWaitCursor = true;
+                listView1.BeginUpdate();
+                listView1.Visible = false;
+
+                pbLabel.Text = "Suspending sorter...";// As it saves time event with the listView invisible
+                Application.DoEvents();
+                listView1.ListViewItemSorter = null;
+
+                pbLabel.Text = "Clear resource list...";
+                Application.DoEvents();
+                listView1.Items.Clear();
+
+                pbLabel.Text = "Updating resource list...";
+                Application.DoEvents();
                 lookup = new Dictionary<IResourceIndexEntry, ListViewItem>();
                 if (resourceList == null) return;
-                //??setResourceNameWidth();
 
                 if (pb != null)
                 {
@@ -485,7 +499,7 @@ namespace S3PIDemoFE
                         {
                             ListViewItem lvi = CreateItem(ie);
                             if (lvi == null) continue;
-                            llvi.Add(lvi);
+                            listView1.Items.Add(lvi);
                             lookup.Add(ie, lvi);
                         }
                         finally
@@ -499,10 +513,6 @@ namespace S3PIDemoFE
             }
             finally
             {
-                pbLabel.Text = "Updating display...";
-                Application.DoEvents();
-                listView1.Items.AddRange(llvi.ToArray());
-
                 pbLabel.Text = "Restoring sorter...";
                 Application.DoEvents();
                 this.listView1.ListViewItemSorter = cmp;
@@ -516,10 +526,12 @@ namespace S3PIDemoFE
                         listView1.SelectedItems[0].EnsureVisible();
                 }
                 SelectedResource = sie;
-                listView1.Enabled = true;
+
+                listView1.Visible = vis;
                 listView1.EndUpdate();
                 Application.UseWaitCursor = false;
                 Application.DoEvents();
+
                 OnListUpdated(this, new EventArgs());
             }
         }
@@ -600,42 +612,52 @@ namespace S3PIDemoFE
             if (nameMap == null) return;
 
             string oldLabel = pbLabel.Text;
-            pbLabel.Text = "Updating resource names...";
-            Application.DoEvents();
-            listView1.Enabled = false;
-
             int oldValue = -1;
             int oldMax = -1;
-            if (pb != null)
-            {
-                oldValue = pb.Value;
-                pb.Value = 0;
-                oldMax = pb.Maximum;
-                pb.Maximum = lookup.Count;
-            }
 
-            int i = 0;
-            bool hasNames = false;
-            foreach (KeyValuePair<IResourceIndexEntry, ListViewItem> kvp in lookup)
+            bool vis = listView1.Visible;
+            try
             {
-                kvp.Value.Text = ResourceName(kvp.Key);
-                hasNames = hasNames || kvp.Value.Text.Length > 0;
-                i++;
-                if (i % 100 == 0)
+                pbLabel.Text = "Updating resource names...";
+                Application.DoEvents();
+
+                listView1.BeginUpdate();
+                listView1.Visible = false;
+                if (pb != null)
                 {
-                    if (pb != null) pb.Value = i;
-                    Application.DoEvents();
+                    oldValue = pb.Value;
+                    pb.Value = 0;
+                    oldMax = pb.Maximum;
+                    pb.Maximum = lookup.Count;
                 }
-            }
-            setResourceNameWidth();
-            listView1.Enabled = true;
 
-            pbLabel.Text = oldLabel;
-            if (pb != null)
+                int i = 0;
+                bool hasNames = false;
+                foreach (KeyValuePair<IResourceIndexEntry, ListViewItem> kvp in lookup)
+                {
+                    kvp.Value.Text = ResourceName(kvp.Key);
+                    hasNames = hasNames || kvp.Value.Text.Length > 0;
+                    i++;
+                    if (i % 100 == 0)
+                    {
+                        if (pb != null) pb.Value = i;
+                        Application.DoEvents();
+                    }
+                }
+                setResourceNameWidth();
+            }
+            finally
             {
-                pb.Value = 0;
-                pb.Maximum = oldMax;
-                pb.Value = oldValue;
+                listView1.Visible = vis;
+                listView1.EndUpdate();
+
+                pbLabel.Text = oldLabel;
+                if (pb != null)
+                {
+                    pb.Value = 0;
+                    pb.Maximum = oldMax;
+                    pb.Value = oldValue;
+                }
             }
 
             Application.DoEvents();
@@ -721,17 +743,22 @@ namespace S3PIDemoFE
                 lvwColumnSorter.Order = SortOrder.Ascending;
             }
 
-            // Perform the sort with these new sort options.
-            listView1.BeginUpdate();
-            listView1.Enabled = false;
-            Application.UseWaitCursor = true;
-            pbLabel.Text = "Sorting display...";
-            Application.DoEvents();
             try
             {
+                // Perform the sort with these new sort options.
+                listView1.BeginUpdate();
+                Application.UseWaitCursor = true;
+                pbLabel.Text = "Sorting display...";
+                Application.DoEvents();
                 this.listView1.Sort();
             }
-            finally { pbLabel.Text = ""; Application.UseWaitCursor = false; Application.DoEvents(); listView1.Enabled = true; listView1.EndUpdate(); }
+            finally
+            {
+                pbLabel.Text = "";
+                Application.UseWaitCursor = false;
+                Application.DoEvents();
+                listView1.EndUpdate();
+            }
             if (listView1.SelectedIndices.Count > 0)
                 listView1.SelectedItems[0].EnsureVisible();
         }
@@ -756,10 +783,19 @@ namespace S3PIDemoFE
 
         private void pkg_ResourceIndexInvalidated(object sender, EventArgs e)
         {
-            nameMap = null;
-            nameMap_ResourceChanged(null, null); //CreateNameMap();
-            resourceList = pkg == null ? null : filter == null ? pkg.GetResourceList : FilteredList();
-            UpdateList();
+            bool vis = listView1.Visible;
+            try
+            {
+                listView1.Visible = false;
+
+                lookup = new Dictionary<IResourceIndexEntry, ListViewItem>();//makes nameMap_ResourceChanged go fast; gets fixed by UpdateList
+                nameMap = null;
+                nameMap_ResourceChanged(null, null); //CreateNameMap();
+
+                resourceList = pkg == null ? null : filter == null ? pkg.GetResourceList : FilteredList();
+                UpdateList();
+            }
+            finally { listView1.Visible = vis; }
         }
 
         IList<IResourceIndexEntry> FilteredList()
