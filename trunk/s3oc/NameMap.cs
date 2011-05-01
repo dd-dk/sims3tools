@@ -68,5 +68,6 @@ namespace ObjectCloner
                 return nmap;
             }
         }
+        public static bool IsOK { get { return NMap != null && NMap.map != null && NMap.map.Count > 0; } }
     }
 }
