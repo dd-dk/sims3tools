@@ -100,7 +100,11 @@ namespace S3PIDemoFE
             {
                 string index = GetFieldIndex(field);
                 if (index == null)
-                    return owner[field];
+                {
+                    float s = 0f;
+                    TypedValue tv = owner[field];
+                    return tv.Type == typeof(Double) || tv.Type == typeof(Single) ? new TypedValue(tv.Type, tv.Value, "R") : tv;
+                }
                 else if (owner is ArrayOwner)
                     return owner[index];
                 else
@@ -1104,22 +1108,12 @@ namespace S3PIDemoFE
                 IDictionaryCTD field = (IDictionaryCTD)value;
                 if (field.Value == null) return value;
 
-                Type keyType = typeof(Type), valueType = typeof(Type);
-                bool set = false;
-                foreach (Type t in field.Value.GetType().GetInterfaces())
-                {
-                    if (t.Name != "IDictionary`2") continue;
-                    if (!t.IsGenericType) continue;
-                    if (t.GetGenericArguments().Length != 2) continue;
-                    keyType = t.GetGenericArguments()[0];
-                    valueType = t.GetGenericArguments()[1];
-                    set = true;
-                    break;
-                }
-                if (!set) return value;
+                object[] attrs = field.Value.GetType().GetCustomAttributes(typeof(ConstructorParametersAttribute), true);
+                if (attrs.Length != 1 || (attrs[0] as ConstructorParametersAttribute).parameters.Length != 2) return value;
+                ConstructorParametersAttribute cpa = (attrs[0] as ConstructorParametersAttribute);
 
-                AsKVPList list = new AsKVPList(keyType, valueType);
                 List<object> oldKeys = new List<object>();
+                AsKVPList list = new AsKVPList(cpa);
                 foreach (var k in field.Value.Keys) { list.Add(k, field.Value[k]); oldKeys.Add(k); }
 
                 NewGridForm ui = new NewGridForm(list);
@@ -1518,10 +1512,9 @@ namespace S3PIDemoFE
 
     public class AsKVPList : DependentList<AsKVP>
     {
-        Type keyType;
-        Type valueType;
-        public AsKVPList(Type keyType, Type valueType) : base(null) { this.keyType = keyType; this.valueType = valueType; }
-        public override void Add() { this.Add((ulong)0, ""); }
+        ConstructorParametersAttribute cpa;
+        public AsKVPList(ConstructorParametersAttribute cpa) : base(null) { this.cpa = cpa; }
+        public override void Add() { this.Add(cpa.parameters[0], cpa.parameters[1]); }
         protected override AsKVP CreateElement(Stream s) { throw new NotImplementedException(); }
         protected override void WriteElement(Stream s, AsKVP element) { throw new NotImplementedException(); }
     }
