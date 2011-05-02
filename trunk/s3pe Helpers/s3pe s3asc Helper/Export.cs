@@ -190,15 +190,40 @@ namespace s3ascHelper
         {
             if (skin == null) { w.WriteLine("; skin is null"); w.WriteLine("skin 0"); return; }
 
-            if (skin.Bones.Count != mesh.JointReferences.Count) { w.WriteLine("; skin.Bones.Count != mesh.JointReferences.Count"); w.WriteLine("skin 0"); return; }
+            if (!mesh.JointReferences.TrueForAll(x => skin.Bones.Exists(y => y.NameHash == x)))
+            {
+                w.WriteLine("; mesh.JointReferences references unknown bone.");
+                w.WriteLine("skin 0");
+                return;
+            }
+            List<uint> seen = new List<uint>();
+            if (!mesh.JointReferences.TrueForAll(x => { if (seen.Contains(x)) return false; seen.Add(x); return true; }))
+            {
+                w.WriteLine("; mesh.JointReferences contains non-unique references.");
+                w.WriteLine("skin 0");
+                return;
+            }
+            seen = null;
 
             w.WriteLine(string.Format("skin {0}", skin.Bones.Count));
 
             mpb.Init("Export SKIN...", skin.Bones.Count);
             int i = 0;
-            foreach (var bone in mesh.JointReferences.ConvertAll<SKIN.Bone>(x => skin.Bones[x]))
+            //Referenced bones
+            foreach (var bone in skin.Bones.FindAll(x => mesh.JointReferences.Contains(x.NameHash)))
             {
-                w.WriteLine(string.Format("{0} {1:X8} {2:F6} {3:F6} {4:F6} {5:F6} {6:F6} {7:F6} {8:F6} {9:F6} {10:F6} {11:F6} {12:F6} {13:F6}",
+                w.WriteLine(string.Format("{0} {1:X8} {2:R} {3:R} {4:R} {5:R} {6:R} {7:R} {8:R} {9:R} {10:R} {11:R} {12:R} {13:R}",
+                    i++,
+                    bone.NameHash,
+                    bone.InverseBindPose.Right.X, bone.InverseBindPose.Right.Y, bone.InverseBindPose.Right.Z, bone.InverseBindPose.Translate.X,
+                    bone.InverseBindPose.Up.X, bone.InverseBindPose.Up.Y, bone.InverseBindPose.Up.Z, bone.InverseBindPose.Translate.Y,
+                    bone.InverseBindPose.Back.X, bone.InverseBindPose.Back.Y, bone.InverseBindPose.Back.Z, bone.InverseBindPose.Translate.Z));
+                mpb.Value++;
+            }
+            //Unreferenced bones
+            foreach (var bone in skin.Bones.FindAll(x => !mesh.JointReferences.Contains(x.NameHash)))
+            {
+                w.WriteLine(string.Format("{0} {1:X8} {2:R} {3:R} {4:R} {5:R} {6:R} {7:R} {8:R} {9:R} {10:R} {11:R} {12:R} {13:R}",
                     i++,
                     bone.NameHash,
                     bone.InverseBindPose.Right.X, bone.InverseBindPose.Right.Y, bone.InverseBindPose.Right.Z, bone.InverseBindPose.Translate.X,
