@@ -335,6 +335,14 @@
       <Link>OBJKResourceEditor.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\s3pe Helpers\s3pe s3asc Helper\bin\Release\S3AscExpImp.exe">
+      <Link>S3AscExpImp.exe</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pe Helpers\s3pe s3asc Helper\bin\Release\s3piwrappers.ModelResources.dll">
+      <Link>s3piwrappers.ModelResources.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\s3pe Helpers\S3SA DLL ExpImp\bin\Release\S3SADLLExpImp.exe">
       <Link>S3SADLLExpImp.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -478,6 +486,14 @@
     </Content>
     <None Include="..\s3pe Helpers\CLIP exportAsNewName\CLIPexportAsNewName.helper">
       <Link>Helpers\CLIPexportAsNewName.helper</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\s3pe Helpers\s3pe s3asc Helper\S3AscExport.helper">
+      <Link>Helpers\S3AscExport.helper</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\s3pe Helpers\s3pe s3asc Helper\S3AscImport.helper">
+      <Link>Helpers\S3AscImport.helper</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Resources\s3pe.ico" />
