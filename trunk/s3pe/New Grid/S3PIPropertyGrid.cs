@@ -101,7 +101,6 @@ namespace S3PIDemoFE
                 string index = GetFieldIndex(field);
                 if (index == null)
                 {
-                    float s = 0f;
                     TypedValue tv = owner[field];
                     return tv.Type == typeof(Double) || tv.Type == typeof(Single) ? new TypedValue(tv.Type, tv.Value, "R") : tv;
                 }
