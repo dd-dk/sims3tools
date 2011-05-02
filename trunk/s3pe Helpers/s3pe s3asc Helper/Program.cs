@@ -64,6 +64,7 @@ namespace s3ascHelper
             }
 #endif
 
+            System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             return s3pi.Helpers.RunHelper.Run(export ? typeof(Export) : typeof(Import), args);
         }
 
