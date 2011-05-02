@@ -199,10 +199,34 @@ namespace s3ascHelper
 
                     Import_MeshGeoStates(r, mlod, mlod.Meshes[m], vrtf, isDefaultVRTF, uvScale, vbuf, ibuf);
 
+                    mlod.Meshes[m].JointReferences = CreateJointReferences(mlod.Meshes[m], vrtf, uvScale, vbuf, skin);
+
                     fsMesh.Close();
                     m++;
                 }
             }
+        }
+
+        private UIntList CreateJointReferences(MLOD.Mesh mesh, VRTF vrtf, float uvScale, VBUF vbuf, SKIN skin)
+        {
+            int maxReference = -1;
+
+            s3piwrappers.Vertex[] vertices = vbuf.GetVertices(mesh, vrtf, uvScale);
+            foreach (var vert in vertices)
+                if (vert.BlendIndices != null)
+                    foreach (var reference in vert.BlendIndices)
+                        if (reference > maxReference) maxReference = reference;
+
+            foreach (var geos in mesh.GeometryStates)
+            {
+                vertices = vbuf.GetVertices(mesh, vrtf, geos, uvScale);
+                foreach (var vert in vertices)
+                    if (vert.BlendIndices != null)
+                        foreach (var reference in vert.BlendIndices)
+                            if (reference > maxReference) maxReference = reference;
+            }
+
+            return maxReference > -1 ? new UIntList(null, skin.Bones.GetRange(0, maxReference + 1).ConvertAll<uint>(x => x.NameHash)) : new UIntList(null);
         }
 
         MATD GetMATDforMesh(GenericRCOLResource.ChunkReference reference)
@@ -326,8 +350,8 @@ namespace s3ascHelper
                 uint name;
                 if (!uint.TryParse(split[1], System.Globalization.NumberStyles.HexNumber, null, out name))
                     throw new InvalidDataException(string.Format("'skin' line {0} has invalid name hash.", b));
-                if (name != mesh.JointReferences[b])
-                    throw new InvalidDataException(string.Format("'skin' line {0} name 0x{1:X8} does not match mesh joint reference 0x{2:X8}.", b, name, mesh.JointReferences[b]));
+                //if (name != mesh.JointReferences[b])
+                    //throw new InvalidDataException(string.Format("'skin' line {0} name 0x{1:X8} does not match mesh joint reference 0x{2:X8}.", b, name, mesh.JointReferences[b]));
                 float[] values = split.Cast<Single>(2);
                 if (values.Length != 12)
                     throw new InvalidDataException(string.Format("'skin' line {0} has incorrect number of float values {1}.", b, values.Length));
