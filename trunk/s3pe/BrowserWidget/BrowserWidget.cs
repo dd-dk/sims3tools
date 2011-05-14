@@ -527,7 +527,7 @@ namespace S3PIDemoFE
                 }
                 SelectedResource = sie;
 
-                listView1.Visible = vis;
+                listView1.Visible = !this.Created || vis;
                 listView1.EndUpdate();
                 Application.UseWaitCursor = false;
                 Application.DoEvents();
@@ -648,7 +648,7 @@ namespace S3PIDemoFE
             }
             finally
             {
-                listView1.Visible = vis;
+                listView1.Visible = !this.Created || vis;
                 listView1.EndUpdate();
 
                 pbLabel.Text = oldLabel;
@@ -795,7 +795,7 @@ namespace S3PIDemoFE
                 resourceList = pkg == null ? null : filter == null ? pkg.GetResourceList : FilteredList();
                 UpdateList();
             }
-            finally { listView1.Visible = vis; }
+            finally { listView1.Visible = !this.Created || vis; }
         }
 
         IList<IResourceIndexEntry> FilteredList()
