@@ -1,6 +1,6 @@
 ﻿namespace s3ascHelper
 {
-    partial class Import
+    partial class ExportForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,19 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.pb = new System.Windows.Forms.ProgressBar();
+            this.sfdExport = new System.Windows.Forms.SaveFileDialog();
             this.label1 = new System.Windows.Forms.Label();
-            this.ofdImport = new System.Windows.Forms.OpenFileDialog();
+            this.pb = new System.Windows.Forms.ProgressBar();
             this.SuspendLayout();
             // 
-            // pb
+            // sfdExport
             // 
-            this.pb.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.pb.Location = new System.Drawing.Point(12, 25);
-            this.pb.Name = "pb";
-            this.pb.Size = new System.Drawing.Size(132, 23);
-            this.pb.TabIndex = 1;
+            this.sfdExport.DefaultExt = "s3asc";
+            this.sfdExport.FileName = "*_filebase.s3asc";
+            this.sfdExport.Filter = "S3Asc base files|*_filebase.s3asc|All files|*.*";
+            this.sfdExport.Title = "Export to s3asc";
             // 
             // label1
             // 
@@ -51,14 +49,16 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Please wait...";
             // 
-            // ofdImport
+            // pb
             // 
-            this.ofdImport.DefaultExt = "s3asc";
-            this.ofdImport.FileName = "*_filebase.s3asc";
-            this.ofdImport.Filter = "S3Asc base files|*.s3asc|All files|*.*";
-            this.ofdImport.Title = "Import from s3asc";
+            this.pb.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.pb.Location = new System.Drawing.Point(12, 25);
+            this.pb.Name = "pb";
+            this.pb.Size = new System.Drawing.Size(132, 23);
+            this.pb.TabIndex = 1;
             // 
-            // Import
+            // Export
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -66,9 +66,9 @@
             this.Controls.Add(this.pb);
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
-            this.Name = "Import";
-            this.Text = "Import...";
-            this.Shown += new System.EventHandler(this.Import_Shown);
+            this.Name = "Export";
+            this.Text = "Export";
+            this.Shown += new System.EventHandler(this.Export_Shown);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -76,8 +76,8 @@
 
         #endregion
 
-        private System.Windows.Forms.ProgressBar pb;
+        private System.Windows.Forms.SaveFileDialog sfdExport;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.OpenFileDialog ofdImport;
+        private System.Windows.Forms.ProgressBar pb;
     }
 }
