@@ -75,22 +75,7 @@ namespace s3ascHelper
             return new float[] { 1f / 32767f, };
         }
 
-        public static void SetUVScales(this GenericRCOLResource rcolResource, MLOD.Mesh mesh, float[] uvScales)
-        {
-            if (uvScales.Length != 3)
-                throw new ArgumentException(String.Format("Found {0} UVScales; expected 3.", uvScales.Length));
-
-            MATD matd = GetMATDforMesh(rcolResource, mesh.MaterialIndex);
-            if (matd != null)
-            {
-                MATD.ShaderDataList sdList = (matd.Version < 0x0103 ? matd.Mtrl.SData : matd.Mtnf.SData);
-                MATD.ShaderData data = sdList.Find(x => x.Field == MATD.FieldType.UVScales);
-                sdList.RemoveAll(x => x.Field == MATD.FieldType.UVScales);
-                sdList.Add(new MATD.ElementFloat3(0, null, MATD.FieldType.UVScales, uvScales[0], uvScales[1], uvScales[2]));
-            }
-        }
-
-        static MATD GetMATDforMesh(GenericRCOLResource rcolResource, GenericRCOLResource.ChunkReference reference)
+        public static MATD GetMATDforMesh(this GenericRCOLResource rcolResource, GenericRCOLResource.ChunkReference reference)
         {
             IRCOLBlock materialRef = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, reference);
             if (materialRef is MATD) return materialRef as MATD;

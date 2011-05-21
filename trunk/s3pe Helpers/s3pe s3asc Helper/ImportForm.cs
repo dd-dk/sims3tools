@@ -107,6 +107,8 @@ namespace s3ascHelper
                     Import import = new Import(new MyProgressBar(label1, pb));
 
                     int m = 0;
+                    List<s3piwrappers.Vertex[]> lmverts = new List<s3piwrappers.Vertex[]>();
+                    List<List<s3piwrappers.Vertex[]>> llverts = new List<List<s3piwrappers.Vertex[]>>();
                     while (true)
                     {
                         string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.s3ascg", filebase, m));
@@ -114,10 +116,16 @@ namespace s3ascHelper
 
                         using (FileStream fsMesh = new FileStream(fnMesh, FileMode.Open, FileAccess.Read))
                         {
-                            import.Import_Mesh(new StreamReader(fsMesh), m++, rcolResource, mlod, rk);
+                            s3piwrappers.Vertex[] mverts;
+                            List<s3piwrappers.Vertex[]> lverts;
+                            import.Import_Mesh(new StreamReader(fsMesh), m++, rcolResource, mlod, rk, out mverts, out lverts);
+                            lmverts.Add(mverts);
+                            llverts.Add(lverts);
                             fsMesh.Close();
                         }
                     }
+
+                    import.VertsToVBUFs(rcolResource, mlod, rk, lmverts, llverts);
 
                     result = (byte[])rcolResource.AsBytes.Clone();
 
