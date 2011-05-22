@@ -155,7 +155,7 @@ namespace s3ascHelper
                 foreach (var vert in vertices)
                     if (vert.BlendIndices != null)
                         foreach (var reference in vert.BlendIndices)
-                            if (reference > maxReference) maxReference = reference;
+                            if ((sbyte)reference > maxReference) maxReference = reference;
             lverts.Remove(mverts);
 
             return maxReference > -1 ? new UIntList(null, skin.Bones.GetRange(0, maxReference + 1).ConvertAll<uint>(x => x.NameHash)) : new UIntList(null);
