@@ -95,7 +95,38 @@ namespace s3ascHelper
             // This reads both VBUF Vertex[]s and the ibufs; but the ibufs just go straigh in quite happily
             lverts = Import_MeshGeoStates(r, mlod, mlod.Meshes[m], vrtf, isDefaultVRTF, ibuf);
 
-            mlod.Meshes[m].JointReferences = CreateJointReferences(mlod.Meshes[m], mverts, lverts ?? new List<s3piwrappers.Vertex[]>(), skin);
+            UIntList joints = CreateJointReferences(mlod.Meshes[m], mverts, lverts ?? new List<s3piwrappers.Vertex[]>(), skin);
+            List<uint> added = new List<uint>(joints);
+            List<uint> removed = new List<uint>();
+
+            foreach (var j in joints)
+            {
+                if (mlod.Meshes[m].JointReferences.Contains(j)) added.Remove(j);
+                else removed.Add(j);
+            }
+            if (added.Count != 0)
+            {
+                mlod.Meshes[m].JointReferences.AddRange(added);
+
+                string adds = "";
+                added.ForEach(a => adds += ", 0x" + a.ToString("X8"));
+                adds.Trim(',', ' ');
+                System.Windows.Forms.CopyableMessageBox.Show(String.Format("JointReferences added (at end): {0}\n({1})", added.Count, adds), "Warning",
+                    System.Windows.Forms.CopyableMessageBoxButtons.OK, System.Windows.Forms.CopyableMessageBoxIcon.Warning);
+            }
+            if (removed.Count != 0)
+            {
+                string rems = "";
+                foreach (var rm in removed)
+                {
+                    int i = mlod.Meshes[m].JointReferences.IndexOf(rm);
+                    mlod.Meshes[m].JointReferences[i] = 0;
+                    rems += ", 0x" + rm.ToString("X8");
+                }
+                rems.Trim(',', ' ');
+                System.Windows.Forms.CopyableMessageBox.Show(String.Format("JointReferences removed (set to zero): {0}\n({1})", removed.Count, rems), "Warning",
+                    System.Windows.Forms.CopyableMessageBoxButtons.OK, System.Windows.Forms.CopyableMessageBoxIcon.Warning);
+            }
         }
 
 
