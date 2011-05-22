@@ -183,7 +183,7 @@ namespace s3ascHelper
 
             lverts.Insert(0, mverts);
             foreach (var vertices in lverts)
-                foreach (var vert in vertices)
+                if (vertices != null) foreach (var vert in vertices)
                     if (vert.BlendIndices != null)
                         foreach (var reference in vert.BlendIndices)
                             if ((sbyte)reference > maxReference) maxReference = reference;
@@ -284,7 +284,7 @@ namespace s3ascHelper
                 foreach (int m in meshGroups[key])
                 {
                     verts.AddRange(lmverts[m]);
-                    if (llverts[m] != null) llverts[m].ForEach(l => verts.AddRange(l));
+                    if (llverts[m] != null) llverts[m].FindAll(l => l != null).ForEach(l => verts.AddRange(l));
                 }
                 matdMaxUVs.Add(key, s3piwrappers.UVCompressor.GetMaxUVs(verts));
             }
@@ -320,7 +320,7 @@ namespace s3ascHelper
                     if (vbuf == null)
                         vbuf = new VBUF(rcolResource.RequestedApiVersion, null) { Version = 0x00000101, Flags = VBUF.FormatFlags.None, SwizzleInfo = new GenericRCOLResource.ChunkReference(0, null, 0), };
                     vbuf.SetVertices(mlod, m, meshVRTF[m], lmverts[m], matdUVScales[key]);
-                    if (llverts[m] != null) for (int i = 0; i < llverts[m].Count; i++) vbuf.SetVertices(mlod, mlod.Meshes[m], i, meshVRTF[m], llverts[m][i], matdUVScales[key]);
+                    if (llverts[m] != null) for (int i = 0; i < llverts[m].Count; i++) if (llverts[m][i] != null) vbuf.SetVertices(mlod, mlod.Meshes[m], i, meshVRTF[m], llverts[m][i], matdUVScales[key]);
 
                     IResourceKey vbufRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].VertexBufferIndex);
                     if (vbufRK == null)//means we created the VBUF: create a RK and add it
