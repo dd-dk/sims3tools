@@ -35,20 +35,20 @@ namespace s3ascHelper
         //--
 
 
-        public void Import_Mesh(StreamReader r, int m, GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, out s3piwrappers.Vertex[] mverts, out List<s3piwrappers.Vertex[]> lverts)
+        public void Import_Mesh(StreamReader r, MLOD.Mesh mesh, GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, out s3piwrappers.Vertex[] mverts, out List<s3piwrappers.Vertex[]> lverts)
         {
             #region Import VRTF
             bool isDefaultVRTF = false;
-            VRTF defaultForMesh = VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
+            VRTF defaultForMesh = VRTF.CreateDefaultForMesh(mesh);
 
             VRTF vrtf = new VRTF(rcolResource.RequestedApiVersion, null) { Version = 2, Layouts = null, };
             r.Import_VRTF(mpb, vrtf);
 
-            IResourceKey vrtfRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].VertexFormatIndex);
+            IResourceKey vrtfRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mesh.VertexFormatIndex);
             if (vrtfRK == null)
             {
-                vrtfRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].SkinControllerIndex);
-                if (vrtfRK == null) vrtfRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].ScaleOffsetIndex);
+                vrtfRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mesh.SkinControllerIndex);
+                if (vrtfRK == null) vrtfRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mesh.ScaleOffsetIndex);
                 if (vrtfRK == null) vrtfRK = new TGIBlock(0, null, 0, 0,
                     System.Security.Cryptography.FNV64.GetHash(DateTime.UtcNow.ToString() + defaultRK.ToString()));
                 vrtfRK = new TGIBlock(0, null, vrtfRK) { ResourceType = vrtf.ResourceType, };
@@ -57,10 +57,10 @@ namespace s3ascHelper
             if (vrtf.Equals(defaultForMesh))
             {
                 isDefaultVRTF = true;
-                mlod.Meshes[m].VertexFormatIndex = new GenericRCOLResource.ChunkReference(0, null, 0);//Clear the reference
+                mesh.VertexFormatIndex = new GenericRCOLResource.ChunkReference(0, null, 0);//Clear the reference
             }
             else
-                rcolResource.ReplaceChunk(mlod.Meshes[m], "VertexFormatIndex", vrtfRK, vrtf);
+                rcolResource.ReplaceChunk(mesh, "VertexFormatIndex", vrtfRK, vrtf);
             #endregion
 
             #region Import SKIN
@@ -69,71 +69,70 @@ namespace s3ascHelper
 
             if (skin.Bones != null)
             {
-                IResourceKey skinRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].SkinControllerIndex);
+                IResourceKey skinRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mesh.SkinControllerIndex);
                 if (skinRK == null)
                     skinRK = new TGIBlock(0, null, vrtfRK) { ResourceType = skin.ResourceType, };
 
-                rcolResource.ReplaceChunk(mlod.Meshes[m], "SkinControllerIndex", skinRK, skin);
+                rcolResource.ReplaceChunk(mesh, "SkinControllerIndex", skinRK, skin);
             }
             #endregion
 
-            mverts = Import_VBUF_Main(r, mlod, m, vrtf, isDefaultVRTF);
+            mverts = Import_VBUF_Main(r, mlod, mesh, vrtf, isDefaultVRTF);
 
             #region Import IBUF
-            IBUF ibuf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].IndexBufferIndex) as IBUF;
+            IBUF ibuf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mesh.IndexBufferIndex) as IBUF;
             if (ibuf == null)
                 ibuf = new IBUF(rcolResource.RequestedApiVersion, null) { Version = 2, Flags = IBUF.FormatFlags.DifferencedIndices, DisplayListUsage = 0, };
-            Import_IBUF_Main(r, mlod, mlod.Meshes[m], ibuf);
+            Import_IBUF_Main(r, mlod, mesh, ibuf);
 
-            IResourceKey ibufRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].IndexBufferIndex);
+            IResourceKey ibufRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mesh.IndexBufferIndex);
             if (ibufRK == null)
                 ibufRK = new TGIBlock(0, null, defaultRK) { ResourceType = ibuf.ResourceType, };
 
-            rcolResource.ReplaceChunk(mlod.Meshes[m], "IndexBufferIndex", ibufRK, ibuf);
+            rcolResource.ReplaceChunk(mesh, "IndexBufferIndex", ibufRK, ibuf);
             #endregion
 
             // This reads both VBUF Vertex[]s and the ibufs; but the ibufs just go straigh in quite happily
-            lverts = Import_MeshGeoStates(r, mlod, mlod.Meshes[m], vrtf, isDefaultVRTF, ibuf);
+            lverts = Import_MeshGeoStates(r, mlod, mesh, vrtf, isDefaultVRTF, ibuf);
 
-            UIntList joints = CreateJointReferences(mlod.Meshes[m], mverts, lverts ?? new List<s3piwrappers.Vertex[]>(), skin);
+            #region Update the JointReferences
+            UIntList joints = CreateJointReferences(mesh, mverts, lverts ?? new List<s3piwrappers.Vertex[]>(), skin);
+
             List<uint> added = new List<uint>(joints);
             List<uint> removed = new List<uint>();
-
-            foreach (var j in joints)
+            foreach (var j in mesh.JointReferences)
             {
-                if (mlod.Meshes[m].JointReferences.Contains(j)) added.Remove(j);
+                if (joints.Contains(j)) added.Remove(j);
                 else removed.Add(j);
             }
+
             if (added.Count != 0)
             {
-                mlod.Meshes[m].JointReferences.AddRange(added);
+                mesh.JointReferences.AddRange(added);
 
-                string adds = "";
-                added.ForEach(a => adds += ", 0x" + a.ToString("X8"));
-                adds.Trim(',', ' ');
-                System.Windows.Forms.CopyableMessageBox.Show(String.Format("JointReferences added (at end): {0}\n({1})", added.Count, adds), "Warning",
-                    System.Windows.Forms.CopyableMessageBoxButtons.OK, System.Windows.Forms.CopyableMessageBoxIcon.Warning);
+                System.Windows.Forms.CopyableMessageBox.Show(String.Format("Mesh: 0x{0}\nJointReferences added (at end): {1}\n({2})",
+                    mesh.Name,
+                    added.Count,
+                    String.Join(", ", added.ConvertAll<string>(a => "0x" + a.ToString("X8")).ToArray())),
+                    "Warning", System.Windows.Forms.CopyableMessageBoxButtons.OK, System.Windows.Forms.CopyableMessageBoxIcon.Warning);
             }
+
             if (removed.Count != 0)
             {
-                string rems = "";
-                foreach (var rm in removed)
-                {
-                    int i = mlod.Meshes[m].JointReferences.IndexOf(rm);
-                    mlod.Meshes[m].JointReferences[i] = 0;
-                    rems += ", 0x" + rm.ToString("X8");
-                }
-                rems.Trim(',', ' ');
-                System.Windows.Forms.CopyableMessageBox.Show(String.Format("JointReferences removed (set to zero): {0}\n({1})", removed.Count, rems), "Warning",
-                    System.Windows.Forms.CopyableMessageBoxButtons.OK, System.Windows.Forms.CopyableMessageBoxIcon.Warning);
+                removed.ForEach(j => mesh.JointReferences[mesh.JointReferences.IndexOf(j)] = 0);
+
+                System.Windows.Forms.CopyableMessageBox.Show(String.Format("Mesh: 0x{0}\nJointReferences removed (set to zero): {1}\n({2})",
+                    mesh.Name,
+                    removed.Count,
+                    String.Join(", ", removed.ConvertAll<string>(a => "0x" + a.ToString("X8")).ToArray())),
+                    "Warning", System.Windows.Forms.CopyableMessageBoxButtons.OK, System.Windows.Forms.CopyableMessageBoxIcon.Warning);
             }
+            #endregion
         }
 
 
-        s3piwrappers.Vertex[] Import_VBUF_Main(StreamReader r, MLOD mlod, int meshIndex, VRTF vrtf, bool isDefaultVRTF)
+        s3piwrappers.Vertex[] Import_VBUF_Main(StreamReader r, MLOD mlod, MLOD.Mesh mesh, VRTF vrtf, bool isDefaultVRTF)
         {
-            MLOD.Mesh mesh = mlod.Meshes[meshIndex];
-
             string tagLine = r.ReadTag();
             string[] split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
             if (split.Length != 2)
@@ -295,19 +294,26 @@ namespace s3ascHelper
             Dictionary<int, VRTF> meshVRTF = new Dictionary<int, VRTF>();
             foreach (MATD key in meshGroups.Keys)
             {
-                List<float[]> lUVScales = new List<float[]>();
+                int uvs = 0;
+                VRTF scaleVRTF = null;
                 foreach (int m in meshGroups[key])
                 {
-                    meshVRTF.Add(m, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexFormatIndex) as VRTF ?? VRTF.CreateDefaultForMesh(mlod.Meshes[m]));
-                    lUVScales.Add(s3piwrappers.UVCompressor.GetUVScales(meshVRTF[m], matdMaxUVs[key]));
+                    VRTF vrtf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexFormatIndex) as VRTF ?? VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
+                    int meshUVs = vrtf.Layouts.FindAll(x => x.Usage == VRTF.ElementUsage.UV).Count;
+                    meshVRTF.Add(m, vrtf);
+                    if (scaleVRTF == null || meshUVs > uvs)
+                    {
+                        scaleVRTF = vrtf;
+                        uvs = meshUVs;
+                    }
                 }
 
-                for (int i = 1; i < lUVScales.Count; i++)
-                    if (!lUVScales[i].Equals<float>(lUVScales[0]))
-                        throw new InvalidOperationException("Different UVScales values for one MATD are not allowed.  Ensure correct MATD is referenced by Mesh.");
+                if (scaleVRTF == null) continue;// assume nothing to do
 
-                matdUVScales.Add(key, lUVScales[0]);
-                if (lUVScales[0] != null) SetUVScales(key, lUVScales[0]);
+                float[] uvScales = s3piwrappers.UVCompressor.GetUVScales(scaleVRTF, matdMaxUVs[key]);
+
+                matdUVScales.Add(key, uvScales);
+                if (uvScales != null) SetUVScales(key, uvScales);
             }
             #endregion
 

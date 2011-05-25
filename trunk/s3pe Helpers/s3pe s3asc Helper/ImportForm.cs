@@ -118,7 +118,7 @@ namespace s3ascHelper
                         {
                             s3piwrappers.Vertex[] mverts;
                             List<s3piwrappers.Vertex[]> lverts;
-                            import.Import_Mesh(new StreamReader(fsMesh), m++, rcolResource, mlod, rk, out mverts, out lverts);
+                            import.Import_Mesh(new StreamReader(fsMesh), mlod.Meshes[m++], rcolResource, mlod, rk, out mverts, out lverts);
                             lmverts.Add(mverts);
                             llverts.Add(lverts);
                             fsMesh.Close();
