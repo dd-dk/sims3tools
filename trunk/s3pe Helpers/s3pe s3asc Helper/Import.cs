@@ -119,6 +119,8 @@ namespace s3ascHelper
 
             if (removed.Count != 0)
             {
+                // http://dino.drealm.info/den/denforum/index.php?topic=394.msg3876#msg3876
+#if UNDEF
                 removed.ForEach(j => mesh.JointReferences[mesh.JointReferences.IndexOf(j)] = 0);
 
                 System.Windows.Forms.CopyableMessageBox.Show(String.Format("Mesh: 0x{0}\nJointReferences removed (set to zero): {1}\n({2})",
@@ -126,6 +128,7 @@ namespace s3ascHelper
                     removed.Count,
                     String.Join(", ", removed.ConvertAll<string>(a => "0x" + a.ToString("X8")).ToArray())),
                     "Warning", System.Windows.Forms.CopyableMessageBoxButtons.OK, System.Windows.Forms.CopyableMessageBoxIcon.Warning);
+#endif
             }
             #endregion
         }
