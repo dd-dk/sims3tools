@@ -120,22 +120,22 @@
     <Compile Include="Import\ImportSettings.Designer.cs">
       <DependentUpon>ImportSettings.cs</DependentUpon>
     </Compile>
-    <Compile Include="New Grid\NewGridForm.cs">
+    <Compile Include="s3peDataGrid\NewGridForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="New Grid\NewGridForm.Designer.cs">
+    <Compile Include="s3peDataGrid\NewGridForm.Designer.cs">
       <DependentUpon>NewGridForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="New Grid\ReaderEditorPanel.cs">
+    <Compile Include="s3peDataGrid\ReaderEditorPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="New Grid\ReaderEditorPanel.Designer.cs">
+    <Compile Include="s3peDataGrid\ReaderEditorPanel.Designer.cs">
       <DependentUpon>ReaderEditorPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="New Grid\TGIBlockSelection.cs">
+    <Compile Include="s3peDataGrid\TGIBlockSelection.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="New Grid\TGIBlockSelection.Designer.cs">
+    <Compile Include="s3peDataGrid\TGIBlockSelection.Designer.cs">
       <DependentUpon>TGIBlockSelection.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyVersion.cs" />
@@ -240,13 +240,13 @@
     <EmbeddedResource Include="MenuBarWidget\MenuBarWidget.resx">
       <DependentUpon>MenuBarWidget.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="New Grid\NewGridForm.resx">
+    <EmbeddedResource Include="s3peDataGrid\NewGridForm.resx">
       <DependentUpon>NewGridForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="New Grid\ReaderEditorPanel.resx">
+    <EmbeddedResource Include="s3peDataGrid\ReaderEditorPanel.resx">
       <DependentUpon>ReaderEditorPanel.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="New Grid\TGIBlockSelection.resx">
+    <EmbeddedResource Include="s3peDataGrid\TGIBlockSelection.resx">
       <DependentUpon>TGIBlockSelection.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="PackageInfo\PackageInfoWidget.resx">
@@ -284,7 +284,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="New Grid\S3PIPropertyGrid.cs">
+    <Compile Include="s3peDataGrid\S3PIPropertyGrid.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Settings.cs" />
