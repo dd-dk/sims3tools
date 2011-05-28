@@ -36,6 +36,7 @@ namespace S3PIDemoFE
             //VS2010Express likes setting these to false:
             bwcmImport.Enabled = true;
             bwcmExport.Enabled = true;
+            bwcmSelectAll.Enabled = true;
 
             tsMD = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 fileToolStripMenuItem, editToolStripMenuItem, resourceToolStripMenuItem, helpToolStripMenuItem,
@@ -43,19 +44,19 @@ namespace S3PIDemoFE
             tsMB = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //File
                 newToolStripMenuItem, openToolStripMenuItem, saveToolStripMenuItem, saveAsToolStripMenuItem, saveCopyAsToolStripMenuItem, closeToolStripMenuItem,
-                setMaxRecentToolStripMenuItem, bookmarkCurrentToolStripMenuItem, setMaxBookmarksToolStripMenuItem,
+                setMaxRecentToolStripMenuItem, bookmarkCurrentToolStripMenuItem, setMaxBookmarksToolStripMenuItem, organiseBookmarksToolStripMenuItem,
                 exitToolStripMenuItem,
                 //Edit
                 editCopyToolStripMenuItem, editFloatToolStripMenuItem, editOTEToolStripMenuItem,
                 //Resource
                 addToolStripMenuItem, resCopyToolStripMenuItem1, resPasteToolStripMenuItem1, duplicateToolStripMenuItem, replaceToolStripMenuItem,
-                compressedToolStripMenuItem, deletedToolStripMenuItem, detailsToolStripMenuItem,
+                compressedToolStripMenuItem, deletedToolStripMenuItem, detailsToolStripMenuItem, selectAllToolStripMenuItem,
                 fromFileToolStripMenuItem, fromPackageToolStripMenuItem, asDBCToolStripMenuItem, toFileToolStripMenuItem, toPackageToolStripMenuItem,
                 hexEditorToolStripMenuItem, textEditorToolStripMenuItem,
                 //Tools
                 fNVHashToolStripMenuItem, searchToolStripMenuItem,
                 //Settings
-                automaticUpdateChecksToolStripMenuItem, organiseBookmarksToolStripMenuItem, externalProgramsToolStripMenuItem,
+                automaticUpdateChecksToolStripMenuItem, organiseBookmarksSettingsToolStripMenuItem, externalProgramsToolStripMenuItem,
                 manageWrappersToolStripMenuItem, enableDDSPreviewToolStripMenuItem, saveSettingsToolStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, checkForUpdateToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
@@ -67,7 +68,7 @@ namespace S3PIDemoFE
             cmsBW = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //BrowserWidgetContextMenuStrip
                 bwcmAdd, bwcmCopy, bwcmPaste, bwcmDuplicate, bwcmReplace,
-                bwcmCompressed, bwcmDeleted, bwcmDetails,
+                bwcmCompressed, bwcmDeleted, bwcmDetails, bwcmSelectAll,
                 bwcmFromFile, bwcmFromPackage, bwcmAsDBC, bwcmToFile, bwcmToPackage,
                 bwcmHexEditor, bwcmTextEditor,
             });
@@ -96,11 +97,11 @@ namespace S3PIDemoFE
         public enum MB
         {
             MBF_new = 0, MBF_open, MBF_save, MBF_saveAs, MBF_saveCopyAs, MBF_close,
-            MBF_setMaxRecent, MBF_bookmarkCurrent, MBF_setMaxBookmarks,
+            MBF_setMaxRecent, MBF_bookmarkCurrent, MBF_setMaxBookmarks, MBF_organiseBookmarks,
             MBF_exit,
             MBE_copy, MBE_float, MBE_ote,
             MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_replace,
-            MBR_compressed, MBR_isdeleted, MBR_details,
+            MBR_compressed, MBR_isdeleted, MBR_details, MBR_selectAll,
             MBR_importResources, MBR_importPackages, MBR_importAsDBC, MBR_exportResources, MBR_exportToPackage,
             MBR_hexEditor, MBR_textEditor,
             MBT_fnvHash, MBT_search,
@@ -116,7 +117,7 @@ namespace S3PIDemoFE
         public enum CMS_BW
         {
             MBR_add = (int)MB.MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_replace,
-            MBR_compressed, MBR_isdeleted, MBR_details,
+            MBR_compressed, MBR_isdeleted, MBR_details, MBR_selectAll,
             MBR_importResources, MBR_importPackages, MBR_importAsDBC, MBR_exportResources, MBR_exportToPackage,
             MBR_hexEditor, MBR_textEditor,
         }
@@ -298,6 +299,7 @@ namespace S3PIDemoFE
             this.bookmarkedPackagesToolStripMenuItem.DropDownItems.Add(toolStripSeparator7);
             this.bookmarkedPackagesToolStripMenuItem.DropDownItems.Add(bookmarkCurrentToolStripMenuItem);
             this.bookmarkedPackagesToolStripMenuItem.DropDownItems.Add(setMaxBookmarksToolStripMenuItem);
+            this.bookmarkedPackagesToolStripMenuItem.DropDownItems.Add(organiseBookmarksToolStripMenuItem);
 
             int i = 0;
             if (S3PIDemoFE.Properties.Settings.Default.Bookmarks != null)

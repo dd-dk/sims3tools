@@ -62,6 +62,7 @@
             this.deletedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.detailsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
+            this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.fromFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fromPackageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -77,7 +78,7 @@
             this.searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.automaticUpdateChecksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.organiseBookmarksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.organiseBookmarksSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.externalProgramsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.manageWrappersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.enableDDSPreviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -100,6 +101,7 @@
             this.bwcmCompressed = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmDeleted = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmDetails = new System.Windows.Forms.ToolStripMenuItem();
+            this.bwcmSelectAll = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
             this.bwcmImport = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmFromFile = new System.Windows.Forms.ToolStripMenuItem();
@@ -115,6 +117,7 @@
             this.tpcmCopy = new System.Windows.Forms.ToolStripMenuItem();
             this.tpcmFloat = new System.Windows.Forms.ToolStripMenuItem();
             this.tpcmOTE = new System.Windows.Forms.ToolStripMenuItem();
+            this.organiseBookmarksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.browserWidgetContextMenuStrip.SuspendLayout();
             this.textPreviewContextMenuStrip.SuspendLayout();
@@ -235,7 +238,8 @@
             this.bookmarkedPackagesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripSeparator7,
             this.bookmarkCurrentToolStripMenuItem,
-            this.setMaxBookmarksToolStripMenuItem});
+            this.setMaxBookmarksToolStripMenuItem,
+            this.organiseBookmarksToolStripMenuItem});
             this.bookmarkedPackagesToolStripMenuItem.Name = "bookmarkedPackagesToolStripMenuItem";
             this.bookmarkedPackagesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.bookmarkedPackagesToolStripMenuItem.Text = "&Bookmarked packages";
@@ -325,6 +329,7 @@
             this.deletedToolStripMenuItem,
             this.detailsToolStripMenuItem,
             this.toolStripSeparator9,
+            this.selectAllToolStripMenuItem,
             this.importToolStripMenuItem1,
             this.exportToolStripMenuItem1,
             this.tsSepHelpers,
@@ -417,6 +422,13 @@
             // 
             this.toolStripSeparator9.Name = "toolStripSeparator9";
             this.toolStripSeparator9.Size = new System.Drawing.Size(192, 6);
+            // 
+            // selectAllToolStripMenuItem
+            // 
+            this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
+            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.selectAllToolStripMenuItem.Text = "S&elect all";
+            this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
             // 
             // importToolStripMenuItem1
             // 
@@ -534,7 +546,7 @@
             // 
             this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.automaticUpdateChecksToolStripMenuItem,
-            this.organiseBookmarksToolStripMenuItem,
+            this.organiseBookmarksSettingsToolStripMenuItem,
             this.externalProgramsToolStripMenuItem,
             this.manageWrappersToolStripMenuItem,
             this.enableDDSPreviewToolStripMenuItem,
@@ -554,10 +566,10 @@
             // 
             // organiseBookmarksToolStripMenuItem
             // 
-            this.organiseBookmarksToolStripMenuItem.Name = "organiseBookmarksToolStripMenuItem";
-            this.organiseBookmarksToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
-            this.organiseBookmarksToolStripMenuItem.Text = "Organise Boo&kmarks...";
-            this.organiseBookmarksToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            this.organiseBookmarksSettingsToolStripMenuItem.Name = "organiseBookmarksToolStripMenuItem";
+            this.organiseBookmarksSettingsToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.organiseBookmarksSettingsToolStripMenuItem.Text = "Organise Boo&kmarks...";
+            this.organiseBookmarksSettingsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // externalProgramsToolStripMenuItem
             // 
@@ -660,6 +672,7 @@
             this.bwcmCompressed,
             this.bwcmDeleted,
             this.bwcmDetails,
+            this.bwcmSelectAll,
             this.toolStripSeparator10,
             this.bwcmImport,
             this.bwcmExport,
@@ -667,15 +680,15 @@
             this.bwcmHexEditor,
             this.bwcmTextEditor});
             this.browserWidgetContextMenuStrip.Name = "browserWidgetContextMenuStrip";
-            this.browserWidgetContextMenuStrip.Size = new System.Drawing.Size(158, 286);
+            this.browserWidgetContextMenuStrip.Size = new System.Drawing.Size(156, 308);
             this.browserWidgetContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.cmsBW_Opening);
             // 
             // bwcmAdd
             // 
             this.bwcmAdd.Enabled = false;
             this.bwcmAdd.Name = "bwcmAdd";
-            this.bwcmAdd.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.bwcmAdd.Size = new System.Drawing.Size(157, 22);
+            this.bwcmAdd.ShortcutKeys = System.Windows.Forms.Keys.Insert;
+            this.bwcmAdd.Size = new System.Drawing.Size(155, 22);
             this.bwcmAdd.Text = "&Add...";
             this.bwcmAdd.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -683,8 +696,7 @@
             // 
             this.bwcmCopy.Enabled = false;
             this.bwcmCopy.Name = "bwcmCopy";
-            this.bwcmCopy.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.bwcmCopy.Size = new System.Drawing.Size(157, 22);
+            this.bwcmCopy.Size = new System.Drawing.Size(155, 22);
             this.bwcmCopy.Text = "Cop&y";
             this.bwcmCopy.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -692,8 +704,7 @@
             // 
             this.bwcmPaste.Enabled = false;
             this.bwcmPaste.Name = "bwcmPaste";
-            this.bwcmPaste.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
-            this.bwcmPaste.Size = new System.Drawing.Size(157, 22);
+            this.bwcmPaste.Size = new System.Drawing.Size(155, 22);
             this.bwcmPaste.Text = "&Paste...";
             this.bwcmPaste.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -701,7 +712,7 @@
             // 
             this.bwcmDuplicate.Enabled = false;
             this.bwcmDuplicate.Name = "bwcmDuplicate";
-            this.bwcmDuplicate.Size = new System.Drawing.Size(157, 22);
+            this.bwcmDuplicate.Size = new System.Drawing.Size(155, 22);
             this.bwcmDuplicate.Text = "D&uplicate";
             this.bwcmDuplicate.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -709,20 +720,20 @@
             // 
             this.bwcmReplace.Enabled = false;
             this.bwcmReplace.Name = "bwcmReplace";
-            this.bwcmReplace.Size = new System.Drawing.Size(157, 22);
+            this.bwcmReplace.Size = new System.Drawing.Size(155, 22);
             this.bwcmReplace.Text = "&Replace...";
             this.bwcmReplace.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(154, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(152, 6);
             // 
             // bwcmCompressed
             // 
             this.bwcmCompressed.Enabled = false;
             this.bwcmCompressed.Name = "bwcmCompressed";
-            this.bwcmCompressed.Size = new System.Drawing.Size(157, 22);
+            this.bwcmCompressed.Size = new System.Drawing.Size(155, 22);
             this.bwcmCompressed.Text = "&Compressed";
             this.bwcmCompressed.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -730,7 +741,8 @@
             // 
             this.bwcmDeleted.Enabled = false;
             this.bwcmDeleted.Name = "bwcmDeleted";
-            this.bwcmDeleted.Size = new System.Drawing.Size(157, 22);
+            this.bwcmDeleted.ShortcutKeys = System.Windows.Forms.Keys.Delete;
+            this.bwcmDeleted.Size = new System.Drawing.Size(155, 22);
             this.bwcmDeleted.Text = "De&leted";
             this.bwcmDeleted.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -738,15 +750,24 @@
             // 
             this.bwcmDetails.Enabled = false;
             this.bwcmDetails.Name = "bwcmDetails";
-            this.bwcmDetails.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
-            this.bwcmDetails.Size = new System.Drawing.Size(157, 22);
+            this.bwcmDetails.ShortcutKeyDisplayString = "Enter";
+            this.bwcmDetails.Size = new System.Drawing.Size(155, 22);
             this.bwcmDetails.Text = "&Details...";
             this.bwcmDetails.Click += new System.EventHandler(this.tsCMSBW_Click);
+            // 
+            // bwcmSelectAll
+            // 
+            this.bwcmSelectAll.Enabled = false;
+            this.bwcmSelectAll.Name = "bwcmSelectAll";
+            this.bwcmSelectAll.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
+            this.bwcmSelectAll.Size = new System.Drawing.Size(155, 22);
+            this.bwcmSelectAll.Text = "S&elect all";
+            this.bwcmSelectAll.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
             // toolStripSeparator10
             // 
             this.toolStripSeparator10.Name = "toolStripSeparator10";
-            this.toolStripSeparator10.Size = new System.Drawing.Size(154, 6);
+            this.toolStripSeparator10.Size = new System.Drawing.Size(152, 6);
             // 
             // bwcmImport
             // 
@@ -756,7 +777,7 @@
             this.bwcmAsDBC});
             this.bwcmImport.Enabled = false;
             this.bwcmImport.Name = "bwcmImport";
-            this.bwcmImport.Size = new System.Drawing.Size(157, 22);
+            this.bwcmImport.Size = new System.Drawing.Size(155, 22);
             this.bwcmImport.Text = "I&mport";
             // 
             // bwcmFromFile
@@ -787,7 +808,7 @@
             this.bwcmToPackage});
             this.bwcmExport.Enabled = false;
             this.bwcmExport.Name = "bwcmExport";
-            this.bwcmExport.Size = new System.Drawing.Size(157, 22);
+            this.bwcmExport.Size = new System.Drawing.Size(155, 22);
             this.bwcmExport.Text = "E&xport";
             // 
             // bwcmToFile
@@ -809,13 +830,13 @@
             // bwcmSepHelpers
             // 
             this.bwcmSepHelpers.Name = "bwcmSepHelpers";
-            this.bwcmSepHelpers.Size = new System.Drawing.Size(154, 6);
+            this.bwcmSepHelpers.Size = new System.Drawing.Size(152, 6);
             // 
             // bwcmHexEditor
             // 
             this.bwcmHexEditor.Enabled = false;
             this.bwcmHexEditor.Name = "bwcmHexEditor";
-            this.bwcmHexEditor.Size = new System.Drawing.Size(157, 22);
+            this.bwcmHexEditor.Size = new System.Drawing.Size(155, 22);
             this.bwcmHexEditor.Text = "&Hex Editor";
             this.bwcmHexEditor.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -823,7 +844,7 @@
             // 
             this.bwcmTextEditor.Enabled = false;
             this.bwcmTextEditor.Name = "bwcmTextEditor";
-            this.bwcmTextEditor.Size = new System.Drawing.Size(157, 22);
+            this.bwcmTextEditor.Size = new System.Drawing.Size(155, 22);
             this.bwcmTextEditor.Text = "&Text Editor";
             this.bwcmTextEditor.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -834,7 +855,7 @@
             this.tpcmFloat,
             this.tpcmOTE});
             this.textPreviewContextMenuStrip.Name = "textPreviewContextMenuStrip";
-            this.textPreviewContextMenuStrip.Size = new System.Drawing.Size(168, 92);
+            this.textPreviewContextMenuStrip.Size = new System.Drawing.Size(168, 70);
             this.textPreviewContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.cmsTP_Opening);
             // 
             // tpcmCopy
@@ -861,6 +882,13 @@
             this.tpcmOTE.Size = new System.Drawing.Size(167, 22);
             this.tpcmOTE.Text = "Open in Text &Editor";
             this.tpcmOTE.Click += new System.EventHandler(this.tsCMSTP_Click);
+            // 
+            // organiseToolStripMenuItem
+            // 
+            this.organiseBookmarksToolStripMenuItem.Name = "organiseToolStripMenuItem";
+            this.organiseBookmarksToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.organiseBookmarksToolStripMenuItem.Text = "Organise...";
+            this.organiseBookmarksToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
             // 
             // MenuBarWidget
             // 
@@ -919,7 +947,7 @@
         private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem externalProgramsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem organiseBookmarksToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem organiseBookmarksSettingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
         private System.Windows.Forms.ToolStripMenuItem saveSettingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem replaceToolStripMenuItem;
@@ -965,5 +993,8 @@
         private System.Windows.Forms.ToolStripMenuItem tpcmFloat;
         private System.Windows.Forms.ToolStripMenuItem tpcmOTE;
         public System.Windows.Forms.ContextMenuStrip textPreviewContextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem selectAllToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bwcmSelectAll;
+        private System.Windows.Forms.ToolStripMenuItem organiseBookmarksToolStripMenuItem;
     }
 }

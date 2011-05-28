@@ -202,10 +202,28 @@ namespace S3PIDemoFE
                     }
                     this.Text = String.Format("{0}: [{1}] {2}", myName, ReadWrite ? "RW" : "RO", s);
                 }
+                catch (InvalidDataException idex)
+                {
+                    CopyableMessageBox.Show(
+                            String.Format("Could not open package:\n{0}\n{1}", Filename, idex.Message),
+                            "Invalid data in file", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                    Filename = "";
+                }
                 catch (Exception ex)
                 {
-                    IssueException(ex, "Could not open package:\n" + Filename);
-                    Filename = "";
+                    if (ReadWrite)
+                    {
+                        int i = CopyableMessageBox.Show(
+                            String.Format("The selected file could not be opened read-write.\n{0}\n{1}\n\nRetry as read-only?", Filename, ex.Message),
+                            "Could not open file", CopyableMessageBoxButtons.RetryCancel, CopyableMessageBoxIcon.Error);
+                        if (i == 0) Filename = "0:" + Filename;
+                        else Filename = "";
+                    }
+                    else
+                    {
+                        IssueException(ex, "Could not open package:\n" + Filename);
+                        Filename = "";
+                    }
                 }
             }
             else
@@ -459,6 +477,7 @@ namespace S3PIDemoFE
                     case MenuBarWidget.MB.MBF_setMaxRecent: fileSetMaxRecent(); break;
                     case MenuBarWidget.MB.MBF_bookmarkCurrent: fileBookmarkCurrent(); break;
                     case MenuBarWidget.MB.MBF_setMaxBookmarks: fileSetMaxBookmarks(); break;
+                    case MenuBarWidget.MB.MBF_organiseBookmarks: fileOrganiseBookmarks(); break;
                     case MenuBarWidget.MB.MBF_exit: fileExit(); break;
                 }
             }
@@ -574,6 +593,11 @@ namespace S3PIDemoFE
             DialogResult dr = gnd.ShowDialog();
             if (dr != DialogResult.OK) return;
             S3PIDemoFE.Properties.Settings.Default.BookmarkSize = (short)gnd.Value;
+        }
+
+        private void fileOrganiseBookmarks()
+        {
+            settingsOrganiseBookmarks();
         }
 
         private void fileExit()
@@ -738,6 +762,7 @@ namespace S3PIDemoFE
                     case MenuBarWidget.MB.MBR_compressed: resourceCompressed(); break;
                     case MenuBarWidget.MB.MBR_isdeleted: resourceIsDeleted(); break;
                     case MenuBarWidget.MB.MBR_details: resourceDetails(); break;
+                    case MenuBarWidget.MB.MBR_selectAll: resourceSelectAll(); break;
                     case MenuBarWidget.MB.MBR_replace: resourceReplace(); break;
                     case MenuBarWidget.MB.MBR_importResources: resourceImport(); break;
                     case MenuBarWidget.MB.MBR_importPackages: resourceImportPackages(); break;
@@ -932,6 +957,11 @@ namespace S3PIDemoFE
                 browserWidget1.ResourceName(ir.Instance, ir.ResourceName, true, ir.AllowRename);
 
             IsPackageDirty = true;
+        }
+
+        private void resourceSelectAll()
+        {
+            browserWidget1.SelectAll();
         }
 
         private void resourceReplace()

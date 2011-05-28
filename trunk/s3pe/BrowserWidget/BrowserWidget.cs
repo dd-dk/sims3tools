@@ -153,6 +153,12 @@ namespace S3PIDemoFE
                 if (nmap.ContainsKey(rie.Instance)) return nmap[rie.Instance];
             return "";
         }
+
+        public void SelectAll()
+        {
+            listView1.SelectedItems.Clear();
+            for (int i = 0; i < listView1.Items.Count; i++) listView1.Items[i].Selected = true;
+        }
         #endregion
 
         #region Properties
@@ -694,8 +700,6 @@ namespace S3PIDemoFE
 
 
         private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(sender, e); }
-
-        private void listView1_KeyUp(object sender, KeyEventArgs e) { if (e.KeyData == Keys.Delete) OnDeletePressed(sender, EventArgs.Empty); }
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
