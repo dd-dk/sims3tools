@@ -119,7 +119,7 @@ namespace s3ascHelper
                 }
                 catch (Exception ex)
                 {
-                    CopyableMessageBox.IssueException(ex, "Error");
+                    CopyableMessageBox.IssueException(ex, "Error processing " + Program.Filename);
                     throw ex;
                 }
             }
