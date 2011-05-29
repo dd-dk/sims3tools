@@ -119,16 +119,16 @@ namespace s3ascHelper
 
             if (removed.Count != 0)
             {
-                // http://dino.drealm.info/den/denforum/index.php?topic=394.msg3876#msg3876
 #if UNDEF
+                // http://dino.drealm.info/den/denforum/index.php?topic=394.msg3876#msg3876
                 removed.ForEach(j => mesh.JointReferences[mesh.JointReferences.IndexOf(j)] = 0);
-
-                System.Windows.Forms.CopyableMessageBox.Show(String.Format("Mesh: 0x{0}\nJointReferences removed (set to zero): {1}\n({2})",
+#endif
+                // However, OM felt more comfortable if there was some indication something a little odd was going on.
+                System.Windows.Forms.CopyableMessageBox.Show(String.Format("Mesh: 0x{0}\nUnused JointReferences: {1}\n({2})",
                     mesh.Name,
                     removed.Count,
                     String.Join(", ", removed.ConvertAll<string>(a => "0x" + a.ToString("X8")).ToArray())),
                     "Warning", System.Windows.Forms.CopyableMessageBoxButtons.OK, System.Windows.Forms.CopyableMessageBoxIcon.Warning);
-#endif
             }
             #endregion
         }
@@ -181,6 +181,8 @@ namespace s3ascHelper
 
         UIntList CreateJointReferences(MLOD.Mesh mesh, s3piwrappers.Vertex[] mverts, List<s3piwrappers.Vertex[]> lverts, SKIN skin)
         {
+            if (skin == null || skin.Bones == null) return new UIntList(null);
+
             int maxReference = -1;
 
             lverts.Insert(0, mverts);
