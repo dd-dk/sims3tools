@@ -1015,6 +1015,8 @@ namespace S3PIDemoFE
 
         #endregion
 
+        public Array Value { get { return (Array)owner[field].Value; } }
+
         public class ArrayConverter : ExpandableObjectConverter
         {
             public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
@@ -1035,7 +1037,7 @@ namespace S3PIDemoFE
             {
                 ArrayCTD ctd = value as ArrayCTD;
                 AApiVersionedFields owner = new ArrayOwner(ctd.owner, ctd.field);
-                Array ary = (Array)ctd.owner[ctd.field].Value;
+                Array ary = ctd.Value;
                 Type type = ary.GetType().GetElementType();
                 string fmt = type.Name + " [{0:X" + ary.Length.ToString("X").Length + "}]";
 

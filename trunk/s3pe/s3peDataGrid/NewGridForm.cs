@@ -218,6 +218,48 @@ namespace S3PIDemoFE
             fillListBox(selectedIndex);
         }
 
+        private void btnExpAll_Click(object sender, EventArgs e)
+        {
+            if (s3PIPropertyGrid1.SelectedGridItem == null) return;
+            GridItem parent = GetRoot(s3PIPropertyGrid1.SelectedGridItem);
+            if (parent != null) ExpandAll(parent);
+        }
+        GridItem GetRoot(GridItem gridItem)
+        {
+            if (gridItem.GridItemType == GridItemType.Root) return gridItem;
+            if (gridItem.Parent != null) return GetRoot(gridItem.Parent);
+            return null;
+        }
+        void ExpandAll(GridItem gridItem)
+        {
+            foreach (GridItem g in gridItem.GridItems)
+            {
+                if (g.Label == "AsBytes") continue;
+                if (g.GridItemType != GridItemType.Property) continue;
+                if (g.Expandable && !g.Expanded)
+                {
+                    PropertyDescriptor pd = g.PropertyDescriptor;
+                    if (pd.PropertyType == typeof(ArrayCTD))
+                    {
+                        ArrayCTD ctd = g.Value as ArrayCTD;
+                        if (ctd == null || ctd.Value == null || ctd.Value.Length > 64) continue;
+                        g.Expanded = true;
+                        ExpandAll(g);
+                    }
+                    else
+                    {
+                        g.Expanded = true;
+                        ExpandAll(g);
+                    }
+                }
+            }
+        }
+
+        private void btnCollAll_Click(object sender, EventArgs e)
+        {
+            s3PIPropertyGrid1.CollapseAllGridItems();
+        }
+
         // added for http://dino.drealm.info/develforums/s3pi/index.php?topic=685.0
         bool OKtoClose = false;
         private void btnClose_Click(object sender, EventArgs e)
