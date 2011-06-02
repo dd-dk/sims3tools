@@ -59,7 +59,7 @@ namespace ObjectCloner.CustomControls
             }
             set
             {
-                if (AResource.ArrayCompare(Value, value)) return;
+                if (Value.Equals<ObjectCatalogResource.TopicRating>(value)) return;
                 int i = 0;
                 IterateTLP(x => x.Value = value[i++]);
             }
