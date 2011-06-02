@@ -1,4 +1,4 @@
-﻿@prefix : <http://sims3.drealm.info/s3octerms/1.0#> .
+@prefix : <http://sims3.drealm.info/s3octerms/1.0#> .
 
 # When "Exclude common resources" is checked, these will be omitted from cloned objects
 :CommonResources a  :ResourceList ;
@@ -11,7 +11,7 @@
    , [ :T "0x00B2D882" ; :I "0x937C71E144222C2C" ; :N "DropShadow" ]			# _IMG
    , [ :T "0x00B2D882" ; :I "0xA4D80FB45AE9066B" ; :N "Burnt" ]				# _IMG
    , [ :T "0x00B2D882" ; :I "0x556A8A2F8D4F616A" ; :N "EmptyOverlayZeroAlp" ]	# _IMG
-   , [ :T "0x00B2D882" ; :I "0x05314CDB2011373E" ; :N "Default Black Spec" ]	# _IMG
+   , [ :T "0x00B2D882" ; :I "0x05314CDB2011373E" ; :N "Default Black Spec" ]		# _IMG
    , [ :T "0x00B2D882" ; :I "0xD5A5566C96875EA4" ; :N "Default ceramic" ]		# _IMG
    , [ :T "0x00B2D882" ; :I "0xD5A5566C96875EA6" ; :N "Default ceramic" ]		# _IMG
    , [ :T "0x00B2D882" ; :I "0xAE9B644A04C19131" ; :N "Default leather" ]		# _IMG
@@ -22,12 +22,12 @@
    , [ :T "0x00B2D882" ; :I "0x758775640DF7E0BB" ; :N "Default metal" ]		# _IMG
    , [ :T "0x00B2D882" ; :I "0x2FE56F0D4D55DB70" ; :N "Default plastic" ]		# _IMG
    , [ :T "0x00B2D882" ; :I "0x2FE56F0D4D55DB72" ; :N "Default plastic" ]		# _IMG
-   , [ :T "0x00B2D882" ; :I "0xD23601EE664004D5" ; :N "Default porcelain" ]	# _IMG
-   , [ :T "0x00B2D882" ; :I "0xD23601EE664004D7" ; :N "Default porcelain" ]	# _IMG
+   , [ :T "0x00B2D882" ; :I "0xD23601EE664004D5" ; :N "Default porcelain" ]		# _IMG
+   , [ :T "0x00B2D882" ; :I "0xD23601EE664004D7" ; :N "Default porcelain" ]		# _IMG
    , [ :T "0x00B2D882" ; :I "0xB81D2D06365CA789" ; :N "Default stone" ]		# _IMG
    , [ :T "0x00B2D882" ; :I "0xB81D2D06365CA78B" ; :N "Default stone" ]		# _IMG
-   , [ :T "0x00B2D882" ; :I "0x4A9A601660C41F69" ; :N "Default wood" ]		# _IMG
-   , [ :T "0x00B2D882" ; :I "0x4A9A601660C41F6B" ; :N "Default wood" ]		# _IMG
+   , [ :T "0x00B2D882" ; :I "0x4A9A601660C41F69" ; :N "Default wood" ]			# _IMG
+   , [ :T "0x00B2D882" ; :I "0x4A9A601660C41F6B" ; :N "Default wood" ]			# _IMG
 .
 
 :Win64
@@ -203,10 +203,67 @@
 :sp3
    a  :Sims3, :SP ;
    :hasName  "SP3" ;
-   :hasLongname  "The Sims 3 SP3 Stuff";
-   :hasDefaultInstallDir  "Electronic Arts/The Sims 3 SP3 Stuff";
+   :hasLongname  "The Sims 3 Outdoor Living Stuff";
+   :hasDefaultInstallDir  "Electronic Arts/The Sims 3 Outdoor Living Stuff";
    :hasPriority  6 ;
    :hasRGVersion  6 ;
+   :isSuppressed  "false" ;
+   :hasPackages [
+      a :Objects ;
+      :in "GameData/Shared" ;
+      :packages (
+         	"DeltaPackages/p04/DeltaBuild_p04.package"
+         	"DeltaPackages/p03/DeltaBuild_p03.package"
+         	"DeltaPackages/p02/DeltaBuild_p02.package"
+		"Packages/FullBuild_p07.package"
+      ) .
+   ], [
+      a :Images ;
+      :in "GameData/Shared" ;
+      :packages ( "Packages/FullBuild_p07.package" ) .
+   ], [
+      a :Thumbnails ;
+      :in "Thumbnails" ;
+      :packages ( "AllThumbnails.package" ) .
+   ]
+.
+
+:ep4
+   a  :Sims3, :EP ;
+   :hasName  "EP4" ;
+   :hasLongname  "The Sims 3 Generations";
+   :hasDefaultInstallDir  "Electronic Arts/The Sims 3 Generations";
+   :hasPriority  7 ;
+   :hasRGVersion  7 ;
+   :isSuppressed  "false" ;
+   :hasPackages [
+      a :Objects ;
+      :in "GameData/Shared" ;
+      :packages (
+         	"DeltaPackages/p05/DeltaBuild_p05.package"
+         	"DeltaPackages/p04/DeltaBuild_p04.package"
+         	"DeltaPackages/p03/DeltaBuild_p03.package"
+         	"DeltaPackages/p02/DeltaBuild_p02.package"
+		"Packages/FullBuild_p06.package"
+      ) .
+   ], [
+      a :Images ;
+      :in "GameData/Shared" ;
+      :packages ( "Packages/FullBuild_p06.package" ) .
+   ], [
+      a :Thumbnails ;
+      :in "Thumbnails" ;
+      :packages ( "AllThumbnails.package" ) .
+   ]
+.
+
+:sp4
+   a  :Sims3, :SP ;
+   :hasName  "SP4" ;
+   :hasLongname  "The Sims 3 Town Life Stuff";
+   :hasDefaultInstallDir  "Electronic Arts/The Sims 3 Town Life Stuff";
+   :hasPriority  8 ;
+   :hasRGVersion  8 ;
    :isSuppressed  "false" ;
    :hasPackages [
       a :Objects ;
