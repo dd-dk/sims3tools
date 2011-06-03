@@ -50,7 +50,16 @@
    :hasPackages [
       a :Objects ;
       :in "GameData/Shared/Packages" ;
-      :packages ( "Deltabuild0.package" "Fullbuild0.package" ) .
+      :packages  (        	
+		"DeltaPackages/p07/DeltaBuild_p07.package"
+         	"DeltaPackages/p06/DeltaBuild_p06.package"
+         	"DeltaPackages/p05/DeltaBuild_p05.package"
+         	"DeltaPackages/p04/DeltaBuild_p04.package"
+         	"DeltaPackages/p03/DeltaBuild_p03.package"
+         	"DeltaPackages/p02/DeltaBuild_p02.package"
+		"Deltabuild0.package" 
+		"Fullbuild0.package" 
+	) .
    ], [
       a :Images ;
       :in "GameData/Shared/Packages" ;
@@ -212,6 +221,8 @@
       a :Objects ;
       :in "GameData/Shared" ;
       :packages (
+         	"DeltaPackages/p06/DeltaBuild_p06.package"
+         	"DeltaPackages/p05/DeltaBuild_p05.package"
          	"DeltaPackages/p04/DeltaBuild_p04.package"
          	"DeltaPackages/p03/DeltaBuild_p03.package"
          	"DeltaPackages/p02/DeltaBuild_p02.package"
@@ -240,16 +251,18 @@
       a :Objects ;
       :in "GameData/Shared" ;
       :packages (
+         	"DeltaPackages/p07/DeltaBuild_p07.package"
+         	"DeltaPackages/p06/DeltaBuild_p06.package"
          	"DeltaPackages/p05/DeltaBuild_p05.package"
          	"DeltaPackages/p04/DeltaBuild_p04.package"
          	"DeltaPackages/p03/DeltaBuild_p03.package"
          	"DeltaPackages/p02/DeltaBuild_p02.package"
-		"Packages/FullBuild_p06.package"
+		"Packages/FullBuild_p08.package"
       ) .
    ], [
       a :Images ;
       :in "GameData/Shared" ;
-      :packages ( "Packages/FullBuild_p06.package" ) .
+      :packages ( "Packages/FullBuild_p08.package" ) .
    ], [
       a :Thumbnails ;
       :in "Thumbnails" ;
@@ -272,12 +285,12 @@
          	"DeltaPackages/p04/DeltaBuild_p04.package"
          	"DeltaPackages/p03/DeltaBuild_p03.package"
          	"DeltaPackages/p02/DeltaBuild_p02.package"
-		"Packages/FullBuild_p07.package"
+		"Packages/FullBuild_p09.package"
       ) .
    ], [
       a :Images ;
       :in "GameData/Shared" ;
-      :packages ( "Packages/FullBuild_p07.package" ) .
+      :packages ( "Packages/FullBuild_p09.package" ) .
    ], [
       a :Thumbnails ;
       :in "Thumbnails" ;
