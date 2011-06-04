@@ -560,7 +560,7 @@ namespace ObjectCloner
             isPadSTBLs = cloneFixOptions.IsPadSTBLs;
 
             if (cloneFixOptions.IsRepair)
-                SetAppendEA(true);//and go off and get the bits (out to a tmp pkg, re-open, fix to current name?)
+                SetAppendEA(true);
 
             if (isCreateNewPackage) CloneStart();
             else FixStart();
@@ -599,6 +599,7 @@ namespace ObjectCloner
             ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(saveFileDialog1.FileName);
             Diagnostics.Log("CloneStart: " + saveFileDialog1.FileName);
 
+            RunRKLookup();
             StartSaving();
         }
 
@@ -612,7 +613,11 @@ namespace ObjectCloner
                 return;
             }
 
-            StartFixing();
+            RunRKLookup();
+            if (cloneFixOptions.IsRepair)
+                RunRepair();//then StartFixing
+            else
+                StartFixing();
         }
         #endregion
 
@@ -1868,15 +1873,18 @@ namespace ObjectCloner
             lastInChain = stepList == null ? -1 : (stepList.IndexOf(lastStepInChain) + 1);
         }
 
+        bool NotJustSelf() { return isCreateNewPackage || cloneFixOptions.IsRepair || cloneFixOptions.IsRenumber; }
+        bool WantThumbs() { return cloneFixOptions.IsIncludeThumbnails || (!(isCreateNewPackage || cloneFixOptions.IsRepair) && cloneFixOptions.IsRenumber); }
+
         void ThumbnailsOnly_Steps(List<Step> stepList, out Step lastStepInChain)
         {
             Diagnostics.Log("ThumbnailsOnly_Steps");
             lastStepInChain = None;
-            if (isCreateNewPackage || cloneFixOptions.IsRenumber)
+            if (NotJustSelf())
             {
                 stepList.AddRange(new Step[] {
                 });
-                if (cloneFixOptions.IsIncludeThumbnails || (!isCreateNewPackage && cloneFixOptions.IsRenumber))
+                if (WantThumbs())
                     stepList.Add(SlurpThumbnails);
             }
         }
@@ -1885,7 +1893,7 @@ namespace ObjectCloner
         {
             Diagnostics.Log("brush_Steps");
             ThumbnailsOnly_Steps(stepList, out lastStepInChain);
-            if (isCreateNewPackage || cloneFixOptions.IsRenumber)
+            if (NotJustSelf())
             {
                 if (isDeepClone)
                 {
@@ -1901,7 +1909,7 @@ namespace ObjectCloner
         {
             Diagnostics.Log("CTPT_Steps");
             brush_Steps(stepList, out lastStepInChain);
-            if (isCreateNewPackage || cloneFixOptions.IsRenumber)
+            if (NotJustSelf())
             {
                 stepList.InsertRange(0, new Step[] {
                     CTPT_addPair,
@@ -1914,7 +1922,7 @@ namespace ObjectCloner
         {
             Diagnostics.Log("CatlgHasVPXY_Steps");
             lastStepInChain = None;
-            if (isCreateNewPackage || cloneFixOptions.IsRenumber)
+            if (NotJustSelf())
             {
                 stepList.AddRange(new Step[] {
                     Catlg_getVPXYs,
@@ -1945,7 +1953,7 @@ namespace ObjectCloner
                 else
                 {
                 }
-                if (cloneFixOptions.IsIncludeThumbnails || (!isCreateNewPackage && cloneFixOptions.IsRenumber))
+                if (WantThumbs())
                     stepList.Add(SlurpThumbnails);
             }
         }
@@ -1954,7 +1962,7 @@ namespace ObjectCloner
         {
             Diagnostics.Log("OBJD_Steps");
             CatlgHasVPXY_Steps(stepList, out lastStepInChain);
-            if (isCreateNewPackage || cloneFixOptions.IsRenumber)
+            if (NotJustSelf())
             {
                 stepList.Remove(Catlg_getVPXYs);
                 stepList.InsertRange(stepList.IndexOf(Catlg_addVPXYs), new Step[] {
@@ -1987,7 +1995,7 @@ namespace ObjectCloner
         {
             Diagnostics.Log("CWAL_Steps");
             CatlgHasVPXY_Steps(stepList, out lastStepInChain);
-            if (isCreateNewPackage || cloneFixOptions.IsRenumber)
+            if (NotJustSelf())
             {
                 if (isDeepClone)
                 {
@@ -1998,7 +2006,7 @@ namespace ObjectCloner
                         Catlg_IncludePresets,
                     });
                 }
-                if (cloneFixOptions.IsIncludeThumbnails || (!isCreateNewPackage && cloneFixOptions.IsRenumber))
+                if (WantThumbs())
                 {
                     stepList.Remove(SlurpThumbnails);
                     stepList.Add(CWAL_SlurpThumbnails);
@@ -2010,7 +2018,7 @@ namespace ObjectCloner
         {
             Diagnostics.Log("CFIR_Steps");
             stepList.AddRange(new Step[] { Item_findObjds, setupObjdStepList, Modular_Main, });
-            if (cloneFixOptions.IsIncludeThumbnails || (!isCreateNewPackage && cloneFixOptions.IsRenumber))
+            if (WantThumbs())
                 stepList.Add(SlurpThumbnails);//For the CFIR itself
             lastStepInChain = None;
         }
@@ -2593,9 +2601,9 @@ namespace ObjectCloner
                         }
             }
 
-            SpecificResource catlgItem = selectedItem;
-            if (selectedItem.CType == CatalogType.ModularResource)
-                catlgItem = ItemForTGIBlock0(catlgItem);
+            SpecificResource catlgItem = selectedItem.CType == CatalogType.ModularResource
+                ? ItemForTGIBlock0(selectedItem)
+                : selectedItem;
 
             if (catlgItem.ResourceIndexEntry != null)
             {
@@ -2621,7 +2629,6 @@ namespace ObjectCloner
 
         void StartFixing()
         {
-            RunRKLookup();
             GenerateNewIIDs();
 
             DoWait("Please wait, updating your package...");
@@ -2982,22 +2989,27 @@ namespace ObjectCloner
         }
         #endregion
 
-        #region Saving thread
+        #region Saving bits
         Thread saveThread;
         bool saving = false;
+        bool waitingForSavePackage;
+        PathPackageTuple target;
         void StartSaving()
         {
             this.Enabled = false;
             waitingForSavePackage = true;
             this.SavingComplete += new EventHandler<BoolEventArgs>(MainForm_SavingComplete);
 
-            RunRKLookup();
-
             DoWait("Please wait, creating your new package...");
+            Diagnostics.Log("Creating output package...");
+            updateProgress(true, "Creating output package...", false, -1, false, -1);
+            s3pi.Package.Package.NewPackage(0).SaveAs(saveFileDialog1.FileName);
+            target = new PathPackageTuple(saveFileDialog1.FileName, true);//need to be able to write to it...
+
             SaveList sl = new SaveList(this,
                 selectedItem, rkLookup,
-                saveFileDialog1.FileName, disableCompression, isPadSTBLs, false/*mode == Mode.FromGame/**/, null, //cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
-                updateProgress, stopSaving, OnSavingComplete);
+                target, disableCompression, isPadSTBLs, false/*mode == Mode.FromGame/**/, null, //cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
+                updateProgress, () => !saving, OnSavingComplete);
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
             saving = true;
@@ -3018,7 +3030,6 @@ namespace ObjectCloner
             }
         }
 
-        bool waitingForSavePackage;
         void MainForm_SavingComplete(object sender, BoolEventArgs e)
         {
             Diagnostics.Log(String.Format("MainForm_SavingComplete arg: {0}", e.arg));
@@ -3037,12 +3048,17 @@ namespace ObjectCloner
                 if (e.arg)
                 {
                     //isPadSTBLs = false;
+                    Diagnostics.Log("Writing package: " + target.Path);
+                    updateProgress(true, "Writing package...", true, 0, true, 0);
+                    target.Package.SavePackage();
+                    s3pi.Package.Package.ClosePackage(0, target.Package);
+
                     isCreateNewPackage = false;
-                    fileReOpenToFix(saveFileDialog1.FileName, selectedItem.CType);
+                    fileReOpenToFix(target.Path, selectedItem.CType);
                 }
                 else
                 {
-                    if (File.Exists(saveFileDialog1.FileName))
+                    if (File.Exists(target.Path))
                         CopyableMessageBox.Show("\nSave not complete.\nPlease ensure package is not in use.\n", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
                     else
                         CopyableMessageBox.Show("\nSave not complete.\n", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
@@ -3051,240 +3067,61 @@ namespace ObjectCloner
             }
         }
 
-        public delegate bool stopSavingCallback();
-        private bool stopSaving() { return !saving; }
-
         private event EventHandler<BoolEventArgs> SavingComplete;
-        public delegate void savingCompleteCallback(bool complete);
         public void OnSavingComplete(bool complete) { if (SavingComplete != null) { SavingComplete(this, new BoolEventArgs(complete)); } }
+        #endregion
 
-        class SaveList
+        #region Repairing bits
+        Thread repairThread;
+        bool repairing = false;
+        bool waitingForRepair;
+        private event EventHandler<BoolEventArgs> RepairingComplete;
+        public void OnRepairingComplete(bool complete) { if (RepairingComplete != null) { RepairingComplete(this, new BoolEventArgs(complete)); } }
+
+        void RunRepair()
         {
-            MainForm mainForm;
-            SpecificResource selectedItem;
-            Dictionary<string, IResourceKey> rkList;
-            string outputPackage;
-            bool compress;
-            bool padSTBLs;
-            bool zeroSTBLIID;
-            List<Dictionary<String, TypedValue>> commonResources;
-            updateProgressCallback updateProgressCB;
-            stopSavingCallback stopSavingCB;
-            savingCompleteCallback savingCompleteCB;
-            public SaveList(MainForm form, SpecificResource catlgItem, Dictionary<string, IResourceKey> rkList,
-                string outputPackage, bool compress, bool padSTBLs, bool zeroSTBLIID, List<Dictionary<String, TypedValue>> commonResources,
-                updateProgressCallback updateProgressCB, stopSavingCallback stopSavingCB, savingCompleteCallback savingCompleteCB)
+            Diagnostics.Log("RunRepair");
+            this.Enabled = false;
+            waitingForRepair = true;
+            this.RepairingComplete += new EventHandler<BoolEventArgs>(MainForm_RepairComplete);
+
+            DoWait("Please wait, adding missing resources...");
+            SaveList sl = new SaveList(this, selectedItem, rkLookup,
+                FileTable.Current, disableCompression, isPadSTBLs, false/*mode == Mode.FromGame/**/, null, //cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
+                updateProgress, () => !repairing, OnRepairingComplete);
+
+            repairThread = new Thread(new ThreadStart(sl.SavePackage));
+            repairing = true;
+            repairThread.Start();
+        }
+
+        void MainForm_RepairComplete(object sender, BoolEventArgs e)
+        {
+            Diagnostics.Log(String.Format("MainForm_RepairComplete arg: {0}", e.arg));
+            repairing = false;
+            this.Enabled = true;
+            while (repairThread != null && repairThread.IsAlive)
+                repairThread.Join(100);
+            repairThread = null;
+
+            this.toolStripProgressBar1.Visible = false;
+            this.toolStripStatusLabel1.Visible = false;
+
+            if (waitingForRepair)
             {
-                this.mainForm = form;
-                this.selectedItem = catlgItem;
-                this.rkList = rkList;
-                this.outputPackage = outputPackage;
-                this.compress = compress;
-                this.padSTBLs = padSTBLs;
-                this.zeroSTBLIID = zeroSTBLIID;
-                this.commonResources = commonResources;
-                this.updateProgressCB = updateProgressCB;
-                this.stopSavingCB = stopSavingCB;
-                this.savingCompleteCB = savingCompleteCB;
-            }
-
-            //Type: 0x00B2D882 resources are in Fullbuild2, everything else is in Fullbuild0, except thumbs
-            //FullBuild0 is:
-            //  ...\Gamedata\Shared\Packages\FullBuild0.package
-            //Relative path to ALLThumbnails is:
-            // .\..\..\..\Thumbnails\ALLThumbnails.package
-            public void SavePackage()
-            {
-                bool complete = false;
-                PathPackageTuple target = null;
-
-                Diagnostics.Log("Creating output package...");
-                updateProgress(true, "Creating output package...", false, -1, false, -1);
-                try
+                waitingForRepair = false;
+                if (e.arg)
                 {
-                    s3pi.Package.Package.NewPackage(0).SaveAs(outputPackage);
-                    target = new PathPackageTuple(outputPackage, true);//need to be able to write to it...
+                    StartFixing();
                 }
-                catch
+                else
                 {
-                    return;
+                    CopyableMessageBox.Show("Repair not complete.\n", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
+                    DisplayOptions();
                 }
-
-                updateProgress(true, "Please wait...", false, -1, false, -1);
-
-                NameMap fb0nm = new NameMap(FileTable.fb0);
-                NameMap ddsnm = new NameMap(FileTable.dds);
-                SpecificResource newnmap = target.AddResource(fb0nm.rk == RK.NULL ? new TGIBlock(0, null, 0x0166038C, 0, selectedItem.RequestedRK.Instance) : fb0nm.rk);
-                IDictionary<ulong, string> newnamemap = (IDictionary<ulong, string>)newnmap.Resource;
-                try
-                {
-                    int i = 0;
-                    int freq = Math.Max(1, rkList.Count / 50);
-                    updateProgress(true, "Cloning... 0%", true, rkList.Count, true, i);
-                    string lastSaved = "nothing yet";
-
-                    List<IResourceKey> saved = new List<IResourceKey>();
-                    foreach (var kvp in rkList)
-                    {
-                        if (stopSaving) return;
-
-                        if (!saved.Contains(kvp.Value) && !excludeResource(kvp.Value))
-                        {
-                            List<PathPackageTuple> lppt =
-                                (selectedItem.RequestedRK.ResourceType != 0x04ED4BB2 && kvp.Value.ResourceType == 0x00B2D882) ? FileTable.dds
-                                : kvp.Key.EndsWith("Thumb") ? FileTable.tmb
-                                : FileTable.fb0;
-                            NameMap nm = kvp.Value.ResourceType == 0x00B2D882 ? ddsnm : fb0nm;
-
-                            SpecificResource item = new SpecificResource(lppt, kvp.Value, true); // use default wrapper
-                            if (item.ResourceIndexEntry != null)
-                            {
-                                if (!stopSaving) target.AddResource(item.ResourceIndexEntry, item.Resource.Stream);
-                                saved.Add(kvp.Value);
-                                Diagnostics.Log(String.Format("Cloned {0} ({1})", kvp.Key, item.LongName));
-                                lastSaved = kvp.Key;
-                                if (!newnamemap.ContainsKey(kvp.Value.Instance))
-                                {
-                                    string name = nm[kvp.Value.Instance];
-                                    if (name != null)
-                                        if (!stopSaving) newnamemap.Add(kvp.Value.Instance, name);
-                                }
-                            }
-                        }
-                        else
-                            Diagnostics.Log(String.Format(saved.Contains(kvp.Value) ? "Already saved {1} ({0})" : "{0} ({1}) is excluded", kvp.Key, kvp.Value));
-
-                        if (++i % freq == 0)
-                            updateProgress(true, "Cloned " + lastSaved + "... " + i * 100 / rkList.Count + "%", true, rkList.Count, true, i);
-                    }
-                    updateProgress(true, "", true, rkList.Count, true, rkList.Count);
-
-                    #region String tables
-                    Diagnostics.Log("Finding string tables...");
-                    updateProgress(true, "Finding string tables...", true, 0, true, 0);
-
-                    SpecificResource catlgItem = selectedItem;
-                    if (catlgItem.CType == CatalogType.ModularResource)
-                    {
-                        TGIBlock tgib = ((TGIBlockList)catlgItem.Resource["TGIBlocks"].Value)[0];
-                        catlgItem = new SpecificResource(FileTable.fb0, tgib);
-                    }
-
-                    if (catlgItem.ResourceIndexEntry != null)
-                    {
-                        ulong nameGUID = (ulong)catlgItem.Resource["CommonBlock.NameGUID"].Value;
-                        ulong descGUID = (ulong)catlgItem.Resource["CommonBlock.DescGUID"].Value;
-
-                        SpecificResource nameStbl = STBLHandler.findStblFor(nameGUID);
-                        SpecificResource descStbl = STBLHandler.findStblFor(descGUID);
-
-                        if (nameStbl == null && descStbl == null)
-                        {
-                            Diagnostics.Log("No string tables found!");
-                            updateProgress(true, "No string tables found!", true, 0, false, 0);
-                        }
-                        else
-                        {
-                            uint stblGroup = (nameStbl != null ? nameStbl : descStbl).RequestedRK.ResourceGroup;
-                            ulong stblInstance = (nameStbl != null ? nameStbl : descStbl).RequestedRK.Instance & (ulong)(zeroSTBLIID ? 0x00FFFFFFFFFF0000 : 0x00FFFFFFFFFFFFFF);
-                            i = 0;
-                            freq = 1;// Math.Max(1, lrie.Count / 10);
-                            Diagnostics.Log("Creating string tables extracts...");
-                            updateProgress(true, "Creating string tables extracts... 0%", true, 0x17, true, i);
-
-                            while (i < 0x17)
-                            {
-                                if (stopSaving) return;
-                                try
-                                {
-                                    SpecificResource oldName = STBLHandler.findStblFor(nameGUID, (byte)i);
-                                    SpecificResource oldDesc = STBLHandler.findStblFor(descGUID, (byte)i);
-                                    if (oldName == null && oldDesc == null && !padSTBLs) continue;
-
-                                    SpecificResource newstbl = target.AddResource(new TGIBlock(0, null, 0x220557DA, stblGroup, ((ulong)i << 56) | stblInstance));
-                                    IDictionary<ulong, string> outstbl = newstbl.Resource as IDictionary<ulong, string>;
-
-                                    if (!outstbl.ContainsKey(nameGUID))
-                                    {
-                                        if (oldName == null) oldName = nameStbl;
-                                        if (oldName != null || padSTBLs)
-                                            outstbl.Add(nameGUID, oldName == null || (oldName.Resource as IDictionary<ulong, string>) == null ? "" : (oldName.Resource as IDictionary<ulong, string>)[nameGUID]);
-                                    }
-
-                                    if (!outstbl.ContainsKey(descGUID))
-                                    {
-                                        if (oldDesc == null) oldDesc = descStbl;
-                                        if (oldDesc != null || padSTBLs)
-                                            outstbl.Add(descGUID, oldDesc == null || (oldDesc.Resource as IDictionary<ulong, string>) == null ? "" : (oldDesc.Resource as IDictionary<ulong, string>)[descGUID]);
-                                    }
-
-                                    if (!stopSaving) newstbl.Commit();
-                                    if (!stopSaving) STBLHandler.AddSTBLToNameMap(newnamemap, (byte)i, newstbl.ResourceIndexEntry.Instance);
-                                }
-                                finally
-                                {
-                                    if (++i % freq == 0)
-                                        updateProgress(true, "Creating string tables extracts... " + i * 100 / 0x17 + "%", true, 0x17, true, i);
-                                }
-                            }
-                        }
-                    }
-                    #endregion
-
-                    Diagnostics.Log("Committing new name map...");
-                    updateProgress(true, "Committing new name map... ", true, 0, true, 0);
-                    if (!stopSaving) newnmap.Commit();
-
-                    Diagnostics.Log("Saving package: " + outputPackage);
-                    updateProgress(true, "Saving package...", true, 0, true, 0);
-                    target.Package.GetResourceList.ForEach(rie => rie.Compressed = (ushort)(compress ? 0xffff : 0x0000));
-                    try
-                    {
-                        target.Package.SavePackage();
-                        s3pi.Package.Package.ClosePackage(0, target.Package);
-                        complete = true;
-                    }
-                    catch (Exception e) { Diagnostics.Log(e.Message); }
-                }
-                catch (ThreadAbortException) { }
-                finally
-                {
-                    savingComplete(complete);
-                }
-            }
-
-            void updateProgress(bool changeText, string text, bool changeMax, int max, bool changeValue, int value)
-            {
-                Thread.Sleep(0);
-                if (mainForm.IsHandleCreated) mainForm.Invoke(updateProgressCB, new object[] { changeText, text, changeMax, max, changeValue, value, });
-            }
-
-            bool stopSaving { get { Thread.Sleep(0); return !mainForm.IsHandleCreated || (bool)mainForm.Invoke(stopSavingCB); } }
-
-            void savingComplete(bool complete)
-            {
-                Thread.Sleep(0);
-                if (mainForm.IsHandleCreated)
-                    mainForm.BeginInvoke(savingCompleteCB, new object[] { complete, });
-            }
-
-            bool excludeResource(IResourceKey rk)
-            {
-                if (commonResources == null) return false;
-
-                TGIBlock tgib = new TGIBlock(0, null, rk);
-                foreach (var dict in commonResources)
-                {
-                    bool match = true;
-                    foreach (string key in dict.Keys)
-                        if (!tgib[key].Equals(dict[key])) { match = false; break; };
-                    if (match) return true;
-                }
-                return false;
             }
         }
         #endregion
-
     }
 
     static class Extensions

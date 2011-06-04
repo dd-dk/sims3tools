@@ -32,7 +32,7 @@ namespace ObjectCloner.TopPanelComponents
         public CloneFixOptions()
         {
             InitializeComponent();
-            ckbRepair.Visible = false;
+            //ckbRepair.Visible = false;
         }
 
         public CloneFixOptions(Form form, bool mustClone, bool allow32bitIIDs, bool shouldPad)

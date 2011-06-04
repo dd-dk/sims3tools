@@ -26,6 +26,8 @@ namespace ObjectCloner
 {
     public class STBLHandler
     {
+        public const ulong FNV64Blank = 0xCBF29CE484222325;
+
         public static bool LangSearch { get { return ObjectCloner.Properties.Settings.Default.LangSearch; } }
 
         static Dictionary<byte, List<SpecificResource>> _STBLs = null;
@@ -55,7 +57,6 @@ namespace ObjectCloner
         public static bool IsOK { get { return STBLs != null && STBLs.Count > 0; } }
 
         public delegate void Callback(byte lang);
-        const ulong FNV64Blank = 0xCBF29CE484222325;
         public static SpecificResource findStblFor(ulong guid, Callback callBack = null)
         {
             if (guid == FNV64Blank) return null;

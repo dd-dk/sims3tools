@@ -109,6 +109,7 @@
     <Compile Include="Diagnostics.cs" />
     <Compile Include="NameMap.cs" />
     <Compile Include="RK.cs" />
+    <Compile Include="SaveList.cs" />
     <Compile Include="SettingsForms\EPsDisabled.cs" />
     <Compile Include="FileTable.cs" />
     <Compile Include="MenuBarWidget\MenuBarWidget.cs">
