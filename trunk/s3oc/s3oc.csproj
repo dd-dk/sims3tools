@@ -149,10 +149,10 @@
     <Compile Include="SpecificResource.cs" />
     <Compile Include="STBLHandler.cs" />
     <Compile Include="THUM.cs" />
-    <Compile Include="TopPanelComponents\TGISearch.cs">
+    <Compile Include="SplitterComponents\TGISearch.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TopPanelComponents\TGISearch.Designer.cs">
+    <Compile Include="SplitterComponents\TGISearch.Designer.cs">
       <DependentUpon>TGISearch.cs</DependentUpon>
     </Compile>
     <None Include="app.config" />
@@ -166,34 +166,34 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="Settings.cs" />
-    <Compile Include="TopPanelComponents\CloneFixOptions.cs">
+    <Compile Include="SplitterComponents\CloneFixOptions.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TopPanelComponents\CloneFixOptions.Designer.cs">
+    <Compile Include="SplitterComponents\CloneFixOptions.Designer.cs">
       <DependentUpon>CloneFixOptions.cs</DependentUpon>
     </Compile>
-    <Compile Include="TopPanelComponents\Search.cs">
+    <Compile Include="SplitterComponents\Search.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TopPanelComponents\Search.Designer.cs">
+    <Compile Include="SplitterComponents\Search.Designer.cs">
       <DependentUpon>Search.cs</DependentUpon>
     </Compile>
-    <Compile Include="TopPanelComponents\ObjectChooser.cs">
+    <Compile Include="SplitterComponents\ObjectChooser.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TopPanelComponents\ObjectChooser.Designer.cs">
+    <Compile Include="SplitterComponents\ObjectChooser.Designer.cs">
       <DependentUpon>ObjectChooser.cs</DependentUpon>
     </Compile>
-    <Compile Include="TopPanelComponents\PleaseWait.cs">
+    <Compile Include="SplitterComponents\PleaseWait.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TopPanelComponents\PleaseWait.Designer.cs">
+    <Compile Include="SplitterComponents\PleaseWait.Designer.cs">
       <DependentUpon>PleaseWait.cs</DependentUpon>
     </Compile>
-    <Compile Include="TopPanelComponents\ResourceList.cs">
+    <Compile Include="SplitterComponents\ResourceList.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TopPanelComponents\ResourceList.Designer.cs">
+    <Compile Include="SplitterComponents\ResourceList.Designer.cs">
       <DependentUpon>ResourceList.cs</DependentUpon>
     </Compile>
     <Content Include="..\s3pi\build\bin\Release\Acknowledgements.txt">
@@ -230,22 +230,22 @@
     <EmbeddedResource Include="SettingsForms\StringInputDialog.resx">
       <DependentUpon>StringInputDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TopPanelComponents\CloneFixOptions.resx">
+    <EmbeddedResource Include="SplitterComponents\CloneFixOptions.resx">
       <DependentUpon>CloneFixOptions.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TopPanelComponents\Search.resx">
+    <EmbeddedResource Include="SplitterComponents\Search.resx">
       <DependentUpon>Search.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TopPanelComponents\ObjectChooser.resx">
+    <EmbeddedResource Include="SplitterComponents\ObjectChooser.resx">
       <DependentUpon>ObjectChooser.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TopPanelComponents\PleaseWait.resx">
+    <EmbeddedResource Include="SplitterComponents\PleaseWait.resx">
       <DependentUpon>PleaseWait.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TopPanelComponents\ResourceList.resx">
+    <EmbeddedResource Include="SplitterComponents\ResourceList.resx">
       <DependentUpon>ResourceList.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="TopPanelComponents\TGISearch.resx">
+    <EmbeddedResource Include="SplitterComponents\TGISearch.resx">
       <DependentUpon>TGISearch.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
