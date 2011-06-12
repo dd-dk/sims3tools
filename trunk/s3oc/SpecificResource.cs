@@ -54,7 +54,7 @@ namespace ObjectCloner
         public void Commit() { PathPackage.Package.ReplaceResource(ResourceIndexEntry, Resource); }
     }
 
-    public class SpecificIndexEntry
+    public class SpecificIndexEntry : IEquatable<SpecificIndexEntry>
     {
         public string PPSource { get; private set; }
         public PathPackageTuple PathPackage { get; private set; }
@@ -135,6 +135,11 @@ namespace ObjectCloner
                 }
             }
             return null;
+        }
+
+        public bool Equals(SpecificIndexEntry other)
+        {
+            return ResourceIndexEntry.Equals(other.ResourceIndexEntry) && PathPackage.Equals(other.PathPackage);
         }
     }
 }
