@@ -147,6 +147,18 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpecificResource.cs" />
+    <Compile Include="SplitterComponents\FixIntegrityResults.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SplitterComponents\FixIntegrityResults.Designer.cs">
+      <DependentUpon>FixIntegrityResults.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SplitterComponents\ReplaceTGI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SplitterComponents\ReplaceTGI.Designer.cs">
+      <DependentUpon>ReplaceTGI.cs</DependentUpon>
+    </Compile>
     <Compile Include="STBLHandler.cs" />
     <Compile Include="THUM.cs" />
     <Compile Include="SplitterComponents\TGISearch.cs">
@@ -155,7 +167,6 @@
     <Compile Include="SplitterComponents\TGISearch.Designer.cs">
       <DependentUpon>TGISearch.cs</DependentUpon>
     </Compile>
-    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -189,12 +200,6 @@
     </Compile>
     <Compile Include="SplitterComponents\PleaseWait.Designer.cs">
       <DependentUpon>PleaseWait.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SplitterComponents\ResourceList.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="SplitterComponents\ResourceList.Designer.cs">
-      <DependentUpon>ResourceList.cs</DependentUpon>
     </Compile>
     <Content Include="..\s3pi\build\bin\Release\Acknowledgements.txt">
       <Link>Acknowledgements.txt</Link>
@@ -233,6 +238,12 @@
     <EmbeddedResource Include="SplitterComponents\CloneFixOptions.resx">
       <DependentUpon>CloneFixOptions.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SplitterComponents\FixIntegrityResults.resx">
+      <DependentUpon>FixIntegrityResults.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SplitterComponents\ReplaceTGI.resx">
+      <DependentUpon>ReplaceTGI.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SplitterComponents\Search.resx">
       <DependentUpon>Search.cs</DependentUpon>
     </EmbeddedResource>
@@ -241,9 +252,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SplitterComponents\PleaseWait.resx">
       <DependentUpon>PleaseWait.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SplitterComponents\ResourceList.resx">
-      <DependentUpon>ResourceList.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SplitterComponents\TGISearch.resx">
       <DependentUpon>TGISearch.cs</DependentUpon>
