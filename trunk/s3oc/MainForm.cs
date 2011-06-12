@@ -29,7 +29,7 @@ using System.Windows.Forms;
 using s3pi.Interfaces;
 using s3pi.Extensions;
 using s3pi.GenericRCOLResource;
-using ObjectCloner.TopPanelComponents;
+using ObjectCloner.SplitterComponents;
 
 namespace ObjectCloner
 {
@@ -48,11 +48,13 @@ namespace ObjectCloner
         SpecificResource selectedItem;
         Image replacementForThumbs;
 
-        private ObjectCloner.TopPanelComponents.ObjectChooser objectChooser;
-        private ObjectCloner.TopPanelComponents.PleaseWait pleaseWait;
-        private ObjectCloner.TopPanelComponents.CloneFixOptions cloneFixOptions;
-        private ObjectCloner.TopPanelComponents.Search searchPane;
-        private ObjectCloner.TopPanelComponents.TGISearch tgiSearchPane;
+        private ObjectChooser objectChooser;
+        private PleaseWait pleaseWait;
+        private CloneFixOptions cloneFixOptions;
+        private Search searchPane;
+        private TGISearch tgiSearchPane;
+        private ReplaceTGI replaceTGIPane;
+        private FixIntegrityResults fixIntegrityResults;
 
         public MainForm()
         {
@@ -107,8 +109,10 @@ namespace ObjectCloner
             }
 
             w = ObjectCloner.Properties.Settings.Default.Splitter1Width;
-            if (w > 0 && w < 100)
-                splitContainer1.SplitterDistance = this.Width * w / 100;
+            if (w > 8 && w < this.ClientSize.Width - 8)
+                splitContainer1.SplitterDistance = w;
+            else
+                splitContainer1.SplitterDistance = this.ClientSize.Width / 2 - 2;
         }
 
         static bool formClosing = false;
@@ -123,8 +127,27 @@ namespace ObjectCloner
             ObjectCloner.Properties.Settings.Default.PersistentLocation = this.WindowState == FormWindowState.Normal ? this.Location : new Point(-1, -1);
             ObjectCloner.Properties.Settings.Default.PersistentHeight = this.WindowState == FormWindowState.Normal ? this.Height : -1;
             ObjectCloner.Properties.Settings.Default.PersistentWidth = this.WindowState == FormWindowState.Normal ? this.Width : -1;
-            ObjectCloner.Properties.Settings.Default.Splitter1Width = splitContainer1.SplitterDistance * 100 / this.Width;
+            ObjectCloner.Properties.Settings.Default.Splitter1Width = splitContainer1.SplitterDistance;
             ObjectCloner.Properties.Settings.Default.Save();
+        }
+
+        void CloseCurrent()
+        {
+            Diagnostics.Log("ClosePkg");
+
+            if (FileTable.Current != null)
+            {
+                s3pi.Package.Package.ClosePackage(0, FileTable.Current.Package);
+                FileTable.Current = null;
+                Reset();// pick up new NameMap / STBLs next time needed
+            }
+        }
+
+        void InitialiseFileTable()
+        {
+            Abort(false);
+            SetUseCC(false);
+            SetAppendEA(true);
         }
 
         void Abort(bool abort)
@@ -146,18 +169,6 @@ namespace ObjectCloner
             {
                 tgiSearchPane.AbortTGISearch(abort);
                 tgiSearchPane = null;
-            }
-        }
-
-        public static void CloseCurrent()
-        {
-            Diagnostics.Log("ClosePkg");
-
-            if (FileTable.Current != null)
-            {
-                s3pi.Package.Package.ClosePackage(0, FileTable.Current.Package);
-                FileTable.Current = null;
-                Reset();// pick up new NameMap / STBLs next time needed
             }
         }
 
@@ -183,14 +194,6 @@ namespace ObjectCloner
         {
             NameMap.Reset();
             STBLHandler.Reset();
-        }
-
-        void InitialiseFileTable()
-        {
-            Abort(false);
-            CloseCurrent();
-            SetUseCC(false);
-            SetAppendEA(true);
         }
 
 
@@ -258,7 +261,7 @@ namespace ObjectCloner
             return new SpecificResource(FileTable.fb0, rk);
         }
 
-        #region LeftPanelComponents
+        #region SplitterComponents
         public abstract class ItemEventArgs : EventArgs
         {
             ListViewItem selectedItem = null;
@@ -340,6 +343,39 @@ namespace ObjectCloner
             }) { Tag = sr });
         }
 
+        #region flowLayoutPanel1 prompt labels and buttons
+        [Flags]
+        enum Prompt
+        {
+            UseMenu = 0x01,
+            CloneFix = 0x02,
+            ReplaceTGI = 0x04,
+            SelectOptions = 0x08,
+
+            Search = 0x10,
+            TGISearch = 0x20,
+            SaveCancel = 0x40,
+        }
+        bool testPrompt(Prompt which, Prompt value) { return (which & value) != 0; }
+        void setPrompt(Prompt which)
+        {
+            flowLayoutPanel1.SuspendLayout();
+
+            lbUseMenu.Visible = testPrompt(which, Prompt.UseMenu);
+            lbCloneFix.Visible = testPrompt(which, Prompt.CloneFix);
+            lbReplaceTGI.Visible = testPrompt(which, Prompt.ReplaceTGI);
+            lbSelectOptions.Visible = testPrompt(which, Prompt.SelectOptions);
+            lbSearch.Visible = testPrompt(which, Prompt.Search);
+            lbTGISearch.Visible = testPrompt(which, Prompt.TGISearch);
+            lbSaveCancel.Visible = testPrompt(which, Prompt.SaveCancel);
+
+            btnStart.Visible = testPrompt(which, Prompt.CloneFix | Prompt.Search);
+            btnStart.Enabled = false;
+
+            flowLayoutPanel1.ResumeLayout();
+        }
+        #endregion
+
         private void DisplayListView(Control listView)
         {
             this.AcceptButton = btnStart;
@@ -350,16 +386,13 @@ namespace ObjectCloner
             menuBarWidget1.Enable(MenuBarWidget.MD.MBT, true);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
 
-            lbTGISearch.Visible = false;
-            lbSearch.Visible = listView == searchPane;
-            lbUseMenu.Visible = false;
-            lbSelectOptions.Visible = false;
-            btnStart.Visible = true;
-            btnStart.Enabled = false;
+            setPrompt(listView == searchPane ? Prompt.Search : Prompt.CloneFix);
 
             StopWait();
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(listView);
+            if (listView == searchPane) searchPane.SelectedItem = null;
+            else objectChooser.SelectedItem = null;
             listView.Dock = DockStyle.Fill;
             listView.Focus();
         }
@@ -374,24 +407,16 @@ namespace ObjectCloner
             {
                 selectedItem = null;
                 ClearTabs();
-                btnStart.Enabled = false;
+                (AcceptButton as Button).Enabled = false;
             }
             else
             {
                 selectedItem = e.SelectedItem;
                 FillTabs(selectedItem);
-                btnStart.Enabled = true;
+                (AcceptButton as Button).Enabled = true;
             }
         }
-        private void listView_ItemActivate(object sender, ItemActivateEventArgs e) { btnStart_Click(sender, EventArgs.Empty); }
-
-        private void DisplaySearch()
-        {
-            Diagnostics.Log("DisplaySearch");
-
-            isFix = false;
-            DisplayListView(searchPane);
-        }
+        private void listView_ItemActivate(object sender, ItemActivateEventArgs e) { AcceptButton.PerformClick(); }
 
         private void DisplayObjectChooser()
         {
@@ -403,11 +428,19 @@ namespace ObjectCloner
             DisplayListView(objectChooser);
         }
 
+        private void DisplaySearch()
+        {
+            Diagnostics.Log("DisplaySearch");
+
+            isFix = false;
+            DisplayListView(searchPane);
+        }
+
         private void DisplayTGISearch()
         {
             Diagnostics.Log("DisplayTGISearch");
 
-            this.AcceptButton = btnStart;
+            this.AcceptButton = null;
             this.CancelButton = null;
 
             menuBarWidget1.Enable(MenuBarWidget.MB.MBF_open, true);
@@ -415,11 +448,7 @@ namespace ObjectCloner
             menuBarWidget1.Enable(MenuBarWidget.MD.MBT, true);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
 
-            lbTGISearch.Visible = true;
-            lbSearch.Visible = false;
-            lbUseMenu.Visible = false;
-            lbSelectOptions.Visible = false;
-            btnStart.Visible = false;
+            setPrompt(Prompt.TGISearch);
 
             StopWait();
             splitContainer1.Panel1.Controls.Clear();
@@ -459,11 +488,8 @@ namespace ObjectCloner
         private void DisplayOptions()
         {
             Diagnostics.Log("DisplayOptions");
-            lbTGISearch.Visible = false;
-            lbSearch.Visible = false;
-            lbUseMenu.Visible = false;
-            lbSelectOptions.Visible = true;
-            btnStart.Visible = false;
+
+            setPrompt(Prompt.SelectOptions);
 
             if (searchPane != null)
                 mode = Mode.FromGame;
@@ -492,9 +518,66 @@ namespace ObjectCloner
             cloneFixOptions.Focus();
         }
 
+        private void DisplayReplaceTGI()
+        {
+            Diagnostics.Log("DisplayReplaceTGI");
+
+            setPrompt(Prompt.ReplaceTGI);
+            replaceTGIPane.CriteriaEnabled = true;
+            replaceTGIPane.SaveEnabled = false;
+
+            replaceTGIPane.FromCriteria = replaceTGIPane.ToCriteria = new ReplaceTGI.Criteria();
+            replaceTGIPane.Results = "";
+
+            StopWait();
+            splitContainer1.Panel1.Controls.Clear();
+            splitContainer1.Panel1.Controls.Add(replaceTGIPane);
+            replaceTGIPane.Dock = DockStyle.Fill;
+            replaceTGIPane.Focus();
+        }
+
+        private void DisplayReplaceTGIResults()
+        {
+            Diagnostics.Log("DisplayReplaceTGIResults");
+
+            setPrompt(Prompt.SaveCancel);
+            replaceTGIPane.CriteriaEnabled = false;
+            replaceTGIPane.SaveEnabled = true;
+
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            foreach (string s in replacements) sb.AppendLine(s);
+
+            replaceTGIPane.Results = sb.ToString();
+
+            StopWait();
+            splitContainer1.Panel1.Controls.Clear();
+            splitContainer1.Panel1.Controls.Add(replaceTGIPane);
+            replaceTGIPane.Dock = DockStyle.Fill;
+            replaceTGIPane.Focus();
+        }
+
+        private void DisplayFixIntegrityResults()
+        {
+            Diagnostics.Log("DisplayFixIntegrityResults");
+
+            setPrompt(Prompt.SaveCancel);
+
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            foreach (var s in replacements) sb.AppendLine(s);
+            fixIntegrityResults.Text = sb.ToString();
+
+            StopWait();
+            splitContainer1.Panel1.Controls.Clear();
+            splitContainer1.Panel1.Controls.Add(fixIntegrityResults);
+            fixIntegrityResults.Dock = DockStyle.Fill;
+            fixIntegrityResults.Focus();
+        }
+
+
         private void DisplayNothing()
         {
             Diagnostics.Log("DisplayNothing");
+
             this.AcceptButton = null;
             this.CancelButton = null;
 
@@ -503,13 +586,10 @@ namespace ObjectCloner
             menuBarWidget1.Enable(MenuBarWidget.MD.MBT, true);
             menuBarWidget1.Enable(MenuBarWidget.MD.MBS, true);
 
-            lbTGISearch.Visible = false;
-            lbSearch.Visible = false;
-            lbUseMenu.Visible = true;
-            lbSelectOptions.Visible = false;
-            btnStart.Visible = false;
+            setPrompt(Prompt.UseMenu);
 
             StopWait();
+            ClearTabs();
             TabEnable(false);
             splitContainer1.Panel1.Controls.Clear();
             if (cloneFixOptions != null)
@@ -545,21 +625,40 @@ namespace ObjectCloner
         #endregion
 
         #region CloneFixOptions
+        string uniqueName = null;
+        bool isRepair = false;
         bool isCreateNewPackage = false;
         bool isDeepClone = false;
         bool isPadSTBLs = false;
+        bool isIncludeThumbnails = false;
+        bool isRenumber = false;
+        bool is32bitIIDs = false;
+        bool isKeepSTBLIIDs = false;
         bool disableCompression = false;
+
+        bool IsDeepClone { get { return isFix || isDeepClone; } }
+        bool JustSelf { get { return !isCreateNewPackage && !isRepair && !isRenumber; } }
+        bool WantThumbs { get { return isIncludeThumbnails || (!(isCreateNewPackage || isRepair) && isRenumber); } }
+
         void cloneFixOptions_StartClicked(object sender, EventArgs e)
         {
             Diagnostics.Log("cloneFixOptions_StartClicked");
+
             this.AcceptButton = null;
             this.CancelButton = null;
-            disableCompression = !cloneFixOptions.IsCompress;
-            isCreateNewPackage = cloneFixOptions.IsClone;
-            isDeepClone = isFix || cloneFixOptions.IsDeepClone;
-            isPadSTBLs = cloneFixOptions.IsPadSTBLs;
 
-            if (cloneFixOptions.IsRepair)
+            uniqueName = cloneFixOptions.UniqueName;
+            isRepair = cloneFixOptions.IsRepair;
+            isCreateNewPackage = cloneFixOptions.IsClone;
+            isDeepClone = cloneFixOptions.IsDeepClone;
+            isPadSTBLs = cloneFixOptions.IsPadSTBLs;
+            isIncludeThumbnails = cloneFixOptions.IsIncludeThumbnails;
+            isRenumber = cloneFixOptions.IsRenumber;
+            is32bitIIDs = cloneFixOptions.Is32bitIIDs;
+            isKeepSTBLIIDs = cloneFixOptions.IsKeepSTBLIIDs;
+            disableCompression = !cloneFixOptions.IsCompress;
+
+            if (isRepair)
                 SetAppendEA(true);
 
             if (isCreateNewPackage) CloneStart();
@@ -607,14 +706,14 @@ namespace ObjectCloner
         {
             Diagnostics.Log("FixStart");
             uniqueObject = null;
-            if (cloneFixOptions.IsRenumber && UniqueObject == null)
+            if (isRenumber && UniqueObject == null)
             {
                 cloneFixOptions_CancelClicked(null, null);
                 return;
             }
 
             RunRKLookup();
-            if (cloneFixOptions.IsRepair)
+            if (isRepair)
                 RunRepair();//then StartFixing
             else
                 StartFixing();
@@ -1286,9 +1385,15 @@ namespace ObjectCloner
             Diagnostics.Log(String.Format("menuBarWidget1_MBDropDownOpening mn: {0}", mn.mn));
             switch (mn.mn)
             {
-                case MenuBarWidget.MD.MBF: break;
+                case MenuBarWidget.MD.MBF:
+                    menuBarWidget1.Enable(MenuBarWidget.MB.MBF_reload, FileTable.Current != null);
+                    menuBarWidget1.Enable(MenuBarWidget.MB.MBF_close, FileTable.Current != null);
+                    break;
                 case MenuBarWidget.MD.MBC: break;
-                case MenuBarWidget.MD.MBT: break;
+                case MenuBarWidget.MD.MBT:
+                    menuBarWidget1.Enable(MenuBarWidget.MB.MBT_replaceTGI, FileTable.Current != null);
+                    menuBarWidget1.Enable(MenuBarWidget.MB.MBT_fixIntegrity, FileTable.Current != null);
+                    break;
                 case MenuBarWidget.MD.MBS: break;
                 case MenuBarWidget.MD.MBH: break;
                 default: break;
@@ -1306,6 +1411,8 @@ namespace ObjectCloner
                 switch (mn.mn)
                 {
                     case MenuBarWidget.MB.MBF_open: fileOpen(); break;
+                    case MenuBarWidget.MB.MBF_reload: fileReloadCurrent(); break;
+                    case MenuBarWidget.MB.MBF_close: fileClose(); break;
                     case MenuBarWidget.MB.MBF_exit: fileExit(); break;
                 }
             }
@@ -1332,8 +1439,8 @@ namespace ObjectCloner
         {
             Diagnostics.Log(String.Format("fileReOpenToFix filename: {0}, type: {1}", filename, type));
 
+            CloseCurrent();//needed
             Abort(true);
-            CloseCurrent();//not needed?
             SetUseCC(false);
             SetAppendEA(false);
 
@@ -1349,6 +1456,25 @@ namespace ObjectCloner
             }
 
             LoadObjectChooser(type, type != 0);
+        }
+
+        private void fileReloadCurrent()
+        {
+            if (FileTable.Current != null)
+            {
+                ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(FileTable.Current.Path);
+                mode = Mode.FromUser;
+                fileReOpenToFix(FileTable.Current.Path, 0);
+            }
+            else
+                DisplayNothing();
+        }
+
+        private void fileClose()
+        {
+            Diagnostics.Log("fileClose");
+            CloseCurrent();//needed
+            DisplayNothing();
         }
 
         private void fileExit()
@@ -1369,6 +1495,7 @@ namespace ObjectCloner
 
                 mode = Mode.FromGame;
 
+                CloseCurrent();//needed
                 InitialiseFileTable();
 
                 LoadObjectChooser(FromCloningMenuEntry(mn.mn), false);
@@ -1418,6 +1545,8 @@ namespace ObjectCloner
                 {
                     case MenuBarWidget.MB.MBT_search: toolsSearch(); break;
                     case MenuBarWidget.MB.MBT_tgiSearch: toolsTGISearch(); break;
+                    case MenuBarWidget.MB.MBT_replaceTGI: toolsReplaceTGI(); break;
+                    case MenuBarWidget.MB.MBT_fixIntegrity: toolsFixIntegrity(); break;
                 }
             }
             finally { this.Enabled = true; }
@@ -1432,6 +1561,7 @@ namespace ObjectCloner
             searchPane = new Search(updateProgress, ListViewAdd);
             searchPane.SelectedIndexChanged += new EventHandler<SelectedIndexChangedEventArgs>(listView_SelectedIndexChanged);
             searchPane.ItemActivate += new EventHandler<ItemActivateEventArgs>(listView_ItemActivate);
+            searchPane.CancelClicked += new EventHandler((x, e) => fileReloadCurrent());
 
             DisplaySearch();
         }
@@ -1442,8 +1572,37 @@ namespace ObjectCloner
             InitialiseFileTable();
 
             tgiSearchPane = new TGISearch(updateProgress);
+            tgiSearchPane.CancelClicked += new EventHandler((x, e) => fileReloadCurrent());
 
             DisplayTGISearch();
+        }
+
+        private void toolsReplaceTGI()
+        {
+            if (FileTable.Current == null) return;
+
+            replaceTGIPane = new ReplaceTGI();
+            replaceTGIPane.ReplaceClicked += new EventHandler(replaceTGIPane_ReplaceClicked);
+            replaceTGIPane.SaveClicked += new EventHandler(replaceTGIPane_SaveClicked);
+            replaceTGIPane.CancelClicked += new EventHandler(replaceTGIPane_CancelClicked);
+
+            ClearTabs();
+            DisplayReplaceTGI();
+        }
+
+        private void toolsFixIntegrity()
+        {
+            if (FileTable.Current == null) return;
+
+            ClearTabs();
+            DoWait("Renumbering all resources and references...");
+            StartRenumbering();
+
+            fixIntegrityResults = new FixIntegrityResults();
+            fixIntegrityResults.SaveClicked += new EventHandler(fixIntegrityResults_SaveClicked);
+            fixIntegrityResults.CancelClicked += new EventHandler(fixIntegrityResults_CancelClicked);
+
+            DisplayFixIntegrityResults();
         }
         #endregion
 
@@ -1700,6 +1859,110 @@ namespace ObjectCloner
         }
 
 
+        List<string> replacements = new List<string>();
+        private bool ReplaceRKsInXML(SpecificResource item, Predicate<IResourceKey> match, Converter<IResourceKey, IResourceKey> replacer)
+        {
+            bool dirty = false;
+            StreamReader sr = new StreamReader(item.Resource.Stream, true);
+            MemoryStream ms = new MemoryStream();
+            StreamWriter sw = new StreamWriter(ms, sr.CurrentEncoding);
+            int ln = 0;
+            while (!sr.EndOfStream)
+            {
+                string line = sr.ReadLine();
+                int i = line.IndexOf("key:");
+                while (i >= 0 && i + 4 + 8 + 1 + 8 + 1 + 16 < line.Length)//key:TTTTTTTT-GGGGGGGG-IIIIIIIIIIIIIIII
+                {
+                    string key = "0x" + line.Substring(i + 4, 8 + 1 + 8 + 1 + 16).Replace("-", "-0x");//translate to s3pi format
+                    IResourceKey rk;
+                    if (RK.TryParse(key, out rk) && match(rk))
+                    {
+                        string newKey = new RK(replacer(rk)).ToString().Replace("0x", "");
+                        line = line.Substring(0, i) + "key:" + newKey + line.Substring(i + 4 + key.Length);
+
+                        replacements.Add(String.Format("_XML {0} line {1} pos {2}: Replaced {3} with {4}", item.RequestedRK + "", ln, i, key, newKey));
+                        dirty = true;
+                    }
+                    i = line.IndexOf("key:", i + 4 + key.Length);
+                }
+                sw.WriteLine(line);
+                ln++;
+            }
+            sw.Flush();
+            if (dirty)
+            {
+                item.Resource.Stream.SetLength(0);
+                item.Resource.Stream.Write(ms.ToArray(), 0, (int)ms.Length);
+            }
+            return dirty;
+        }
+        private bool ReplaceRKsInField(SpecificResource item, string fn, Predicate<IResourceKey> match, Converter<IResourceKey, IResourceKey> replacer, AApiVersionedFields field)
+        {
+            bool dirty = false;
+
+            Type t = field.GetType();
+            if (typeof(IResourceKey).IsAssignableFrom(t))
+            {
+                IResourceKey rk = (IResourceKey)field;
+                if (rk != RK.NULL && match(rk))
+                {
+                    string oldRK = new RK(rk) + "";
+                    IResourceKey newRK = replacer(rk);
+                    rk.ResourceType = newRK.ResourceType;
+                    rk.ResourceGroup = newRK.ResourceGroup;
+                    rk.Instance = newRK.Instance;
+
+                    replacements.Add(String.Format("{0} {1}: Replaced {2} with {3}", item.RequestedRK + "", fn, oldRK, new RK(newRK) + ""));
+                    dirty = true;
+                }
+            }
+            else
+            {
+                if (typeof(IEnumerable).IsAssignableFrom(field.GetType()))
+                    dirty = ReplaceRKsInIEnumerable(item, fn, match, replacer, (IEnumerable)field);
+
+                dirty = ReplaceRKsInAApiVersionedFields(item, fn, match, replacer, field) || dirty;
+            }
+
+            return dirty;
+        }
+        private bool ReplaceRKsInIEnumerable(SpecificResource item, string fn, Predicate<IResourceKey> match, Converter<IResourceKey, IResourceKey> replacer, IEnumerable list)
+        {
+            bool dirty = false;
+
+            int i = 0;
+            string fmt = fn + "[{0:X}]";
+            if (list != null)
+                foreach (object o in list)
+                    if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
+                        dirty = ReplaceRKsInField(item, String.Format(fmt, i++), match, replacer, (AApiVersionedFields)o) || dirty;
+                    else if (typeof(IEnumerable).IsAssignableFrom(o.GetType()))
+                        dirty = ReplaceRKsInIEnumerable(item, String.Format(fmt, i++), match, replacer, (IEnumerable)o) || dirty;
+
+            return dirty;
+        }
+        private bool ReplaceRKsInAApiVersionedFields(SpecificResource item, string fn, Predicate<IResourceKey> match, Converter<IResourceKey, IResourceKey> replacer, AApiVersionedFields field)
+        {
+            bool dirty = false;
+
+            List<string> fields = field.ContentFields;
+            foreach (string f in fields)
+            {
+                if ((new List<string>(new string[] { "Stream", "AsBytes", "Value", })).Contains(f)) continue;
+
+                Type t = AApiVersionedFields.GetContentFieldTypes(0, field.GetType())[f];
+                if (!t.IsClass || t.Equals(typeof(string))) continue;
+                if (t.IsArray && (!t.GetElementType().IsClass || t.GetElementType().Equals(typeof(string)))) continue;
+
+                if (typeof(IEnumerable).IsAssignableFrom(t))
+                    dirty = ReplaceRKsInIEnumerable(item, fn + (fn.Length == 0 ? "" : ".") + f, match, replacer, (IEnumerable)field[f].Value) || dirty;
+                else if (typeof(AApiVersionedFields).IsAssignableFrom(t))
+                    dirty = ReplaceRKsInField(item, fn + (fn.Length == 0 ? "" : ".") + f, match, replacer, (AApiVersionedFields)field[f].Value) || dirty;
+            }
+
+            return dirty;
+        }
+
         #region Fetch resources
         Dictionary<string, IResourceKey> rkLookup = null;
         void RunRKLookup()
@@ -1873,18 +2136,15 @@ namespace ObjectCloner
             lastInChain = stepList == null ? -1 : (stepList.IndexOf(lastStepInChain) + 1);
         }
 
-        bool NotJustSelf() { return isCreateNewPackage || cloneFixOptions.IsRepair || cloneFixOptions.IsRenumber; }
-        bool WantThumbs() { return cloneFixOptions.IsIncludeThumbnails || (!(isCreateNewPackage || cloneFixOptions.IsRepair) && cloneFixOptions.IsRenumber); }
-
         void ThumbnailsOnly_Steps(List<Step> stepList, out Step lastStepInChain)
         {
             Diagnostics.Log("ThumbnailsOnly_Steps");
             lastStepInChain = None;
-            if (NotJustSelf())
+            if (!JustSelf)
             {
                 stepList.AddRange(new Step[] {
                 });
-                if (WantThumbs())
+                if (WantThumbs)
                     stepList.Add(SlurpThumbnails);
             }
         }
@@ -1893,9 +2153,9 @@ namespace ObjectCloner
         {
             Diagnostics.Log("brush_Steps");
             ThumbnailsOnly_Steps(stepList, out lastStepInChain);
-            if (NotJustSelf())
+            if (!JustSelf)
             {
-                if (isDeepClone)
+                if (IsDeepClone)
                 {
                     stepList.Insert(0, brush_addBrushShape);
                 }
@@ -1909,7 +2169,7 @@ namespace ObjectCloner
         {
             Diagnostics.Log("CTPT_Steps");
             brush_Steps(stepList, out lastStepInChain);
-            if (NotJustSelf())
+            if (!JustSelf)
             {
                 stepList.InsertRange(0, new Step[] {
                     CTPT_addPair,
@@ -1922,7 +2182,7 @@ namespace ObjectCloner
         {
             Diagnostics.Log("CatlgHasVPXY_Steps");
             lastStepInChain = None;
-            if (NotJustSelf())
+            if (!JustSelf)
             {
                 stepList.AddRange(new Step[] {
                     Catlg_getVPXYs,
@@ -1938,7 +2198,7 @@ namespace ObjectCloner
                     MODLs_SlurpMLODs,
                 });
                 lastStepInChain = MODLs_SlurpMLODs;
-                if (isDeepClone)
+                if (IsDeepClone)
                 {
                     stepList.InsertRange(stepList.IndexOf(Catlg_getVPXYs), new Step[] {
                         Catlg_SlurpRKs,
@@ -1953,7 +2213,7 @@ namespace ObjectCloner
                 else
                 {
                 }
-                if (WantThumbs())
+                if (WantThumbs)
                     stepList.Add(SlurpThumbnails);
             }
         }
@@ -1962,7 +2222,7 @@ namespace ObjectCloner
         {
             Diagnostics.Log("OBJD_Steps");
             CatlgHasVPXY_Steps(stepList, out lastStepInChain);
-            if (NotJustSelf())
+            if (!JustSelf)
             {
                 stepList.Remove(Catlg_getVPXYs);
                 stepList.InsertRange(stepList.IndexOf(Catlg_addVPXYs), new Step[] {
@@ -1977,7 +2237,7 @@ namespace ObjectCloner
                 {
                     stepList.Insert(stepList.IndexOf(OBJD_getOBJK), OBJD_setFallback);
                 }
-                if (isDeepClone)
+                if (IsDeepClone)
                 {
                 }
                 else
@@ -1995,9 +2255,9 @@ namespace ObjectCloner
         {
             Diagnostics.Log("CWAL_Steps");
             CatlgHasVPXY_Steps(stepList, out lastStepInChain);
-            if (NotJustSelf())
+            if (!JustSelf)
             {
-                if (isDeepClone)
+                if (IsDeepClone)
                 {
                 }
                 else
@@ -2006,7 +2266,7 @@ namespace ObjectCloner
                         Catlg_IncludePresets,
                     });
                 }
-                if (WantThumbs())
+                if (WantThumbs)
                 {
                     stepList.Remove(SlurpThumbnails);
                     stepList.Add(CWAL_SlurpThumbnails);
@@ -2018,7 +2278,7 @@ namespace ObjectCloner
         {
             Diagnostics.Log("CFIR_Steps");
             stepList.AddRange(new Step[] { Item_findObjds, setupObjdStepList, Modular_Main, });
-            if (WantThumbs())
+            if (WantThumbs)
                 stepList.Add(SlurpThumbnails);//For the CFIR itself
             lastStepInChain = None;
         }
@@ -2489,29 +2749,26 @@ namespace ObjectCloner
             {
                 if (uniqueObject == null)
                 {
-                    if (cloneFixOptions.UniqueName == null || cloneFixOptions.UniqueName.Length == 0)
+                    if (uniqueName == null || uniqueName.Length == 0)
                     {
                         StringInputDialog ond = new StringInputDialog();
                         ond.Caption = "Unique Resource Name";
                         ond.Prompt = "Enter unique identifier";
-                        ond.Value = cloneFixOptions.UniqueName;
+                        ond.Value = CreatorName + "_" + Guid.NewGuid().ToString("N") + "_" + DateTime.UtcNow.ToBinary().ToString("X16");
                         DialogResult dr = ond.ShowDialog();
                         if (dr == DialogResult.OK) uniqueObject = ond.Value;
                     }
-                    else uniqueObject = cloneFixOptions.UniqueName;
+                    else uniqueObject = uniqueName;
                 }
                 return uniqueObject;
             }
         }
 
+        // A map from RK to SpecificResource
         Dictionary<IResourceKey, SpecificResource> rkToItem;
-        Dictionary<ulong, ulong> oldToNew;
-        ulong nameGUID, newNameGUID;
-        ulong descGUID, newDescGUID;
-        void GenerateNewIIDs()
+        void MapRKtoSpecificResource()
         {
-            Diagnostics.Log("GenerateNewIIDs");
-            // A list of the TGIs we are going to renumber and the resource that "owns" them
+            Diagnostics.Log("MapRKtoSpecificResource");
             rkToItem = new Dictionary<IResourceKey, SpecificResource>();
 
             // We need to process anything we found in the previous steps
@@ -2529,15 +2786,16 @@ namespace ObjectCloner
                 rkToItem.Add(sr.ResourceIndexEntry, sr);
 
             // We may also need to process RCOL internal chunks and NameMaps but only if we're renumbering
-            if (cloneFixOptions.IsRenumber)
+            if (isRenumber)
             {
                 //If there are internal chunk references not covered by the above, we also need to add them
                 Dictionary<IResourceKey, SpecificResource> rcolChunks = new Dictionary<IResourceKey, SpecificResource>();
                 foreach (var kvp in rkToItem)
                 {
-                    if (!typeof(GenericRCOLResource).IsAssignableFrom(kvp.Value.Resource.GetType())) continue;
+                    GenericRCOLResource rcol = kvp.Value.Resource as GenericRCOLResource;
+                    if (rcol == null) continue;
 
-                    foreach (GenericRCOLResource.ChunkEntry chunk in (kvp.Value.Resource as GenericRCOLResource).ChunkEntries)
+                    foreach (GenericRCOLResource.ChunkEntry chunk in rcol.ChunkEntries)
                     {
                         if (chunk.TGIBlock == RK.NULL) continue;
                         if (rkToItem.ContainsKey(chunk.TGIBlock)) continue; // External reference and we've seen it
@@ -2551,24 +2809,34 @@ namespace ObjectCloner
                 FileTable.Current.FindAll(rie => rie.ResourceType == 0x0166038C && !rkToItem.ContainsKey(rie))
                     .ForEach(sr => rkToItem.Add(sr.ResourceIndexEntry, sr));
             }
+        }
 
-            // A list to hold the new numbers
+        // A list to hold the new numbers
+        Dictionary<ulong, ulong> oldToNew;
+        ulong nameGUID, newNameGUID;
+        ulong descGUID, newDescGUID;
+        void GenerateNewIIDs()
+        {
+            Diagnostics.Log("GenerateNewIIDs");
+
             oldToNew = new Dictionary<ulong, ulong>();
 
-            if (cloneFixOptions.IsRenumber && selectedItem.CType == CatalogType.ModularResource)
-                oldToNew.Add(selectedItem.ResourceIndexEntry.Instance, FNV64.GetHash(UniqueObject));//MDLR needs its IID as a specific hash value
-
             ulong PngInstance = 0;
-            if (selectedItem.CType != CatalogType.ModularResource)
-                PngInstance = (ulong)selectedItem.Resource["CommonBlock.PngInstance"].Value;
+            if (isRenumber)
+            {
+                if (selectedItem.CType == CatalogType.ModularResource)
+                    oldToNew.Add(selectedItem.ResourceIndexEntry.Instance, FNV64.GetHash(UniqueObject));//MDLR needs its IID as a specific hash value
+                else
+                {
+                    PngInstance = (ulong)selectedItem.Resource["CommonBlock.PngInstance"].Value;
+                    if (PngInstance != 0)
+                        oldToNew.Add(PngInstance, CreateInstance());
+                }
+            }
 
-            if (cloneFixOptions.IsRenumber || !cloneFixOptions.IsKeepSTBLIIDs)
+            if (isRenumber || !isKeepSTBLIIDs)
             {
                 // Generate new numbers for everything we've decided to renumber
-
-                // Renumber the PNGInstance we're referencing
-                if (cloneFixOptions.IsRenumber && PngInstance != 0)
-                    oldToNew.Add(PngInstance, CreateInstance());
 
                 Dictionary<ulong, ulong> langMap = new Dictionary<ulong, ulong>();
                 foreach (var kvp in rkToItem)
@@ -2581,16 +2849,16 @@ namespace ObjectCloner
                                 langMap.Add(rk.Instance & 0x00FFFFFFFFFFFFFF, CreateInstance() & 0x00FFFFFFFFFFFFFF);
                             oldToNew.Add(rk.Instance, rk.Instance & 0xFF00000000000000 | langMap[rk.Instance & 0x00FFFFFFFFFFFFFF]);
                         }
-                        else if (cloneFixOptions.IsRenumber)
+                        else if (isRenumber)
                         {
-                            if (cloneFixOptions.Is32bitIIDs &&
+                            if (is32bitIIDs &&
                                 (rk.ResourceType == (uint)CatalogType.CatalogObject || rk.ResourceType == 0x02DC343F))//OBJD&OBJK
                                 oldToNew.Add(rk.Instance, CreateInstance32());
                             else
                                 oldToNew.Add(rk.Instance, CreateInstance());
                         }
                     }
-                if (cloneFixOptions.IsRenumber)
+                if (isRenumber)
                     foreach (IResourceKey rk in rkToItem.Keys)//Requested RK
                         if (!oldToNew.ContainsKey(rk.Instance))//Find those references we don't have new IIDs for
                         {
@@ -2610,7 +2878,7 @@ namespace ObjectCloner
                 nameGUID = (ulong)catlgItem.Resource["CommonBlock.NameGUID"].Value;
                 descGUID = (ulong)catlgItem.Resource["CommonBlock.DescGUID"].Value;
 
-                if (cloneFixOptions.IsRenumber)
+                if (isRenumber)
                 {
                     newNameGUID = FNV64.GetHash("CatalogObjects/Name:" + UniqueObject);
                     newDescGUID = FNV64.GetHash("CatalogObjects/Description:" + UniqueObject);
@@ -2629,6 +2897,7 @@ namespace ObjectCloner
 
         void StartFixing()
         {
+            MapRKtoSpecificResource();
             GenerateNewIIDs();
 
             DoWait("Please wait, updating your package...");
@@ -2640,17 +2909,38 @@ namespace ObjectCloner
             try
             {
                 //Need to take a copy of the ResourceList as it can get modified, which messes up the enumerator
-                List<SpecificResource> lsr =
-                    new List<SpecificResource>(FileTable.Current.Package.GetResourceList.ConvertAll<SpecificResource>(rie => new SpecificResource(FileTable.Current, rie)));
+                List<SpecificResource> lsr = FileTable.Current.FindAll(rie => true);
 
                 foreach (SpecificResource item in lsr)
                 {
                     bool dirty = false;
 
-                    if ((item.RequestedRK.Equals(selectedItem.RequestedRK) && item.CType != CatalogType.ModularResource)//Selected CatlgItem
-                        || item.CType == CatalogType.CatalogObject//all OBJDs (i.e. from MDLR or CFIR)
-                        || item.CType == CatalogType.CatalogTerrainPaintBrush//all CTPTs (i.e. pair of selectedItem)
-                        )
+                    if (item.ResourceIndexEntry.ResourceType == 0x0166038C)
+                    {
+                        #region NameMap
+                        IDictionary<ulong, string> nm = (IDictionary<ulong, string>)item.Resource;
+                        foreach (ulong old in oldToNew.Keys)
+                            if (nm.ContainsKey(old) && !nm.ContainsKey(oldToNew[old]))
+                            {
+                                nm.Add(oldToNew[old], nm[old]);
+                                nm.Remove(old);
+                                dirty = true;
+                            }
+                        #endregion
+                    }
+                    else if (item.ResourceIndexEntry.ResourceType == 0x220557DA)//STBL
+                    {
+                        dirty |= UpdateStbl(tbCatlgName.Text, nameGUID, item, newNameGUID);
+                        dirty |= UpdateStbl(tbCatlgDesc.Text, descGUID, item, newDescGUID);
+                    }
+                    else if (item.ResourceIndexEntry.ResourceType == 0x0333406C)//XML
+                    {
+                        dirty = ReplaceRKsInXML(item, FixMatch, IIDReplacer);
+                    }
+                    else if ((item.RequestedRK.Equals(selectedItem.RequestedRK) && item.CType != CatalogType.ModularResource)//Selected CatlgItem
+                    || item.CType == CatalogType.CatalogObject//all OBJDs (i.e. from MDLR or CFIR)
+                    || item.CType == CatalogType.CatalogTerrainPaintBrush//all CTPTs (i.e. pair of selectedItem)
+                    )
                     {
                         #region Selected CatlgItem; all OBJD (i.e. from MDLR or CFIR)
                         AHandlerElement commonBlock = ((AHandlerElement)item.Resource["CommonBlock"].Value);
@@ -2666,7 +2956,7 @@ namespace ObjectCloner
                             commonBlock["DescGUID"] = new TypedValue(typeof(ulong), newDescGUID);
                             commonBlock["Price"] = new TypedValue(typeof(float), float.Parse(tbPrice.Text));
 
-                            if (cloneFixOptions.IsRenumber)
+                            if (isRenumber)
                             {
                                 commonBlock["Name"] = new TypedValue(typeof(string), "CatalogObjects/Name:" + UniqueObject);
                                 commonBlock["Desc"] = new TypedValue(typeof(string), "CatalogObjects/Description:" + UniqueObject);
@@ -2693,7 +2983,7 @@ namespace ObjectCloner
                             ulong PngInstance = (ulong)commonBlock["PngInstance"].Value;
                             bool isPng = PngInstance != 0;
 
-                            if (cloneFixOptions.IsIncludeThumbnails)
+                            if (isIncludeThumbnails)
                             {
                                 Image img = replacementForThumbs != null ? replacementForThumbs : THUM.getLargestThumbOrDefault(item);
                                 ulong instance = isPng ? PngInstance : item.RequestedRK.Instance;
@@ -2745,7 +3035,7 @@ namespace ObjectCloner
                         }
                         #endregion
 
-                        if (cloneFixOptions.IsRenumber)
+                        if (isRenumber)
                         {
                             #region Keep brushes together
                             if (item.CType == CatalogType.CatalogTerrainPaintBrush)//Both CTPTs
@@ -2766,43 +3056,21 @@ namespace ObjectCloner
                                 TGIBlockList tgiBlocks = item.Resource["TGIBlocks"].Value as TGIBlockList;
                                 AResourceKey fallbackRK = new TGIBlock(0, null, tgiBlocks[fallbackIndex]);
 
-                                UpdateRKsFromField((AResource)item.Resource);
+                                ReplaceRKsInField(item, "", FixMatch, IIDReplacer, (AResource)item.Resource);
 
                                 tgiBlocks[fallbackIndex] = new TGIBlock(0, null, (IResourceKey)fallbackRK);
                                 #endregion
                             }
                             else
-                                UpdateRKsFromField((AResource)item.Resource);
+                                ReplaceRKsInField(item, "", FixMatch, IIDReplacer, (AResource)item.Resource);
                         }
 
                         dirty = true;
                         #endregion
                     }
-                    else if (item.ResourceIndexEntry.ResourceType == 0x0166038C)
-                    {
-                        #region NameMap
-                        IDictionary<ulong, string> nm = (IDictionary<ulong, string>)item.Resource;
-                        foreach (ulong old in oldToNew.Keys)
-                            if (nm.ContainsKey(old) && !nm.ContainsKey(oldToNew[old]))
-                            {
-                                nm.Add(oldToNew[old], nm[old]);
-                                nm.Remove(old);
-                                dirty = true;
-                            }
-                        #endregion
-                    }
-                    else if (item.ResourceIndexEntry.ResourceType == 0x220557DA)//STBL
-                    {
-                        dirty |= UpdateStbl(tbCatlgName.Text, nameGUID, item, newNameGUID);
-                        dirty |= UpdateStbl(tbCatlgDesc.Text, descGUID, item, newDescGUID);
-                    }
-                    else if (item.ResourceIndexEntry.ResourceType == 0x0333406C)
-                    {
-                        dirty = UpdateRKsFromXML(item);
-                    }
                     else
                     {
-                        dirty = UpdateRKsFromField((AResource)item.Resource);
+                        dirty = ReplaceRKsInField(item, "", FixMatch, IIDReplacer, (AResource)item.Resource);
                     }
 
                     if (dirty) item.Commit();
@@ -2818,6 +3086,7 @@ namespace ObjectCloner
 
                 foreach (var kvp in rkToItemAdded)
                     if (!rkToItem.ContainsKey(kvp.Key)) rkToItem.Add(kvp.Key, kvp.Value);
+
                 foreach (SpecificResource item in rkToItem.Values)
                 {
                     if (item.RequestedRK == RK.NULL) { continue; }
@@ -2837,100 +3106,17 @@ namespace ObjectCloner
                 StopWait();
             }
 
-            CloseCurrent();//needed
-            Diagnostics.Log("...done..!");
-            DisplayNothing();
-            CopyableMessageBox.Show("OK", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
-        }
+            int dr = CopyableMessageBox.Show("Your updated package is ready.\nDo you wish to continue working\non it in s3oc?",
+                myName, CopyableMessageBoxButtons.YesNo, CopyableMessageBoxIcon.Question);
 
-        private bool UpdateRKsFromField(AApiVersionedFields field)
-        {
-            bool dirty = false;
-
-            Type t = field.GetType();
-            if (typeof(IResourceKey).IsAssignableFrom(t))
-            {
-                IResourceKey rk = (IResourceKey)field;
-                if (rk != RK.NULL && rkToItem.ContainsKey(rk) && oldToNew.ContainsKey(rk.Instance)) { rk.Instance = oldToNew[rk.Instance]; dirty = true; }
-            }
+            if (dr == 0)
+                fileReloadCurrent();
             else
-            {
-                if (typeof(IEnumerable).IsAssignableFrom(field.GetType()))
-                    dirty = UpdateRKsFromIEnumerable((IEnumerable)field) || dirty;
-                dirty = UpdateRKsFromAApiVersionedFields(field) || dirty;
-            }
-
-            return dirty;
+                fileClose();
         }
-        private bool UpdateRKsFromAApiVersionedFields(AApiVersionedFields field)
-        {
-            bool dirty = false;
 
-            List<string> fields = field.ContentFields;
-            foreach (string f in fields)
-            {
-                if ((new List<string>(new string[] { "Stream", "AsBytes", "Value", })).Contains(f)) continue;
-
-                Type t = AApiVersionedFields.GetContentFieldTypes(0, field.GetType())[f];
-                if (!t.IsClass || t.Equals(typeof(string))) continue;
-                if (t.IsArray && (!t.GetElementType().IsClass || t.GetElementType().Equals(typeof(string)))) continue;
-
-                if (typeof(IEnumerable).IsAssignableFrom(t))
-                    dirty = UpdateRKsFromIEnumerable((IEnumerable)field[f].Value) || dirty;
-                else if (typeof(AApiVersionedFields).IsAssignableFrom(t))
-                    dirty = UpdateRKsFromField((AApiVersionedFields)field[f].Value) || dirty;
-            }
-
-            return dirty;
-        }
-        private bool UpdateRKsFromIEnumerable(IEnumerable list)
-        {
-            bool dirty = false;
-
-            if (list != null)
-                foreach (object o in list)
-                    if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
-                        dirty = UpdateRKsFromField((AApiVersionedFields)o) || dirty;
-                    else if (typeof(IEnumerable).IsAssignableFrom(o.GetType()))
-                        dirty = UpdateRKsFromIEnumerable((IEnumerable)o) || dirty;
-
-            return dirty;
-        }
-        private bool UpdateRKsFromXML(SpecificResource item)
-        {
-            bool dirty = false;
-            StreamReader sr = new StreamReader(item.Resource.Stream, true);
-            MemoryStream ms = new MemoryStream();
-            StreamWriter sw = new StreamWriter(ms, sr.CurrentEncoding);
-            while (!sr.EndOfStream)
-            {
-                string line = sr.ReadLine();
-                int i = line.IndexOf("key:");
-                while (i >= 0 && i + 22 + 16 < line.Length)
-                {
-                    string iid = line.Substring(i + 22, 16);
-                    ulong IID;
-                    if (ulong.TryParse(iid, System.Globalization.NumberStyles.HexNumber, null, out IID))
-                    {
-                        if (oldToNew.ContainsKey(IID))
-                        {
-                            string newiid = oldToNew[IID].ToString("X16");
-                            line = line.Replace(iid, newiid);
-                            dirty = true;
-                        }
-                    }
-                    i = line.IndexOf("key:", i + 22 + 16);
-                }
-                sw.WriteLine(line);
-            }
-            sw.Flush();
-            if (dirty)
-            {
-                item.Resource.Stream.SetLength(0);
-                item.Resource.Stream.Write(ms.ToArray(), 0, (int)ms.Length);
-            }
-            return dirty;
-        }
+        bool FixMatch(IResourceKey rk) { return rkToItem.ContainsKey(rk) && oldToNew.ContainsKey(rk.Instance); }
+        IResourceKey IIDReplacer(IResourceKey rk) { return new TGIBlock(0, null, rk) { Instance = oldToNew[rk.Instance] }; }
 
         private bool UpdateStbl(string value, ulong guid, SpecificResource item, ulong newGuid)
         {
@@ -3120,6 +3306,299 @@ namespace ObjectCloner
                     DisplayOptions();
                 }
             }
+        }
+        #endregion
+
+        #region Replace TGI bits
+        void replaceTGIPane_ReplaceClicked(object sender, EventArgs e)
+        {
+            Diagnostics.Log("replaceTGIPane_ReplaceClicked");
+
+            DoWait("Please wait, replacing resource keys...");
+
+            this.AcceptButton = null;
+            this.CancelButton = null;
+
+            replaceTGIPane.Results = "";
+            replacements = new List<string>();
+
+            try
+            {
+                foreach (SpecificResource item in FileTable.Current.FindAll(rie => true))
+                {
+                    bool dirty = false;
+
+                    if (item.ResourceIndexEntry.ResourceType == 0x0333406C)//_XML
+                    {
+                        dirty = ReplaceRKsInXML(item, ReplaceTGIMatch, ReplaceTGIReplacer);
+                    }
+                    else
+                    {
+                        dirty = ReplaceRKsInField(item, "", ReplaceTGIMatch, ReplaceTGIReplacer, item.Resource as AApiVersionedFields);
+                    }
+
+                    if (dirty) item.Commit();
+                }
+            }
+            finally
+            {
+                this.toolStripProgressBar1.Visible = false;
+                this.toolStripStatusLabel1.Visible = false;
+                StopWait();
+            }
+
+            DisplayReplaceTGIResults();
+        }
+
+        bool ReplaceTGIMatch(IResourceKey rk) { return replaceTGIPane.FromCriteria.Match(rk); }
+        IResourceKey ReplaceTGIReplacer(IResourceKey rk) { return replaceTGIPane.ToCriteria.GetValueOrDefault(rk); }
+
+        void replaceTGIPane_SaveClicked(object sender, EventArgs e)
+        {
+            Diagnostics.Log("replaceTGIPane_SaveClicked");
+
+            DoWait();
+
+            FileTable.Current.Package.SavePackage();
+            CopyableMessageBox.Show("Package saved.", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
+
+            fileReloadCurrent();
+        }
+
+        void replaceTGIPane_CancelClicked(object sender, EventArgs e)
+        {
+            Diagnostics.Log("replaceTGIPane_CancelClicked");
+
+            if (replaceTGIPane.SaveEnabled)
+            {
+                int dr = CopyableMessageBox.Show("Any unsaved changes will be lost!\n\nAre you sure?", myName, CopyableMessageBoxButtons.YesNo, CopyableMessageBoxIcon.Exclamation);
+                if (dr != 0) return;
+            }
+
+            fileReloadCurrent();
+        }
+        #endregion
+
+        #region Renumber package bits
+        void StartRenumbering()
+        {
+            numNewInstances = 0;
+            oldToNew = new Dictionary<ulong, ulong>();
+            replacements = new List<string>();
+
+            #region Renumber CatalogResources and GUIDs
+
+            // 1. Find all (non-FNV64Blank) GUIDs (GUID->Catlg SR)
+            List<ulong> guidsSeen = new List<ulong>();
+            foreach (SpecificResource sr in FileTable.Current.FindAll(rie => rie.ResourceType != 0xCF9A4ACE && Enum.IsDefined(typeof(CatalogType), rie.ResourceType)))
+            {
+                CatalogResource.CatalogResource cr = sr.Resource as CatalogResource.CatalogResource;
+                if (cr == null) continue;
+
+                // Whilst we're here on a CatalogResource, get its new IID
+                if (!oldToNew.ContainsKey(sr.ResourceIndexEntry.Instance))
+                    oldToNew.Add(sr.ResourceIndexEntry.Instance, RenumberingGUIDIID());
+
+                // Now find its GUIDs
+                if (cr.CommonBlock.NameGUID != STBLHandler.FNV64Blank && !guidsSeen.Contains(cr.CommonBlock.NameGUID))
+                    guidsSeen.Add(cr.CommonBlock.NameGUID);
+                if (cr.CommonBlock.DescGUID != STBLHandler.FNV64Blank && !guidsSeen.Contains(cr.CommonBlock.DescGUID))
+                    guidsSeen.Add(cr.CommonBlock.DescGUID);
+            }
+
+            // 2. Delete GUID->Catlg entries where STBL not found (i.e. not current package, so not eligible for renumber)
+            List<IDictionary<ulong, string>> stbls = FileTable.Current
+                .FindAll(rie => rie.ResourceType == 0x220557DA)
+                .ConvertAll<IDictionary<ulong, string>>(sr => sr.Resource as IDictionary<ulong, string>)
+                .FindAll(stbl => stbl != null);
+            new List<ulong>(guidsSeen)// Don't think it's safe updating guidsSeen whilst it's enumerating itself
+                .FindAll(g => stbls.FindAll(d => d.ContainsKey(g)).Count == 0)// Old GUID not in current package
+                .ForEach(g => guidsSeen.Remove(g));// So remove from those we'll renumber
+
+            // 3. Generate new GUIDs
+            Dictionary<ulong, ulong> oldToNewGUID = new Dictionary<ulong, ulong>();
+            guidsSeen.ForEach(g => oldToNewGUID.Add(g, RenumberingGUIDIID()));
+
+            // 4. Update Catlg entries
+            foreach (SpecificResource sr in FileTable.Current.FindAll(rie => rie.ResourceType != 0xCF9A4ACE && Enum.IsDefined(typeof(CatalogType), rie.ResourceType)))
+            {
+                CatalogResource.CatalogResource cr = sr.Resource as CatalogResource.CatalogResource;
+                if (cr == null) continue;
+
+                bool dirty = false;
+
+                if (oldToNewGUID.ContainsKey(cr.CommonBlock.NameGUID))
+                {
+                    replacements.Add(String.Format("{0}: Replaced NameGUID 0x{1:X16} with 0x{2:X16} in {3}", "" + sr.ResourceIndexEntry,
+                        cr.CommonBlock.NameGUID, oldToNewGUID[cr.CommonBlock.NameGUID], cr.GetType().Name));
+                    cr.CommonBlock.NameGUID = oldToNewGUID[cr.CommonBlock.NameGUID];
+                    dirty = true;
+                }
+                if (oldToNewGUID.ContainsKey(cr.CommonBlock.DescGUID))
+                {
+                    replacements.Add(String.Format("{0}: Replaced DescGUID 0x{1:X16} with 0x{2:X16} in {3}", "" + sr.ResourceIndexEntry,
+                        cr.CommonBlock.DescGUID, oldToNewGUID[cr.CommonBlock.DescGUID], cr.GetType().Name));
+                    cr.CommonBlock.DescGUID = oldToNewGUID[cr.CommonBlock.DescGUID];
+                    dirty = true;
+                }
+
+                if (dirty) sr.Commit();
+            }
+
+            // 5. Generate referenced STBL IIDs and update GUIDs
+            Dictionary<ulong, ulong> langMap = new Dictionary<ulong, ulong>();
+            foreach (SpecificResource sr in FileTable.Current.FindAll(rie => rie.ResourceType == 0x220557DA))
+            {
+                IDictionary<ulong, string> stbl = sr.Resource as IDictionary<ulong, string>;
+                if (stbl == null) continue;
+                if (new List<ulong>(stbl.Keys).FindAll(g => guidsSeen.Contains(g)).Count == 0) continue;//Not referenced
+
+                if (!oldToNew.ContainsKey(sr.ResourceIndexEntry.Instance))
+                {
+                    if (!langMap.ContainsKey(sr.ResourceIndexEntry.Instance & 0x00FFFFFFFFFFFFFF))
+                        langMap.Add(sr.ResourceIndexEntry.Instance & 0x00FFFFFFFFFFFFFF, RenumberingGUIDIID() & 0x00FFFFFFFFFFFFFF);
+                    oldToNew.Add(sr.ResourceIndexEntry.Instance, sr.ResourceIndexEntry.Instance & 0xFF00000000000000 | langMap[sr.ResourceIndexEntry.Instance & 0x00FFFFFFFFFFFFFF]);
+                }
+
+                bool dirty = false;
+
+                foreach (var kvp in oldToNewGUID)
+                    if (stbl.ContainsKey(kvp.Key))
+                    {
+                        replacements.Add(String.Format("{0}: Replaced GUID 0x{1:X16} with 0x{2:X16} in STBL", "" + sr.ResourceIndexEntry, kvp.Key, kvp.Value));
+                        stbl.Add(kvp.Value, stbl[kvp.Key]);
+                        stbl.Remove(kvp.Key);
+                        dirty = true;
+                    }
+
+                if (dirty) sr.Commit();
+            }
+
+            #endregion
+
+            #region Update TGIBlocks referencing package resources
+
+            // RenumberingMatch doesn't work for RCOL ChunkEntries, so find these first and generate new IIDs
+            foreach (var rcol in FileTable.Current
+                .FindAll(rie => true)
+                .ConvertAll<GenericRCOLResource>(sr => sr.Resource as GenericRCOLResource)
+                .FindAll(rcol => rcol != null))
+            {
+                foreach (var ce in rcol.ChunkEntries)
+                {
+                    if (ce.TGIBlock.Instance == 0) continue;// do not renumber zeros
+                    if (!oldToNew.ContainsKey(ce.TGIBlock.Instance))
+                        oldToNew.Add(ce.TGIBlock.Instance, RenumberingGUIDIID());
+                }
+            }
+
+            foreach (SpecificResource item in FileTable.Current.FindAll(rie => true))
+            {
+                bool dirty = false;
+
+                // RenumberingMatch does magic
+                if (item.ResourceIndexEntry.ResourceType == 0x0333406C)//_XML
+                    dirty = ReplaceRKsInXML(item, RenumberingMatch, IIDReplacer);
+                else
+                    dirty = ReplaceRKsInField(item, "", RenumberingMatch, IIDReplacer, item.Resource as AApiVersionedFields);
+
+                if (dirty) item.Commit();
+            }
+            #endregion
+
+            #region Name map and ResourceIndex
+
+            // 1. Generate referenced _KEY IIDs
+            foreach (SpecificResource sr in FileTable.Current.FindAll(rie => rie.ResourceType == 0x0166038C))
+            {
+                IDictionary<ulong, string> namemap = sr.Resource as IDictionary<ulong, string>;
+                if (namemap == null) continue;
+                if (!namemap.ContainsKey(sr.ResourceIndexEntry.Instance)// Doesn't contain its own name
+                    && (new List<ulong>(namemap.Keys).FindAll(i => oldToNew.ContainsKey(i)).Count == 0))// Doesn't contain names for anything we're renumbering
+                    continue;
+
+                if (!oldToNew.ContainsKey(sr.ResourceIndexEntry.Instance))
+                    oldToNew.Add(sr.ResourceIndexEntry.Instance, RenumberingGUIDIID());
+            }
+
+            // 2. Update referenced _KEYs
+            foreach (SpecificResource sr in FileTable.Current.FindAll(rie => rie.ResourceType == 0x0166038C))
+            {
+                IDictionary<ulong, string> namemap = sr.Resource as IDictionary<ulong, string>;
+                if (namemap == null) continue;
+
+                bool dirty = false;
+
+                foreach (var kvp in oldToNew)
+                    if (namemap.ContainsKey(kvp.Key))
+                    {
+                        namemap.Add(kvp.Value, namemap[kvp.Key]);
+                        namemap.Remove(kvp.Key);
+                        replacements.Add(String.Format("{0}: Replaced IID 0x{1:X16} with 0x{2:X16} in _KEY", "" + sr.ResourceIndexEntry, kvp.Key, kvp.Value));
+                        dirty = true;
+                    }
+
+                if (dirty) sr.Commit();
+            }
+
+            // 3. Update ResourceIndexEntries
+            foreach (var rie in FileTable.Current.Package.FindAll(rie => oldToNew.ContainsKey(rie.Instance)))//Only referenced resources
+            {
+                replacements.Add(String.Format("{0}: Renumbered IID to 0x{1:X16}", "" + rie, oldToNew[rie.Instance]));
+                rie.Instance = oldToNew[rie.Instance];
+            }
+
+            #endregion
+        }
+        bool RenumberingMatch(IResourceKey rk)
+        {
+            if (rk.Instance == 0) return false;// do not renumber zeros
+            if (rk.ResourceType == 0xCF9A4ACE) return false; // MDLR - absolutely never ever match
+            if (rk.ResourceType == 0x220557DA) return false; // STBL - dealt with separately, not a reference
+            if (oldToNew.ContainsKey(rk.Instance)) return true; // Already seen this old IID
+
+            SpecificIndexEntry sie = new SpecificIndexEntry(FileTable.fb0, rk);
+            if (sie.ResourceIndexEntry == null || sie.PathPackage != FileTable.Current) return false; // Not found in current package, so we don't renumber it here
+
+            if (rk.ResourceType == 0x736884F1 && rk.Instance >> 32 == 0) // It's a request for a VPXY using version...
+            {
+                if (!oldToNew.ContainsKey(sie.ResourceIndexEntry.Instance)) // Target not yet in map
+                    oldToNew.Add(sie.ResourceIndexEntry.Instance, RenumberingGUIDIID());
+
+                // Add a reference to the new canonical IID
+                oldToNew.Add(rk.Instance, oldToNew[sie.ResourceIndexEntry.Instance]);
+            }
+            else
+            {
+                oldToNew.Add(rk.Instance, RenumberingGUIDIID());
+            }
+            return true;
+        }
+        ulong RenumberingGUIDIID()
+        {
+            return FNV64.GetHash((++numNewInstances).ToString("X8") + "_" + CreatorName + "_" + Guid.NewGuid().ToString("N") + "_" + DateTime.UtcNow.ToBinary().ToString("X16"));
+        }
+
+        void fixIntegrityResults_SaveClicked(object sender, EventArgs e)
+        {
+            Diagnostics.Log("fixIntegrityResults_SaveClicked");
+
+            DoWait();
+
+            FileTable.Current.Package.SavePackage();
+            CopyableMessageBox.Show("Package saved.", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
+
+            fileReloadCurrent();
+        }
+
+        void fixIntegrityResults_CancelClicked(object sender, EventArgs e)
+        {
+            Diagnostics.Log("fixIntegrityResults_CancelClicked");
+
+            int dr = CopyableMessageBox.Show("Any unsaved changes will be lost!\n\nAre you sure?", myName, CopyableMessageBoxButtons.YesNo, CopyableMessageBoxIcon.Exclamation);
+            if (dr != 0) return;
+
+            fileReloadCurrent();
         }
         #endregion
     }
