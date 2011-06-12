@@ -115,13 +115,23 @@ namespace ObjectCloner
             else
             {
                 ulong png = (item.Resource != null) ? (ulong)item.Resource["CommonBlock.PngInstance"].Value : 0;
+                SpecificResource sr = getRK(item.RequestedRK.ResourceType, png != 0 ? png : item.RequestedRK.Instance, size, png != 0);
+                return sr == null ? RK.NULL : sr.RequestedRK;
+            }
+        }
+        public static SpecificResource getTHUM(THUMSize size, SpecificResource item)
+        {
+            if (item.CType == CatalogType.ModularResource)
+                return null;
+            else
+            {
+                ulong png = (item.Resource != null) ? (ulong)item.Resource["CommonBlock.PngInstance"].Value : 0;
                 return getRK(item.RequestedRK.ResourceType, png != 0 ? png : item.RequestedRK.Instance, size, png != 0);
             }
         }
-        static IResourceKey getRK(uint type, ulong instance, THUMSize size, bool isPNGInstance)
+        static SpecificResource getRK(uint type, ulong instance, THUMSize size, bool isPNGInstance)
         {
-            SpecificResource item = getItem(isPNGInstance ? FileTable.tmb : FileTable.tmb, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
-            return item == null ? RK.NULL : item.RequestedRK;
+            return getItem(isPNGInstance ? FileTable.tmb : FileTable.tmb, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
         }
 
         public static IResourceKey getNewRK(THUMSize size, SpecificResource item)
