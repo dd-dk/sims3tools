@@ -24,12 +24,12 @@ using s3pi.Interfaces;
 
 namespace ObjectCloner
 {
-    public class PathPackageTuple
+    public class PathPackageTuple : IEquatable<PathPackageTuple>
     {
         public string Path { get; private set; }
         public IPackage Package { get; private set; }
 
-        public PathPackageTuple(string path, bool readwrite = false) { Path = path; Package = s3pi.Package.Package.OpenPackage(0, path, readwrite); }
+        public PathPackageTuple(string path, bool readwrite = false) { Path = System.IO.Path.GetFullPath(path); Package = s3pi.Package.Package.OpenPackage(0, Path, readwrite); }
 
         public SpecificResource AddResource(IResourceKey rk, Stream stream = null)
         {
@@ -48,5 +48,7 @@ namespace ObjectCloner
         {
             return Package.FindAll(match).ConvertAll<SpecificResource>(rie => new SpecificResource(this, rie));
         }
+
+        public bool Equals(PathPackageTuple other) { return Path.Equals(other.Path); }
     }
 }
