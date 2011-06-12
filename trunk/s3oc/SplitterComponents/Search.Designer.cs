@@ -1,4 +1,4 @@
-﻿namespace ObjectCloner.TopPanelComponents
+﻿namespace ObjectCloner.SplitterComponents
 {
     partial class Search
     {
@@ -34,6 +34,7 @@
             this.TagID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.ContentCategoryFlags = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.TGI = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.searchContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.scmCopyRK = new System.Windows.Forms.ToolStripMenuItem();
             this.tlpSearch = new System.Windows.Forms.TableLayoutPanel();
@@ -53,7 +54,7 @@
             this.tbText = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.Path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.btnCancel = new System.Windows.Forms.Button();
             this.searchContextMenu.SuspendLayout();
             this.tlpSearch.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -78,7 +79,7 @@
             this.listView1.MultiSelect = false;
             this.listView1.Name = "listView1";
             this.listView1.Size = new System.Drawing.Size(800, 114);
-            this.listView1.TabIndex = 8;
+            this.listView1.TabIndex = 7;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
             this.listView1.ItemActivate += new System.EventHandler(this.listView1_ItemActivate);
@@ -103,6 +104,11 @@
             // 
             this.TGI.Text = "ResourceKey";
             this.TGI.Width = 192;
+            // 
+            // Path
+            // 
+            this.Path.Text = "Path";
+            this.Path.Width = 296;
             // 
             // searchContextMenu
             // 
@@ -147,18 +153,20 @@
             this.tlpSearch.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 2F));
             this.tlpSearch.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlpSearch.Size = new System.Drawing.Size(800, 300);
-            this.tlpSearch.TabIndex = 1;
+            this.tlpSearch.TabIndex = 0;
             // 
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.AutoSize = true;
             this.tableLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel1.ColumnCount = 2;
+            this.tableLayoutPanel1.ColumnCount = 3;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.Controls.Add(this.cbCatalogType, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.btnSearch, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.btnCancel, 2, 0);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(100, 152);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
@@ -173,17 +181,17 @@
             this.cbCatalogType.FormattingEnabled = true;
             this.cbCatalogType.Location = new System.Drawing.Point(3, 4);
             this.cbCatalogType.Name = "cbCatalogType";
-            this.cbCatalogType.Size = new System.Drawing.Size(608, 21);
-            this.cbCatalogType.TabIndex = 6;
+            this.cbCatalogType.Size = new System.Drawing.Size(527, 21);
+            this.cbCatalogType.TabIndex = 1;
             // 
             // btnSearch
             // 
             this.btnSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSearch.Enabled = false;
-            this.btnSearch.Location = new System.Drawing.Point(617, 3);
+            this.btnSearch.Location = new System.Drawing.Point(536, 3);
             this.btnSearch.Name = "btnSearch";
             this.btnSearch.Size = new System.Drawing.Size(75, 23);
-            this.btnSearch.TabIndex = 7;
+            this.btnSearch.TabIndex = 2;
             this.btnSearch.Text = "&Search";
             this.btnSearch.UseVisualStyleBackColor = true;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
@@ -349,10 +357,15 @@
             this.label3.TabIndex = 5;
             this.label3.Text = "Kind of object:";
             // 
-            // Path
+            // btnCancel
             // 
-            this.Path.Text = "Path";
-            this.Path.Width = 296;
+            this.btnCancel.Location = new System.Drawing.Point(617, 3);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnCancel.TabIndex = 3;
+            this.btnCancel.Text = "C&ancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // Search
             // 
@@ -397,6 +410,7 @@
         private System.Windows.Forms.ToolStripMenuItem scmCopyRK;
         private System.Windows.Forms.CheckBox ckbUseCC;
         private System.Windows.Forms.ColumnHeader Path;
+        private System.Windows.Forms.Button btnCancel;
 
     }
 }

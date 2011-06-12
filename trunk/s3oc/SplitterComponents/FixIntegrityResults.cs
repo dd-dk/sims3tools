@@ -1,5 +1,5 @@
 ﻿/***************************************************************************
- *  Copyright (C) 2009 by Peter L Jones                                    *
+ *  Copyright (C) 2011 by Peter L Jones                                    *
  *  pljones@users.sf.net                                                   *
  *                                                                         *
  *  This file is part of the Sims 3 Package Interface (s3pi)               *
@@ -18,26 +18,38 @@
  *  along with s3pi.  If not, see <http://www.gnu.org/licenses/>.          *
  ***************************************************************************/
 using System;
+using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
+using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
+using s3pi.Interfaces;
 
 namespace ObjectCloner.SplitterComponents
 {
-    public partial class PleaseWait : UserControl
+    public partial class FixIntegrityResults : UserControl
     {
-        public PleaseWait()
+        public FixIntegrityResults()
         {
             InitializeComponent();
         }
-        public string Label { get { return label1.Text; } set { label1.Text = value; } }
 
-        public static string DoWait(Control control, string Label = "Please wait...", string Key = "pleaseWait1")
+        [Browsable(true)]
+        [Category("Appearance")]
+        [DefaultValue("")]
+        [Description("Contains the text to display.")]
+        public new string Text
         {
-            PleaseWait pw = new PleaseWait() { Dock = DockStyle.Fill, Label = Label, Name = Key, };
-            control.Controls.Add(pw);
-            return pw.Name;
+            get { return richTextBox1.Text; }
+            set { richTextBox1.Text = value; }
         }
 
-        public static void StopWait(Control control, string Key = "pleaseWait1") { control.Controls.RemoveByKey(Key); }
+        public event EventHandler SaveClicked;
+        public event EventHandler CancelClicked;
+
+        private void btnSave_Click(object sender, EventArgs e) { if (SaveClicked != null) SaveClicked(this, EventArgs.Empty); }
+
+        private void btnCancel_Click(object sender, EventArgs e) { if (CancelClicked != null) CancelClicked(this, EventArgs.Empty); }
     }
 }

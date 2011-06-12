@@ -23,7 +23,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace ObjectCloner.TopPanelComponents
+namespace ObjectCloner.SplitterComponents
 {
     public partial class CloneFixOptions : UserControl
     {

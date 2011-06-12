@@ -26,7 +26,7 @@ using System.Windows.Forms;
 using System.Threading;
 using s3pi.Interfaces;
 
-namespace ObjectCloner.TopPanelComponents
+namespace ObjectCloner.SplitterComponents
 {
     public partial class TGISearch : UserControl
     {
@@ -180,6 +180,9 @@ namespace ObjectCloner.TopPanelComponents
                 StartTGISearch();
             }
         }
+
+        public event EventHandler CancelClicked;
+        private void btnCancel_Click(object sender, EventArgs e) { if (CancelClicked != null) CancelClicked(this, EventArgs.Empty); }
 
 
 

@@ -26,7 +26,7 @@ using System.Threading;
 using System.Windows.Forms;
 using s3pi.Interfaces;
 
-namespace ObjectCloner.TopPanelComponents
+namespace ObjectCloner.SplitterComponents
 {
     public partial class ObjectChooser : UserControl
     {
@@ -85,7 +85,7 @@ namespace ObjectCloner.TopPanelComponents
         }
 
 
-        public ListViewItem SelectedItem { get { return listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0] : null; } set { listView1.SelectedItems.Clear(); if (listView1.Items.Contains(value)) try { value.Selected = true; } catch { } } }
+        public ListViewItem SelectedItem { get { return listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0] : null; } set { listView1.SelectedItems.Clear(); if (value != null && listView1.Items.Contains(value)) try { value.Selected = true; } catch { } } }
 
         #region Occurs whenever the 'SelectedIndex' for the Object Chooser changes
         [Browsable(true)]

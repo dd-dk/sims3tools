@@ -1,4 +1,4 @@
-﻿namespace ObjectCloner.TopPanelComponents
+﻿namespace ObjectCloner.SplitterComponents
 {
     partial class PleaseWait
     {

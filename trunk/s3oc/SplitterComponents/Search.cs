@@ -26,7 +26,7 @@ using System.Threading;
 using System.Windows.Forms;
 using s3pi.Interfaces;
 
-namespace ObjectCloner.TopPanelComponents
+namespace ObjectCloner.SplitterComponents
 {
     public partial class Search : UserControl
     {
@@ -80,7 +80,7 @@ namespace ObjectCloner.TopPanelComponents
 
 
 
-        public ListViewItem SelectedItem { get { return listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0] : null; } set { listView1.SelectedItems.Clear(); if (listView1.Items.Contains(value)) try { value.Selected = true; } catch { } } }
+        public ListViewItem SelectedItem { get { return listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0] : null; } set { listView1.SelectedItems.Clear(); if (value != null && listView1.Items.Contains(value)) try { value.Selected = true; } catch { } } }
 
         #region Occurs whenever the 'SelectedIndex' for the Search Results changes
         [Browsable(true)]
@@ -142,6 +142,9 @@ namespace ObjectCloner.TopPanelComponents
                 StartSearch();
             }
         }
+
+        public event EventHandler CancelClicked;
+        private void btnCancel_Click(object sender, EventArgs e) { if (CancelClicked != null) CancelClicked(this, EventArgs.Empty); }
 
         public CatalogType SelectedCatalogType { get { return cbCatalogType.SelectedIndex > 0 ? ((CatalogType[])Enum.GetValues(typeof(CatalogType)))[cbCatalogType.SelectedIndex - 1] : 0; } }
 

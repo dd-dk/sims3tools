@@ -1,4 +1,4 @@
-﻿namespace ObjectCloner.TopPanelComponents
+﻿namespace ObjectCloner.SplitterComponents
 {
     partial class TGISearch
     {
@@ -52,6 +52,7 @@
             this.label4 = new System.Windows.Forms.Label();
             this.ckbUseCC = new System.Windows.Forms.CheckBox();
             this.btnSearch = new System.Windows.Forms.Button();
+            this.btnCancel = new System.Windows.Forms.Button();
             this.tlpSearch.SuspendLayout();
             this.tgiSearchContextMenu.SuspendLayout();
             this.tlpTGIValues.SuspendLayout();
@@ -68,7 +69,8 @@
             this.tlpSearch.Controls.Add(this.label1, 0, 0);
             this.tlpSearch.Controls.Add(this.tlpTGIValues, 1, 0);
             this.tlpSearch.Controls.Add(this.ckbUseCC, 1, 2);
-            this.tlpSearch.Controls.Add(this.btnSearch, 2, 2);
+            this.tlpSearch.Controls.Add(this.btnSearch, 2, 1);
+            this.tlpSearch.Controls.Add(this.btnCancel, 2, 2);
             this.tlpSearch.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tlpSearch.Location = new System.Drawing.Point(0, 0);
             this.tlpSearch.Name = "tlpSearch";
@@ -98,7 +100,7 @@
             this.listView1.MultiSelect = false;
             this.listView1.Name = "listView1";
             this.listView1.Size = new System.Drawing.Size(800, 114);
-            this.listView1.TabIndex = 4;
+            this.listView1.TabIndex = 5;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
             this.listView1.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView1_ColumnClick);
@@ -307,14 +309,24 @@
             // 
             // btnSearch
             // 
-            this.btnSearch.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnSearch.Location = new System.Drawing.Point(407, 92);
+            this.btnSearch.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.btnSearch.Location = new System.Drawing.Point(407, 63);
             this.btnSearch.Name = "btnSearch";
             this.btnSearch.Size = new System.Drawing.Size(75, 23);
             this.btnSearch.TabIndex = 3;
             this.btnSearch.Text = "&Search";
             this.btnSearch.UseVisualStyleBackColor = true;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
+            // 
+            // btnCancel
+            // 
+            this.btnCancel.Location = new System.Drawing.Point(407, 92);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnCancel.TabIndex = 4;
+            this.btnCancel.Text = "C&ancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // TGISearch
             // 
@@ -357,5 +369,6 @@
         private System.Windows.Forms.ToolStripMenuItem tgisPasteRK;
         private System.Windows.Forms.ToolStripMenuItem tgisCopyRK;
         private System.Windows.Forms.CheckBox ckbUseCC;
+        private System.Windows.Forms.Button btnCancel;
     }
 }
