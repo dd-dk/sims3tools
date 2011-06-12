@@ -33,11 +33,11 @@ namespace ObjectCloner
         {
             InitializeComponent();
             tsMD = new List<ToolStripMenuItem>(new ToolStripMenuItem[]{
-                fileToolStripMenuItem, cloningToolStripMenuItem, settingsToolStripMenuItem, helpToolStripMenuItem,
+                fileToolStripMenuItem, cloningToolStripMenuItem, toolsToolStripMenuItem, settingsToolStripMenuItem, helpToolStripMenuItem,
             });
             tsMB = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //File
-                openToolStripMenuItem, exitToolStripMenuItem,
+                openToolStripMenuItem, reloadStripMenuItem, closeStripMenuItem, exitToolStripMenuItem,
                 //Cloning -- These must be in order of enum CatalogType by value:
                 cfenToolStripMenuItem, cstrToolStripMenuItem, cprxToolStripMenuItem, cttlToolStripMenuItem,
                 cralToolStripMenuItem, ctptToolStripMenuItem, cfirToolStripMenuItem, cwatToolStripMenuItem,
@@ -45,7 +45,7 @@ namespace ObjectCloner
                 cfndToolStripMenuItem, objdToolStripMenuItem, cwalToolStripMenuItem, cwstToolStripMenuItem,
                 crstToolStripMenuItem, mdlrToolStripMenuItem, crmtToolStripMenuItem,
                 //Tools
-                searchToolStripMenuItem, tgiSearchToolStripMenuItem,
+                tgiSearchToolStripMenuItem, searchToolStripMenuItem, replaceTGIToolStripMenuItem, fixIntegrityToolStripMenuItem,
                 //Settings
                 gameFoldersToolStripMenuItem, userNameToopStripMenuItem, langSearchToolStripMenuItem, automaticUpdateCheckToolStripMenuItem,
                 advancedCloningToolStripMenuItem,
@@ -85,13 +85,13 @@ namespace ObjectCloner
 
         public enum MB
         {
-            MBF_open = 0, MBF_exit,
+            MBF_open = 0, MBF_reload, MBF_close, MBF_exit,
             MBC_cfen, MBC_cstr, MBC_cprx, MBC_cttl,
             MBC_cral, MBC_ctpt, MBC_cfir, MBC_cwat,
             MBC_ccfp,
             MBC_cfnd, MBC_objd, MBC_cwal, MBC_cwst,
             MBC_crst, MBC_mdlr, MBC_crmt,
-            MBT_search, MBT_tgiSearch,
+            MBT_tgiSearch, MBT_search, MBT_replaceTGI, MBT_fixIntegrity,
             MBS_sims3Folder, MBS_userName, MBS_langSearch, MBS_updates, MBS_advanced, MBS_popups, MBS_logging,
             MBH_contents, MBH_about, MBH_update, MBH_warranty, MBH_licence,
         }

@@ -30,6 +30,8 @@
         {
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reloadStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.closeStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cloningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,8 +52,9 @@
             this.cwstToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.crstToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tgiSearchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.replaceTGIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameFoldersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.userNameToopStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -68,12 +71,15 @@
             this.checkForUpdateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fixIntegrityToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SuspendLayout();
             // 
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem,
+            this.reloadStripMenuItem,
+            this.closeStripMenuItem,
             this.toolStripSeparator2,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
@@ -88,6 +94,22 @@
             this.openToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
             this.openToolStripMenuItem.Text = "&Open Package...";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
+            // 
+            // reloadStripMenuItem
+            // 
+            this.reloadStripMenuItem.Name = "reloadStripMenuItem";
+            this.reloadStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F5)));
+            this.reloadStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.reloadStripMenuItem.Text = "Re&fresh";
+            this.reloadStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
+            // 
+            // closeStripMenuItem
+            // 
+            this.closeStripMenuItem.Name = "closeStripMenuItem";
+            this.closeStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
+            this.closeStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.closeStripMenuItem.Text = "&Close";
+            this.closeStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
             // 
             // toolStripSeparator2
             // 
@@ -259,26 +281,42 @@
             // toolsToolStripMenuItem
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tgiSearchToolStripMenuItem,
             this.searchToolStripMenuItem,
-            this.tgiSearchToolStripMenuItem});
+            this.replaceTGIToolStripMenuItem,
+            this.fixIntegrityToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
             this.toolsToolStripMenuItem.Text = "&Tools";
             this.toolsToolStripMenuItem.DropDownOpening += new System.EventHandler(this.tsMD_DropDownOpening);
             // 
-            // searchToolStripMenuItem
-            // 
-            this.searchToolStripMenuItem.Name = "searchToolStripMenuItem";
-            this.searchToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.searchToolStripMenuItem.Text = "&Search";
-            this.searchToolStripMenuItem.Click += new System.EventHandler(this.tsMBT_Click);
-            // 
             // tgiSearchToolStripMenuItem
             // 
             this.tgiSearchToolStripMenuItem.Name = "tgiSearchToolStripMenuItem";
-            this.tgiSearchToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.tgiSearchToolStripMenuItem.Text = "Find Resource&Key";
+            this.tgiSearchToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.tgiSearchToolStripMenuItem.Text = "&Find Resource";
             this.tgiSearchToolStripMenuItem.Click += new System.EventHandler(this.tsMBT_Click);
+            // 
+            // searchToolStripMenuItem
+            // 
+            this.searchToolStripMenuItem.Name = "searchToolStripMenuItem";
+            this.searchToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.searchToolStripMenuItem.Text = "&Search";
+            this.searchToolStripMenuItem.Click += new System.EventHandler(this.tsMBT_Click);
+            // 
+            // replaceTGIToolStripMenuItem
+            // 
+            this.replaceTGIToolStripMenuItem.Name = "replaceTGIToolStripMenuItem";
+            this.replaceTGIToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.replaceTGIToolStripMenuItem.Text = "&Replace ResourceKey...";
+            this.replaceTGIToolStripMenuItem.Click += new System.EventHandler(this.tsMBT_Click);
+            // 
+            // fixIntegrityToolStripMenuItem
+            // 
+            this.fixIntegrityToolStripMenuItem.Name = "fixIntegrityToolStripMenuItem";
+            this.fixIntegrityToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.fixIntegrityToolStripMenuItem.Text = "Fix Inte&grity";
+            this.fixIntegrityToolStripMenuItem.Click += new System.EventHandler(this.tsMBT_Click);
             // 
             // settingsToolStripMenuItem
             // 
@@ -423,6 +461,9 @@
 
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem reloadStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem closeStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cloningToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem objdToolStripMenuItem;
@@ -443,23 +484,24 @@
         private System.Windows.Forms.ToolStripMenuItem crmtToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem tgiSearchToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem replaceTGIToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fixIntegrityToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gameFoldersToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem userNameToopStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem langSearchToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem automaticUpdateCheckToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem diagnosticsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem loggingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem advancedCloningToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem contentsToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem checkForUpdateToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem warrantyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem licenceToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem automaticUpdateCheckToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem checkForUpdateToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem advancedCloningToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem langSearchToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem tgiSearchToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem loggingToolStripMenuItem;
     }
 }
