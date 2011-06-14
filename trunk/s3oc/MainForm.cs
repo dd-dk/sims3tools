@@ -320,6 +320,21 @@ namespace ObjectCloner
             }
             #endregion
 
+            /*string name = NameMap.NMap[sr.ResourceIndexEntry.Instance];
+            if (name == null)
+            {
+                SpecificResource ctlg = sr.ResourceIndexEntry.ResourceType == (uint)CatalogType.ModularResource ? ItemForTGIBlock0(sr) : sr;
+                if (ctlg.Resource != null)
+                {
+                    name = ctlg.Resource["CommonBlock.Name"];
+                    name = (name.IndexOf(':') < 0) ? name : name.Substring(name.LastIndexOf(':') + 1);
+                }
+                else
+                {
+                    name = ctlg.Exception.Message;
+                    for (Exception ex = ctlg.Exception.InnerException; ex != null; ex = ex.InnerException) name = ex.Message + "|  " + name;
+                }
+            }/**/
             string name;
             SpecificResource ctlg = sr.ResourceIndexEntry.ResourceType == (uint)CatalogType.ModularResource ? ItemForTGIBlock0(sr) : sr;
             if (ctlg.Resource != null)
@@ -422,8 +437,7 @@ namespace ObjectCloner
         {
             Diagnostics.Log("DisplayObjectChooser");
 
-            DoWait("Setting up folders...");
-            if (!CheckInstallDirs(splitContainer1.Panel1)) return;
+            if (!CheckInstallDirs(null)) return;
 
             DisplayListView(objectChooser);
         }
@@ -600,6 +614,8 @@ namespace ObjectCloner
             }
         }
 
+        public delegate void DoWaitCallback(string waitText = "Please wait...");
+        public delegate void StopWaitCallback(Control control);
         private void DoWait(string waitText = "Please wait...")
         {
             Diagnostics.Log(waitText);
@@ -612,6 +628,13 @@ namespace ObjectCloner
             TabEnable(false);
             this.Text = myName + " [busy]";
             Application.DoEvents();
+        }
+        private void StopWait(Control control)
+        {
+            StopWait();
+            splitContainer1.Panel1.Controls.Clear();
+            splitContainer1.Panel1.Controls.Add(control);
+            control.Dock = DockStyle.Fill;
         }
         private void StopWait()
         {
@@ -1518,7 +1541,7 @@ namespace ObjectCloner
             isFix = IsFixPass;
 
             CTPTBrushIndexToPair = new Dictionary<ulong, SpecificResource>();
-            objectChooser = new ObjectChooser(updateProgress, ListViewAdd, resourceType, isFix);
+            objectChooser = new ObjectChooser(DoWait, StopWait, updateProgress, ListViewAdd, resourceType, isFix);
             if (isFix)
             {
                 objectChooser.SelectedIndexChanged += new EventHandler<SelectedIndexChangedEventArgs>((sender, e) => selectedItem = e.SelectedItem);
@@ -1558,7 +1581,7 @@ namespace ObjectCloner
             InitialiseFileTable();
 
             CTPTBrushIndexToPair = new Dictionary<ulong, SpecificResource>();
-            searchPane = new Search(updateProgress, ListViewAdd);
+            searchPane = new Search(CheckInstallDirs, updateProgress, ListViewAdd);
             searchPane.SelectedIndexChanged += new EventHandler<SelectedIndexChangedEventArgs>(listView_SelectedIndexChanged);
             searchPane.ItemActivate += new EventHandler<ItemActivateEventArgs>(listView_ItemActivate);
             searchPane.CancelClicked += new EventHandler((x, e) => fileReloadCurrent());
@@ -1571,7 +1594,7 @@ namespace ObjectCloner
             ClearTabs();
             InitialiseFileTable();
 
-            tgiSearchPane = new TGISearch(updateProgress);
+            tgiSearchPane = new TGISearch(CheckInstallDirs, updateProgress);
             tgiSearchPane.CancelClicked += new EventHandler((x, e) => fileReloadCurrent());
 
             DisplayTGISearch();
@@ -1811,12 +1834,13 @@ namespace ObjectCloner
         }
         #endregion
 
-        public static bool CheckInstallDirs(Control control)
+        public delegate bool CheckInstallDirsCB(Control control);
+        public bool CheckInstallDirs(Control control)
         {
             Diagnostics.Log("CheckInstallDirs");
             try
             {
-                PleaseWait.DoWait(control, "Setting up folders...");
+                DoWait("Setting up folders...");
                 if (!FileTable.IsOK)
                 {
                     CopyableMessageBox.Show("Found no packages\nPlease check your Game Folder settings.", "No objects to clone",
@@ -1827,7 +1851,7 @@ namespace ObjectCloner
                 bool loadedNMaps = NameMap.IsOK;
                 return true;
             }
-            finally { PleaseWait.StopWait(control); Application.DoEvents(); }
+            finally { if (control != null) StopWait(control); else StopWait(); Application.DoEvents(); }
         }
         #endregion
 

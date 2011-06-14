@@ -33,6 +33,8 @@ namespace ObjectCloner.SplitterComponents
 
         ListViewColumnSorter lvwColumnSorter;
 
+        MainForm.DoWaitCallback doWaitCB;
+        MainForm.StopWaitCallback stopWaitCB;
         MainForm.updateProgressCallback updateProgressCB;
         MainForm.listViewAddCallBack listViewAddCB;
         public CatalogType ResourceType { get; private set; }
@@ -47,12 +49,16 @@ namespace ObjectCloner.SplitterComponents
             this.Load += new EventHandler(ObjectChooser_Load);
         }
 
-        public ObjectChooser(MainForm.updateProgressCallback updateProgressCB, MainForm.listViewAddCallBack listViewAddCB, CatalogType resourceType, bool isFix)
+        public ObjectChooser(MainForm.DoWaitCallback doWaitCB, MainForm.StopWaitCallback stopWaitCB,
+            MainForm.updateProgressCallback updateProgressCB, MainForm.listViewAddCallBack listViewAddCB,
+            CatalogType resourceType, bool isFix)
             : this()
         {
-            ResourceType = resourceType;
+            this.doWaitCB = doWaitCB;
+            this.stopWaitCB = stopWaitCB;
             this.updateProgressCB = updateProgressCB;
             this.listViewAddCB = listViewAddCB;
+            this.ResourceType = resourceType;
             this.isFix = isFix;
         }
 
@@ -275,7 +281,7 @@ namespace ObjectCloner.SplitterComponents
             listView1.Visible = false;
             if (!isFix)
             {
-                PleaseWait.DoWait(this, "Please wait, loading object catalog...");
+                doWaitCB("Please wait, loading object catalog...");
             }
             listView1.Items.Clear();
 
@@ -296,7 +302,7 @@ namespace ObjectCloner.SplitterComponents
             fillThread = null;
 
             updateProgressCB(true, "", true, -1, false, 0);
-            if (!isFix) PleaseWait.StopWait(this);
+            if (!isFix) stopWaitCB(this);
             listView1.Visible = !isFix;
 
 

@@ -33,6 +33,7 @@ namespace ObjectCloner.SplitterComponents
 
         ListViewColumnSorter lvwColumnSorter;
 
+        MainForm.CheckInstallDirsCB checkInstallDirsCB;
         MainForm.updateProgressCallback updateProgressCB;
         MainForm.listViewAddCallBack listViewAddCB;
 
@@ -57,9 +58,10 @@ namespace ObjectCloner.SplitterComponents
             ckbUseCC.Checked = ckbUseCC.Enabled && FileTable.UseCustomContent;
         }
 
-        public Search(MainForm.updateProgressCallback updateProgressCB, MainForm.listViewAddCallBack listViewAddCB)
+        public Search(MainForm.CheckInstallDirsCB checkInstallDirsCB, MainForm.updateProgressCallback updateProgressCB, MainForm.listViewAddCallBack listViewAddCB)
             : this()
         {
+            this.checkInstallDirsCB = checkInstallDirsCB;
             this.updateProgressCB = updateProgressCB;
             this.listViewAddCB = listViewAddCB;
         }
@@ -133,11 +135,11 @@ namespace ObjectCloner.SplitterComponents
             {
                 tlpSearch.Visible = false;
                 MainForm.SetUseCC(ckbUseCC.Checked);
-                if (!MainForm.CheckInstallDirs(this))
+                if (!checkInstallDirsCB(this))
                     return;
                 tlpSearch.Visible = true;
 
-                listView1.Enabled = searchContextMenu.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = false;
+                btnCancel.Enabled = listView1.Enabled = searchContextMenu.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = false;
                 btnSearch.Text = "&Stop";
                 StartSearch();
             }
@@ -331,7 +333,7 @@ namespace ObjectCloner.SplitterComponents
 
             updateProgressCB(true, "", true, -1, false, 0);
 
-            listView1.Enabled = searchContextMenu.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = true;
+            btnCancel.Enabled = listView1.Enabled = searchContextMenu.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = true;
             btnSearch.Text = "&Search";
             
             

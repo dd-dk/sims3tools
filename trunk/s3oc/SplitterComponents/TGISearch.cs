@@ -33,6 +33,7 @@ namespace ObjectCloner.SplitterComponents
 
         ListViewColumnSorter lvwColumnSorter;
 
+        MainForm.CheckInstallDirsCB checkInstallDirsCB;
         MainForm.updateProgressCallback updateProgressCB;
 
 
@@ -50,9 +51,10 @@ namespace ObjectCloner.SplitterComponents
             ckbUseCC.Checked = ckbUseCC.Enabled && FileTable.UseCustomContent;
         }
 
-        public TGISearch(MainForm.updateProgressCallback updateProgressCB)
+        public TGISearch(MainForm.CheckInstallDirsCB checkInstallDirsCB, MainForm.updateProgressCallback updateProgressCB)
             : this()
         {
+            this.checkInstallDirsCB = checkInstallDirsCB;
             this.updateProgressCB = updateProgressCB;
         }
 
@@ -171,11 +173,11 @@ namespace ObjectCloner.SplitterComponents
             {
                 tlpSearch.Visible = false;
                 MainForm.SetUseCC(ckbUseCC.Checked);
-                if (!MainForm.CheckInstallDirs(this))
+                if (!checkInstallDirsCB(this))
                     return;
                 tlpSearch.Visible = true;
 
-                listView1.Enabled = tgiSearchContextMenu.Enabled = ckbUseCC.Enabled = tlpTGIValues.Enabled = false;
+                btnCancel.Enabled = listView1.Enabled = tgiSearchContextMenu.Enabled = ckbUseCC.Enabled = tlpTGIValues.Enabled = false;
                 btnSearch.Text = "&Stop";
                 StartTGISearch();
             }
@@ -349,7 +351,7 @@ namespace ObjectCloner.SplitterComponents
 
             updateProgressCB(true, "", true, -1, false, 0);
 
-            listView1.Enabled = tgiSearchContextMenu.Enabled = ckbUseCC.Enabled = tlpTGIValues.Enabled = true;
+            btnCancel.Enabled = listView1.Enabled = tgiSearchContextMenu.Enabled = ckbUseCC.Enabled = tlpTGIValues.Enabled = true;
             btnSearch.Text = "&Search";
 
 

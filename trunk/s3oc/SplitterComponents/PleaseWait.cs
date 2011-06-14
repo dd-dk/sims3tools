@@ -30,14 +30,5 @@ namespace ObjectCloner.SplitterComponents
             InitializeComponent();
         }
         public string Label { get { return label1.Text; } set { label1.Text = value; } }
-
-        public static string DoWait(Control control, string Label = "Please wait...", string Key = "pleaseWait1")
-        {
-            PleaseWait pw = new PleaseWait() { Dock = DockStyle.Fill, Label = Label, Name = Key, };
-            control.Controls.Add(pw);
-            return pw.Name;
-        }
-
-        public static void StopWait(Control control, string Key = "pleaseWait1") { control.Controls.RemoveByKey(Key); }
     }
 }
