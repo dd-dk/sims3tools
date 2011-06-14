@@ -31,7 +31,7 @@ namespace ObjectCloner
         public static bool UseCustomContent { get; set; }
         static List<PathPackageTuple> cc = null;
         public static List<PathPackageTuple> CustomContent { get { if (cc == null) cc = ccGetList(ObjectCloner.Properties.Settings.Default.CustomContent); return cc; } }
-        //Inge (15-01-2011): "Only ever looking *.package for custom content"
+        //Inge (15-01-2011): "Only ever look in *.package for custom content"
         //static List<string> pkgPatterns = new List<string>(new string[] { "*.package", "*.dbc", "*.world", "*.nhd", });
         static List<string> CCpkgPatterns = new List<string>(new string[] { "*.package", });
         static List<PathPackageTuple> ccGetList(string ccPath)
