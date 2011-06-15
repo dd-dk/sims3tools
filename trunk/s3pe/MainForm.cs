@@ -1800,19 +1800,18 @@ namespace S3PIDemoFE
                 Form f = new Form();
                 f.SuspendLayout();
                 f.Controls.Add(c);
+                c.Dock = DockStyle.Fill;
                 f.Icon = this.Icon;
 
                 f.Text = this.Text + ((resourceName != null && resourceName.Length > 0) ? " - " + resourceName : "");
 
                 if (c.GetType().Equals(typeof(RichTextBox)))
                 {
-                    c.Dock = DockStyle.Fill;
                     f.ClientSize = new Size(this.ClientSize.Width - (this.ClientSize.Width / 5), this.ClientSize.Height - (this.ClientSize.Height / 5));
                 }
                 else if (c.GetType().Equals(typeof(PictureBox)))
                 {
-                    f.AutoSize = true;
-                    f.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+                    f.ClientSize = c.Size;
                     f.SizeGripStyle = SizeGripStyle.Hide;
                 }
 
