@@ -39,15 +39,25 @@ namespace ObjectCloner.SplitterComponents
 
 
 
+        bool useEA = FileTable.AppendFileTable;
+        bool useCC = FileTable.UseCustomContent;
         public TGISearch()
         {
             InitializeComponent();
             lvwColumnSorter = new ListViewColumnSorter();
             this.listView1.ListViewItemSorter = lvwColumnSorter;
+
             cbResourceType.Value = 0;
             tbResourceGroup.Text = "0x00000000";
             tbInstance.Text = "0x0000000000000000";
-            ckbUseCC.Enabled = ObjectCloner.Properties.Settings.Default.CCEnabled;
+
+
+
+
+
+
+            ckbUseEA.Enabled = ckbUseCC.Enabled = ObjectCloner.Properties.Settings.Default.CCEnabled;
+            ckbUseEA.Checked = true;
             ckbUseCC.Checked = ckbUseCC.Enabled && FileTable.UseCustomContent;
         }
 
@@ -132,9 +142,13 @@ namespace ObjectCloner.SplitterComponents
             allowSearch();
         }
 
+        private void ckbUse_CheckedChanged(object sender, EventArgs e) { allowSearch(); }
+
         private void allowSearch()
         {
-            btnSearch.Enabled = !ckbResourceType.Checked || !ckbResourceGroup.Checked || !ckbInstance.Checked;
+            btnSearch.Enabled =
+                (ckbUseEA.Checked || ckbUseCC.Checked) &&
+                !(ckbResourceType.Checked && ckbResourceGroup.Checked && ckbInstance.Checked);
         }
 
         private void tbResourceGroup_Validating(object sender, CancelEventArgs e)
@@ -171,11 +185,10 @@ namespace ObjectCloner.SplitterComponents
                 AbortTGISearch(false);
             else
             {
-                tlpSearch.Visible = false;
-                MainForm.SetUseCC(ckbUseCC.Checked);
-                if (!checkInstallDirsCB(this))
+                useEA = FileTable.AppendFileTable;
+                useCC = FileTable.UseCustomContent;
+                if (!MainForm.SetFT(ckbUseCC.Checked, ckbUseEA.Checked, checkInstallDirsCB, this))
                     return;
-                tlpSearch.Visible = true;
 
                 btnCancel.Enabled = listView1.Enabled = tgiSearchContextMenu.Enabled = ckbUseCC.Enabled = tlpTGIValues.Enabled = false;
                 btnSearch.Text = "&Stop";
@@ -348,6 +361,7 @@ namespace ObjectCloner.SplitterComponents
             while (searchThread != null && searchThread.IsAlive)
                 searchThread.Join(100);
             searchThread = null;
+            MainForm.SetFT(useCC, useEA, checkInstallDirsCB, this);
 
             updateProgressCB(true, "", true, -1, false, 0);
 

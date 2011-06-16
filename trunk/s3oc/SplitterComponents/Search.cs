@@ -39,6 +39,8 @@ namespace ObjectCloner.SplitterComponents
 
 
 
+        bool useEA = FileTable.AppendFileTable;
+        bool useCC = FileTable.UseCustomContent;
         public Search()
         {
             InitializeComponent();
@@ -54,7 +56,8 @@ namespace ObjectCloner.SplitterComponents
                 "Roof Style", "Modular Resource", "Roof Pattern",
             });
             cbCatalogType.SelectedIndex = 0;
-            ckbUseCC.Enabled = ObjectCloner.Properties.Settings.Default.CCEnabled;
+            ckbUseEA.Enabled = ckbUseCC.Enabled = ObjectCloner.Properties.Settings.Default.CCEnabled;
+            ckbUseEA.Checked = true;
             ckbUseCC.Checked = ckbUseCC.Enabled && FileTable.UseCustomContent;
         }
 
@@ -133,11 +136,10 @@ namespace ObjectCloner.SplitterComponents
                 AbortSearch(false);
             else
             {
-                tlpSearch.Visible = false;
-                MainForm.SetUseCC(ckbUseCC.Checked);
-                if (!checkInstallDirsCB(this))
+                useEA = FileTable.AppendFileTable;
+                useCC = FileTable.UseCustomContent;
+                if (!MainForm.SetFT(ckbUseCC.Checked, ckbUseEA.Checked, checkInstallDirsCB, this))
                     return;
-                tlpSearch.Visible = true;
 
                 btnCancel.Enabled = listView1.Enabled = searchContextMenu.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = false;
                 btnSearch.Text = "&Stop";
@@ -153,6 +155,7 @@ namespace ObjectCloner.SplitterComponents
         bool haveCriteria()
         {
             return tbText.Text.Length > 0 &&
+                (ckbUseEA.Checked || ckbUseCC.Checked) && 
                 (ckbResourceName.Checked || ckbCatalogDesc.Checked || ckbCatalogName.Checked || ckbObjectDesc.Checked || ckbObjectName.Checked);
         }
         #endregion
@@ -330,6 +333,7 @@ namespace ObjectCloner.SplitterComponents
             while (searchThread != null && searchThread.IsAlive)
                 searchThread.Join(100);
             searchThread = null;
+            MainForm.SetFT(useCC, useEA, checkInstallDirsCB, this);
 
             updateProgressCB(true, "", true, -1, false, 0);
 

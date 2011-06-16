@@ -41,6 +41,7 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.cbCatalogType = new System.Windows.Forms.ComboBox();
             this.btnSearch = new System.Windows.Forms.Button();
+            this.btnCancel = new System.Windows.Forms.Button();
             this.tlpWhere = new System.Windows.Forms.TableLayoutPanel();
             this.ckbResourceName = new System.Windows.Forms.CheckBox();
             this.rb1English = new System.Windows.Forms.RadioButton();
@@ -54,7 +55,7 @@
             this.tbText = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.btnCancel = new System.Windows.Forms.Button();
+            this.ckbUseEA = new System.Windows.Forms.CheckBox();
             this.searchContextMenu.SuspendLayout();
             this.tlpSearch.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -74,11 +75,11 @@
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.FullRowSelect = true;
             this.listView1.HideSelection = false;
-            this.listView1.Location = new System.Drawing.Point(0, 184);
+            this.listView1.Location = new System.Drawing.Point(0, 167);
             this.listView1.Margin = new System.Windows.Forms.Padding(0);
             this.listView1.MultiSelect = false;
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(800, 114);
+            this.listView1.Size = new System.Drawing.Size(800, 131);
             this.listView1.TabIndex = 7;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.Details;
@@ -167,7 +168,7 @@
             this.tableLayoutPanel1.Controls.Add(this.cbCatalogType, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.btnSearch, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.btnCancel, 2, 0);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(100, 152);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(100, 135);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -196,30 +197,43 @@
             this.btnSearch.UseVisualStyleBackColor = true;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
+            // btnCancel
+            // 
+            this.btnCancel.Location = new System.Drawing.Point(617, 3);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnCancel.TabIndex = 3;
+            this.btnCancel.Text = "C&ancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            // 
             // tlpWhere
             // 
             this.tlpWhere.AutoSize = true;
             this.tlpWhere.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tlpWhere.ColumnCount = 2;
+            this.tlpWhere.ColumnCount = 4;
             this.tlpWhere.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpWhere.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpWhere.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 12F));
             this.tlpWhere.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpWhere.Controls.Add(this.ckbResourceName, 0, 0);
-            this.tlpWhere.Controls.Add(this.rb1English, 0, 3);
-            this.tlpWhere.Controls.Add(this.rb1All, 1, 3);
+            this.tlpWhere.Controls.Add(this.rb1English, 0, 4);
+            this.tlpWhere.Controls.Add(this.rb1All, 1, 4);
             this.tlpWhere.Controls.Add(this.ckbObjectName, 0, 1);
             this.tlpWhere.Controls.Add(this.ckbObjectDesc, 1, 1);
-            this.tlpWhere.Controls.Add(this.ckbCatalogName, 0, 2);
-            this.tlpWhere.Controls.Add(this.ckbCatalogDesc, 1, 2);
-            this.tlpWhere.Controls.Add(this.ckbUseCC, 0, 4);
+            this.tlpWhere.Controls.Add(this.ckbCatalogName, 0, 3);
+            this.tlpWhere.Controls.Add(this.ckbCatalogDesc, 1, 3);
+            this.tlpWhere.Controls.Add(this.ckbUseEA, 3, 0);
+            this.tlpWhere.Controls.Add(this.ckbUseCC, 3, 1);
             this.tlpWhere.Location = new System.Drawing.Point(100, 31);
             this.tlpWhere.Name = "tlpWhere";
             this.tlpWhere.RowCount = 5;
             this.tlpWhere.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpWhere.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpWhere.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 6F));
             this.tlpWhere.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpWhere.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpWhere.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpWhere.Size = new System.Drawing.Size(205, 115);
+            this.tlpWhere.Size = new System.Drawing.Size(360, 98);
             this.tlpWhere.TabIndex = 4;
             // 
             // ckbResourceName
@@ -239,7 +253,7 @@
             this.rb1English.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.rb1English.AutoSize = true;
             this.rb1English.Checked = true;
-            this.rb1English.Location = new System.Drawing.Point(3, 72);
+            this.rb1English.Location = new System.Drawing.Point(3, 78);
             this.rb1English.Name = "rb1English";
             this.rb1English.Size = new System.Drawing.Size(81, 17);
             this.rb1English.TabIndex = 6;
@@ -251,7 +265,7 @@
             // 
             this.rb1All.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.rb1All.AutoSize = true;
-            this.rb1All.Location = new System.Drawing.Point(112, 72);
+            this.rb1All.Location = new System.Drawing.Point(112, 78);
             this.rb1All.Name = "rb1All";
             this.rb1All.Size = new System.Drawing.Size(88, 17);
             this.rb1All.TabIndex = 7;
@@ -286,7 +300,7 @@
             // 
             this.ckbCatalogName.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.ckbCatalogName.AutoSize = true;
-            this.ckbCatalogName.Location = new System.Drawing.Point(3, 49);
+            this.ckbCatalogName.Location = new System.Drawing.Point(3, 55);
             this.ckbCatalogName.Name = "ckbCatalogName";
             this.ckbCatalogName.Size = new System.Drawing.Size(93, 17);
             this.ckbCatalogName.TabIndex = 4;
@@ -298,7 +312,7 @@
             // 
             this.ckbCatalogDesc.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.ckbCatalogDesc.AutoSize = true;
-            this.ckbCatalogDesc.Location = new System.Drawing.Point(112, 49);
+            this.ckbCatalogDesc.Location = new System.Drawing.Point(112, 55);
             this.ckbCatalogDesc.Name = "ckbCatalogDesc";
             this.ckbCatalogDesc.Size = new System.Drawing.Size(90, 17);
             this.ckbCatalogDesc.TabIndex = 5;
@@ -310,13 +324,13 @@
             // 
             this.ckbUseCC.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.ckbUseCC.AutoSize = true;
-            this.tlpWhere.SetColumnSpan(this.ckbUseCC, 2);
-            this.ckbUseCC.Location = new System.Drawing.Point(3, 95);
+            this.ckbUseCC.Location = new System.Drawing.Point(220, 26);
             this.ckbUseCC.Name = "ckbUseCC";
             this.ckbUseCC.Size = new System.Drawing.Size(137, 17);
             this.ckbUseCC.TabIndex = 8;
             this.ckbUseCC.Text = "Include custom content";
             this.ckbUseCC.UseVisualStyleBackColor = true;
+            this.ckbUseCC.CheckedChanged += new System.EventHandler(this.ckb_CheckedChanged);
             // 
             // label1
             // 
@@ -339,9 +353,10 @@
             // 
             // label2
             // 
-            this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(5, 82);
+            this.label2.Location = new System.Drawing.Point(5, 34);
+            this.label2.Margin = new System.Windows.Forms.Padding(3, 6, 3, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(89, 13);
             this.label2.TabIndex = 3;
@@ -351,21 +366,23 @@
             // 
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(19, 160);
+            this.label3.Location = new System.Drawing.Point(19, 143);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(75, 13);
             this.label3.TabIndex = 5;
             this.label3.Text = "Kind of object:";
             // 
-            // btnCancel
+            // ckbUseEA
             // 
-            this.btnCancel.Location = new System.Drawing.Point(617, 3);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(75, 23);
-            this.btnCancel.TabIndex = 3;
-            this.btnCancel.Text = "C&ancel";
-            this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            this.ckbUseEA.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ckbUseEA.AutoSize = true;
+            this.ckbUseEA.Location = new System.Drawing.Point(220, 3);
+            this.ckbUseEA.Name = "ckbUseEA";
+            this.ckbUseEA.Size = new System.Drawing.Size(117, 17);
+            this.ckbUseEA.TabIndex = 8;
+            this.ckbUseEA.Text = "Include EA content";
+            this.ckbUseEA.UseVisualStyleBackColor = true;
+            this.ckbUseEA.CheckedChanged += new System.EventHandler(this.ckb_CheckedChanged);
             // 
             // Search
             // 
@@ -411,6 +428,7 @@
         private System.Windows.Forms.CheckBox ckbUseCC;
         private System.Windows.Forms.ColumnHeader Path;
         private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.CheckBox ckbUseEA;
 
     }
 }

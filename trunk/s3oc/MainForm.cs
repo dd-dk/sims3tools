@@ -172,6 +172,27 @@ namespace ObjectCloner
             }
         }
 
+        public static bool SetFT(bool useCC, bool useEA, CheckInstallDirsCB checkInstallDirsCB = null, Control control = null)
+        {
+            bool changed = false;
+            if (useCC != FileTable.UseCustomContent)
+            {
+                FileTable.UseCustomContent = useCC;
+                changed = true;
+            }
+            if (useEA != FileTable.AppendFileTable)
+            {
+                FileTable.AppendFileTable = useEA;
+                changed = true;
+            }
+            if (changed)
+            {
+                Reset();
+                if (checkInstallDirsCB != null) return checkInstallDirsCB(control);
+            }
+            return true;
+        }
+
         public static void SetUseCC(bool value)
         {
             if (FileTable.UseCustomContent != value)
@@ -320,8 +341,9 @@ namespace ObjectCloner
             }
             #endregion
 
-            /*string name = NameMap.NMap[sr.ResourceIndexEntry.Instance];
+            string name = NameMap.NMap[sr.ResourceIndexEntry.Instance];
             if (name == null)
+                //name = "";
             {
                 SpecificResource ctlg = sr.ResourceIndexEntry.ResourceType == (uint)CatalogType.ModularResource ? ItemForTGIBlock0(sr) : sr;
                 if (ctlg.Resource != null)
@@ -334,7 +356,9 @@ namespace ObjectCloner
                     name = ctlg.Exception.Message;
                     for (Exception ex = ctlg.Exception.InnerException; ex != null; ex = ex.InnerException) name = ex.Message + "|  " + name;
                 }
-            }/**/
+            }
+            /**/
+            /*
             string name;
             SpecificResource ctlg = sr.ResourceIndexEntry.ResourceType == (uint)CatalogType.ModularResource ? ItemForTGIBlock0(sr) : sr;
             if (ctlg.Resource != null)
@@ -347,6 +371,7 @@ namespace ObjectCloner
                 name = ctlg.Exception.Message;
                 for (Exception ex = ctlg.Exception.InnerException; ex != null; ex = ex.InnerException) name = ex.Message + "|  " + name;
             }
+            /**/
 
             List<string> exts;
             string tag = "UNKN";

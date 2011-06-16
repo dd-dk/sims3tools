@@ -50,12 +50,17 @@
             this.ckbInstance = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.ckbUseCC = new System.Windows.Forms.CheckBox();
-            this.btnSearch = new System.Windows.Forms.Button();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.btnSearch = new System.Windows.Forms.Button();
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.ckbUseCC = new System.Windows.Forms.CheckBox();
+            this.ckbUseEA = new System.Windows.Forms.CheckBox();
             this.tlpSearch.SuspendLayout();
             this.tgiSearchContextMenu.SuspendLayout();
             this.tlpTGIValues.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
+            this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // tlpSearch
@@ -65,20 +70,19 @@
             this.tlpSearch.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpSearch.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpSearch.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpSearch.Controls.Add(this.listView1, 0, 3);
+            this.tlpSearch.Controls.Add(this.listView1, 0, 2);
             this.tlpSearch.Controls.Add(this.label1, 0, 0);
             this.tlpSearch.Controls.Add(this.tlpTGIValues, 1, 0);
-            this.tlpSearch.Controls.Add(this.ckbUseCC, 1, 2);
-            this.tlpSearch.Controls.Add(this.btnSearch, 2, 1);
-            this.tlpSearch.Controls.Add(this.btnCancel, 2, 2);
+            this.tlpSearch.Controls.Add(this.tableLayoutPanel1, 2, 1);
+            this.tlpSearch.Controls.Add(this.tableLayoutPanel2, 1, 1);
             this.tlpSearch.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tlpSearch.Location = new System.Drawing.Point(0, 0);
             this.tlpSearch.Name = "tlpSearch";
-            this.tlpSearch.RowCount = 4;
-            this.tlpSearch.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpSearch.RowCount = 3;
             this.tlpSearch.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpSearch.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpSearch.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpSearch.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlpSearch.Size = new System.Drawing.Size(800, 232);
             this.tlpSearch.TabIndex = 0;
             // 
@@ -162,11 +166,11 @@
             // 
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 0);
+            this.label1.Location = new System.Drawing.Point(3, 35);
             this.label1.Name = "label1";
             this.label1.Padding = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.label1.Size = new System.Drawing.Size(59, 19);
-            this.label1.TabIndex = 0;
+            this.label1.TabIndex = 1;
             this.label1.Text = "Search for:";
             // 
             // tlpTGIValues
@@ -188,13 +192,12 @@
             this.tlpTGIValues.Location = new System.Drawing.Point(68, 3);
             this.tlpTGIValues.Name = "tlpTGIValues";
             this.tlpTGIValues.RowCount = 4;
-            this.tlpSearch.SetRowSpan(this.tlpTGIValues, 2);
             this.tlpTGIValues.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpTGIValues.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpTGIValues.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpTGIValues.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tlpTGIValues.Size = new System.Drawing.Size(333, 83);
-            this.tlpTGIValues.TabIndex = 1;
+            this.tlpTGIValues.TabIndex = 2;
             // 
             // label2
             // 
@@ -203,7 +206,7 @@
             this.label2.Location = new System.Drawing.Point(20, 7);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(31, 13);
-            this.label2.TabIndex = 0;
+            this.label2.TabIndex = 1;
             this.label2.Text = "Type";
             // 
             // tbInstance
@@ -212,7 +215,7 @@
             this.tbInstance.Location = new System.Drawing.Point(107, 56);
             this.tbInstance.Name = "tbInstance";
             this.tbInstance.Size = new System.Drawing.Size(223, 20);
-            this.tbInstance.TabIndex = 8;
+            this.tbInstance.TabIndex = 9;
             this.tbInstance.Text = "0xWWWWWWWWWWWWWWWW";
             this.tbInstance.Validating += new System.ComponentModel.CancelEventHandler(this.tbInstance_Validating);
             // 
@@ -222,7 +225,7 @@
             this.tbResourceGroup.Location = new System.Drawing.Point(107, 30);
             this.tbResourceGroup.Name = "tbResourceGroup";
             this.tbResourceGroup.Size = new System.Drawing.Size(223, 20);
-            this.tbResourceGroup.TabIndex = 5;
+            this.tbResourceGroup.TabIndex = 6;
             this.tbResourceGroup.Text = "0xWWWWWWWW";
             this.tbResourceGroup.Validating += new System.ComponentModel.CancelEventHandler(this.tbResourceGroup_Validating);
             // 
@@ -233,7 +236,7 @@
             this.cbResourceType.Location = new System.Drawing.Point(107, 3);
             this.cbResourceType.Name = "cbResourceType";
             this.cbResourceType.Size = new System.Drawing.Size(223, 21);
-            this.cbResourceType.TabIndex = 2;
+            this.cbResourceType.TabIndex = 3;
             this.cbResourceType.Value = ((uint)(0u));
             // 
             // ckbResourceType
@@ -244,7 +247,7 @@
             this.ckbResourceType.Location = new System.Drawing.Point(57, 5);
             this.ckbResourceType.Name = "ckbResourceType";
             this.ckbResourceType.Size = new System.Drawing.Size(44, 17);
-            this.ckbResourceType.TabIndex = 1;
+            this.ckbResourceType.TabIndex = 2;
             this.ckbResourceType.Text = "Any";
             this.ckbResourceType.UseVisualStyleBackColor = true;
             this.ckbResourceType.CheckedChanged += new System.EventHandler(this.ckbResourceType_CheckedChanged);
@@ -257,7 +260,7 @@
             this.ckbResourceGroup.Location = new System.Drawing.Point(57, 31);
             this.ckbResourceGroup.Name = "ckbResourceGroup";
             this.ckbResourceGroup.Size = new System.Drawing.Size(44, 17);
-            this.ckbResourceGroup.TabIndex = 4;
+            this.ckbResourceGroup.TabIndex = 5;
             this.ckbResourceGroup.Text = "Any";
             this.ckbResourceGroup.UseVisualStyleBackColor = true;
             this.ckbResourceGroup.CheckedChanged += new System.EventHandler(this.ckbResourceGroup_CheckedChanged);
@@ -270,7 +273,7 @@
             this.ckbInstance.Location = new System.Drawing.Point(57, 57);
             this.ckbInstance.Name = "ckbInstance";
             this.ckbInstance.Size = new System.Drawing.Size(44, 17);
-            this.ckbInstance.TabIndex = 7;
+            this.ckbInstance.TabIndex = 8;
             this.ckbInstance.Text = "Any";
             this.ckbInstance.UseVisualStyleBackColor = true;
             this.ckbInstance.CheckedChanged += new System.EventHandler(this.ckbInstance_CheckedChanged);
@@ -282,7 +285,7 @@
             this.label3.Location = new System.Drawing.Point(15, 33);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(36, 13);
-            this.label3.TabIndex = 3;
+            this.label3.TabIndex = 4;
             this.label3.Text = "Group";
             // 
             // label4
@@ -292,41 +295,89 @@
             this.label4.Location = new System.Drawing.Point(3, 59);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(48, 13);
-            this.label4.TabIndex = 6;
+            this.label4.TabIndex = 7;
             this.label4.Text = "Instance";
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.AutoSize = true;
+            this.tableLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tableLayoutPanel1.ColumnCount = 2;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Controls.Add(this.btnCancel, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.btnSearch, 0, 0);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(404, 89);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 1;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(162, 29);
+            this.tableLayoutPanel1.TabIndex = 4;
+            // 
+            // btnCancel
+            // 
+            this.btnCancel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnCancel.Location = new System.Drawing.Point(84, 3);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnCancel.TabIndex = 2;
+            this.btnCancel.Text = "C&ancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            // 
+            // btnSearch
+            // 
+            this.btnSearch.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnSearch.Location = new System.Drawing.Point(3, 3);
+            this.btnSearch.Name = "btnSearch";
+            this.btnSearch.Size = new System.Drawing.Size(75, 23);
+            this.btnSearch.TabIndex = 1;
+            this.btnSearch.Text = "&Search";
+            this.btnSearch.UseVisualStyleBackColor = true;
+            this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
+            // 
+            // tableLayoutPanel2
+            // 
+            this.tableLayoutPanel2.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.tableLayoutPanel2.AutoSize = true;
+            this.tableLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tableLayoutPanel2.ColumnCount = 2;
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel2.Controls.Add(this.ckbUseCC, 1, 0);
+            this.tableLayoutPanel2.Controls.Add(this.ckbUseEA, 0, 0);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(65, 92);
+            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            this.tableLayoutPanel2.RowCount = 1;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(266, 23);
+            this.tableLayoutPanel2.TabIndex = 3;
             // 
             // ckbUseCC
             // 
-            this.ckbUseCC.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ckbUseCC.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ckbUseCC.AutoSize = true;
-            this.ckbUseCC.Location = new System.Drawing.Point(68, 95);
+            this.ckbUseCC.Location = new System.Drawing.Point(126, 3);
             this.ckbUseCC.Name = "ckbUseCC";
             this.ckbUseCC.Size = new System.Drawing.Size(137, 17);
             this.ckbUseCC.TabIndex = 2;
             this.ckbUseCC.Text = "Include custom content";
             this.ckbUseCC.UseVisualStyleBackColor = true;
-            this.ckbUseCC.CheckedChanged += new System.EventHandler(this.ckbInstance_CheckedChanged);
+            this.ckbUseCC.CheckedChanged += new System.EventHandler(this.ckbUse_CheckedChanged);
             // 
-            // btnSearch
+            // ckbUseEA
             // 
-            this.btnSearch.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSearch.Location = new System.Drawing.Point(407, 63);
-            this.btnSearch.Name = "btnSearch";
-            this.btnSearch.Size = new System.Drawing.Size(75, 23);
-            this.btnSearch.TabIndex = 3;
-            this.btnSearch.Text = "&Search";
-            this.btnSearch.UseVisualStyleBackColor = true;
-            this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
-            // 
-            // btnCancel
-            // 
-            this.btnCancel.Location = new System.Drawing.Point(407, 92);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(75, 23);
-            this.btnCancel.TabIndex = 4;
-            this.btnCancel.Text = "C&ancel";
-            this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            this.ckbUseEA.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbUseEA.AutoSize = true;
+            this.ckbUseEA.Location = new System.Drawing.Point(3, 3);
+            this.ckbUseEA.Name = "ckbUseEA";
+            this.ckbUseEA.Size = new System.Drawing.Size(117, 17);
+            this.ckbUseEA.TabIndex = 1;
+            this.ckbUseEA.Text = "Include EA content";
+            this.ckbUseEA.UseVisualStyleBackColor = true;
+            this.ckbUseEA.CheckedChanged += new System.EventHandler(this.ckbUse_CheckedChanged);
             // 
             // TGISearch
             // 
@@ -340,6 +391,9 @@
             this.tgiSearchContextMenu.ResumeLayout(false);
             this.tlpTGIValues.ResumeLayout(false);
             this.tlpTGIValues.PerformLayout();
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel2.ResumeLayout(false);
+            this.tableLayoutPanel2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -370,5 +424,8 @@
         private System.Windows.Forms.ToolStripMenuItem tgisCopyRK;
         private System.Windows.Forms.CheckBox ckbUseCC;
         private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
+        private System.Windows.Forms.CheckBox ckbUseEA;
     }
 }
