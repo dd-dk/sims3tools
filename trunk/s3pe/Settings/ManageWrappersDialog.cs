@@ -27,14 +27,15 @@ using s3pi.Extensions;
 
 namespace S3PIDemoFE.Settings
 {
-    public partial class ManageWrappersDialog : Form, System.Collections.IComparer
+    public partial class ManageWrappersDialog : Form
     {
-        //int sortColumn = 1;
-
         public ManageWrappersDialog()
         {
             InitializeComponent();
             this.Icon = ((System.Drawing.Icon)(new ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
+
+            lvWrappers.ListViewItemSorter = new ListViewColumnSorter() { SortColumn = 0, Order = SortOrder.Ascending, };
+            lvDisabled.ListViewItemSorter = new ListViewColumnSorter() { SortColumn = 0, Order = SortOrder.Ascending, };
 
             PopulateWrappers();
             PopulateDisable();
@@ -46,11 +47,14 @@ namespace S3PIDemoFE.Settings
 
         void PopulateListView(ListView lv, List<KeyValuePair<string, Type>> map, Predicate<KeyValuePair<string, Type>> match)
         {
+            lv.Visible = false;
             lv.BeginUpdate();
-            lv.Sorting = SortOrder.None;
             lv.Items.Clear();
+            string fmt = "{0:D" + (map.Count.ToString().Length) + "}";
+            int order = 0;
             foreach (var kvp in map)
             {
+                order++;
                 if (!match(kvp)) continue;
                 string tag = getTag(kvp.Key);
                 string wrapper = kvp.Value.Name;
@@ -59,15 +63,14 @@ namespace S3PIDemoFE.Settings
                 string description = GetAttrValue(kvp.Value.Assembly, typeof(System.Reflection.AssemblyDescriptionAttribute), "Description");
                 string company = GetAttrValue(kvp.Value.Assembly, typeof(System.Reflection.AssemblyCompanyAttribute), "Company");
                 string product = GetAttrValue(kvp.Value.Assembly, typeof(System.Reflection.AssemblyProductAttribute), "Product");
-                ListViewItem lvi = new ListViewItem(new string[] { tag, kvp.Key, wrapper, file, title, description, company, product, });
+                ListViewItem lvi = new ListViewItem(new string[] { String.Format(fmt, order), tag, kvp.Key, wrapper, file, title, description, company, product, });
                 lvi.Tag = kvp;
                 lv.Items.Add(lvi);
             }
-            //lv.ListViewItemSorter = this;
-            //lv.Sorting = SortOrder.Ascending;
             if (lv.Items.Count > 0)
                 lv.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             lv.EndUpdate();
+            lv.Visible = true;
         }
 
         string GetAttrValue(System.Reflection.Assembly assy, Type attrType, string field)
@@ -85,17 +88,9 @@ namespace S3PIDemoFE.Settings
             return "";
         }
 
-        public int Compare(object x, object y)
-        {
-            return 0;
-            /*ListViewItem lviX = x as ListViewItem;
-            ListViewItem lviY = y as ListViewItem;
-            return lviX.SubItems[sortColumn].Text.CompareTo(lviY.SubItems[sortColumn].Text);/**/
-        }
-
         void doSort(ListView lv)
         {
-            //lv.Sort();
+            lv.Sort();
             if (lv.Items.Count > 0)
                 lv.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             if (lv.SelectedItems.Count > 0)
@@ -154,9 +149,9 @@ namespace S3PIDemoFE.Settings
 
         private void lv_ColumnClick(object sender, ColumnClickEventArgs e)
         {
+            ((sender as ListView).ListViewItemSorter as ListViewColumnSorter).SortColumn = e.Column;
+            (sender as ListView).Sort();
             return;
-            /*sortColumn = e.Column;
-            SortBoth();/**/
         }
 
         private void lvWrappers_SelectedIndexChanged(object sender, EventArgs e)

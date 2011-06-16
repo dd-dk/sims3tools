@@ -36,33 +36,35 @@
             this.chaType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chaWrapper = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chaFile = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chaTitle = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chaDescription = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chaCompany = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chaProduct = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.lvDisabled = new System.Windows.Forms.ListView();
             this.chdTag = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chdType = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chdWrapper = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chdFile = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chdTitle = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chdDescription = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chdCompany = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chdProduct = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnDisable = new System.Windows.Forms.Button();
             this.btnEnable = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.chaTitle = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.chaDescription = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.chaCompany = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.chaProduct = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.chdTitle = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.chdDescription = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.chdCompany = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.chdProduct = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chaOrder = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chdOrder = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
             // 
-            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.ColumnCount = 3;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
@@ -107,6 +109,7 @@
             // lvWrappers
             // 
             this.lvWrappers.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.chaOrder,
             this.chaTag,
             this.chaType,
             this.chaWrapper,
@@ -145,9 +148,26 @@
             // 
             this.chaFile.Text = "File";
             // 
+            // chaTitle
+            // 
+            this.chaTitle.Text = "Title";
+            // 
+            // chaDescription
+            // 
+            this.chaDescription.Text = "Description";
+            // 
+            // chaCompany
+            // 
+            this.chaCompany.Text = "Company";
+            // 
+            // chaProduct
+            // 
+            this.chaProduct.Text = "Product";
+            // 
             // lvDisabled
             // 
             this.lvDisabled.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.chdOrder,
             this.chdTag,
             this.chdType,
             this.chdWrapper,
@@ -185,6 +205,22 @@
             // chdFile
             // 
             this.chdFile.Text = "File";
+            // 
+            // chdTitle
+            // 
+            this.chdTitle.Text = "Title";
+            // 
+            // chdDescription
+            // 
+            this.chdDescription.Text = "Description";
+            // 
+            // chdCompany
+            // 
+            this.chdCompany.Text = "Company";
+            // 
+            // chdProduct
+            // 
+            this.chdProduct.Text = "Product";
             // 
             // panel1
             // 
@@ -243,37 +279,13 @@
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
-            // chaTitle
+            // chaOrder
             // 
-            this.chaTitle.Text = "Title";
+            this.chaOrder.Text = "Order";
             // 
-            // chaDescription
+            // chdOrder
             // 
-            this.chaDescription.Text = "Description";
-            // 
-            // chaCompany
-            // 
-            this.chaCompany.Text = "Company";
-            // 
-            // chaProduct
-            // 
-            this.chaProduct.Text = "Product";
-            // 
-            // chdTitle
-            // 
-            this.chdTitle.Text = "Title";
-            // 
-            // chdDescription
-            // 
-            this.chdDescription.Text = "Description";
-            // 
-            // chdCompany
-            // 
-            this.chdCompany.Text = "Company";
-            // 
-            // chdProduct
-            // 
-            this.chdProduct.Text = "Product";
+            this.chdOrder.Text = "Order";
             // 
             // ManageWrappersDialog
             // 
@@ -323,5 +335,7 @@
         private System.Windows.Forms.ColumnHeader chdDescription;
         private System.Windows.Forms.ColumnHeader chdCompany;
         private System.Windows.Forms.ColumnHeader chdProduct;
+        private System.Windows.Forms.ColumnHeader chaOrder;
+        private System.Windows.Forms.ColumnHeader chdOrder;
     }
 }
