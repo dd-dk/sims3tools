@@ -31,9 +31,10 @@
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.btnImport = new System.Windows.Forms.Button();
             this.btnExport = new System.Windows.Forms.Button();
+            this.btnEdit = new System.Windows.Forms.Button();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.btnEdit = new System.Windows.Forms.Button();
+            this.btnViewHex = new System.Windows.Forms.Button();
             this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -44,11 +45,12 @@
             this.flowLayoutPanel1.BackColor = System.Drawing.SystemColors.ButtonFace;
             this.flowLayoutPanel1.Controls.Add(this.btnImport);
             this.flowLayoutPanel1.Controls.Add(this.btnExport);
+            this.flowLayoutPanel1.Controls.Add(this.btnViewHex);
             this.flowLayoutPanel1.Controls.Add(this.btnEdit);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(204, 23);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(287, 23);
             this.flowLayoutPanel1.TabIndex = 0;
             // 
             // btnImport
@@ -75,6 +77,18 @@
             this.btnExport.UseVisualStyleBackColor = false;
             this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
             // 
+            // btnEdit
+            // 
+            this.btnEdit.BackColor = System.Drawing.SystemColors.Control;
+            this.btnEdit.Location = new System.Drawing.Point(227, 0);
+            this.btnEdit.Margin = new System.Windows.Forms.Padding(6, 0, 0, 0);
+            this.btnEdit.Name = "btnEdit";
+            this.btnEdit.Size = new System.Drawing.Size(60, 23);
+            this.btnEdit.TabIndex = 2;
+            this.btnEdit.Text = "Edit...";
+            this.btnEdit.UseVisualStyleBackColor = false;
+            this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
+            // 
             // saveFileDialog1
             // 
             this.saveFileDialog1.Title = "Export...";
@@ -83,17 +97,18 @@
             // 
             this.openFileDialog1.Title = "Import...";
             // 
-            // btnEdit
+            // btnViewHex
             // 
-            this.btnEdit.BackColor = System.Drawing.SystemColors.Control;
-            this.btnEdit.Location = new System.Drawing.Point(144, 0);
-            this.btnEdit.Margin = new System.Windows.Forms.Padding(6, 0, 0, 0);
-            this.btnEdit.Name = "btnEdit";
-            this.btnEdit.Size = new System.Drawing.Size(60, 23);
-            this.btnEdit.TabIndex = 2;
-            this.btnEdit.Text = "Edit...";
-            this.btnEdit.UseVisualStyleBackColor = false;
-            this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
+            this.btnViewHex.AutoSize = true;
+            this.btnViewHex.BackColor = System.Drawing.SystemColors.Control;
+            this.btnViewHex.Location = new System.Drawing.Point(144, 0);
+            this.btnViewHex.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.btnViewHex.Name = "btnViewHex";
+            this.btnViewHex.Size = new System.Drawing.Size(71, 23);
+            this.btnViewHex.TabIndex = 2;
+            this.btnViewHex.Text = "View Hex...";
+            this.btnViewHex.UseVisualStyleBackColor = false;
+            this.btnViewHex.Click += new System.EventHandler(this.btnViewHex_Click);
             // 
             // ReaderEditorPanel
             // 
@@ -103,8 +118,9 @@
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.Controls.Add(this.flowLayoutPanel1);
             this.Name = "ReaderEditorPanel";
-            this.Size = new System.Drawing.Size(204, 23);
+            this.Size = new System.Drawing.Size(287, 23);
             this.flowLayoutPanel1.ResumeLayout(false);
+            this.flowLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -118,5 +134,6 @@
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.Button btnEdit;
+        private System.Windows.Forms.Button btnViewHex;
     }
 }

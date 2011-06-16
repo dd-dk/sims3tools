@@ -46,7 +46,7 @@ namespace S3PIDemoFE
             this.owner = owner;
             this.field = field;
             btnImport.Enabled = owner.GetType().GetProperty(field).CanWrite;
-            btnExport.Enabled = owner.GetType().GetProperty(field).CanRead;
+            btnViewHex.Enabled = btnExport.Enabled = owner.GetType().GetProperty(field).CanRead;
 
             btnEdit.Enabled = false;
             if (btnExport.Enabled && btnImport.Enabled)
@@ -142,6 +142,40 @@ namespace S3PIDemoFE
             if (typeof(TextReader).IsAssignableFrom(type)) Export_TextReader();
             if (typeof(BinaryReader).IsAssignableFrom(type)) Export_BinaryReader();
             edSvc.CloseDropDown();
+        }
+
+        private void btnViewHex_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                this.Enabled = false;
+                Application.DoEvents();
+
+                // Set up an IResource for HexWidget to eat
+                IResource resource = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x00000000");
+                BinaryReader r = owner[field].Value as BinaryReader;
+                if (r.BaseStream.CanSeek) r.BaseStream.Position = 0;
+                (new BinaryWriter(resource.Stream)).Write(r.ReadBytes((int)r.BaseStream.Length));
+                if (resource.Stream.CanSeek) resource.Stream.Position = 0;
+
+                Form f = new Form();
+                HexWidget hw = new HexWidget();
+
+                f.SuspendLayout();
+                f.Controls.Add(hw);
+                f.Icon = ((System.Drawing.Icon)(new System.ComponentModel.ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
+
+                hw.Dock = DockStyle.Fill;
+                hw.Resource = resource == null ? null : resource;
+
+                f.ClientSize = new Size(640, 480);
+                f.Text = "Hex view";
+                f.StartPosition = FormStartPosition.CenterParent;
+
+                f.ResumeLayout();
+                f.Show(this);
+            }
+            finally { this.Enabled = true; edSvc.CloseDropDown(); }
         }
 
         private void Edit_TextReader()

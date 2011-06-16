@@ -1366,7 +1366,7 @@ namespace S3PIDemoFE
             public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
             {
                 if (typeof(string).IsAssignableFrom(destinationType))
-                    return "Import/Export/Edit...";
+                    return "Import/Export/View Hex/Edit...";
                 return base.ConvertTo(context, culture, value, destinationType);
             }
         }
