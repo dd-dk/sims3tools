@@ -84,6 +84,9 @@ namespace ObjectCloner.SettingsForms
             btnCCEdit.Enabled = ckbCustomContent.Checked = ObjectCloner.Properties.Settings.Default.CCEnabled;
             tbCCFolder.Text = ObjectCloner.Properties.Settings.Default.CustomContent;
 
+            btnPkgEdEdit.Enabled = ckbEditor.Checked = ObjectCloner.Properties.Settings.Default.pkgEditorEnabled;
+            tbEditorPath.Text = ObjectCloner.Properties.Settings.Default.pkgEditorPath;
+
             Size size = this.Size;
             Size sizeTLP = tlpGameFolders.Size;
 
@@ -185,6 +188,27 @@ namespace ObjectCloner.SettingsForms
             tbCCFolder.Text = ObjectCloner.Properties.Settings.Default.CustomContent = folderBrowserDialog1.SelectedPath;
         }
 
+        private void ckbCustomContent_CheckedChanged(object sender, EventArgs e)
+        {
+            btnCCEdit.Enabled = ObjectCloner.Properties.Settings.Default.CCEnabled = ckbCustomContent.Checked;
+        }
+
+        private void btnPkgEdEdit_Click(object sender, EventArgs e)
+        {
+            string path = ObjectCloner.Properties.Settings.Default.pkgEditorPath;
+            if (path != null && File.Exists(path)) { openFileDialog1.InitialDirectory = Path.GetDirectoryName(path); openFileDialog1.FileName = Path.GetFileName(path); }
+            else { openFileDialog1.InitialDirectory = Environment.GetEnvironmentVariable("PROGRAMFILES"); openFileDialog1.FileName = "*.exe"; }
+            DialogResult dr = openFileDialog1.ShowDialog();
+            if (dr != DialogResult.OK) return;
+
+            tbEditorPath.Text = ObjectCloner.Properties.Settings.Default.pkgEditorPath = Path.GetFullPath(openFileDialog1.FileName);
+        }
+
+        private void ckbEditor_CheckedChanged(object sender, EventArgs e)
+        {
+            btnPkgEdEdit.Enabled = ObjectCloner.Properties.Settings.Default.pkgEditorEnabled = ckbEditor.Checked;
+        }
+
         private void btnReset_Click(object sender, EventArgs e)
         {
             foreach (S3ocSims3 sims3 in s3ocTTL.lS3ocSims3)
@@ -194,11 +218,6 @@ namespace ObjectCloner.SettingsForms
             }
             DialogResult = DialogResult.Retry;
             Close();
-        }
-
-        private void ckbCustomContent_CheckedChanged(object sender, EventArgs e)
-        {
-            btnCCEdit.Enabled = ObjectCloner.Properties.Settings.Default.CCEnabled = ckbCustomContent.Checked;
         }
     }
 }
