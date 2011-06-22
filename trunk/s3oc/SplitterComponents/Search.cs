@@ -30,17 +30,15 @@ namespace ObjectCloner.SplitterComponents
 {
     public partial class Search : UserControl
     {
-
         ListViewColumnSorter lvwColumnSorter;
 
         MainForm.CheckInstallDirsCB checkInstallDirsCB;
         MainForm.updateProgressCallback updateProgressCB;
         MainForm.listViewAddCallBack listViewAddCB;
 
-
-
         bool useEA = FileTable.AppendFileTable;
         bool useCC = FileTable.UseCustomContent;
+        PathPackageTuple current = FileTable.Current;
         public Search()
         {
             InitializeComponent();
@@ -69,8 +67,6 @@ namespace ObjectCloner.SplitterComponents
             this.listViewAddCB = listViewAddCB;
         }
 
-
-
         void Search_LoadListViewSettings()
         {
             string cw = ObjectCloner.Properties.Settings.Default.ColumnWidths;
@@ -83,8 +79,6 @@ namespace ObjectCloner.SplitterComponents
             listView1.Columns[3].Width = cws.Length > 3 && int.TryParse(cws[3], out w) && w > 0 ? w : (this.listView1.Width - 32) / 3;/**/
         }
 
-
-
         public ListViewItem SelectedItem { get { return listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0] : null; } set { listView1.SelectedItems.Clear(); if (value != null && listView1.Items.Contains(value)) try { value.Selected = true; } catch { } } }
 
         #region Occurs whenever the 'SelectedIndex' for the Search Results changes
@@ -95,39 +89,98 @@ namespace ObjectCloner.SplitterComponents
         protected virtual void OnSelectedIndexChanged(object sender, MainForm.SelectedIndexChangedEventArgs e) { if (SelectedIndexChanged != null) SelectedIndexChanged(sender, e); }
         #endregion
 
-        #region Occurs when an item is actived
+        #region Occurs when an item is actived or when the Clone context menu entry is used
         [Browsable(true)]
         [Category("Action")]
-        [Description("Occurs when an item is actived")]
+        [Description("Occurs when an item is actived or when the Clone context menu entry is used")]
         public event EventHandler<MainForm.ItemActivateEventArgs> ItemActivate;
         protected virtual void OnItemActivate(object sender, MainForm.ItemActivateEventArgs e) { if (ItemActivate != null) ItemActivate(sender, e); }
         #endregion
 
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e) { OnSelectedIndexChanged(sender, new MainForm.SelectedIndexChangedEventArgs(sender as ListView)); }
-        private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(sender, new MainForm.ItemActivateEventArgs(sender as ListView)); }
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e) { OnSelectedIndexChanged(this, new MainForm.SelectedIndexChangedEventArgs(sender as ListView)); }
+        private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(sender as ListView)); }
 
+        #region Context menu
         private void scmCopyRK_Click(object sender, EventArgs e)
         {
             if (SelectedItem != null && SelectedItem.Tag as SpecificResource != null)
                 Clipboard.SetText((SelectedItem.Tag as SpecificResource).ResourceIndexEntry + "");
         }
 
+        private void scmClone_Click(object sender, EventArgs e) { listView1_ItemActivate(listView1, e); }
 
+        private void scmFix_Click(object sender, EventArgs e)
+        {
+            SpecificResource sr = SelectedItem == null ? null : SelectedItem.Tag as SpecificResource;
+            if (sr != null
+                && sr.PPSource == "cc"
+                && System.IO.File.Exists(sr.PathPackage.Path))
+            {
+                OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.CloneFix.Fix));
+            }
+        }
+
+        private void scmEdit_Click(object sender, EventArgs e)
+        {
+            SpecificResource sr = SelectedItem == null ? null : SelectedItem.Tag as SpecificResource;
+            if (sr != null
+                && sr.PPSource == "cc"
+                && System.IO.File.Exists(sr.PathPackage.Path)
+                && ObjectCloner.Properties.Settings.Default.pkgEditorEnabled
+                && ObjectCloner.Properties.Settings.Default.pkgEditorPath != null
+                && System.IO.File.Exists(ObjectCloner.Properties.Settings.Default.pkgEditorPath))
+            {
+                string command = ObjectCloner.Properties.Settings.Default.pkgEditorPath;
+                string arguments = String.Format(@"""{0}""", sr.PathPackage.Path);
+
+                System.Diagnostics.Process p = new System.Diagnostics.Process();
+
+                p.StartInfo.FileName = command;
+                p.StartInfo.Arguments = arguments;
+                p.StartInfo.UseShellExecute = false;
+
+                try { p.Start(); }
+                catch (Exception ex)
+                {
+                    CopyableMessageBox.IssueException(ex,
+                        String.Format("Application failed to start:\n{0}\n{1}", command, arguments),
+                        "Launch failed");
+                }
+            }
+        }
 
         private void searchContextMenu_Opening(object sender, CancelEventArgs e)
         {
-            scmCopyRK.Enabled = SelectedItem != null;
+            SpecificResource sr = SelectedItem == null ? null : SelectedItem.Tag as SpecificResource;
+            scmClone.Enabled = scmCopyRK.Enabled = sr != null;
+            scmFix.Enabled = sr != null
+                && sr.PPSource == "cc"
+                && System.IO.File.Exists(sr.PathPackage.Path);
+            scmEdit.Enabled = sr != null
+                && sr.PPSource == "cc"
+                && System.IO.File.Exists(sr.PathPackage.Path)
+                && ObjectCloner.Properties.Settings.Default.pkgEditorEnabled
+                && ObjectCloner.Properties.Settings.Default.pkgEditorPath != null
+                && System.IO.File.Exists(ObjectCloner.Properties.Settings.Default.pkgEditorPath);
         }
+        #endregion
 
         #region Search Controls
         private void ckb_CheckedChanged(object sender, EventArgs e)
         {
-            btnSearch.Enabled = haveCriteria();
+            btnSearch.Enabled = allowSearch();
         }
 
         private void tbText_TextChanged(object sender, EventArgs e)
         {
-            btnSearch.Enabled = haveCriteria();
+            btnSearch.Enabled = allowSearch();
+        }
+
+        private bool allowSearch()
+        {
+            return tbText.Text.Length > 0 &&
+                (ckbUseEA.Checked || ckbUseCC.Checked) && 
+                (ckbResourceName.Checked || ckbCatalogDesc.Checked || ckbCatalogName.Checked || ckbObjectDesc.Checked || ckbObjectName.Checked);
         }
 
         private void btnSearch_Click(object sender, EventArgs e)
@@ -138,6 +191,8 @@ namespace ObjectCloner.SplitterComponents
             {
                 useEA = FileTable.AppendFileTable;
                 useCC = FileTable.UseCustomContent;
+                current = FileTable.Current;
+                FileTable.Current = null;
                 if (!MainForm.SetFT(ckbUseCC.Checked, ckbUseEA.Checked, checkInstallDirsCB, this))
                     return;
 
@@ -151,13 +206,6 @@ namespace ObjectCloner.SplitterComponents
         private void btnCancel_Click(object sender, EventArgs e) { if (CancelClicked != null) CancelClicked(this, EventArgs.Empty); }
 
         public CatalogType SelectedCatalogType { get { return cbCatalogType.SelectedIndex > 0 ? ((CatalogType[])Enum.GetValues(typeof(CatalogType)))[cbCatalogType.SelectedIndex - 1] : 0; } }
-
-        bool haveCriteria()
-        {
-            return tbText.Text.Length > 0 &&
-                (ckbUseEA.Checked || ckbUseCC.Checked) && 
-                (ckbResourceName.Checked || ckbCatalogDesc.Checked || ckbCatalogName.Checked || ckbObjectDesc.Checked || ckbObjectName.Checked);
-        }
         #endregion
 
         #region ListViewColumnSorter
@@ -333,6 +381,7 @@ namespace ObjectCloner.SplitterComponents
             while (searchThread != null && searchThread.IsAlive)
                 searchThread.Join(100);
             searchThread = null;
+            FileTable.Current = current;
             MainForm.SetFT(useCC, useEA, checkInstallDirsCB, this);
 
             updateProgressCB(true, "", true, -1, false, 0);

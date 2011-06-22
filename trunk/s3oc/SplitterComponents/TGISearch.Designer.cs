@@ -36,11 +36,16 @@
             this.ContentCategoryFlags = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.TGI = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.Path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.tgiSearchContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.tgisCopyRK = new System.Windows.Forms.ToolStripMenuItem();
-            this.tgisPasteRK = new System.Windows.Forms.ToolStripMenuItem();
+            this.lvContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.lvcmCopyRK = new System.Windows.Forms.ToolStripMenuItem();
+            this.lvcmActivate = new System.Windows.Forms.ToolStripMenuItem();
+            this.lvcmFix = new System.Windows.Forms.ToolStripMenuItem();
+            this.lvcmEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
             this.tlpTGIValues = new System.Windows.Forms.TableLayoutPanel();
+            this.tlpTGIContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tgisCopyRK = new System.Windows.Forms.ToolStripMenuItem();
+            this.tgisPasteRK = new System.Windows.Forms.ToolStripMenuItem();
             this.label2 = new System.Windows.Forms.Label();
             this.tbInstance = new System.Windows.Forms.TextBox();
             this.tbResourceGroup = new System.Windows.Forms.TextBox();
@@ -57,8 +62,9 @@
             this.ckbUseCC = new System.Windows.Forms.CheckBox();
             this.ckbUseEA = new System.Windows.Forms.CheckBox();
             this.tlpSearch.SuspendLayout();
-            this.tgiSearchContextMenu.SuspendLayout();
+            this.lvContextMenu.SuspendLayout();
             this.tlpTGIValues.SuspendLayout();
+            this.tlpTGIContextMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
@@ -95,7 +101,7 @@
             this.TGI,
             this.Path});
             this.tlpSearch.SetColumnSpan(this.listView1, 4);
-            this.listView1.ContextMenuStrip = this.tgiSearchContextMenu;
+            this.listView1.ContextMenuStrip = this.lvContextMenu;
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView1.FullRowSelect = true;
             this.listView1.HideSelection = false;
@@ -135,32 +141,47 @@
             this.Path.Text = "Path";
             this.Path.Width = 296;
             // 
-            // tgiSearchContextMenu
+            // lvContextMenu
             // 
-            this.tgiSearchContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tgisCopyRK,
-            this.tgisPasteRK});
-            this.tgiSearchContextMenu.Name = "tgiSearchContextMenu";
-            this.tgiSearchContextMenu.Size = new System.Drawing.Size(209, 70);
-            this.tgiSearchContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.tgiSearchContextMenu_Opening);
+            this.lvContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lvcmCopyRK,
+            this.lvcmActivate,
+            this.lvcmFix,
+            this.lvcmEdit});
+            this.lvContextMenu.Name = "lvContextMenu";
+            this.lvContextMenu.Size = new System.Drawing.Size(205, 114);
+            this.lvContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.lvContextMenu_Opening);
             // 
-            // tgisCopyRK
+            // lvcmCopyRK
             // 
-            this.tgisCopyRK.Enabled = false;
-            this.tgisCopyRK.Name = "tgisCopyRK";
-            this.tgisCopyRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.tgisCopyRK.Size = new System.Drawing.Size(208, 22);
-            this.tgisCopyRK.Text = "&Copy ResourceKey";
-            this.tgisCopyRK.Click += new System.EventHandler(this.tgisCopyRK_Click);
+            this.lvcmCopyRK.Name = "lvcmCopyRK";
+            this.lvcmCopyRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.lvcmCopyRK.Size = new System.Drawing.Size(204, 22);
+            this.lvcmCopyRK.Text = "&Copy ResourceKey";
+            this.lvcmCopyRK.Click += new System.EventHandler(this.tgisCopyRK_Click);
             // 
-            // tgisPasteRK
+            // lvcmActivate
             // 
-            this.tgisPasteRK.Enabled = false;
-            this.tgisPasteRK.Name = "tgisPasteRK";
-            this.tgisPasteRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
-            this.tgisPasteRK.Size = new System.Drawing.Size(208, 22);
-            this.tgisPasteRK.Text = "&Paste ResourceKey";
-            this.tgisPasteRK.Click += new System.EventHandler(this.tgisPasteRK_Click);
+            this.lvcmActivate.Name = "lvcmActivate";
+            this.lvcmActivate.ShortcutKeyDisplayString = "Enter";
+            this.lvcmActivate.Size = new System.Drawing.Size(204, 22);
+            this.lvcmActivate.Text = "Resource details";
+            this.lvcmActivate.Click += new System.EventHandler(this.lvActivate_Click);
+            // 
+            // lvcmFix
+            // 
+            this.lvcmFix.Name = "lvcmFix";
+            this.lvcmFix.Size = new System.Drawing.Size(204, 22);
+            this.lvcmFix.Text = "&Open package";
+            this.lvcmFix.Click += new System.EventHandler(this.lvcmFix_Click);
+            // 
+            // lvcmEdit
+            // 
+            this.lvcmEdit.Name = "lvcmEdit";
+            this.lvcmEdit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
+            this.lvcmEdit.Size = new System.Drawing.Size(204, 22);
+            this.lvcmEdit.Text = "Open in &Editor";
+            this.lvcmEdit.Click += new System.EventHandler(this.lvcmEdit_Click);
             // 
             // label1
             // 
@@ -179,6 +200,7 @@
             this.tlpTGIValues.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpTGIValues.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpTGIValues.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 229F));
+            this.tlpTGIValues.ContextMenuStrip = this.tlpTGIContextMenu;
             this.tlpTGIValues.Controls.Add(this.label2, 0, 0);
             this.tlpTGIValues.Controls.Add(this.tbInstance, 2, 2);
             this.tlpTGIValues.Controls.Add(this.tbResourceGroup, 2, 1);
@@ -198,6 +220,31 @@
             this.tlpTGIValues.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tlpTGIValues.Size = new System.Drawing.Size(333, 83);
             this.tlpTGIValues.TabIndex = 2;
+            // 
+            // tlpTGIContextMenu
+            // 
+            this.tlpTGIContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tgisCopyRK,
+            this.tgisPasteRK});
+            this.tlpTGIContextMenu.Name = "tgiSearchContextMenu";
+            this.tlpTGIContextMenu.Size = new System.Drawing.Size(206, 48);
+            this.tlpTGIContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.tgiSearchContextMenu_Opening);
+            // 
+            // tgisCopyRK
+            // 
+            this.tgisCopyRK.Name = "tgisCopyRK";
+            this.tgisCopyRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.tgisCopyRK.Size = new System.Drawing.Size(205, 22);
+            this.tgisCopyRK.Text = "&Copy ResourceKey";
+            this.tgisCopyRK.Click += new System.EventHandler(this.tgisCopyRK_Click);
+            // 
+            // tgisPasteRK
+            // 
+            this.tgisPasteRK.Name = "tgisPasteRK";
+            this.tgisPasteRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
+            this.tgisPasteRK.Size = new System.Drawing.Size(205, 22);
+            this.tgisPasteRK.Text = "&Paste ResourceKey";
+            this.tgisPasteRK.Click += new System.EventHandler(this.tgisPasteRK_Click);
             // 
             // label2
             // 
@@ -388,9 +435,10 @@
             this.Size = new System.Drawing.Size(800, 232);
             this.tlpSearch.ResumeLayout(false);
             this.tlpSearch.PerformLayout();
-            this.tgiSearchContextMenu.ResumeLayout(false);
+            this.lvContextMenu.ResumeLayout(false);
             this.tlpTGIValues.ResumeLayout(false);
             this.tlpTGIValues.PerformLayout();
+            this.tlpTGIContextMenu.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
@@ -419,7 +467,7 @@
         private System.Windows.Forms.Button btnSearch;
         private System.Windows.Forms.TableLayoutPanel tlpTGIValues;
         private System.Windows.Forms.ColumnHeader Path;
-        private System.Windows.Forms.ContextMenuStrip tgiSearchContextMenu;
+        private System.Windows.Forms.ContextMenuStrip tlpTGIContextMenu;
         private System.Windows.Forms.ToolStripMenuItem tgisPasteRK;
         private System.Windows.Forms.ToolStripMenuItem tgisCopyRK;
         private System.Windows.Forms.CheckBox ckbUseCC;
@@ -427,5 +475,10 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.CheckBox ckbUseEA;
+        private System.Windows.Forms.ContextMenuStrip lvContextMenu;
+        private System.Windows.Forms.ToolStripMenuItem lvcmCopyRK;
+        private System.Windows.Forms.ToolStripMenuItem lvcmActivate;
+        private System.Windows.Forms.ToolStripMenuItem lvcmFix;
+        private System.Windows.Forms.ToolStripMenuItem lvcmEdit;
     }
 }

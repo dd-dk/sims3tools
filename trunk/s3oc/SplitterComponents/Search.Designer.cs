@@ -50,12 +50,15 @@
             this.ckbObjectDesc = new System.Windows.Forms.CheckBox();
             this.ckbCatalogName = new System.Windows.Forms.CheckBox();
             this.ckbCatalogDesc = new System.Windows.Forms.CheckBox();
+            this.ckbUseEA = new System.Windows.Forms.CheckBox();
             this.ckbUseCC = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.tbText = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.ckbUseEA = new System.Windows.Forms.CheckBox();
+            this.scmClone = new System.Windows.Forms.ToolStripMenuItem();
+            this.scmFix = new System.Windows.Forms.ToolStripMenuItem();
+            this.scmEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.searchContextMenu.SuspendLayout();
             this.tlpSearch.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -114,14 +117,16 @@
             // searchContextMenu
             // 
             this.searchContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.scmCopyRK});
+            this.scmCopyRK,
+            this.scmClone,
+            this.scmFix,
+            this.scmEdit});
             this.searchContextMenu.Name = "searchContextMenu";
-            this.searchContextMenu.Size = new System.Drawing.Size(205, 26);
+            this.searchContextMenu.Size = new System.Drawing.Size(205, 114);
             this.searchContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.searchContextMenu_Opening);
             // 
             // scmCopyRK
             // 
-            this.scmCopyRK.Enabled = false;
             this.scmCopyRK.Name = "scmCopyRK";
             this.scmCopyRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
             this.scmCopyRK.Size = new System.Drawing.Size(204, 22);
@@ -320,6 +325,18 @@
             this.ckbCatalogDesc.UseVisualStyleBackColor = true;
             this.ckbCatalogDesc.CheckedChanged += new System.EventHandler(this.ckb_CheckedChanged);
             // 
+            // ckbUseEA
+            // 
+            this.ckbUseEA.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ckbUseEA.AutoSize = true;
+            this.ckbUseEA.Location = new System.Drawing.Point(220, 3);
+            this.ckbUseEA.Name = "ckbUseEA";
+            this.ckbUseEA.Size = new System.Drawing.Size(117, 17);
+            this.ckbUseEA.TabIndex = 8;
+            this.ckbUseEA.Text = "Include EA content";
+            this.ckbUseEA.UseVisualStyleBackColor = true;
+            this.ckbUseEA.CheckedChanged += new System.EventHandler(this.ckb_CheckedChanged);
+            // 
             // ckbUseCC
             // 
             this.ckbUseCC.Anchor = System.Windows.Forms.AnchorStyles.Left;
@@ -372,17 +389,28 @@
             this.label3.TabIndex = 5;
             this.label3.Text = "Kind of object:";
             // 
-            // ckbUseEA
+            // scmClone
             // 
-            this.ckbUseEA.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ckbUseEA.AutoSize = true;
-            this.ckbUseEA.Location = new System.Drawing.Point(220, 3);
-            this.ckbUseEA.Name = "ckbUseEA";
-            this.ckbUseEA.Size = new System.Drawing.Size(117, 17);
-            this.ckbUseEA.TabIndex = 8;
-            this.ckbUseEA.Text = "Include EA content";
-            this.ckbUseEA.UseVisualStyleBackColor = true;
-            this.ckbUseEA.CheckedChanged += new System.EventHandler(this.ckb_CheckedChanged);
+            this.scmClone.Name = "scmClone";
+            this.scmClone.ShortcutKeyDisplayString = "Enter";
+            this.scmClone.Size = new System.Drawing.Size(204, 22);
+            this.scmClone.Text = "Clone";
+            this.scmClone.Click += new System.EventHandler(this.scmClone_Click);
+            // 
+            // scmFix
+            // 
+            this.scmFix.Name = "scmFix";
+            this.scmFix.Size = new System.Drawing.Size(204, 22);
+            this.scmFix.Text = "&Open package";
+            this.scmFix.Click += new System.EventHandler(this.scmFix_Click);
+            // 
+            // scmEdit
+            // 
+            this.scmEdit.Name = "scmEdit";
+            this.scmEdit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
+            this.scmEdit.Size = new System.Drawing.Size(204, 22);
+            this.scmEdit.Text = "Open in &Editor";
+            this.scmEdit.Click += new System.EventHandler(this.scmEdit_Click);
             // 
             // Search
             // 
@@ -429,6 +457,9 @@
         private System.Windows.Forms.ColumnHeader Path;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.CheckBox ckbUseEA;
+        private System.Windows.Forms.ToolStripMenuItem scmClone;
+        private System.Windows.Forms.ToolStripMenuItem scmFix;
+        private System.Windows.Forms.ToolStripMenuItem scmEdit;
 
     }
 }

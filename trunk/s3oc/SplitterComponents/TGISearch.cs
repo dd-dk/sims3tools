@@ -30,17 +30,15 @@ namespace ObjectCloner.SplitterComponents
 {
     public partial class TGISearch : UserControl
     {
-
         ListViewColumnSorter lvwColumnSorter;
 
         MainForm.CheckInstallDirsCB checkInstallDirsCB;
         MainForm.updateProgressCallback updateProgressCB;
 
 
-
-
         bool useEA = FileTable.AppendFileTable;
         bool useCC = FileTable.UseCustomContent;
+        PathPackageTuple current = FileTable.Current;
         public TGISearch()
         {
             InitializeComponent();
@@ -74,11 +72,13 @@ namespace ObjectCloner.SplitterComponents
 
 
 
-
-
-
-
-
+        #region Occurs when the Clone context menu entry is used
+        [Browsable(true)]
+        [Category("Action")]
+        [Description("Occurs when the Clone context menu entry is used")]
+        public event EventHandler<MainForm.ItemActivateEventArgs> ItemActivate;
+        protected virtual void OnItemActivate(object sender, MainForm.ItemActivateEventArgs e) { if (ItemActivate != null) ItemActivate(sender, e); }
+        #endregion
 
 
         private void listView1_ItemActivate(object sender, EventArgs e)
@@ -98,10 +98,19 @@ namespace ObjectCloner.SplitterComponents
                 "Selected item");
         }
 
+        #region Context menus
         private void tgisCopyRK_Click(object sender, EventArgs e)
         {
-            if (listView1.SelectedItems[0] != null && listView1.SelectedItems[0].Tag as AResourceKey != null)
-                Clipboard.SetText((listView1.SelectedItems[0].Tag as AResourceKey) + "");
+            ToolStripDropDownItem tsmi = sender as ToolStripDropDownItem;
+            if ((tsmi.Owner as ContextMenuStrip).SourceControl == listView1)
+            {
+                if (listView1.SelectedItems[0] != null && listView1.SelectedItems[0].Tag as AResourceKey != null)
+                    Clipboard.SetText((listView1.SelectedItems[0].Tag as AResourceKey) + "");
+            }
+            else
+            {
+                Clipboard.SetText(GetCriteria().ResourceKey + "");
+            }
         }
 
         private void tgisPasteRK_Click(object sender, EventArgs e)
@@ -117,36 +126,92 @@ namespace ObjectCloner.SplitterComponents
 
         private void tgiSearchContextMenu_Opening(object sender, CancelEventArgs e)
         {
-            tgisCopyRK.Enabled = listView1.SelectedItems.Count == 1 && listView1.SelectedItems[0].Tag as AResourceKey != null;
-
             IResourceKey rk;
             tgisPasteRK.Enabled = Clipboard.ContainsText() && RK.TryParse(Clipboard.GetText(), out rk);
         }
+
+        private void lvActivate_Click(object sender, EventArgs e) { listView1_ItemActivate(listView1, e); }
+
+        private void lvcmFix_Click(object sender, EventArgs e)
+        {
+            SpecificResource sr = listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0].Tag as SpecificResource : null;
+            if (sr != null
+                && sr.PPSource == "cc"
+                && System.IO.File.Exists(sr.PathPackage.Path))
+            {
+                OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.CloneFix.Fix));
+            }
+        }
+
+        private void lvcmEdit_Click(object sender, EventArgs e)
+        {
+            SpecificResource sr = listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0].Tag as SpecificResource : null;
+            if (sr != null
+                && sr.PPSource == "cc"
+                && System.IO.File.Exists(sr.PathPackage.Path)
+                && ObjectCloner.Properties.Settings.Default.pkgEditorEnabled
+                && ObjectCloner.Properties.Settings.Default.pkgEditorPath != null
+                && System.IO.File.Exists(ObjectCloner.Properties.Settings.Default.pkgEditorPath))
+            {
+                string command = ObjectCloner.Properties.Settings.Default.pkgEditorPath;
+                string arguments = String.Format(@"""{0}""", sr.PathPackage.Path);
+
+                System.Diagnostics.Process p = new System.Diagnostics.Process();
+
+                p.StartInfo.FileName = command;
+                p.StartInfo.Arguments = arguments;
+                p.StartInfo.UseShellExecute = false;
+
+                try { p.Start(); }
+                catch (Exception ex)
+                {
+                    CopyableMessageBox.IssueException(ex,
+                        String.Format("Application failed to start:\n{0}\n{1}", command, arguments),
+                        "Launch failed");
+                }
+            }
+        }
+
+        private void lvContextMenu_Opening(object sender, CancelEventArgs e)
+        {
+            SpecificResource sr = listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0].Tag as SpecificResource : null;
+            lvcmActivate.Enabled = lvcmCopyRK.Enabled = sr != null;
+            lvcmFix.Enabled = sr != null
+                && sr.PPSource == "cc"
+                && System.IO.File.Exists(sr.PathPackage.Path);
+            lvcmEdit.Enabled = sr != null
+                && sr.PPSource == "cc"
+                && System.IO.File.Exists(sr.PathPackage.Path)
+                && ObjectCloner.Properties.Settings.Default.pkgEditorEnabled
+                && ObjectCloner.Properties.Settings.Default.pkgEditorPath != null
+                && System.IO.File.Exists(ObjectCloner.Properties.Settings.Default.pkgEditorPath);
+        }
+        #endregion
 
         #region Search controls
         private void ckbResourceType_CheckedChanged(object sender, EventArgs e)
         {
             cbResourceType.Enabled = !ckbResourceType.Checked;
-            allowSearch();
+            btnSearch.Enabled = allowSearch();
         }
 
         private void ckbResourceGroup_CheckedChanged(object sender, EventArgs e)
         {
             tbResourceGroup.Enabled = !ckbResourceGroup.Checked;
-            allowSearch();
+            btnSearch.Enabled = allowSearch();
         }
 
         private void ckbInstance_CheckedChanged(object sender, EventArgs e)
         {
             tbInstance.Enabled = !ckbInstance.Checked;
-            allowSearch();
+            btnSearch.Enabled = allowSearch();
         }
 
-        private void ckbUse_CheckedChanged(object sender, EventArgs e) { allowSearch(); }
+        private void ckbUse_CheckedChanged(object sender, EventArgs e) { btnSearch.Enabled = allowSearch(); }
 
-        private void allowSearch()
+        private bool allowSearch()
         {
-            btnSearch.Enabled =
+            return
                 (ckbUseEA.Checked || ckbUseCC.Checked) &&
                 !(ckbResourceType.Checked && ckbResourceGroup.Checked && ckbInstance.Checked);
         }
@@ -187,10 +252,12 @@ namespace ObjectCloner.SplitterComponents
             {
                 useEA = FileTable.AppendFileTable;
                 useCC = FileTable.UseCustomContent;
+                current = FileTable.Current;
+                FileTable.Current = null;
                 if (!MainForm.SetFT(ckbUseCC.Checked, ckbUseEA.Checked, checkInstallDirsCB, this))
                     return;
 
-                btnCancel.Enabled = listView1.Enabled = tgiSearchContextMenu.Enabled = ckbUseCC.Enabled = tlpTGIValues.Enabled = false;
+                btnCancel.Enabled = listView1.Enabled = tlpTGIContextMenu.Enabled = ckbUseCC.Enabled = tlpTGIValues.Enabled = false;
                 btnSearch.Text = "&Stop";
                 StartTGISearch();
             }
@@ -361,11 +428,12 @@ namespace ObjectCloner.SplitterComponents
             while (searchThread != null && searchThread.IsAlive)
                 searchThread.Join(100);
             searchThread = null;
+            FileTable.Current = current;
             MainForm.SetFT(useCC, useEA, checkInstallDirsCB, this);
 
             updateProgressCB(true, "", true, -1, false, 0);
 
-            btnCancel.Enabled = listView1.Enabled = tgiSearchContextMenu.Enabled = ckbUseCC.Enabled = tlpTGIValues.Enabled = true;
+            btnCancel.Enabled = listView1.Enabled = tlpTGIContextMenu.Enabled = ckbUseCC.Enabled = tlpTGIValues.Enabled = true;
             btnSearch.Text = "&Search";
 
 
@@ -461,6 +529,11 @@ namespace ObjectCloner.SplitterComponents
                 public uint resourceGroup;
                 public bool useInstance;
                 public ulong instance;
+                public IResourceKey ResourceKey { get { return GetValueOrDefault(0, 0, 0); } }
+                public IResourceKey GetValueOrDefault(uint defaultResourceType, uint defaultResourceGroup, ulong defaultInstance)
+                {
+                    return new TGIBlock(0, null, useResourceType ? resourceType : 0, useResourceGroup ? resourceGroup : 0, useInstance ? instance : 0);
+                }
             }
 
             Control control;
@@ -488,6 +561,7 @@ namespace ObjectCloner.SplitterComponents
 
                 try
                 {
+                    List<string> pathsSeen = new List<string>();
                     List<List<PathPackageTuple>> pptLists = new List<List<PathPackageTuple>>(new List<PathPackageTuple>[] { FileTable.fb0, FileTable.dds, FileTable.tmb, });
                     int searchCount = 0;
                     int searched = 0;
@@ -497,14 +571,18 @@ namespace ObjectCloner.SplitterComponents
 
                     pptLists.ForEach(ppts => ppts.ForEach(ppt => {
                         if (stopSearch) return;
+                        ++searched;
+                        if (!pathsSeen.Contains(ppt.Path))
+                        {
+                            pathsSeen.Add(ppt.Path);
+                            updateProgress(true, String.Format("Searching package {0} of {1}...", searched, searchCount), false, -1, true, searched);
 
-                        updateProgress(true, String.Format("Searching package {0} of {1}...", ++searched, searchCount), false, -1, true, searched);
-
-                        ppt.FindAll(sr => !stopSearch
-                            && (!criteria.useResourceType || sr.ResourceType.Equals(criteria.resourceType))
-                            && (!criteria.useResourceGroup || sr.ResourceGroup.Equals(criteria.resourceGroup))
-                            && (!criteria.useInstance || sr.Instance.Equals(criteria.instance))
-                        ).ForEach(sr => Add(sr));
+                            ppt.FindAll(sr => !stopSearch
+                                && (!criteria.useResourceType || sr.ResourceType.Equals(criteria.resourceType))
+                                && (!criteria.useResourceGroup || sr.ResourceGroup.Equals(criteria.resourceGroup))
+                                && (!criteria.useInstance || sr.Instance.Equals(criteria.instance))
+                            ).ForEach(sr => Add(sr));
+                        }
                     }));
 
                     complete = true;

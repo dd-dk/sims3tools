@@ -30,13 +30,13 @@ namespace ObjectCloner.SplitterComponents
 {
     public partial class ObjectChooser : UserControl
     {
-
         ListViewColumnSorter lvwColumnSorter;
 
         MainForm.DoWaitCallback doWaitCB;
         MainForm.StopWaitCallback stopWaitCB;
         MainForm.updateProgressCallback updateProgressCB;
         MainForm.listViewAddCallBack listViewAddCB;
+
         public CatalogType ResourceType { get; private set; }
         bool isFix;
 
@@ -109,8 +109,8 @@ namespace ObjectCloner.SplitterComponents
         protected virtual void OnItemActivate(object sender, MainForm.ItemActivateEventArgs e) { if (ItemActivate != null) ItemActivate(sender, e); }
         #endregion
 
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e) { OnSelectedIndexChanged(sender, new MainForm.SelectedIndexChangedEventArgs(sender as ListView)); }
-        private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(sender, new MainForm.ItemActivateEventArgs(sender as ListView)); }
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e) { OnSelectedIndexChanged(this, new MainForm.SelectedIndexChangedEventArgs(sender as ListView)); }
+        private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(sender as ListView)); }
 
         private void omCopyRK_Click(object sender, EventArgs e)
         {
