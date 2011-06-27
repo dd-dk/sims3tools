@@ -688,13 +688,34 @@ namespace S3PIDemoFE
                     i++;
                 }
 
-                ListBox lb = new ListBox();
+                int maxWidth = Application.OpenForms[0].Width / 3;
+                if (maxWidth < Screen.PrimaryScreen.WorkingArea.Size.Width / 4) maxWidth = Screen.PrimaryScreen.WorkingArea.Size.Width / 4;
+                int maxHeight = Application.OpenForms[0].Height / 3;
+                if (maxHeight < Screen.PrimaryScreen.WorkingArea.Size.Height / 4) maxHeight = Screen.PrimaryScreen.WorkingArea.Size.Height / 4;
+
+                TextBox tb = new TextBox
+                {
+                    AutoSize = true,
+                    Font = new ListBox().Font,
+                    Margin = new Padding(0),
+                    MaximumSize = new System.Drawing.Size(maxWidth, maxHeight),
+                    Multiline = true,
+                    Lines = enumValues.ToArray(),
+                };
+                tb.PerformLayout();
+
+                ListBox lb = new ListBox()
+                {
+                    IntegralHeight = false,
+                    Margin = new Padding(0),
+                    Size = tb.PreferredSize,
+                    Tag = edSvc,
+                };
                 lb.Items.AddRange(enumValues.ToArray());
+                lb.PerformLayout();
+
                 if (index >= 0) { lb.SelectedIndices.Add(index); }
                 lb.SelectedIndexChanged += new EventHandler(lb_SelectedIndexChanged);
-                lb.Tag = edSvc;
-                lb.Height = lb.Items.Count * (lb.ItemHeight + lb.Margin.Vertical);
-                lb.IntegralHeight = false;
                 edSvc.DropDownControl(lb);
 
                 return lb.SelectedItem == null ? value : (Enum)new EnumChooserConverter().ConvertFrom(context, System.Globalization.CultureInfo.CurrentCulture, lb.SelectedItem);
