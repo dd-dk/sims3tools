@@ -1741,9 +1741,11 @@ namespace S3PIDemoFE
                 else if (!controlPanel1.HexOnly && controlPanel1.AutoValue && hasValueContentField())
                 {
                     Control c = getValueControl();
-                    c.ContextMenuStrip = menuBarWidget1.textPreviewContextMenuStrip;
                     if (c != null)
+                    {
+                        c.ContextMenuStrip = menuBarWidget1.textPreviewContextMenuStrip;
                         pnAuto.Controls.Add(c);
+                    }
                 }
             }
             pnAuto.ResumeLayout();
