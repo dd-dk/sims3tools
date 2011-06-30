@@ -1466,7 +1466,7 @@ namespace S3PIDemoFE
         private void helpAbout()
         {
             string copyright = "\n" +
-                this.Text + "  Copyright (C) 2009  Peter L Jones\n" +
+                myName + "  Copyright (C) 2009  Peter L Jones\n" +
                 "\n" +
                 "This program comes with ABSOLUTELY NO WARRANTY; for details see Help->Warranty.\n" +
                 "\n" +
@@ -1482,7 +1482,7 @@ namespace S3PIDemoFE
                 , copyright
                 , getVersion(typeof(MainForm), "s3pe")
                 , getVersion(typeof(s3pi.Interfaces.AApiVersionedFields), "s3pe")
-                ), this.Text);
+                ), myName);
         }
 
         private static string getVersion(Type type, string p)
@@ -1505,7 +1505,7 @@ namespace S3PIDemoFE
         {
             bool msgDisplayed = AutoUpdate.Checker.GetUpdate(false);
             if (!msgDisplayed)
-                CopyableMessageBox.Show("Your " + Application.ProductName + " is up to date", this.Text,
+                CopyableMessageBox.Show("Your " + Application.ProductName + " is up to date", myName,
                     CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
         }
 
@@ -1533,7 +1533,7 @@ namespace S3PIDemoFE
                 " OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS)," +
                 " EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.\n" +
                 "\n",
-                this.Text);
+                myName);
 
         }
 
@@ -1546,7 +1546,7 @@ namespace S3PIDemoFE
                 "\n" +
                 "Do you wish to visit this site now?" +
                 "\n",
-                this.Text,
+                myName,
                 CopyableMessageBoxButtons.YesNo, CopyableMessageBoxIcon.Question, 1);
             if (dr != 0) return;
             Help.ShowHelp(this, "http://www.fsf.org/licensing/licenses/gpl.html");
@@ -1568,7 +1568,7 @@ namespace S3PIDemoFE
                         e.name.Length > 0
                         ? e.name
                         : String.Format("TGI {0:X8}-{1:X8}-{2:X16}", browserWidget1.SelectedResource.ResourceType, browserWidget1.SelectedResource.ResourceGroup, browserWidget1.SelectedResource.Instance)
-                    ), this.Text, CopyableMessageBoxButtons.YesNoCancel, CopyableMessageBoxIcon.Question, 1);
+                    ), myName, CopyableMessageBoxButtons.YesNoCancel, CopyableMessageBoxIcon.Question, 1);
                 if (dr == 2)
                 {
                     e.Cancel = true;
