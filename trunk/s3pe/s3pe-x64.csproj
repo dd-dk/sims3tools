@@ -12,7 +12,7 @@
     <AssemblyName>s3pe-x64</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <ApplicationIcon>Resources\s3pe.ico</ApplicationIcon>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -404,6 +404,10 @@
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.ObjKeyResource.dll">
       <Link>s3pi.ObjKeyResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.RCOLChunks.dll">
+      <Link>s3pi.RCOLChunks.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.ScriptResource.dll">
