@@ -713,6 +713,46 @@ namespace DdsFileTypePlugin
         }
 
         /// <summary>
+        /// Apply <see cref="RGBHSV.HSVShift"/> values to this DDS image based on the
+        /// channels in the <paramref name="mask"/>.
+        /// Each channel of the mask acts independently, in order "R", "G", "B", "A".
+        /// </summary>
+        /// <param name="mask">A DDS image file, each colourway acting as a mask channel.</param>
+        /// <param name="ch1Shift">A shift to apply to the image when the first channel of the mask is active.</param>
+        /// <param name="ch2Shift">A shift to apply to the image when the second channel of the mask is active.</param>
+        /// <param name="ch3Shift">A shift to apply to the image when the third channel of the mask is active.</param>
+        /// <param name="ch4Shift">A shift to apply to the image when the fourth channel of the mask is active.</param>
+        public void SetMaskNoBlend(DdsFile mask, RGBHSV.HSVShift ch1Shift, RGBHSV.HSVShift ch2Shift, RGBHSV.HSVShift ch3Shift, RGBHSV.HSVShift ch4Shift)
+        {
+            if (!SupportsHSV) return;
+
+            maskInEffect = maskInEffect || !ch1Shift.IsEmpty || !ch2Shift.IsEmpty || !ch3Shift.IsEmpty || !ch4Shift.IsEmpty;
+
+            if (!maskInEffect) return;
+
+            RGBHSV.ColorHSVA[] result = new RGBHSV.ColorHSVA[hsvData.Length];
+            Array.Copy(hsvData, 0, result, 0, result.Length);
+
+            if (!ch1Shift.IsEmpty)
+                for (int i = 0; i < hsvData.Length; i++)
+                    if (mask.m_pixelData[i * 4 + 0] != 0) result[i] = hsvData[i].HSVShift(ch1Shift);
+
+            if (!ch2Shift.IsEmpty)
+                for (int i = 0; i < hsvData.Length; i++)
+                    if (mask.m_pixelData[i * 4 + 1] != 0) result[i] = hsvData[i].HSVShift(ch2Shift);
+
+            if (!ch3Shift.IsEmpty)
+                for (int i = 0; i < hsvData.Length; i++)
+                    if (mask.m_pixelData[i * 4 + 2] != 0) result[i] = hsvData[i].HSVShift(ch3Shift);
+
+            if (!ch4Shift.IsEmpty)
+                for (int i = 0; i < hsvData.Length; i++)
+                    if (mask.m_pixelData[i * 4 + 3] != 0) result[i] = hsvData[i].HSVShift(ch4Shift);
+
+            hsvData = result;
+        }
+
+        /// <summary>
         /// Clears a previously-applied HSVShift mask.
         /// </summary>
         public void ClearMask()

@@ -222,12 +222,16 @@ namespace DDSPanel
         /// <param name="ch2Shift">A shift to apply to the image when the second channel of the mask is active.</param>
         /// <param name="ch3Shift">A shift to apply to the image when the third channel of the mask is active.</param>
         /// <param name="ch4Shift">A shift to apply to the image when the fourth channel of the mask is active.</param>
-        public void ApplyMask(Stream mask, RGBHSV.HSVShift ch1Shift, RGBHSV.HSVShift ch2Shift, RGBHSV.HSVShift ch3Shift, RGBHSV.HSVShift ch4Shift)
+        /// <param name="blend">When true, each channel's shift adds; when false, each channel's shift overrides.</param>
+        public void ApplyMask(Stream mask, RGBHSV.HSVShift ch1Shift, RGBHSV.HSVShift ch2Shift, RGBHSV.HSVShift ch3Shift, RGBHSV.HSVShift ch4Shift, bool blend)
         {
             if (!SupportsHSV) return;
             DdsFile ddsMask = new DdsFile();
             ddsMask.Load(mask, false);//only want the pixmap data
-            ddsFile.SetMask(ddsMask, ch1Shift, ch2Shift, ch3Shift, ch4Shift);
+            if (blend)
+                ddsFile.SetMask(ddsMask, ch1Shift, ch2Shift, ch3Shift, ch4Shift);
+            else
+                ddsFile.SetMaskNoBlend(ddsMask, ch1Shift, ch2Shift, ch3Shift, ch4Shift);
 
             ckb_CheckedChanged(null, null);
         }
