@@ -36,25 +36,25 @@ namespace TestDDSPanel
             if (dr != DialogResult.OK) return;
 
             mask = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read);
-            mask.Position = 0;
-            ddsPanel1.ApplyMask(mask,
-                new RGBHSV.HSVShift { h = (float)numMaskCh1Hue.Value, s = (float)numMaskCh1Saturation.Value, v = (float)numMaskCh1Value.Value, },
-                RGBHSV.HSVShift.Empty, RGBHSV.HSVShift.Empty, RGBHSV.HSVShift.Empty);
         }
 
         private void btnResetMask_Click(object sender, EventArgs e)
         {
             ddsPanel1.ClearMask();
-            numMaskCh1Hue.Value = numMaskCh1Saturation.Value = numMaskCh1Value.Value = 0;
+            numMaskCh1Hue.Value = numMaskCh1Saturation.Value = numMaskCh1Value.Value =
+                numMaskCh2Hue.Value = numMaskCh2Saturation.Value = numMaskCh2Value.Value = 0;
+            btnApply_Click(null, null);
         }
 
-        private void numMask_ValueChanged(object sender, EventArgs e)
+        private void btnApply_Click(object sender, EventArgs e)
         {
             if (mask == null) return;
+
             mask.Position = 0;
             ddsPanel1.ApplyMask(mask,
                 new RGBHSV.HSVShift { h = (float)numMaskCh1Hue.Value, s = (float)numMaskCh1Saturation.Value, v = (float)numMaskCh1Value.Value, },
-                RGBHSV.HSVShift.Empty, RGBHSV.HSVShift.Empty, RGBHSV.HSVShift.Empty);
+                new RGBHSV.HSVShift { h = (float)numMaskCh2Hue.Value, s = (float)numMaskCh2Saturation.Value, v = (float)numMaskCh2Value.Value, },
+                RGBHSV.HSVShift.Empty, RGBHSV.HSVShift.Empty, ckbBlend.Checked);
         }
     }
 }
