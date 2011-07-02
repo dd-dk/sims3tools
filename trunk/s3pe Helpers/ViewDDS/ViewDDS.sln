@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViewDDS", "HelperApp\ViewDD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DDSPanel", "DDSPanel\DDSPanel.csproj", "{901D5F73-7DAC-49C3-9A5F-33EEA1E97F22}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestDDSPanel", "TestDDSPanel\TestDDSPanel.csproj", "{767207F7-4DC5-445E-8C1C-1F2D3DB3F750}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{901D5F73-7DAC-49C3-9A5F-33EEA1E97F22}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{901D5F73-7DAC-49C3-9A5F-33EEA1E97F22}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{901D5F73-7DAC-49C3-9A5F-33EEA1E97F22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{767207F7-4DC5-445E-8C1C-1F2D3DB3F750}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{767207F7-4DC5-445E-8C1C-1F2D3DB3F750}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{767207F7-4DC5-445E-8C1C-1F2D3DB3F750}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{767207F7-4DC5-445E-8C1C-1F2D3DB3F750}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
