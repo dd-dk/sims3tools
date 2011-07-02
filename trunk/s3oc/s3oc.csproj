@@ -68,6 +68,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.Package.dll</HintPath>
     </Reference>
+    <Reference Include="s3pi.RCOLChunks">
+      <HintPath>..\s3pi\build\bin\Release\s3pi.RCOLChunks.dll</HintPath>
+    </Reference>
     <Reference Include="s3pi.WrapperDealer">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.WrapperDealer.dll</HintPath>
@@ -326,20 +329,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PreBuildEvent>set mydate=%25date: =0%25
-set dd=%25mydate:~0,2%25
-set mm=%25mydate:~3,2%25
-set yy=%25mydate:~8,2%25
-set mytime=%25time: =0%25
-set h=%25mytime:~0,2%25
-set version="%25yy%25%25mm%25.%25dd%25.%25h%25%25m%25.*"
-
-(echo using System.Reflection;
-echo using System.Runtime.CompilerServices;
-echo using System.Runtime.InteropServices;
-echo /*"*/ [assembly: AssemblyVersion(%25version%25)] /*"*/
-)&gt;"$(ProjectDir)Properties\AssemblyVersion.cs"
-
-</PreBuildEvent>
+    <PreBuildEvent>"$(SolutionDir)..\s3pi\CreateAssemblyVersion\bin\Release\CreateAssemblyVersion.exe" "$(ProjectDir)\"</PreBuildEvent>
   </PropertyGroup>
 </Project>
