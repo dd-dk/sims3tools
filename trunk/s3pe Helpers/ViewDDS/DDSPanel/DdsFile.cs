@@ -675,6 +675,50 @@ namespace DdsFileTypePlugin
                 hsvData = RGBHSV.ColorRGBA.ConvertToColorHSVAArray(m_pixelData);
         }
 
+        /// <summary>
+        /// Fill the image with a single colour, specified by the byte parameters,
+        /// with the size given by the int parameters.
+        /// If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
+        /// </summary>
+        /// <param name="r">Amount of red per pixel.</param>
+        /// <param name="g">Amount of green per pixel.</param>
+        /// <param name="b">Amount of blue per pixel.</param>
+        /// <param name="a">Amount of alpha per pixel.</param>
+        /// <param name="width">Width of image.</param>
+        /// <param name="height">Height of image.</param>
+        /// <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
+        public void SetColour(byte r, byte g, byte b, byte a, int width, int height, bool supportHSV)
+        {
+            m_header.m_width = (uint)width;
+            m_header.m_height = (uint)height;
+            m_pixelData = new byte[width * height * 4];
+            for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
+                {
+                    m_pixelData[4 * (x * height + y) + 0] = r;
+                    m_pixelData[4 * (x * height + y) + 1] = g;
+                    m_pixelData[4 * (x * height + y) + 2] = b;
+                    m_pixelData[4 * (x * height + y) + 3] = a;
+                }
+
+            if (supportHSV)
+                hsvData = RGBHSV.ColorRGBA.ConvertToColorHSVAArray(m_pixelData);
+        }
+
+        /// <summary>
+        /// Fill the image with a single colour, specified by the uint parameter
+        /// (low byte is "blue", then "green", then "red" then high byte is "alpha"),
+        /// with the size given by the int parameters.
+        /// If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
+        /// </summary>
+        /// <param name="argb">Colour of image (low byte is "blue", then "green", then "red" then high byte is "alpha").</param>
+        /// <param name="width">Width of image.</param>
+        /// <param name="height">Height of image.</param>
+        /// <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
+        public void SetColour(uint argb, int width, int height, bool supportHSV)
+        {
+            SetColour((byte)((argb >> 16) & 0xff), (byte)((argb >> 8) & 0xff), (byte)(argb & 0xff), (byte)((argb >> 24) & 0xff), width, height, supportHSV);
+        }
 
         bool maskInEffect = false;
 
@@ -762,6 +806,13 @@ namespace DdsFileTypePlugin
             maskInEffect = false;
         }
 
+        /// <summary>
+        /// The image size.
+        /// </summary>
+        public Size Size
+        {
+            get { return new Size(GetWidth(), GetHeight()); }
+        }
 
         int GetWidth()
         {
