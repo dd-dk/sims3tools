@@ -23,6 +23,7 @@ namespace DDSPanel
         DateTime now = DateTime.UtcNow;
         Image image;
         RGBHSV.HSVShift hsvShift;
+        DdsFile ddsMask = null;
         #endregion
 
         /// <summary>
@@ -202,6 +203,103 @@ namespace DDSPanel
         }
 
         /// <summary>
+        /// Sets the colour of the image.
+        /// </summary>
+        /// <param name="colour">ARGB colour.</param>
+        /// <param name="size">Size of image.</param>
+        /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
+        public void SetColour(uint colour, Size size, bool supportHSV = false)
+        {
+            SetColour(colour, size.Width, size.Height, supportHSV);
+        }
+
+        /// <summary>
+        /// Sets the colour of the image.  Alpha will be 255.
+        /// </summary>
+        /// <param name="colour">ARGB colour.</param>
+        /// <param name="width">Width of image.</param>
+        /// <param name="height">Height of image.</param>
+        /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
+        public void SetColour(uint colour, int width, int height, bool supportHSV = false)
+        {
+            try
+            {
+                this.Enabled = false;
+                Application.UseWaitCursor = true;
+                ddsFile.SetColour(colour, width, height, supportHSV);
+                loaded = true;
+            }
+            finally { this.Enabled = true; Application.UseWaitCursor = false; }
+            this.supportHSV = supportHSV;
+            ckb_CheckedChanged(null, null);
+        }
+
+        /// <summary>
+        /// Sets the colour of the image.  Alpha will be 255.
+        /// </summary>
+        /// <param name="red">Amount of red per pixel.</param>
+        /// <param name="green">Amount of green per pixel.</param>
+        /// <param name="blue">Amount of blue per pixel.</param>
+        /// <param name="size">Size of image.</param>
+        /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
+        public void SetColour(byte red, byte green, byte blue, Size size, bool supportHSV = false)
+        {
+            SetColour(red, green, blue, 255, size.Width, size.Height, supportHSV);
+        }
+
+        /// <summary>
+        /// Sets the colour of the image.  Alpha will be 255.
+        /// </summary>
+        /// <param name="red">Amount of red per pixel.</param>
+        /// <param name="green">Amount of green per pixel.</param>
+        /// <param name="blue">Amount of blue per pixel.</param>
+        /// <param name="width">Width of image.</param>
+        /// <param name="height">Height of image.</param>
+        /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
+        public void SetColour(byte red, byte green, byte blue, int width, int height, bool supportHSV = false)
+        {
+            SetColour(red, green, blue, 255, width, height, supportHSV);
+        }
+
+        /// <summary>
+        /// Sets the colour of the image.
+        /// </summary>
+        /// <param name="red">Amount of red per pixel.</param>
+        /// <param name="green">Amount of green per pixel.</param>
+        /// <param name="blue">Amount of blue per pixel.</param>
+        /// <param name="alpha">Amount of alpha per pixel.</param>
+        /// <param name="size">Size of image.</param>
+        /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
+        public void SetColour(byte red, byte green, byte blue, byte alpha, Size size, bool supportHSV = false)
+        {
+            SetColour(red, green, blue, alpha, size.Width, size.Height, supportHSV);
+        }
+
+        /// <summary>
+        /// Sets the colour of the image.
+        /// </summary>
+        /// <param name="red">Amount of red per pixel.</param>
+        /// <param name="green">Amount of green per pixel.</param>
+        /// <param name="blue">Amount of blue per pixel.</param>
+        /// <param name="alpha">Amount of alpha per pixel.</param>
+        /// <param name="width">Width of image.</param>
+        /// <param name="height">Height of image.</param>
+        /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
+        public void SetColour(byte red, byte green, byte blue, byte alpha, int width, int height, bool supportHSV = false)
+        {
+            try
+            {
+                this.Enabled = false;
+                Application.UseWaitCursor = true;
+                ddsFile.SetColour(red, green, blue, alpha, width, height, supportHSV);
+                loaded = true;
+            }
+            finally { this.Enabled = true; Application.UseWaitCursor = false; }
+            this.supportHSV = supportHSV;
+            ckb_CheckedChanged(null, null);
+        }
+
+        /// <summary>
         /// Apply a hue, saturation and value shift to the image.
         /// </summary>
         /// <param name="h">Hue shift, default 0</param>
@@ -226,7 +324,7 @@ namespace DDSPanel
         public void ApplyMask(Stream mask, RGBHSV.HSVShift ch1Shift, RGBHSV.HSVShift ch2Shift, RGBHSV.HSVShift ch3Shift, RGBHSV.HSVShift ch4Shift, bool blend)
         {
             if (!SupportsHSV) return;
-            DdsFile ddsMask = new DdsFile();
+            ddsMask = new DdsFile();
             ddsMask.Load(mask, false);//only want the pixmap data
             if (blend)
                 ddsFile.SetMask(ddsMask, ch1Shift, ch2Shift, ch3Shift, ch4Shift);
@@ -237,12 +335,28 @@ namespace DDSPanel
         }
 
         /// <summary>
+        /// Indicates whether a Mask has been applied (and not Cleared) to the current iamge.
+        /// </summary>
+        public bool MaskApplied { get { return ddsMask != null; } }
+
+        /// <summary>
+        /// The size of the current image (or <see cref="Size.Empty"/> if not loaded).
+        /// </summary>
+        public Size ImageSize { get { return loaded ? ddsFile.Size : Size.Empty; } }
+
+        /// <summary>
+        /// The size of the current mask (or <see cref="Size.Empty"/> if no mask).
+        /// </summary>
+        public Size MaskSize { get { return ddsMask != null ? ddsMask.Size : Size.Empty; } }
+
+        /// <summary>
         /// Removes any previously applied masked shifts
         /// </summary>
         public void ClearMask()
         {
             if (!SupportsHSV) return;
             ddsFile.ClearMask();
+            ddsMask = null;
             ckb_CheckedChanged(null, null);
         }
         #endregion
