@@ -15,9 +15,11 @@ namespace TestDDSPanel
             ddsPanel1.Fit = true;
         }
 
-        private void ned_ValueChanged(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
-            ddsPanel1.HSVShift(hueShift.Value, saturationShift.Value, valueShift.Value);
+            int width = ddsPanel1.MaskSize != Size.Empty ? ddsPanel1.MaskSize.Width : 128;
+            int height = ddsPanel1.MaskSize != Size.Empty ? ddsPanel1.MaskSize.Height : 128;
+            ddsPanel1.SetColour((byte)nudRed.Value, (byte)nudGreen.Value, (byte)nudBlue.Value, (byte)nudAlpha.Value, width, height, true);
         }
 
         private void btnOpenImage_Click(object sender, EventArgs e)
@@ -27,6 +29,11 @@ namespace TestDDSPanel
 
             FileStream fs = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read);
             ddsPanel1.DDSLoad(fs, true);
+        }
+
+        private void ned_ValueChanged(object sender, EventArgs e)
+        {
+            ddsPanel1.HSVShift(hueShift.Value, saturationShift.Value, valueShift.Value);
         }
 
         Stream mask = null;
@@ -55,6 +62,11 @@ namespace TestDDSPanel
                 new RGBHSV.HSVShift { h = (float)numMaskCh1Hue.Value, s = (float)numMaskCh1Saturation.Value, v = (float)numMaskCh1Value.Value, },
                 new RGBHSV.HSVShift { h = (float)numMaskCh2Hue.Value, s = (float)numMaskCh2Saturation.Value, v = (float)numMaskCh2Value.Value, },
                 RGBHSV.HSVShift.Empty, RGBHSV.HSVShift.Empty, ckbBlend.Checked);
+
+            if (ddsPanel1.ImageSize.Width != ddsPanel1.MaskSize.Width || ddsPanel1.ImageSize.Height != ddsPanel1.MaskSize.Height)
+            {
+                button1_Click(null, null);
+            }
         }
     }
 }

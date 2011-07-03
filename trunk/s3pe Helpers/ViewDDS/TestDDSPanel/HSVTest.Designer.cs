@@ -56,8 +56,19 @@
             this.label9 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
-            this.ddsPanel1 = new DDSPanel.DDSPanel();
             this.btnApply = new System.Windows.Forms.Button();
+            this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
+            this.nudRed = new System.Windows.Forms.NumericUpDown();
+            this.nudGreen = new System.Windows.Forms.NumericUpDown();
+            this.nudBlue = new System.Windows.Forms.NumericUpDown();
+            this.label12 = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
+            this.label16 = new System.Windows.Forms.Label();
+            this.nudAlpha = new System.Windows.Forms.NumericUpDown();
+            this.ddsPanel1 = new DDSPanel.DDSPanel();
             ((System.ComponentModel.ISupportInitialize)(this.hueShift)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.saturationShift)).BeginInit();
@@ -70,6 +81,11 @@
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh2Hue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh2Saturation)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh2Value)).BeginInit();
+            this.tableLayoutPanel4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudRed)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudGreen)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudBlue)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudAlpha)).BeginInit();
             this.SuspendLayout();
             // 
             // hueShift
@@ -108,7 +124,7 @@
             this.tableLayoutPanel1.Controls.Add(this.label1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.label2, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.label3, 0, 2);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(2, 9);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(2, 193);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 3;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -199,7 +215,7 @@
             // 
             // btnOpenImage
             // 
-            this.btnOpenImage.Location = new System.Drawing.Point(12, 94);
+            this.btnOpenImage.Location = new System.Drawing.Point(12, 12);
             this.btnOpenImage.Name = "btnOpenImage";
             this.btnOpenImage.Size = new System.Drawing.Size(75, 23);
             this.btnOpenImage.TabIndex = 3;
@@ -209,7 +225,7 @@
             // 
             // btnOpenMask
             // 
-            this.btnOpenMask.Location = new System.Drawing.Point(12, 123);
+            this.btnOpenMask.Location = new System.Drawing.Point(12, 278);
             this.btnOpenMask.Name = "btnOpenMask";
             this.btnOpenMask.Size = new System.Drawing.Size(75, 23);
             this.btnOpenMask.TabIndex = 3;
@@ -236,7 +252,7 @@
             this.tableLayoutPanel2.Controls.Add(this.label5, 0, 2);
             this.tableLayoutPanel2.Controls.Add(this.label6, 0, 3);
             this.tableLayoutPanel2.Controls.Add(this.label7, 0, 0);
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(2, 175);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(2, 330);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 4;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -360,7 +376,7 @@
             // 
             // btnResetMask
             // 
-            this.btnResetMask.Location = new System.Drawing.Point(12, 400);
+            this.btnResetMask.Location = new System.Drawing.Point(12, 555);
             this.btnResetMask.Name = "btnResetMask";
             this.btnResetMask.Size = new System.Drawing.Size(75, 23);
             this.btnResetMask.TabIndex = 3;
@@ -371,7 +387,7 @@
             // ckbBlend
             // 
             this.ckbBlend.AutoSize = true;
-            this.ckbBlend.Location = new System.Drawing.Point(12, 152);
+            this.ckbBlend.Location = new System.Drawing.Point(12, 307);
             this.ckbBlend.Name = "ckbBlend";
             this.ckbBlend.Size = new System.Drawing.Size(96, 17);
             this.ckbBlend.TabIndex = 4;
@@ -390,7 +406,7 @@
             this.tableLayoutPanel3.Controls.Add(this.label9, 0, 2);
             this.tableLayoutPanel3.Controls.Add(this.label10, 0, 3);
             this.tableLayoutPanel3.Controls.Add(this.label11, 0, 0);
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(2, 273);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(2, 428);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 4;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -512,6 +528,173 @@
             this.label11.TabIndex = 3;
             this.label11.Text = "Ch2 Shift";
             // 
+            // btnApply
+            // 
+            this.btnApply.Location = new System.Drawing.Point(12, 526);
+            this.btnApply.Name = "btnApply";
+            this.btnApply.Size = new System.Drawing.Size(75, 23);
+            this.btnApply.TabIndex = 5;
+            this.btnApply.Text = "Apply";
+            this.btnApply.UseVisualStyleBackColor = true;
+            this.btnApply.Click += new System.EventHandler(this.btnApply_Click);
+            // 
+            // tableLayoutPanel4
+            // 
+            this.tableLayoutPanel4.ColumnCount = 2;
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel4.Controls.Add(this.nudRed, 1, 1);
+            this.tableLayoutPanel4.Controls.Add(this.nudGreen, 1, 2);
+            this.tableLayoutPanel4.Controls.Add(this.nudBlue, 1, 3);
+            this.tableLayoutPanel4.Controls.Add(this.label12, 0, 1);
+            this.tableLayoutPanel4.Controls.Add(this.label13, 0, 2);
+            this.tableLayoutPanel4.Controls.Add(this.label14, 0, 3);
+            this.tableLayoutPanel4.Controls.Add(this.label15, 0, 0);
+            this.tableLayoutPanel4.Controls.Add(this.label16, 0, 4);
+            this.tableLayoutPanel4.Controls.Add(this.nudAlpha, 1, 4);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(2, 41);
+            this.tableLayoutPanel4.Name = "tableLayoutPanel4";
+            this.tableLayoutPanel4.RowCount = 5;
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(106, 117);
+            this.tableLayoutPanel4.TabIndex = 2;
+            // 
+            // nudRed
+            // 
+            this.nudRed.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.nudRed.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.nudRed.Location = new System.Drawing.Point(45, 16);
+            this.nudRed.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.nudRed.Name = "nudRed";
+            this.nudRed.Size = new System.Drawing.Size(58, 20);
+            this.nudRed.TabIndex = 1;
+            // 
+            // nudGreen
+            // 
+            this.nudGreen.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.nudGreen.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.nudGreen.Location = new System.Drawing.Point(45, 42);
+            this.nudGreen.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.nudGreen.Name = "nudGreen";
+            this.nudGreen.Size = new System.Drawing.Size(58, 20);
+            this.nudGreen.TabIndex = 1;
+            // 
+            // nudBlue
+            // 
+            this.nudBlue.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.nudBlue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.nudBlue.Location = new System.Drawing.Point(45, 68);
+            this.nudBlue.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.nudBlue.Name = "nudBlue";
+            this.nudBlue.Size = new System.Drawing.Size(58, 20);
+            this.nudBlue.TabIndex = 1;
+            // 
+            // label12
+            // 
+            this.label12.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(12, 19);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(27, 13);
+            this.label12.TabIndex = 2;
+            this.label12.Text = "Red";
+            // 
+            // label13
+            // 
+            this.label13.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(3, 45);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(36, 13);
+            this.label13.TabIndex = 2;
+            this.label13.Text = "Green";
+            // 
+            // label14
+            // 
+            this.label14.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(11, 71);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(28, 13);
+            this.label14.TabIndex = 2;
+            this.label14.Text = "Blue";
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.tableLayoutPanel4.SetColumnSpan(this.label15, 2);
+            this.label15.Location = new System.Drawing.Point(3, 0);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(40, 13);
+            this.label15.TabIndex = 3;
+            this.label15.Text = "Colour:";
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(12, 164);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 3;
+            this.button1.Text = "Set colour";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // label16
+            // 
+            this.label16.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(5, 97);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(34, 13);
+            this.label16.TabIndex = 2;
+            this.label16.Text = "Alpha";
+            // 
+            // nudAlpha
+            // 
+            this.nudAlpha.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.nudAlpha.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.nudAlpha.Location = new System.Drawing.Point(45, 94);
+            this.nudAlpha.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.nudAlpha.Name = "nudAlpha";
+            this.nudAlpha.Size = new System.Drawing.Size(58, 20);
+            this.nudAlpha.TabIndex = 1;
+            // 
             // ddsPanel1
             // 
             this.ddsPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -521,31 +704,23 @@
             this.ddsPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.ddsPanel1.MaxSize = new System.Drawing.Size(0, 0);
             this.ddsPanel1.Name = "ddsPanel1";
-            this.ddsPanel1.Size = new System.Drawing.Size(417, 451);
+            this.ddsPanel1.Size = new System.Drawing.Size(417, 572);
             this.ddsPanel1.TabIndex = 0;
-            // 
-            // btnApply
-            // 
-            this.btnApply.Location = new System.Drawing.Point(12, 371);
-            this.btnApply.Name = "btnApply";
-            this.btnApply.Size = new System.Drawing.Size(75, 23);
-            this.btnApply.TabIndex = 5;
-            this.btnApply.Text = "Apply";
-            this.btnApply.UseVisualStyleBackColor = true;
-            this.btnApply.Click += new System.EventHandler(this.btnApply_Click);
             // 
             // HSVTest
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(567, 465);
+            this.ClientSize = new System.Drawing.Size(567, 586);
             this.Controls.Add(this.btnApply);
             this.Controls.Add(this.ckbBlend);
             this.Controls.Add(this.btnResetMask);
             this.Controls.Add(this.btnOpenMask);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.btnOpenImage);
             this.Controls.Add(this.tableLayoutPanel3);
             this.Controls.Add(this.tableLayoutPanel2);
+            this.Controls.Add(this.tableLayoutPanel4);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.ddsPanel1);
             this.Name = "HSVTest";
@@ -565,6 +740,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh2Hue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh2Saturation)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh2Value)).EndInit();
+            this.tableLayoutPanel4.ResumeLayout(false);
+            this.tableLayoutPanel4.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudRed)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudGreen)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudBlue)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudAlpha)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -602,5 +783,16 @@
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Button btnApply;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
+        private System.Windows.Forms.NumericUpDown nudRed;
+        private System.Windows.Forms.NumericUpDown nudGreen;
+        private System.Windows.Forms.NumericUpDown nudBlue;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.NumericUpDown nudAlpha;
     }
 }
