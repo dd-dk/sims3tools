@@ -694,15 +694,23 @@ namespace DdsFileTypePlugin
             m_pixelData = new byte[width * height * 4];
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < height; y++)
-                {
-                    m_pixelData[4 * (x * height + y) + 0] = r;
-                    m_pixelData[4 * (x * height + y) + 1] = g;
-                    m_pixelData[4 * (x * height + y) + 2] = b;
-                    m_pixelData[4 * (x * height + y) + 3] = a;
-                }
+                    setPixelRGBA(m_pixelData, 4 * (x * height + y), r, g, b, a);
 
             if (supportHSV)
                 hsvData = RGBHSV.ColorRGBA.ConvertToColorHSVAArray(m_pixelData);
+        }
+
+        void setPixelRGBA(byte[] pixelData, int offset, byte r, byte g, byte b, byte a)
+        {
+            pixelData[offset + 0] = r;
+            pixelData[offset + 1] = g;
+            pixelData[offset + 2] = b;
+            pixelData[offset + 3] = a;
+        }
+
+        void setPixelRGBA(byte[] pixelData, int offset, uint argb)
+        {
+            setPixelRGBA(pixelData, offset, (byte)((argb >> 16) & 0xff), (byte)((argb >> 8) & 0xff), (byte)(argb & 0xff), (byte)((argb >> 24) & 0xff));
         }
 
         /// <summary>
@@ -731,7 +739,7 @@ namespace DdsFileTypePlugin
         /// <param name="ch2Shift">A shift to apply to the image when the second channel of the mask is active.</param>
         /// <param name="ch3Shift">A shift to apply to the image when the third channel of the mask is active.</param>
         /// <param name="ch4Shift">A shift to apply to the image when the fourth channel of the mask is active.</param>
-        public void SetMask(DdsFile mask, RGBHSV.HSVShift ch1Shift, RGBHSV.HSVShift ch2Shift, RGBHSV.HSVShift ch3Shift, RGBHSV.HSVShift ch4Shift)
+        public void MaskedHSVShift(DdsFile mask, RGBHSV.HSVShift ch1Shift, RGBHSV.HSVShift ch2Shift, RGBHSV.HSVShift ch3Shift, RGBHSV.HSVShift ch4Shift)
         {
             if (!SupportsHSV) return;
 
@@ -766,7 +774,7 @@ namespace DdsFileTypePlugin
         /// <param name="ch2Shift">A shift to apply to the image when the second channel of the mask is active.</param>
         /// <param name="ch3Shift">A shift to apply to the image when the third channel of the mask is active.</param>
         /// <param name="ch4Shift">A shift to apply to the image when the fourth channel of the mask is active.</param>
-        public void SetMaskNoBlend(DdsFile mask, RGBHSV.HSVShift ch1Shift, RGBHSV.HSVShift ch2Shift, RGBHSV.HSVShift ch3Shift, RGBHSV.HSVShift ch4Shift)
+        public void MaskedHSVShiftNoBlend(DdsFile mask, RGBHSV.HSVShift ch1Shift, RGBHSV.HSVShift ch2Shift, RGBHSV.HSVShift ch3Shift, RGBHSV.HSVShift ch4Shift)
         {
             if (!SupportsHSV) return;
 
@@ -794,6 +802,33 @@ namespace DdsFileTypePlugin
                     if (mask.m_pixelData[i * 4 + 3] != 0) result[i] = hsvData[i].HSVShift(ch4Shift);
 
             hsvData = result;
+        }
+
+        /// <summary>
+        /// Set the colour of the image based on the channels in the <paramref name="mask"/>.
+        /// </summary>
+        /// <param name="mask">The <see cref="System.IO.Stream"/> containing the DDS image to use as a mask.</param>
+        /// <param name="ch1Colour">(Nullable) ARGB colour to the image when the first channel of the mask is active.</param>
+        /// <param name="ch2Colour">(Nullable) ARGB colour to the image when the second channel of the mask is active.</param>
+        /// <param name="ch3Colour">(Nullable) ARGB colour to the image when the third channel of the mask is active.</param>
+        /// <param name="ch4Colour">(Nullable) ARGB colour to the image when the fourth channel of the mask is active.</param>
+        public void MaskedSetColour(DdsFile mask, uint? ch1Colour, uint? ch2Colour, uint? ch3Colour, uint? ch4Colour)
+        {
+            if (ch1Colour.HasValue)
+                for (int i = 0; i < hsvData.Length; i++)
+                    if (mask.m_pixelData[i * 4 + 0] != 0) setPixelRGBA(m_pixelData, i * 4, ch1Colour.Value);
+
+            if (ch2Colour.HasValue)
+                for (int i = 0; i < hsvData.Length; i++)
+                    if (mask.m_pixelData[i * 4 + 1] != 0) setPixelRGBA(m_pixelData, i * 4, ch2Colour.Value);
+
+            if (ch3Colour.HasValue)
+                for (int i = 0; i < hsvData.Length; i++)
+                    if (mask.m_pixelData[i * 4 + 2] != 0) setPixelRGBA(m_pixelData, i * 4, ch3Colour.Value);
+
+            if (ch4Colour.HasValue)
+                for (int i = 0; i < hsvData.Length; i++)
+                    if (mask.m_pixelData[i * 4 + 3] != 0) setPixelRGBA(m_pixelData, i * 4, ch4Colour.Value);
         }
 
         /// <summary>
