@@ -15,7 +15,7 @@ namespace TestDDSPanel
             ddsPanel1.Fit = true;
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void btnSetColour_Click(object sender, EventArgs e)
         {
             int width = ddsPanel1.MaskSize != Size.Empty ? ddsPanel1.MaskSize.Width : 128;
             int height = ddsPanel1.MaskSize != Size.Empty ? ddsPanel1.MaskSize.Height : 128;
@@ -36,13 +36,12 @@ namespace TestDDSPanel
             ddsPanel1.HSVShift(hueShift.Value, saturationShift.Value, valueShift.Value);
         }
 
-        Stream mask = null;
         private void btnOpenMask_Click(object sender, EventArgs e)
         {
             DialogResult dr = openFileDialog1.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            mask = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read);
+            ddsPanel1.LoadMask(new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read));
         }
 
         private void btnResetMask_Click(object sender, EventArgs e)
@@ -50,23 +49,36 @@ namespace TestDDSPanel
             ddsPanel1.ClearMask();
             numMaskCh1Hue.Value = numMaskCh1Saturation.Value = numMaskCh1Value.Value =
                 numMaskCh2Hue.Value = numMaskCh2Saturation.Value = numMaskCh2Value.Value = 0;
-            btnApply_Click(null, null);
+            btnApplyShift_Click(null, null);
         }
 
-        private void btnApply_Click(object sender, EventArgs e)
+        private void btnApplyShift_Click(object sender, EventArgs e)
         {
-            if (mask == null) return;
+            if (!ddsPanel1.MaskLoaded) return;
 
-            mask.Position = 0;
-            ddsPanel1.ApplyMask(mask,
+            ddsPanel1.ApplyHSVShift(
                 new RGBHSV.HSVShift { h = (float)numMaskCh1Hue.Value, s = (float)numMaskCh1Saturation.Value, v = (float)numMaskCh1Value.Value, },
                 new RGBHSV.HSVShift { h = (float)numMaskCh2Hue.Value, s = (float)numMaskCh2Saturation.Value, v = (float)numMaskCh2Value.Value, },
                 RGBHSV.HSVShift.Empty, RGBHSV.HSVShift.Empty, ckbBlend.Checked);
 
             if (ddsPanel1.ImageSize.Width != ddsPanel1.MaskSize.Width || ddsPanel1.ImageSize.Height != ddsPanel1.MaskSize.Height)
             {
-                button1_Click(null, null);
+                btnSetColour_Click(null, null);
             }
+        }
+
+        uint GetColour(decimal r, decimal g, decimal b, decimal a)
+        {
+            return ((uint)a << 24) | ((uint)r << 16) | ((uint)g << 8) | (uint)b;
+        }
+
+        private void btnApplyColour_Click(object sender, EventArgs e)
+        {
+            if (!ddsPanel1.MaskLoaded) return;
+
+            ddsPanel1.ApplyColours(GetColour(nudCh1Red.Value, nudCh1Green.Value, nudCh1Blue.Value, nudCh1Alpha.Value),
+                GetColour(nudCh2Red.Value, nudCh2Green.Value, nudCh2Blue.Value, nudCh2Alpha.Value),
+                null, null);
         }
     }
 }

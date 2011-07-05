@@ -35,6 +35,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
             this.btnOpenImage = new System.Windows.Forms.Button();
             this.btnOpenMask = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
@@ -56,7 +57,7 @@
             this.label9 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
-            this.btnApply = new System.Windows.Forms.Button();
+            this.btnApplyShift = new System.Windows.Forms.Button();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.nudRed = new System.Windows.Forms.NumericUpDown();
             this.nudGreen = new System.Windows.Forms.NumericUpDown();
@@ -65,10 +66,31 @@
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.label15 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
             this.label16 = new System.Windows.Forms.Label();
             this.nudAlpha = new System.Windows.Forms.NumericUpDown();
+            this.btnSetColour = new System.Windows.Forms.Button();
             this.ddsPanel1 = new DDSPanel.DDSPanel();
+            this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
+            this.nudCh1Red = new System.Windows.Forms.NumericUpDown();
+            this.nudCh1Green = new System.Windows.Forms.NumericUpDown();
+            this.nudCh1Blue = new System.Windows.Forms.NumericUpDown();
+            this.label18 = new System.Windows.Forms.Label();
+            this.label19 = new System.Windows.Forms.Label();
+            this.label20 = new System.Windows.Forms.Label();
+            this.label21 = new System.Windows.Forms.Label();
+            this.label22 = new System.Windows.Forms.Label();
+            this.nudCh1Alpha = new System.Windows.Forms.NumericUpDown();
+            this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
+            this.nudCh2Red = new System.Windows.Forms.NumericUpDown();
+            this.nudCh2Green = new System.Windows.Forms.NumericUpDown();
+            this.nudCh2Blue = new System.Windows.Forms.NumericUpDown();
+            this.label23 = new System.Windows.Forms.Label();
+            this.label24 = new System.Windows.Forms.Label();
+            this.label25 = new System.Windows.Forms.Label();
+            this.label26 = new System.Windows.Forms.Label();
+            this.label27 = new System.Windows.Forms.Label();
+            this.nudCh2Alpha = new System.Windows.Forms.NumericUpDown();
+            this.btnApplyColour = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.hueShift)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.saturationShift)).BeginInit();
@@ -86,6 +108,16 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudGreen)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudBlue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudAlpha)).BeginInit();
+            this.tableLayoutPanel5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCh1Red)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCh1Green)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCh1Blue)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCh1Alpha)).BeginInit();
+            this.tableLayoutPanel6.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCh2Red)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCh2Green)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCh2Blue)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCh2Alpha)).BeginInit();
             this.SuspendLayout();
             // 
             // hueShift
@@ -97,7 +129,7 @@
             0,
             0,
             65536});
-            this.hueShift.Location = new System.Drawing.Point(45, 3);
+            this.hueShift.Location = new System.Drawing.Point(45, 16);
             this.hueShift.Maximum = new decimal(new int[] {
             1,
             0,
@@ -118,19 +150,21 @@
             this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Controls.Add(this.hueShift, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.saturationShift, 1, 1);
-            this.tableLayoutPanel1.Controls.Add(this.valueShift, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.label1, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.label2, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.label3, 0, 2);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(2, 193);
+            this.tableLayoutPanel1.Controls.Add(this.hueShift, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.saturationShift, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.valueShift, 1, 3);
+            this.tableLayoutPanel1.Controls.Add(this.label1, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.label2, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.label3, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.label17, 0, 0);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(114, 41);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 3;
+            this.tableLayoutPanel1.RowCount = 4;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(131, 79);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(131, 92);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
             // saturationShift
@@ -142,7 +176,7 @@
             0,
             0,
             65536});
-            this.saturationShift.Location = new System.Drawing.Point(45, 29);
+            this.saturationShift.Location = new System.Drawing.Point(45, 42);
             this.saturationShift.Maximum = new decimal(new int[] {
             1,
             0,
@@ -167,7 +201,7 @@
             0,
             0,
             65536});
-            this.valueShift.Location = new System.Drawing.Point(45, 55);
+            this.valueShift.Location = new System.Drawing.Point(45, 68);
             this.valueShift.Maximum = new decimal(new int[] {
             1,
             0,
@@ -187,7 +221,7 @@
             // 
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 6);
+            this.label1.Location = new System.Drawing.Point(3, 19);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(36, 13);
             this.label1.TabIndex = 2;
@@ -197,7 +231,7 @@
             // 
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(4, 32);
+            this.label2.Location = new System.Drawing.Point(4, 45);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(35, 13);
             this.label2.TabIndex = 2;
@@ -207,11 +241,21 @@
             // 
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(4, 59);
+            this.label3.Location = new System.Drawing.Point(4, 72);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(35, 13);
             this.label3.TabIndex = 2;
             this.label3.Text = "VShift";
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.tableLayoutPanel1.SetColumnSpan(this.label17, 2);
+            this.label17.Location = new System.Drawing.Point(3, 0);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(70, 13);
+            this.label17.TabIndex = 3;
+            this.label17.Text = "Overall shifts:";
             // 
             // btnOpenImage
             // 
@@ -225,7 +269,7 @@
             // 
             // btnOpenMask
             // 
-            this.btnOpenMask.Location = new System.Drawing.Point(12, 278);
+            this.btnOpenMask.Location = new System.Drawing.Point(12, 193);
             this.btnOpenMask.Name = "btnOpenMask";
             this.btnOpenMask.Size = new System.Drawing.Size(75, 23);
             this.btnOpenMask.TabIndex = 3;
@@ -252,7 +296,7 @@
             this.tableLayoutPanel2.Controls.Add(this.label5, 0, 2);
             this.tableLayoutPanel2.Controls.Add(this.label6, 0, 3);
             this.tableLayoutPanel2.Controls.Add(this.label7, 0, 0);
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(2, 330);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(2, 245);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 4;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -376,7 +420,7 @@
             // 
             // btnResetMask
             // 
-            this.btnResetMask.Location = new System.Drawing.Point(12, 555);
+            this.btnResetMask.Location = new System.Drawing.Point(139, 193);
             this.btnResetMask.Name = "btnResetMask";
             this.btnResetMask.Size = new System.Drawing.Size(75, 23);
             this.btnResetMask.TabIndex = 3;
@@ -387,7 +431,7 @@
             // ckbBlend
             // 
             this.ckbBlend.AutoSize = true;
-            this.ckbBlend.Location = new System.Drawing.Point(12, 307);
+            this.ckbBlend.Location = new System.Drawing.Point(12, 222);
             this.ckbBlend.Name = "ckbBlend";
             this.ckbBlend.Size = new System.Drawing.Size(96, 17);
             this.ckbBlend.TabIndex = 4;
@@ -406,7 +450,7 @@
             this.tableLayoutPanel3.Controls.Add(this.label9, 0, 2);
             this.tableLayoutPanel3.Controls.Add(this.label10, 0, 3);
             this.tableLayoutPanel3.Controls.Add(this.label11, 0, 0);
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(2, 428);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(2, 368);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 4;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -528,15 +572,15 @@
             this.label11.TabIndex = 3;
             this.label11.Text = "Ch2 Shift";
             // 
-            // btnApply
+            // btnApplyShift
             // 
-            this.btnApply.Location = new System.Drawing.Point(12, 526);
-            this.btnApply.Name = "btnApply";
-            this.btnApply.Size = new System.Drawing.Size(75, 23);
-            this.btnApply.TabIndex = 5;
-            this.btnApply.Text = "Apply";
-            this.btnApply.UseVisualStyleBackColor = true;
-            this.btnApply.Click += new System.EventHandler(this.btnApply_Click);
+            this.btnApplyShift.Location = new System.Drawing.Point(17, 491);
+            this.btnApplyShift.Name = "btnApplyShift";
+            this.btnApplyShift.Size = new System.Drawing.Size(75, 23);
+            this.btnApplyShift.TabIndex = 5;
+            this.btnApplyShift.Text = "Apply";
+            this.btnApplyShift.UseVisualStyleBackColor = true;
+            this.btnApplyShift.Click += new System.EventHandler(this.btnApplyShift_Click);
             // 
             // tableLayoutPanel4
             // 
@@ -657,16 +701,6 @@
             this.label15.TabIndex = 3;
             this.label15.Text = "Colour:";
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(12, 164);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 3;
-            this.button1.Text = "Set colour";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
             // label16
             // 
             this.label16.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -695,31 +729,348 @@
             this.nudAlpha.Size = new System.Drawing.Size(58, 20);
             this.nudAlpha.TabIndex = 1;
             // 
+            // btnSetColour
+            // 
+            this.btnSetColour.Location = new System.Drawing.Point(12, 164);
+            this.btnSetColour.Name = "btnSetColour";
+            this.btnSetColour.Size = new System.Drawing.Size(75, 23);
+            this.btnSetColour.TabIndex = 3;
+            this.btnSetColour.Text = "Set colour";
+            this.btnSetColour.UseVisualStyleBackColor = true;
+            this.btnSetColour.Click += new System.EventHandler(this.btnSetColour_Click);
+            // 
             // ddsPanel1
             // 
             this.ddsPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.ddsPanel1.Location = new System.Drawing.Point(141, 4);
+            this.ddsPanel1.Location = new System.Drawing.Point(248, 4);
             this.ddsPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.ddsPanel1.MaxSize = new System.Drawing.Size(0, 0);
             this.ddsPanel1.Name = "ddsPanel1";
-            this.ddsPanel1.Size = new System.Drawing.Size(417, 572);
+            this.ddsPanel1.Size = new System.Drawing.Size(507, 507);
             this.ddsPanel1.TabIndex = 0;
+            // 
+            // tableLayoutPanel5
+            // 
+            this.tableLayoutPanel5.ColumnCount = 2;
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel5.Controls.Add(this.nudCh1Red, 1, 1);
+            this.tableLayoutPanel5.Controls.Add(this.nudCh1Green, 1, 2);
+            this.tableLayoutPanel5.Controls.Add(this.nudCh1Blue, 1, 3);
+            this.tableLayoutPanel5.Controls.Add(this.label18, 0, 1);
+            this.tableLayoutPanel5.Controls.Add(this.label19, 0, 2);
+            this.tableLayoutPanel5.Controls.Add(this.label20, 0, 3);
+            this.tableLayoutPanel5.Controls.Add(this.label21, 0, 0);
+            this.tableLayoutPanel5.Controls.Add(this.label22, 0, 4);
+            this.tableLayoutPanel5.Controls.Add(this.nudCh1Alpha, 1, 4);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(139, 245);
+            this.tableLayoutPanel5.Name = "tableLayoutPanel5";
+            this.tableLayoutPanel5.RowCount = 5;
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(106, 117);
+            this.tableLayoutPanel5.TabIndex = 2;
+            // 
+            // nudCh1Red
+            // 
+            this.nudCh1Red.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.nudCh1Red.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.nudCh1Red.Location = new System.Drawing.Point(45, 16);
+            this.nudCh1Red.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.nudCh1Red.Name = "nudCh1Red";
+            this.nudCh1Red.Size = new System.Drawing.Size(58, 20);
+            this.nudCh1Red.TabIndex = 1;
+            // 
+            // nudCh1Green
+            // 
+            this.nudCh1Green.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.nudCh1Green.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.nudCh1Green.Location = new System.Drawing.Point(45, 42);
+            this.nudCh1Green.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.nudCh1Green.Name = "nudCh1Green";
+            this.nudCh1Green.Size = new System.Drawing.Size(58, 20);
+            this.nudCh1Green.TabIndex = 1;
+            // 
+            // nudCh1Blue
+            // 
+            this.nudCh1Blue.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.nudCh1Blue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.nudCh1Blue.Location = new System.Drawing.Point(45, 68);
+            this.nudCh1Blue.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.nudCh1Blue.Name = "nudCh1Blue";
+            this.nudCh1Blue.Size = new System.Drawing.Size(58, 20);
+            this.nudCh1Blue.TabIndex = 1;
+            // 
+            // label18
+            // 
+            this.label18.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(12, 19);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(27, 13);
+            this.label18.TabIndex = 2;
+            this.label18.Text = "Red";
+            // 
+            // label19
+            // 
+            this.label19.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(3, 45);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(36, 13);
+            this.label19.TabIndex = 2;
+            this.label19.Text = "Green";
+            // 
+            // label20
+            // 
+            this.label20.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(11, 71);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(28, 13);
+            this.label20.TabIndex = 2;
+            this.label20.Text = "Blue";
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.tableLayoutPanel5.SetColumnSpan(this.label21, 2);
+            this.label21.Location = new System.Drawing.Point(3, 0);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(62, 13);
+            this.label21.TabIndex = 3;
+            this.label21.Text = "Ch1 Colour:";
+            // 
+            // label22
+            // 
+            this.label22.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label22.AutoSize = true;
+            this.label22.Location = new System.Drawing.Point(5, 97);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(34, 13);
+            this.label22.TabIndex = 2;
+            this.label22.Text = "Alpha";
+            // 
+            // nudCh1Alpha
+            // 
+            this.nudCh1Alpha.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.nudCh1Alpha.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.nudCh1Alpha.Location = new System.Drawing.Point(45, 94);
+            this.nudCh1Alpha.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.nudCh1Alpha.Name = "nudCh1Alpha";
+            this.nudCh1Alpha.Size = new System.Drawing.Size(58, 20);
+            this.nudCh1Alpha.TabIndex = 1;
+            // 
+            // tableLayoutPanel6
+            // 
+            this.tableLayoutPanel6.ColumnCount = 2;
+            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel6.Controls.Add(this.nudCh2Red, 1, 1);
+            this.tableLayoutPanel6.Controls.Add(this.nudCh2Green, 1, 2);
+            this.tableLayoutPanel6.Controls.Add(this.nudCh2Blue, 1, 3);
+            this.tableLayoutPanel6.Controls.Add(this.label23, 0, 1);
+            this.tableLayoutPanel6.Controls.Add(this.label24, 0, 2);
+            this.tableLayoutPanel6.Controls.Add(this.label25, 0, 3);
+            this.tableLayoutPanel6.Controls.Add(this.label26, 0, 0);
+            this.tableLayoutPanel6.Controls.Add(this.label27, 0, 4);
+            this.tableLayoutPanel6.Controls.Add(this.nudCh2Alpha, 1, 4);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(139, 368);
+            this.tableLayoutPanel6.Name = "tableLayoutPanel6";
+            this.tableLayoutPanel6.RowCount = 5;
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(106, 117);
+            this.tableLayoutPanel6.TabIndex = 2;
+            // 
+            // nudCh2Red
+            // 
+            this.nudCh2Red.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.nudCh2Red.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.nudCh2Red.Location = new System.Drawing.Point(45, 16);
+            this.nudCh2Red.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.nudCh2Red.Name = "nudCh2Red";
+            this.nudCh2Red.Size = new System.Drawing.Size(58, 20);
+            this.nudCh2Red.TabIndex = 1;
+            // 
+            // nudCh2Green
+            // 
+            this.nudCh2Green.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.nudCh2Green.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.nudCh2Green.Location = new System.Drawing.Point(45, 42);
+            this.nudCh2Green.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.nudCh2Green.Name = "nudCh2Green";
+            this.nudCh2Green.Size = new System.Drawing.Size(58, 20);
+            this.nudCh2Green.TabIndex = 1;
+            // 
+            // nudCh2Blue
+            // 
+            this.nudCh2Blue.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.nudCh2Blue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.nudCh2Blue.Location = new System.Drawing.Point(45, 68);
+            this.nudCh2Blue.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.nudCh2Blue.Name = "nudCh2Blue";
+            this.nudCh2Blue.Size = new System.Drawing.Size(58, 20);
+            this.nudCh2Blue.TabIndex = 1;
+            // 
+            // label23
+            // 
+            this.label23.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(12, 19);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(27, 13);
+            this.label23.TabIndex = 2;
+            this.label23.Text = "Red";
+            // 
+            // label24
+            // 
+            this.label24.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(3, 45);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(36, 13);
+            this.label24.TabIndex = 2;
+            this.label24.Text = "Green";
+            // 
+            // label25
+            // 
+            this.label25.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label25.AutoSize = true;
+            this.label25.Location = new System.Drawing.Point(11, 71);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(28, 13);
+            this.label25.TabIndex = 2;
+            this.label25.Text = "Blue";
+            // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.tableLayoutPanel6.SetColumnSpan(this.label26, 2);
+            this.label26.Location = new System.Drawing.Point(3, 0);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(62, 13);
+            this.label26.TabIndex = 3;
+            this.label26.Text = "Ch2 Colour:";
+            // 
+            // label27
+            // 
+            this.label27.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(5, 97);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(34, 13);
+            this.label27.TabIndex = 2;
+            this.label27.Text = "Alpha";
+            // 
+            // nudCh2Alpha
+            // 
+            this.nudCh2Alpha.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.nudCh2Alpha.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.nudCh2Alpha.Location = new System.Drawing.Point(45, 94);
+            this.nudCh2Alpha.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.nudCh2Alpha.Name = "nudCh2Alpha";
+            this.nudCh2Alpha.Size = new System.Drawing.Size(58, 20);
+            this.nudCh2Alpha.TabIndex = 1;
+            // 
+            // btnApplyColour
+            // 
+            this.btnApplyColour.Location = new System.Drawing.Point(139, 491);
+            this.btnApplyColour.Name = "btnApplyColour";
+            this.btnApplyColour.Size = new System.Drawing.Size(75, 23);
+            this.btnApplyColour.TabIndex = 5;
+            this.btnApplyColour.Text = "Apply";
+            this.btnApplyColour.UseVisualStyleBackColor = true;
+            this.btnApplyColour.Click += new System.EventHandler(this.btnApplyColour_Click);
             // 
             // HSVTest
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(567, 586);
-            this.Controls.Add(this.btnApply);
+            this.ClientSize = new System.Drawing.Size(764, 521);
+            this.Controls.Add(this.btnApplyColour);
+            this.Controls.Add(this.btnApplyShift);
             this.Controls.Add(this.ckbBlend);
             this.Controls.Add(this.btnResetMask);
             this.Controls.Add(this.btnOpenMask);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btnSetColour);
             this.Controls.Add(this.btnOpenImage);
             this.Controls.Add(this.tableLayoutPanel3);
             this.Controls.Add(this.tableLayoutPanel2);
+            this.Controls.Add(this.tableLayoutPanel6);
+            this.Controls.Add(this.tableLayoutPanel5);
             this.Controls.Add(this.tableLayoutPanel4);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.ddsPanel1);
@@ -746,6 +1097,18 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudGreen)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudBlue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudAlpha)).EndInit();
+            this.tableLayoutPanel5.ResumeLayout(false);
+            this.tableLayoutPanel5.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCh1Red)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCh1Green)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCh1Blue)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCh1Alpha)).EndInit();
+            this.tableLayoutPanel6.ResumeLayout(false);
+            this.tableLayoutPanel6.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCh2Red)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCh2Green)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCh2Blue)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCh2Alpha)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -782,17 +1145,39 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.Button btnApply;
+        private System.Windows.Forms.Button btnApplyShift;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
         private System.Windows.Forms.NumericUpDown nudRed;
         private System.Windows.Forms.NumericUpDown nudGreen;
         private System.Windows.Forms.NumericUpDown nudBlue;
         private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnSetColour;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.NumericUpDown nudAlpha;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
+        private System.Windows.Forms.NumericUpDown nudCh1Red;
+        private System.Windows.Forms.NumericUpDown nudCh1Green;
+        private System.Windows.Forms.NumericUpDown nudCh1Blue;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.NumericUpDown nudCh1Alpha;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
+        private System.Windows.Forms.NumericUpDown nudCh2Red;
+        private System.Windows.Forms.NumericUpDown nudCh2Green;
+        private System.Windows.Forms.NumericUpDown nudCh2Blue;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.Label label25;
+        private System.Windows.Forms.Label label26;
+        private System.Windows.Forms.Label label27;
+        private System.Windows.Forms.NumericUpDown nudCh2Alpha;
+        private System.Windows.Forms.Button btnApplyColour;
     }
 }
