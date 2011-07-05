@@ -312,6 +312,18 @@ namespace DDSPanel
         }
 
         /// <summary>
+        /// Load a mask to use for HSV shifting or masked application of colours.
+        /// Clears any mask currently applied.
+        /// </summary>
+        /// <param name="mask"></param>
+        public void LoadMask(Stream mask)
+        {
+            ClearMask();
+            ddsMask = new DdsFile();
+            ddsMask.Load(mask, false);//only want the pixmap data
+        }
+
+        /// <summary>
         /// Apply <see cref="RGBHSV.HSVShift"/> values to the image, based on the
         /// channels in the <paramref name="mask"/>.
         /// </summary>
@@ -321,15 +333,59 @@ namespace DDSPanel
         /// <param name="ch3Shift">A shift to apply to the image when the third channel of the mask is active.</param>
         /// <param name="ch4Shift">A shift to apply to the image when the fourth channel of the mask is active.</param>
         /// <param name="blend">When true, each channel's shift adds; when false, each channel's shift overrides.</param>
-        public void ApplyMask(Stream mask, RGBHSV.HSVShift ch1Shift, RGBHSV.HSVShift ch2Shift, RGBHSV.HSVShift ch3Shift, RGBHSV.HSVShift ch4Shift, bool blend)
+        public void ApplyHSVShift(Stream mask, RGBHSV.HSVShift ch1Shift, RGBHSV.HSVShift ch2Shift, RGBHSV.HSVShift ch3Shift, RGBHSV.HSVShift ch4Shift, bool blend)
         {
             if (!SupportsHSV) return;
-            ddsMask = new DdsFile();
-            ddsMask.Load(mask, false);//only want the pixmap data
+            LoadMask(mask);
+            ApplyHSVShift(ch1Shift, ch2Shift, ch3Shift, ch4Shift, blend);
+        }
+
+        /// <summary>
+        /// Apply <see cref="RGBHSV.HSVShift"/> values to the image, based on the
+        /// channels in the currently loaded mask.
+        /// </summary>
+        /// <param name="ch1Shift">A shift to apply to the image when the first channel of the mask is active.</param>
+        /// <param name="ch2Shift">A shift to apply to the image when the second channel of the mask is active.</param>
+        /// <param name="ch3Shift">A shift to apply to the image when the third channel of the mask is active.</param>
+        /// <param name="ch4Shift">A shift to apply to the image when the fourth channel of the mask is active.</param>
+        /// <param name="blend">When true, each channel's shift adds; when false, each channel's shift overrides.</param>
+        public void ApplyHSVShift(RGBHSV.HSVShift ch1Shift, RGBHSV.HSVShift ch2Shift, RGBHSV.HSVShift ch3Shift, RGBHSV.HSVShift ch4Shift, bool blend)
+        {
+            if (!SupportsHSV || !MaskLoaded) return;
             if (blend)
-                ddsFile.SetMask(ddsMask, ch1Shift, ch2Shift, ch3Shift, ch4Shift);
+                ddsFile.MaskedHSVShift(ddsMask, ch1Shift, ch2Shift, ch3Shift, ch4Shift);
             else
-                ddsFile.SetMaskNoBlend(ddsMask, ch1Shift, ch2Shift, ch3Shift, ch4Shift);
+                ddsFile.MaskedHSVShiftNoBlend(ddsMask, ch1Shift, ch2Shift, ch3Shift, ch4Shift);
+
+            ckb_CheckedChanged(null, null);
+        }
+
+        /// <summary>
+        /// Set the colour of the image based on the channels in the <paramref name="mask"/>.
+        /// </summary>
+        /// <param name="mask">The <see cref="System.IO.Stream"/> containing the DDS image to use as a mask.</param>
+        /// <param name="ch1Colour">(Nullable) ARGB colour to the image when the first channel of the mask is active.</param>
+        /// <param name="ch2Colour">(Nullable) ARGB colour to the image when the second channel of the mask is active.</param>
+        /// <param name="ch3Colour">(Nullable) ARGB colour to the image when the third channel of the mask is active.</param>
+        /// <param name="ch4Colour">(Nullable) ARGB colour to the image when the fourth channel of the mask is active.</param>
+        public void ApplyColours(Stream mask, uint? ch1Colour, uint? ch2Colour, uint? ch3Colour, uint? ch4Colour)
+        {
+            if (!SupportsHSV) return;
+            LoadMask(mask);
+            ApplyColours(ch1Colour, ch2Colour, ch3Colour, ch4Colour);
+        }
+
+        /// <summary>
+        /// Set the colour of the image based on the channels in the currently loaded mask.
+        /// </summary>
+        /// <param name="ch1Colour">(Nullable) ARGB colour to the image when the first channel of the mask is active.</param>
+        /// <param name="ch2Colour">(Nullable) ARGB colour to the image when the second channel of the mask is active.</param>
+        /// <param name="ch3Colour">(Nullable) ARGB colour to the image when the third channel of the mask is active.</param>
+        /// <param name="ch4Colour">(Nullable) ARGB colour to the image when the fourth channel of the mask is active.</param>
+        public void ApplyColours(uint? ch1Colour, uint? ch2Colour, uint? ch3Colour, uint? ch4Colour)
+        {
+            if (!MaskLoaded) return;
+            ddsFile.MaskedSetColour(ddsMask, ch1Colour, ch2Colour, ch3Colour, ch4Colour);
 
             ckb_CheckedChanged(null, null);
         }
@@ -337,7 +393,7 @@ namespace DDSPanel
         /// <summary>
         /// Indicates whether a Mask has been applied (and not Cleared) to the current iamge.
         /// </summary>
-        public bool MaskApplied { get { return ddsMask != null; } }
+        public bool MaskLoaded { get { return ddsMask != null; } }
 
         /// <summary>
         /// The size of the current image (or <see cref="Size.Empty"/> if not loaded).
