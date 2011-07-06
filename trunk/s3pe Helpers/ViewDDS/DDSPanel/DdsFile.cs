@@ -23,6 +23,13 @@
 	TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 	SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
+/***************************************************************************
+ *  This derivative of the DDS File Type Plugin for Paint.Net is           *
+ *  distributed as part of sims3tools                                      *
+ *                                                                         *
+ *  Copyright (C) 2011 by Peter L Jones                                    *
+ *  pljones@users.sf.net                                                   *
+ ***************************************************************************/
 //------------------------------------------------------------------------------
 
 // If we want to do the alignment as per the (broken) DDS documentation, then we
@@ -38,293 +45,293 @@ using System.Drawing;
 
 namespace DdsFileTypePlugin
 {
-	enum DdsFileFormat
-	{
-		DDS_FORMAT_DXT1,
-		DDS_FORMAT_DXT3,
-		DDS_FORMAT_DXT5,
-		DDS_FORMAT_A8R8G8B8,
-		DDS_FORMAT_X8R8G8B8,
-		DDS_FORMAT_A8B8G8R8,
-		DDS_FORMAT_X8B8G8R8,
-		DDS_FORMAT_A1R5G5B5,
-		DDS_FORMAT_A4R4G4B4,
-		DDS_FORMAT_R8G8B8,
-		DDS_FORMAT_R5G6B5,
+    enum DdsFileFormat
+    {
+        DDS_FORMAT_DXT1,
+        DDS_FORMAT_DXT3,
+        DDS_FORMAT_DXT5,
+        DDS_FORMAT_A8R8G8B8,
+        DDS_FORMAT_X8R8G8B8,
+        DDS_FORMAT_A8B8G8R8,
+        DDS_FORMAT_X8B8G8R8,
+        DDS_FORMAT_A1R5G5B5,
+        DDS_FORMAT_A4R4G4B4,
+        DDS_FORMAT_R8G8B8,
+        DDS_FORMAT_R5G6B5,
 
-		DDS_FORMAT_INVALID,
-	}
+        DDS_FORMAT_INVALID,
+    }
 
-	class DdsPixelFormat
-	{
-		public enum PixelFormatFlags
-		{
-			DDS_FOURCC	=	0x00000004,
-			DDS_RGB		=	0x00000040,
-			DDS_RGBA	=	0x00000041,
-		}
+    class DdsPixelFormat
+    {
+        public enum PixelFormatFlags
+        {
+            DDS_FOURCC = 0x00000004,
+            DDS_RGB = 0x00000040,
+            DDS_RGBA = 0x00000041,
+        }
 
-	    public uint	m_size;
-	    public uint	m_flags;
-	    public uint	m_fourCC;
-	    public uint	m_rgbBitCount;
-	    public uint	m_rBitMask;
-	    public uint	m_gBitMask;
-	    public uint	m_bBitMask;
-	    public uint	m_aBitMask;
+        public uint m_size;
+        public uint m_flags;
+        public uint m_fourCC;
+        public uint m_rgbBitCount;
+        public uint m_rBitMask;
+        public uint m_gBitMask;
+        public uint m_bBitMask;
+        public uint m_aBitMask;
 
-		public uint	Size()
-		{
-			return 8 * 4;
-		}
+        public uint Size()
+        {
+            return 8 * 4;
+        }
 
-		public void Initialise( DdsFileFormat fileFormat )
-		{
-			m_size = Size();
-			switch( fileFormat )
-			{
-				case	DdsFileFormat.DDS_FORMAT_DXT1:
-				case	DdsFileFormat.DDS_FORMAT_DXT3:
-				case	DdsFileFormat.DDS_FORMAT_DXT5:
-				{
-					// DXT1/DXT3/DXT5
-					m_flags			= ( int )PixelFormatFlags.DDS_FOURCC;
-					m_rgbBitCount	=	0;
-					m_rBitMask		=	0;
-					m_gBitMask		=	0;
-					m_bBitMask		=	0;
-					m_aBitMask		=	0;
-					if ( fileFormat == DdsFileFormat.DDS_FORMAT_DXT1 ) m_fourCC = 0x31545844;	//"DXT1"
-					if ( fileFormat == DdsFileFormat.DDS_FORMAT_DXT3 ) m_fourCC = 0x33545844;	//"DXT1"
-					if ( fileFormat == DdsFileFormat.DDS_FORMAT_DXT5 ) m_fourCC = 0x35545844;	//"DXT1"
-					break;
-				}
-	
-				case	DdsFileFormat.DDS_FORMAT_A8R8G8B8:
-				{	
-					m_flags			= ( int )PixelFormatFlags.DDS_RGBA;
-					m_rgbBitCount	= 32;
-					m_fourCC		= 0;
-					m_rBitMask		= 0x00ff0000;
-					m_gBitMask		= 0x0000ff00;
-					m_bBitMask		= 0x000000ff;
-					m_aBitMask		= 0xff000000;
-					break;
-				}
+        public void Initialise(DdsFileFormat fileFormat)
+        {
+            m_size = Size();
+            switch (fileFormat)
+            {
+                case DdsFileFormat.DDS_FORMAT_DXT1:
+                case DdsFileFormat.DDS_FORMAT_DXT3:
+                case DdsFileFormat.DDS_FORMAT_DXT5:
+                    {
+                        // DXT1/DXT3/DXT5
+                        m_flags = (int)PixelFormatFlags.DDS_FOURCC;
+                        m_rgbBitCount = 0;
+                        m_rBitMask = 0;
+                        m_gBitMask = 0;
+                        m_bBitMask = 0;
+                        m_aBitMask = 0;
+                        if (fileFormat == DdsFileFormat.DDS_FORMAT_DXT1) m_fourCC = 0x31545844;	//"DXT1"
+                        if (fileFormat == DdsFileFormat.DDS_FORMAT_DXT3) m_fourCC = 0x33545844;	//"DXT1"
+                        if (fileFormat == DdsFileFormat.DDS_FORMAT_DXT5) m_fourCC = 0x35545844;	//"DXT1"
+                        break;
+                    }
 
-				case	DdsFileFormat.DDS_FORMAT_X8R8G8B8:
-				{	
-					m_flags			= ( int )PixelFormatFlags.DDS_RGB;
-					m_rgbBitCount	= 32;
-					m_fourCC		= 0;
-					m_rBitMask		= 0x00ff0000;
-					m_gBitMask		= 0x0000ff00;
-					m_bBitMask		= 0x000000ff;
-					m_aBitMask		= 0x00000000;
-					break;
-				}
+                case DdsFileFormat.DDS_FORMAT_A8R8G8B8:
+                    {
+                        m_flags = (int)PixelFormatFlags.DDS_RGBA;
+                        m_rgbBitCount = 32;
+                        m_fourCC = 0;
+                        m_rBitMask = 0x00ff0000;
+                        m_gBitMask = 0x0000ff00;
+                        m_bBitMask = 0x000000ff;
+                        m_aBitMask = 0xff000000;
+                        break;
+                    }
 
-				case	DdsFileFormat.DDS_FORMAT_A8B8G8R8:
-				{	
-					m_flags			= ( int )PixelFormatFlags.DDS_RGBA;
-					m_rgbBitCount	= 32;
-					m_fourCC		= 0;
-					m_rBitMask		= 0x000000ff;
-					m_gBitMask		= 0x0000ff00;
-					m_bBitMask		= 0x00ff0000;
-					m_aBitMask		= 0xff000000;
-					break;
-				}
+                case DdsFileFormat.DDS_FORMAT_X8R8G8B8:
+                    {
+                        m_flags = (int)PixelFormatFlags.DDS_RGB;
+                        m_rgbBitCount = 32;
+                        m_fourCC = 0;
+                        m_rBitMask = 0x00ff0000;
+                        m_gBitMask = 0x0000ff00;
+                        m_bBitMask = 0x000000ff;
+                        m_aBitMask = 0x00000000;
+                        break;
+                    }
 
-				case	DdsFileFormat.DDS_FORMAT_X8B8G8R8:
-				{	
-					m_flags			= ( int )PixelFormatFlags.DDS_RGB;
-					m_rgbBitCount	= 32;
-					m_fourCC		= 0;
-					m_rBitMask		= 0x000000ff;
-					m_gBitMask		= 0x0000ff00;
-					m_bBitMask		= 0x00ff0000;
-					m_aBitMask		= 0x00000000;
-					break;
-				}
+                case DdsFileFormat.DDS_FORMAT_A8B8G8R8:
+                    {
+                        m_flags = (int)PixelFormatFlags.DDS_RGBA;
+                        m_rgbBitCount = 32;
+                        m_fourCC = 0;
+                        m_rBitMask = 0x000000ff;
+                        m_gBitMask = 0x0000ff00;
+                        m_bBitMask = 0x00ff0000;
+                        m_aBitMask = 0xff000000;
+                        break;
+                    }
 
-				case	DdsFileFormat.DDS_FORMAT_A1R5G5B5:
-				{	
-					m_flags			= ( int )PixelFormatFlags.DDS_RGBA;
-					m_rgbBitCount	= 16;
-					m_fourCC		= 0;
-					m_rBitMask		= 0x00007c00;
-					m_gBitMask		= 0x000003e0;
-					m_bBitMask		= 0x0000001f;
-					m_aBitMask		= 0x00008000;
-					break;
-				}
+                case DdsFileFormat.DDS_FORMAT_X8B8G8R8:
+                    {
+                        m_flags = (int)PixelFormatFlags.DDS_RGB;
+                        m_rgbBitCount = 32;
+                        m_fourCC = 0;
+                        m_rBitMask = 0x000000ff;
+                        m_gBitMask = 0x0000ff00;
+                        m_bBitMask = 0x00ff0000;
+                        m_aBitMask = 0x00000000;
+                        break;
+                    }
 
-				case	DdsFileFormat.DDS_FORMAT_A4R4G4B4:
-				{	
-					m_flags			= ( int )PixelFormatFlags.DDS_RGBA;
-					m_rgbBitCount	= 16;
-					m_fourCC		= 0;
-					m_rBitMask		= 0x00000f00;
-					m_gBitMask		= 0x000000f0;
-					m_bBitMask		= 0x0000000f;
-					m_aBitMask		= 0x0000f000;
-					break;
-				}
+                case DdsFileFormat.DDS_FORMAT_A1R5G5B5:
+                    {
+                        m_flags = (int)PixelFormatFlags.DDS_RGBA;
+                        m_rgbBitCount = 16;
+                        m_fourCC = 0;
+                        m_rBitMask = 0x00007c00;
+                        m_gBitMask = 0x000003e0;
+                        m_bBitMask = 0x0000001f;
+                        m_aBitMask = 0x00008000;
+                        break;
+                    }
 
-				case	DdsFileFormat.DDS_FORMAT_R8G8B8:
-				{	
-					m_flags			= ( int )PixelFormatFlags.DDS_RGB;
-					m_fourCC		= 0;
-					m_rgbBitCount	= 24;
-					m_rBitMask		= 0x00ff0000;
-					m_gBitMask		= 0x0000ff00;
-					m_bBitMask		= 0x000000ff;
-					m_aBitMask		= 0x00000000;
-					break;
-				}
+                case DdsFileFormat.DDS_FORMAT_A4R4G4B4:
+                    {
+                        m_flags = (int)PixelFormatFlags.DDS_RGBA;
+                        m_rgbBitCount = 16;
+                        m_fourCC = 0;
+                        m_rBitMask = 0x00000f00;
+                        m_gBitMask = 0x000000f0;
+                        m_bBitMask = 0x0000000f;
+                        m_aBitMask = 0x0000f000;
+                        break;
+                    }
 
-				case	DdsFileFormat.DDS_FORMAT_R5G6B5:
-				{	
-					m_flags			= ( int )PixelFormatFlags.DDS_RGB;
-					m_fourCC		= 0;
-					m_rgbBitCount	= 16;
-					m_rBitMask		= 0x0000f800;
-					m_gBitMask		= 0x000007e0;
-					m_bBitMask		= 0x0000001f;
-					m_aBitMask		= 0x00000000;
-					break;
-				}
-		
-				default:
-					break;
-			}
-		}
+                case DdsFileFormat.DDS_FORMAT_R8G8B8:
+                    {
+                        m_flags = (int)PixelFormatFlags.DDS_RGB;
+                        m_fourCC = 0;
+                        m_rgbBitCount = 24;
+                        m_rBitMask = 0x00ff0000;
+                        m_gBitMask = 0x0000ff00;
+                        m_bBitMask = 0x000000ff;
+                        m_aBitMask = 0x00000000;
+                        break;
+                    }
 
-		public void Read( BinaryReader input )
-		{
-			this.m_size			= input.ReadUInt32();
-	    	this.m_flags		= input.ReadUInt32();
-	    	this.m_fourCC		= input.ReadUInt32();
+                case DdsFileFormat.DDS_FORMAT_R5G6B5:
+                    {
+                        m_flags = (int)PixelFormatFlags.DDS_RGB;
+                        m_fourCC = 0;
+                        m_rgbBitCount = 16;
+                        m_rBitMask = 0x0000f800;
+                        m_gBitMask = 0x000007e0;
+                        m_bBitMask = 0x0000001f;
+                        m_aBitMask = 0x00000000;
+                        break;
+                    }
+
+                default:
+                    break;
+            }
+        }
+
+        public void Read(BinaryReader input)
+        {
+            this.m_size = input.ReadUInt32();
+            this.m_flags = input.ReadUInt32();
+            this.m_fourCC = input.ReadUInt32();
             this.m_rgbBitCount = input.ReadUInt32();
             this.m_rBitMask = input.ReadUInt32();
             this.m_gBitMask = input.ReadUInt32();
             this.m_bBitMask = input.ReadUInt32();
             this.m_aBitMask = input.ReadUInt32();
-		}
+        }
 
-	}
+    }
 
-	class DdsHeader
-	{
-		public enum HeaderFlags
-		{
-			DDS_HEADER_FLAGS_TEXTURE	=	0x00001007,	// DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT 
-			DDS_HEADER_FLAGS_MIPMAP		=	0x00020000,	// DDSD_MIPMAPCOUNT
-			DDS_HEADER_FLAGS_VOLUME		=	0x00800000,	// DDSD_DEPTH
-			DDS_HEADER_FLAGS_PITCH		=	0x00000008,	// DDSD_PITCH
-			DDS_HEADER_FLAGS_LINEARSIZE	=	0x00080000,	// DDSD_LINEARSIZE
-		}
+    class DdsHeader
+    {
+        public enum HeaderFlags
+        {
+            DDS_HEADER_FLAGS_TEXTURE = 0x00001007,	// DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT 
+            DDS_HEADER_FLAGS_MIPMAP = 0x00020000,	// DDSD_MIPMAPCOUNT
+            DDS_HEADER_FLAGS_VOLUME = 0x00800000,	// DDSD_DEPTH
+            DDS_HEADER_FLAGS_PITCH = 0x00000008,	// DDSD_PITCH
+            DDS_HEADER_FLAGS_LINEARSIZE = 0x00080000,	// DDSD_LINEARSIZE
+        }
 
-		public enum SurfaceFlags
-		{
-			DDS_SURFACE_FLAGS_TEXTURE	=	0x00001000,	// DDSCAPS_TEXTURE
-			DDS_SURFACE_FLAGS_MIPMAP	=	0x00400008,	// DDSCAPS_COMPLEX | DDSCAPS_MIPMAP
-			DDS_SURFACE_FLAGS_CUBEMAP	=	0x00000008,	// DDSCAPS_COMPLEX
-		}
+        public enum SurfaceFlags
+        {
+            DDS_SURFACE_FLAGS_TEXTURE = 0x00001000,	// DDSCAPS_TEXTURE
+            DDS_SURFACE_FLAGS_MIPMAP = 0x00400008,	// DDSCAPS_COMPLEX | DDSCAPS_MIPMAP
+            DDS_SURFACE_FLAGS_CUBEMAP = 0x00000008,	// DDSCAPS_COMPLEX
+        }
 
-		public enum CubemapFlags
-		{
-			DDS_CUBEMAP_POSITIVEX		=	0x00000600, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEX
-			DDS_CUBEMAP_NEGATIVEX		=	0x00000a00, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEX
-			DDS_CUBEMAP_POSITIVEY		=	0x00001200, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEY
-			DDS_CUBEMAP_NEGATIVEY		=	0x00002200, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEY
-			DDS_CUBEMAP_POSITIVEZ		=	0x00004200, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEZ
-			DDS_CUBEMAP_NEGATIVEZ		=	0x00008200, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEZ
-		
-			DDS_CUBEMAP_ALLFACES		=	(	DDS_CUBEMAP_POSITIVEX | DDS_CUBEMAP_NEGATIVEX |
-												DDS_CUBEMAP_POSITIVEY | DDS_CUBEMAP_NEGATIVEY |
-												DDS_CUBEMAP_POSITIVEZ | DDS_CUBEMAP_NEGATIVEZ )
-		}
+        public enum CubemapFlags
+        {
+            DDS_CUBEMAP_POSITIVEX = 0x00000600, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEX
+            DDS_CUBEMAP_NEGATIVEX = 0x00000a00, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEX
+            DDS_CUBEMAP_POSITIVEY = 0x00001200, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEY
+            DDS_CUBEMAP_NEGATIVEY = 0x00002200, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEY
+            DDS_CUBEMAP_POSITIVEZ = 0x00004200, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEZ
+            DDS_CUBEMAP_NEGATIVEZ = 0x00008200, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEZ
 
-		public enum VolumeFlags
-		{
-			DDS_FLAGS_VOLUME			=	0x00200000,	// DDSCAPS2_VOLUME
-		}
+            DDS_CUBEMAP_ALLFACES = (DDS_CUBEMAP_POSITIVEX | DDS_CUBEMAP_NEGATIVEX |
+                                                DDS_CUBEMAP_POSITIVEY | DDS_CUBEMAP_NEGATIVEY |
+                                                DDS_CUBEMAP_POSITIVEZ | DDS_CUBEMAP_NEGATIVEZ)
+        }
 
-		public DdsHeader()
-		{
-			m_pixelFormat	= new DdsPixelFormat();
-		}
+        public enum VolumeFlags
+        {
+            DDS_FLAGS_VOLUME = 0x00200000,	// DDSCAPS2_VOLUME
+        }
 
-		public uint	Size()
-		{
-			return ( 18 * 4 ) + m_pixelFormat.Size() + ( 5 * 4 );
-		}
+        public DdsHeader()
+        {
+            m_pixelFormat = new DdsPixelFormat();
+        }
 
-		public uint				m_size;
-		public uint				m_headerFlags;
-		public uint				m_height;
-		public uint				m_width;
-		public uint				m_pitchOrLinearSize;
-		public uint				m_depth;
-		public uint				m_mipMapCount;
-		public uint				m_reserved1_0;
-		public uint				m_reserved1_1;
-		public uint				m_reserved1_2;
-		public uint				m_reserved1_3;
-		public uint				m_reserved1_4;
-		public uint				m_reserved1_5;
-		public uint				m_reserved1_6;
-		public uint				m_reserved1_7;
-		public uint				m_reserved1_8;
-		public uint				m_reserved1_9;
-		public uint				m_reserved1_10;
-		public DdsPixelFormat	m_pixelFormat;
-		public uint				m_surfaceFlags;
-		public uint				m_cubemapFlags;
-		public uint				m_reserved2_0;
-		public uint				m_reserved2_1;
-		public uint				m_reserved2_2;
+        public uint Size()
+        {
+            return (18 * 4) + m_pixelFormat.Size() + (5 * 4);
+        }
 
-		public void Read( System.IO.Stream input )
-		{
-            BinaryReader Utility = new BinaryReader(input);
+        public uint m_size;
+        public uint m_headerFlags;
+        public uint m_height;
+        public uint m_width;
+        public uint m_pitchOrLinearSize;
+        public uint m_depth;
+        public uint m_mipMapCount;
+        public uint m_reserved1_0;
+        public uint m_reserved1_1;
+        public uint m_reserved1_2;
+        public uint m_reserved1_3;
+        public uint m_reserved1_4;
+        public uint m_reserved1_5;
+        public uint m_reserved1_6;
+        public uint m_reserved1_7;
+        public uint m_reserved1_8;
+        public uint m_reserved1_9;
+        public uint m_reserved1_10;
+        public DdsPixelFormat m_pixelFormat;
+        public uint m_surfaceFlags;
+        public uint m_cubemapFlags;
+        public uint m_reserved2_0;
+        public uint m_reserved2_1;
+        public uint m_reserved2_2;
 
-			this.m_size					= Utility.ReadUInt32();
-	    	this.m_headerFlags			= Utility.ReadUInt32();
-	    	this.m_height				= Utility.ReadUInt32();
-	    	this.m_width				= Utility.ReadUInt32();
-	    	this.m_pitchOrLinearSize	= Utility.ReadUInt32();
-	    	this.m_depth				= Utility.ReadUInt32();
-	    	this.m_mipMapCount			= Utility.ReadUInt32();
-	    	this.m_reserved1_0			= Utility.ReadUInt32();
-	    	this.m_reserved1_1			= Utility.ReadUInt32();
-	    	this.m_reserved1_2			= Utility.ReadUInt32();
-	    	this.m_reserved1_3			= Utility.ReadUInt32();
-	    	this.m_reserved1_4			= Utility.ReadUInt32();
-	    	this.m_reserved1_5			= Utility.ReadUInt32();
-	    	this.m_reserved1_6			= Utility.ReadUInt32();
-	    	this.m_reserved1_7			= Utility.ReadUInt32();
-	    	this.m_reserved1_8			= Utility.ReadUInt32();
-	    	this.m_reserved1_9			= Utility.ReadUInt32();
-	    	this.m_reserved1_10			= Utility.ReadUInt32();
-            this.m_pixelFormat.Read(Utility);
-			this.m_surfaceFlags			= Utility.ReadUInt32( );
-			this.m_cubemapFlags			= Utility.ReadUInt32( );
-			this.m_reserved2_0			= Utility.ReadUInt32( );
-			this.m_reserved2_1			= Utility.ReadUInt32( );
-			this.m_reserved2_2			= Utility.ReadUInt32( );
+        public void Read(System.IO.Stream input)
+        {
+            BinaryReader br = new BinaryReader(input);
 
-		}
+            this.m_size = br.ReadUInt32();
+            this.m_headerFlags = br.ReadUInt32();
+            this.m_height = br.ReadUInt32();
+            this.m_width = br.ReadUInt32();
+            this.m_pitchOrLinearSize = br.ReadUInt32();
+            this.m_depth = br.ReadUInt32();
+            this.m_mipMapCount = br.ReadUInt32();
+            this.m_reserved1_0 = br.ReadUInt32();
+            this.m_reserved1_1 = br.ReadUInt32();
+            this.m_reserved1_2 = br.ReadUInt32();
+            this.m_reserved1_3 = br.ReadUInt32();
+            this.m_reserved1_4 = br.ReadUInt32();
+            this.m_reserved1_5 = br.ReadUInt32();
+            this.m_reserved1_6 = br.ReadUInt32();
+            this.m_reserved1_7 = br.ReadUInt32();
+            this.m_reserved1_8 = br.ReadUInt32();
+            this.m_reserved1_9 = br.ReadUInt32();
+            this.m_reserved1_10 = br.ReadUInt32();
+            this.m_pixelFormat.Read(br);
+            this.m_surfaceFlags = br.ReadUInt32();
+            this.m_cubemapFlags = br.ReadUInt32();
+            this.m_reserved2_0 = br.ReadUInt32();
+            this.m_reserved2_1 = br.ReadUInt32();
+            this.m_reserved2_2 = br.ReadUInt32();
+
+        }
 
 
-	}
+    }
 
     /// <summary>
     /// Represents an image encoded using one of the supported DDS mechanisms.
     /// </summary>
-    public class DdsFile
+    public class DdsFile : IDisposable
     {
         /// <summary>
         /// Converts the DDS encoded image into a <see cref="System.Drawing.Image"/> representation,
@@ -882,5 +889,15 @@ namespace DdsFileTypePlugin
         /// </summary>
         /// <seealso cref="SupportsHSV"/>
         public RGBHSV.HSVShift HSVShift { get { return hsvShift; } set { hsvShift = value; } }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            maskInEffect = false;
+            hsvData = null;
+            m_pixelData = null;
+        }
     }
 }
