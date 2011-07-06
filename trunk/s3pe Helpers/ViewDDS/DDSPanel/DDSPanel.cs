@@ -14,14 +14,15 @@ namespace DDSPanel
     public partial class DDSPanel : UserControl
     {
         #region Attributes
-        bool fit = false;
-        Size maxSize = new Size(Size.Empty.Width, Size.Empty.Height);
-        bool supportHSV = false;
-
         DdsFile ddsFile = new DdsFile();
         bool loaded = false;
-        DateTime now = DateTime.UtcNow;
+        bool supportHSV = false;
         Image image;
+
+        bool fit = false;
+        Size maxSize = new Size(Size.Empty.Width, Size.Empty.Height);
+
+        DateTime now = DateTime.UtcNow;
         RGBHSV.HSVShift hsvShift;
         DdsFile ddsMask = null;
         #endregion
@@ -34,8 +35,7 @@ namespace DDSPanel
             InitializeComponent();
         }
 
-
-        #region Designer properties
+        #region Properties
         /// <summary>
         /// When true, the image will resize to the control bounds.
         /// </summary>
@@ -92,9 +92,11 @@ namespace DDSPanel
         [DefaultValue(false), Description("Enables use of HSV-related methods.  Requires an increase in stored data whilst true.")]
         public bool SupportsHSV
         {
-            get { return ddsFile.SupportsHSV; }
+            get { return loaded && ddsFile.SupportsHSV; }
             set
             {
+                if (!loaded) return;
+
                 if (ddsFile.SupportsHSV != value)
                 {
                     ddsFile.SupportsHSV = value;
@@ -135,6 +137,24 @@ namespace DDSPanel
             get { return hsvShift.v; }
             set { if (hsvShift.v != value) { hsvShift.v = value; if (SupportsHSV) ckb_CheckedChanged(null, null); } }
         }
+
+        /// <summary>
+        /// Indicates whether a Mask has been applied (and not Cleared) to the current iamge.
+        /// </summary>
+        [ReadOnly(true), Description("Indicates whether a Mask has been applied (and not Cleared) to the current iamge.")]
+        public bool MaskLoaded { get { return ddsMask != null; } }
+
+        /// <summary>
+        /// The size of the current image (or <see cref="Size.Empty"/> if not loaded).
+        /// </summary>
+        [ReadOnly(true), Description("The size of the current image (or Size.Empty if not loaded).")]
+        public Size ImageSize { get { return loaded ? ddsFile.Size : Size.Empty; } }
+
+        /// <summary>
+        /// The size of the current mask (or <see cref="Size.Empty"/> if no mask).
+        /// </summary>
+        [ReadOnly(true), Description("The size of the current mask (or Size.Empty if no mask).")]
+        public Size MaskSize { get { return MaskLoaded ? ddsMask.Size : Size.Empty; } }
         #endregion
 
         #region Events
@@ -186,20 +206,39 @@ namespace DDSPanel
         /// <summary>
         /// Load a DDS image from a <see cref="System.IO.Stream"/>
         /// </summary>
-        /// <param name="stream">The <see cref="System.IO.Stream"/> containing the DDS image to display</param>
+        /// <param name="stream">The <see cref="System.IO.Stream"/> containing the DDS image to display,<br/>
+        /// - or -<br/>
+        /// <c>null</c> to clear the image and free resources.</param>
         /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
         public void DDSLoad(Stream stream, bool supportHSV = false)
         {
-            try
+            if (stream != null)
             {
-                this.Enabled = false;
-                Application.UseWaitCursor = true;
-                ddsFile.Load(stream, supportHSV);
-                loaded = true;
+                try
+                {
+                    this.Enabled = false;
+                    Application.UseWaitCursor = true;
+                    ddsFile.Load(stream, supportHSV);
+                    loaded = true;
+                }
+                finally { this.Enabled = true; Application.UseWaitCursor = false; }
+                this.supportHSV = supportHSV;
+                ckb_CheckedChanged(null, null);
             }
-            finally { this.Enabled = true; Application.UseWaitCursor = false; }
-            this.supportHSV = supportHSV;
-            ckb_CheckedChanged(null, null);
+            else
+                Clear();
+        }
+
+        /// <summary>
+        /// Sets the DDSPanel to an unloaded state, freeing resources.
+        /// </summary>
+        public void Clear()
+        {
+            ddsFile = new DdsFile();
+            loaded = false;
+            ddsMask = null;
+            pictureBox1.Image = image = null;
+            pictureBox1.Size = new Size(128, 128);
         }
 
         /// <summary>
@@ -222,6 +261,8 @@ namespace DDSPanel
         /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
         public void SetColour(uint colour, int width, int height, bool supportHSV = false)
         {
+            if (!loaded) return;
+
             try
             {
                 this.Enabled = false;
@@ -287,6 +328,8 @@ namespace DDSPanel
         /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
         public void SetColour(byte red, byte green, byte blue, byte alpha, int width, int height, bool supportHSV = false)
         {
+            if (!loaded) return;
+
             try
             {
                 this.Enabled = false;
@@ -321,6 +364,18 @@ namespace DDSPanel
             ClearMask();
             ddsMask = new DdsFile();
             ddsMask.Load(mask, false);//only want the pixmap data
+        }
+
+        /// <summary>
+        /// Removes any previously applied masked shifts
+        /// </summary>
+        public void ClearMask()
+        {
+            if (SupportsHSV)
+                ddsFile.ClearMask();
+            ddsMask = null;
+            if (loaded)
+                ckb_CheckedChanged(null, null);
         }
 
         /// <summary>
@@ -370,7 +425,7 @@ namespace DDSPanel
         /// <param name="ch4Colour">(Nullable) ARGB colour to the image when the fourth channel of the mask is active.</param>
         public void ApplyColours(Stream mask, uint? ch1Colour, uint? ch2Colour, uint? ch3Colour, uint? ch4Colour)
         {
-            if (!SupportsHSV) return;
+            if (!loaded) return;
             LoadMask(mask);
             ApplyColours(ch1Colour, ch2Colour, ch3Colour, ch4Colour);
         }
@@ -384,35 +439,9 @@ namespace DDSPanel
         /// <param name="ch4Colour">(Nullable) ARGB colour to the image when the fourth channel of the mask is active.</param>
         public void ApplyColours(uint? ch1Colour, uint? ch2Colour, uint? ch3Colour, uint? ch4Colour)
         {
-            if (!MaskLoaded) return;
+            if (!loaded || !MaskLoaded) return;
             ddsFile.MaskedSetColour(ddsMask, ch1Colour, ch2Colour, ch3Colour, ch4Colour);
 
-            ckb_CheckedChanged(null, null);
-        }
-
-        /// <summary>
-        /// Indicates whether a Mask has been applied (and not Cleared) to the current iamge.
-        /// </summary>
-        public bool MaskLoaded { get { return ddsMask != null; } }
-
-        /// <summary>
-        /// The size of the current image (or <see cref="Size.Empty"/> if not loaded).
-        /// </summary>
-        public Size ImageSize { get { return loaded ? ddsFile.Size : Size.Empty; } }
-
-        /// <summary>
-        /// The size of the current mask (or <see cref="Size.Empty"/> if no mask).
-        /// </summary>
-        public Size MaskSize { get { return ddsMask != null ? ddsMask.Size : Size.Empty; } }
-
-        /// <summary>
-        /// Removes any previously applied masked shifts
-        /// </summary>
-        public void ClearMask()
-        {
-            if (!SupportsHSV) return;
-            ddsFile.ClearMask();
-            ddsMask = null;
             ckb_CheckedChanged(null, null);
         }
         #endregion
