@@ -54,8 +54,6 @@ namespace TestDDSPanel
 
         private void btnApplyShift_Click(object sender, EventArgs e)
         {
-            if (!ddsPanel1.MaskLoaded) return;
-
             ddsPanel1.ApplyHSVShift(
                 new RGBHSV.HSVShift { h = (float)numMaskCh1Hue.Value, s = (float)numMaskCh1Saturation.Value, v = (float)numMaskCh1Value.Value, },
                 new RGBHSV.HSVShift { h = (float)numMaskCh2Hue.Value, s = (float)numMaskCh2Saturation.Value, v = (float)numMaskCh2Value.Value, },
@@ -74,11 +72,14 @@ namespace TestDDSPanel
 
         private void btnApplyColour_Click(object sender, EventArgs e)
         {
-            if (!ddsPanel1.MaskLoaded) return;
-
             ddsPanel1.ApplyColours(GetColour(nudCh1Red.Value, nudCh1Green.Value, nudCh1Blue.Value, nudCh1Alpha.Value),
                 GetColour(nudCh2Red.Value, nudCh2Green.Value, nudCh2Blue.Value, nudCh2Alpha.Value),
                 null, null);
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            ddsPanel1.Clear();
         }
     }
 }

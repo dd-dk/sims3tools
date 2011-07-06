@@ -91,6 +91,7 @@
             this.label27 = new System.Windows.Forms.Label();
             this.nudCh2Alpha = new System.Windows.Forms.NumericUpDown();
             this.btnApplyColour = new System.Windows.Forms.Button();
+            this.btnClear = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.hueShift)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.saturationShift)).BeginInit();
@@ -1055,6 +1056,16 @@
             this.btnApplyColour.UseVisualStyleBackColor = true;
             this.btnApplyColour.Click += new System.EventHandler(this.btnApplyColour_Click);
             // 
+            // btnClear
+            // 
+            this.btnClear.Location = new System.Drawing.Point(139, 12);
+            this.btnClear.Name = "btnClear";
+            this.btnClear.Size = new System.Drawing.Size(75, 23);
+            this.btnClear.TabIndex = 3;
+            this.btnClear.Text = "Clear";
+            this.btnClear.UseVisualStyleBackColor = true;
+            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
+            // 
             // HSVTest
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1066,6 +1077,7 @@
             this.Controls.Add(this.btnResetMask);
             this.Controls.Add(this.btnOpenMask);
             this.Controls.Add(this.btnSetColour);
+            this.Controls.Add(this.btnClear);
             this.Controls.Add(this.btnOpenImage);
             this.Controls.Add(this.tableLayoutPanel3);
             this.Controls.Add(this.tableLayoutPanel2);
@@ -1179,5 +1191,6 @@
         private System.Windows.Forms.Label label27;
         private System.Windows.Forms.NumericUpDown nudCh2Alpha;
         private System.Windows.Forms.Button btnApplyColour;
+        private System.Windows.Forms.Button btnClear;
     }
 }
