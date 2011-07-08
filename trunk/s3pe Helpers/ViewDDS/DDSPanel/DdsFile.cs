@@ -694,8 +694,9 @@ namespace DdsFileTypePlugin
         /// <param name="width">Width of image.</param>
         /// <param name="height">Height of image.</param>
         /// <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
-        public void SetColour(byte r, byte g, byte b, byte a, int width, int height, bool supportHSV)
+        public void CreateImage(byte r, byte g, byte b, byte a, int width, int height, bool supportHSV)
         {
+            m_header = new DdsHeader();
             m_header.m_width = (uint)width;
             m_header.m_height = (uint)height;
             m_pixelData = new byte[width * height * 4];
@@ -730,9 +731,9 @@ namespace DdsFileTypePlugin
         /// <param name="width">Width of image.</param>
         /// <param name="height">Height of image.</param>
         /// <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
-        public void SetColour(uint argb, int width, int height, bool supportHSV)
+        public void CreateImage(uint argb, int width, int height, bool supportHSV)
         {
-            SetColour((byte)((argb >> 16) & 0xff), (byte)((argb >> 8) & 0xff), (byte)(argb & 0xff), (byte)((argb >> 24) & 0xff), width, height, supportHSV);
+            CreateImage((byte)((argb >> 16) & 0xff), (byte)((argb >> 8) & 0xff), (byte)(argb & 0xff), (byte)((argb >> 24) & 0xff), width, height, supportHSV);
         }
 
         bool maskInEffect = false;
