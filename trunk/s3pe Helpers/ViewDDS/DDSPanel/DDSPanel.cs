@@ -261,8 +261,6 @@ namespace DDSPanel
         /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
         public void SetColour(uint colour, int width, int height, bool supportHSV = false)
         {
-            if (!loaded) return;
-
             try
             {
                 this.Enabled = false;
@@ -271,6 +269,8 @@ namespace DDSPanel
                 loaded = true;
             }
             finally { this.Enabled = true; Application.UseWaitCursor = false; }
+
+            if (!loaded) return;
             this.supportHSV = supportHSV;
             ckb_CheckedChanged(null, null);
         }
@@ -328,8 +328,6 @@ namespace DDSPanel
         /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
         public void SetColour(byte red, byte green, byte blue, byte alpha, int width, int height, bool supportHSV = false)
         {
-            if (!loaded) return;
-
             try
             {
                 this.Enabled = false;
@@ -338,6 +336,8 @@ namespace DDSPanel
                 loaded = true;
             }
             finally { this.Enabled = true; Application.UseWaitCursor = false; }
+
+            if (!loaded) return;
             this.supportHSV = supportHSV;
             ckb_CheckedChanged(null, null);
         }
