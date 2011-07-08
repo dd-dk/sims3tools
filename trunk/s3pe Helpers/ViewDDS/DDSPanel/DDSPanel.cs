@@ -1,4 +1,23 @@
-﻿using System;
+﻿/***************************************************************************
+ *  Copyright (C) 2011 by Peter L Jones                                    *
+ *  pljones@users.sf.net                                                   *
+ *                                                                         *
+ *  This file is part of the Sims 3 Package Interface (s3pi)               *
+ *                                                                         *
+ *  s3pi is free software: you can redistribute it and/or modify           *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  s3pi is distributed in the hope that it will be useful,                *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with s3pi.  If not, see <http://www.gnu.org/licenses/>.          *
+ ***************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -155,6 +174,12 @@ namespace DDSPanel
         /// </summary>
         [ReadOnly(true), Description("The size of the current mask (or Size.Empty if no mask).")]
         public Size MaskSize { get { return MaskLoaded ? ddsMask.Size : Size.Empty; } }
+
+        /// <summary>
+        /// Returns the image that is displayed by the DDSPanel.
+        /// </summary>
+        [ReadOnly(true), Description("Returns the image that is displayed by the DDSPanel")]
+        public Image Image { get { return pictureBox1.Image; } }
         #endregion
 
         #region Events
@@ -204,7 +229,9 @@ namespace DDSPanel
 
         #region Methods
         /// <summary>
-        /// Load a DDS image from a <see cref="System.IO.Stream"/>
+        /// Load a DDS image from a <see cref="System.IO.Stream"/>;
+        /// if <paramref name="supportHSV"/> is passed and true (default is false), the image will
+        /// support HSV shift operations.
         /// </summary>
         /// <param name="stream">The <see cref="System.IO.Stream"/> containing the DDS image to display,<br/>
         /// - or -<br/>
@@ -242,30 +269,35 @@ namespace DDSPanel
         }
 
         /// <summary>
-        /// Sets the colour of the image.
+        /// Creates an image of a specified <paramref name="colour"/> and <paramref name="size"/>;
+        /// if <paramref name="supportHSV"/> is passed and true (default is false), the image will
+        /// support HSV shift operations.
         /// </summary>
         /// <param name="colour">ARGB colour.</param>
         /// <param name="size">Size of image.</param>
         /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
-        public void SetColour(uint colour, Size size, bool supportHSV = false)
+        public void CreateImage(uint colour, Size size, bool supportHSV = false)
         {
-            SetColour(colour, size.Width, size.Height, supportHSV);
+            CreateImage(colour, size.Width, size.Height, supportHSV);
         }
 
         /// <summary>
-        /// Sets the colour of the image.  Alpha will be 255.
+        /// Creates an image of a specified <paramref name="colour"/> and given
+        /// <paramref name="width"/> and <paramref name="height"/>;
+        /// if <paramref name="supportHSV"/> is passed and true (default is false), the image will
+        /// support HSV shift operations.
         /// </summary>
         /// <param name="colour">ARGB colour.</param>
         /// <param name="width">Width of image.</param>
         /// <param name="height">Height of image.</param>
         /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
-        public void SetColour(uint colour, int width, int height, bool supportHSV = false)
+        public void CreateImage(uint colour, int width, int height, bool supportHSV = false)
         {
             try
             {
                 this.Enabled = false;
                 Application.UseWaitCursor = true;
-                ddsFile.SetColour(colour, width, height, supportHSV);
+                ddsFile.CreateImage(colour, width, height, supportHSV);
                 loaded = true;
             }
             finally { this.Enabled = true; Application.UseWaitCursor = false; }
@@ -276,20 +308,25 @@ namespace DDSPanel
         }
 
         /// <summary>
-        /// Sets the colour of the image.  Alpha will be 255.
+        /// Creates an image of a specified colour (with alpha set to full on) and <paramref name="size"/>;
+        /// if <paramref name="supportHSV"/> is passed and true (default is false), the image will
+        /// support HSV shift operations.
         /// </summary>
         /// <param name="red">Amount of red per pixel.</param>
         /// <param name="green">Amount of green per pixel.</param>
         /// <param name="blue">Amount of blue per pixel.</param>
         /// <param name="size">Size of image.</param>
         /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
-        public void SetColour(byte red, byte green, byte blue, Size size, bool supportHSV = false)
+        public void CreateImage(byte red, byte green, byte blue, Size size, bool supportHSV = false)
         {
-            SetColour(red, green, blue, 255, size.Width, size.Height, supportHSV);
+            CreateImage(red, green, blue, 255, size.Width, size.Height, supportHSV);
         }
 
         /// <summary>
-        /// Sets the colour of the image.  Alpha will be 255.
+        /// Creates an image of a specified colour (with alpha set to full on) and given
+        /// <paramref name="width"/> and <paramref name="height"/>;
+        /// if <paramref name="supportHSV"/> is passed and true (default is false), the image will
+        /// support HSV shift operations.
         /// </summary>
         /// <param name="red">Amount of red per pixel.</param>
         /// <param name="green">Amount of green per pixel.</param>
@@ -297,13 +334,15 @@ namespace DDSPanel
         /// <param name="width">Width of image.</param>
         /// <param name="height">Height of image.</param>
         /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
-        public void SetColour(byte red, byte green, byte blue, int width, int height, bool supportHSV = false)
+        public void CreateImage(byte red, byte green, byte blue, int width, int height, bool supportHSV = false)
         {
-            SetColour(red, green, blue, 255, width, height, supportHSV);
+            CreateImage(red, green, blue, 255, width, height, supportHSV);
         }
 
         /// <summary>
-        /// Sets the colour of the image.
+        /// Creates an image of a specified colour and <paramref name="size"/>;
+        /// if <paramref name="supportHSV"/> is passed and true (default is false), the image will
+        /// support HSV shift operations.
         /// </summary>
         /// <param name="red">Amount of red per pixel.</param>
         /// <param name="green">Amount of green per pixel.</param>
@@ -311,13 +350,16 @@ namespace DDSPanel
         /// <param name="alpha">Amount of alpha per pixel.</param>
         /// <param name="size">Size of image.</param>
         /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
-        public void SetColour(byte red, byte green, byte blue, byte alpha, Size size, bool supportHSV = false)
+        public void CreateImage(byte red, byte green, byte blue, byte alpha, Size size, bool supportHSV = false)
         {
-            SetColour(red, green, blue, alpha, size.Width, size.Height, supportHSV);
+            CreateImage(red, green, blue, alpha, size.Width, size.Height, supportHSV);
         }
 
         /// <summary>
-        /// Sets the colour of the image.
+        /// Creates an image of a specified colour and given
+        /// <paramref name="width"/> and <paramref name="height"/>;
+        /// if <paramref name="supportHSV"/> is passed and true (default is false), the image will
+        /// support HSV shift operations.
         /// </summary>
         /// <param name="red">Amount of red per pixel.</param>
         /// <param name="green">Amount of green per pixel.</param>
@@ -326,13 +368,13 @@ namespace DDSPanel
         /// <param name="width">Width of image.</param>
         /// <param name="height">Height of image.</param>
         /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
-        public void SetColour(byte red, byte green, byte blue, byte alpha, int width, int height, bool supportHSV = false)
+        public void CreateImage(byte red, byte green, byte blue, byte alpha, int width, int height, bool supportHSV = false)
         {
             try
             {
                 this.Enabled = false;
                 Application.UseWaitCursor = true;
-                ddsFile.SetColour(red, green, blue, alpha, width, height, supportHSV);
+                ddsFile.CreateImage(red, green, blue, alpha, width, height, supportHSV);
                 loaded = true;
             }
             finally { this.Enabled = true; Application.UseWaitCursor = false; }
@@ -376,6 +418,34 @@ namespace DDSPanel
             ddsMask = null;
             if (loaded)
                 ckb_CheckedChanged(null, null);
+        }
+
+        /// <summary>
+        /// Creates a mask with given <paramref name="maskChannels"/> active and of given <paramref name="size"/>.
+        /// </summary>
+        /// <param name="maskChannels">Which channels in the mask should be activated.</param>
+        /// <param name="size">Size of image.</param>
+        public void CreateMask(MaskChannel maskChannels, Size size)
+        {
+            CreateMask(maskChannels, size.Width, size.Height);
+        }
+
+        /// <summary>
+        /// Creates a mask with given <paramref name="maskChannels"/> active and of given <paramref name="width"/> and <paramref name="height"/>.
+        /// </summary>
+        /// <param name="maskChannels">Which channels in the mask should be activated.</param>
+        /// <param name="width">Width of image.</param>
+        /// <param name="height">Height of image.</param>
+        public void CreateMask(MaskChannel maskChannels, int width, int height)
+        {
+            ClearMask();
+            ddsMask = new DdsFile();
+            ddsMask.CreateImage(
+                MaskChannelToByte(maskChannels, MaskChannel.C1),
+                MaskChannelToByte(maskChannels, MaskChannel.C2),
+                MaskChannelToByte(maskChannels, MaskChannel.C3),
+                MaskChannelToByte(maskChannels, MaskChannel.C4),
+                width, height, false);
         }
 
         /// <summary>
@@ -443,6 +513,32 @@ namespace DDSPanel
             ddsFile.MaskedSetColour(ddsMask, ch1Colour, ch2Colour, ch3Colour, ch4Colour);
 
             ckb_CheckedChanged(null, null);
+        }
+        #endregion
+
+        #region Enumerations
+        /// <summary>
+        /// Used to indicate which channels in a mask should be activated when creating a new mask.
+        /// </summary>
+        [Flags]
+        public enum MaskChannel
+        {
+            /// <summary>
+            /// Activates channel 1 ("Red")
+            /// </summary>
+            C1,
+            /// <summary>
+            /// Activates channel 2 ("Green")
+            /// </summary>
+            C2,
+            /// <summary>
+            /// Activates channel 3 ("Blue")
+            /// </summary>
+            C3,
+            /// <summary>
+            /// Activates channel 4 ("Alpha")
+            /// </summary>
+            C4,
         }
         #endregion
 
@@ -518,6 +614,8 @@ namespace DDSPanel
             timer1.Enabled = false;
             pictureBox1.Image = doResize();
         }
+
+        byte MaskChannelToByte(MaskChannel value, MaskChannel test, byte bTrue = 255, byte bFalse = 0) { return (value & test) != 0 ? bTrue : bFalse; }
         #endregion
     }
 }
