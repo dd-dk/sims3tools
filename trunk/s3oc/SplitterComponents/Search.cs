@@ -47,6 +47,7 @@ namespace ObjectCloner.SplitterComponents
             Search_LoadListViewSettings();
             cbCatalogType.Items.AddRange(new string[] {
                 "Any",
+                "CAS Part",
                 "Fence", "Stairs", "Proxy Product", "Terrain Geometry Brush",
                 "Railing", "Terrain Paint Brush", "Fireplace", "Terrain Water Brush",
                 "Fountain / Pool",
@@ -174,6 +175,20 @@ namespace ObjectCloner.SplitterComponents
         private void tbText_TextChanged(object sender, EventArgs e)
         {
             btnSearch.Enabled = allowSearch();
+        }
+
+        private void cbCatalogType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (SelectedCatalogType == CatalogType.CAS_Part)
+            {
+                ckbObjectName.Enabled = ckbObjectDesc.Enabled = ckbCatalogName.Enabled = ckbCatalogDesc.Enabled = false;
+                rb1English.Enabled = rb1All.Enabled = false;
+            }
+            else
+            {
+                ckbObjectName.Enabled = ckbObjectDesc.Enabled = ckbCatalogName.Enabled = ckbCatalogDesc.Enabled = true;
+                rb1English.Enabled = rb1All.Enabled = true;
+            }
         }
 
         private bool allowSearch()
@@ -493,13 +508,14 @@ namespace ObjectCloner.SplitterComponents
                         #endregion
 
                         #region Fetch STBLs
-                        if (criteria.catalogName || criteria.catalogDesc)
-                        {
-                            updateProgress(true, String.Format("Retrieving string tables for package {0} of {1}...", p + 1, FileTable.fb0.Count), true, -1, false, 0);
-                            stbls = ppt.FindAll(rie => rie.ResourceType == 0x220557DA && (criteria.allLanguages || rie.Instance >> 56 == 0x00))
-                                .ConvertAll<IDictionary<ulong, string>>(sr => sr.Resource as IDictionary<ulong, string>);
-                            if (stopSearch) return;
-                        }
+                        if (criteria.catalogType!= CatalogType.CAS_Part)
+                            if (criteria.catalogName || criteria.catalogDesc)
+                            {
+                                updateProgress(true, String.Format("Retrieving string tables for package {0} of {1}...", p + 1, FileTable.fb0.Count), true, -1, false, 0);
+                                stbls = ppt.FindAll(rie => rie.ResourceType == 0x220557DA && (criteria.allLanguages || rie.Instance >> 56 == 0x00))
+                                    .ConvertAll<IDictionary<ulong, string>>(sr => sr.Resource as IDictionary<ulong, string>);
+                                if (stopSearch) return;
+                            }
                         #endregion
 
                         // Find the right type of resource to search
@@ -551,6 +567,9 @@ namespace ObjectCloner.SplitterComponents
             {
                 match = match.ResourceIndexEntry.ResourceType == (uint)CatalogType.ModularResource ? MainForm.ItemForTGIBlock0(match) : match;
                 if (criteria.resourceName && MatchResourceName(match)) return true;
+                
+                if (criteria.catalogType == CatalogType.CAS_Part) return false;
+
                 if (criteria.objectName && MatchObjectName(match)) return true;
                 if (criteria.objectDesc && MatchObjectDesc(match)) return true;
                 if (criteria.catalogName && MatchCatalogName(match)) return true;

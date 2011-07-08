@@ -37,6 +37,9 @@
             this.Path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.searchContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.scmCopyRK = new System.Windows.Forms.ToolStripMenuItem();
+            this.scmClone = new System.Windows.Forms.ToolStripMenuItem();
+            this.scmFix = new System.Windows.Forms.ToolStripMenuItem();
+            this.scmEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.tlpSearch = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.cbCatalogType = new System.Windows.Forms.ComboBox();
@@ -56,9 +59,6 @@
             this.tbText = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.scmClone = new System.Windows.Forms.ToolStripMenuItem();
-            this.scmFix = new System.Windows.Forms.ToolStripMenuItem();
-            this.scmEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.searchContextMenu.SuspendLayout();
             this.tlpSearch.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -133,6 +133,29 @@
             this.scmCopyRK.Text = "&Copy ResourceKey";
             this.scmCopyRK.Click += new System.EventHandler(this.scmCopyRK_Click);
             // 
+            // scmClone
+            // 
+            this.scmClone.Name = "scmClone";
+            this.scmClone.ShortcutKeyDisplayString = "Enter";
+            this.scmClone.Size = new System.Drawing.Size(204, 22);
+            this.scmClone.Text = "Clone";
+            this.scmClone.Click += new System.EventHandler(this.scmClone_Click);
+            // 
+            // scmFix
+            // 
+            this.scmFix.Name = "scmFix";
+            this.scmFix.Size = new System.Drawing.Size(204, 22);
+            this.scmFix.Text = "&Open package";
+            this.scmFix.Click += new System.EventHandler(this.scmFix_Click);
+            // 
+            // scmEdit
+            // 
+            this.scmEdit.Name = "scmEdit";
+            this.scmEdit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
+            this.scmEdit.Size = new System.Drawing.Size(204, 22);
+            this.scmEdit.Text = "Open in &Editor";
+            this.scmEdit.Click += new System.EventHandler(this.scmEdit_Click);
+            // 
             // tlpSearch
             // 
             this.tlpSearch.ColumnCount = 4;
@@ -189,6 +212,7 @@
             this.cbCatalogType.Name = "cbCatalogType";
             this.cbCatalogType.Size = new System.Drawing.Size(527, 21);
             this.cbCatalogType.TabIndex = 1;
+            this.cbCatalogType.SelectedIndexChanged += new System.EventHandler(this.cbCatalogType_SelectedIndexChanged);
             // 
             // btnSearch
             // 
@@ -388,29 +412,6 @@
             this.label3.Size = new System.Drawing.Size(75, 13);
             this.label3.TabIndex = 5;
             this.label3.Text = "Kind of object:";
-            // 
-            // scmClone
-            // 
-            this.scmClone.Name = "scmClone";
-            this.scmClone.ShortcutKeyDisplayString = "Enter";
-            this.scmClone.Size = new System.Drawing.Size(204, 22);
-            this.scmClone.Text = "Clone";
-            this.scmClone.Click += new System.EventHandler(this.scmClone_Click);
-            // 
-            // scmFix
-            // 
-            this.scmFix.Name = "scmFix";
-            this.scmFix.Size = new System.Drawing.Size(204, 22);
-            this.scmFix.Text = "&Open package";
-            this.scmFix.Click += new System.EventHandler(this.scmFix_Click);
-            // 
-            // scmEdit
-            // 
-            this.scmEdit.Name = "scmEdit";
-            this.scmEdit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
-            this.scmEdit.Size = new System.Drawing.Size(204, 22);
-            this.scmEdit.Text = "Open in &Editor";
-            this.scmEdit.Click += new System.EventHandler(this.scmEdit_Click);
             // 
             // Search
             // 

@@ -32,6 +32,7 @@ namespace ObjectCloner
         Dictionary<string, IResourceKey> rkList;
         PathPackageTuple target = null;
         bool compress;
+        bool addSTBLs;
         bool padSTBLs;
         bool zeroSTBLIID;
         List<Dictionary<String, TypedValue>> commonResources;
@@ -43,7 +44,7 @@ namespace ObjectCloner
         public delegate void SaveListComplete(bool complete);
 
         public SaveList(MainForm mainForm, SpecificResource selectedItem, Dictionary<string, IResourceKey> rkList,
-            PathPackageTuple target, bool compress, bool padSTBLs, bool zeroSTBLIID, List<Dictionary<String, TypedValue>> commonResources,
+            PathPackageTuple target, bool compress, bool addSTBLs, bool padSTBLs, bool zeroSTBLIID, List<Dictionary<String, TypedValue>> commonResources,
                 MainForm.updateProgressCallback updateProgressCB, StopSavingCallback stopSavingCB, SaveListComplete savingCompleteCB)
         {
             this.mainForm = mainForm;
@@ -51,6 +52,7 @@ namespace ObjectCloner
             this.rkList = rkList;
             this.target = target;
             this.compress = compress;
+            this.addSTBLs = addSTBLs;
             this.padSTBLs = padSTBLs;
             this.zeroSTBLIID = zeroSTBLIID;
             this.commonResources = commonResources;
@@ -165,7 +167,8 @@ namespace ObjectCloner
                 #endregion
 
                 if (stopSaving) return;
-                AddSTBLs(newnamemap);
+                if (addSTBLs)
+                    AddSTBLs(newnamemap);
 
                 if (stopSaving) return;
                 updateProgress(true, "Committing new name map... ", true, 0, true, 0);

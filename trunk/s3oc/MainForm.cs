@@ -481,7 +481,8 @@ namespace ObjectCloner
         private void btnStart_Click(object sender, EventArgs e)
         {
             Diagnostics.Log("btnStart_Click");
-            fillOverviewUpdateImage(selectedItem);
+            if (tabControl1.Contains(tpMain))
+                fillOverviewUpdateImage(selectedItem);
             TabEnable(true);
             DisplayOptions();
         }
@@ -559,7 +560,7 @@ namespace ObjectCloner
             if (searchPane != null)
                 mode = Mode.FromGame;
 
-            cloneFixOptions = new CloneFixOptions(this, mode == Mode.FromGame, hasOBJDs(), itemName == null || itemDesc == null);
+            cloneFixOptions = new CloneFixOptions(this, mode == Mode.FromGame, selectedItem.CType == CatalogType.CAS_Part, hasOBJDs(), itemName == null || itemDesc == null);
             cloneFixOptions.CancelClicked += new EventHandler(cloneFixOptions_CancelClicked);
             cloneFixOptions.StartClicked += new EventHandler(cloneFixOptions_StartClicked);
 
@@ -936,31 +937,60 @@ namespace ObjectCloner
                 if (resourceType == CatalogType.ModularResource) resourceType = CatalogType.CatalogObject;//Modular Resources - display OBJD0
 
                 IResource res = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x" + ((uint)resourceType).ToString("X8"));
-                this.tabControl1.Controls.Remove(this.tpDetail);
-                if (tabType == CatalogType.CatalogObject || tabType == CatalogType.CatalogTerrainPaintBrush)
+                this.tabControl1.TabPages.Clear();
+                if (tabType == CatalogType.CAS_Part)
                 {
-                    this.tabControl1.Controls.Add(this.tpDetail);
-                    InitialiseDetailsTab(res);
+                    InitialiseCASP();
+                    this.tabControl1.TabPages.Add(this.tpCASP);
                 }
-                this.tabControl1.Controls.Remove(this.tpFlagsRoom);
-                this.tabControl1.Controls.Remove(this.tpFlagsFunc);
-                this.tabControl1.Controls.Remove(this.tpFlagsBuild);
-                this.tabControl1.Controls.Remove(this.tpFlagsMisc);
-                if (tabType == CatalogType.CatalogObject)
+                else
                 {
-                    this.tabControl1.Controls.Add(this.tpFlagsRoom);
-                    this.tabControl1.Controls.Add(this.tpFlagsFunc);
-                    this.tabControl1.Controls.Add(this.tpFlagsBuild);
-                    this.tabControl1.Controls.Add(this.tpFlagsMisc);
-                    InitialiseFlagTabs(res);
-                    if (tlpOther.Visible)
-                        InitialiseOtherTab(res);
+                    this.tabControl1.TabPages.Add(this.tpMain);
+                    if (tabType == CatalogType.CatalogObject || tabType == CatalogType.CatalogTerrainPaintBrush)
+                    {
+                        InitialiseDetailsTab(res);
+                        this.tabControl1.TabPages.Add(this.tpDetail);
+                    }
+                    if (tabType == CatalogType.CatalogObject)
+                    {
+                        InitialiseFlagTabs(res);
+                        if (tlpOther.Visible)
+                            InitialiseOtherTab(res);
+                        this.tabControl1.TabPages.Add(this.tpFlagsRoom);
+                        this.tabControl1.TabPages.Add(this.tpFlagsFunc);
+                        this.tabControl1.TabPages.Add(this.tpFlagsBuild);
+                        this.tabControl1.TabPages.Add(this.tpFlagsMisc);
+                    }
                 }
             }
             finally { this.Text = appWas; Application.UseWaitCursor = false; Application.DoEvents(); }
         }
         void InitialiseDetailsTab(IResource catlg) { InitialiseMaps(); InitialiseTabTLP(catlg, tlpObjectDetail, labelToFieldMap.Values); }
         void InitialiseOtherTab(IResource objd) { InitialiseMaps(); InitialiseTabTLP(objd, tlpOther, otherFieldMap.Keys); }
+
+        void InitialiseCASP()
+        {
+            cbCASPClothingType.Items.Clear();
+            cbCASPClothingType.Items.AddRange(Enum.GetNames(typeof(CASPartResource.ClothingType)));
+            clbCASPTypeFlags.Items.Clear();
+            clbCASPTypeFlags.Items.AddRange(Enum.GetNames(typeof(CASPartResource.DataTypeFlags)));
+
+            List<string> flags = new List<string>(Enum.GetNames(typeof(CASPartResource.AgeGenderFlags)));
+            flags.RemoveAt(0);
+            clbCASPAgeFlags.Items.Clear();
+            clbCASPGenderFlags.Items.Clear();
+            clbCASPSpeciesFlags.Items.Clear();
+            clbCASPHandedness.Items.Clear();
+            for (int i = 0; i < 8; i++) if (!flags[i].StartsWith("Unknown")) clbCASPAgeFlags.Items.Add(flags[i]);
+            for (int i = 8; i < 16; i++) if (!flags[i].StartsWith("Unknown")) clbCASPGenderFlags.Items.Add(flags[i]);
+            for (int i = 16; i < 20; i++) if (!flags[i].StartsWith("Unknown")) clbCASPSpeciesFlags.Items.Add(flags[i]);
+            for (int i = 20; i < 24; i++) if (!flags[i].StartsWith("Unknown")) clbCASPHandedness.Items.Add(flags[i]);
+
+            flags = new List<string>(Enum.GetNames(typeof(CASPartResource.ClothingCategoryFlags)));
+            flags.RemoveAt(0);
+            clbCASPCategory.Items.Clear();
+            clbCASPCategory.Items.AddRange(flags.FindAll(x => !x.StartsWith("Unknown")).ToArray());
+        }
 
         bool ffInitialised = false;
         void InitialiseFlagTabs(IResource objd)
@@ -1117,6 +1147,7 @@ namespace ObjectCloner
             try
             {
                 clearOverview();
+                clearCASP();
                 if (tabControl1.Contains(tpDetail))
                     clearDetails();
                 if (tabControl1.Contains(tpFlagsRoom))
@@ -1143,6 +1174,20 @@ namespace ObjectCloner
             tbPrice.Text = "";
             tbProductStatus.Text = "";
             tbPackage.Text = "";
+        }
+        void clearCASP()
+        {
+            tbCASPResourceName.Text = "";
+            tbCASPUnknown1.Text = "";
+            cbCASPClothingType.SelectedIndex = -1;
+            for (int i = 0; i < clbCASPTypeFlags.Items.Count; i++) clbCASPTypeFlags.SetItemChecked(i, false);
+            for (int i = 0; i < clbCASPAgeFlags.Items.Count; i++) clbCASPAgeFlags.SetItemChecked(i, false);
+            for (int i = 0; i < clbCASPGenderFlags.Items.Count; i++) clbCASPGenderFlags.SetItemChecked(i, false);
+            for (int i = 0; i < clbCASPSpeciesFlags.Items.Count; i++) clbCASPSpeciesFlags.SetItemChecked(i, false);
+            for (int i = 0; i < clbCASPHandedness.Items.Count; i++) clbCASPHandedness.SetItemChecked(i, false);
+            for (int i = 0; i < clbCASPCategory.Items.Count; i++) clbCASPCategory.SetItemChecked(i, false);
+            tbCASPUnknown4.Text = "";
+            tbCASPPackage.Text = "";
         }
         void clearDetails() { IterateTLP(tlpObjectDetail, clearTLP); }
         void clearOther() { IterateTLP(tlpOther, clearTLP); }
@@ -1182,16 +1227,21 @@ namespace ObjectCloner
 
                 if (catlg.ResourceIndexEntry != null)
                 {
-                    fillOverview(catlg);
-                    if (formClosing) return;
-                    if (tabControl1.Contains(tpDetail))
-                        fillDetails(catlg);
-                    if (formClosing) return;
-                    if (item.CType == CatalogType.CatalogObject)
+                    if (tabControl1.Contains(tpCASP))
+                        fillCASPTab(catlg);
+                    else
                     {
-                        fillFlags(catlg);
+                        fillOverview(catlg);
                         if (formClosing) return;
-                        fillOther(catlg);
+                        if (tabControl1.Contains(tpDetail))
+                            fillDetails(catlg);
+                        if (formClosing) return;
+                        if (item.CType == CatalogType.CatalogObject)
+                        {
+                            fillFlags(catlg);
+                            if (formClosing) return;
+                            fillOther(catlg);
+                        }
                     }
                 }
                 else
@@ -1260,6 +1310,37 @@ namespace ObjectCloner
             tbCatlgDesc.Font = tbPrice.Font = tbProductStatus.Font =
                 new Font(tbObjName.Font, FontStyle.Italic);
         }
+
+        void fillCASPTab(SpecificResource item)
+        {
+            CASPartResource.CASPartResource casp = item.Resource as CASPartResource.CASPartResource;
+            if (casp == null) { clearCASP(); return; }
+
+            tbCASPResourceName.Text = NameMap.NMap[item.RequestedRK.Instance];
+            tbCASPPackage.Text = item.PathPackage.Path;
+
+            tbCASPUnknown1.Text = casp.Unknown1;
+            tbCASPUnknown4.Text = casp.Unknown4;
+
+            cbCASPClothingType.SelectedIndex = Enum.IsDefined(typeof(CASPartResource.ClothingType), casp.Clothing) ? (int)casp.Clothing : -1;
+
+            IList<CASPartResource.DataTypeFlags> dtFlags = (CASPartResource.DataTypeFlags[])Enum.GetValues(typeof(CASPartResource.DataTypeFlags));
+            for (int i = 0; i < dtFlags.Count; i++) clbCASPTypeFlags.SetItemChecked(i, (casp.DataType & dtFlags[i]) != 0);
+
+            List<string> flags = new List<string>(Enum.GetNames(typeof(CASPartResource.AgeGenderFlags)));
+            flags.RemoveAt(0);
+            int j;
+            j = 0; for (int i = 0; i < 8; i++) if (!flags[i].StartsWith("Unknown")) clbCASPAgeFlags.SetItemChecked(j++, bitset((uint)casp.AgeGender, i));
+            j = 0; for (int i = 8; i < 16; i++) if (!flags[i].StartsWith("Unknown")) clbCASPGenderFlags.SetItemChecked(j++, bitset((uint)casp.AgeGender, i));
+            j = 0; for (int i = 16; i < 20; i++) if (!flags[i].StartsWith("Unknown")) clbCASPSpeciesFlags.SetItemChecked(j++, bitset((uint)casp.AgeGender, i));
+            j = 0; for (int i = 20; i < 24; i++) if (!flags[i].StartsWith("Unknown")) clbCASPHandedness.SetItemChecked(j++, bitset((uint)casp.AgeGender, i));
+
+
+            flags = new List<string>(Enum.GetNames(typeof(CASPartResource.ClothingCategoryFlags)));
+            flags.RemoveAt(0);
+            j = 0; for (int i = 0; i < flags.Count; i++) if (!flags[i].StartsWith("Unknown")) clbCASPCategory.SetItemChecked(j++, bitset((uint)casp.ClothingCategory, i));
+        }
+        bool bitset(uint value, int bit) { return (value & (uint)Math.Pow(2, bit)) != 0; }
 
         void fillDetails(SpecificResource item) { IterateTLP(tlpObjectDetail, (l, c) => fillControl(item, l, c)); }
         void fillOther(SpecificResource item) { IterateTLP(tlpOther, (l, c) => fillControl(item, l, c)); }
@@ -1341,13 +1422,18 @@ namespace ObjectCloner
             Application.DoEvents();
             try
             {
-                tabEnableOverview(enabled);
-                if (tabControl1.Contains(tpDetail))
-                    tabEnableDetails(enabled);
-                if (tabControl1.Contains(tpFlagsRoom))
+                if (tabControl1.Contains(tpCASP))
+                    tabEnableCASP(enabled);
+                else
                 {
-                    tabEnableFlags(enabled);
-                    tabEnableOther(enabled);
+                    tabEnableOverview(enabled);
+                    if (tabControl1.Contains(tpDetail))
+                        tabEnableDetails(enabled);
+                    if (tabControl1.Contains(tpFlagsRoom))
+                    {
+                        tabEnableFlags(enabled);
+                        tabEnableOther(enabled);
+                    }
                 }
             }
             finally { this.Text = appWas; Application.UseWaitCursor = false; Application.DoEvents(); }
@@ -1363,6 +1449,20 @@ namespace ObjectCloner
             tbProductStatus.ReadOnly = !enabled;
             tbCatlgName.BackColor = tbCatlgName.ReadOnly ? SystemColors.Control : SystemColors.Window;
             tbCatlgDesc.BackColor = tbCatlgDesc.ReadOnly ? SystemColors.Control : SystemColors.Window;
+        }
+        void tabEnableCASP(bool enabled)
+        {
+            //tbCASPResourceName.Text = "";
+            tbCASPUnknown1.ReadOnly = !enabled;
+            cbCASPClothingType.Enabled = enabled;
+            clbCASPTypeFlags.Enabled = enabled;
+            clbCASPAgeFlags.Enabled = enabled;
+            clbCASPGenderFlags.Enabled = enabled;
+            clbCASPSpeciesFlags.Enabled = enabled;
+            clbCASPHandedness.Enabled = enabled;
+            clbCASPCategory.Enabled = enabled;
+            tbCASPUnknown4.ReadOnly = !enabled;
+            //tbCASPPackage.Text = "";
         }
         void tabEnableDetails(bool enabled) { IterateTLP(tlpObjectDetail, (l, c) => { if (c.Tag != null) c.Enabled = enabled; }); }
         void tabEnableOther(bool enabled) { IterateTLP(tlpOther, (l, c) => { if (c.Tag != null) c.Enabled = enabled; }); }
@@ -1574,7 +1674,7 @@ namespace ObjectCloner
         {
             if (!Enum.IsDefined(typeof(MenuBarWidget.MB), menuEntry)) return 0;
             List<MenuBarWidget.MB> ml = new List<MenuBarWidget.MB>((MenuBarWidget.MB[])Enum.GetValues(typeof(MenuBarWidget.MB)));
-            return ((CatalogType[])Enum.GetValues(typeof(CatalogType)))[ml.IndexOf(menuEntry) - ml.IndexOf(MenuBarWidget.MB.MBC_cfen)];
+            return ((CatalogType[])Enum.GetValues(typeof(CatalogType)))[ml.IndexOf(menuEntry) - ml.IndexOf(MenuBarWidget.MB.MBC_casp)];
         }
         #endregion
 
@@ -2008,39 +2108,52 @@ namespace ObjectCloner
 
 
         List<string> replacements = new List<string>();
-        private bool ReplaceRKsInXML(SpecificResource item, Predicate<IResourceKey> match, Converter<IResourceKey, IResourceKey> replacer)
+
+        private bool ReplaceRKsInTextReader(string fn, Predicate<IResourceKey> match, Converter<IResourceKey, IResourceKey> replacer, TextReader tr, TextWriter tw)
         {
             bool dirty = false;
-            StreamReader sr = new StreamReader(item.Resource.Stream, true);
-            MemoryStream ms = new MemoryStream();
-            StreamWriter sw = new StreamWriter(ms, sr.CurrentEncoding);
             int ln = 0;
-            while (!sr.EndOfStream)
+            string line = tr.ReadLine();
+            while (line != null)
             {
-                string line = sr.ReadLine();
                 int i = line.IndexOf("key:");
                 while (i >= 0 && i + 4 + 8 + 1 + 8 + 1 + 16 < line.Length)//key:TTTTTTTT-GGGGGGGG-IIIIIIIIIIIIIIII
                 {
-                    string key = "0x" + line.Substring(i + 4, 8 + 1 + 8 + 1 + 16).Replace("-", "-0x");//translate to s3pi format
+                    string oldKey = line.Substring(i + 4, 8 + 1 + 8 + 1 + 16);
+                    bool hasColons = oldKey.Contains(":");
+                    string key = "0x" + (hasColons ? oldKey.Replace(":", "-0x") : oldKey.Replace("-", "-0x"));//translate to s3pi format
                     IResourceKey rk;
                     if (RK.TryParse(key, out rk) && match(rk))
                     {
                         string newKey = new RK(replacer(rk)).ToString().Replace("0x", "");
+                        if (hasColons) newKey = newKey.Replace("-", ":");
                         line = line.Substring(0, i) + "key:" + newKey + line.Substring(i + 4 + key.Length);
 
-                        replacements.Add(String.Format("_XML {0} line {1} pos {2}: Replaced {3} with {4}", item.RequestedRK + "", ln, i, key, newKey));
+                        replacements.Add(String.Format("{0} line {1} pos {2}: Replaced {3} with {4}", fn, ln, i, key, newKey));
                         dirty = true;
                     }
                     i = line.IndexOf("key:", i + 4 + key.Length);
                 }
-                sw.WriteLine(line);
+                tw.WriteLine(line);
                 ln++;
+                line = tr.ReadLine();
             }
-            sw.Flush();
-            if (dirty)
+            tw.Flush();
+            return dirty;
+        }
+        private bool ReplaceRKsInResourceStream(SpecificResource item, Predicate<IResourceKey> match, Converter<IResourceKey, IResourceKey> replacer)
+        {
+            bool dirty = false;
+            using (StreamReader sr = new StreamReader(item.Resource.Stream, true))
+            using (MemoryStream ms = new MemoryStream())
+            using (StreamWriter sw = new StreamWriter(ms, sr.CurrentEncoding))
             {
-                item.Resource.Stream.SetLength(0);
-                item.Resource.Stream.Write(ms.ToArray(), 0, (int)ms.Length);
+                dirty = ReplaceRKsInTextReader("_XML " + item.RequestedRK, match, replacer, sr, sw);
+                if (dirty)
+                {
+                    item.Resource.Stream.SetLength(0);
+                    item.Resource.Stream.Write(ms.ToArray(), 0, (int)ms.Length);
+                }
             }
             return dirty;
         }
@@ -2198,13 +2311,12 @@ namespace ObjectCloner
                 }
             }
         }
-        private void SlurpRKsFromXML(string key, SpecificResource item)
+        private void SlurpRKsFromTextReader(string key, TextReader tr)
         {
             int j = 0;
-            StreamReader sr = new StreamReader(item.Resource.Stream, true);
-            while (!sr.EndOfStream)
+            string line = tr.ReadLine();
+            while (line != null)
             {
-                string line = sr.ReadLine();
                 int i = line.IndexOf("key:");
                 while (i >= 0 && i + 38 < line.Length)
                 {
@@ -2215,6 +2327,7 @@ namespace ObjectCloner
                         Add(key + "[" + (j++) + "]", (AResourceKey)field);
                     i = line.IndexOf("key:", i + 38);
                 }
+                line = tr.ReadLine();
             }
         }
 
@@ -2279,6 +2392,9 @@ namespace ObjectCloner
                     CFIR_Steps(stepList, out lastStepInChain); break;
                 case CatalogType.ModularResource:
                     MDLR_Steps(stepList, out lastStepInChain); break;
+
+                case CatalogType.CAS_Part:
+                    CASP_Steps(stepList, out lastStepInChain); break;
             }
             lastInChain = stepList == null ? -1 : (stepList.IndexOf(lastStepInChain) + 1);
         }
@@ -2437,6 +2553,19 @@ namespace ObjectCloner
             lastStepInChain = None;
         }
 
+        void CASP_Steps(List<Step> stepList, out Step lastStepInChain)
+        {
+            Diagnostics.Log("CASP_Steps");
+            lastStepInChain = None;
+            if (!JustSelf)
+            {
+                stepList.AddRange(new Step[] {
+                    CASP_deepClone,
+                });
+                lastStepInChain = CASP_deepClone;
+            }
+        }
+
         Dictionary<Step, string> StepText;
         void SetStepText()
         {
@@ -2476,6 +2605,8 @@ namespace ObjectCloner
 
             StepText.Add(SlurpThumbnails, "Add thumbnails");
             StepText.Add(CWAL_SlurpThumbnails, "Add thumbnails");
+
+            StepText.Add(CASP_deepClone, "CASP_deepClone");
         }
 
         void None() { }
@@ -2794,6 +2925,35 @@ namespace ObjectCloner
             Diagnostics.Show(s, "No TXTC items");
         }
 
+        void CASP_deepClone()
+        {
+            Diagnostics.Log("CASP_deepClone");
+            CASPartResource.CASPartResource casp = selectedItem.Resource as CASPartResource.CASPartResource;
+            if (casp == null) return;
+
+            for (int i = 0; i < casp.Presets.Count; i++)
+                SlurpRKsFromTextReader("clone.preset[" + i + "]", casp.Presets[i].XmlFile);
+
+            SlurpRKsFromField("clone", casp);
+
+            // Remove all CASP entries in rkLookup except self
+            List<string> casps = new List<string>();
+            foreach (var kvp in rkLookup)
+                if (kvp.Value.ResourceType == 0x034AEECB && !kvp.Value.Equals(selectedItem.RequestedRK)) casps.Add(kvp.Key);
+            casps.ForEach(key => rkLookup.Remove(key));
+
+            // Slurp everything pointed to by what we have so far
+            List<IResourceKey> seen = new List<IResourceKey>();
+            foreach (IResourceKey rk in rkLookup.Values) if (!seen.Contains(rk)) seen.Add(rk);// cannot modify rkLookup here
+            for (int i = 0; i < seen.Count; i++) SlurpRKsFromRK("clone.RK[" + i + "]", seen[i]);
+
+            // And again, remove all CASP entries in rkLookup except self
+            casps = new List<string>();
+            foreach (var kvp in rkLookup)
+                if (kvp.Value.ResourceType == 0x034AEECB && !kvp.Value.Equals(selectedItem.RequestedRK)) casps.Add(kvp.Key);
+            casps.ForEach(key => rkLookup.Remove(key));
+        }
+
 
         List<SpecificResource> objdList;
         void Item_findObjds()
@@ -2961,11 +3121,33 @@ namespace ObjectCloner
 
         // A list to hold the new numbers
         Dictionary<ulong, ulong> oldToNew;
+
+        void CASP_GenerateNewIIDs()
+        {
+            Diagnostics.Log("CASP_GenerateNewIIDs");
+
+            oldToNew = new Dictionary<ulong, ulong>();
+            if (isRenumber)
+            {
+                foreach (var kvp in rkToItem)
+                    if (!oldToNew.ContainsKey(kvp.Value.ResourceIndexEntry.Instance))//Only generate a new IID once per resource in the package
+                        oldToNew.Add(kvp.Value.ResourceIndexEntry.Instance, CreateInstance());
+                foreach (IResourceKey rk in rkToItem.Keys)//Requested RK
+                    if (!oldToNew.ContainsKey(rk.Instance))//Find those references we don't have new IIDs for
+                    {
+                        if (rk.ResourceType == 0x736884F1 && rk.Instance >> 32 == 0)//Either it's a request for a VPXY using version...
+                            oldToNew.Add(rk.Instance, oldToNew[rkToItem[rk].ResourceIndexEntry.Instance]);//So add the new number for that resource
+                        else//Or it's an RCOL chunk that needs a new IID...
+                            oldToNew.Add(rk.Instance, CreateInstance());//So renumber it
+                    }
+            }
+        }
+
         ulong nameGUID, newNameGUID;
         ulong descGUID, newDescGUID;
-        void GenerateNewIIDs()
+        void Catlg_GenerateNewIIDs()
         {
-            Diagnostics.Log("GenerateNewIIDs");
+            Diagnostics.Log("Catlg_GenerateNewIIDs");
 
             oldToNew = new Dictionary<ulong, ulong>();
 
@@ -3046,7 +3228,10 @@ namespace ObjectCloner
         void StartFixing()
         {
             MapRKtoSpecificResource();
-            GenerateNewIIDs();
+            if (selectedItem.CType == CatalogType.CAS_Part)
+                CASP_GenerateNewIIDs();
+            else
+                Catlg_GenerateNewIIDs();
 
             DoWait("Please wait, updating your package...");
 
@@ -3066,6 +3251,7 @@ namespace ObjectCloner
 
                     if (item.ResourceIndexEntry.ResourceType == 0x0166038C)
                     {
+                        Diagnostics.Log("NMAP: " + item.LongName);
                         #region NameMap
                         IDictionary<ulong, string> nm = (IDictionary<ulong, string>)item.Resource;
                         foreach (ulong old in oldToNew.Keys)
@@ -3079,18 +3265,71 @@ namespace ObjectCloner
                     }
                     else if (item.ResourceIndexEntry.ResourceType == 0x220557DA)//STBL
                     {
+                        Diagnostics.Log("STBL: " + item.LongName);
                         dirty |= UpdateStbl(tbCatlgName.Text, nameGUID, item, newNameGUID);
                         dirty |= UpdateStbl(tbCatlgDesc.Text, descGUID, item, newDescGUID);
                     }
                     else if (item.ResourceIndexEntry.ResourceType == 0x0333406C)//XML
                     {
-                        dirty = ReplaceRKsInXML(item, FixMatch, IIDReplacer);
+                        Diagnostics.Log("_XML: " + item.LongName);
+                        dirty = ReplaceRKsInResourceStream(item, FixMatch, IIDReplacer);
+                    }
+                    else if (item.RequestedRK.Equals(selectedItem.RequestedRK) && item.CType == CatalogType.CAS_Part)//Deal with CASP separately..!
+                    {
+                        Diagnostics.Log("CAS_Part: " + item.LongName);
+                        #region CAS Part
+                        CASPartResource.CASPartResource casp = selectedItem.Resource as CASPartResource.CASPartResource;
+                        // put all the details from the tab page into the resource
+                        //...
+                        casp.Unknown1 = tbCASPUnknown1.Text;
+                        casp.Unknown4 = tbCASPUnknown4.Text;
+
+                        if (cbCASPClothingType.SelectedIndex != -1)
+                            casp.Clothing = (CASPartResource.ClothingType)Enum.Parse(typeof(CASPartResource.ClothingType), cbCASPClothingType.SelectedItem + "");
+
+                        casp.DataType = 0;
+                        foreach (var typeFlag in clbCASPTypeFlags.CheckedItems)
+                            casp.DataType |= (CASPartResource.DataTypeFlags)Enum.Parse(typeof(CASPartResource.DataTypeFlags), typeFlag + "");
+
+                        casp.AgeGender = 0;
+                        foreach (var typeFlag in clbCASPAgeFlags.CheckedItems)
+                            casp.AgeGender |= (CASPartResource.AgeGenderFlags)Enum.Parse(typeof(CASPartResource.AgeGenderFlags), typeFlag + "");
+                        foreach (var typeFlag in clbCASPGenderFlags.CheckedItems)
+                            casp.AgeGender |= (CASPartResource.AgeGenderFlags)Enum.Parse(typeof(CASPartResource.AgeGenderFlags), typeFlag + "");
+                        foreach (var typeFlag in clbCASPSpeciesFlags.CheckedItems)
+                            casp.AgeGender |= (CASPartResource.AgeGenderFlags)Enum.Parse(typeof(CASPartResource.AgeGenderFlags), typeFlag + "");
+                        foreach (var typeFlag in clbCASPHandedness.CheckedItems)
+                            casp.AgeGender |= (CASPartResource.AgeGenderFlags)Enum.Parse(typeof(CASPartResource.AgeGenderFlags), typeFlag + "");
+
+                        casp.ClothingCategory = 0;
+                        foreach (var typeFlag in clbCASPCategory.CheckedItems)
+                            casp.ClothingCategory |= (CASPartResource.ClothingCategoryFlags)Enum.Parse(typeof(CASPartResource.ClothingCategoryFlags), typeFlag + "");
+
+                        for (int i = 0; i < casp.Presets.Count; i++)
+                        {
+                            CASPartResource.CASPartResource.Preset preset = casp.Presets[i];
+                            using (StringWriter sw = new StringWriter())
+                            {
+                                if (ReplaceRKsInTextReader("CASP " + selectedItem.RequestedRK + ".Preset[" + i + "]", FixMatch, IIDReplacer, preset.XmlFile, sw))
+                                {
+                                    using (StringReader sr = new StringReader(sw.GetStringBuilder().ToString()))
+                                    {
+                                        preset.XmlFile = sr;
+                                    }
+                                }
+                            }
+                        }
+                        ReplaceRKsInField(item, "", FixMatch, IIDReplacer, casp);
+
+                        dirty = true;
+                        #endregion
                     }
                     else if ((item.RequestedRK.Equals(selectedItem.RequestedRK) && item.CType != CatalogType.ModularResource)//Selected CatlgItem
                     || item.CType == CatalogType.CatalogObject//all OBJDs (i.e. from MDLR or CFIR)
                     || item.CType == CatalogType.CatalogTerrainPaintBrush//all CTPTs (i.e. pair of selectedItem)
                     )
                     {
+                        Diagnostics.Log("Selected CatlgItem || any OBJD || any CTPT: " + item.LongName);
                         #region Selected CatlgItem; all OBJD (i.e. from MDLR or CFIR)
                         AHandlerElement commonBlock = ((AHandlerElement)item.Resource["CommonBlock"].Value);
 
@@ -3219,6 +3458,7 @@ namespace ObjectCloner
                     }
                     else
                     {
+                        Diagnostics.Log("Anything else: " + item.LongName);
                         dirty = ReplaceRKsInField(item, "", FixMatch, IIDReplacer, (AResource)item.Resource);
                     }
 
@@ -3344,7 +3584,8 @@ namespace ObjectCloner
 
             SaveList sl = new SaveList(this,
                 selectedItem, rkLookup,
-                target, disableCompression, isPadSTBLs, false/*mode == Mode.FromGame/**/, null, //cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
+                target, disableCompression, selectedItem.CType != CatalogType.CAS_Part,
+                isPadSTBLs, false/*mode == Mode.FromGame/**/, null, //cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
                 updateProgress, () => !saving, OnSavingComplete);
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
@@ -3424,7 +3665,8 @@ namespace ObjectCloner
 
             DoWait("Please wait, adding missing resources...");
             SaveList sl = new SaveList(this, selectedItem, rkLookup,
-                FileTable.Current, disableCompression, isPadSTBLs, false/*mode == Mode.FromGame/**/, null, //cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
+                FileTable.Current, disableCompression, selectedItem.CType != CatalogType.CAS_Part,
+                isPadSTBLs, false/*mode == Mode.FromGame/**/, null, //cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
                 updateProgress, () => !repairing, OnRepairingComplete);
 
             repairThread = new Thread(new ThreadStart(sl.SavePackage));
@@ -3481,7 +3723,7 @@ namespace ObjectCloner
 
                     if (item.ResourceIndexEntry.ResourceType == 0x0333406C)//_XML
                     {
-                        dirty = ReplaceRKsInXML(item, ReplaceTGIMatch, ReplaceTGIReplacer);
+                        dirty = ReplaceRKsInResourceStream(item, ReplaceTGIMatch, ReplaceTGIReplacer);
                     }
                     else
                     {
@@ -3649,7 +3891,7 @@ namespace ObjectCloner
 
                 // RenumberingMatch does magic
                 if (item.ResourceIndexEntry.ResourceType == 0x0333406C)//_XML
-                    dirty = ReplaceRKsInXML(item, RenumberingMatch, IIDReplacer);
+                    dirty = ReplaceRKsInResourceStream(item, RenumberingMatch, IIDReplacer);
                 else
                     dirty = ReplaceRKsInField(item, "", RenumberingMatch, IIDReplacer, item.Resource as AApiVersionedFields);
 

@@ -39,6 +39,7 @@ namespace ObjectCloner
                 //File
                 openToolStripMenuItem, reloadStripMenuItem, closeStripMenuItem, exitToolStripMenuItem,
                 //Cloning -- These must be in order of enum CatalogType by value:
+                caspToolStripMenuItem,
                 cfenToolStripMenuItem, cstrToolStripMenuItem, cprxToolStripMenuItem, cttlToolStripMenuItem,
                 cralToolStripMenuItem, ctptToolStripMenuItem, cfirToolStripMenuItem, cwatToolStripMenuItem,
                 ccfpToolStripMenuItem,
@@ -62,6 +63,7 @@ namespace ObjectCloner
 
         void advancedCloningToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
         {
+            advCloningToolStripSeparator.Visible =
             cprxToolStripMenuItem.Visible = cttlToolStripMenuItem.Visible =
             ccfpToolStripMenuItem.Visible =
             cwatToolStripMenuItem.Visible =
@@ -86,6 +88,7 @@ namespace ObjectCloner
         public enum MB
         {
             MBF_open = 0, MBF_reload, MBF_close, MBF_exit,
+            MBC_casp,
             MBC_cfen, MBC_cstr, MBC_cprx, MBC_cttl,
             MBC_cral, MBC_ctpt, MBC_cfir, MBC_cwat,
             MBC_ccfp,

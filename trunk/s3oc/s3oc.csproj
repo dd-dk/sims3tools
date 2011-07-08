@@ -40,6 +40,9 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="s3pi.CASPartResource">
+      <HintPath>..\s3pi\build\bin\Release\s3pi.CASPartResource.dll</HintPath>
+    </Reference>
     <Reference Include="s3pi.CatalogResource">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.CatalogResource.dll</HintPath>

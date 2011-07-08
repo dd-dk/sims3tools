@@ -24,6 +24,8 @@ namespace ObjectCloner
 {
     public enum CatalogType : uint
     {
+        CAS_Part = 0x034AEECB,
+
         CatalogFence = 0x0418FE2A,
         CatalogStairs = 0x049CA4CD,
         CatalogProxyProduct = 0x04AC5D93,

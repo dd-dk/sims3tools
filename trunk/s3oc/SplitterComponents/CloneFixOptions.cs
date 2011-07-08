@@ -34,7 +34,7 @@ namespace ObjectCloner.SplitterComponents
             InitializeComponent();
         }
 
-        public CloneFixOptions(Form form, bool mustClone, bool allow32bitIIDs, bool shouldPad)
+        public CloneFixOptions(Form form, bool mustClone, bool isCASP, bool allow32bitIIDs, bool shouldPad)
             : this()
         {
             if (mustClone)
@@ -44,13 +44,25 @@ namespace ObjectCloner.SplitterComponents
                 ckbClone.Enabled = false;
                 ckbClone.Checked = true;
             }
-            ckbClone_CheckedChanged(null, EventArgs.Empty);
+
+            if (isCASP)
+            {
+                ckbDeepClone.Checked = true;
+                ckbDeepClone.Enabled = false;
+                ckbPadSTBLs.Checked = false;
+                ckbPadSTBLs.Enabled = false;
+                ckbThumbs.Checked = false;
+                ckbThumbs.Enabled = false;
+            }
+            else
+            {
+                ckbClone_CheckedChanged(null, EventArgs.Empty);
+                ckbPadSTBLs.Checked = shouldPad;
+            }
 
             ckbRenumber.Checked = mustClone;
             this.allow32bitIIDs = allow32bitIIDs;
             ckbRenumber_CheckedChanged(null, EventArgs.Empty);
-
-            ckbPadSTBLs.Checked = shouldPad;
 
             form.AcceptButton = btnStart;
             form.CancelButton = btnCancel;
