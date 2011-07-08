@@ -683,7 +683,7 @@ namespace DdsFileTypePlugin
         }
 
         /// <summary>
-        /// Fill the image with a single colour, specified by the byte parameters,
+        /// Creates an image of a single colour, specified by the byte parameters,
         /// with the size given by the int parameters.
         /// If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
         /// </summary>
@@ -722,7 +722,7 @@ namespace DdsFileTypePlugin
         }
 
         /// <summary>
-        /// Fill the image with a single colour, specified by the uint parameter
+        /// Creates an image of a single colour, specified by the uint parameter
         /// (low byte is "blue", then "green", then "red" then high byte is "alpha"),
         /// with the size given by the int parameters.
         /// If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
