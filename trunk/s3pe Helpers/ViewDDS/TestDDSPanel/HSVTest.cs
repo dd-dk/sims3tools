@@ -19,7 +19,7 @@ namespace TestDDSPanel
         {
             int width = ddsPanel1.MaskSize != Size.Empty ? ddsPanel1.MaskSize.Width : 128;
             int height = ddsPanel1.MaskSize != Size.Empty ? ddsPanel1.MaskSize.Height : 128;
-            ddsPanel1.SetColour((byte)nudRed.Value, (byte)nudGreen.Value, (byte)nudBlue.Value, (byte)nudAlpha.Value, width, height, true);
+            ddsPanel1.CreateImage((byte)nudRed.Value, (byte)nudGreen.Value, (byte)nudBlue.Value, (byte)nudAlpha.Value, width, height, true);
         }
 
         private void btnOpenImage_Click(object sender, EventArgs e)
