@@ -158,9 +158,9 @@ namespace DDSPanel
         }
 
         /// <summary>
-        /// Indicates whether a Mask has been applied (and not Cleared) to the current iamge.
+        /// Indicates that a Mask is currently loaded.
         /// </summary>
-        [ReadOnly(true), Description("Indicates whether a Mask has been applied (and not Cleared) to the current iamge.")]
+        [ReadOnly(true), Description("Indicates that a Mask is currently loaded.")]
         public bool MaskLoaded { get { return ddsMask != null; } }
 
         /// <summary>
@@ -170,9 +170,9 @@ namespace DDSPanel
         public Size ImageSize { get { return loaded ? ddsFile.Size : Size.Empty; } }
 
         /// <summary>
-        /// The size of the current mask (or <see cref="Size.Empty"/> if no mask).
+        /// The size of the current mask (or <see cref="Size.Empty"/> if no mask loaded).
         /// </summary>
-        [ReadOnly(true), Description("The size of the current mask (or Size.Empty if no mask).")]
+        [ReadOnly(true), Description("The size of the current mask (or Size.Empty if no mask loaded).")]
         public Size MaskSize { get { return MaskLoaded ? ddsMask.Size : Size.Empty; } }
 
         /// <summary>
@@ -223,8 +223,6 @@ namespace DDSPanel
         /// </summary>
         [Description("Raised to indicate ShowChannelSelector value changed")]
         public event EventHandler ShowChannelSelectorChanged;
-
-        void OnChanged(EventHandler h) { if (h != null) h(this, EventArgs.Empty); }
         #endregion
 
         #region Methods
@@ -257,6 +255,16 @@ namespace DDSPanel
         }
 
         /// <summary>
+        /// Saves the current image to a DDS in <paramref name="stream"/>.
+        /// </summary>
+        /// <param name="stream"></param>
+        public void DDSSave(Stream stream)
+        {
+            if (stream != null)
+                this.ddsFile.Save(stream);
+        }
+
+        /// <summary>
         /// Sets the DDSPanel to an unloaded state, freeing resources.
         /// </summary>
         public void Clear()
@@ -265,7 +273,7 @@ namespace DDSPanel
             loaded = false;
             ddsMask = null;
             pictureBox1.Image = image = null;
-            pictureBox1.Size = new Size(128, 128);
+            pictureBox1.Size = (this.MaxSize == Size.Empty) ? new Size(0x80, 0x80) : Min(new Size(0x80, 0x80), this.MaxSize);
         }
 
         /// <summary>
@@ -273,10 +281,10 @@ namespace DDSPanel
         /// if <paramref name="supportHSV"/> is passed and true (default is false), the image will
         /// support HSV shift operations.
         /// </summary>
-        /// <param name="colour">ARGB colour.</param>
+        /// <param name="colour">ARGB colour.  If <c>null</c>, method returns with no action.</param>
         /// <param name="size">Size of image.</param>
         /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
-        public void CreateImage(uint colour, Size size, bool supportHSV = false)
+        public void CreateImage(uint? colour, Size size, bool supportHSV = false)
         {
             CreateImage(colour, size.Width, size.Height, supportHSV);
         }
@@ -287,17 +295,18 @@ namespace DDSPanel
         /// if <paramref name="supportHSV"/> is passed and true (default is false), the image will
         /// support HSV shift operations.
         /// </summary>
-        /// <param name="colour">ARGB colour.</param>
+        /// <param name="colour">ARGB colour.  If <c>null</c>, method returns with no action.</param>
         /// <param name="width">Width of image.</param>
         /// <param name="height">Height of image.</param>
         /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
-        public void CreateImage(uint colour, int width, int height, bool supportHSV = false)
+        public void CreateImage(uint? colour, int width, int height, bool supportHSV = false)
         {
+            if (!colour.HasValue) return;
             try
             {
                 this.Enabled = false;
                 Application.UseWaitCursor = true;
-                ddsFile.CreateImage(colour, width, height, supportHSV);
+                ddsFile.CreateImage(colour.Value, width, height, supportHSV);
                 loaded = true;
             }
             finally { this.Enabled = true; Application.UseWaitCursor = false; }
@@ -404,8 +413,18 @@ namespace DDSPanel
         public void LoadMask(Stream mask)
         {
             ClearMask();
-            ddsMask = new DdsFile();
-            ddsMask.Load(mask, false);//only want the pixmap data
+            try
+            {
+                base.Enabled = false;
+                Application.UseWaitCursor = true;
+                this.ddsMask = new DdsFile();
+                this.ddsMask.Load(mask, false);//only want the pixmap data
+            }
+            finally
+            {
+                base.Enabled = true;
+                Application.UseWaitCursor = false;
+            }
         }
 
         /// <summary>
@@ -514,6 +533,116 @@ namespace DDSPanel
 
             ckb_CheckedChanged(null, null);
         }
+
+        /// <summary>
+        /// Apply the supplied images to the areas of the base image defined by the
+        /// channels in the <paramref name="mask"/>.
+        /// </summary>
+        /// <param name="mask">The <see cref="T:System.IO.Stream"/> containing the DDS image to use as a mask.</param>
+        /// <param name="ch1Image">The <see cref="T:System.IO.Stream"/> containing the DDS image to apply to the image when the first channel of the mask is active.</param>
+        /// <param name="ch2Image">The <see cref="T:System.IO.Stream"/> containing the DDS image to apply to the image when the second channel of the mask is active.</param>
+        /// <param name="ch3Image">The <see cref="T:System.IO.Stream"/> containing the DDS image to apply to the image when the third channel of the mask is active.</param>
+        /// <param name="ch4Image">The <see cref="T:System.IO.Stream"/> containing the DDS image to apply to the image when the fourth channel of the mask is active.</param>
+        public void ApplyImage(Stream mask, Stream ch1Image, Stream ch2Image, Stream ch3Image, Stream ch4Image)
+        {
+            if (!this.loaded) return;
+
+            LoadMask(mask);
+            ApplyImage(ch1Image, ch2Image, ch3Image, ch4Image);
+        }
+
+        /// <summary>
+        /// Apply the supplied images to the areas of the base image defined by the
+        /// channels in the currently loaded mask.
+        /// </summary>
+        /// <param name="ch1Image">The <see cref="T:System.IO.Stream"/> containing the DDS image to apply to the image when the first channel of the mask is active.</param>
+        /// <param name="ch2Image">The <see cref="T:System.IO.Stream"/> containing the DDS image to apply to the image when the second channel of the mask is active.</param>
+        /// <param name="ch3Image">The <see cref="T:System.IO.Stream"/> containing the DDS image to apply to the image when the third channel of the mask is active.</param>
+        /// <param name="ch4Image">The <see cref="T:System.IO.Stream"/> containing the DDS image to apply to the image when the fourth channel of the mask is active.</param>
+        public void ApplyImage(Stream ch1Image, Stream ch2Image, Stream ch3Image, Stream ch4Image)
+        {
+            if (!this.loaded || !this.MaskLoaded) return;
+
+            DdsFile ch1dds = null, ch2dds = null, ch3dds = null, ch4dds = null;
+            try
+            {
+                this.Enabled = false;
+                Application.UseWaitCursor = true;
+                if (ch1Image != null) { ch1dds = new DdsFile(); ch1dds.Load(ch1Image, false); }
+                if (ch2Image != null) { ch2dds = new DdsFile(); ch2dds.Load(ch2Image, false); }
+                if (ch3Image != null) { ch3dds = new DdsFile(); ch3dds.Load(ch3Image, false); }
+                if (ch4Image != null) { ch4dds = new DdsFile(); ch4dds.Load(ch4Image, false); }
+                ddsFile.MaskedApplyImage(this.ddsMask, ch1dds, ch2dds, ch3dds, ch4dds);
+            }
+            finally { this.Enabled = true; Application.UseWaitCursor = false; }
+            this.ckb_CheckedChanged(null, null);
+        }
+
+        /// <summary>
+        /// Apply the supplied images to the areas of the base image defined by the
+        /// channels in the <paramref name="mask"/>.
+        /// </summary>
+        /// <param name="mask">The <see cref="T:System.IO.Stream"/> containing the DDS image to use as a mask.</param>
+        /// <param name="ch1Image">The <see cref="T:System.Drawing.Image"/> to apply to the image when the first channel of the mask is active.</param>
+        /// <param name="ch2Image">The <see cref="T:System.Drawing.Image"/> to apply to the image when the second channel of the mask is active.</param>
+        /// <param name="ch3Image">The <see cref="T:System.Drawing.Image"/> to apply to the image when the third channel of the mask is active.</param>
+        /// <param name="ch4Image">The <see cref="T:System.Drawing.Image"/> to apply to the image when the fourth channel of the mask is active.</param>
+        public void ApplyImage(Stream mask, Image ch1Image, Image ch2Image, Image ch3Image, Image ch4Image)
+        {
+            if (!this.loaded) return;
+
+            LoadMask(mask);
+            ApplyImage(ch1Image, ch2Image, ch3Image, ch4Image);
+        }
+
+        /// <summary>
+        /// Apply the supplied images to the areas of the base image defined by the
+        /// channels in the currently loaded mask.
+        /// </summary>
+        /// <param name="ch1Image">The <see cref="T:System.Drawing.Image"/> to apply to the image when the first channel of the mask is active.</param>
+        /// <param name="ch2Image">The <see cref="T:System.Drawing.Image"/> to apply to the image when the second channel of the mask is active.</param>
+        /// <param name="ch3Image">The <see cref="T:System.Drawing.Image"/> to apply to the image when the third channel of the mask is active.</param>
+        /// <param name="ch4Image">The <see cref="T:System.Drawing.Image"/> to apply to the image when the fourth channel of the mask is active.</param>
+        public void ApplyImage(Image ch1Image, Image ch2Image, Image ch3Image, Image ch4Image)
+        {
+            if (!this.loaded || !this.MaskLoaded) return;
+
+            ddsFile.MaskedApplyImage(this.ddsMask, ch1Image, ch2Image, ch3Image, ch4Image);
+            this.ckb_CheckedChanged(null, null);
+        }
+
+        /// <summary>
+        /// Apply the supplied images to the areas of the base image defined by the
+        /// channels in the <paramref name="mask"/>.
+        /// </summary>
+        /// <param name="mask">The <see cref="T:System.IO.Stream"/> containing the DDS image to use as a mask.</param>
+        /// <param name="ch1Image">The <see cref="T:System.Drawing.Bitmap"/> to apply to the image when the first channel of the mask is active.</param>
+        /// <param name="ch2Image">The <see cref="T:System.Drawing.Bitmap"/> to apply to the image when the second channel of the mask is active.</param>
+        /// <param name="ch3Image">The <see cref="T:System.Drawing.Bitmap"/> to apply to the image when the third channel of the mask is active.</param>
+        /// <param name="ch4Image">The <see cref="T:System.Drawing.Bitmap"/> to apply to the image when the fourth channel of the mask is active.</param>
+        public void ApplyImage(Stream mask, Bitmap ch1Image, Bitmap ch2Image, Bitmap ch3Image, Bitmap ch4Image)
+        {
+            if (!this.loaded) return;
+
+            LoadMask(mask);
+            ApplyImage(ch1Image, ch2Image, ch3Image, ch4Image);
+        }
+
+        /// <summary>
+        /// Apply the supplied images to the areas of the base image defined by the
+        /// channels in the currently loaded mask.
+        /// </summary>
+        /// <param name="ch1Image">The <see cref="T:System.Drawing.Bitmap"/> to apply to the image when the first channel of the mask is active.</param>
+        /// <param name="ch2Image">The <see cref="T:System.Drawing.Bitmap"/> to apply to the image when the second channel of the mask is active.</param>
+        /// <param name="ch3Image">The <see cref="T:System.Drawing.Bitmap"/> to apply to the image when the third channel of the mask is active.</param>
+        /// <param name="ch4Image">The <see cref="T:System.Drawing.Bitmap"/> to apply to the image when the fourth channel of the mask is active.</param>
+        public void ApplyImage(Bitmap ch1Image, Bitmap ch2Image, Bitmap ch3Image, Bitmap ch4Image)
+        {
+            if (!this.loaded || !this.MaskLoaded) return;
+
+            ddsFile.MaskedApplyImage(this.ddsMask, ch1Image, ch2Image, ch3Image, ch4Image);
+            this.ckb_CheckedChanged(null, null);
+        }
         #endregion
 
         #region Enumerations
@@ -526,23 +655,25 @@ namespace DDSPanel
             /// <summary>
             /// Activates channel 1 ("Red")
             /// </summary>
-            C1,
+            C1 = 1,
             /// <summary>
             /// Activates channel 2 ("Green")
             /// </summary>
-            C2,
+            C2 = 2,
             /// <summary>
             /// Activates channel 3 ("Blue")
             /// </summary>
-            C3,
+            C3 = 4,
             /// <summary>
             /// Activates channel 4 ("Alpha")
             /// </summary>
-            C4,
+            C4 = 8,
         }
         #endregion
 
         #region Implementation
+        void OnChanged(EventHandler h) { if (h != null) h(this, EventArgs.Empty); }
+
         private void ckb_CheckedChanged(object sender, EventArgs e)
         {
             if (!loaded) return;
@@ -569,10 +700,7 @@ namespace DDSPanel
 
         Image doResize()
         {
-            if (!loaded) return null;
-
-            Image targetImage = image;
-            Size targetSize = targetImage.Size;
+            Size targetSize = loaded ? image.Size : new Size(128, 128);
 
             if (Fit) targetSize = ScaleToFit(targetSize, panel1.ClientSize);
 
@@ -580,11 +708,13 @@ namespace DDSPanel
 
             pictureBox1.Size = targetSize;
 
+            if (!this.loaded) return null;
+
+            Image targetImage = image;
+
+            Size minSize = Min(targetImage.Size, targetSize);
             if (targetImage.Size.Width > targetSize.Width || targetImage.Size.Height > targetSize.Height)
-                targetImage = targetImage.GetThumbnailImage(
-                    targetImage.Size.Width > targetSize.Width ? targetSize.Width : targetImage.Size.Width,
-                    targetImage.Size.Height > targetSize.Height ? targetSize.Height : targetImage.Size.Height,
-                    gtAbort, System.IntPtr.Zero);
+                targetImage = targetImage.GetThumbnailImage(minSize.Width, minSize.Height, gtAbort, System.IntPtr.Zero);
 
             return targetImage;
         }
@@ -596,6 +726,16 @@ namespace DDSPanel
             double scaleHeight = constraint.Height <= 0 ? 1 : Math.Min(from.Height, constraint.Height) / (double)from.Height;
             double scale = Math.Min(scaleWidth, scaleHeight);
             return new Size((int)Math.Round(from.Width * scale - 0.5), (int)Math.Round(from.Height * scale - 0.5));
+        }
+
+        private static Size Max(Size left, Size right)
+        {
+            return new Size(Math.Max(left.Width, right.Width), Math.Max(left.Height, right.Height));
+        }
+
+        private static Size Min(Size left, Size right)
+        {
+            return new Size(Math.Min(left.Width, right.Width), Math.Min(left.Height, right.Height));
         }
 
         private void DDSPanel_Resize(object sender, EventArgs e)
