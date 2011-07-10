@@ -45,6 +45,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pe Helpers\ViewDDS\DDSPanel\bin\Release\DDSPanel.dll</HintPath>
     </Reference>
+    <Reference Include="s3pi.Controls">
+      <HintPath>..\s3pi\build\bin\Release\s3pi.Controls.dll</HintPath>
+    </Reference>
     <Reference Include="s3pi.CustomForms">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
@@ -338,6 +341,14 @@
       <Link>squishinterface_x64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\s3pe Helpers\ViewDDS\HelperApp\bin\ViewDDS\ViewDDS.exe">
+      <Link>ViewDDS.exe</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pe Helpers\ViewDDS\TestDDSPanel\bin\Release\TestDDSPanel.exe">
+      <Link>TestDDSPanel.exe</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\s3pe Helpers\VPXY Resource Editor\bin\Release\VPXYResourceEditor.exe">
       <Link>VPXYResourceEditor.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -479,6 +490,9 @@
       <Link>Helpers\S3AscImport.helper</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="..\s3pe Helpers\ViewDDS\HelperApp\bin\ViewDDS\Helpers\sim3tools_ViewDDS.helper">
+      <Link>Helpers\sim3tools_ViewDDS.helper</Link>
+    </None>
     <None Include="Resources\s3pe.ico" />
     <Content Include="s3peUpdate.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

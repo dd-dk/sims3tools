@@ -4,7 +4,6 @@ set ConfigurationName=Release
 set base=%TargetName%
 rem -%ConfigurationName%
 set src=%TargetName%-Source
-set viewDDS=s3pe Helpers\ViewDDS\HelperApp\bin\ViewDDS
 
 set out=S:\Sims3\Tools\s3pe\
 set helpFolder=%out%HelpFiles
@@ -47,7 +46,6 @@ pushd ..
 7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" s3pe
 popd
 
-xcopy "..\%viewDDS%\*" "bin\%ConfigurationName%" /s /i /y
 pushd bin\%ConfigurationName%
 echo %suffix% >%TargetName%-Version.txt
 attrib +r %TargetName%-Version.txt
@@ -57,7 +55,6 @@ xcopy "%helpFolder%\*" HelpFiles /s /i /y
 del /f %TargetName%-Version.txt
 del /f /q HelpFiles
 popd
-for %%I in (..\%viewDDS%\*) do del "bin\%ConfigurationName%\%%~nxI"
 
 7za x -o"%base%-%suffix%" "%out%%base%_%suffix%.7z"
 pushd "%base%-%suffix%"
@@ -98,7 +95,6 @@ del INSTFILES.txt
 
 rem --- x64 packaging ---
 if not exist bin\%ConfigurationName%\x64 goto nox64
-xcopy "..\%viewDDS%\*" "bin\%ConfigurationName%\x64" /s /i /y
 pushd bin\%ConfigurationName%\x64
 echo %suffix% >%TargetName%-Version.txt
 attrib +r %TargetName%-Version.txt
@@ -108,7 +104,6 @@ xcopy "%helpFolder%\*" HelpFiles /s /i /y
 del /f %TargetName%-Version.txt
 del /f /q HelpFiles
 popd
-for %%I in (..\%viewDDS%\*) do del "bin\%ConfigurationName%\x64\%%~nxI"
 
 7za x -o"%base%-%suffix%-x64" "%out%%base%_%suffix%-x64.7z"
 pushd "%base%-%suffix%-x64"
