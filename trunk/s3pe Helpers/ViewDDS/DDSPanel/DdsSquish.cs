@@ -73,7 +73,25 @@ namespace DdsFileTypePlugin
 			[DllImport("squishinterface_x64.dll")]
 			internal static	extern unsafe void SquishDecompressImage( byte* rgba, int width, int height, byte* blocks, int flags );
 		}
-	
+
+        private static unsafe void CallCompressImage(byte[] rgba, int width, int height, byte[] blocks, int flags)
+        {
+            fixed (byte* numRef = rgba)
+            {
+                fixed (byte* numRef2 = blocks)
+                {
+                    if (Is64Bit())
+                    {
+                        SquishInterface_64.SquishCompressImage(numRef, width, height, numRef2, flags);
+                    }
+                    else
+                    {
+                        SquishInterface_32.SquishCompressImage(numRef, width, height, numRef2, flags);
+                    }
+                }
+            }
+        }
+
 		private static unsafe void	CallDecompressImage( byte[] rgba, int width, int height, byte[] blocks, int flags )
 		{
 			fixed ( byte* pRGBA = rgba )
@@ -87,6 +105,35 @@ namespace DdsFileTypePlugin
 				}
 			}
 		}
+
+        // ---------------------------------------------------------------------------------------
+        //	CompressImage
+        // ---------------------------------------------------------------------------------------
+        //
+        //	Params
+        //		pixelInput    	:	Source byte array containing decompressed pixel data
+        //		width			:	Width of image in pixels
+        //		height			:	Height of image in pixels
+        //		flags			:	Flags for squish decompression control
+        //
+        //	Return	
+        //		byte[]			:	Array of bytes containing compressed blocks
+        //
+        // ---------------------------------------------------------------------------------------
+
+        internal static byte[] CompressImage(byte[] pixelInput, int width, int height, int flags)
+        {
+            // Allocate room for compressed output
+            int blockCount = ((width + 3) / 4) * ((width + 3) / 4);
+            int blockSize = ((flags & 1) != 0) ? 8 : 0x10;
+            byte[] blocks = new byte[blockCount * blockSize];
+
+            // Invoke squish::CompressImage() with the required parameters
+            CallCompressImage(pixelInput, width, height, blocks, flags);
+
+            // Return our block data to caller..
+            return blocks;
+        }
 
 		// ---------------------------------------------------------------------------------------
 		//	DecompressImage
