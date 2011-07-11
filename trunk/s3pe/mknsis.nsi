@@ -8,6 +8,9 @@
 !ifndef UNINSTFILES
   !error "Caller didn't define UNINSTFILES"
 !endif
+!ifndef VSN
+  !error "Caller didn't define VSN"
+!endif
 
 Var wasInUse
 Var wantAll
@@ -131,35 +134,37 @@ FunctionEnd
 
 Function GetInstDir
   Push $0
+  ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
+  StrCmp $0 "" gidNotCU
+  IfFileExists "$0${EXE}" gidSetINSTDIR
+gidNotCU:
   ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
-  StrCmp $0 "" NotInstalledLM
+  StrCmp $0 "" gidDone
+  IfFileExists "$0${EXE}" gidSetINSTDIR gidDone
+gidSetINSTDIR:
   StrCpy $INSTDIR $0
-  Goto InstDirDone
-NotInstalledLM:
-  ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
-  StrCmp $0 "" InstDirDone
-  StrCpy $INSTDIR $0
-InstDirDone:
+gidDone:
   Pop $0
+  ClearErrors
 FunctionEnd
 
 Function CheckInUse
   StrCpy $wasInUse 0
-
-  IfFileExists "$INSTDIR\${EXE}" Exists
+cuiRetry:
+  IfFileExists "$INSTDIR\${EXE}" cuiExists
   Return
-Exists:
+cuiExists:
   ClearErrors
   FileOpen $0 "$INSTDIR\${EXE}" a
-  IfErrors InUse
+  IfErrors cuiInUse
   FileClose $0
   Return
-InUse:
+cuiInUse:
   StrCpy $wasInUse 1
 
   MessageBox MB_RETRYCANCEL|MB_ICONQUESTION \
     "${EXE} is running.$\r$\nPlease close it and retry.$\r$\n$INSTDIR\${EXE}" \
-    IDRETRY Exists
+    IDRETRY cuiRetry
 
   MessageBox MB_OK|MB_ICONSTOP "Cannot continue to install if ${EXE} is running."
   Quit
@@ -167,18 +172,19 @@ FunctionEnd
 
 Function CheckOldVersion
   ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "UninstallString"
-  StrCmp $R0 "" NotInstalledCU Installed
-NotInstalledCU:
+  StrCmp $R0 "" covNotCU covFound
+covNotCU:
   ReadRegStr $R0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "UninstallString"
-  StrCmp $R0 "" NotInstalled
-Installed:
+  StrCmp $R0 "" covDone
+covFound:
   MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
     "${PROGRAM_NAME} is already installed.$\n$\nClick [OK] to remove the previous version or [Cancel] to abort this upgrade." \
-    IDOK UnInstall
+    IDOK covUninstall
   Quit
-UnInstall:
-  ExecWait "$R0"
-NotInstalled:
+
+covUninstall:
+  ExecWait $R0
+covDone:
   ClearErrors
 FunctionEnd
 
@@ -192,73 +198,69 @@ Function un.onGUIInit
 FunctionEnd
 
 Function un.GetInstDir
+  SetShellVarContext all
+  ClearErrors
   Push $0
-  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
-  StrCmp $0 "" NotInstalledLM
-  StrCpy $INSTDIR $0
-  Goto InstDirDone
-NotInstalledLM:
-  ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
-  StrCmp $0 "" NoInstDir
-  StrCpy $INSTDIR $0
-  Goto InstDirDone
+  ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
+  Pop $0
+  IfErrors notCU
+  SetShellVarContext current
+notCU:  
+  ClearErrors
 
-NoInstDir:
+  Push $0
+
+  ReadRegStr $0 SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
+  StrCmp $0 "" ungidBadInstallLocation
+  IfFileExists "$0" ungidSetINSTDIR
+ungidBadInstallLocation:
   MessageBox MB_OK|MB_ICONSTOP "Cannot find Install Location."
   Abort
   
-InstDirDone:
+ungidSetINSTDIR:
+  StrCpy $INSTDIR $0
   Pop $0
 FunctionEnd
 
 Function un.CheckInUse
   StrCpy $wasInUse 0
 
-  IfFileExists "$INSTDIR" Exists
+uncuiRetry:
+  IfFileExists "$INSTDIR" uncuiExists
   MessageBox MB_OK|MB_ICONSTOP "Cannot find $INSTDIR to uninstall."
   Abort
-Exists:
+uncuiExists:
   ClearErrors
   FileOpen $0 "$INSTDIR\${EXE}" a
-  IfErrors InUse
+  IfErrors uncuiInUse
   FileClose $0
   Return
-InUse:
+uncuiInUse:
   StrCpy $wasInUse 1
 
   MessageBox MB_RETRYCANCEL|MB_ICONQUESTION \
     "${EXE} is running.$\r$\nPlease close it and retry.$\r$\n$INSTDIR\${EXE}" \
-    IDRETRY Exists
+    IDRETRY uncuiRetry
 
-  MessageBox MB_OK|MB_ICONSTOP "Cannot continue to install if ${EXE} is running."
+  MessageBox MB_OK|MB_ICONSTOP "Cannot continue to uninstall if ${EXE} is running."
   Abort
 FunctionEnd
 
 Function un.GetWantAssoc
   Push $0
-  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "RemoveAssociation"
-  StrCmp $0 "" NotWantAssocLM
+  ReadRegStr $0 SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "RemoveAssociation"
+  StrCmp $0 "" ungwaDone
   StrCpy $wantAssoc $0
-  Goto WantAssocDone
-NotWantAssocLM:
-  ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "RemoveAssociation"
-  StrCmp $0 "" WantAssocDone
-  StrCpy $wantAssoc $0
-WantAssocDone:
+ungwaDone:
   Pop $0
 FunctionEnd
 
 Function un.GetWantSendTo
   Push $0
-  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "RemoveSendTo"
-  StrCmp $0 "" NotWantSendToLM
+  ReadRegStr $0 SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "RemoveSendTo"
+  StrCmp $0 "" ungwstDone
   StrCpy $wantSendTo $0
-  Goto WantSendToDone
-NotWantSendToLM:
-  ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "RemoveSendTo"
-  StrCmp $0 "" WantSendToDone
-  StrCpy $wantSendTo $0
-WantSendToDone:
+ungwstDone:
   Pop $0
 FunctionEnd
 
@@ -273,14 +275,6 @@ Section /o "un.Delete user settings"
 SectionEnd
 
 Section "Uninstall"
-  SetShellVarContext all
-  ClearErrors
-  Push $0
-  ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
-  Pop $0
-  IfErrors notCU
-  SetShellVarContext current
-notCU:  
 
   DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}"
   DeleteRegKey SHCTX Software\s3pi\${tla}

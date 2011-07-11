@@ -129,6 +129,10 @@ pushd HelpFiles
 for %%f in (*) do echo Delete $INSTDIR\HelpFiles\%%f
 echo RmDir HelpFiles
 popd
+pushd Helpers
+for %%f in (*) do echo Delete $INSTDIR\Helpers\%%f
+echo RmDir Helpers
+popd
 ) > UNINST.LOG
 attrib +r +h UNINST.LOG
 popd
