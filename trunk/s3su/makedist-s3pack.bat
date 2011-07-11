@@ -5,7 +5,8 @@ set base=%TargetName%
 rem -%ConfigurationName%
 set src=%TargetName%-Source
 
-set out=S:\Sims3\Tools\S3PackUnpacker\
+
+set out=S:\Sims3\Tools\s3su\
 
 
 set mydate=%date: =0%
@@ -16,7 +17,7 @@ set mytime=%time: =0%
 set h=%mytime:~0,2%
 set m=%mytime:~3,2%
 set s=%mytime:~6,2%
-set suffix=%yy%%mm%-%dd%-%h%%m%
+set suffix=%yy%-%mm%%dd%-%h%%m%
 
 if EXIST "%PROGRAMFILES%\nsis\makensis.exe" goto gotNotX86
 if EXIST "%PROGRAMFILES(x86)%\nsis\makensis.exe" goto gotX86
@@ -46,6 +47,7 @@ pushd ..
 7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" "s3pi S3Pack"
 popd
 
+
 pushd bin\%ConfigurationName%
 echo %suffix% >%TargetName%-Version.txt
 attrib +r %TargetName%-Version.txt
@@ -72,6 +74,7 @@ for %%f in (*) do echo File /a %%f
 
 
 
+dir /-c "..\%base%-%suffix%" | find " bytes" | for /f "tokens=3" %%f in ('find /v " free"') do @echo StrCpy $0 %%f
 ) > ..\INSTFILES.txt
 
 (
@@ -88,7 +91,7 @@ for %%f in (*) do echo Delete $INSTDIR\%%f
 attrib +r +h UNINST.LOG
 popd
 
-"%MAKENSIS%" "/DINSTFILES=INSTFILES.txt" "/DUNINSTFILES=UNINST.LOG" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%.exe"
+"%MAKENSIS%" "/DINSTFILES=INSTFILES.txt" "/DUNINSTFILES=UNINST.LOG" "/DVSN=%suffix%" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%.exe"
 
 :done:
 rmdir /s/q %base%-%suffix%
