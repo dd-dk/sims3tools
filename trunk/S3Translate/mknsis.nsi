@@ -1,6 +1,6 @@
 ;!include "MUI.nsh"
 
-!define PROGRAM_NAME "jonha's S3Translate"
+
 !define tla "S3Translate"
 !ifndef INSTFILES
   !error "Caller didn't define INSTFILES"
@@ -8,24 +8,41 @@
 !ifndef UNINSTFILES
   !error "Caller didn't define UNINSTFILES"
 !endif
-
-XPStyle on
-SetCompressor /SOLID LZMA
+!ifndef VSN
+  !error "Caller didn't define VSN"
+!endif
 
 Var wasInUse
 Var wantAll
 Var wantSM
+
+
 ; Var delSettings
 
-Name "${PROGRAM_NAME}"
-InstallDir $PROGRAMFILES\${tla}
-!define EXE ${tla}.exe
 
+InstallDir $PROGRAMFILES64\${tla}
+!define PROGRAM_NAME "jonha's S3Translate"
+!define INSTREGKEY "${tla}"
+!define SMDIR "$SMPROGRAMS\${tla}"
+!define EXE ${tla}.exe
+!define LNK "${tla}.lnk"
+
+
+
+
+
+
+
+
+
+SetCompressor /SOLID LZMA
+XPStyle on
+Name "${PROGRAM_NAME}"
 AddBrandingImage top 0
 ; Icon Resources\${tla}.ico
 ; UninstallIcon Resources\${tla}.ico
 
-; Request application privileges for Windows Vista
+; Request application privileges for Windows Vista and above
 RequestExecutionLevel admin
 
 LicenseData "gpl.txt"
@@ -48,6 +65,15 @@ Section "Create Start Menu entry"
   StrCpy $wantSM "Y"
 SectionEnd
 
+
+
+
+
+
+
+
+
+
 Section
   SetShellVarContext all
   StrCmp "Y" $wantAll gotAll
@@ -55,18 +81,24 @@ Section
 gotAll:  
 
   SetOutPath $INSTDIR
-  ; Write the installation path into the registry
-  WriteRegStr HKLM Software\s3pi\${tla} "InstallDir" "$INSTDIR"
-  
-  ; Write the uninstall keys for Windows
-  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}" "DisplayName" "${PROGRAM_NAME}"
-  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}" "UninstallString" '"$INSTDIR\uninst-${tla}.exe"'
-  WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}" "NoModify" 1
-  WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}" "NoRepair" 1
+
+  !include ${INSTFILES}
+  IntOp $0 $0 / 1024
 
   WriteUninstaller uninst-${tla}.exe
-  
-  !include ${INSTFILES}
+
+  ; Write the uninstall keys for Windows
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "DisplayIcon" "$INSTDIR\${EXE}"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "DisplayName" "${PROGRAM_NAME}"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "DisplayVersion" "${VSN}"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "HelpLink" "http://dino.drealm.info/den/denforum/index.php?board=20.0"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation" "$INSTDIR"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "Publisher" "Peter L Jones"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "UninstallString" '"$INSTDIR\uninst-${tla}.exe"'
+  ; $0 is set in ${INSTFILES} by the batch file...
+  WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "EstimatedSize" $0
+  WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "NoModify" 1
+  WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "NoRepair" 1
 
   StrCmp "Y" $wantSM wantSM noWantSM
 wantSM:
@@ -75,6 +107,19 @@ wantSM:
   CreateShortCut "$SMPROGRAMS\${tla}\Uninstall.lnk" "$INSTDIR\uninst-${tla}.exe" "" "" "" SW_SHOWNORMAL "" "Uninstall"
   CreateShortCut "$SMPROGRAMS\${tla}\${tla}-Version.lnk" "$INSTDIR\${tla}-Version.txt" "" "" "" SW_SHOWNORMAL "" "Show version"
 noWantSM:
+
+
+
+
+
+
+
+
+
+
+
+
+
 SectionEnd
 
 Function .onGUIInit
@@ -89,56 +134,132 @@ FunctionEnd
 
 Function GetInstDir
   Push $0
-  ReadRegStr $0 HKLM Software\s3pi\${tla} "InstallDir"
-  StrCmp $0 "" NotInstalledLM
+  ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
+  StrCmp $0 "" gidNotCU
+  IfFileExists "$0${EXE}" gidSetINSTDIR
+gidNotCU:
+  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
+  StrCmp $0 "" gidDone
+  IfFileExists "$0${EXE}" gidSetINSTDIR gidDone
+gidSetINSTDIR:
   StrCpy $INSTDIR $0
-  Goto InstDirDone
-NotInstalledLM:
-  ReadRegStr $R0 HKCU Software\s3pi\${tla} "InstallDir"
-  StrCmp $0 "" InstDirDone
-  StrCpy $INSTDIR $0
-InstDirDone:
+gidDone:
   Pop $0
+  ClearErrors
 FunctionEnd
 
 Function CheckInUse
   StrCpy $wasInUse 0
-
-  IfFileExists "$INSTDIR\${EXE}" Exists
+cuiRetry:
+  IfFileExists "$INSTDIR\${EXE}" cuiExists
   Return
-Exists:
+cuiExists:
   ClearErrors
   FileOpen $0 "$INSTDIR\${EXE}" a
-  IfErrors InUse
+  IfErrors cuiInUse
   FileClose $0
   Return
-InUse:
+cuiInUse:
   StrCpy $wasInUse 1
 
   MessageBox MB_RETRYCANCEL|MB_ICONQUESTION \
     "${EXE} is running.$\r$\nPlease close it and retry.$\r$\n$INSTDIR\${EXE}" \
-    IDRETRY Exists
+    IDRETRY cuiRetry
 
   MessageBox MB_OK|MB_ICONSTOP "Cannot continue to install if ${EXE} is running."
   Quit
 FunctionEnd
 
 Function CheckOldVersion
-  ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}" "UninstallString"
-  StrCmp $R0 "" NotInstalledCU Installed
-NotInstalledCU:
-  ReadRegStr $R0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}" "UninstallString"
-  StrCmp $R0 "" NotInstalled
-Installed:
+  ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "UninstallString"
+  StrCmp $R0 "" covNotCU covFound
+covNotCU:
+  ReadRegStr $R0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "UninstallString"
+  StrCmp $R0 "" covDone
+covFound:
   MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
     "${PROGRAM_NAME} is already installed.$\n$\nClick [OK] to remove the previous version or [Cancel] to abort this upgrade." \
-    IDOK UnInstall
+    IDOK covUninstall
   Quit
-UnInstall:
-  ExecWait "$R0"
-NotInstalled:
+
+covUninstall:
+  ExecWait $R0
+covDone:
   ClearErrors
 FunctionEnd
+
+
+
+Function un.onGUIInit
+  Call un.GetInstDir
+  Call un.CheckInUse
+
+
+FunctionEnd
+
+Function un.GetInstDir
+  SetShellVarContext all
+  ClearErrors
+  Push $0
+  ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
+  Pop $0
+  IfErrors notCU
+  SetShellVarContext current
+notCU:  
+  ClearErrors
+
+  Push $0
+
+  ReadRegStr $0 SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
+  StrCmp $0 "" ungidBadInstallLocation
+  IfFileExists "$0" ungidSetINSTDIR
+ungidBadInstallLocation:
+  MessageBox MB_OK|MB_ICONSTOP "Cannot find Install Location."
+  Abort
+  
+ungidSetINSTDIR:
+  StrCpy $INSTDIR $0
+  Pop $0
+FunctionEnd
+
+Function un.CheckInUse
+  StrCpy $wasInUse 0
+
+uncuiRetry:
+  IfFileExists "$INSTDIR" uncuiExists
+  MessageBox MB_OK|MB_ICONSTOP "Cannot find $INSTDIR to uninstall."
+  Abort
+uncuiExists:
+  ClearErrors
+  FileOpen $0 "$INSTDIR\${EXE}" a
+  IfErrors uncuiInUse
+  FileClose $0
+  Return
+uncuiInUse:
+  StrCpy $wasInUse 1
+
+  MessageBox MB_RETRYCANCEL|MB_ICONQUESTION \
+    "${EXE} is running.$\r$\nPlease close it and retry.$\r$\n$INSTDIR\${EXE}" \
+    IDRETRY uncuiRetry
+
+  MessageBox MB_OK|MB_ICONSTOP "Cannot continue to uninstall if ${EXE} is running."
+  Abort
+FunctionEnd
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -154,19 +275,21 @@ UninstPage instfiles
 ; SectionEnd
 
 Section "Uninstall"
-  SetShellVarContext all
-  ClearErrors
-  Push $0
-  ReadRegStr $0 HKCU Software\s3pi\${tla} "InstallDir"
-  Pop $0
-  IfErrors notCU
-  SetShellVarContext current
-notCU:  
 
-  DeleteRegKey SHCTX Software\Microsoft\Windows\CurrentVersion\Uninstall\${tla}
+  DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}"
   DeleteRegKey SHCTX Software\s3pi\${tla}
 
-  RMDir /r "$SMPROGRAMS\${tla}"
+  RMDir /r "${SMDIR}"
+
+
+
+
+
+
+
+
+
+
 
   !include ${UNINSTFILES}
   Delete $INSTDIR\uninst-${tla}.exe

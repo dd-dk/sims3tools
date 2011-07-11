@@ -5,6 +5,7 @@ set base=%TargetName%
 rem -%ConfigurationName%
 set src=%TargetName%-Source
 
+
 set out=S:\Sims3\Tools\S3Translate\
 
 
@@ -46,6 +47,7 @@ pushd ..
 7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" "S3Translate"
 popd
 
+
 pushd bin\%ConfigurationName%
 echo %suffix% >%TargetName%-Version.txt
 attrib +r %TargetName%-Version.txt
@@ -56,20 +58,40 @@ del /f %TargetName%-Version.txt
 
 popd
 
+
 7za x -o"%base%-%suffix%" "%out%%base%_%suffix%.7z"
 pushd "%base%-%suffix%"
 (
 echo !cd %base%-%suffix%
 for %%f in (*) do echo File /a %%f
+
+
+
+
+
+
+
+
+
+
+dir /-c "..\%base%-%suffix%" | find " bytes" | for /f "tokens=3" %%f in ('find /v " free"') do @echo StrCpy $0 %%f
 ) > ..\INSTFILES.txt
 
 (
 for %%f in (*) do echo Delete $INSTDIR\%%f
+
+
+
+
+
+
+
+
 ) > UNINST.LOG
 attrib +r +h UNINST.LOG
 popd
 
-"%MAKENSIS%" "/DINSTFILES=INSTFILES.txt" "/DUNINSTFILES=UNINST.LOG" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%.exe"
+"%MAKENSIS%" "/DINSTFILES=INSTFILES.txt" "/DUNINSTFILES=UNINST.LOG" "/DVSN=%suffix%" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%.exe"
 
 :done:
 rmdir /s/q %base%-%suffix%
