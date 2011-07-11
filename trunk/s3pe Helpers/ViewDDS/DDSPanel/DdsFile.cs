@@ -678,7 +678,7 @@ namespace DdsFileTypePlugin
             m_pixelData = new byte[width * height * 4];
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < height; y++)
-                    setPixelRGBA(m_pixelData, 4 * (x * height + y), r, g, b, a);
+                    setPixelRGBA(m_pixelData, pixelOffset(x, y, width), r, g, b, a);
 
             if (supportHSV)
                 hsvData = RGBHSV.ColorRGBA.ConvertToColorHSVAArray(m_pixelData);
@@ -697,6 +697,38 @@ namespace DdsFileTypePlugin
         public void CreateImage(uint argb, int width, int height, bool supportHSV)
         {
             CreateImage((byte)((argb >> 16) & 0xff), (byte)((argb >> 8) & 0xff), (byte)(argb & 0xff), (byte)((argb >> 24) & 0xff), width, height, supportHSV);
+        }
+
+        /// <summary>
+        /// Creates an image from a given <seealso cref="Image"/>.
+        /// If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
+        /// </summary>
+        /// <param name="image"><seealso cref="Image"/> from which to extract image pixel.</param>
+        /// <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
+        public void CreateImage(Image image, bool supportHSV)
+        {
+            CreateImage(new Bitmap(image), supportHSV);
+        }
+
+        /// <summary>
+        /// Creates an image from a given <seealso cref="Bitmap"/>.
+        /// If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
+        /// </summary>
+        /// <param name="image"><seealso cref="Bitmap"/> from which to extract image pixel.</param>
+        /// <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
+        public void CreateImage(Bitmap image, bool supportHSV)
+        {
+            m_header = new DdsHeader();
+            m_header.m_width = (uint)image.Width;
+            m_header.m_height = (uint)image.Height;
+            m_header.m_pixelFormat.Initialise(DdsFileFormat.DDS_FORMAT_DXT1);
+            m_pixelData = new byte[image.Width * image.Height * 4];
+            for (int y = 0; y < image.Height; y++)
+                for (int x = 0; x < image.Width; x++)
+                    setPixelARGB(m_pixelData, pixelOffset(x, y, image.Width), (uint)image.GetPixel(x, y).ToArgb());
+
+            if (supportHSV)
+                hsvData = RGBHSV.ColorRGBA.ConvertToColorHSVAArray(m_pixelData);
         }
 
         void setPixelRGBA(byte[] pixelData, int offset, byte r, byte g, byte b, byte a)
@@ -719,6 +751,8 @@ namespace DdsFileTypePlugin
                 outPixelData[offset + i] = inPixelData[offset + i];
             }
         }
+
+        int pixelOffset(int x, int y, int width) { return (y * width + x) * 4; }
 
         ///  <summary>
         ///  Saves the current image using one of the supported DDS mechanisms.
@@ -785,7 +819,7 @@ namespace DdsFileTypePlugin
             {
                 for (int x = 0; x < this.GetWidth(); x++)
                 {
-                    int readPixelOffset = (y * this.GetWidth() * 4) + (x * 4);
+                    int readPixelOffset = pixelOffset(x, y, this.GetWidth());
 
                     int cred = 0;
                     int cgreen = 0;
