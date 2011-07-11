@@ -255,6 +255,36 @@ namespace DDSPanel
         }
 
         /// <summary>
+        /// Imports an <seealso cref="System.Drawing.Image"/> from the specified file using embedded color
+        /// management information in that file and uses the file as the DDS image to work on;
+        /// if <paramref name="supportHSV"/> is passed and true (default is false), the image will
+        /// support HSV shift operations.
+        /// </summary>
+        /// <param name="filename">A string that contains the name of the file from which to read the <seealso cref="System.Drawing.Image"/>.</param>
+        /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
+        /// <exception cref="System.OutOfMemoryException">
+        /// The file does not have a valid image format.<br/>
+        /// -or-<br/>
+        /// GDI+ does not support the pixel format of the file.
+        /// </exception>
+        /// <exception cref="System.IO.FileNotFoundException">The specified file does not exist.</exception>
+        /// <exception cref="System.ArgumentException">filename is a System.Uri.</exception>
+        public void Import(string filename, bool supportHSV = false)
+        {
+            try
+            {
+                this.Enabled = false;
+                Application.UseWaitCursor = true;
+                Image import = Image.FromFile(filename, true);
+                ddsFile.CreateImage(import, supportHSV);
+                loaded = true;
+            }
+            finally { this.Enabled = true; Application.UseWaitCursor = false; }
+            this.supportHSV = supportHSV;
+            ckb_CheckedChanged(null, null);
+        }
+
+        /// <summary>
         /// Saves the current image to a DDS in <paramref name="stream"/>.
         /// </summary>
         /// <param name="stream"></param>
