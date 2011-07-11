@@ -30,13 +30,13 @@
         {
             this.hueShift = new System.Windows.Forms.NumericUpDown();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.btnHSVShift = new System.Windows.Forms.Button();
             this.saturationShift = new System.Windows.Forms.NumericUpDown();
             this.valueShift = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
+            this.btnHSVShift = new System.Windows.Forms.Button();
             this.btnOpenImage = new System.Windows.Forms.Button();
             this.btnOpenMask = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
@@ -55,7 +55,6 @@
             this.label11 = new System.Windows.Forms.Label();
             this.btnApplyShift = new System.Windows.Forms.Button();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
-            this.btnSetColour = new System.Windows.Forms.Button();
             this.nudRed = new System.Windows.Forms.NumericUpDown();
             this.nudGreen = new System.Windows.Forms.NumericUpDown();
             this.nudBlue = new System.Windows.Forms.NumericUpDown();
@@ -65,6 +64,7 @@
             this.label15 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
             this.nudAlpha = new System.Windows.Forms.NumericUpDown();
+            this.btnSetColour = new System.Windows.Forms.Button();
             this.nudCh1Red = new System.Windows.Forms.NumericUpDown();
             this.nudCh1Green = new System.Windows.Forms.NumericUpDown();
             this.nudCh1Blue = new System.Windows.Forms.NumericUpDown();
@@ -79,7 +79,6 @@
             this.nudCh2Alpha = new System.Windows.Forms.NumericUpDown();
             this.btnApplyColour = new System.Windows.Forms.Button();
             this.btnClear = new System.Windows.Forms.Button();
-            this.panel1 = new System.Windows.Forms.Panel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel11 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel9 = new System.Windows.Forms.TableLayoutPanel();
@@ -119,9 +118,13 @@
             this.ckbNoCh3 = new System.Windows.Forms.CheckBox();
             this.ckbNoCh4 = new System.Windows.Forms.CheckBox();
             this.ddsMask = new DDSPanel.DDSPanel();
-            this.panel2 = new System.Windows.Forms.Panel();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.btnSave = new System.Windows.Forms.Button();
+            this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel10 = new System.Windows.Forms.TableLayoutPanel();
+            this.btnExport = new System.Windows.Forms.Button();
+            this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
+            this.btnImport = new System.Windows.Forms.Button();
             this.ddsPanel1 = new DDSPanel.DDSPanel();
             ((System.ComponentModel.ISupportInitialize)(this.hueShift)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
@@ -146,7 +149,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudCh2Green)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudCh2Blue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudCh2Alpha)).BeginInit();
-            this.panel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel11.SuspendLayout();
             this.tableLayoutPanel9.SuspendLayout();
@@ -172,7 +174,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.pbCh3)).BeginInit();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbCh4)).BeginInit();
-            this.panel2.SuspendLayout();
+            this.tableLayoutPanel5.SuspendLayout();
+            this.tableLayoutPanel10.SuspendLayout();
+            this.tableLayoutPanel6.SuspendLayout();
             this.SuspendLayout();
             // 
             // hueShift
@@ -206,7 +210,6 @@
             this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Controls.Add(this.btnHSVShift, 0, 5);
             this.tableLayoutPanel1.Controls.Add(this.hueShift, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.saturationShift, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.valueShift, 1, 3);
@@ -214,30 +217,16 @@
             this.tableLayoutPanel1.Controls.Add(this.label2, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.label3, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.label17, 0, 0);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(282, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 6;
+            this.tableLayoutPanel1.RowCount = 4;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(114, 146);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(114, 91);
             this.tableLayoutPanel1.TabIndex = 0;
-            // 
-            // btnHSVShift
-            // 
-            this.btnHSVShift.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.tableLayoutPanel1.SetColumnSpan(this.btnHSVShift, 2);
-            this.btnHSVShift.Location = new System.Drawing.Point(19, 120);
-            this.btnHSVShift.Name = "btnHSVShift";
-            this.btnHSVShift.Size = new System.Drawing.Size(75, 23);
-            this.btnHSVShift.TabIndex = 7;
-            this.btnHSVShift.Text = "Apply";
-            this.btnHSVShift.UseVisualStyleBackColor = true;
-            this.btnHSVShift.Click += new System.EventHandler(this.btnHSVShift_Click);
             // 
             // saturationShift
             // 
@@ -330,9 +319,21 @@
             this.label17.TabIndex = 0;
             this.label17.Text = "Overall shifts:";
             // 
+            // btnHSVShift
+            // 
+            this.btnHSVShift.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnHSVShift.Location = new System.Drawing.Point(301, 120);
+            this.btnHSVShift.Name = "btnHSVShift";
+            this.btnHSVShift.Size = new System.Drawing.Size(75, 23);
+            this.btnHSVShift.TabIndex = 7;
+            this.btnHSVShift.Text = "Apply";
+            this.btnHSVShift.UseVisualStyleBackColor = true;
+            this.btnHSVShift.Click += new System.EventHandler(this.btnHSVShift_Click);
+            // 
             // btnOpenImage
             // 
-            this.btnOpenImage.Location = new System.Drawing.Point(3, 5);
+            this.btnOpenImage.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnOpenImage.Location = new System.Drawing.Point(3, 3);
             this.btnOpenImage.Name = "btnOpenImage";
             this.btnOpenImage.Size = new System.Drawing.Size(75, 23);
             this.btnOpenImage.TabIndex = 0;
@@ -597,7 +598,6 @@
             this.tableLayoutPanel4.ColumnCount = 2;
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel4.Controls.Add(this.btnSetColour, 0, 5);
             this.tableLayoutPanel4.Controls.Add(this.nudRed, 1, 1);
             this.tableLayoutPanel4.Controls.Add(this.nudGreen, 1, 2);
             this.tableLayoutPanel4.Controls.Add(this.nudBlue, 1, 3);
@@ -607,30 +607,17 @@
             this.tableLayoutPanel4.Controls.Add(this.label15, 0, 0);
             this.tableLayoutPanel4.Controls.Add(this.label16, 0, 4);
             this.tableLayoutPanel4.Controls.Add(this.nudAlpha, 1, 4);
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(81, 0);
             this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
-            this.tableLayoutPanel4.RowCount = 6;
+            this.tableLayoutPanel4.RowCount = 5;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(100, 146);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(100, 117);
             this.tableLayoutPanel4.TabIndex = 0;
-            // 
-            // btnSetColour
-            // 
-            this.btnSetColour.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.tableLayoutPanel4.SetColumnSpan(this.btnSetColour, 2);
-            this.btnSetColour.Location = new System.Drawing.Point(12, 120);
-            this.btnSetColour.Name = "btnSetColour";
-            this.btnSetColour.Size = new System.Drawing.Size(75, 23);
-            this.btnSetColour.TabIndex = 9;
-            this.btnSetColour.Text = "Create";
-            this.btnSetColour.UseVisualStyleBackColor = true;
-            this.btnSetColour.Click += new System.EventHandler(this.btnCreateImage_Click);
             // 
             // nudRed
             // 
@@ -710,9 +697,9 @@
             this.tableLayoutPanel4.SetColumnSpan(this.label15, 2);
             this.label15.Location = new System.Drawing.Point(3, 0);
             this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(89, 13);
+            this.label15.Size = new System.Drawing.Size(91, 13);
             this.label15.TabIndex = 0;
-            this.label15.Text = "Set image colour:";
+            this.label15.Text = "Solid colour DDS:";
             // 
             // label16
             // 
@@ -742,6 +729,17 @@
             0,
             0,
             0});
+            // 
+            // btnSetColour
+            // 
+            this.btnSetColour.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnSetColour.Location = new System.Drawing.Point(93, 120);
+            this.btnSetColour.Name = "btnSetColour";
+            this.btnSetColour.Size = new System.Drawing.Size(75, 23);
+            this.btnSetColour.TabIndex = 9;
+            this.btnSetColour.Text = "Create";
+            this.btnSetColour.UseVisualStyleBackColor = true;
+            this.btnSetColour.Click += new System.EventHandler(this.btnCreateImage_Click);
             // 
             // nudCh1Red
             // 
@@ -915,24 +913,14 @@
             // 
             // btnClear
             // 
-            this.btnClear.Location = new System.Drawing.Point(3, 126);
+            this.btnClear.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnClear.Location = new System.Drawing.Point(184, 120);
             this.btnClear.Name = "btnClear";
             this.btnClear.Size = new System.Drawing.Size(75, 23);
             this.btnClear.TabIndex = 1;
             this.btnClear.Text = "Clear";
             this.btnClear.UseVisualStyleBackColor = true;
             this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
-            // 
-            // panel1
-            // 
-            this.panel1.AutoSize = true;
-            this.panel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel1.Controls.Add(this.tableLayoutPanel4);
-            this.panel1.Location = new System.Drawing.Point(84, 5);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(102, 148);
-            this.panel1.TabIndex = 2;
             // 
             // groupBox1
             // 
@@ -941,7 +929,7 @@
             this.groupBox1.Controls.Add(this.tableLayoutPanel11);
             this.groupBox1.Location = new System.Drawing.Point(3, 159);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(453, 394);
+            this.groupBox1.Size = new System.Drawing.Size(447, 388);
             this.groupBox1.TabIndex = 4;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Mask tools";
@@ -965,7 +953,7 @@
             this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel11.Size = new System.Drawing.Size(441, 356);
+            this.tableLayoutPanel11.Size = new System.Drawing.Size(435, 350);
             this.tableLayoutPanel11.TabIndex = 7;
             // 
             // tableLayoutPanel9
@@ -1032,7 +1020,8 @@
             this.tableLayoutPanel9.Controls.Add(this.ckbNoCh2, 2, 9);
             this.tableLayoutPanel9.Controls.Add(this.ckbNoCh3, 3, 9);
             this.tableLayoutPanel9.Controls.Add(this.ckbNoCh4, 4, 9);
-            this.tableLayoutPanel9.Location = new System.Drawing.Point(3, 74);
+            this.tableLayoutPanel9.Location = new System.Drawing.Point(0, 71);
+            this.tableLayoutPanel9.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel9.Name = "tableLayoutPanel9";
             this.tableLayoutPanel9.RowCount = 10;
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -1581,17 +1570,6 @@
             this.ddsMask.TabStop = false;
             this.ddsMask.DoubleClick += new System.EventHandler(this.ddsMask_DoubleClick);
             // 
-            // panel2
-            // 
-            this.panel2.AutoSize = true;
-            this.panel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel2.Controls.Add(this.tableLayoutPanel1);
-            this.panel2.Location = new System.Drawing.Point(192, 5);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(116, 148);
-            this.panel2.TabIndex = 3;
-            // 
             // saveFileDialog1
             // 
             this.saveFileDialog1.DefaultExt = "dds";
@@ -1601,13 +1579,96 @@
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(314, 5);
+            this.btnSave.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnSave.Location = new System.Drawing.Point(3, 3);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 2;
             this.btnSave.Text = "Save DDS...";
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            // 
+            // tableLayoutPanel5
+            // 
+            this.tableLayoutPanel5.AutoSize = true;
+            this.tableLayoutPanel5.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tableLayoutPanel5.ColumnCount = 5;
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel5.Controls.Add(this.tableLayoutPanel6, 0, 0);
+            this.tableLayoutPanel5.Controls.Add(this.btnHSVShift, 4, 1);
+            this.tableLayoutPanel5.Controls.Add(this.tableLayoutPanel1, 4, 0);
+            this.tableLayoutPanel5.Controls.Add(this.tableLayoutPanel4, 1, 0);
+            this.tableLayoutPanel5.Controls.Add(this.btnSetColour, 1, 1);
+            this.tableLayoutPanel5.Controls.Add(this.tableLayoutPanel10, 2, 0);
+            this.tableLayoutPanel5.Controls.Add(this.btnClear, 2, 1);
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(3, 9);
+            this.tableLayoutPanel5.Name = "tableLayoutPanel5";
+            this.tableLayoutPanel5.RowCount = 2;
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(396, 146);
+            this.tableLayoutPanel5.TabIndex = 8;
+            // 
+            // tableLayoutPanel10
+            // 
+            this.tableLayoutPanel10.AutoSize = true;
+            this.tableLayoutPanel10.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tableLayoutPanel10.ColumnCount = 1;
+            this.tableLayoutPanel10.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel10.Controls.Add(this.btnExport, 0, 1);
+            this.tableLayoutPanel10.Controls.Add(this.btnSave, 0, 0);
+            this.tableLayoutPanel10.Location = new System.Drawing.Point(181, 0);
+            this.tableLayoutPanel10.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel10.Name = "tableLayoutPanel10";
+            this.tableLayoutPanel10.RowCount = 2;
+            this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel10.Size = new System.Drawing.Size(81, 58);
+            this.tableLayoutPanel10.TabIndex = 9;
+            // 
+            // btnExport
+            // 
+            this.btnExport.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnExport.Location = new System.Drawing.Point(3, 32);
+            this.btnExport.Name = "btnExport";
+            this.btnExport.Size = new System.Drawing.Size(75, 23);
+            this.btnExport.TabIndex = 3;
+            this.btnExport.Text = "Export...";
+            this.btnExport.UseVisualStyleBackColor = true;
+            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
+            // 
+            // tableLayoutPanel6
+            // 
+            this.tableLayoutPanel6.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.tableLayoutPanel6.AutoSize = true;
+            this.tableLayoutPanel6.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tableLayoutPanel6.ColumnCount = 1;
+            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel6.Controls.Add(this.btnOpenImage, 0, 0);
+            this.tableLayoutPanel6.Controls.Add(this.btnImport, 0, 1);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel6.Name = "tableLayoutPanel6";
+            this.tableLayoutPanel6.RowCount = 2;
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(81, 58);
+            this.tableLayoutPanel6.TabIndex = 9;
+            // 
+            // btnImport
+            // 
+            this.btnImport.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnImport.Location = new System.Drawing.Point(3, 32);
+            this.btnImport.Name = "btnImport";
+            this.btnImport.Size = new System.Drawing.Size(75, 23);
+            this.btnImport.TabIndex = 1;
+            this.btnImport.Text = "Import...";
+            this.btnImport.UseVisualStyleBackColor = true;
+            this.btnImport.Click += new System.EventHandler(this.btnImport_Click);
             // 
             // ddsPanel1
             // 
@@ -1616,27 +1677,23 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.ddsPanel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.ddsPanel1.Fit = true;
-            this.ddsPanel1.Location = new System.Drawing.Point(458, 5);
+            this.ddsPanel1.Location = new System.Drawing.Point(453, 5);
             this.ddsPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.ddsPanel1.MaxSize = new System.Drawing.Size(0, 0);
             this.ddsPanel1.Name = "ddsPanel1";
-            this.ddsPanel1.Size = new System.Drawing.Size(529, 548);
+            this.ddsPanel1.Size = new System.Drawing.Size(513, 542);
             this.ddsPanel1.TabIndex = 5;
             // 
             // HSVTest
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(995, 562);
-            this.Controls.Add(this.btnSave);
-            this.Controls.Add(this.panel2);
+            this.ClientSize = new System.Drawing.Size(975, 557);
+            this.Controls.Add(this.tableLayoutPanel5);
             this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.panel1);
-            this.Controls.Add(this.btnClear);
-            this.Controls.Add(this.btnOpenImage);
             this.Controls.Add(this.ddsPanel1);
             this.Name = "HSVTest";
-            this.Text = "HSVTest";
+            this.Text = "DDSPanel Test Tool";
             ((System.ComponentModel.ISupportInitialize)(this.hueShift)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
@@ -1662,8 +1719,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudCh2Green)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudCh2Blue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudCh2Alpha)).EndInit();
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.tableLayoutPanel11.ResumeLayout(false);
@@ -1696,8 +1751,10 @@
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbCh4)).EndInit();
-            this.panel2.ResumeLayout(false);
-            this.panel2.PerformLayout();
+            this.tableLayoutPanel5.ResumeLayout(false);
+            this.tableLayoutPanel5.PerformLayout();
+            this.tableLayoutPanel10.ResumeLayout(false);
+            this.tableLayoutPanel6.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1756,11 +1813,9 @@
         private System.Windows.Forms.NumericUpDown nudCh2Alpha;
         private System.Windows.Forms.Button btnApplyColour;
         private System.Windows.Forms.Button btnClear;
-        private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.GroupBox groupBox1;
         private DDSPanel.DDSPanel ddsMask;
         private System.Windows.Forms.Button btnHSVShift;
-        private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.PictureBox pbCh1;
         private System.Windows.Forms.Button btnApplyImage;
         private System.Windows.Forms.PictureBox pbCh2;
@@ -1800,5 +1855,10 @@
         private System.Windows.Forms.CheckBox ckbNoCh2;
         private System.Windows.Forms.CheckBox ckbNoCh3;
         private System.Windows.Forms.CheckBox ckbNoCh4;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel10;
+        private System.Windows.Forms.Button btnExport;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
+        private System.Windows.Forms.Button btnImport;
     }
 }

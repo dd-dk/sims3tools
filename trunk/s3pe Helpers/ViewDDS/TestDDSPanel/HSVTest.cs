@@ -28,6 +28,16 @@ namespace TestDDSPanel
             }
         }
 
+        private void btnImport_Click(object sender, EventArgs e)
+        {
+            string filename = GetImageName();
+            try
+            {
+                ddsPanel1.Import(filename, true);
+            }
+            catch { }
+        }
+
         private void btnCreateImage_Click(object sender, EventArgs e)
         {
             int width = ddsPanel1.MaskSize != Size.Empty ? ddsPanel1.MaskSize.Width : 128;
@@ -44,6 +54,8 @@ namespace TestDDSPanel
         {
             if (ddsPanel1.ImageSize == Size.Empty) return;
 
+            saveFileDialog1.FileName = "*.dds";
+            saveFileDialog1.FilterIndex = 0;
             DialogResult dr = saveFileDialog1.ShowDialog();
             if (dr != DialogResult.OK) return;
 
@@ -53,6 +65,31 @@ namespace TestDDSPanel
                 fs.Close();
             }
             MessageBox.Show("Saved DDS file.", "Save DDS as...");
+        }
+
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            if (ddsPanel1.ImageSize == Size.Empty) return;
+
+            string oldFilter = saveFileDialog1.Filter;
+            string oldCaption = saveFileDialog1.Title;
+            try
+            {
+                saveFileDialog1.Filter = "Image files|*.bmp;*.jpg;*.png;*.gif|All files|*.*";
+                saveFileDialog1.Title = "Save to image file";
+                saveFileDialog1.FileName = "*.bmp;*.jpg;*.png;*.gif";
+                saveFileDialog1.FilterIndex = 0;
+                DialogResult dr = saveFileDialog1.ShowDialog();
+                if (dr != DialogResult.OK) return;
+            }
+            finally { saveFileDialog1.Filter = oldFilter; saveFileDialog1.Title = oldCaption; }
+
+            try
+            {
+                ddsPanel1.Image.Save(saveFileDialog1.FileName);
+                MessageBox.Show("Saved image to file.", "Export...");
+            }
+            catch { }
         }
 
         private void btnHSVShift_Click(object sender, EventArgs e)
