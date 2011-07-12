@@ -731,6 +731,49 @@ namespace DdsFileTypePlugin
                 hsvData = RGBHSV.ColorRGBA.ConvertToColorHSVAArray(m_pixelData);
         }
 
+        // (0 + 0 + 0) / 3 = 0
+        // (255 + 255 + 255) / 3 = 255
+        /// <summary>
+        /// Converts the R, G and B channels of the supplied <paramref name="image"/> to greyscale
+        /// and loads this into the Alpha channel of the current image.
+        /// </summary>
+        /// <param name="image"><seealso cref="DdsFile"/> to extract greyscale data from for alpha channel.</param>
+        public void SetAlphaFromGreyscale(DdsFile image)
+        {
+            for (int x = 0; x < this.GetWidth(); x++)
+                for (int y = 0; y < this.GetHeight(); y++)
+                {
+                    int offset = pixelOffset(x, y, this.GetWidth());
+                    m_pixelData[offset + 3] = (byte)((image.m_pixelData[offset + 0] + image.m_pixelData[offset + 1] + image.m_pixelData[offset + 2]) / 3);
+                }
+        }
+
+        /// <summary>
+        /// Converts the R, G and B channels of the supplied <paramref name="image"/> to greyscale
+        /// and loads this into the Alpha channel of the current image.
+        /// </summary>
+        /// <param name="image"><seealso cref="Image"/> to extract greyscale data from for alpha channel.</param>
+        public void SetAlphaFromGreyscale(Image image)
+        {
+            SetAlphaFromGreyscale(new Bitmap(image));
+        }
+
+        /// <summary>
+        /// Converts the R, G and B channels of the supplied <paramref name="image"/> to greyscale
+        /// and loads this into the Alpha channel of the current image.
+        /// </summary>
+        /// <param name="image"><seealso cref="Bitmap"/> to extract greyscale data from for alpha channel.</param>
+        public void SetAlphaFromGreyscale(Bitmap image)
+        {
+            for (int x = 0; x < this.GetWidth(); x++)
+                for (int y = 0; y < this.GetHeight(); y++)
+                {
+                    int offset = pixelOffset(x, y, this.GetWidth());
+                    uint argb = (uint)(image.GetPixel(x, y).ToArgb() & 0x00FFFFFF);
+                    m_pixelData[offset + 3] = (byte)((argb >> 16) + ((argb >> 8) & 0xFF) + (argb & 0xFF) / 3);
+                }
+        }
+
         void setPixelRGBA(byte[] pixelData, int offset, byte r, byte g, byte b, byte a)
         {
             pixelData[offset + 0] = r;
