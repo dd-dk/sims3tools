@@ -255,6 +255,19 @@ namespace DDSPanel
         }
 
         /// <summary>
+        /// Sets the DDS image for this <seealso cref="DDSPanel"/> from the given <paramref name="ddsfile"/>.
+        /// <seealso cref="SupportsHSV"/> is determined from the <seealso cref="DdsFile.SupportsHSV"/> value.
+        /// </summary>
+        /// <param name="ddsfile">A <seealso cref="DdsFile"/> to display in this <seealso cref="DDSPanel"/>.</param>
+        public void DDSLoad(DdsFile ddsfile)
+        {
+            this.ddsFile = ddsfile;
+            loaded = true;
+            this.supportHSV = ddsfile.SupportsHSV;
+            ckb_CheckedChanged(null, null);
+        }
+
+        /// <summary>
         /// Imports an <seealso cref="System.Drawing.Image"/> from the specified file using embedded color
         /// management information in that file and uses the file as the DDS image to work on;
         /// if <paramref name="supportHSV"/> is passed and true (default is false), the image will
@@ -436,6 +449,49 @@ namespace DDSPanel
         }
 
         /// <summary>
+        /// Set the alpha channel of the current image from the given DDS file stream.
+        /// </summary>
+        /// <param name="image"><seealso cref="Stream"/> containing a DDS image.</param>
+        public void SetAlphaFromGreyscale(Stream image)
+        {
+            DdsFile greyscale = new DdsFile();
+            greyscale.Load(image, false);
+            ddsFile.SetAlphaFromGreyscale(greyscale);
+            ckb_CheckedChanged(null, null);
+        }
+
+        /// <summary>
+        /// Set the alpha channel of the current image from the given <paramref name="greyscale"/>.
+        /// </summary>
+        /// <param name="greyscale"><seealso cref="Image"/> to use to set alpha channel.</param>
+        public void SetAlphaFromGreyscale(Image greyscale)
+        {
+            try
+            {
+                base.Enabled = false;
+                Application.UseWaitCursor = true;
+                if (greyscale.Width != image.Width || greyscale.Height != image.Height)
+                    greyscale = greyscale.GetThumbnailImage(image.Width, image.Height, gtAbort, System.IntPtr.Zero);
+                ddsFile.SetAlphaFromGreyscale(greyscale);
+            }
+            finally
+            {
+                base.Enabled = true;
+                Application.UseWaitCursor = false;
+            }
+            ckb_CheckedChanged(null, null);
+        }
+
+        /// <summary>
+        /// Set the alpha channel of the current image from the given <paramref name="greyscale"/>.
+        /// </summary>
+        /// <param name="greyscale"><seealso cref="Bitmap"/> to use to set alpha channel.</param>
+        public void SetAlphaFromGreyscale(Bitmap greyscale)
+        {
+            SetAlphaFromGreyscale(greyscale as Image);
+        }
+
+        /// <summary>
         /// Load a mask to use for HSV shifting or masked application of colours.
         /// Clears any mask currently applied.
         /// </summary>
@@ -495,6 +551,29 @@ namespace DDSPanel
                 MaskChannelToByte(maskChannels, MaskChannel.C3),
                 MaskChannelToByte(maskChannels, MaskChannel.C4),
                 width, height, false);
+        }
+
+        /// <summary>
+        /// Resize the current mask to the current image.
+        /// </summary>
+        public void ResizeMask()
+        {
+            try
+            {
+                base.Enabled = false;
+                Application.UseWaitCursor = true;
+                Image maskImage = ddsMask.Image();
+                ClearMask();
+                if (maskImage.Width != image.Width || maskImage.Height != image.Height)
+                    maskImage = maskImage.GetThumbnailImage(image.Width, image.Height, gtAbort, System.IntPtr.Zero);
+                ddsMask = new DdsFile();
+                ddsMask.CreateImage(maskImage, false);
+            }
+            finally
+            {
+                base.Enabled = true;
+                Application.UseWaitCursor = false;
+            }
         }
 
         /// <summary>
