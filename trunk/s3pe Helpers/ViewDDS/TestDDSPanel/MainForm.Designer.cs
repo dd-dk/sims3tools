@@ -1,6 +1,6 @@
-﻿namespace TestDDSPanel
+﻿namespace s3pe.DDSTool
 {
-    partial class HSVTest
+    partial class MainForm
     {
         /// <summary>
         /// Required designer variable.
@@ -33,11 +33,16 @@
             this.saturationShift = new System.Windows.Forms.NumericUpDown();
             this.valueShift = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
+            this.tlpImageSize = new System.Windows.Forms.TableLayoutPanel();
+            this.label13 = new System.Windows.Forms.Label();
+            this.lbImageW = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
+            this.lbImageH = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
             this.btnHSVShift = new System.Windows.Forms.Button();
-            this.btnOpenImage = new System.Windows.Forms.Button();
+            this.btnHSVReset = new System.Windows.Forms.Button();
             this.btnOpenMask = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.numMaskCh1Hue = new System.Windows.Forms.NumericUpDown();
@@ -54,17 +59,6 @@
             this.numMaskCh2Value = new System.Windows.Forms.NumericUpDown();
             this.label11 = new System.Windows.Forms.Label();
             this.btnApplyShift = new System.Windows.Forms.Button();
-            this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
-            this.nudRed = new System.Windows.Forms.NumericUpDown();
-            this.nudGreen = new System.Windows.Forms.NumericUpDown();
-            this.nudBlue = new System.Windows.Forms.NumericUpDown();
-            this.label12 = new System.Windows.Forms.Label();
-            this.label13 = new System.Windows.Forms.Label();
-            this.label14 = new System.Windows.Forms.Label();
-            this.label15 = new System.Windows.Forms.Label();
-            this.label16 = new System.Windows.Forms.Label();
-            this.nudAlpha = new System.Windows.Forms.NumericUpDown();
-            this.btnSetColour = new System.Windows.Forms.Button();
             this.nudCh1Red = new System.Windows.Forms.NumericUpDown();
             this.nudCh1Green = new System.Windows.Forms.NumericUpDown();
             this.nudCh1Blue = new System.Windows.Forms.NumericUpDown();
@@ -77,8 +71,7 @@
             this.nudCh2Green = new System.Windows.Forms.NumericUpDown();
             this.nudCh2Blue = new System.Windows.Forms.NumericUpDown();
             this.nudCh2Alpha = new System.Windows.Forms.NumericUpDown();
-            this.btnApplyColour = new System.Windows.Forms.Button();
-            this.btnClear = new System.Windows.Forms.Button();
+            this.btnApplyRGBA = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel11 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel9 = new System.Windows.Forms.TableLayoutPanel();
@@ -117,30 +110,43 @@
             this.ckbNoCh2 = new System.Windows.Forms.CheckBox();
             this.ckbNoCh3 = new System.Windows.Forms.CheckBox();
             this.ckbNoCh4 = new System.Windows.Forms.CheckBox();
-            this.ddsMask = new DDSPanel.DDSPanel();
+            this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
+            this.tlpMaskSize = new System.Windows.Forms.TableLayoutPanel();
+            this.label12 = new System.Windows.Forms.Label();
+            this.lbMaskW = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.lbMaskH = new System.Windows.Forms.Label();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-            this.btnSave = new System.Windows.Forms.Button();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
-            this.tableLayoutPanel10 = new System.Windows.Forms.TableLayoutPanel();
-            this.btnExport = new System.Windows.Forms.Button();
-            this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
-            this.btnImport = new System.Windows.Forms.Button();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importImageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.reloadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importAlphaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ddsMaskCh1 = new DDSPanel.DDSPanel();
+            this.ddsMaskCh2 = new DDSPanel.DDSPanel();
+            this.ddsMaskCh3 = new DDSPanel.DDSPanel();
+            this.ddsMaskCh4 = new DDSPanel.DDSPanel();
             this.ddsPanel1 = new DDSPanel.DDSPanel();
             ((System.ComponentModel.ISupportInitialize)(this.hueShift)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.saturationShift)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.valueShift)).BeginInit();
+            this.tlpImageSize.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh1Hue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh1Saturation)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh1Value)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh2Hue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh2Saturation)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh2Value)).BeginInit();
-            this.tableLayoutPanel4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.nudRed)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nudGreen)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nudBlue)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nudAlpha)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudCh1Red)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudCh1Green)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudCh1Blue)).BeginInit();
@@ -174,9 +180,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.pbCh3)).BeginInit();
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbCh4)).BeginInit();
+            this.tableLayoutPanel4.SuspendLayout();
+            this.tlpMaskSize.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
-            this.tableLayoutPanel10.SuspendLayout();
-            this.tableLayoutPanel6.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // hueShift
@@ -188,7 +195,7 @@
             0,
             0,
             65536});
-            this.hueShift.Location = new System.Drawing.Point(39, 16);
+            this.hueShift.Location = new System.Drawing.Point(39, 22);
             this.hueShift.Maximum = new decimal(new int[] {
             1,
             0,
@@ -207,17 +214,23 @@
             // 
             this.tableLayoutPanel1.AutoSize = true;
             this.tableLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel1.ColumnCount = 2;
+            this.tableLayoutPanel1.ColumnCount = 5;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.Controls.Add(this.hueShift, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.saturationShift, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.valueShift, 1, 3);
             this.tableLayoutPanel1.Controls.Add(this.label1, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.tlpImageSize, 4, 1);
             this.tableLayoutPanel1.Controls.Add(this.label2, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.label3, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.label17, 0, 0);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(282, 0);
+            this.tableLayoutPanel1.Controls.Add(this.btnHSVShift, 2, 3);
+            this.tableLayoutPanel1.Controls.Add(this.btnHSVReset, 2, 2);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 4;
@@ -225,8 +238,8 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(114, 91);
-            this.tableLayoutPanel1.TabIndex = 0;
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(288, 103);
+            this.tableLayoutPanel1.TabIndex = 1;
             // 
             // saturationShift
             // 
@@ -237,7 +250,7 @@
             0,
             0,
             65536});
-            this.saturationShift.Location = new System.Drawing.Point(39, 42);
+            this.saturationShift.Location = new System.Drawing.Point(39, 49);
             this.saturationShift.Maximum = new decimal(new int[] {
             1,
             0,
@@ -261,7 +274,7 @@
             0,
             0,
             65536});
-            this.valueShift.Location = new System.Drawing.Point(39, 68);
+            this.valueShift.Location = new System.Drawing.Point(39, 78);
             this.valueShift.Maximum = new decimal(new int[] {
             1,
             0,
@@ -280,18 +293,76 @@
             // 
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(0, 19);
+            this.label1.Location = new System.Drawing.Point(0, 25);
             this.label1.Margin = new System.Windows.Forms.Padding(0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(36, 13);
             this.label1.TabIndex = 1;
             this.label1.Text = "HShift";
             // 
+            // tlpImageSize
+            // 
+            this.tlpImageSize.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.tlpImageSize.AutoSize = true;
+            this.tlpImageSize.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tlpImageSize.ColumnCount = 2;
+            this.tlpImageSize.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpImageSize.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpImageSize.Controls.Add(this.label13, 0, 0);
+            this.tlpImageSize.Controls.Add(this.lbImageW, 1, 0);
+            this.tlpImageSize.Controls.Add(this.label16, 0, 1);
+            this.tlpImageSize.Controls.Add(this.lbImageH, 1, 1);
+            this.tlpImageSize.Location = new System.Drawing.Point(218, 33);
+            this.tlpImageSize.Name = "tlpImageSize";
+            this.tlpImageSize.RowCount = 2;
+            this.tableLayoutPanel1.SetRowSpan(this.tlpImageSize, 2);
+            this.tlpImageSize.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpImageSize.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpImageSize.Size = new System.Drawing.Size(67, 26);
+            this.tlpImageSize.TabIndex = 3;
+            this.tlpImageSize.Visible = false;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(3, 0);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(18, 13);
+            this.label13.TabIndex = 0;
+            this.label13.Text = "W";
+            // 
+            // lbImageW
+            // 
+            this.lbImageW.AutoSize = true;
+            this.lbImageW.Location = new System.Drawing.Point(27, 0);
+            this.lbImageW.Name = "lbImageW";
+            this.lbImageW.Size = new System.Drawing.Size(37, 13);
+            this.lbImageW.TabIndex = 0;
+            this.lbImageW.Text = "44444";
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Location = new System.Drawing.Point(3, 13);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(15, 13);
+            this.label16.TabIndex = 0;
+            this.label16.Text = "H";
+            // 
+            // lbImageH
+            // 
+            this.lbImageH.AutoSize = true;
+            this.lbImageH.Location = new System.Drawing.Point(27, 13);
+            this.lbImageH.Name = "lbImageH";
+            this.lbImageH.Size = new System.Drawing.Size(37, 13);
+            this.lbImageH.TabIndex = 0;
+            this.lbImageH.Text = "44444";
+            // 
             // label2
             // 
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(1, 45);
+            this.label2.Location = new System.Drawing.Point(1, 53);
             this.label2.Margin = new System.Windows.Forms.Padding(0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(35, 13);
@@ -302,7 +373,7 @@
             // 
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(1, 71);
+            this.label3.Location = new System.Drawing.Point(1, 82);
             this.label3.Margin = new System.Windows.Forms.Padding(0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(35, 13);
@@ -313,7 +384,8 @@
             // 
             this.label17.AutoSize = true;
             this.tableLayoutPanel1.SetColumnSpan(this.label17, 2);
-            this.label17.Location = new System.Drawing.Point(3, 0);
+            this.label17.Location = new System.Drawing.Point(3, 3);
+            this.label17.Margin = new System.Windows.Forms.Padding(3);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(70, 13);
             this.label17.TabIndex = 0;
@@ -322,7 +394,7 @@
             // btnHSVShift
             // 
             this.btnHSVShift.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnHSVShift.Location = new System.Drawing.Point(301, 120);
+            this.btnHSVShift.Location = new System.Drawing.Point(117, 77);
             this.btnHSVShift.Name = "btnHSVShift";
             this.btnHSVShift.Size = new System.Drawing.Size(75, 23);
             this.btnHSVShift.TabIndex = 7;
@@ -330,16 +402,15 @@
             this.btnHSVShift.UseVisualStyleBackColor = true;
             this.btnHSVShift.Click += new System.EventHandler(this.btnHSVShift_Click);
             // 
-            // btnOpenImage
+            // btnHSVReset
             // 
-            this.btnOpenImage.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnOpenImage.Location = new System.Drawing.Point(3, 3);
-            this.btnOpenImage.Name = "btnOpenImage";
-            this.btnOpenImage.Size = new System.Drawing.Size(75, 23);
-            this.btnOpenImage.TabIndex = 0;
-            this.btnOpenImage.Text = "Load DDS...";
-            this.btnOpenImage.UseVisualStyleBackColor = true;
-            this.btnOpenImage.Click += new System.EventHandler(this.btnOpenImage_Click);
+            this.btnHSVReset.Location = new System.Drawing.Point(117, 48);
+            this.btnHSVReset.Name = "btnHSVReset";
+            this.btnHSVReset.Size = new System.Drawing.Size(75, 23);
+            this.btnHSVReset.TabIndex = 8;
+            this.btnHSVReset.Text = "Reset";
+            this.btnHSVReset.UseVisualStyleBackColor = true;
+            this.btnHSVReset.Click += new System.EventHandler(this.btnHSVReset_Click);
             // 
             // btnOpenMask
             // 
@@ -591,156 +662,6 @@
             this.btnApplyShift.UseVisualStyleBackColor = true;
             this.btnApplyShift.Click += new System.EventHandler(this.btnApplyShift_Click);
             // 
-            // tableLayoutPanel4
-            // 
-            this.tableLayoutPanel4.AutoSize = true;
-            this.tableLayoutPanel4.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel4.ColumnCount = 2;
-            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel4.Controls.Add(this.nudRed, 1, 1);
-            this.tableLayoutPanel4.Controls.Add(this.nudGreen, 1, 2);
-            this.tableLayoutPanel4.Controls.Add(this.nudBlue, 1, 3);
-            this.tableLayoutPanel4.Controls.Add(this.label12, 0, 1);
-            this.tableLayoutPanel4.Controls.Add(this.label13, 0, 2);
-            this.tableLayoutPanel4.Controls.Add(this.label14, 0, 3);
-            this.tableLayoutPanel4.Controls.Add(this.label15, 0, 0);
-            this.tableLayoutPanel4.Controls.Add(this.label16, 0, 4);
-            this.tableLayoutPanel4.Controls.Add(this.nudAlpha, 1, 4);
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(81, 0);
-            this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel4.Name = "tableLayoutPanel4";
-            this.tableLayoutPanel4.RowCount = 5;
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(100, 117);
-            this.tableLayoutPanel4.TabIndex = 0;
-            // 
-            // nudRed
-            // 
-            this.nudRed.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.nudRed.Location = new System.Drawing.Point(39, 16);
-            this.nudRed.Maximum = new decimal(new int[] {
-            255,
-            0,
-            0,
-            0});
-            this.nudRed.Name = "nudRed";
-            this.nudRed.Size = new System.Drawing.Size(58, 20);
-            this.nudRed.TabIndex = 2;
-            // 
-            // nudGreen
-            // 
-            this.nudGreen.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.nudGreen.Location = new System.Drawing.Point(39, 42);
-            this.nudGreen.Maximum = new decimal(new int[] {
-            255,
-            0,
-            0,
-            0});
-            this.nudGreen.Name = "nudGreen";
-            this.nudGreen.Size = new System.Drawing.Size(58, 20);
-            this.nudGreen.TabIndex = 4;
-            // 
-            // nudBlue
-            // 
-            this.nudBlue.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.nudBlue.Location = new System.Drawing.Point(39, 68);
-            this.nudBlue.Maximum = new decimal(new int[] {
-            255,
-            0,
-            0,
-            0});
-            this.nudBlue.Name = "nudBlue";
-            this.nudBlue.Size = new System.Drawing.Size(58, 20);
-            this.nudBlue.TabIndex = 6;
-            // 
-            // label12
-            // 
-            this.label12.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(9, 19);
-            this.label12.Margin = new System.Windows.Forms.Padding(0);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(27, 13);
-            this.label12.TabIndex = 1;
-            this.label12.Text = "Red";
-            // 
-            // label13
-            // 
-            this.label13.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(0, 45);
-            this.label13.Margin = new System.Windows.Forms.Padding(0);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(36, 13);
-            this.label13.TabIndex = 3;
-            this.label13.Text = "Green";
-            // 
-            // label14
-            // 
-            this.label14.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(8, 71);
-            this.label14.Margin = new System.Windows.Forms.Padding(0);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(28, 13);
-            this.label14.TabIndex = 5;
-            this.label14.Text = "Blue";
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.tableLayoutPanel4.SetColumnSpan(this.label15, 2);
-            this.label15.Location = new System.Drawing.Point(3, 0);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(91, 13);
-            this.label15.TabIndex = 0;
-            this.label15.Text = "Solid colour DDS:";
-            // 
-            // label16
-            // 
-            this.label16.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(2, 97);
-            this.label16.Margin = new System.Windows.Forms.Padding(0);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(34, 13);
-            this.label16.TabIndex = 7;
-            this.label16.Text = "Alpha";
-            // 
-            // nudAlpha
-            // 
-            this.nudAlpha.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.nudAlpha.Location = new System.Drawing.Point(39, 94);
-            this.nudAlpha.Maximum = new decimal(new int[] {
-            255,
-            0,
-            0,
-            0});
-            this.nudAlpha.Name = "nudAlpha";
-            this.nudAlpha.Size = new System.Drawing.Size(58, 20);
-            this.nudAlpha.TabIndex = 8;
-            this.nudAlpha.Value = new decimal(new int[] {
-            255,
-            0,
-            0,
-            0});
-            // 
-            // btnSetColour
-            // 
-            this.btnSetColour.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnSetColour.Location = new System.Drawing.Point(93, 120);
-            this.btnSetColour.Name = "btnSetColour";
-            this.btnSetColour.Size = new System.Drawing.Size(75, 23);
-            this.btnSetColour.TabIndex = 9;
-            this.btnSetColour.Text = "Create";
-            this.btnSetColour.UseVisualStyleBackColor = true;
-            this.btnSetColour.Click += new System.EventHandler(this.btnCreateImage_Click);
-            // 
             // nudCh1Red
             // 
             this.nudCh1Red.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -899,40 +820,29 @@
             0,
             0});
             // 
-            // btnApplyColour
+            // btnApplyRGBA
             // 
-            this.btnApplyColour.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnApplyColour.Location = new System.Drawing.Point(357, 131);
-            this.btnApplyColour.Name = "btnApplyColour";
-            this.tableLayoutPanel9.SetRowSpan(this.btnApplyColour, 4);
-            this.btnApplyColour.Size = new System.Drawing.Size(75, 23);
-            this.btnApplyColour.TabIndex = 3;
-            this.btnApplyColour.Text = "ApplyRGBA";
-            this.btnApplyColour.UseVisualStyleBackColor = true;
-            this.btnApplyColour.Click += new System.EventHandler(this.btnApplyColour_Click);
-            // 
-            // btnClear
-            // 
-            this.btnClear.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnClear.Location = new System.Drawing.Point(184, 120);
-            this.btnClear.Name = "btnClear";
-            this.btnClear.Size = new System.Drawing.Size(75, 23);
-            this.btnClear.TabIndex = 1;
-            this.btnClear.Text = "Clear";
-            this.btnClear.UseVisualStyleBackColor = true;
-            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
+            this.btnApplyRGBA.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnApplyRGBA.Location = new System.Drawing.Point(357, 131);
+            this.btnApplyRGBA.Name = "btnApplyRGBA";
+            this.tableLayoutPanel9.SetRowSpan(this.btnApplyRGBA, 4);
+            this.btnApplyRGBA.Size = new System.Drawing.Size(75, 23);
+            this.btnApplyRGBA.TabIndex = 3;
+            this.btnApplyRGBA.Text = "ApplyRGBA";
+            this.btnApplyRGBA.UseVisualStyleBackColor = true;
+            this.btnApplyRGBA.Click += new System.EventHandler(this.btnApplyRGBA_Click);
             // 
             // groupBox1
             // 
             this.groupBox1.AutoSize = true;
             this.groupBox1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.groupBox1.Controls.Add(this.tableLayoutPanel11);
-            this.groupBox1.Location = new System.Drawing.Point(3, 159);
+            this.groupBox1.Location = new System.Drawing.Point(3, 106);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(447, 388);
-            this.groupBox1.TabIndex = 4;
+            this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Mask tools";
+            this.groupBox1.Text = "&Mask tools";
             // 
             // tableLayoutPanel11
             // 
@@ -945,8 +855,8 @@
             this.tableLayoutPanel11.Controls.Add(this.tableLayoutPanel9, 0, 2);
             this.tableLayoutPanel11.Controls.Add(this.ckbBlend, 0, 1);
             this.tableLayoutPanel11.Controls.Add(this.btnOpenMask, 0, 0);
-            this.tableLayoutPanel11.Controls.Add(this.ddsMask, 2, 0);
             this.tableLayoutPanel11.Controls.Add(this.btnResetMask, 1, 0);
+            this.tableLayoutPanel11.Controls.Add(this.tableLayoutPanel4, 2, 0);
             this.tableLayoutPanel11.Location = new System.Drawing.Point(6, 19);
             this.tableLayoutPanel11.Name = "tableLayoutPanel11";
             this.tableLayoutPanel11.RowCount = 3;
@@ -954,7 +864,7 @@
             this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel11.Size = new System.Drawing.Size(435, 350);
-            this.tableLayoutPanel11.TabIndex = 7;
+            this.tableLayoutPanel11.TabIndex = 1;
             // 
             // tableLayoutPanel9
             // 
@@ -971,7 +881,7 @@
             this.tableLayoutPanel9.Controls.Add(this.nudCh2Blue, 2, 6);
             this.tableLayoutPanel9.Controls.Add(this.btnApplyImage, 5, 8);
             this.tableLayoutPanel9.Controls.Add(this.nudCh2Green, 2, 5);
-            this.tableLayoutPanel9.Controls.Add(this.btnApplyColour, 5, 4);
+            this.tableLayoutPanel9.Controls.Add(this.btnApplyRGBA, 5, 4);
             this.tableLayoutPanel9.Controls.Add(this.tableLayoutPanel8, 2, 8);
             this.tableLayoutPanel9.Controls.Add(this.nudCh2Red, 2, 4);
             this.tableLayoutPanel9.Controls.Add(this.tableLayoutPanel7, 1, 8);
@@ -1556,19 +1466,85 @@
             this.ckbNoCh4.TabIndex = 9;
             this.ckbNoCh4.UseVisualStyleBackColor = true;
             // 
-            // ddsMask
+            // tableLayoutPanel4
             // 
-            this.ddsMask.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ddsMask.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.ddsMask.Location = new System.Drawing.Point(162, 0);
-            this.ddsMask.Margin = new System.Windows.Forms.Padding(0);
-            this.ddsMask.MaxSize = new System.Drawing.Size(48, 48);
-            this.ddsMask.Name = "ddsMask";
-            this.ddsMask.ShowChannelSelector = false;
-            this.ddsMask.Size = new System.Drawing.Size(48, 48);
-            this.ddsMask.TabIndex = 2;
-            this.ddsMask.TabStop = false;
-            this.ddsMask.DoubleClick += new System.EventHandler(this.ddsMask_DoubleClick);
+            this.tableLayoutPanel4.AutoSize = true;
+            this.tableLayoutPanel4.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tableLayoutPanel4.ColumnCount = 5;
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel4.Controls.Add(this.ddsMaskCh1, 0, 0);
+            this.tableLayoutPanel4.Controls.Add(this.ddsMaskCh2, 1, 0);
+            this.tableLayoutPanel4.Controls.Add(this.ddsMaskCh3, 2, 0);
+            this.tableLayoutPanel4.Controls.Add(this.ddsMaskCh4, 3, 0);
+            this.tableLayoutPanel4.Controls.Add(this.tlpMaskSize, 4, 0);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(162, 0);
+            this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel4.Name = "tableLayoutPanel4";
+            this.tableLayoutPanel4.RowCount = 1;
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(265, 48);
+            this.tableLayoutPanel4.TabIndex = 8;
+            // 
+            // tlpMaskSize
+            // 
+            this.tlpMaskSize.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.tlpMaskSize.AutoSize = true;
+            this.tlpMaskSize.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tlpMaskSize.ColumnCount = 2;
+            this.tlpMaskSize.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpMaskSize.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpMaskSize.Controls.Add(this.label12, 0, 0);
+            this.tlpMaskSize.Controls.Add(this.lbMaskW, 1, 0);
+            this.tlpMaskSize.Controls.Add(this.label14, 0, 1);
+            this.tlpMaskSize.Controls.Add(this.lbMaskH, 1, 1);
+            this.tlpMaskSize.Location = new System.Drawing.Point(195, 11);
+            this.tlpMaskSize.Name = "tlpMaskSize";
+            this.tlpMaskSize.RowCount = 2;
+            this.tlpMaskSize.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpMaskSize.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpMaskSize.Size = new System.Drawing.Size(67, 26);
+            this.tlpMaskSize.TabIndex = 3;
+            this.tlpMaskSize.Visible = false;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(3, 0);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(18, 13);
+            this.label12.TabIndex = 0;
+            this.label12.Text = "W";
+            // 
+            // lbMaskW
+            // 
+            this.lbMaskW.AutoSize = true;
+            this.lbMaskW.Location = new System.Drawing.Point(27, 0);
+            this.lbMaskW.Name = "lbMaskW";
+            this.lbMaskW.Size = new System.Drawing.Size(37, 13);
+            this.lbMaskW.TabIndex = 0;
+            this.lbMaskW.Text = "44444";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(3, 13);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(15, 13);
+            this.label14.TabIndex = 0;
+            this.label14.Text = "H";
+            // 
+            // lbMaskH
+            // 
+            this.lbMaskH.AutoSize = true;
+            this.lbMaskH.Location = new System.Drawing.Point(27, 13);
+            this.lbMaskH.Name = "lbMaskH";
+            this.lbMaskH.Size = new System.Drawing.Size(37, 13);
+            this.lbMaskH.TabIndex = 0;
+            this.lbMaskH.Text = "44444";
             // 
             // saveFileDialog1
             // 
@@ -1577,140 +1553,238 @@
             this.saveFileDialog1.Filter = "DDS Images|*.dds|All files|*.*";
             this.saveFileDialog1.Title = "Save DDS as...";
             // 
-            // btnSave
-            // 
-            this.btnSave.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnSave.Location = new System.Drawing.Point(3, 3);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(75, 23);
-            this.btnSave.TabIndex = 2;
-            this.btnSave.Text = "Save DDS...";
-            this.btnSave.UseVisualStyleBackColor = true;
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
-            // 
             // tableLayoutPanel5
             // 
-            this.tableLayoutPanel5.AutoSize = true;
             this.tableLayoutPanel5.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel5.ColumnCount = 5;
+            this.tableLayoutPanel5.ColumnCount = 2;
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel5.Controls.Add(this.tableLayoutPanel6, 0, 0);
-            this.tableLayoutPanel5.Controls.Add(this.btnHSVShift, 4, 1);
-            this.tableLayoutPanel5.Controls.Add(this.tableLayoutPanel1, 4, 0);
-            this.tableLayoutPanel5.Controls.Add(this.tableLayoutPanel4, 1, 0);
-            this.tableLayoutPanel5.Controls.Add(this.btnSetColour, 1, 1);
-            this.tableLayoutPanel5.Controls.Add(this.tableLayoutPanel10, 2, 0);
-            this.tableLayoutPanel5.Controls.Add(this.btnClear, 2, 1);
-            this.tableLayoutPanel5.Location = new System.Drawing.Point(3, 9);
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel5.Controls.Add(this.groupBox1, 0, 1);
+            this.tableLayoutPanel5.Controls.Add(this.ddsPanel1, 1, 0);
+            this.tableLayoutPanel5.Controls.Add(this.tableLayoutPanel1, 0, 0);
+            this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(0, 24);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 2;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(396, 146);
-            this.tableLayoutPanel5.TabIndex = 8;
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(919, 495);
+            this.tableLayoutPanel5.TabIndex = 0;
             // 
-            // tableLayoutPanel10
+            // menuStrip1
             // 
-            this.tableLayoutPanel10.AutoSize = true;
-            this.tableLayoutPanel10.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel10.ColumnCount = 1;
-            this.tableLayoutPanel10.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel10.Controls.Add(this.btnExport, 0, 1);
-            this.tableLayoutPanel10.Controls.Add(this.btnSave, 0, 0);
-            this.tableLayoutPanel10.Location = new System.Drawing.Point(181, 0);
-            this.tableLayoutPanel10.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel10.Name = "tableLayoutPanel10";
-            this.tableLayoutPanel10.RowCount = 2;
-            this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel10.Size = new System.Drawing.Size(81, 58);
-            this.tableLayoutPanel10.TabIndex = 9;
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(919, 24);
+            this.menuStrip1.TabIndex = 9;
+            this.menuStrip1.Text = "menuStrip1";
             // 
-            // btnExport
+            // fileToolStripMenuItem
             // 
-            this.btnExport.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnExport.Location = new System.Drawing.Point(3, 32);
-            this.btnExport.Name = "btnExport";
-            this.btnExport.Size = new System.Drawing.Size(75, 23);
-            this.btnExport.TabIndex = 3;
-            this.btnExport.Text = "Export...";
-            this.btnExport.UseVisualStyleBackColor = true;
-            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.newToolStripMenuItem,
+            this.openToolStripMenuItem,
+            this.importImageToolStripMenuItem,
+            this.importAlphaToolStripMenuItem,
+            this.reloadToolStripMenuItem,
+            this.clearToolStripMenuItem,
+            this.saveToolStripMenuItem,
+            this.saveAsToolStripMenuItem,
+            this.exportToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.exitToolStripMenuItem});
+            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
+            this.fileToolStripMenuItem.Text = "&File";
+            this.fileToolStripMenuItem.DropDownOpening += new System.EventHandler(this.fileToolStripMenuItem_DropDownOpening);
             // 
-            // tableLayoutPanel6
+            // newToolStripMenuItem
             // 
-            this.tableLayoutPanel6.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.tableLayoutPanel6.AutoSize = true;
-            this.tableLayoutPanel6.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel6.ColumnCount = 1;
-            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel6.Controls.Add(this.btnOpenImage, 0, 0);
-            this.tableLayoutPanel6.Controls.Add(this.btnImport, 0, 1);
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel6.Name = "tableLayoutPanel6";
-            this.tableLayoutPanel6.RowCount = 2;
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(81, 58);
-            this.tableLayoutPanel6.TabIndex = 9;
+            this.newToolStripMenuItem.Name = "newToolStripMenuItem";
+            this.newToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.newToolStripMenuItem.Text = "&New...";
+            this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
             // 
-            // btnImport
+            // openToolStripMenuItem
             // 
-            this.btnImport.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnImport.Location = new System.Drawing.Point(3, 32);
-            this.btnImport.Name = "btnImport";
-            this.btnImport.Size = new System.Drawing.Size(75, 23);
-            this.btnImport.TabIndex = 1;
-            this.btnImport.Text = "Import...";
-            this.btnImport.UseVisualStyleBackColor = true;
-            this.btnImport.Click += new System.EventHandler(this.btnImport_Click);
+            this.openToolStripMenuItem.Name = "openToolStripMenuItem";
+            this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.openToolStripMenuItem.Text = "&Open DDS...";
+            this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
+            // 
+            // importImageToolStripMenuItem
+            // 
+            this.importImageToolStripMenuItem.Name = "importImageToolStripMenuItem";
+            this.importImageToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.importImageToolStripMenuItem.Text = "&Import image...";
+            this.importImageToolStripMenuItem.Click += new System.EventHandler(this.importImageToolStripMenuItem_Click);
+            // 
+            // reloadToolStripMenuItem
+            // 
+            this.reloadToolStripMenuItem.Name = "reloadToolStripMenuItem";
+            this.reloadToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.reloadToolStripMenuItem.Text = "&Reload";
+            this.reloadToolStripMenuItem.Click += new System.EventHandler(this.reloadToolStripMenuItem_Click);
+            // 
+            // clearToolStripMenuItem
+            // 
+            this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
+            this.clearToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
+            this.clearToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.clearToolStripMenuItem.Text = "&Clear";
+            this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
+            // 
+            // saveToolStripMenuItem
+            // 
+            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.saveToolStripMenuItem.Text = "&Save DDS";
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
+            // 
+            // saveAsToolStripMenuItem
+            // 
+            this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.saveAsToolStripMenuItem.Text = "S&ave DDS as...";
+            this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
+            // 
+            // exportToolStripMenuItem
+            // 
+            this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.exportToolStripMenuItem.Text = "&Export...";
+            this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(172, 6);
+            // 
+            // exitToolStripMenuItem
+            // 
+            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.exitToolStripMenuItem.Text = "E&xit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            // 
+            // importAlphaToolStripMenuItem
+            // 
+            this.importAlphaToolStripMenuItem.Name = "importAlphaToolStripMenuItem";
+            this.importAlphaToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.importAlphaToolStripMenuItem.Text = "Import &Alpha...";
+            this.importAlphaToolStripMenuItem.Click += new System.EventHandler(this.importAlphaToolStripMenuItem_Click);
+            // 
+            // ddsMaskCh1
+            // 
+            this.ddsMaskCh1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ddsMaskCh1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.ddsMaskCh1.Channel2 = false;
+            this.ddsMaskCh1.Channel3 = false;
+            this.ddsMaskCh1.Channel4 = false;
+            this.ddsMaskCh1.Fit = true;
+            this.ddsMaskCh1.Location = new System.Drawing.Point(0, 0);
+            this.ddsMaskCh1.Margin = new System.Windows.Forms.Padding(0);
+            this.ddsMaskCh1.MaxSize = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh1.Name = "ddsMaskCh1";
+            this.ddsMaskCh1.ShowChannelSelector = false;
+            this.ddsMaskCh1.Size = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh1.TabIndex = 2;
+            this.ddsMaskCh1.TabStop = false;
+            // 
+            // ddsMaskCh2
+            // 
+            this.ddsMaskCh2.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ddsMaskCh2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.ddsMaskCh2.Channel1 = false;
+            this.ddsMaskCh2.Channel3 = false;
+            this.ddsMaskCh2.Channel4 = false;
+            this.ddsMaskCh2.Fit = true;
+            this.ddsMaskCh2.Location = new System.Drawing.Point(48, 0);
+            this.ddsMaskCh2.Margin = new System.Windows.Forms.Padding(0);
+            this.ddsMaskCh2.MaxSize = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh2.Name = "ddsMaskCh2";
+            this.ddsMaskCh2.ShowChannelSelector = false;
+            this.ddsMaskCh2.Size = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh2.TabIndex = 2;
+            this.ddsMaskCh2.TabStop = false;
+            // 
+            // ddsMaskCh3
+            // 
+            this.ddsMaskCh3.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ddsMaskCh3.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.ddsMaskCh3.Channel1 = false;
+            this.ddsMaskCh3.Channel2 = false;
+            this.ddsMaskCh3.Channel4 = false;
+            this.ddsMaskCh3.Fit = true;
+            this.ddsMaskCh3.Location = new System.Drawing.Point(96, 0);
+            this.ddsMaskCh3.Margin = new System.Windows.Forms.Padding(0);
+            this.ddsMaskCh3.MaxSize = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh3.Name = "ddsMaskCh3";
+            this.ddsMaskCh3.ShowChannelSelector = false;
+            this.ddsMaskCh3.Size = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh3.TabIndex = 2;
+            this.ddsMaskCh3.TabStop = false;
+            // 
+            // ddsMaskCh4
+            // 
+            this.ddsMaskCh4.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ddsMaskCh4.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.ddsMaskCh4.Channel1 = false;
+            this.ddsMaskCh4.Channel2 = false;
+            this.ddsMaskCh4.Channel3 = false;
+            this.ddsMaskCh4.Fit = true;
+            this.ddsMaskCh4.Location = new System.Drawing.Point(144, 0);
+            this.ddsMaskCh4.Margin = new System.Windows.Forms.Padding(0);
+            this.ddsMaskCh4.MaxSize = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh4.Name = "ddsMaskCh4";
+            this.ddsMaskCh4.ShowChannelSelector = false;
+            this.ddsMaskCh4.Size = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh4.TabIndex = 2;
+            this.ddsMaskCh4.TabStop = false;
             // 
             // ddsPanel1
             // 
-            this.ddsPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.ddsPanel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.ddsPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ddsPanel1.Fit = true;
-            this.ddsPanel1.Location = new System.Drawing.Point(453, 5);
+            this.ddsPanel1.Location = new System.Drawing.Point(453, 0);
             this.ddsPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.ddsPanel1.MaxSize = new System.Drawing.Size(0, 0);
             this.ddsPanel1.Name = "ddsPanel1";
-            this.ddsPanel1.Size = new System.Drawing.Size(513, 542);
-            this.ddsPanel1.TabIndex = 5;
+            this.tableLayoutPanel5.SetRowSpan(this.ddsPanel1, 2);
+            this.ddsPanel1.Size = new System.Drawing.Size(466, 497);
+            this.ddsPanel1.TabIndex = 3;
             // 
-            // HSVTest
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(975, 557);
+            this.ClientSize = new System.Drawing.Size(919, 519);
             this.Controls.Add(this.tableLayoutPanel5);
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.ddsPanel1);
-            this.Name = "HSVTest";
-            this.Text = "DDSPanel Test Tool";
+            this.Controls.Add(this.menuStrip1);
+            this.MainMenuStrip = this.menuStrip1;
+            this.Name = "MainForm";
+            this.Text = "DDS Tool";
             ((System.ComponentModel.ISupportInitialize)(this.hueShift)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.saturationShift)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.valueShift)).EndInit();
+            this.tlpImageSize.ResumeLayout(false);
+            this.tlpImageSize.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh1Hue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh1Saturation)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh1Value)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh2Hue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh2Saturation)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMaskCh2Value)).EndInit();
-            this.tableLayoutPanel4.ResumeLayout(false);
-            this.tableLayoutPanel4.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.nudRed)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nudGreen)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nudBlue)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nudAlpha)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudCh1Red)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudCh1Green)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudCh1Blue)).EndInit();
@@ -1751,10 +1825,14 @@
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbCh4)).EndInit();
+            this.tableLayoutPanel4.ResumeLayout(false);
+            this.tableLayoutPanel4.PerformLayout();
+            this.tlpMaskSize.ResumeLayout(false);
+            this.tlpMaskSize.PerformLayout();
             this.tableLayoutPanel5.ResumeLayout(false);
             this.tableLayoutPanel5.PerformLayout();
-            this.tableLayoutPanel10.ResumeLayout(false);
-            this.tableLayoutPanel6.ResumeLayout(false);
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1770,7 +1848,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button btnOpenImage;
         private System.Windows.Forms.Button btnOpenMask;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.NumericUpDown numMaskCh1Hue;
@@ -1787,17 +1864,6 @@
         private System.Windows.Forms.NumericUpDown numMaskCh2Value;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Button btnApplyShift;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
-        private System.Windows.Forms.NumericUpDown nudRed;
-        private System.Windows.Forms.NumericUpDown nudGreen;
-        private System.Windows.Forms.NumericUpDown nudBlue;
-        private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.Button btnSetColour;
-        private System.Windows.Forms.Label label13;
-        private System.Windows.Forms.Label label14;
-        private System.Windows.Forms.Label label15;
-        private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.NumericUpDown nudAlpha;
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.NumericUpDown nudCh1Red;
         private System.Windows.Forms.NumericUpDown nudCh1Green;
@@ -1811,10 +1877,9 @@
         private System.Windows.Forms.NumericUpDown nudCh2Green;
         private System.Windows.Forms.NumericUpDown nudCh2Blue;
         private System.Windows.Forms.NumericUpDown nudCh2Alpha;
-        private System.Windows.Forms.Button btnApplyColour;
-        private System.Windows.Forms.Button btnClear;
+        private System.Windows.Forms.Button btnApplyRGBA;
         private System.Windows.Forms.GroupBox groupBox1;
-        private DDSPanel.DDSPanel ddsMask;
+        private DDSPanel.DDSPanel ddsMaskCh1;
         private System.Windows.Forms.Button btnHSVShift;
         private System.Windows.Forms.PictureBox pbCh1;
         private System.Windows.Forms.Button btnApplyImage;
@@ -1822,7 +1887,6 @@
         private System.Windows.Forms.LinkLabel llCh1pb;
         private System.Windows.Forms.LinkLabel llCh2pb;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
-        private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel11;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel9;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel8;
@@ -1856,9 +1920,33 @@
         private System.Windows.Forms.CheckBox ckbNoCh3;
         private System.Windows.Forms.CheckBox ckbNoCh4;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel10;
-        private System.Windows.Forms.Button btnExport;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
-        private System.Windows.Forms.Button btnImport;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem reloadToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importImageToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem clearToolStripMenuItem;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
+        private DDSPanel.DDSPanel ddsMaskCh2;
+        private DDSPanel.DDSPanel ddsMaskCh3;
+        private DDSPanel.DDSPanel ddsMaskCh4;
+        private System.Windows.Forms.TableLayoutPanel tlpImageSize;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label lbImageW;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label lbImageH;
+        private System.Windows.Forms.TableLayoutPanel tlpMaskSize;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label lbMaskW;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Label lbMaskH;
+        private System.Windows.Forms.Button btnHSVReset;
+        private System.Windows.Forms.ToolStripMenuItem importAlphaToolStripMenuItem;
     }
 }

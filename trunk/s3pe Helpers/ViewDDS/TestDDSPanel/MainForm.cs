@@ -1,56 +1,171 @@
-﻿using System;
+﻿/***************************************************************************
+ *  Copyright (C) 2011 by Peter L Jones                                    *
+ *  pljones@users.sf.net                                                   *
+ *                                                                         *
+ *  This file is part of the Sims 3 Package Interface (s3pi)               *
+ *                                                                         *
+ *  s3pi is free software: you can redistribute it and/or modify           *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  s3pi is distributed in the hope that it will be useful,                *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with s3pi.  If not, see <http://www.gnu.org/licenses/>.          *
+ ***************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
 
-namespace TestDDSPanel
+namespace s3pe.DDSTool
 {
-    public partial class HSVTest : Form
+    public partial class MainForm : Form
     {
-        public HSVTest()
+        string currentDdsFile = null;
+        bool? currentDdsFileIsDds = null;
+
+        public MainForm()
         {
             InitializeComponent();
         }
 
-        private void btnOpenImage_Click(object sender, EventArgs e)
+        public MainForm(string filename, bool isDDS)
+            : this()
+        {
+            currentDdsFile = filename;
+            currentDdsFileIsDds = isDDS;
+            reloadToolStripMenuItem_Click(null, null);
+        }
+
+        private void fileToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            reloadToolStripMenuItem.Enabled = currentDdsFileIsDds.HasValue;
+            saveToolStripMenuItem.Enabled = currentDdsFileIsDds.HasValue && currentDdsFileIsDds == true;
+            importAlphaToolStripMenuItem.Enabled =
+                clearToolStripMenuItem.Enabled =
+                saveAsToolStripMenuItem.Enabled =
+                exportToolStripMenuItem.Enabled =
+                ddsPanel1.ImageSize != Size.Empty;
+        }
+
+        private void newToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            int width = ddsPanel1.MaskSize != Size.Empty ? ddsPanel1.MaskSize.Width : 1024;
+            int height = ddsPanel1.MaskSize != Size.Empty ? ddsPanel1.MaskSize.Height : 1024;
+
+            NewDDSParameters parms = new NewDDSParameters(width, height);
+            DialogResult dr = parms.ShowDialog();
+            if (dr != DialogResult.OK) return;
+
+            currentDdsFile = null;
+            currentDdsFileIsDds = null;
+            ddsPanel1.CreateImage(parms.Value.Red, parms.Value.Green, parms.Value.Blue, parms.Value.Alpha, parms.Value.Width, parms.Value.Height, true);
+            lbImageW.Text = ddsPanel1.ImageSize.Width + "";
+            lbImageH.Text = ddsPanel1.ImageSize.Height + "";
+            tlpImageSize.Visible = true;
+            checkMaskSize();
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             openFileDialog1.FileName = "*.dds";
             openFileDialog1.FilterIndex = 0;
             DialogResult dr = openFileDialog1.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            using (FileStream fs = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read))
-            {
-                ddsPanel1.DDSLoad(fs, true);
-                fs.Close();
-            }
+            currentDdsFile = openFileDialog1.FileName;
+            currentDdsFileIsDds = true;
+            openDDS(currentDdsFile);
         }
 
-        private void btnImport_Click(object sender, EventArgs e)
+        void openDDS(string filename)
         {
-            string filename = GetImageName();
             try
             {
-                ddsPanel1.Import(filename, true);
+                using (FileStream fs = new FileStream(filename, FileMode.Open, FileAccess.Read))
+                {
+                    ddsPanel1.DDSLoad(fs, true);
+                    fs.Close();
+                }
+                lbImageW.Text = ddsPanel1.ImageSize.Width + "";
+                lbImageH.Text = ddsPanel1.ImageSize.Height + "";
+                tlpImageSize.Visible = true;
+                checkMaskSize();
             }
             catch { }
         }
 
-        private void btnCreateImage_Click(object sender, EventArgs e)
+        private void importImageToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            int width = ddsPanel1.MaskSize != Size.Empty ? ddsPanel1.MaskSize.Width : 128;
-            int height = ddsPanel1.MaskSize != Size.Empty ? ddsPanel1.MaskSize.Height : 128;
-            ddsPanel1.CreateImage((byte)nudRed.Value, (byte)nudGreen.Value, (byte)nudBlue.Value, (byte)nudAlpha.Value, width, height, true);
+            string filename = GetImageName();
+            if (filename == null || filename == "" || !File.Exists(filename))
+                return;
+
+            currentDdsFile = filename;
+            currentDdsFileIsDds = false;
+            openImage(currentDdsFile);
         }
 
-        private void btnClear_Click(object sender, EventArgs e)
+        void openImage(string filename)
         {
+            try
+            {
+                ddsPanel1.Import(filename, true);
+                lbImageW.Text = ddsPanel1.ImageSize.Width + "";
+                lbImageH.Text = ddsPanel1.ImageSize.Height + "";
+                tlpImageSize.Visible = true;
+                checkMaskSize();
+            }
+            catch { }
+        }
+
+        private void importAlphaToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (ddsPanel1.ImageSize == Size.Empty) return;
+
+            string filename = GetImageName();
+            if (filename == null || filename == "" || !File.Exists(filename))
+                return;
+
+            Image alphaChannelGreyScale = Image.FromFile(filename, true);
+            ddsPanel1.SetAlphaFromGreyscale(alphaChannelGreyScale);
+        }
+
+        private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (currentDdsFileIsDds.HasValue)
+            {
+                if (currentDdsFileIsDds == true)
+                    openDDS(currentDdsFile);
+                else
+                    openImage(currentDdsFile);
+            }
+        }
+
+        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            currentDdsFile = null;
+            currentDdsFileIsDds = null;
+            tlpImageSize.Visible = false;
+
             ddsPanel1.Clear();
         }
 
-        private void btnSave_Click(object sender, EventArgs e)
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!currentDdsFileIsDds.HasValue || currentDdsFileIsDds != true) return;
+
+            saveDDS(currentDdsFile);
+        }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (ddsPanel1.ImageSize == Size.Empty) return;
 
@@ -59,7 +174,14 @@ namespace TestDDSPanel
             DialogResult dr = saveFileDialog1.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            using (FileStream fs = new FileStream(saveFileDialog1.FileName, FileMode.Create, FileAccess.Write))
+            currentDdsFile = saveFileDialog1.FileName;
+            currentDdsFileIsDds = true;
+            saveDDS(currentDdsFile);
+        }
+
+        void saveDDS(string filename)
+        {
+            using (FileStream fs = new FileStream(filename, FileMode.Create, FileAccess.Write))
             {
                 ddsPanel1.DDSSave(fs);
                 fs.Close();
@@ -67,7 +189,7 @@ namespace TestDDSPanel
             MessageBox.Show("Saved DDS file.", "Save DDS as...");
         }
 
-        private void btnExport_Click(object sender, EventArgs e)
+        private void exportToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (ddsPanel1.ImageSize == Size.Empty) return;
 
@@ -92,6 +214,19 @@ namespace TestDDSPanel
             catch { }
         }
 
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Environment.ExitCode = 0;
+            this.Close();
+        }
+
+
+        private void btnHSVReset_Click(object sender, EventArgs e)
+        {
+            hueShift.Value = saturationShift.Value = valueShift.Value = 0;
+            btnHSVShift_Click(null, null);
+        }
+
         private void btnHSVShift_Click(object sender, EventArgs e)
         {
             ddsPanel1.HSVShift(hueShift.Value, saturationShift.Value, valueShift.Value);
@@ -112,16 +247,32 @@ namespace TestDDSPanel
 
             using (FileStream fs = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read))
             {
-                ddsMask.DDSLoad(fs);
-                fs.Position = 0;
+                using (DdsFileTypePlugin.DdsFile ddsfile = new DdsFileTypePlugin.DdsFile())
+                {
+                    ddsfile.Load(fs, false); fs.Position = 0;
+                    ddsMaskCh1.DDSLoad(ddsfile);
+                    ddsMaskCh2.DDSLoad(ddsfile);
+                    ddsMaskCh3.DDSLoad(ddsfile);
+                    ddsMaskCh4.DDSLoad(ddsfile);
+                }
+                
                 ddsPanel1.LoadMask(fs);
+
+                lbMaskW.Text = ddsPanel1.MaskSize.Width + "";
+                lbMaskH.Text = ddsPanel1.MaskSize.Height + "";
+                tlpMaskSize.Visible = true;
+
                 fs.Close();
             }
+            checkMaskSize();
         }
 
         private void btnResetMask_Click(object sender, EventArgs e)
         {
-            ddsMask.Clear();
+            ddsMaskCh1.Clear();
+            ddsMaskCh2.Clear();
+            ddsMaskCh3.Clear();
+            ddsMaskCh4.Clear();
             numMaskCh1Hue.Value = numMaskCh1Saturation.Value = numMaskCh1Value.Value =
                 numMaskCh2Hue.Value = numMaskCh2Saturation.Value = numMaskCh2Value.Value =
                 numMaskCh3Hue.Value = numMaskCh3Saturation.Value = numMaskCh3Value.Value =
@@ -134,12 +285,10 @@ namespace TestDDSPanel
                 0;
             nudCh1Alpha.Value = nudCh2Alpha.Value = nudCh3Alpha.Value = nudCh4Alpha.Value =
                 255;
-            ddsPanel1.ClearMask();
-        }
 
-        private void ddsMask_DoubleClick(object sender, EventArgs e)
-        {
-            btnOpenMask_Click(sender, EventArgs.Empty);
+            tlpMaskSize.Visible = false;
+
+            ddsPanel1.ClearMask();
         }
 
         private void btnApplyShift_Click(object sender, EventArgs e)
@@ -153,7 +302,7 @@ namespace TestDDSPanel
 
             if (ddsPanel1.ImageSize.Width != ddsPanel1.MaskSize.Width || ddsPanel1.ImageSize.Height != ddsPanel1.MaskSize.Height)
             {
-                btnCreateImage_Click(null, null);
+                newToolStripMenuItem_Click(null, null);
             }
         }
 
@@ -162,7 +311,7 @@ namespace TestDDSPanel
             return ((uint)a << 24) | ((uint)r << 16) | ((uint)g << 8) | (uint)b;
         }
 
-        private void btnApplyColour_Click(object sender, EventArgs e)
+        private void btnApplyRGBA_Click(object sender, EventArgs e)
         {
             ddsPanel1.ApplyColours(
                 ckbNoCh1.Checked ? null : GetColour(nudCh1Red.Value, nudCh1Green.Value, nudCh1Blue.Value, nudCh1Alpha.Value),
@@ -201,7 +350,7 @@ namespace TestDDSPanel
             string filename = GetImageName();
             if (filename != null)
                 try { pbCh1.Load(filename); }
-                catch (ArgumentException ex) { }
+                catch (ArgumentException) { }
         }
 
         private void pbCh2_DoubleClick(object sender, EventArgs e)
@@ -209,7 +358,7 @@ namespace TestDDSPanel
             string filename = GetImageName();
             if (filename != null)
                 try { pbCh2.Load(filename); }
-                catch (ArgumentException ex) { }
+                catch (ArgumentException) { }
         }
 
         private void pbCh3_DoubleClick(object sender, EventArgs e)
@@ -217,7 +366,7 @@ namespace TestDDSPanel
             string filename = GetImageName();
             if (filename != null)
                 try { pbCh3.Load(filename); }
-                catch (ArgumentException ex) { }
+                catch (ArgumentException) { }
         }
 
         private void pbCh4_DoubleClick(object sender, EventArgs e)
@@ -225,7 +374,17 @@ namespace TestDDSPanel
             string filename = GetImageName();
             if (filename != null)
                 try { pbCh4.Load(filename); }
-                catch (ArgumentException ex) { }
+                catch (ArgumentException) { }
+        }
+
+        private void btnApplyImage_Click(object sender, EventArgs e)
+        {
+            ddsPanel1.ApplyImage(
+                ckbNoCh1.Checked ? null : pbCh1.Image,
+                ckbNoCh2.Checked ? null : pbCh2.Image,
+                ckbNoCh3.Checked ? null : pbCh3.Image,
+                ckbNoCh4.Checked ? null : pbCh4.Image
+                );
         }
 
         string GetImageName()
@@ -245,14 +404,24 @@ namespace TestDDSPanel
             return openFileDialog1.FileName;
         }
 
-        private void btnApplyImage_Click(object sender, EventArgs e)
+        void checkMaskSize()
         {
-            ddsPanel1.ApplyImage(
-                ckbNoCh1.Checked ? null : pbCh1.Image,
-                ckbNoCh2.Checked ? null : pbCh2.Image,
-                ckbNoCh3.Checked ? null : pbCh3.Image,
-                ckbNoCh4.Checked ? null : pbCh4.Image
-                );
+            if (ddsPanel1.ImageSize == Size.Empty || !ddsPanel1.MaskLoaded) return;
+
+            if (ddsPanel1.ImageSize.Width == ddsPanel1.MaskSize.Width &&
+                ddsPanel1.ImageSize.Height == ddsPanel1.MaskSize.Height) return;
+
+            DialogResult dr = MessageBox.Show(String.Format("Resize Mask ({0}x{1}) to Image ({2}x{3})?",
+                ddsPanel1.MaskSize.Width, ddsPanel1.MaskSize.Height,
+                ddsPanel1.ImageSize.Width, ddsPanel1.ImageSize.Height),
+                "Resize Mask?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (dr != DialogResult.Yes) return;
+
+            ddsPanel1.ResizeMask();
+
+            lbMaskW.Text = ddsPanel1.MaskSize.Width + "";
+            lbMaskH.Text = ddsPanel1.MaskSize.Height + "";
         }
     }
 }

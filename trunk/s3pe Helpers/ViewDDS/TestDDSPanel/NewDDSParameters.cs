@@ -19,45 +19,63 @@
  ***************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace s3pe.DDSTool
 {
-    static class Program
+    public partial class NewDDSParameters : Form
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static int Main(params string[] args)
+        public NewDDSParameters()
         {
+            InitializeComponent();
+        }
 
-            if (args.Length < 0 || args.Length > 1)
+        public NewDDSParameters(int width, int height) : this()
+        {
+            nudWidth.Value = width;
+            nudHeight.Value = height;
+        }
+
+        public Result Value
+        {
+            get
             {
-                MessageBox.Show("Pass only zero or one file arguments",
-                    "Fail", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                return 1;
-            }
-
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-
-            if (args.Length == 0)
-                Application.Run(new MainForm());
-            else
-            {
-                if (!File.Exists(args[0]))
+                return new Result
                 {
-                    MessageBox.Show("File not found:\n" + args[0],
-                        "Fail", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                    return 2;
-                }
-
-                Application.Run(new MainForm(args[0], args[0].ToLower().EndsWith(".dds")));
+                    Red = (byte)nudRed.Value,
+                    Green = (byte)nudGreen.Value,
+                    Blue = (byte)nudBlue.Value,
+                    Alpha = (byte)nudAlpha.Value,
+                    Width = (int)nudWidth.Value,
+                    Height = (int)nudHeight.Value,
+                    DialogResult = this.DialogResult,
+                };
             }
+        }
 
-            return 0;
+        public struct Result
+        {
+            public byte Red;
+            public byte Green;
+            public byte Blue;
+            public byte Alpha;
+            public int Width;
+            public int Height;
+            public DialogResult DialogResult;
+        }
+
+        private void btnOK_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.OK;
+            this.Close();
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.Cancel;
+            this.Close();
         }
     }
 }
