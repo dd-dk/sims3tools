@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("DDSPanel")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Provides support for DDS images.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyCompany("Dean Ashton, Delphy@MTS, Peter L Jones")]
 [assembly: AssemblyProduct("DDSPanel")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2011")]
+[assembly: AssemblyCopyright("Copyright © 2006 Dean Ashton; Copyright © 2011 Peter L Jones")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
