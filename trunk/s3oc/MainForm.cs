@@ -2121,18 +2121,18 @@ namespace ObjectCloner
                 {
                     string oldKey = line.Substring(i + 4, 8 + 1 + 8 + 1 + 16);
                     bool hasColons = oldKey.Contains(":");
-                    string key = "0x" + (hasColons ? oldKey.Replace(":", "-0x") : oldKey.Replace("-", "-0x"));//translate to s3pi format
+                    string RKkey = "0x" + (hasColons ? oldKey.Replace(":", "-0x") : oldKey.Replace("-", "-0x"));//translate to s3pi format
                     IResourceKey rk;
-                    if (RK.TryParse(key, out rk) && match(rk))
+                    if (RK.TryParse(RKkey, out rk) && match(rk))
                     {
                         string newKey = new RK(replacer(rk)).ToString().Replace("0x", "");
                         if (hasColons) newKey = newKey.Replace("-", ":");
-                        line = line.Substring(0, i) + "key:" + newKey + line.Substring(i + 4 + key.Length);
+                        line = line.Substring(0, i) + "key:" + newKey + line.Substring(i + 4 + oldKey.Length);
 
-                        replacements.Add(String.Format("{0} line {1} pos {2}: Replaced {3} with {4}", fn, ln, i, key, newKey));
+                        replacements.Add(String.Format("{0} line {1} pos {2}: Replaced {3} with {4}", fn, ln, i, oldKey, newKey));
                         dirty = true;
                     }
-                    i = line.IndexOf("key:", i + 4 + key.Length);
+                    i = line.IndexOf("key:", i + 4 + oldKey.Length);
                 }
                 tw.WriteLine(line);
                 ln++;
@@ -2144,17 +2144,17 @@ namespace ObjectCloner
         private bool ReplaceRKsInResourceStream(SpecificResource item, Predicate<IResourceKey> match, Converter<IResourceKey, IResourceKey> replacer)
         {
             bool dirty = false;
-            using (StreamReader sr = new StreamReader(item.Resource.Stream, true))
-            using (MemoryStream ms = new MemoryStream())
-            using (StreamWriter sw = new StreamWriter(ms, sr.CurrentEncoding))
+            MemoryStream ms = new MemoryStream();//Need this to persist its resources.
+            StreamReader sr = new StreamReader(item.Resource.Stream, true);
+            StreamWriter sw = new StreamWriter(ms, sr.CurrentEncoding);
+
+            dirty = ReplaceRKsInTextReader("_XML " + item.RequestedRK, match, replacer, sr, sw);
+            if (dirty)
             {
-                dirty = ReplaceRKsInTextReader("_XML " + item.RequestedRK, match, replacer, sr, sw);
-                if (dirty)
-                {
-                    item.Resource.Stream.SetLength(0);
-                    item.Resource.Stream.Write(ms.ToArray(), 0, (int)ms.Length);
-                }
+                item.Resource.Stream.SetLength(0);
+                item.Resource.Stream.Write(ms.ToArray(), 0, (int)ms.Length);
             }
+            
             return dirty;
         }
         private bool ReplaceRKsInField(SpecificResource item, string fn, Predicate<IResourceKey> match, Converter<IResourceKey, IResourceKey> replacer, AApiVersionedFields field)
@@ -3262,17 +3262,20 @@ namespace ObjectCloner
                                 dirty = true;
                             }
                         #endregion
+                        Diagnostics.Log("NMAP: " + item.LongName + " is" + (dirty ? "" : " not") + " dirty.");
                     }
                     else if (item.ResourceIndexEntry.ResourceType == 0x220557DA)//STBL
                     {
                         Diagnostics.Log("STBL: " + item.LongName);
                         dirty |= UpdateStbl(tbCatlgName.Text, nameGUID, item, newNameGUID);
                         dirty |= UpdateStbl(tbCatlgDesc.Text, descGUID, item, newDescGUID);
+                        Diagnostics.Log("STBL: " + item.LongName + " is" + (dirty ? "" : " not") + " dirty.");
                     }
                     else if (item.ResourceIndexEntry.ResourceType == 0x0333406C)//XML
                     {
                         Diagnostics.Log("_XML: " + item.LongName);
                         dirty = ReplaceRKsInResourceStream(item, FixMatch, IIDReplacer);
+                        Diagnostics.Log("_XML: " + item.LongName + " is" + (dirty ? "" : " not") + " dirty.");
                     }
                     else if (item.RequestedRK.Equals(selectedItem.RequestedRK) && item.CType == CatalogType.CAS_Part)//Deal with CASP separately..!
                     {
@@ -3323,6 +3326,7 @@ namespace ObjectCloner
 
                         dirty = true;
                         #endregion
+                        Diagnostics.Log("CAS_Part: " + item.LongName + " is" + (dirty ? "" : " not") + " dirty.");
                     }
                     else if ((item.RequestedRK.Equals(selectedItem.RequestedRK) && item.CType != CatalogType.ModularResource)//Selected CatlgItem
                     || item.CType == CatalogType.CatalogObject//all OBJDs (i.e. from MDLR or CFIR)
@@ -3455,11 +3459,13 @@ namespace ObjectCloner
 
                         dirty = true;
                         #endregion
+                        Diagnostics.Log("Selected CatlgItem || any OBJD || any CTPT: " + item.LongName + " is" + (dirty ? "" : " not") + " dirty.");
                     }
                     else
                     {
                         Diagnostics.Log("Anything else: " + item.LongName);
                         dirty = ReplaceRKsInField(item, "", FixMatch, IIDReplacer, (AResource)item.Resource);
+                        Diagnostics.Log("Anything else: " + item.LongName + " is" + (dirty ? "" : " not") + " dirty.");
                     }
 
                     if (dirty) item.Commit();
