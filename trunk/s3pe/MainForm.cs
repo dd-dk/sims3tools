@@ -1298,10 +1298,11 @@ namespace S3PIDemoFE
                 switch (mn.mn)
                 {
                     case MenuBarWidget.MB.MBS_updates: settingsAutomaticUpdates(); break;
+                    case MenuBarWidget.MB.MBS_previewDDS: settingsEnableDDSPreview(); break;
+                    case MenuBarWidget.MB.MBS_askAutoSaveDBC: settingsMBS_askAutoSaveDBC(); break;
                     case MenuBarWidget.MB.MBS_bookmarks: settingsOrganiseBookmarks(); break;
                     case MenuBarWidget.MB.MBS_externals: settingsExternalPrograms(); break;
                     case MenuBarWidget.MB.MBS_wrappers: settingsManageWrappers(); break;
-                    case MenuBarWidget.MB.MBS_previewDDS: settingsEnableDDSPreview(); break;
                     case MenuBarWidget.MB.MBS_saveSettings: saveSettings(); break;
                 }
             }
@@ -1311,6 +1312,40 @@ namespace S3PIDemoFE
         private void settingsAutomaticUpdates()
         {
             AutoUpdate.Checker.AutoUpdateChoice = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_updates);
+        }
+
+        bool ddsEnableWarningIssued = false;
+        private void settingsEnableDDSPreview()
+        {
+            if (!S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview && !ddsEnableWarningIssued)
+            {
+                ddsEnableWarningIssued = true;
+                if (CopyableMessageBox.Show("The DDS Preview feature is in early testing.\n" + "Please save your work frequently if you enable it.\n" +
+                    "\nClick OK to continue or Cancel to leave the feature disabled.", "Enable DDS Preview",
+                    CopyableMessageBoxButtons.OKCancel, CopyableMessageBoxIcon.Warning) != 0) return;
+            }
+            S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_previewDDS);
+            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_previewDDS, S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview);
+            if (S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview)
+            {
+                IResourceIndexEntry rie = browserWidget1.SelectedResource;
+                browserWidget1.SelectedResource = null;
+                browserWidget1.SelectedResource = rie;
+            }
+        }
+
+        bool dbcWarningIssued = false;
+        private void settingsMBS_askAutoSaveDBC()
+        {
+            if (!S3PIDemoFE.Properties.Settings.Default.AskDBCAutoSave && !dbcWarningIssued)
+            {
+                dbcWarningIssued = true;
+                if (CopyableMessageBox.Show("AutoSave during import of DBC packages is recommended.\n" +
+                    "Are you sure you want to be prompted?", "Enable DBC AutoSave prompt",
+                    CopyableMessageBoxButtons.YesNo, CopyableMessageBoxIcon.Warning) != 0) return;
+            }
+            S3PIDemoFE.Properties.Settings.Default.AskDBCAutoSave = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_askAutoSaveDBC);
+            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_askAutoSaveDBC, S3PIDemoFE.Properties.Settings.Default.AskDBCAutoSave);
         }
 
         private void settingsOrganiseBookmarks()
@@ -1402,26 +1437,6 @@ namespace S3PIDemoFE
             IResourceIndexEntry rie = browserWidget1.SelectedResource;
             browserWidget1.SelectedResource = null;
             browserWidget1.SelectedResource = rie;
-        }
-
-        bool ddsEnableWarningIssued = false;
-        private void settingsEnableDDSPreview()
-        {
-            if (!S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview && !ddsEnableWarningIssued)
-            {
-                ddsEnableWarningIssued = true;
-                if (CopyableMessageBox.Show("The DDS Preview feature is in early testing.\n" + "Please save your work frequently if you enable it.\n" +
-                    "\nClick OK to continue or Cancel to leave the feature disabled.", "Enable DDS Preview",
-                    CopyableMessageBoxButtons.OKCancel, CopyableMessageBoxIcon.Warning) != 0) return;
-            }
-            S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_previewDDS);
-            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_previewDDS, S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview);
-            if (S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview)
-            {
-                IResourceIndexEntry rie = browserWidget1.SelectedResource;
-                browserWidget1.SelectedResource = null;
-                browserWidget1.SelectedResource = rie;
-            }
         }
 
         private void saveSettings()

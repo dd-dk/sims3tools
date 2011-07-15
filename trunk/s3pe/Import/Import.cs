@@ -102,16 +102,8 @@ namespace S3PIDemoFE
             //-Anach: no, this is needed by roofing 0x2E75C765, //ICON: sims3pack
         });
         static List<uint> allowList = new List<uint>();
-        static bool shownIt = false;
         private void resourceImportAsDBC()
         {
-            if (!shownIt)
-            {
-                //DialogResult maty = new ExperimentalDBCWarning().ShowDialog();
-                //if (maty != System.Windows.Forms.DialogResult.OK) return;
-                shownIt = true;
-            }
-
             if (allowList.Count == 0)
             {
                 allowList.AddRange(xmlList);
@@ -124,7 +116,10 @@ namespace S3PIDemoFE
                 DialogResult dr = importPackagesDialog.ShowDialog();
                 if (dr != DialogResult.OK) return;
 
-                importPackagesCommon(importPackagesDialog.FileNames, true, true, DuplicateHandling.allow, allowList, importPackagesDialog.Title);
+                AutoSaveState autoSaveState = AutoSaveState.Always;
+                if (S3PIDemoFE.Properties.Settings.Default.AskDBCAutoSave)
+                    autoSaveState = AutoSaveState.Ask;
+                importPackagesCommon(importPackagesDialog.FileNames, true, true, DuplicateHandling.allow, allowList, importPackagesDialog.Title, autoSaveState);
 
                 browserWidget1.Visible = false;
                 lbProgress.Text = "Doing DBC clean up...";
@@ -175,19 +170,32 @@ namespace S3PIDemoFE
         }
 
 
-        private void importPackagesCommon(string[] packageList, bool useNames, bool compress, DuplicateHandling dups, List<uint> dupsList, string title)
+        internal enum AutoSaveState
+        {
+            Never,
+            Ask,
+            Always,
+        }
+        private void importPackagesCommon(string[] packageList, bool useNames, bool compress, DuplicateHandling dups, List<uint> dupsList, string title,
+            AutoSaveState autoSaveState = AutoSaveState.Ask)
         {
             bool CPuseNames = controlPanel1.UseNames;
             int CPautoState = controlPanel1.AutoOff ? 0 : controlPanel1.AutoHex ? 1 : 2;
             DateTime now = DateTime.UtcNow;
 
             bool autoSave = false;
-            switch (CopyableMessageBox.Show("Auto-save current package after each package imported?", title,
-                 CopyableMessageBoxButtons.YesNoCancel, CopyableMessageBoxIcon.Question))
+            if (autoSaveState == AutoSaveState.Ask)
             {
-                case 0: autoSave = true; break;
-                case 2: return;
+                switch (CopyableMessageBox.Show("Auto-save current package after each package imported?", title,
+                     CopyableMessageBoxButtons.YesNoCancel, CopyableMessageBoxIcon.Question))
+                {
+                    case 0: autoSave = true; break;
+                    case 2: return;
+                }
             }
+            else
+                autoSave = autoSaveState == AutoSaveState.Always;
+
             try
             {
                 controlPanel1.UseNames = false;
@@ -338,22 +346,28 @@ namespace S3PIDemoFE
             if (CurrentPackage == null)
                 fileNew();
 
-            ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(_key => _key.ResourceType == 0x0166038C) != null, true);
-            ir.Filename = filename;
-            DialogResult dr = ir.ShowDialog();
-            if (dr != DialogResult.OK) return;
-
-            if (new List<string>(asPkgExts).Contains(ir.Filename.Substring(ir.Filename.LastIndexOf('.'))))
+            if (new List<string>(asPkgExts).Contains(filename.Substring(filename.LastIndexOf('.'))))
             {
                 try
                 {
+                    ImportBatch ib = new ImportBatch( new string[] { filename, }, ImportBatch.Mode.package);
+                    ib.UseNames = true;
+                    DialogResult dr = ib.ShowDialog();
+                    if (dr != DialogResult.OK) return;
+
                     this.Enabled = false;
-                    importPackagesCommon(new string[] { ir.Filename, }, ir.UseName, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, title);
+                    importPackagesCommon(new string[] { filename, }, ib.UseNames, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, title);
                 }
                 finally { this.Enabled = true; }
             }
             else
             {
+
+                ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(_key => _key.ResourceType == 0x0166038C) != null, true);
+                ir.Filename = filename;
+                DialogResult dr = ir.ShowDialog();
+                if (dr != DialogResult.OK) return;
+
                 importFile(ir.Filename, ir, ir.UseName, ir.AllowRename, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject);
             }
         }

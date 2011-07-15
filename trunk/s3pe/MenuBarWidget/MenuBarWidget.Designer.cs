@@ -45,6 +45,7 @@
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.bookmarkCurrentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.setMaxBookmarksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.organiseBookmarksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -117,7 +118,8 @@
             this.tpcmCopy = new System.Windows.Forms.ToolStripMenuItem();
             this.tpcmFloat = new System.Windows.Forms.ToolStripMenuItem();
             this.tpcmOTE = new System.Windows.Forms.ToolStripMenuItem();
-            this.organiseBookmarksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.askToAutosaveDBCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.browserWidgetContextMenuStrip.SuspendLayout();
             this.textPreviewContextMenuStrip.SuspendLayout();
@@ -253,8 +255,8 @@
             // 
             this.bookmarkCurrentToolStripMenuItem.Enabled = false;
             this.bookmarkCurrentToolStripMenuItem.Name = "bookmarkCurrentToolStripMenuItem";
-            this.bookmarkCurrentToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
-                        | System.Windows.Forms.Keys.B)));
+            this.bookmarkCurrentToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.B)));
             this.bookmarkCurrentToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
             this.bookmarkCurrentToolStripMenuItem.Text = "&Bookmark current";
             this.bookmarkCurrentToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
@@ -265,6 +267,13 @@
             this.setMaxBookmarksToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
             this.setMaxBookmarksToolStripMenuItem.Text = "Set &Max...";
             this.setMaxBookmarksToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
+            // 
+            // organiseBookmarksToolStripMenuItem
+            // 
+            this.organiseBookmarksToolStripMenuItem.Name = "organiseBookmarksToolStripMenuItem";
+            this.organiseBookmarksToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
+            this.organiseBookmarksToolStripMenuItem.Text = "Organise...";
+            this.organiseBookmarksToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
             // 
             // toolStripSeparator1
             // 
@@ -345,8 +354,8 @@
             // 
             this.addToolStripMenuItem.Enabled = false;
             this.addToolStripMenuItem.Name = "addToolStripMenuItem";
-            this.addToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
-                        | System.Windows.Forms.Keys.A)));
+            this.addToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.A)));
             this.addToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
             this.addToolStripMenuItem.Text = "&Add...";
             this.addToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
@@ -355,8 +364,8 @@
             // 
             this.resCopyToolStripMenuItem1.Enabled = false;
             this.resCopyToolStripMenuItem1.Name = "resCopyToolStripMenuItem1";
-            this.resCopyToolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
-                        | System.Windows.Forms.Keys.C)));
+            this.resCopyToolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.C)));
             this.resCopyToolStripMenuItem1.Size = new System.Drawing.Size(195, 22);
             this.resCopyToolStripMenuItem1.Text = "Cop&y";
             this.resCopyToolStripMenuItem1.Click += new System.EventHandler(this.tsMBR_Click);
@@ -365,8 +374,8 @@
             // 
             this.resPasteToolStripMenuItem1.Enabled = false;
             this.resPasteToolStripMenuItem1.Name = "resPasteToolStripMenuItem1";
-            this.resPasteToolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
-                        | System.Windows.Forms.Keys.V)));
+            this.resPasteToolStripMenuItem1.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.V)));
             this.resPasteToolStripMenuItem1.Size = new System.Drawing.Size(195, 22);
             this.resPasteToolStripMenuItem1.Text = "&Paste...";
             this.resPasteToolStripMenuItem1.Click += new System.EventHandler(this.tsMBR_Click);
@@ -412,8 +421,8 @@
             // 
             this.detailsToolStripMenuItem.Enabled = false;
             this.detailsToolStripMenuItem.Name = "detailsToolStripMenuItem";
-            this.detailsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
-                        | System.Windows.Forms.Keys.D)));
+            this.detailsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.D)));
             this.detailsToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
             this.detailsToolStripMenuItem.Text = "&Details...";
             this.detailsToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
@@ -443,24 +452,24 @@
             // fromFileToolStripMenuItem
             // 
             this.fromFileToolStripMenuItem.Name = "fromFileToolStripMenuItem";
-            this.fromFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
-                        | System.Windows.Forms.Keys.M)));
-            this.fromFileToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
+            this.fromFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.M)));
+            this.fromFileToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.fromFileToolStripMenuItem.Text = "From &file...";
             this.fromFileToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
             // 
             // fromPackageToolStripMenuItem
             // 
             this.fromPackageToolStripMenuItem.Name = "fromPackageToolStripMenuItem";
-            this.fromPackageToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
+            this.fromPackageToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.fromPackageToolStripMenuItem.Text = "From &package...";
             this.fromPackageToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
             // 
             // asDBCToolStripMenuItem
             // 
             this.asDBCToolStripMenuItem.Name = "asDBCToolStripMenuItem";
-            this.asDBCToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
-            this.asDBCToolStripMenuItem.Text = "(EXPERIMENTAL) As &dbc...";
+            this.asDBCToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.asDBCToolStripMenuItem.Text = "As &dbc...";
             this.asDBCToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
             // 
             // exportToolStripMenuItem1
@@ -476,8 +485,8 @@
             // 
             this.toFileToolStripMenuItem.Enabled = false;
             this.toFileToolStripMenuItem.Name = "toFileToolStripMenuItem";
-            this.toFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
-                        | System.Windows.Forms.Keys.X)));
+            this.toFileToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.X)));
             this.toFileToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
             this.toFileToolStripMenuItem.Text = "To &file...";
             this.toFileToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
@@ -499,8 +508,8 @@
             // 
             this.hexEditorToolStripMenuItem.Enabled = false;
             this.hexEditorToolStripMenuItem.Name = "hexEditorToolStripMenuItem";
-            this.hexEditorToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
-                        | System.Windows.Forms.Keys.H)));
+            this.hexEditorToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.H)));
             this.hexEditorToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
             this.hexEditorToolStripMenuItem.Text = "&Hex Editor";
             this.hexEditorToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
@@ -509,8 +518,8 @@
             // 
             this.textEditorToolStripMenuItem.Enabled = false;
             this.textEditorToolStripMenuItem.Name = "textEditorToolStripMenuItem";
-            this.textEditorToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift)
-                        | System.Windows.Forms.Keys.T)));
+            this.textEditorToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.T)));
             this.textEditorToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
             this.textEditorToolStripMenuItem.Text = "&Text Editor";
             this.textEditorToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
@@ -546,10 +555,12 @@
             // 
             this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.automaticUpdateChecksToolStripMenuItem,
+            this.enableDDSPreviewToolStripMenuItem,
+            this.askToAutosaveDBCToolStripMenuItem,
+            this.toolStripSeparator11,
             this.organiseBookmarksSettingsToolStripMenuItem,
             this.externalProgramsToolStripMenuItem,
             this.manageWrappersToolStripMenuItem,
-            this.enableDDSPreviewToolStripMenuItem,
             this.toolStripSeparator8,
             this.saveSettingsToolStripMenuItem});
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
@@ -564,9 +575,9 @@
             this.automaticUpdateChecksToolStripMenuItem.Text = "Automatic &Update Checks";
             this.automaticUpdateChecksToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
-            // organiseBookmarksToolStripMenuItem
+            // organiseBookmarksSettingsToolStripMenuItem
             // 
-            this.organiseBookmarksSettingsToolStripMenuItem.Name = "organiseBookmarksToolStripMenuItem";
+            this.organiseBookmarksSettingsToolStripMenuItem.Name = "organiseBookmarksSettingsToolStripMenuItem";
             this.organiseBookmarksSettingsToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.organiseBookmarksSettingsToolStripMenuItem.Text = "Organise Boo&kmarks...";
             this.organiseBookmarksSettingsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
@@ -883,12 +894,17 @@
             this.tpcmOTE.Text = "Open in Text &Editor";
             this.tpcmOTE.Click += new System.EventHandler(this.tsCMSTP_Click);
             // 
-            // organiseToolStripMenuItem
+            // askToAutosaveDBCToolStripMenuItem
             // 
-            this.organiseBookmarksToolStripMenuItem.Name = "organiseToolStripMenuItem";
-            this.organiseBookmarksToolStripMenuItem.Size = new System.Drawing.Size(226, 22);
-            this.organiseBookmarksToolStripMenuItem.Text = "Organise...";
-            this.organiseBookmarksToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
+            this.askToAutosaveDBCToolStripMenuItem.Name = "askToAutosaveDBCToolStripMenuItem";
+            this.askToAutosaveDBCToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.askToAutosaveDBCToolStripMenuItem.Text = "As&k to autosave DBC";
+            this.askToAutosaveDBCToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
+            // toolStripSeparator11
+            // 
+            this.toolStripSeparator11.Name = "toolStripSeparator11";
+            this.toolStripSeparator11.Size = new System.Drawing.Size(194, 6);
             // 
             // MenuBarWidget
             // 
@@ -996,5 +1012,7 @@
         private System.Windows.Forms.ToolStripMenuItem selectAllToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bwcmSelectAll;
         private System.Windows.Forms.ToolStripMenuItem organiseBookmarksToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem askToAutosaveDBCToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
     }
 }

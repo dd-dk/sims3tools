@@ -56,8 +56,9 @@ namespace S3PIDemoFE
                 //Tools
                 fNVHashToolStripMenuItem, searchToolStripMenuItem,
                 //Settings
-                automaticUpdateChecksToolStripMenuItem, organiseBookmarksSettingsToolStripMenuItem, externalProgramsToolStripMenuItem,
-                manageWrappersToolStripMenuItem, enableDDSPreviewToolStripMenuItem, saveSettingsToolStripMenuItem,
+                automaticUpdateChecksToolStripMenuItem, enableDDSPreviewToolStripMenuItem, askToAutosaveDBCToolStripMenuItem,
+                organiseBookmarksSettingsToolStripMenuItem, externalProgramsToolStripMenuItem, manageWrappersToolStripMenuItem,
+                saveSettingsToolStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, checkForUpdateToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
             });
@@ -105,7 +106,9 @@ namespace S3PIDemoFE
             MBR_importResources, MBR_importPackages, MBR_importAsDBC, MBR_exportResources, MBR_exportToPackage,
             MBR_hexEditor, MBR_textEditor,
             MBT_fnvHash, MBT_search,
-            MBS_updates, MBS_bookmarks, MBS_externals, MBS_wrappers, MBS_previewDDS, MBS_saveSettings,
+            MBS_updates, MBS_previewDDS, MBS_askAutoSaveDBC,
+            MBS_bookmarks, MBS_externals, MBS_wrappers,
+            MBS_saveSettings,
             MBH_contents, MBH_about, MBH_update, MBH_warranty, MBH_licence,
         }
 
