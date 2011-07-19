@@ -102,6 +102,8 @@ namespace ObjectCloner.CustomControls
 
         UInt64 Get_Value(string value)
         {
+            if (value == "") return 0;
+
             if (!value.StartsWith("0x"))
                 return UInt64.Parse(value);
             else
@@ -121,6 +123,7 @@ namespace ObjectCloner.CustomControls
         private void tb_Validating(object sender, CancelEventArgs e)
         {
             TextBox tb = sender as TextBox;
+            if (tb.Text == "") return;
 
             try { Get_Value(tb == tbTopic ? typeof(ObjectCatalogResource.TopicCategory) : typeof(int), tb); }
             catch { e.Cancel = true; }
