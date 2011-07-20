@@ -3242,9 +3242,16 @@ namespace ObjectCloner
             try
             {
                 this.Enabled = false;
+
+                if (isPadSTBLs)
+                {
+                    PadStbls(tbCatlgName.Text, nameGUID, newNameGUID);
+                    PadStbls(tbCatlgDesc.Text, descGUID, newDescGUID);
+                    NameMap.NMap.Commit();
+                }
+
                 //Need to take a copy of the ResourceList as it can get modified, which messes up the enumerator
                 List<SpecificResource> lsr = FileTable.Current.FindAll(rie => true);
-
                 foreach (SpecificResource item in lsr)
                 {
                     bool dirty = false;
@@ -3472,13 +3479,6 @@ namespace ObjectCloner
 
                 }
 
-                if (isPadSTBLs)
-                {
-                    PadStbls(tbCatlgName.Text, nameGUID, newNameGUID);
-                    PadStbls(tbCatlgDesc.Text, descGUID, newDescGUID);
-                    NameMap.NMap.Commit();
-                }
-
                 foreach (var kvp in rkToItemAdded)
                     if (!rkToItem.ContainsKey(kvp.Key)) rkToItem.Add(kvp.Key, kvp.Value);
 
@@ -3535,7 +3535,7 @@ namespace ObjectCloner
                 Application.DoEvents();
 
                 List<ulong> stbls = new List<ulong>();
-                new List<IResourceIndexEntry>(FileTable.Current.Package.FindAll(x => x.ResourceType == 0x220557DA))
+                FileTable.Current.Package.FindAll(x => x.ResourceType == 0x220557DA)
                     .ConvertAll<ulong>(x => { return x.Instance & 0x00FFFFFFFFFFFFFF; })
                     .ForEach(x => { if (!stbls.Contains(x)) stbls.Add(x); });
 
