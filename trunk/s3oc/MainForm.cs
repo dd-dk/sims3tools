@@ -2258,7 +2258,7 @@ namespace ObjectCloner
         private void SlurpRKsFromRK(string key, IResourceKey rk)
         {
             SpecificResource item = new SpecificResource(FileTable.fb0, rk);
-            if (item.ResourceIndexEntry != null) SlurpRKsFromField(key, (AResource)item.Resource);
+            if (item.Resource != null) SlurpRKsFromField(key, (AResource)item.Resource);
             else Diagnostics.Show(String.Format("RK {0} not found", key));
         }
         private void SlurpRKsFromField(string key, AApiVersionedFields field)
