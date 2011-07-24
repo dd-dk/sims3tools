@@ -105,7 +105,7 @@
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(162, 29);
-            this.tableLayoutPanel2.TabIndex = 1;
+            this.tableLayoutPanel2.TabIndex = 13;
             // 
             // btnOK
             // 
@@ -113,7 +113,7 @@
             this.btnOK.Location = new System.Drawing.Point(84, 3);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
-            this.btnOK.TabIndex = 9;
+            this.btnOK.TabIndex = 2;
             this.btnOK.Text = "&OK";
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
@@ -177,7 +177,7 @@
             this.label12.Margin = new System.Windows.Forms.Padding(0);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(27, 13);
-            this.label12.TabIndex = 2;
+            this.label12.TabIndex = 1;
             this.label12.Text = "Red";
             // 
             // nudAlpha
@@ -206,7 +206,7 @@
             this.label13.Margin = new System.Windows.Forms.Padding(0);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(36, 13);
-            this.label13.TabIndex = 4;
+            this.label13.TabIndex = 3;
             this.label13.Text = "Green";
             // 
             // label14
@@ -217,7 +217,7 @@
             this.label14.Margin = new System.Windows.Forms.Padding(0);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(28, 13);
-            this.label14.TabIndex = 6;
+            this.label14.TabIndex = 5;
             this.label14.Text = "Blue";
             // 
             // label1
@@ -239,7 +239,7 @@
             this.label2.Margin = new System.Windows.Forms.Padding(0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(35, 13);
-            this.label2.TabIndex = 2;
+            this.label2.TabIndex = 9;
             this.label2.Text = "Width";
             // 
             // label3
@@ -250,7 +250,7 @@
             this.label3.Margin = new System.Windows.Forms.Padding(0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(38, 13);
-            this.label3.TabIndex = 4;
+            this.label3.TabIndex = 11;
             this.label3.Text = "Height";
             // 
             // nudWidth
@@ -264,7 +264,7 @@
             0});
             this.nudWidth.Name = "nudWidth";
             this.nudWidth.Size = new System.Drawing.Size(56, 20);
-            this.nudWidth.TabIndex = 2;
+            this.nudWidth.TabIndex = 10;
             this.nudWidth.Value = new decimal(new int[] {
             1024,
             0,
@@ -282,7 +282,7 @@
             0});
             this.nudHeight.Name = "nudHeight";
             this.nudHeight.Size = new System.Drawing.Size(56, 20);
-            this.nudHeight.TabIndex = 4;
+            this.nudHeight.TabIndex = 12;
             this.nudHeight.Value = new decimal(new int[] {
             1024,
             0,

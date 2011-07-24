@@ -111,6 +111,10 @@
             this.ckbNoCh3 = new System.Windows.Forms.CheckBox();
             this.ckbNoCh4 = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
+            this.ddsMaskCh1 = new DDSPanel.DDSPanel();
+            this.ddsMaskCh2 = new DDSPanel.DDSPanel();
+            this.ddsMaskCh3 = new DDSPanel.DDSPanel();
+            this.ddsMaskCh4 = new DDSPanel.DDSPanel();
             this.tlpMaskSize = new System.Windows.Forms.TableLayoutPanel();
             this.label12 = new System.Windows.Forms.Label();
             this.lbMaskW = new System.Windows.Forms.Label();
@@ -118,11 +122,13 @@
             this.lbMaskH = new System.Windows.Forms.Label();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
+            this.ddsPanel1 = new DDSPanel.DDSPanel();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importImageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importAlphaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.reloadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -130,12 +136,6 @@
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.importAlphaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ddsMaskCh1 = new DDSPanel.DDSPanel();
-            this.ddsMaskCh2 = new DDSPanel.DDSPanel();
-            this.ddsMaskCh3 = new DDSPanel.DDSPanel();
-            this.ddsMaskCh4 = new DDSPanel.DDSPanel();
-            this.ddsPanel1 = new DDSPanel.DDSPanel();
             ((System.ComponentModel.ISupportInitialize)(this.hueShift)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.saturationShift)).BeginInit();
@@ -208,7 +208,7 @@
             -2147483648});
             this.hueShift.Name = "hueShift";
             this.hueShift.Size = new System.Drawing.Size(72, 20);
-            this.hueShift.TabIndex = 2;
+            this.hueShift.TabIndex = 3;
             // 
             // tableLayoutPanel1
             // 
@@ -263,7 +263,7 @@
             -2147483648});
             this.saturationShift.Name = "saturationShift";
             this.saturationShift.Size = new System.Drawing.Size(72, 20);
-            this.saturationShift.TabIndex = 4;
+            this.saturationShift.TabIndex = 5;
             // 
             // valueShift
             // 
@@ -287,7 +287,7 @@
             -2147483648});
             this.valueShift.Name = "valueShift";
             this.valueShift.Size = new System.Drawing.Size(72, 20);
-            this.valueShift.TabIndex = 6;
+            this.valueShift.TabIndex = 7;
             // 
             // label1
             // 
@@ -297,7 +297,7 @@
             this.label1.Margin = new System.Windows.Forms.Padding(0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(36, 13);
-            this.label1.TabIndex = 1;
+            this.label1.TabIndex = 2;
             this.label1.Text = "HShift";
             // 
             // tlpImageSize
@@ -319,7 +319,7 @@
             this.tlpImageSize.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpImageSize.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpImageSize.Size = new System.Drawing.Size(67, 26);
-            this.tlpImageSize.TabIndex = 3;
+            this.tlpImageSize.TabIndex = 10;
             this.tlpImageSize.Visible = false;
             // 
             // label13
@@ -328,7 +328,7 @@
             this.label13.Location = new System.Drawing.Point(3, 0);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(18, 13);
-            this.label13.TabIndex = 0;
+            this.label13.TabIndex = 1;
             this.label13.Text = "W";
             // 
             // lbImageW
@@ -337,7 +337,7 @@
             this.lbImageW.Location = new System.Drawing.Point(27, 0);
             this.lbImageW.Name = "lbImageW";
             this.lbImageW.Size = new System.Drawing.Size(37, 13);
-            this.lbImageW.TabIndex = 0;
+            this.lbImageW.TabIndex = 2;
             this.lbImageW.Text = "44444";
             // 
             // label16
@@ -346,7 +346,7 @@
             this.label16.Location = new System.Drawing.Point(3, 13);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(15, 13);
-            this.label16.TabIndex = 0;
+            this.label16.TabIndex = 3;
             this.label16.Text = "H";
             // 
             // lbImageH
@@ -355,7 +355,7 @@
             this.lbImageH.Location = new System.Drawing.Point(27, 13);
             this.lbImageH.Name = "lbImageH";
             this.lbImageH.Size = new System.Drawing.Size(37, 13);
-            this.lbImageH.TabIndex = 0;
+            this.lbImageH.TabIndex = 4;
             this.lbImageH.Text = "44444";
             // 
             // label2
@@ -366,7 +366,7 @@
             this.label2.Margin = new System.Windows.Forms.Padding(0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(35, 13);
-            this.label2.TabIndex = 3;
+            this.label2.TabIndex = 4;
             this.label2.Text = "SShift";
             // 
             // label3
@@ -377,7 +377,7 @@
             this.label3.Margin = new System.Windows.Forms.Padding(0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(35, 13);
-            this.label3.TabIndex = 5;
+            this.label3.TabIndex = 6;
             this.label3.Text = "VShift";
             // 
             // label17
@@ -388,7 +388,7 @@
             this.label17.Margin = new System.Windows.Forms.Padding(3);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(70, 13);
-            this.label17.TabIndex = 0;
+            this.label17.TabIndex = 1;
             this.label17.Text = "Overall shifts:";
             // 
             // btnHSVShift
@@ -397,7 +397,7 @@
             this.btnHSVShift.Location = new System.Drawing.Point(117, 77);
             this.btnHSVShift.Name = "btnHSVShift";
             this.btnHSVShift.Size = new System.Drawing.Size(75, 23);
-            this.btnHSVShift.TabIndex = 7;
+            this.btnHSVShift.TabIndex = 9;
             this.btnHSVShift.Text = "Apply";
             this.btnHSVShift.UseVisualStyleBackColor = true;
             this.btnHSVShift.Click += new System.EventHandler(this.btnHSVShift_Click);
@@ -418,7 +418,7 @@
             this.btnOpenMask.Location = new System.Drawing.Point(3, 12);
             this.btnOpenMask.Name = "btnOpenMask";
             this.btnOpenMask.Size = new System.Drawing.Size(75, 23);
-            this.btnOpenMask.TabIndex = 0;
+            this.btnOpenMask.TabIndex = 1;
             this.btnOpenMask.Text = "Load Mask";
             this.btnOpenMask.UseVisualStyleBackColor = true;
             this.btnOpenMask.Click += new System.EventHandler(this.btnOpenMask_Click);
@@ -452,7 +452,7 @@
             -2147483648});
             this.numMaskCh1Hue.Name = "numMaskCh1Hue";
             this.numMaskCh1Hue.Size = new System.Drawing.Size(72, 20);
-            this.numMaskCh1Hue.TabIndex = 2;
+            this.numMaskCh1Hue.TabIndex = 14;
             // 
             // numMaskCh1Saturation
             // 
@@ -476,7 +476,7 @@
             -2147483648});
             this.numMaskCh1Saturation.Name = "numMaskCh1Saturation";
             this.numMaskCh1Saturation.Size = new System.Drawing.Size(72, 20);
-            this.numMaskCh1Saturation.TabIndex = 4;
+            this.numMaskCh1Saturation.TabIndex = 15;
             // 
             // numMaskCh1Value
             // 
@@ -500,7 +500,7 @@
             -2147483648});
             this.numMaskCh1Value.Name = "numMaskCh1Value";
             this.numMaskCh1Value.Size = new System.Drawing.Size(72, 20);
-            this.numMaskCh1Value.TabIndex = 6;
+            this.numMaskCh1Value.TabIndex = 16;
             // 
             // label4
             // 
@@ -510,7 +510,7 @@
             this.label4.Margin = new System.Windows.Forms.Padding(0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(36, 13);
-            this.label4.TabIndex = 1;
+            this.label4.TabIndex = 5;
             this.label4.Text = "HShift";
             // 
             // label5
@@ -521,7 +521,7 @@
             this.label5.Margin = new System.Windows.Forms.Padding(0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(35, 13);
-            this.label5.TabIndex = 3;
+            this.label5.TabIndex = 6;
             this.label5.Text = "SShift";
             // 
             // label6
@@ -532,7 +532,7 @@
             this.label6.Margin = new System.Windows.Forms.Padding(0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(35, 13);
-            this.label6.TabIndex = 5;
+            this.label6.TabIndex = 7;
             this.label6.Text = "VShift";
             // 
             // label7
@@ -542,7 +542,7 @@
             this.label7.Location = new System.Drawing.Point(53, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(55, 13);
-            this.label7.TabIndex = 0;
+            this.label7.TabIndex = 1;
             this.label7.Text = "Channel 1";
             // 
             // btnResetMask
@@ -551,7 +551,7 @@
             this.btnResetMask.Location = new System.Drawing.Point(84, 12);
             this.btnResetMask.Name = "btnResetMask";
             this.btnResetMask.Size = new System.Drawing.Size(75, 23);
-            this.btnResetMask.TabIndex = 1;
+            this.btnResetMask.TabIndex = 2;
             this.btnResetMask.Text = "Reset";
             this.btnResetMask.UseVisualStyleBackColor = true;
             this.btnResetMask.Click += new System.EventHandler(this.btnResetMask_Click);
@@ -564,7 +564,7 @@
             this.ckbBlend.Location = new System.Drawing.Point(3, 51);
             this.ckbBlend.Name = "ckbBlend";
             this.ckbBlend.Size = new System.Drawing.Size(142, 17);
-            this.ckbBlend.TabIndex = 3;
+            this.ckbBlend.TabIndex = 8;
             this.ckbBlend.Text = "Blending Mask (for HSV)";
             this.ckbBlend.UseVisualStyleBackColor = true;
             // 
@@ -590,7 +590,7 @@
             -2147483648});
             this.numMaskCh2Hue.Name = "numMaskCh2Hue";
             this.numMaskCh2Hue.Size = new System.Drawing.Size(72, 20);
-            this.numMaskCh2Hue.TabIndex = 2;
+            this.numMaskCh2Hue.TabIndex = 17;
             // 
             // numMaskCh2Saturation
             // 
@@ -614,7 +614,7 @@
             -2147483648});
             this.numMaskCh2Saturation.Name = "numMaskCh2Saturation";
             this.numMaskCh2Saturation.Size = new System.Drawing.Size(72, 20);
-            this.numMaskCh2Saturation.TabIndex = 4;
+            this.numMaskCh2Saturation.TabIndex = 18;
             // 
             // numMaskCh2Value
             // 
@@ -638,7 +638,7 @@
             -2147483648});
             this.numMaskCh2Value.Name = "numMaskCh2Value";
             this.numMaskCh2Value.Size = new System.Drawing.Size(72, 20);
-            this.numMaskCh2Value.TabIndex = 6;
+            this.numMaskCh2Value.TabIndex = 19;
             // 
             // label11
             // 
@@ -647,7 +647,7 @@
             this.label11.Location = new System.Drawing.Point(131, 0);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(55, 13);
-            this.label11.TabIndex = 0;
+            this.label11.TabIndex = 2;
             this.label11.Text = "Channel 2";
             // 
             // btnApplyShift
@@ -657,7 +657,7 @@
             this.btnApplyShift.Name = "btnApplyShift";
             this.tableLayoutPanel9.SetRowSpan(this.btnApplyShift, 3);
             this.btnApplyShift.Size = new System.Drawing.Size(75, 23);
-            this.btnApplyShift.TabIndex = 3;
+            this.btnApplyShift.TabIndex = 26;
             this.btnApplyShift.Text = "ApplyHSV";
             this.btnApplyShift.UseVisualStyleBackColor = true;
             this.btnApplyShift.Click += new System.EventHandler(this.btnApplyShift_Click);
@@ -673,7 +673,7 @@
             0});
             this.nudCh1Red.Name = "nudCh1Red";
             this.nudCh1Red.Size = new System.Drawing.Size(52, 20);
-            this.nudCh1Red.TabIndex = 2;
+            this.nudCh1Red.TabIndex = 27;
             // 
             // nudCh1Green
             // 
@@ -686,7 +686,7 @@
             0});
             this.nudCh1Green.Name = "nudCh1Green";
             this.nudCh1Green.Size = new System.Drawing.Size(52, 20);
-            this.nudCh1Green.TabIndex = 4;
+            this.nudCh1Green.TabIndex = 28;
             // 
             // nudCh1Blue
             // 
@@ -699,7 +699,7 @@
             0});
             this.nudCh1Blue.Name = "nudCh1Blue";
             this.nudCh1Blue.Size = new System.Drawing.Size(52, 20);
-            this.nudCh1Blue.TabIndex = 6;
+            this.nudCh1Blue.TabIndex = 29;
             // 
             // label18
             // 
@@ -709,7 +709,7 @@
             this.label18.Margin = new System.Windows.Forms.Padding(0);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(27, 13);
-            this.label18.TabIndex = 1;
+            this.label18.TabIndex = 8;
             this.label18.Text = "Red";
             // 
             // label19
@@ -720,7 +720,7 @@
             this.label19.Margin = new System.Windows.Forms.Padding(0);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(36, 13);
-            this.label19.TabIndex = 3;
+            this.label19.TabIndex = 9;
             this.label19.Text = "Green";
             // 
             // label20
@@ -731,7 +731,7 @@
             this.label20.Margin = new System.Windows.Forms.Padding(0);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(28, 13);
-            this.label20.TabIndex = 5;
+            this.label20.TabIndex = 10;
             this.label20.Text = "Blue";
             // 
             // label22
@@ -742,7 +742,7 @@
             this.label22.Margin = new System.Windows.Forms.Padding(0);
             this.label22.Name = "label22";
             this.label22.Size = new System.Drawing.Size(34, 13);
-            this.label22.TabIndex = 7;
+            this.label22.TabIndex = 11;
             this.label22.Text = "Alpha";
             // 
             // nudCh1Alpha
@@ -756,7 +756,7 @@
             0});
             this.nudCh1Alpha.Name = "nudCh1Alpha";
             this.nudCh1Alpha.Size = new System.Drawing.Size(52, 20);
-            this.nudCh1Alpha.TabIndex = 8;
+            this.nudCh1Alpha.TabIndex = 30;
             this.nudCh1Alpha.Value = new decimal(new int[] {
             255,
             0,
@@ -774,7 +774,7 @@
             0});
             this.nudCh2Red.Name = "nudCh2Red";
             this.nudCh2Red.Size = new System.Drawing.Size(52, 20);
-            this.nudCh2Red.TabIndex = 2;
+            this.nudCh2Red.TabIndex = 31;
             // 
             // nudCh2Green
             // 
@@ -787,7 +787,7 @@
             0});
             this.nudCh2Green.Name = "nudCh2Green";
             this.nudCh2Green.Size = new System.Drawing.Size(52, 20);
-            this.nudCh2Green.TabIndex = 4;
+            this.nudCh2Green.TabIndex = 32;
             // 
             // nudCh2Blue
             // 
@@ -800,7 +800,7 @@
             0});
             this.nudCh2Blue.Name = "nudCh2Blue";
             this.nudCh2Blue.Size = new System.Drawing.Size(52, 20);
-            this.nudCh2Blue.TabIndex = 6;
+            this.nudCh2Blue.TabIndex = 33;
             // 
             // nudCh2Alpha
             // 
@@ -813,7 +813,7 @@
             0});
             this.nudCh2Alpha.Name = "nudCh2Alpha";
             this.nudCh2Alpha.Size = new System.Drawing.Size(52, 20);
-            this.nudCh2Alpha.TabIndex = 8;
+            this.nudCh2Alpha.TabIndex = 34;
             this.nudCh2Alpha.Value = new decimal(new int[] {
             255,
             0,
@@ -827,7 +827,7 @@
             this.btnApplyRGBA.Name = "btnApplyRGBA";
             this.tableLayoutPanel9.SetRowSpan(this.btnApplyRGBA, 4);
             this.btnApplyRGBA.Size = new System.Drawing.Size(75, 23);
-            this.btnApplyRGBA.TabIndex = 3;
+            this.btnApplyRGBA.TabIndex = 43;
             this.btnApplyRGBA.Text = "ApplyRGBA";
             this.btnApplyRGBA.UseVisualStyleBackColor = true;
             this.btnApplyRGBA.Click += new System.EventHandler(this.btnApplyRGBA_Click);
@@ -864,7 +864,7 @@
             this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel11.Size = new System.Drawing.Size(435, 350);
-            this.tableLayoutPanel11.TabIndex = 1;
+            this.tableLayoutPanel11.TabIndex = 3;
             // 
             // tableLayoutPanel9
             // 
@@ -953,7 +953,7 @@
             this.btnApplyImage.Location = new System.Drawing.Point(357, 210);
             this.btnApplyImage.Name = "btnApplyImage";
             this.btnApplyImage.Size = new System.Drawing.Size(75, 23);
-            this.btnApplyImage.TabIndex = 4;
+            this.btnApplyImage.TabIndex = 48;
             this.btnApplyImage.Text = "ApplyImages";
             this.btnApplyImage.UseVisualStyleBackColor = true;
             this.btnApplyImage.Click += new System.EventHandler(this.btnApplyImage_Click);
@@ -973,7 +973,7 @@
             this.tableLayoutPanel8.RowCount = 1;
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel8.Size = new System.Drawing.Size(68, 48);
-            this.tableLayoutPanel8.TabIndex = 8;
+            this.tableLayoutPanel8.TabIndex = 45;
             // 
             // llCh2pb
             // 
@@ -1015,7 +1015,7 @@
             this.tableLayoutPanel7.RowCount = 1;
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel7.Size = new System.Drawing.Size(68, 48);
-            this.tableLayoutPanel7.TabIndex = 7;
+            this.tableLayoutPanel7.TabIndex = 44;
             // 
             // pbCh1
             // 
@@ -1037,7 +1037,7 @@
             this.llCh1pb.Margin = new System.Windows.Forms.Padding(0);
             this.llCh1pb.Name = "llCh1pb";
             this.llCh1pb.Size = new System.Drawing.Size(20, 13);
-            this.llCh1pb.TabIndex = 0;
+            this.llCh1pb.TabIndex = 1;
             this.llCh1pb.TabStop = true;
             this.llCh1pb.Text = "C1";
             this.llCh1pb.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llCh1pb_LinkClicked);
@@ -1049,7 +1049,7 @@
             this.label8.Location = new System.Drawing.Point(209, 0);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(55, 13);
-            this.label8.TabIndex = 0;
+            this.label8.TabIndex = 3;
             this.label8.Text = "Channel 3";
             // 
             // label9
@@ -1059,7 +1059,7 @@
             this.label9.Location = new System.Drawing.Point(287, 0);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(55, 13);
-            this.label9.TabIndex = 0;
+            this.label9.TabIndex = 4;
             this.label9.Text = "Channel 4";
             // 
             // numMaskCh3Hue
@@ -1084,7 +1084,7 @@
             -2147483648});
             this.numMaskCh3Hue.Name = "numMaskCh3Hue";
             this.numMaskCh3Hue.Size = new System.Drawing.Size(72, 20);
-            this.numMaskCh3Hue.TabIndex = 2;
+            this.numMaskCh3Hue.TabIndex = 20;
             // 
             // numMaskCh4Hue
             // 
@@ -1108,7 +1108,7 @@
             -2147483648});
             this.numMaskCh4Hue.Name = "numMaskCh4Hue";
             this.numMaskCh4Hue.Size = new System.Drawing.Size(72, 20);
-            this.numMaskCh4Hue.TabIndex = 2;
+            this.numMaskCh4Hue.TabIndex = 23;
             // 
             // numMaskCh3Saturation
             // 
@@ -1132,7 +1132,7 @@
             -2147483648});
             this.numMaskCh3Saturation.Name = "numMaskCh3Saturation";
             this.numMaskCh3Saturation.Size = new System.Drawing.Size(72, 20);
-            this.numMaskCh3Saturation.TabIndex = 4;
+            this.numMaskCh3Saturation.TabIndex = 21;
             // 
             // numMaskCh4Saturation
             // 
@@ -1156,7 +1156,7 @@
             -2147483648});
             this.numMaskCh4Saturation.Name = "numMaskCh4Saturation";
             this.numMaskCh4Saturation.Size = new System.Drawing.Size(72, 20);
-            this.numMaskCh4Saturation.TabIndex = 4;
+            this.numMaskCh4Saturation.TabIndex = 24;
             // 
             // numMaskCh3Value
             // 
@@ -1180,7 +1180,7 @@
             -2147483648});
             this.numMaskCh3Value.Name = "numMaskCh3Value";
             this.numMaskCh3Value.Size = new System.Drawing.Size(72, 20);
-            this.numMaskCh3Value.TabIndex = 6;
+            this.numMaskCh3Value.TabIndex = 22;
             // 
             // numMaskCh4Value
             // 
@@ -1204,7 +1204,7 @@
             -2147483648});
             this.numMaskCh4Value.Name = "numMaskCh4Value";
             this.numMaskCh4Value.Size = new System.Drawing.Size(72, 20);
-            this.numMaskCh4Value.TabIndex = 6;
+            this.numMaskCh4Value.TabIndex = 25;
             // 
             // nudCh3Red
             // 
@@ -1217,7 +1217,7 @@
             0});
             this.nudCh3Red.Name = "nudCh3Red";
             this.nudCh3Red.Size = new System.Drawing.Size(52, 20);
-            this.nudCh3Red.TabIndex = 2;
+            this.nudCh3Red.TabIndex = 35;
             // 
             // nudCh4Red
             // 
@@ -1230,7 +1230,7 @@
             0});
             this.nudCh4Red.Name = "nudCh4Red";
             this.nudCh4Red.Size = new System.Drawing.Size(52, 20);
-            this.nudCh4Red.TabIndex = 2;
+            this.nudCh4Red.TabIndex = 39;
             // 
             // nudCh3Green
             // 
@@ -1243,7 +1243,7 @@
             0});
             this.nudCh3Green.Name = "nudCh3Green";
             this.nudCh3Green.Size = new System.Drawing.Size(52, 20);
-            this.nudCh3Green.TabIndex = 4;
+            this.nudCh3Green.TabIndex = 36;
             // 
             // nudCh4Green
             // 
@@ -1256,7 +1256,7 @@
             0});
             this.nudCh4Green.Name = "nudCh4Green";
             this.nudCh4Green.Size = new System.Drawing.Size(52, 20);
-            this.nudCh4Green.TabIndex = 4;
+            this.nudCh4Green.TabIndex = 40;
             // 
             // nudCh3Blue
             // 
@@ -1269,7 +1269,7 @@
             0});
             this.nudCh3Blue.Name = "nudCh3Blue";
             this.nudCh3Blue.Size = new System.Drawing.Size(52, 20);
-            this.nudCh3Blue.TabIndex = 6;
+            this.nudCh3Blue.TabIndex = 37;
             // 
             // nudCh4Blue
             // 
@@ -1282,7 +1282,7 @@
             0});
             this.nudCh4Blue.Name = "nudCh4Blue";
             this.nudCh4Blue.Size = new System.Drawing.Size(52, 20);
-            this.nudCh4Blue.TabIndex = 6;
+            this.nudCh4Blue.TabIndex = 41;
             // 
             // nudCh3Alpha
             // 
@@ -1295,7 +1295,7 @@
             0});
             this.nudCh3Alpha.Name = "nudCh3Alpha";
             this.nudCh3Alpha.Size = new System.Drawing.Size(52, 20);
-            this.nudCh3Alpha.TabIndex = 8;
+            this.nudCh3Alpha.TabIndex = 38;
             this.nudCh3Alpha.Value = new decimal(new int[] {
             255,
             0,
@@ -1313,7 +1313,7 @@
             0});
             this.nudCh4Alpha.Name = "nudCh4Alpha";
             this.nudCh4Alpha.Size = new System.Drawing.Size(52, 20);
-            this.nudCh4Alpha.TabIndex = 8;
+            this.nudCh4Alpha.TabIndex = 42;
             this.nudCh4Alpha.Value = new decimal(new int[] {
             255,
             0,
@@ -1335,7 +1335,7 @@
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.Size = new System.Drawing.Size(68, 48);
-            this.tableLayoutPanel2.TabIndex = 7;
+            this.tableLayoutPanel2.TabIndex = 46;
             // 
             // pbCh3
             // 
@@ -1377,7 +1377,7 @@
             this.tableLayoutPanel3.RowCount = 1;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel3.Size = new System.Drawing.Size(68, 48);
-            this.tableLayoutPanel3.TabIndex = 7;
+            this.tableLayoutPanel3.TabIndex = 47;
             // 
             // pbCh4
             // 
@@ -1412,7 +1412,7 @@
             this.label10.Margin = new System.Windows.Forms.Padding(0);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(41, 13);
-            this.label10.TabIndex = 7;
+            this.label10.TabIndex = 12;
             this.label10.Text = "Images";
             // 
             // label21
@@ -1423,47 +1423,51 @@
             this.label21.Margin = new System.Windows.Forms.Padding(0);
             this.label21.Name = "label21";
             this.label21.Size = new System.Drawing.Size(42, 13);
-            this.label21.TabIndex = 7;
+            this.label21.TabIndex = 13;
             this.label21.Text = "Disable";
             // 
             // ckbNoCh1
             // 
             this.ckbNoCh1.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ckbNoCh1.AutoSize = true;
-            this.ckbNoCh1.Location = new System.Drawing.Point(73, 257);
+            this.ckbNoCh1.Location = new System.Drawing.Point(61, 255);
             this.ckbNoCh1.Name = "ckbNoCh1";
-            this.ckbNoCh1.Size = new System.Drawing.Size(15, 14);
-            this.ckbNoCh1.TabIndex = 9;
+            this.ckbNoCh1.Size = new System.Drawing.Size(39, 17);
+            this.ckbNoCh1.TabIndex = 49;
+            this.ckbNoCh1.Text = "C1";
             this.ckbNoCh1.UseVisualStyleBackColor = true;
             // 
             // ckbNoCh2
             // 
             this.ckbNoCh2.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ckbNoCh2.AutoSize = true;
-            this.ckbNoCh2.Location = new System.Drawing.Point(151, 257);
+            this.ckbNoCh2.Location = new System.Drawing.Point(139, 255);
             this.ckbNoCh2.Name = "ckbNoCh2";
-            this.ckbNoCh2.Size = new System.Drawing.Size(15, 14);
-            this.ckbNoCh2.TabIndex = 9;
+            this.ckbNoCh2.Size = new System.Drawing.Size(39, 17);
+            this.ckbNoCh2.TabIndex = 50;
+            this.ckbNoCh2.Text = "C2";
             this.ckbNoCh2.UseVisualStyleBackColor = true;
             // 
             // ckbNoCh3
             // 
             this.ckbNoCh3.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ckbNoCh3.AutoSize = true;
-            this.ckbNoCh3.Location = new System.Drawing.Point(229, 257);
+            this.ckbNoCh3.Location = new System.Drawing.Point(217, 255);
             this.ckbNoCh3.Name = "ckbNoCh3";
-            this.ckbNoCh3.Size = new System.Drawing.Size(15, 14);
-            this.ckbNoCh3.TabIndex = 9;
+            this.ckbNoCh3.Size = new System.Drawing.Size(39, 17);
+            this.ckbNoCh3.TabIndex = 51;
+            this.ckbNoCh3.Text = "C3";
             this.ckbNoCh3.UseVisualStyleBackColor = true;
             // 
             // ckbNoCh4
             // 
             this.ckbNoCh4.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ckbNoCh4.AutoSize = true;
-            this.ckbNoCh4.Location = new System.Drawing.Point(307, 257);
+            this.ckbNoCh4.Location = new System.Drawing.Point(295, 255);
             this.ckbNoCh4.Name = "ckbNoCh4";
-            this.ckbNoCh4.Size = new System.Drawing.Size(15, 14);
-            this.ckbNoCh4.TabIndex = 9;
+            this.ckbNoCh4.Size = new System.Drawing.Size(39, 17);
+            this.ckbNoCh4.TabIndex = 52;
+            this.ckbNoCh4.Text = "C4";
             this.ckbNoCh4.UseVisualStyleBackColor = true;
             // 
             // tableLayoutPanel4
@@ -1489,6 +1493,74 @@
             this.tableLayoutPanel4.Size = new System.Drawing.Size(265, 48);
             this.tableLayoutPanel4.TabIndex = 8;
             // 
+            // ddsMaskCh1
+            // 
+            this.ddsMaskCh1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ddsMaskCh1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.ddsMaskCh1.Channel2 = false;
+            this.ddsMaskCh1.Channel3 = false;
+            this.ddsMaskCh1.Channel4 = false;
+            this.ddsMaskCh1.Fit = true;
+            this.ddsMaskCh1.Location = new System.Drawing.Point(0, 0);
+            this.ddsMaskCh1.Margin = new System.Windows.Forms.Padding(0);
+            this.ddsMaskCh1.MaxSize = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh1.Name = "ddsMaskCh1";
+            this.ddsMaskCh1.ShowChannelSelector = false;
+            this.ddsMaskCh1.Size = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh1.TabIndex = 3;
+            this.ddsMaskCh1.TabStop = false;
+            // 
+            // ddsMaskCh2
+            // 
+            this.ddsMaskCh2.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ddsMaskCh2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.ddsMaskCh2.Channel1 = false;
+            this.ddsMaskCh2.Channel3 = false;
+            this.ddsMaskCh2.Channel4 = false;
+            this.ddsMaskCh2.Fit = true;
+            this.ddsMaskCh2.Location = new System.Drawing.Point(48, 0);
+            this.ddsMaskCh2.Margin = new System.Windows.Forms.Padding(0);
+            this.ddsMaskCh2.MaxSize = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh2.Name = "ddsMaskCh2";
+            this.ddsMaskCh2.ShowChannelSelector = false;
+            this.ddsMaskCh2.Size = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh2.TabIndex = 4;
+            this.ddsMaskCh2.TabStop = false;
+            // 
+            // ddsMaskCh3
+            // 
+            this.ddsMaskCh3.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ddsMaskCh3.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.ddsMaskCh3.Channel1 = false;
+            this.ddsMaskCh3.Channel2 = false;
+            this.ddsMaskCh3.Channel4 = false;
+            this.ddsMaskCh3.Fit = true;
+            this.ddsMaskCh3.Location = new System.Drawing.Point(96, 0);
+            this.ddsMaskCh3.Margin = new System.Windows.Forms.Padding(0);
+            this.ddsMaskCh3.MaxSize = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh3.Name = "ddsMaskCh3";
+            this.ddsMaskCh3.ShowChannelSelector = false;
+            this.ddsMaskCh3.Size = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh3.TabIndex = 5;
+            this.ddsMaskCh3.TabStop = false;
+            // 
+            // ddsMaskCh4
+            // 
+            this.ddsMaskCh4.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ddsMaskCh4.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.ddsMaskCh4.Channel1 = false;
+            this.ddsMaskCh4.Channel2 = false;
+            this.ddsMaskCh4.Channel3 = false;
+            this.ddsMaskCh4.Fit = true;
+            this.ddsMaskCh4.Location = new System.Drawing.Point(144, 0);
+            this.ddsMaskCh4.Margin = new System.Windows.Forms.Padding(0);
+            this.ddsMaskCh4.MaxSize = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh4.Name = "ddsMaskCh4";
+            this.ddsMaskCh4.ShowChannelSelector = false;
+            this.ddsMaskCh4.Size = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh4.TabIndex = 6;
+            this.ddsMaskCh4.TabStop = false;
+            // 
             // tlpMaskSize
             // 
             this.tlpMaskSize.Anchor = System.Windows.Forms.AnchorStyles.None;
@@ -1507,7 +1579,7 @@
             this.tlpMaskSize.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpMaskSize.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpMaskSize.Size = new System.Drawing.Size(67, 26);
-            this.tlpMaskSize.TabIndex = 3;
+            this.tlpMaskSize.TabIndex = 1;
             this.tlpMaskSize.Visible = false;
             // 
             // label12
@@ -1525,7 +1597,7 @@
             this.lbMaskW.Location = new System.Drawing.Point(27, 0);
             this.lbMaskW.Name = "lbMaskW";
             this.lbMaskW.Size = new System.Drawing.Size(37, 13);
-            this.lbMaskW.TabIndex = 0;
+            this.lbMaskW.TabIndex = 2;
             this.lbMaskW.Text = "44444";
             // 
             // label14
@@ -1534,7 +1606,7 @@
             this.label14.Location = new System.Drawing.Point(3, 13);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(15, 13);
-            this.label14.TabIndex = 0;
+            this.label14.TabIndex = 3;
             this.label14.Text = "H";
             // 
             // lbMaskH
@@ -1543,7 +1615,7 @@
             this.lbMaskH.Location = new System.Drawing.Point(27, 13);
             this.lbMaskH.Name = "lbMaskH";
             this.lbMaskH.Size = new System.Drawing.Size(37, 13);
-            this.lbMaskH.TabIndex = 0;
+            this.lbMaskH.TabIndex = 4;
             this.lbMaskH.Text = "44444";
             // 
             // saveFileDialog1
@@ -1571,6 +1643,19 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel5.Size = new System.Drawing.Size(919, 495);
             this.tableLayoutPanel5.TabIndex = 0;
+            // 
+            // ddsPanel1
+            // 
+            this.ddsPanel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.ddsPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ddsPanel1.Fit = true;
+            this.ddsPanel1.Location = new System.Drawing.Point(453, 0);
+            this.ddsPanel1.Margin = new System.Windows.Forms.Padding(0);
+            this.ddsPanel1.MaxSize = new System.Drawing.Size(0, 0);
+            this.ddsPanel1.Name = "ddsPanel1";
+            this.tableLayoutPanel5.SetRowSpan(this.ddsPanel1, 2);
+            this.ddsPanel1.Size = new System.Drawing.Size(466, 497);
+            this.ddsPanel1.TabIndex = 4;
             // 
             // menuStrip1
             // 
@@ -1624,6 +1709,13 @@
             this.importImageToolStripMenuItem.Text = "&Import image...";
             this.importImageToolStripMenuItem.Click += new System.EventHandler(this.importImageToolStripMenuItem_Click);
             // 
+            // importAlphaToolStripMenuItem
+            // 
+            this.importAlphaToolStripMenuItem.Name = "importAlphaToolStripMenuItem";
+            this.importAlphaToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.importAlphaToolStripMenuItem.Text = "Import &Alpha...";
+            this.importAlphaToolStripMenuItem.Click += new System.EventHandler(this.importAlphaToolStripMenuItem_Click);
+            // 
             // reloadToolStripMenuItem
             // 
             this.reloadToolStripMenuItem.Name = "reloadToolStripMenuItem";
@@ -1673,94 +1765,6 @@
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
-            // 
-            // importAlphaToolStripMenuItem
-            // 
-            this.importAlphaToolStripMenuItem.Name = "importAlphaToolStripMenuItem";
-            this.importAlphaToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
-            this.importAlphaToolStripMenuItem.Text = "Import &Alpha...";
-            this.importAlphaToolStripMenuItem.Click += new System.EventHandler(this.importAlphaToolStripMenuItem_Click);
-            // 
-            // ddsMaskCh1
-            // 
-            this.ddsMaskCh1.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.ddsMaskCh1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.ddsMaskCh1.Channel2 = false;
-            this.ddsMaskCh1.Channel3 = false;
-            this.ddsMaskCh1.Channel4 = false;
-            this.ddsMaskCh1.Fit = true;
-            this.ddsMaskCh1.Location = new System.Drawing.Point(0, 0);
-            this.ddsMaskCh1.Margin = new System.Windows.Forms.Padding(0);
-            this.ddsMaskCh1.MaxSize = new System.Drawing.Size(48, 48);
-            this.ddsMaskCh1.Name = "ddsMaskCh1";
-            this.ddsMaskCh1.ShowChannelSelector = false;
-            this.ddsMaskCh1.Size = new System.Drawing.Size(48, 48);
-            this.ddsMaskCh1.TabIndex = 2;
-            this.ddsMaskCh1.TabStop = false;
-            // 
-            // ddsMaskCh2
-            // 
-            this.ddsMaskCh2.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.ddsMaskCh2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.ddsMaskCh2.Channel1 = false;
-            this.ddsMaskCh2.Channel3 = false;
-            this.ddsMaskCh2.Channel4 = false;
-            this.ddsMaskCh2.Fit = true;
-            this.ddsMaskCh2.Location = new System.Drawing.Point(48, 0);
-            this.ddsMaskCh2.Margin = new System.Windows.Forms.Padding(0);
-            this.ddsMaskCh2.MaxSize = new System.Drawing.Size(48, 48);
-            this.ddsMaskCh2.Name = "ddsMaskCh2";
-            this.ddsMaskCh2.ShowChannelSelector = false;
-            this.ddsMaskCh2.Size = new System.Drawing.Size(48, 48);
-            this.ddsMaskCh2.TabIndex = 2;
-            this.ddsMaskCh2.TabStop = false;
-            // 
-            // ddsMaskCh3
-            // 
-            this.ddsMaskCh3.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.ddsMaskCh3.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.ddsMaskCh3.Channel1 = false;
-            this.ddsMaskCh3.Channel2 = false;
-            this.ddsMaskCh3.Channel4 = false;
-            this.ddsMaskCh3.Fit = true;
-            this.ddsMaskCh3.Location = new System.Drawing.Point(96, 0);
-            this.ddsMaskCh3.Margin = new System.Windows.Forms.Padding(0);
-            this.ddsMaskCh3.MaxSize = new System.Drawing.Size(48, 48);
-            this.ddsMaskCh3.Name = "ddsMaskCh3";
-            this.ddsMaskCh3.ShowChannelSelector = false;
-            this.ddsMaskCh3.Size = new System.Drawing.Size(48, 48);
-            this.ddsMaskCh3.TabIndex = 2;
-            this.ddsMaskCh3.TabStop = false;
-            // 
-            // ddsMaskCh4
-            // 
-            this.ddsMaskCh4.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.ddsMaskCh4.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.ddsMaskCh4.Channel1 = false;
-            this.ddsMaskCh4.Channel2 = false;
-            this.ddsMaskCh4.Channel3 = false;
-            this.ddsMaskCh4.Fit = true;
-            this.ddsMaskCh4.Location = new System.Drawing.Point(144, 0);
-            this.ddsMaskCh4.Margin = new System.Windows.Forms.Padding(0);
-            this.ddsMaskCh4.MaxSize = new System.Drawing.Size(48, 48);
-            this.ddsMaskCh4.Name = "ddsMaskCh4";
-            this.ddsMaskCh4.ShowChannelSelector = false;
-            this.ddsMaskCh4.Size = new System.Drawing.Size(48, 48);
-            this.ddsMaskCh4.TabIndex = 2;
-            this.ddsMaskCh4.TabStop = false;
-            // 
-            // ddsPanel1
-            // 
-            this.ddsPanel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.ddsPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ddsPanel1.Fit = true;
-            this.ddsPanel1.Location = new System.Drawing.Point(453, 0);
-            this.ddsPanel1.Margin = new System.Windows.Forms.Padding(0);
-            this.ddsPanel1.MaxSize = new System.Drawing.Size(0, 0);
-            this.ddsPanel1.Name = "ddsPanel1";
-            this.tableLayoutPanel5.SetRowSpan(this.ddsPanel1, 2);
-            this.ddsPanel1.Size = new System.Drawing.Size(466, 497);
-            this.ddsPanel1.TabIndex = 3;
             // 
             // MainForm
             // 
