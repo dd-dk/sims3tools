@@ -76,6 +76,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="s3pi.Controls">
+      <HintPath>..\..\s3pi\build\bin\Release\s3pi.Controls.dll</HintPath>
+    </Reference>
     <Reference Include="s3pi.CustomForms">
       <HintPath>..\..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
     </Reference>
