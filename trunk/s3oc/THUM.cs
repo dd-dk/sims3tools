@@ -30,13 +30,14 @@ namespace ObjectCloner
     {
         static Image defaultThumbnail =
             Image.FromFile(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Resources/defaultThumbnail.png"),
-            true).GetThumbnailImage(256, 256, gtAbort, IntPtr.Zero);
+            true).GetThumbnailImage(256, 256, () => false, IntPtr.Zero);
         static Dictionary<uint, uint[]> thumTypes;
         static ushort[] thumSizes = new ushort[] { 32, 64, 128, };
         static uint defType = 0x319E4F1D;
         static THUM()
         {
             thumTypes = new Dictionary<uint, uint[]>();
+            thumTypes.Add(0x034AEECB, new uint[] { 0x626F60CC, 0x626F60CD, 0x626F60CE, }); //Create-a-Sim Part
             thumTypes.Add(0x319E4F1D, new uint[] { 0x0580A2B4, 0x0580A2B5, 0x0580A2B6, }); //Catalog Object
             thumTypes.Add(0xCF9A4ACE, new uint[] { 0x00000000, 0x00000000, 0x00000000, }); //Modular Resource
             thumTypes.Add(0x0418FE2A, new uint[] { 0x2653E3C8, 0x2653E3C9, 0x2653E3CA, }); //Catalog Fence
@@ -87,12 +88,11 @@ namespace ObjectCloner
                     throw new ArgumentException();
 
                 Image thumb;
-                thumb = value.GetThumbnailImage(thumSizes[(int)size], thumSizes[(int)size], gtAbort, System.IntPtr.Zero);
+                thumb = value.GetThumbnailImage(thumSizes[(int)size], thumSizes[(int)size], () => false, System.IntPtr.Zero);
                 thumb.Save(item.Resource.Stream, System.Drawing.Imaging.ImageFormat.Png);
                 item.Commit();
             }
         }
-        static bool gtAbort() { return false; }
         static SpecificResource getItem(List<PathPackageTuple> ppts, ulong instance, uint type)
         {
             if (ppts == null) return null;
@@ -111,7 +111,14 @@ namespace ObjectCloner
         public static IResourceKey getImageRK(THUMSize size, SpecificResource item)
         {
             if (item.CType == CatalogType.ModularResource)
+            {
                 return RK.NULL;
+            }
+            else if (item.CType == CatalogType.CAS_Part)
+            {
+                SpecificResource sr = getRK(item.RequestedRK.ResourceType, item.RequestedRK.Instance, size, false);
+                return sr == null ? RK.NULL : sr.RequestedRK;
+            }
             else
             {
                 ulong png = (item.Resource != null) ? (ulong)item.Resource["CommonBlock.PngInstance"].Value : 0;
@@ -122,7 +129,13 @@ namespace ObjectCloner
         public static SpecificResource getTHUM(THUMSize size, SpecificResource item)
         {
             if (item.CType == CatalogType.ModularResource)
+            {
                 return null;
+            }
+            else if (item.CType == CatalogType.CAS_Part)
+            {
+                return getRK(item.RequestedRK.ResourceType, item.RequestedRK.Instance, size, false);
+            }
             else
             {
                 ulong png = (item.Resource != null) ? (ulong)item.Resource["CommonBlock.PngInstance"].Value : 0;
@@ -137,7 +150,13 @@ namespace ObjectCloner
         public static IResourceKey getNewRK(THUMSize size, SpecificResource item)
         {
             if (item.CType == CatalogType.ModularResource)
+            {
                 return RK.NULL;
+            }
+            else if (item.CType == CatalogType.CAS_Part)
+            {
+                return getNewRK(item.RequestedRK.ResourceType, item.RequestedRK.Instance, size, false);
+            }
             else
             {
                 ulong png = (item.Resource != null) ? (ulong)item.Resource["CommonBlock.PngInstance"].Value : 0;
@@ -166,7 +185,13 @@ namespace ObjectCloner
         public static Image getImage(THUMSize size, SpecificResource item)
         {
             if (item.CType == CatalogType.ModularResource)
+            {
                 return getImage(size, MainForm.ItemForTGIBlock0(item));
+            }
+            else if (item.CType == CatalogType.CAS_Part)
+            {
+                return Thumb[item.RequestedRK.ResourceType, item.RequestedRK.Instance, size, false];
+            }
             else
             {
                 ulong png = (item.Resource != null) ? (ulong)item.Resource["CommonBlock.PngInstance"].Value : 0;

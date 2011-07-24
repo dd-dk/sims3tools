@@ -483,6 +483,8 @@ namespace ObjectCloner
             Diagnostics.Log("btnStart_Click");
             if (tabControl1.Contains(tpMain))
                 fillOverviewUpdateImage(selectedItem);
+            else if (tabControl1.Contains(tpCASP))
+                fillCASPUpdateImage(selectedItem);
             TabEnable(true);
             DisplayOptions();
         }
@@ -1161,8 +1163,8 @@ namespace ObjectCloner
         }
         void clearOverview()
         {
-            pictureBox1.Image = null;
-            lbThumbTGI.Text = "";
+            pbCatlgThum.Image = null;
+            lbTGICatlgThum.Text = "";
             tbResourceName.Text = "";
             tbObjName.Text = "";
             tbNameGUID.Text = "";
@@ -1177,6 +1179,8 @@ namespace ObjectCloner
         }
         void clearCASP()
         {
+            pbCASPThum.Image = null;
+            lbTGICASPThum.Text = "";
             tbCASPResourceName.Text = "";
             tbCASPUnknown1.Text = "";
             cbCASPClothingType.SelectedIndex = -1;
@@ -1255,15 +1259,19 @@ namespace ObjectCloner
         string itemDesc = null;
         void fillOverview(SpecificResource item)
         {
-            lbThumbTGI.Font = new Font(lbThumbTGI.Font, FontStyle.Regular);
+            lbTGICatlgThum.Font = new Font(lbTGICatlgThum.Font, FontStyle.Regular);
             tbObjName.Font = tbNameGUID.Font =
             tbCatlgName.Font = tbObjDesc.Font = tbDescGUID.Font =
             tbCatlgDesc.Font = tbPrice.Font = tbProductStatus.Font =
                 new Font(tbObjName.Font, FontStyle.Regular);
 
             AApiVersionedFields common = item.Resource["CommonBlock"].Value as AApiVersionedFields;
-            if (formClosing) return; else pictureBox1.Image = THUM.getImage(THUM.THUMSize.large, item);
-            if (formClosing) return; else lbThumbTGI.Text = (AResourceKey)THUM.getImageRK(THUM.THUMSize.large, item);
+
+            if (formClosing) return;
+            SpecificResource thumSR = THUM.getTHUM(THUM.THUMSize.large, item);
+            pbCatlgThum.Image = ResizeImage(Image.FromStream(thumSR.Resource.Stream), pbCatlgThum);
+            lbTGICatlgThum.Text = (AResourceKey)(thumSR == null ? RK.NULL : thumSR.RequestedRK);
+
             if (formClosing) return; else tbResourceName.Text = NameMap.NMap[item.RequestedRK.Instance];
             tbObjName.Text = common["Name"].Value + "";
             tbNameGUID.Text = common["NameGUID"] + "";
@@ -1300,11 +1308,11 @@ namespace ObjectCloner
             tbPackage.Text = item.PathPackage.Path;
 
             tpMain.Tag = noData;
-            lbThumbTGI.Text = tbObjName.Text = tbNameGUID.Text =
+            lbTGICatlgThum.Text = tbObjName.Text = tbNameGUID.Text =
             tbCatlgName.Text = tbObjDesc.Text = tbDescGUID.Text =
             tbCatlgDesc.Text = tbPrice.Text = tbProductStatus.Text =
                 noData;
-            lbThumbTGI.Font = new Font(lbThumbTGI.Font, FontStyle.Italic);
+            lbTGICatlgThum.Font = new Font(lbTGICatlgThum.Font, FontStyle.Italic);
             tbObjName.Font = tbNameGUID.Font =
             tbCatlgName.Font = tbObjDesc.Font = tbDescGUID.Font =
             tbCatlgDesc.Font = tbPrice.Font = tbProductStatus.Font =
@@ -1315,6 +1323,11 @@ namespace ObjectCloner
         {
             CASPartResource.CASPartResource casp = item.Resource as CASPartResource.CASPartResource;
             if (casp == null) { clearCASP(); return; }
+
+            if (formClosing) return;
+            SpecificResource thumSR = THUM.getTHUM(THUM.THUMSize.large, item);
+            pbCASPThum.Image = ResizeImage(Image.FromStream(thumSR.Resource.Stream), pbCASPThum);
+            lbTGICASPThum.Text = (AResourceKey)(thumSR == null ? RK.NULL : thumSR.RequestedRK);
 
             tbCASPResourceName.Text = NameMap.NMap[item.RequestedRK.Instance];
             tbCASPPackage.Text = item.PathPackage.Path;
@@ -1407,10 +1420,20 @@ namespace ObjectCloner
         void fillOverviewUpdateImage(SpecificResource item)
         {
             if (formClosing) return;
-            if (pictureBox1.Image == null)
+            if (pbCatlgThum.Image == null)
             {
-                pictureBox1.Image = THUM.getLargestThumbOrDefault(item).GetThumbnailImage(pictureBox1.Width, pictureBox1.Height, gtAbort, IntPtr.Zero);
-                lbThumbTGI.Text = (AResourceKey)THUM.getNewRK(THUM.THUMSize.large, item);
+                pbCatlgThum.Image = ResizeImage(THUM.getLargestThumbOrDefault(item), pbCatlgThum);
+                lbTGICatlgThum.Text = (AResourceKey)THUM.getNewRK(THUM.THUMSize.large, item);
+            }
+        }
+
+        void fillCASPUpdateImage(SpecificResource item)
+        {
+            if (formClosing) return;
+            if (pbCASPThum.Image == null)
+            {
+                pbCASPThum.Image = ResizeImage(THUM.getLargestThumbOrDefault(item), pbCASPThum);
+                lbTGICASPThum.Text = (AResourceKey)THUM.getNewRK(THUM.THUMSize.large, item);
             }
         }
 
@@ -1441,7 +1464,7 @@ namespace ObjectCloner
         void tabEnableOverview(bool enabled)
         {
             enabled &= !((string)tpMain.Tag == noData);
-            btnReplThumb.Enabled = enabled;
+            btnReplCatlgThum.Enabled = enabled;
             tbCatlgName.ReadOnly = !enabled;// || itemName == null;
             tbCatlgDesc.ReadOnly = !enabled;// || itemDesc == null;
             ckbCopyToAll.Enabled = enabled;
@@ -1453,6 +1476,7 @@ namespace ObjectCloner
         void tabEnableCASP(bool enabled)
         {
             //tbCASPResourceName.Text = "";
+            btnReplCASPThum.Enabled = enabled;
             tbCASPUnknown1.ReadOnly = !enabled;
             cbCASPClothingType.Enabled = enabled;
             clbCASPTypeFlags.Enabled = enabled;
@@ -2087,25 +2111,51 @@ namespace ObjectCloner
         }
         #endregion
 
-        private void btnReplThumb_Click(object sender, EventArgs e)
+        private void btnReplCatlgThum_Click(object sender, EventArgs e)
+        {
+            Image rep = getReplacementForThumbs();
+            if (rep != null)
+            {
+                replacementForThumbs = rep;
+                pbCatlgThum.Image = ResizeImage(rep, pbCatlgThum);
+            }
+        }
+
+        private void pbCatlgThum_DoubleClick(object sender, EventArgs e) { btnReplCatlgThum_Click(sender, e); }
+
+        private void btnReplCASPThum_Click(object sender, EventArgs e)
+        {
+            Image rep = getReplacementForThumbs();
+            if (rep != null)
+            {
+                replacementForThumbs = rep;
+                pbCASPThum.Image = ResizeImage(rep, pbCASPThum);
+            }
+        }
+
+        private void pbCASPThum_DoubleClick(object sender, EventArgs e) { btnReplCASPThum_Click(sender, e); }
+
+        Image getReplacementForThumbs()
         {
             openThumbnailDialog.FilterIndex = 1;
             openThumbnailDialog.FileName = "*.PNG";
             DialogResult dr = openThumbnailDialog.ShowDialog();
-            if (dr != DialogResult.OK) return;
+            if (dr != DialogResult.OK) return null;
             try
             {
-                replacementForThumbs = Image.FromFile(openThumbnailDialog.FileName, true);
-                pictureBox1.Image = replacementForThumbs.GetThumbnailImage(pictureBox1.Width, pictureBox1.Height, gtAbort, System.IntPtr.Zero);
+                return Image.FromFile(openThumbnailDialog.FileName, true);
             }
             catch (Exception ex)
             {
                 CopyableMessageBox.IssueException(ex, "Could not read thumbnail:\n" + openThumbnailDialog.FileName, openThumbnailDialog.Title);
-                replacementForThumbs = null;
+                return null;
             }
         }
-        static bool gtAbort() { return false; }
 
+        Image ResizeImage(Image src, PictureBox target)
+        {
+            return src.GetThumbnailImage(target.Width, target.Height, () => false, System.IntPtr.Zero);
+        }
 
         List<string> replacements = new List<string>();
 
@@ -2561,8 +2611,11 @@ namespace ObjectCloner
             {
                 stepList.AddRange(new Step[] {
                     CASP_deepClone,
+                    CASP_getKinXML,
                 });
-                lastStepInChain = CASP_deepClone;
+                lastStepInChain = CASP_getKinXML;
+                if (WantThumbs)
+                    stepList.Add(SlurpThumbnails);
             }
         }
 
@@ -2606,7 +2659,8 @@ namespace ObjectCloner
             StepText.Add(SlurpThumbnails, "Add thumbnails");
             StepText.Add(CWAL_SlurpThumbnails, "Add thumbnails");
 
-            StepText.Add(CASP_deepClone, "CASP_deepClone");
+            StepText.Add(CASP_deepClone, "Deep clone of resources referenced by CASP");
+            StepText.Add(CASP_getKinXML, "Preset XML (same instances as CASP)");
         }
 
         void None() { }
@@ -2925,33 +2979,43 @@ namespace ObjectCloner
             Diagnostics.Show(s, "No TXTC items");
         }
 
+        void deepClone(string _key, IResourceKey _rk, Predicate<IResourceKey> _match)
+        {
+            if (!_match(_rk)) return;
+            Add(_key, _rk);
+            SpecificResource sr = new SpecificResource(FileTable.fb0, _rk);
+            if (sr.ResourceIndexEntry == null) return;
+
+            int i = 0;
+            IEnumerable<IResourceKey> ierk;
+            if (_rk.ResourceType == 0x0333406C)
+            {
+                ierk = new EnumerableTextReader(new StreamReader(sr.Resource.Stream, true));
+            }
+            else
+            {
+                ierk = new EnumerableResource(sr.Resource as AResource);
+            }
+            foreach (IResourceKey rk in ierk)
+                deepClone(_key + ": " + sr.LongName.Substring(0, 4) + " RK " + i++, rk, _match);
+        }
         void CASP_deepClone()
         {
             Diagnostics.Log("CASP_deepClone");
             CASPartResource.CASPartResource casp = selectedItem.Resource as CASPartResource.CASPartResource;
             if (casp == null) return;
 
-            for (int i = 0; i < casp.Presets.Count; i++)
-                SlurpRKsFromTextReader("clone.preset[" + i + "]", casp.Presets[i].XmlFile);
-
-            SlurpRKsFromField("clone", casp);
-
-            // Remove all CASP entries in rkLookup except self
-            List<string> casps = new List<string>();
-            foreach (var kvp in rkLookup)
-                if (kvp.Value.ResourceType == 0x034AEECB && !kvp.Value.Equals(selectedItem.RequestedRK)) casps.Add(kvp.Key);
-            casps.ForEach(key => rkLookup.Remove(key));
-
-            // Slurp everything pointed to by what we have so far
+            IEnumerable<IResourceKey> ierk = new EnumerableResource(casp);
+            int i = 0;
             List<IResourceKey> seen = new List<IResourceKey>();
-            foreach (IResourceKey rk in rkLookup.Values) if (!seen.Contains(rk)) seen.Add(rk);// cannot modify rkLookup here
-            for (int i = 0; i < seen.Count; i++) SlurpRKsFromRK("clone.RK[" + i + "]", seen[i]);
+            foreach (IResourceKey rk in ierk)
+                deepClone("casp RK " + i++, rk, x => { if (seen.Contains(x) || x.ResourceType == 0x034AEECB) return false; seen.Add(x); return true; });
+        }
 
-            // And again, remove all CASP entries in rkLookup except self
-            casps = new List<string>();
-            foreach (var kvp in rkLookup)
-                if (kvp.Value.ResourceType == 0x034AEECB && !kvp.Value.Equals(selectedItem.RequestedRK)) casps.Add(kvp.Key);
-            casps.ForEach(key => rkLookup.Remove(key));
+        void CASP_getKinXML()
+        {
+            Diagnostics.Log(String.Format("CASP_getKinXML" + ": 0x{0:X8}-*-0x{1:X16}", 0x0333406C, selectedItem.ResourceIndexEntry.Instance));
+            SlurpKindred("casp.PresetXML", rie => rie.ResourceType == 0x0333406C && rie.Instance == selectedItem.ResourceIndexEntry.Instance);
         }
 
 
@@ -4005,5 +4069,211 @@ namespace ObjectCloner
     static class Extensions
     {
         public static bool Contains(this IEnumerable<string> haystack, string needle) { foreach (var x in haystack) if (x.Equals(needle)) return true; return false; }
+    }
+
+    class EnumerableResource : IEnumerable<IResourceKey>
+    {
+        AApiVersionedFields resource;
+
+        public EnumerableResource(AApiVersionedFields resource) { this.resource = resource; }
+        public static explicit operator EnumerableResource(AApiVersionedFields resource) { return new EnumerableResource(resource); }
+
+        public IEnumerator<IResourceKey> GetEnumerator() { return new Enumerator(resource); }
+        IEnumerator IEnumerable.GetEnumerator() { return (IEnumerator<IResourceKey>)GetEnumerator(); }
+
+        public struct Enumerator : IEnumerator<IResourceKey>
+        {
+            AApiVersionedFields resource;
+            IResourceKey rk;
+            TypedValue current;
+            IEnumerator<string> contentFieldsEnumerator;
+            DependentList<TGIBlock> tgiDependentList;
+            IEnumerator<TGIBlock> tgiEnumerator;
+            IEnumerable<IResourceKey> rkEnumerable;
+            IEnumerator<IResourceKey> rkEnumerator;
+            IEnumerable<GenericRCOLResource.ChunkEntry> ceEnumerable;
+            IEnumerator<GenericRCOLResource.ChunkEntry> ceEnumerator;
+            public Enumerator(AApiVersionedFields resource)
+            {
+                this.resource = resource;
+                rk = null;
+                current = null;
+                contentFieldsEnumerator = resource.ContentFields.GetEnumerator();
+                tgiDependentList = null;
+                tgiEnumerator = null;
+                rkEnumerable = null;
+                rkEnumerator = null;
+                ceEnumerable = null;
+                ceEnumerator = null;
+            }
+
+            public IResourceKey Current { get { return rk; } }
+            object IEnumerator.Current { get { return (IResourceKey)Current; } }
+
+            public void Dispose()
+            {
+                this.resource = null;
+                rk = null;
+                current = null;
+                contentFieldsEnumerator = null;
+                tgiDependentList = null;
+                tgiEnumerator = null;
+                rkEnumerable = null;
+                rkEnumerator = null;
+                ceEnumerable = null;
+                ceEnumerator = null;
+            }
+
+            public bool MoveNext()
+            {
+                while (true)
+                {
+                    if (current == null)
+                    {
+                        if (!contentFieldsEnumerator.MoveNext()) break;
+                        current = resource[contentFieldsEnumerator.Current];
+                        tgiDependentList = null;
+                        rkEnumerable = null;
+                        ceEnumerable = null;
+                    }
+                    if (typeof(IResourceKey).IsAssignableFrom(current.Type))
+                    {
+                        rk = current.Value as IResourceKey;
+                        current = null;
+                        return true;
+                    }
+                    else if (typeof(DependentList<TGIBlock>).IsAssignableFrom(current.Type))
+                    {
+                        if (tgiDependentList == null)
+                        {
+                            tgiDependentList = current.Value as DependentList<TGIBlock>;
+                            tgiEnumerator = tgiDependentList.GetEnumerator();
+                        }
+                        if (tgiEnumerator.MoveNext())
+                        {
+                            rk = tgiEnumerator.Current;
+                            return true;
+                        }
+                    }
+                    else if (typeof(TextReader).IsAssignableFrom(current.Type))
+                    {
+                        if (rkEnumerable == null)
+                        {
+                            rkEnumerable = new EnumerableTextReader(current.Value as TextReader);
+                            rkEnumerator = rkEnumerable.GetEnumerator();
+                        }
+                        if (rkEnumerator.MoveNext())
+                        {
+                            rk = rkEnumerator.Current;
+                            return true;
+                        }
+                    }
+                    else if (typeof(AApiVersionedFields).IsAssignableFrom(current.Type))
+                    {
+                        if (rkEnumerable == null)
+                        {
+                            rkEnumerable = new EnumerableResource(current.Value as AApiVersionedFields);
+                            rkEnumerator = rkEnumerable.GetEnumerator();
+                        }
+                        if (rkEnumerator.MoveNext())
+                        {
+                            rk = rkEnumerator.Current;
+                            return true;
+                        }
+                    }
+                    else if (typeof(IEnumerable<GenericRCOLResource.ChunkEntry>).IsAssignableFrom(current.Type))
+                    {
+                        if (ceEnumerable == null)
+                        {
+                            ceEnumerable = current.Value as IEnumerable<GenericRCOLResource.ChunkEntry>;
+                            ceEnumerator = ceEnumerable.GetEnumerator();
+                            rkEnumerable = null;
+                        }
+                        if (rkEnumerable == null)
+                        {
+                            if (!ceEnumerator.MoveNext())
+                            {
+                                current = null;
+                                continue;
+                            }
+                            rkEnumerable = new EnumerableResource(ceEnumerator.Current);
+                            rkEnumerator = rkEnumerable.GetEnumerator();
+                        }
+                        if (!rkEnumerator.MoveNext())
+                        {
+                            rkEnumerable = null;
+                            continue;
+                        }
+                        rk = rkEnumerator.Current;
+                        return true;
+                    }
+                    current = null;
+                }
+                return false;
+            }
+
+            public void Reset() { contentFieldsEnumerator = resource.ContentFields.GetEnumerator(); current = null; }
+        }
+    }
+
+    class EnumerableTextReader : IEnumerable<IResourceKey>
+    {
+        TextReader tr;
+
+        public EnumerableTextReader(TextReader tr) { this.tr = tr; }
+        public static explicit operator EnumerableTextReader(TextReader tr) { return new EnumerableTextReader(tr); }
+
+        public IEnumerator<IResourceKey> GetEnumerator() { return new Enumerator(tr); }
+        IEnumerator IEnumerable.GetEnumerator() { return (IEnumerator<IResourceKey>)GetEnumerator(); }
+
+        public struct Enumerator : IEnumerator<IResourceKey>
+        {
+            const int keyLen = 3 + 1 + 8 + 1 + 8 + 1 + 16;//key:TTTTTTTT:GGGGGGGG:IIIIIIIIIIIIIIII
+            TextReader tr;
+            string line;
+            IResourceKey rk;
+            int linePos;
+            int index;
+            public Enumerator(TextReader tr)
+            {
+                this.tr = tr;
+                line = tr.ReadLine();
+                rk = null;
+                linePos = 0;
+                index = -1;
+            }
+
+            public IResourceKey Current { get { return rk; } }
+            object IEnumerator.Current { get { return (IResourceKey)Current; } }
+
+            public void Dispose() { tr = null; }
+
+            public bool MoveNext()
+            {
+                if (line == null) return false;
+
+                index = line.IndexOf("key:", linePos);
+                while (index == -1)
+                {
+                    line = tr.ReadLine();
+                    if (line == null) return false;
+
+                    linePos = 0;
+                    index = line.IndexOf("key:", linePos);
+                }
+                linePos += keyLen;
+                if (linePos > line.Length)
+                {
+                    line = tr.ReadLine();
+                    return MoveNext();
+                }
+
+                string oldKey = line.Substring(index, keyLen).Substring(4).Replace('-', ':');
+                string RKkey = "0x" + oldKey.Replace(":", "-0x");//translate to s3pi format
+                return RK.TryParse(RKkey, out rk);
+            }
+
+            public void Reset() { throw new InvalidOperationException(); }
+        }
     }
 }

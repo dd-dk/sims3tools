@@ -67,7 +67,7 @@
    ], [
       a :Thumbnails ;
       :in "Thumbnails" ;
-      :packages ( "AllThumbnails.package" ) .
+      :packages ( "AllThumbnails.package" "CasThumbnails.package" ) .
    ]
 .
 
@@ -93,7 +93,7 @@
    ], [
       a :Thumbnails ;
       :in "Thumbnails" ;
-      :packages ( "AllThumbnails.package" ) .
+      :packages ( "AllThumbnails.package" "CasThumbnails.package" ) .
    ]
 .
 
@@ -120,7 +120,7 @@
    ], [
       a :Thumbnails ;
       :in "Thumbnails" ;
-      :packages ( "AllThumbnails.package" ) .
+      :packages ( "AllThumbnails.package" "CasThumbnails.package" ) .
    ]
 .
 
@@ -148,7 +148,7 @@
    ], [
       a :Thumbnails ;
       :in "Thumbnails" ;
-      :packages ( "AllThumbnails.package" ) .
+      :packages ( "AllThumbnails.package" "CasThumbnails.package" ) .
    ]
 .
 
@@ -176,7 +176,7 @@
    ], [
       a :Thumbnails ;
       :in "Thumbnails" ;
-      :packages ( "AllThumbnails.package" ) .
+      :packages ( "AllThumbnails.package" "CasThumbnails.package" ) .
    ]
 .
 
@@ -205,7 +205,7 @@
    ], [
       a :Thumbnails ;
       :in "Thumbnails" ;
-      :packages ( "AllThumbnails.package" ) .
+      :packages ( "AllThumbnails.package" "CasThumbnails.package" ) .
    ]
 .
 
@@ -235,7 +235,7 @@
    ], [
       a :Thumbnails ;
       :in "Thumbnails" ;
-      :packages ( "AllThumbnails.package" ) .
+      :packages ( "AllThumbnails.package" "CasThumbnails.package" ) .
    ]
 .
 
@@ -266,7 +266,7 @@
    ], [
       a :Thumbnails ;
       :in "Thumbnails" ;
-      :packages ( "AllThumbnails.package" ) .
+      :packages ( "AllThumbnails.package" "CasThumbnails.package" ) .
    ]
 .
 
@@ -294,6 +294,6 @@
    ], [
       a :Thumbnails ;
       :in "Thumbnails" ;
-      :packages ( "AllThumbnails.package" ) .
+      :packages ( "AllThumbnails.package" "CasThumbnails.package" ) .
    ]
 .

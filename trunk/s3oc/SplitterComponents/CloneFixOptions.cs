@@ -51,8 +51,6 @@ namespace ObjectCloner.SplitterComponents
                 ckbDeepClone.Enabled = false;
                 ckbPadSTBLs.Checked = false;
                 ckbPadSTBLs.Enabled = false;
-                ckbThumbs.Checked = false;
-                ckbThumbs.Enabled = false;
             }
             else
             {

@@ -71,7 +71,7 @@
             this.ckbCompress.Location = new System.Drawing.Point(35, 511);
             this.ckbCompress.Name = "ckbCompress";
             this.ckbCompress.Size = new System.Drawing.Size(121, 17);
-            this.ckbCompress.TabIndex = 6;
+            this.ckbCompress.TabIndex = 7;
             this.ckbCompress.Text = "Enable compression";
             this.ckbCompress.UseVisualStyleBackColor = false;
             // 
@@ -164,13 +164,13 @@
             this.label22.Size = new System.Drawing.Size(259, 45);
             this.label22.TabIndex = 1;
             this.label22.Text = "If you intend to remove any parts of the scenegraph\r\nchain in order for the objec" +
-                "t to use original resouces,\r\nyou must do so before renumbering internally";
+    "t to use original resouces,\r\nyou must do so before renumbering internally";
             // 
             // tlpOptions
             // 
-            this.tlpOptions.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.tlpOptions.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tlpOptions.ColumnCount = 4;
             this.tlpOptions.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tlpOptions.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 24F));
@@ -213,7 +213,7 @@
             this.flowLayoutPanel1.Location = new System.Drawing.Point(150, 534);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Size = new System.Drawing.Size(162, 29);
-            this.flowLayoutPanel1.TabIndex = 7;
+            this.flowLayoutPanel1.TabIndex = 8;
             // 
             // btnCancel
             // 
@@ -242,7 +242,7 @@
             this.ckbThumbs.Location = new System.Drawing.Point(35, 242);
             this.ckbThumbs.Name = "ckbThumbs";
             this.ckbThumbs.Size = new System.Drawing.Size(114, 17);
-            this.ckbThumbs.TabIndex = 4;
+            this.ckbThumbs.TabIndex = 5;
             this.ckbThumbs.Text = "Include thumbnails";
             this.ckbThumbs.UseVisualStyleBackColor = true;
             // 
@@ -253,7 +253,7 @@
             this.ckbPadSTBLs.Location = new System.Drawing.Point(35, 219);
             this.ckbPadSTBLs.Name = "ckbPadSTBLs";
             this.ckbPadSTBLs.Size = new System.Drawing.Size(153, 17);
-            this.ckbPadSTBLs.TabIndex = 3;
+            this.ckbPadSTBLs.TabIndex = 4;
             this.ckbPadSTBLs.Text = "Create missing string tables";
             this.ckbPadSTBLs.UseVisualStyleBackColor = true;
             // 
@@ -342,7 +342,7 @@
             this.ckbIncludePresets.Location = new System.Drawing.Point(27, 72);
             this.ckbIncludePresets.Name = "ckbIncludePresets";
             this.ckbIncludePresets.Size = new System.Drawing.Size(131, 17);
-            this.ckbIncludePresets.TabIndex = 3;
+            this.ckbIncludePresets.TabIndex = 4;
             this.ckbIncludePresets.Text = "Include Preset Images";
             this.ckbIncludePresets.UseVisualStyleBackColor = true;
             this.ckbIncludePresets.Visible = false;
@@ -356,7 +356,7 @@
             this.groupBox2.Location = new System.Drawing.Point(35, 277);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(277, 216);
-            this.groupBox2.TabIndex = 5;
+            this.groupBox2.TabIndex = 6;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Make object unique";
             // 
