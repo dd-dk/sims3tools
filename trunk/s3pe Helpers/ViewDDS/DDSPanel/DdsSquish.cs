@@ -76,17 +76,17 @@ namespace DdsFileTypePlugin
 
         private static unsafe void CallCompressImage(byte[] rgba, int width, int height, byte[] blocks, int flags)
         {
-            fixed (byte* numRef = rgba)
+            fixed (byte* _rgba = rgba)
             {
-                fixed (byte* numRef2 = blocks)
+                fixed (byte* _blocks = blocks)
                 {
                     if (Is64Bit())
                     {
-                        SquishInterface_64.SquishCompressImage(numRef, width, height, numRef2, flags);
+                        SquishInterface_64.SquishCompressImage(_rgba, width, height, _blocks, flags);
                     }
                     else
                     {
-                        SquishInterface_32.SquishCompressImage(numRef, width, height, numRef2, flags);
+                        SquishInterface_32.SquishCompressImage(_rgba, width, height, _blocks, flags);
                     }
                 }
             }
@@ -121,18 +121,10 @@ namespace DdsFileTypePlugin
         //
         // ---------------------------------------------------------------------------------------
 
-        internal static byte[] CompressImage(byte[] pixelInput, int width, int height, int flags)
+        internal static void CompressImage(byte[] pixelInput, int width, int height, byte[] blocks, int flags)
         {
-            // Allocate room for compressed output
-            int blockCount = ((width + 3) / 4) * ((width + 3) / 4);
-            int blockSize = ((flags & 1) != 0) ? 8 : 0x10;
-            byte[] blocks = new byte[blockCount * blockSize];
-
             // Invoke squish::CompressImage() with the required parameters
             CallCompressImage(pixelInput, width, height, blocks, flags);
-
-            // Return our block data to caller..
-            return blocks;
         }
 
 		// ---------------------------------------------------------------------------------------

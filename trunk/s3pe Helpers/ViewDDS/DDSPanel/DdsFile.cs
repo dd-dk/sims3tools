@@ -506,33 +506,7 @@ namespace DdsFileTypePlugin
                 int srcPixelSize = ((int)m_header.m_pixelFormat.m_rgbBitCount / 8);
 
                 // We need the pitch for a row, so we can allocate enough memory for the load.
-                int rowPitch = 0;
-
-                if ((m_header.m_headerFlags & (int)DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_PITCH) != 0)
-                {
-                    // Pitch specified.. so we can use directly
-                    rowPitch = (int)m_header.m_pitchOrLinearSize;
-                }
-                else if ((m_header.m_headerFlags & (int)DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_LINEARSIZE) != 0)
-                {
-                    // Linear size specified.. compute row pitch. Of course, this should never happen
-                    // as linear size is *supposed* to be for compressed textures. But Microsoft don't 
-                    // always play by the rules when it comes to DDS output. 
-                    rowPitch = (int)m_header.m_pitchOrLinearSize / (int)m_header.m_height;
-                }
-                else
-                {
-                    // Another case of Microsoft not obeying their standard is the 'Convert to..' shell extension
-                    // that ships in the DirectX SDK. Seems to always leave flags empty..so no indication of pitch
-                    // or linear size. And - to cap it all off - they leave pitchOrLinearSize as *zero*. Zero??? If
-                    // we get this bizarre set of inputs, we just go 'screw it' and compute row pitch ourselves, 
-                    // making sure we DWORD align it (if that code path is enabled).
-                    rowPitch = ((int)m_header.m_width * srcPixelSize);
-
-#if	APPLY_PITCH_ALIGNMENT
-					rowPitch = ( ( ( int )rowPitch + 3 ) & ( ~3 ) );
-#endif	// APPLY_PITCH_ALIGNMENT
-                }
+                int rowPitch = getRowPitch(srcPixelSize);
 
                 //				System.Diagnostics.Debug.WriteLine( "Image width : " + m_header.m_width + ", rowPitch = " + rowPitch );
                 #endregion
@@ -584,6 +558,36 @@ namespace DdsFileTypePlugin
             if (supportHSV)
                 hsvData = RGBHSV.ColorRGBA.ConvertToColorHSVAArray(m_pixelData);
         }
+
+        int getRowPitch(int srcPixelSize)
+        {
+            if ((m_header.m_headerFlags & (int)DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_PITCH) != 0)
+            {
+                // Pitch specified.. so we can use directly
+                return (int)m_header.m_pitchOrLinearSize;
+            }
+            else if ((m_header.m_headerFlags & (int)DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_LINEARSIZE) != 0)
+            {
+                // Linear size specified.. compute row pitch. Of course, this should never happen
+                // as linear size is *supposed* to be for compressed textures. But Microsoft don't 
+                // always play by the rules when it comes to DDS output. 
+                return (int)m_header.m_pitchOrLinearSize / (int)m_header.m_height;
+            }
+            else
+            {
+                // Another case of Microsoft not obeying their standard is the 'Convert to..' shell extension
+                // that ships in the DirectX SDK. Seems to always leave flags empty..so no indication of pitch
+                // or linear size. And - to cap it all off - they leave pitchOrLinearSize as *zero*. Zero??? If
+                // we get this bizarre set of inputs, we just go 'screw it' and compute row pitch ourselves, 
+                // making sure we DWORD align it (if that code path is enabled).
+                return ((int)m_header.m_width * srcPixelSize);
+
+#if	APPLY_PITCH_ALIGNMENT
+					rowPitch = ( ( ( int )rowPitch + 3 ) & ( ~3 ) );
+#endif	// APPLY_PITCH_ALIGNMENT
+            }
+        }
+
         #region Supported non-DXT conversion methods
         delegate void pixelSet(uint pixelColour, out uint pixelRed, out uint pixelGreen, out uint pixelBlue, out uint pixelAlpha);
         void pixelSetDDS_FORMAT_A8R8G8B8(uint pixelColour, out uint pixelRed, out uint pixelGreen, out uint pixelBlue, out uint pixelAlpha)
@@ -675,7 +679,9 @@ namespace DdsFileTypePlugin
             m_header.m_width = (uint)width;
             m_header.m_height = (uint)height;
             m_header.m_pixelFormat.Initialise(DdsFileFormat.DDS_FORMAT_DXT1);
-            m_pixelData = new byte[width * height * 4];
+            m_header.m_headerFlags |= (int)DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_PITCH;
+            m_header.m_pitchOrLinearSize = (uint)(m_header.m_width + 3) >> 2;
+            m_pixelData = new byte[m_header.m_width * 4 * m_header.m_height];
             for (int x = 0; x < width; x++)
                 for (int y = 0; y < height; y++)
                     setPixelRGBA(m_pixelData, pixelOffset(x, y, width), r, g, b, a);
@@ -722,7 +728,9 @@ namespace DdsFileTypePlugin
             m_header.m_width = (uint)image.Width;
             m_header.m_height = (uint)image.Height;
             m_header.m_pixelFormat.Initialise(DdsFileFormat.DDS_FORMAT_DXT1);
-            m_pixelData = new byte[image.Width * image.Height * 4];
+            m_header.m_headerFlags |= (int)DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_PITCH;
+            m_header.m_pitchOrLinearSize = (uint)(m_header.m_width + 3) >> 2;
+            m_pixelData = new byte[m_header.m_width * 4 * m_header.m_height];
             for (int y = 0; y < image.Height; y++)
                 for (int x = 0; x < image.Width; x++)
                     setPixelARGB(m_pixelData, pixelOffset(x, y, image.Width), (uint)image.GetPixel(x, y).ToArgb());
@@ -805,8 +813,6 @@ namespace DdsFileTypePlugin
         ///  <param name="m_fourCC">Optional; when null (or omitted), uses the value from the loaded image; FourCC tags DXT1, DXT3 and DXT5 are supported.</param>
         public void Save(Stream output, uint? m_flags = null, uint? m_fourCC = null)
         {
-            byte[] buffer2;
-            byte[] pixelData = this.GetPixelData();
             if (!m_flags.HasValue) m_flags =  this.m_header.m_pixelFormat.m_flags;
             if (!m_fourCC.HasValue) m_fourCC = this.m_header.m_pixelFormat.m_fourCC;
 
@@ -814,31 +820,35 @@ namespace DdsFileTypePlugin
                 throw new FormatException("Non-squish compression is not currently supported");
 
             int flags = 0;
-            uint valueOrDefault = m_fourCC.GetValueOrDefault();
-            if (m_fourCC.HasValue)
+            int ratio = 2;
+            switch (m_fourCC)
             {
-                switch (valueOrDefault)
-                {
-                    case 0x31545844:
-                        flags = (int)DdsSquish.SquishFlags.kDxt1;
-                        break;
+                case 0x31545844:
+                    flags = (int)DdsSquish.SquishFlags.kDxt1;
+                    ratio = 3;
+                    break;
 
-                    case 0x33545844:
-                        flags = (int)DdsSquish.SquishFlags.kDxt3;
-                        break;
+                case 0x33545844:
+                    flags = (int)DdsSquish.SquishFlags.kDxt3;
+                    break;
 
-                    case 0x35545844:
-                        flags = (int)DdsSquish.SquishFlags.kDxt5;
-                        break;
-                    default:
-                        throw new FormatException("File is not a squish-supported DDS format");
-                }
+                case 0x35545844:
+                    flags = (int)DdsSquish.SquishFlags.kDxt5;
+                    break;
+
+                default:
+                    throw new FormatException("File is not a squish-supported DDS format");
             }
 
-            buffer2 = DdsSquish.CompressImage(pixelData, this.GetWidth(), this.GetHeight(), flags);
             new BinaryWriter(output).Write((uint)0x20534444);
             this.m_header.Write(output);
-            output.Write(buffer2, 0, buffer2.Length);
+
+            byte[] pixelData = this.GetPixelData();
+            byte[] writePixelData = new byte[((m_header.m_width + 3) >> ratio) * 4 * m_header.m_height];
+            DdsSquish.CompressImage(pixelData, this.GetWidth(), this.GetHeight(), writePixelData, flags);
+            output.Write(writePixelData, 0, writePixelData.Length);
+            
+            output.Flush();
         }
 
         /// <summary>
