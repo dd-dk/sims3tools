@@ -132,8 +132,8 @@
             this.label37 = new System.Windows.Forms.Label();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.lbTGICASPThum = new System.Windows.Forms.Label();
-            this.btnReplCASPThum = new System.Windows.Forms.Button();
             this.pbCASPThum = new System.Windows.Forms.PictureBox();
+            this.btnReplCASPThum = new System.Windows.Forms.Button();
             this.menuBarWidget1 = new ObjectCloner.MenuBarWidget();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -457,7 +457,7 @@
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(215, 128);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(387, 128);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // panel1
@@ -469,16 +469,18 @@
             this.panel1.Controls.Add(this.btnReplCatlgThum);
             this.panel1.Location = new System.Drawing.Point(131, 43);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(81, 42);
+            this.panel1.Size = new System.Drawing.Size(253, 42);
             this.panel1.TabIndex = 0;
             // 
             // lbTGICatlgThum
             // 
             this.lbTGICatlgThum.AutoSize = true;
+            this.lbTGICatlgThum.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbTGICatlgThum.Location = new System.Drawing.Point(3, 29);
             this.lbTGICatlgThum.Name = "lbTGICatlgThum";
-            this.lbTGICatlgThum.Size = new System.Drawing.Size(0, 13);
+            this.lbTGICatlgThum.Size = new System.Drawing.Size(247, 13);
             this.lbTGICatlgThum.TabIndex = 2;
+            this.lbTGICatlgThum.Text = "0x00000000-0x00000000-0x0000000000000000";
             // 
             // btnReplCatlgThum
             // 
@@ -1356,7 +1358,7 @@
             this.clbCASPTypeFlags.Location = new System.Drawing.Point(93, 82);
             this.clbCASPTypeFlags.MultiColumn = true;
             this.clbCASPTypeFlags.Name = "clbCASPTypeFlags";
-            this.clbCASPTypeFlags.Size = new System.Drawing.Size(399, 79);
+            this.clbCASPTypeFlags.Size = new System.Drawing.Size(355, 79);
             this.clbCASPTypeFlags.TabIndex = 8;
             // 
             // label30
@@ -1398,7 +1400,7 @@
             this.clbCASPAgeFlags.Location = new System.Drawing.Point(93, 167);
             this.clbCASPAgeFlags.MultiColumn = true;
             this.clbCASPAgeFlags.Name = "clbCASPAgeFlags";
-            this.clbCASPAgeFlags.Size = new System.Drawing.Size(399, 64);
+            this.clbCASPAgeFlags.Size = new System.Drawing.Size(355, 64);
             this.clbCASPAgeFlags.TabIndex = 10;
             // 
             // clbCASPGenderFlags
@@ -1409,7 +1411,7 @@
             this.clbCASPGenderFlags.Location = new System.Drawing.Point(93, 237);
             this.clbCASPGenderFlags.MultiColumn = true;
             this.clbCASPGenderFlags.Name = "clbCASPGenderFlags";
-            this.clbCASPGenderFlags.Size = new System.Drawing.Size(399, 34);
+            this.clbCASPGenderFlags.Size = new System.Drawing.Size(355, 34);
             this.clbCASPGenderFlags.TabIndex = 12;
             // 
             // clbCASPCategory
@@ -1453,7 +1455,7 @@
             this.clbCASPHandedness.Location = new System.Drawing.Point(93, 302);
             this.clbCASPHandedness.MultiColumn = true;
             this.clbCASPHandedness.Name = "clbCASPHandedness";
-            this.clbCASPHandedness.Size = new System.Drawing.Size(399, 34);
+            this.clbCASPHandedness.Size = new System.Drawing.Size(355, 34);
             this.clbCASPHandedness.TabIndex = 2;
             // 
             // clbCASPSpeciesFlags
@@ -1464,7 +1466,7 @@
             this.clbCASPSpeciesFlags.Location = new System.Drawing.Point(93, 277);
             this.clbCASPSpeciesFlags.MultiColumn = true;
             this.clbCASPSpeciesFlags.Name = "clbCASPSpeciesFlags";
-            this.clbCASPSpeciesFlags.Size = new System.Drawing.Size(399, 19);
+            this.clbCASPSpeciesFlags.Size = new System.Drawing.Size(355, 19);
             this.clbCASPSpeciesFlags.TabIndex = 14;
             // 
             // label35
@@ -1537,7 +1539,7 @@
             this.tableLayoutPanel6.Controls.Add(this.lbTGICASPThum, 0, 1);
             this.tableLayoutPanel6.Controls.Add(this.pbCASPThum, 0, 0);
             this.tableLayoutPanel6.Controls.Add(this.btnReplCASPThum, 1, 0);
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(495, 79);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(451, 79);
             this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 2;
@@ -1548,29 +1550,19 @@
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 128F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 128F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 128F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(209, 148);
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(253, 148);
             this.tableLayoutPanel6.TabIndex = 19;
             // 
             // lbTGICASPThum
             // 
             this.lbTGICASPThum.AutoSize = true;
             this.tableLayoutPanel6.SetColumnSpan(this.lbTGICASPThum, 2);
+            this.lbTGICASPThum.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbTGICASPThum.Location = new System.Drawing.Point(3, 128);
             this.lbTGICASPThum.Name = "lbTGICASPThum";
-            this.lbTGICASPThum.Size = new System.Drawing.Size(0, 13);
+            this.lbTGICASPThum.Size = new System.Drawing.Size(247, 13);
             this.lbTGICASPThum.TabIndex = 2;
-            // 
-            // btnReplCASPThum
-            // 
-            this.btnReplCASPThum.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnReplCASPThum.Enabled = false;
-            this.btnReplCASPThum.Location = new System.Drawing.Point(131, 102);
-            this.btnReplCASPThum.Name = "btnReplCASPThum";
-            this.btnReplCASPThum.Size = new System.Drawing.Size(75, 23);
-            this.btnReplCASPThum.TabIndex = 1;
-            this.btnReplCASPThum.Text = "Replace...";
-            this.btnReplCASPThum.UseVisualStyleBackColor = true;
-            this.btnReplCASPThum.Click += new System.EventHandler(this.btnReplCASPThum_Click);
+            this.lbTGICASPThum.Text = "0x00000000-0x00000000-0x0000000000000000";
             // 
             // pbCASPThum
             // 
@@ -1583,6 +1575,18 @@
             this.pbCASPThum.TabIndex = 0;
             this.pbCASPThum.TabStop = false;
             this.pbCASPThum.DoubleClick += new System.EventHandler(this.pbCASPThum_DoubleClick);
+            // 
+            // btnReplCASPThum
+            // 
+            this.btnReplCASPThum.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnReplCASPThum.Enabled = false;
+            this.btnReplCASPThum.Location = new System.Drawing.Point(131, 102);
+            this.btnReplCASPThum.Name = "btnReplCASPThum";
+            this.btnReplCASPThum.Size = new System.Drawing.Size(75, 23);
+            this.btnReplCASPThum.TabIndex = 1;
+            this.btnReplCASPThum.Text = "Replace...";
+            this.btnReplCASPThum.UseVisualStyleBackColor = true;
+            this.btnReplCASPThum.Click += new System.EventHandler(this.btnReplCASPThum_Click);
             // 
             // menuBarWidget1
             // 

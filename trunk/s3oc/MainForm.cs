@@ -1164,7 +1164,7 @@ namespace ObjectCloner
         void clearOverview()
         {
             pbCatlgThum.Image = null;
-            lbTGICatlgThum.Text = "";
+            lbTGICatlgThum.Text = "0x00000000-0x00000000-0x0000000000000000";
             tbResourceName.Text = "";
             tbObjName.Text = "";
             tbNameGUID.Text = "";
@@ -1180,7 +1180,7 @@ namespace ObjectCloner
         void clearCASP()
         {
             pbCASPThum.Image = null;
-            lbTGICASPThum.Text = "";
+            lbTGICASPThum.Text = "0x00000000-0x00000000-0x0000000000000000";
             tbCASPResourceName.Text = "";
             tbCASPUnknown1.Text = "";
             cbCASPClothingType.SelectedIndex = -1;
@@ -1269,8 +1269,16 @@ namespace ObjectCloner
 
             if (formClosing) return;
             SpecificResource thumSR = THUM.getTHUM(THUM.THUMSize.large, item);
-            pbCatlgThum.Image = ResizeImage(Image.FromStream(thumSR.Resource.Stream), pbCatlgThum);
-            lbTGICatlgThum.Text = (AResourceKey)(thumSR == null ? RK.NULL : thumSR.RequestedRK);
+            if (thumSR == null)
+            {
+                pbCatlgThum.Image = null;
+                lbTGICatlgThum.Text = "0x00000000-0x00000000-0x0000000000000000";
+            }
+            else
+            {
+                pbCatlgThum.Image = ResizeImage(Image.FromStream(thumSR.Resource.Stream), pbCatlgThum);
+                lbTGICatlgThum.Text = "" + (AResourceKey)thumSR.RequestedRK;
+            }
 
             if (formClosing) return; else tbResourceName.Text = NameMap.NMap[item.RequestedRK.Instance];
             tbObjName.Text = common["Name"].Value + "";
@@ -1326,8 +1334,16 @@ namespace ObjectCloner
 
             if (formClosing) return;
             SpecificResource thumSR = THUM.getTHUM(THUM.THUMSize.large, item);
-            pbCASPThum.Image = ResizeImage(Image.FromStream(thumSR.Resource.Stream), pbCASPThum);
-            lbTGICASPThum.Text = (AResourceKey)(thumSR == null ? RK.NULL : thumSR.RequestedRK);
+            if (thumSR == null)
+            {
+                pbCASPThum.Image = null;
+                lbTGICASPThum.Text = "0x00000000-0x00000000-0x0000000000000000";
+            }
+            else
+            {
+                pbCASPThum.Image = ResizeImage(Image.FromStream(thumSR.Resource.Stream), pbCASPThum);
+                lbTGICASPThum.Text = "" + (AResourceKey)thumSR.RequestedRK;
+            }
 
             tbCASPResourceName.Text = NameMap.NMap[item.RequestedRK.Instance];
             tbCASPPackage.Text = item.PathPackage.Path;
