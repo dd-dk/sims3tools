@@ -33,7 +33,7 @@
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.ddsPanel1 = new DDSPanel.DDSPanel();
+            this.ddsPanel1 = new System.Windows.Forms.DDSPanel();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -115,7 +115,7 @@
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem licenceToolStripMenuItem;
-        private DDSPanel.DDSPanel ddsPanel1;
+        private System.Windows.Forms.DDSPanel ddsPanel1;
     }
 }
 

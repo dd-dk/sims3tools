@@ -22,10 +22,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using DdsFileTypePlugin;
 using System.IO;
 
-namespace DDSPanel
+namespace System.Windows.Forms
 {
     /// <summary>
     /// Displays and manipulates a DDS image
@@ -42,7 +41,7 @@ namespace DDSPanel
         Size maxSize = new Size(Size.Empty.Width, Size.Empty.Height);
 
         DateTime now = DateTime.UtcNow;
-        RGBHSV.HSVShift hsvShift;
+        HSVShift hsvShift;
         DdsFile ddsMask = null;
         #endregion
 
@@ -268,6 +267,21 @@ namespace DDSPanel
         }
 
         /// <summary>
+        /// Sets the DDS image for this <seealso cref="DDSPanel"/> from the given <paramref name="image"/>;
+        /// if <paramref name="supportHSV"/> is passed and true (default is false), the image will
+        /// support HSV shift operations.
+        /// </summary>
+        /// <param name="image">A <seealso cref="Bitmap"/> to display in this <seealso cref="DDSPanel"/>.</param>
+        /// <param name="supportHSV">Optional; when true, HSV operations will be supported on the image.</param>
+        public void DDSLoad(Bitmap image, bool supportHSV = false)
+        {
+            ddsFile.CreateImage(image, supportHSV);
+            loaded = true;
+            this.supportHSV = supportHSV;
+            ckb_CheckedChanged(null, null);
+        }
+
+        /// <summary>
         /// Imports an <seealso cref="System.Drawing.Image"/> from the specified file using embedded color
         /// management information in that file and uses the file as the DDS image to work on;
         /// if <paramref name="supportHSV"/> is passed and true (default is false), the image will
@@ -444,7 +458,7 @@ namespace DDSPanel
         /// <param name="v">Value shift, default 0</param>
         public void HSVShift(decimal h = 0, decimal s = 0, decimal v = 0)
         {
-            hsvShift = new RGBHSV.HSVShift { h = (float)h, s = (float)s, v = (float)v, };
+            hsvShift = new HSVShift { h = (float)h, s = (float)s, v = (float)v, };
             if (SupportsHSV) ckb_CheckedChanged(null, null);
         }
 
@@ -471,7 +485,7 @@ namespace DDSPanel
                 base.Enabled = false;
                 Application.UseWaitCursor = true;
                 if (greyscale.Width != image.Width || greyscale.Height != image.Height)
-                    greyscale = greyscale.GetThumbnailImage(image.Width, image.Height, gtAbort, System.IntPtr.Zero);
+                    greyscale = greyscale.GetThumbnailImage(image.Width, image.Height, () => false, System.IntPtr.Zero);
                 ddsFile.SetAlphaFromGreyscale(greyscale);
             }
             finally
@@ -489,6 +503,17 @@ namespace DDSPanel
         public void SetAlphaFromGreyscale(Bitmap greyscale)
         {
             SetAlphaFromGreyscale(greyscale as Image);
+        }
+
+        /// <summary>
+        /// Converts the alpha channel of the currently loaded DDS image into a greyscale bitmap.
+        /// </summary>
+        /// <returns>A greyscale bitmap representing the current DDS image alpha channel.</returns>
+        public Bitmap GetGreyscaleFromAlpha()
+        {
+            if (!this.loaded) return null;
+
+            return ddsFile.GetGreyscaleFromAlpha();
         }
 
         /// <summary>
@@ -554,30 +579,7 @@ namespace DDSPanel
         }
 
         /// <summary>
-        /// Resize the current mask to the current image.
-        /// </summary>
-        public void ResizeMask()
-        {
-            try
-            {
-                base.Enabled = false;
-                Application.UseWaitCursor = true;
-                Image maskImage = ddsMask.Image();
-                ClearMask();
-                if (maskImage.Width != image.Width || maskImage.Height != image.Height)
-                    maskImage = maskImage.GetThumbnailImage(image.Width, image.Height, gtAbort, System.IntPtr.Zero);
-                ddsMask = new DdsFile();
-                ddsMask.CreateImage(maskImage, false);
-            }
-            finally
-            {
-                base.Enabled = true;
-                Application.UseWaitCursor = false;
-            }
-        }
-
-        /// <summary>
-        /// Apply <see cref="RGBHSV.HSVShift"/> values to the image, based on the
+        /// Apply <see cref="HSVShift"/> values to the image, based on the
         /// channels in the <paramref name="mask"/>.
         /// </summary>
         /// <param name="mask">The <see cref="System.IO.Stream"/> containing the DDS image to use as a mask.</param>
@@ -586,7 +588,7 @@ namespace DDSPanel
         /// <param name="ch3Shift">A shift to apply to the image when the third channel of the mask is active.</param>
         /// <param name="ch4Shift">A shift to apply to the image when the fourth channel of the mask is active.</param>
         /// <param name="blend">When true, each channel's shift adds; when false, each channel's shift overrides.</param>
-        public void ApplyHSVShift(Stream mask, RGBHSV.HSVShift ch1Shift, RGBHSV.HSVShift ch2Shift, RGBHSV.HSVShift ch3Shift, RGBHSV.HSVShift ch4Shift, bool blend)
+        public void ApplyHSVShift(Stream mask, HSVShift ch1Shift, HSVShift ch2Shift, HSVShift ch3Shift, HSVShift ch4Shift, bool blend)
         {
             if (!SupportsHSV) return;
             LoadMask(mask);
@@ -594,7 +596,7 @@ namespace DDSPanel
         }
 
         /// <summary>
-        /// Apply <see cref="RGBHSV.HSVShift"/> values to the image, based on the
+        /// Apply <see cref="HSVShift"/> values to the image, based on the
         /// channels in the currently loaded mask.
         /// </summary>
         /// <param name="ch1Shift">A shift to apply to the image when the first channel of the mask is active.</param>
@@ -602,7 +604,7 @@ namespace DDSPanel
         /// <param name="ch3Shift">A shift to apply to the image when the third channel of the mask is active.</param>
         /// <param name="ch4Shift">A shift to apply to the image when the fourth channel of the mask is active.</param>
         /// <param name="blend">When true, each channel's shift adds; when false, each channel's shift overrides.</param>
-        public void ApplyHSVShift(RGBHSV.HSVShift ch1Shift, RGBHSV.HSVShift ch2Shift, RGBHSV.HSVShift ch3Shift, RGBHSV.HSVShift ch4Shift, bool blend)
+        public void ApplyHSVShift(HSVShift ch1Shift, HSVShift ch2Shift, HSVShift ch3Shift, HSVShift ch4Shift, bool blend)
         {
             if (!SupportsHSV || !MaskLoaded) return;
             if (blend)
@@ -792,7 +794,7 @@ namespace DDSPanel
                 this.Enabled = false;
                 Application.UseWaitCursor = true;
                 ddsFile.HSVShift = hsvShift;
-                image = ddsFile.Image(ckbR.Checked, ckbG.Checked, ckbB.Checked, ckbA.Checked, ckbI.Checked);
+                image = ddsFile.GetImage(ckbR.Checked, ckbG.Checked, ckbB.Checked, ckbA.Checked, ckbI.Checked);
                 pictureBox1.Image = doResize();
             }
             finally { this.Enabled = true; Application.UseWaitCursor = false; }
@@ -823,11 +825,10 @@ namespace DDSPanel
 
             Size minSize = Min(targetImage.Size, targetSize);
             if (targetImage.Size.Width > targetSize.Width || targetImage.Size.Height > targetSize.Height)
-                targetImage = targetImage.GetThumbnailImage(minSize.Width, minSize.Height, gtAbort, System.IntPtr.Zero);
+                targetImage = targetImage.GetThumbnailImage(minSize.Width, minSize.Height, () => false, System.IntPtr.Zero);
 
             return targetImage;
         }
-        static bool gtAbort() { return false; }
 
         Size ScaleToFit(Size from, Size constraint)
         {

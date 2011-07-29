@@ -111,10 +111,6 @@
             this.ckbNoCh3 = new System.Windows.Forms.CheckBox();
             this.ckbNoCh4 = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
-            this.ddsMaskCh1 = new DDSPanel.DDSPanel();
-            this.ddsMaskCh2 = new DDSPanel.DDSPanel();
-            this.ddsMaskCh3 = new DDSPanel.DDSPanel();
-            this.ddsMaskCh4 = new DDSPanel.DDSPanel();
             this.tlpMaskSize = new System.Windows.Forms.TableLayoutPanel();
             this.label12 = new System.Windows.Forms.Label();
             this.lbMaskW = new System.Windows.Forms.Label();
@@ -122,7 +118,6 @@
             this.lbMaskH = new System.Windows.Forms.Label();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
-            this.ddsPanel1 = new DDSPanel.DDSPanel();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -136,6 +131,11 @@
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ddsMaskCh1 = new System.Windows.Forms.DDSPanel();
+            this.ddsMaskCh2 = new System.Windows.Forms.DDSPanel();
+            this.ddsMaskCh3 = new System.Windows.Forms.DDSPanel();
+            this.ddsMaskCh4 = new System.Windows.Forms.DDSPanel();
+            this.ddsPanel1 = new System.Windows.Forms.DDSPanel();
             ((System.ComponentModel.ISupportInitialize)(this.hueShift)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.saturationShift)).BeginInit();
@@ -220,6 +220,7 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Controls.Add(this.hueShift, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.saturationShift, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.valueShift, 1, 3);
@@ -1493,74 +1494,6 @@
             this.tableLayoutPanel4.Size = new System.Drawing.Size(265, 48);
             this.tableLayoutPanel4.TabIndex = 8;
             // 
-            // ddsMaskCh1
-            // 
-            this.ddsMaskCh1.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.ddsMaskCh1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.ddsMaskCh1.Channel2 = false;
-            this.ddsMaskCh1.Channel3 = false;
-            this.ddsMaskCh1.Channel4 = false;
-            this.ddsMaskCh1.Fit = true;
-            this.ddsMaskCh1.Location = new System.Drawing.Point(0, 0);
-            this.ddsMaskCh1.Margin = new System.Windows.Forms.Padding(0);
-            this.ddsMaskCh1.MaxSize = new System.Drawing.Size(48, 48);
-            this.ddsMaskCh1.Name = "ddsMaskCh1";
-            this.ddsMaskCh1.ShowChannelSelector = false;
-            this.ddsMaskCh1.Size = new System.Drawing.Size(48, 48);
-            this.ddsMaskCh1.TabIndex = 3;
-            this.ddsMaskCh1.TabStop = false;
-            // 
-            // ddsMaskCh2
-            // 
-            this.ddsMaskCh2.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.ddsMaskCh2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.ddsMaskCh2.Channel1 = false;
-            this.ddsMaskCh2.Channel3 = false;
-            this.ddsMaskCh2.Channel4 = false;
-            this.ddsMaskCh2.Fit = true;
-            this.ddsMaskCh2.Location = new System.Drawing.Point(48, 0);
-            this.ddsMaskCh2.Margin = new System.Windows.Forms.Padding(0);
-            this.ddsMaskCh2.MaxSize = new System.Drawing.Size(48, 48);
-            this.ddsMaskCh2.Name = "ddsMaskCh2";
-            this.ddsMaskCh2.ShowChannelSelector = false;
-            this.ddsMaskCh2.Size = new System.Drawing.Size(48, 48);
-            this.ddsMaskCh2.TabIndex = 4;
-            this.ddsMaskCh2.TabStop = false;
-            // 
-            // ddsMaskCh3
-            // 
-            this.ddsMaskCh3.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.ddsMaskCh3.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.ddsMaskCh3.Channel1 = false;
-            this.ddsMaskCh3.Channel2 = false;
-            this.ddsMaskCh3.Channel4 = false;
-            this.ddsMaskCh3.Fit = true;
-            this.ddsMaskCh3.Location = new System.Drawing.Point(96, 0);
-            this.ddsMaskCh3.Margin = new System.Windows.Forms.Padding(0);
-            this.ddsMaskCh3.MaxSize = new System.Drawing.Size(48, 48);
-            this.ddsMaskCh3.Name = "ddsMaskCh3";
-            this.ddsMaskCh3.ShowChannelSelector = false;
-            this.ddsMaskCh3.Size = new System.Drawing.Size(48, 48);
-            this.ddsMaskCh3.TabIndex = 5;
-            this.ddsMaskCh3.TabStop = false;
-            // 
-            // ddsMaskCh4
-            // 
-            this.ddsMaskCh4.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.ddsMaskCh4.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.ddsMaskCh4.Channel1 = false;
-            this.ddsMaskCh4.Channel2 = false;
-            this.ddsMaskCh4.Channel3 = false;
-            this.ddsMaskCh4.Fit = true;
-            this.ddsMaskCh4.Location = new System.Drawing.Point(144, 0);
-            this.ddsMaskCh4.Margin = new System.Windows.Forms.Padding(0);
-            this.ddsMaskCh4.MaxSize = new System.Drawing.Size(48, 48);
-            this.ddsMaskCh4.Name = "ddsMaskCh4";
-            this.ddsMaskCh4.ShowChannelSelector = false;
-            this.ddsMaskCh4.Size = new System.Drawing.Size(48, 48);
-            this.ddsMaskCh4.TabIndex = 6;
-            this.ddsMaskCh4.TabStop = false;
-            // 
             // tlpMaskSize
             // 
             this.tlpMaskSize.Anchor = System.Windows.Forms.AnchorStyles.None;
@@ -1643,19 +1576,6 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel5.Size = new System.Drawing.Size(919, 495);
             this.tableLayoutPanel5.TabIndex = 0;
-            // 
-            // ddsPanel1
-            // 
-            this.ddsPanel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.ddsPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ddsPanel1.Fit = true;
-            this.ddsPanel1.Location = new System.Drawing.Point(453, 0);
-            this.ddsPanel1.Margin = new System.Windows.Forms.Padding(0);
-            this.ddsPanel1.MaxSize = new System.Drawing.Size(0, 0);
-            this.ddsPanel1.Name = "ddsPanel1";
-            this.tableLayoutPanel5.SetRowSpan(this.ddsPanel1, 2);
-            this.ddsPanel1.Size = new System.Drawing.Size(466, 497);
-            this.ddsPanel1.TabIndex = 4;
             // 
             // menuStrip1
             // 
@@ -1766,6 +1686,87 @@
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
+            // ddsMaskCh1
+            // 
+            this.ddsMaskCh1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ddsMaskCh1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.ddsMaskCh1.Channel2 = false;
+            this.ddsMaskCh1.Channel3 = false;
+            this.ddsMaskCh1.Channel4 = false;
+            this.ddsMaskCh1.Fit = true;
+            this.ddsMaskCh1.Location = new System.Drawing.Point(0, 0);
+            this.ddsMaskCh1.Margin = new System.Windows.Forms.Padding(0);
+            this.ddsMaskCh1.MaxSize = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh1.Name = "ddsMaskCh1";
+            this.ddsMaskCh1.ShowChannelSelector = false;
+            this.ddsMaskCh1.Size = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh1.TabIndex = 3;
+            this.ddsMaskCh1.TabStop = false;
+            // 
+            // ddsMaskCh2
+            // 
+            this.ddsMaskCh2.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ddsMaskCh2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.ddsMaskCh2.Channel1 = false;
+            this.ddsMaskCh2.Channel3 = false;
+            this.ddsMaskCh2.Channel4 = false;
+            this.ddsMaskCh2.Fit = true;
+            this.ddsMaskCh2.Location = new System.Drawing.Point(48, 0);
+            this.ddsMaskCh2.Margin = new System.Windows.Forms.Padding(0);
+            this.ddsMaskCh2.MaxSize = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh2.Name = "ddsMaskCh2";
+            this.ddsMaskCh2.ShowChannelSelector = false;
+            this.ddsMaskCh2.Size = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh2.TabIndex = 4;
+            this.ddsMaskCh2.TabStop = false;
+            // 
+            // ddsMaskCh3
+            // 
+            this.ddsMaskCh3.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ddsMaskCh3.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.ddsMaskCh3.Channel1 = false;
+            this.ddsMaskCh3.Channel2 = false;
+            this.ddsMaskCh3.Channel4 = false;
+            this.ddsMaskCh3.Fit = true;
+            this.ddsMaskCh3.Location = new System.Drawing.Point(96, 0);
+            this.ddsMaskCh3.Margin = new System.Windows.Forms.Padding(0);
+            this.ddsMaskCh3.MaxSize = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh3.Name = "ddsMaskCh3";
+            this.ddsMaskCh3.ShowChannelSelector = false;
+            this.ddsMaskCh3.Size = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh3.TabIndex = 5;
+            this.ddsMaskCh3.TabStop = false;
+            // 
+            // ddsMaskCh4
+            // 
+            this.ddsMaskCh4.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ddsMaskCh4.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.ddsMaskCh4.Channel1 = false;
+            this.ddsMaskCh4.Channel2 = false;
+            this.ddsMaskCh4.Channel3 = false;
+            this.ddsMaskCh4.Fit = true;
+            this.ddsMaskCh4.Location = new System.Drawing.Point(144, 0);
+            this.ddsMaskCh4.Margin = new System.Windows.Forms.Padding(0);
+            this.ddsMaskCh4.MaxSize = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh4.Name = "ddsMaskCh4";
+            this.ddsMaskCh4.ShowChannelSelector = false;
+            this.ddsMaskCh4.Size = new System.Drawing.Size(48, 48);
+            this.ddsMaskCh4.TabIndex = 6;
+            this.ddsMaskCh4.TabStop = false;
+            // 
+            // ddsPanel1
+            // 
+            this.ddsPanel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.ddsPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ddsPanel1.Fit = true;
+            this.ddsPanel1.Location = new System.Drawing.Point(453, 0);
+            this.ddsPanel1.Margin = new System.Windows.Forms.Padding(0);
+            this.ddsPanel1.MaxSize = new System.Drawing.Size(0, 0);
+            this.ddsPanel1.Name = "ddsPanel1";
+            this.tableLayoutPanel5.SetRowSpan(this.ddsPanel1, 2);
+            this.ddsPanel1.Size = new System.Drawing.Size(466, 528);
+            this.ddsPanel1.TabIndex = 4;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1844,7 +1845,7 @@
 
         #endregion
 
-        private DDSPanel.DDSPanel ddsPanel1;
+        private System.Windows.Forms.DDSPanel ddsPanel1;
         private System.Windows.Forms.NumericUpDown hueShift;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.NumericUpDown saturationShift;
@@ -1883,7 +1884,7 @@
         private System.Windows.Forms.NumericUpDown nudCh2Alpha;
         private System.Windows.Forms.Button btnApplyRGBA;
         private System.Windows.Forms.GroupBox groupBox1;
-        private DDSPanel.DDSPanel ddsMaskCh1;
+        private System.Windows.Forms.DDSPanel ddsMaskCh1;
         private System.Windows.Forms.Button btnHSVShift;
         private System.Windows.Forms.PictureBox pbCh1;
         private System.Windows.Forms.Button btnApplyImage;
@@ -1937,9 +1938,9 @@
         private System.Windows.Forms.ToolStripMenuItem importImageToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem clearToolStripMenuItem;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
-        private DDSPanel.DDSPanel ddsMaskCh2;
-        private DDSPanel.DDSPanel ddsMaskCh3;
-        private DDSPanel.DDSPanel ddsMaskCh4;
+        private System.Windows.Forms.DDSPanel ddsMaskCh2;
+        private System.Windows.Forms.DDSPanel ddsMaskCh3;
+        private System.Windows.Forms.DDSPanel ddsMaskCh4;
         private System.Windows.Forms.TableLayoutPanel tlpImageSize;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label lbImageW;

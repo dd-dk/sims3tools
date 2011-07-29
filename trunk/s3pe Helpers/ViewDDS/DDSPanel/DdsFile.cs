@@ -24,8 +24,9 @@
 	SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **/
 /***************************************************************************
- *  This derivative of the DDS File Type Plugin for Paint.Net is           *
- *  distributed as part of sims3tools                                      *
+ *  This pretty much complete rewrite of the DDS File Type Plugin          *
+ *  for Paint.Net is distributed as part of sims3tools.  All the bugs      *
+ *  are mine.                                                              *
  *                                                                         *
  *  Copyright (C) 2011 by Peter L Jones                                    *
  *  pljones@users.sf.net                                                   *
@@ -43,145 +44,165 @@ using System.Text;
 //using PaintDotNet;
 using System.Drawing;
 
-namespace DdsFileTypePlugin
+namespace System.Drawing
 {
-    enum DdsFileFormat
+    /// <summary>
+    /// Represents an image encoded using one of the supported DDS mechanisms.
+    /// </summary>
+    /// <remarks>
+    /// A &quot;DirectX Draw Surface&quot; stores compressed pixel data that is used when
+    /// rendering scenes.  The pixel data may be used for purposes other than purely display,
+    /// such as being used for masked operations on another DDS image.
+    /// </remarks>
+    public class DdsFile : IDisposable
     {
-        DDS_FORMAT_DXT1,
-        DDS_FORMAT_DXT3,
-        DDS_FORMAT_DXT5,
-        DDS_FORMAT_A8R8G8B8,
-        DDS_FORMAT_X8R8G8B8,
-        DDS_FORMAT_A8B8G8R8,
-        DDS_FORMAT_X8B8G8R8,
-        DDS_FORMAT_A1R5G5B5,
-        DDS_FORMAT_A4R4G4B4,
-        DDS_FORMAT_R8G8B8,
-        DDS_FORMAT_R5G6B5,
+        // Used to identify the resource as a DDS
+        const uint fourccDDS_ = 0x20534444;
 
-        DDS_FORMAT_INVALID,
-    }
+        // DdsHeader describes the DDS resource
+        DdsHeader ddsHeader;
 
-    class DdsPixelFormat
-    {
-        public enum PixelFormatFlags
+        // ARGB data as extracted from the DDS resource
+        uint[] baseImage = null;
+        uint[] currentImage = null;
+
+        // HSVa data
+        ColorHSVA[] hsvData = null;
+
+        // The hsvShift applied to create hsvData
+        HSVShift hsvShift;
+
+
+        #region Internal values
+        const uint fourccDXT1 = 0x31545844;
+        const uint fourccDXT3 = 0x33545844;
+        const uint fourccDXT5 = 0x35545844;
+
+        enum DdsFileFormat
         {
-            DDS_FOURCC = 0x00000004,
-            DDS_RGB = 0x00000040,
-            DDS_RGBA = 0x00000041,
+            DDS_FORMAT_DXT1,
+            DDS_FORMAT_DXT3,
+            DDS_FORMAT_DXT5,
+            DDS_FORMAT_A8R8G8B8,
+            DDS_FORMAT_X8R8G8B8,
+            DDS_FORMAT_A8B8G8R8,
+            DDS_FORMAT_X8B8G8R8,
+            DDS_FORMAT_A1R5G5B5,
+            DDS_FORMAT_A4R4G4B4,
+            DDS_FORMAT_R8G8B8,
+            DDS_FORMAT_R5G6B5,
+
+            DDS_FORMAT_INVALID,
         }
 
-        public uint m_size;
-        public uint m_flags;
-        public uint m_fourCC;
-        public uint m_rgbBitCount;
-        public uint m_rBitMask;
-        public uint m_gBitMask;
-        public uint m_bBitMask;
-        public uint m_aBitMask;
-
-        public uint Size()
+        class DdsPixelFormat
         {
-            return 8 * 4;
-        }
-
-        public void Initialise(DdsFileFormat fileFormat)
-        {
-            m_size = Size();
-            switch (fileFormat)
+            public enum PixelFormatFlags : uint
             {
-                case DdsFileFormat.DDS_FORMAT_DXT1:
-                case DdsFileFormat.DDS_FORMAT_DXT3:
-                case DdsFileFormat.DDS_FORMAT_DXT5:
-                    {
+                DDS_FOURCC = 0x00000004,
+                DDS_RGB = 0x00000040,
+                DDS_RGBA = 0x00000041,
+            }
+
+            public uint m_size;
+            public PixelFormatFlags m_flags;
+            public uint m_fourCC;
+            public uint m_rgbBitCount;
+            public uint m_rBitMask;
+            public uint m_gBitMask;
+            public uint m_bBitMask;
+            public uint m_aBitMask;
+
+            public uint Size()
+            {
+                return 8 * 4;
+            }
+
+            public void Initialise(DdsFileFormat fileFormat)
+            {
+                m_size = Size();
+                switch (fileFormat)
+                {
+                    case DdsFileFormat.DDS_FORMAT_DXT1:
+                    case DdsFileFormat.DDS_FORMAT_DXT3:
+                    case DdsFileFormat.DDS_FORMAT_DXT5:
                         // DXT1/DXT3/DXT5
-                        m_flags = (int)PixelFormatFlags.DDS_FOURCC;
+                        m_flags = PixelFormatFlags.DDS_FOURCC;
+                        switch (fileFormat)
+                        {
+                            case DdsFileFormat.DDS_FORMAT_DXT1: m_fourCC = fourccDXT1; break;
+                            case DdsFileFormat.DDS_FORMAT_DXT3: m_fourCC = fourccDXT3; break;
+                            case DdsFileFormat.DDS_FORMAT_DXT5: m_fourCC = fourccDXT5; break;
+                        }
                         m_rgbBitCount = 0;
                         m_rBitMask = 0;
                         m_gBitMask = 0;
                         m_bBitMask = 0;
                         m_aBitMask = 0;
-                        if (fileFormat == DdsFileFormat.DDS_FORMAT_DXT1) m_fourCC = 0x31545844;	//"DXT1"
-                        if (fileFormat == DdsFileFormat.DDS_FORMAT_DXT3) m_fourCC = 0x33545844;	//"DXT1"
-                        if (fileFormat == DdsFileFormat.DDS_FORMAT_DXT5) m_fourCC = 0x35545844;	//"DXT1"
                         break;
-                    }
 
-                case DdsFileFormat.DDS_FORMAT_A8R8G8B8:
-                    {
-                        m_flags = (int)PixelFormatFlags.DDS_RGBA;
-                        m_rgbBitCount = 32;
+                    case DdsFileFormat.DDS_FORMAT_A8R8G8B8:
+                        m_flags = PixelFormatFlags.DDS_RGBA;
                         m_fourCC = 0;
+                        m_rgbBitCount = 32;
                         m_rBitMask = 0x00ff0000;
                         m_gBitMask = 0x0000ff00;
                         m_bBitMask = 0x000000ff;
                         m_aBitMask = 0xff000000;
                         break;
-                    }
 
-                case DdsFileFormat.DDS_FORMAT_X8R8G8B8:
-                    {
-                        m_flags = (int)PixelFormatFlags.DDS_RGB;
-                        m_rgbBitCount = 32;
+                    case DdsFileFormat.DDS_FORMAT_X8R8G8B8:
+                        m_flags = PixelFormatFlags.DDS_RGB;
                         m_fourCC = 0;
+                        m_rgbBitCount = 32;
                         m_rBitMask = 0x00ff0000;
                         m_gBitMask = 0x0000ff00;
                         m_bBitMask = 0x000000ff;
                         m_aBitMask = 0x00000000;
                         break;
-                    }
 
-                case DdsFileFormat.DDS_FORMAT_A8B8G8R8:
-                    {
-                        m_flags = (int)PixelFormatFlags.DDS_RGBA;
-                        m_rgbBitCount = 32;
+                    case DdsFileFormat.DDS_FORMAT_A8B8G8R8:
+                        m_flags = PixelFormatFlags.DDS_RGBA;
                         m_fourCC = 0;
+                        m_rgbBitCount = 32;
                         m_rBitMask = 0x000000ff;
                         m_gBitMask = 0x0000ff00;
                         m_bBitMask = 0x00ff0000;
                         m_aBitMask = 0xff000000;
                         break;
-                    }
-
-                case DdsFileFormat.DDS_FORMAT_X8B8G8R8:
-                    {
-                        m_flags = (int)PixelFormatFlags.DDS_RGB;
-                        m_rgbBitCount = 32;
+ 
+                    case DdsFileFormat.DDS_FORMAT_X8B8G8R8:
+                        m_flags = PixelFormatFlags.DDS_RGB;
                         m_fourCC = 0;
+                        m_rgbBitCount = 32;
                         m_rBitMask = 0x000000ff;
                         m_gBitMask = 0x0000ff00;
                         m_bBitMask = 0x00ff0000;
                         m_aBitMask = 0x00000000;
                         break;
-                    }
 
-                case DdsFileFormat.DDS_FORMAT_A1R5G5B5:
-                    {
-                        m_flags = (int)PixelFormatFlags.DDS_RGBA;
+                    case DdsFileFormat.DDS_FORMAT_A1R5G5B5:
+                        m_flags = PixelFormatFlags.DDS_RGBA;
+                        m_fourCC = 0;
                         m_rgbBitCount = 16;
-                        m_fourCC = 0;
                         m_rBitMask = 0x00007c00;
                         m_gBitMask = 0x000003e0;
                         m_bBitMask = 0x0000001f;
                         m_aBitMask = 0x00008000;
                         break;
-                    }
 
-                case DdsFileFormat.DDS_FORMAT_A4R4G4B4:
-                    {
-                        m_flags = (int)PixelFormatFlags.DDS_RGBA;
-                        m_rgbBitCount = 16;
+                    case DdsFileFormat.DDS_FORMAT_A4R4G4B4:
+                        m_flags = PixelFormatFlags.DDS_RGBA;
                         m_fourCC = 0;
+                        m_rgbBitCount = 16;
                         m_rBitMask = 0x00000f00;
                         m_gBitMask = 0x000000f0;
                         m_bBitMask = 0x0000000f;
                         m_aBitMask = 0x0000f000;
                         break;
-                    }
 
-                case DdsFileFormat.DDS_FORMAT_R8G8B8:
-                    {
-                        m_flags = (int)PixelFormatFlags.DDS_RGB;
+                    case DdsFileFormat.DDS_FORMAT_R8G8B8:
+                        m_flags = PixelFormatFlags.DDS_RGB;
                         m_fourCC = 0;
                         m_rgbBitCount = 24;
                         m_rBitMask = 0x00ff0000;
@@ -189,11 +210,9 @@ namespace DdsFileTypePlugin
                         m_bBitMask = 0x000000ff;
                         m_aBitMask = 0x00000000;
                         break;
-                    }
 
-                case DdsFileFormat.DDS_FORMAT_R5G6B5:
-                    {
-                        m_flags = (int)PixelFormatFlags.DDS_RGB;
+                    case DdsFileFormat.DDS_FORMAT_R5G6B5:
+                        m_flags = PixelFormatFlags.DDS_RGB;
                         m_fourCC = 0;
                         m_rgbBitCount = 16;
                         m_rBitMask = 0x0000f800;
@@ -201,176 +220,184 @@ namespace DdsFileTypePlugin
                         m_bBitMask = 0x0000001f;
                         m_aBitMask = 0x00000000;
                         break;
-                    }
 
-                default:
-                    break;
+                    default:
+                        break;
+                }
+            }
+
+            public void Read(BinaryReader input)
+            {
+                this.m_size = input.ReadUInt32();
+                this.m_flags = (PixelFormatFlags)input.ReadUInt32();
+                this.m_fourCC = input.ReadUInt32();
+                this.m_rgbBitCount = input.ReadUInt32();
+                this.m_rBitMask = input.ReadUInt32();
+                this.m_gBitMask = input.ReadUInt32();
+                this.m_bBitMask = input.ReadUInt32();
+                this.m_aBitMask = input.ReadUInt32();
+            }
+
+            public void Write(BinaryWriter output)
+            {
+                output.Write(this.m_size);
+                output.Write((uint)this.m_flags);
+                output.Write(this.m_fourCC);
+                output.Write(this.m_rgbBitCount);
+                output.Write(this.m_rBitMask);
+                output.Write(this.m_gBitMask);
+                output.Write(this.m_bBitMask);
+                output.Write(this.m_aBitMask);
             }
         }
 
-        public void Read(BinaryReader input)
+        class DdsHeader
         {
-            this.m_size = input.ReadUInt32();
-            this.m_flags = input.ReadUInt32();
-            this.m_fourCC = input.ReadUInt32();
-            this.m_rgbBitCount = input.ReadUInt32();
-            this.m_rBitMask = input.ReadUInt32();
-            this.m_gBitMask = input.ReadUInt32();
-            this.m_bBitMask = input.ReadUInt32();
-            this.m_aBitMask = input.ReadUInt32();
+            public enum HeaderFlags
+            {
+                DDS_HEADER_FLAGS_TEXTURE = 0x00001007,	// DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT 
+                DDS_HEADER_FLAGS_MIPMAP = 0x00020000,	// DDSD_MIPMAPCOUNT
+                DDS_HEADER_FLAGS_VOLUME = 0x00800000,	// DDSD_DEPTH
+                DDS_HEADER_FLAGS_PITCH = 0x00000008,	// DDSD_PITCH
+                DDS_HEADER_FLAGS_LINEARSIZE = 0x00080000,	// DDSD_LINEARSIZE
+            }
+
+            public enum SurfaceFlags
+            {
+                DDS_SURFACE_FLAGS_TEXTURE = 0x00001000,	// DDSCAPS_TEXTURE
+                DDS_SURFACE_FLAGS_MIPMAP = 0x00400008,	// DDSCAPS_COMPLEX | DDSCAPS_MIPMAP
+                DDS_SURFACE_FLAGS_CUBEMAP = 0x00000008,	// DDSCAPS_COMPLEX
+            }
+
+            public enum CubemapFlags
+            {
+                DDS_CUBEMAP_POSITIVEX = 0x00000600, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEX
+                DDS_CUBEMAP_NEGATIVEX = 0x00000a00, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEX
+                DDS_CUBEMAP_POSITIVEY = 0x00001200, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEY
+                DDS_CUBEMAP_NEGATIVEY = 0x00002200, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEY
+                DDS_CUBEMAP_POSITIVEZ = 0x00004200, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEZ
+                DDS_CUBEMAP_NEGATIVEZ = 0x00008200, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEZ
+
+                DDS_CUBEMAP_ALLFACES = (DDS_CUBEMAP_POSITIVEX | DDS_CUBEMAP_NEGATIVEX |
+                                                    DDS_CUBEMAP_POSITIVEY | DDS_CUBEMAP_NEGATIVEY |
+                                                    DDS_CUBEMAP_POSITIVEZ | DDS_CUBEMAP_NEGATIVEZ)
+            }
+
+            public enum VolumeFlags
+            {
+                DDS_FLAGS_VOLUME = 0x00200000,	// DDSCAPS2_VOLUME
+            }
+
+            public DdsHeader()
+            {
+                m_pixelFormat = new DdsPixelFormat();
+            }
+
+            public uint Size()
+            {
+                return (18 * 4) + m_pixelFormat.Size() + (5 * 4);
+            }
+
+            public uint m_size;
+            public uint m_headerFlags;
+            public int m_height;
+            public int m_width;
+            public int m_pitchOrLinearSize;
+            public uint m_depth;
+            public uint m_mipMapCount;
+            public uint m_reserved1_0;
+            public uint m_reserved1_1;
+            public uint m_reserved1_2;
+            public uint m_reserved1_3;
+            public uint m_reserved1_4;
+            public uint m_reserved1_5;
+            public uint m_reserved1_6;
+            public uint m_reserved1_7;
+            public uint m_reserved1_8;
+            public uint m_reserved1_9;
+            public uint m_reserved1_10;
+            public DdsPixelFormat m_pixelFormat;
+            public uint m_surfaceFlags;
+            public uint m_cubemapFlags;
+            public uint m_reserved2_0;
+            public uint m_reserved2_1;
+            public uint m_reserved2_2;
+
+            public void Read(System.IO.Stream input)
+            {
+                BinaryReader br = new BinaryReader(input);
+
+                this.m_size = br.ReadUInt32();
+                this.m_headerFlags = br.ReadUInt32();
+                this.m_height = br.ReadInt32();
+                this.m_width = br.ReadInt32();
+                this.m_pitchOrLinearSize = br.ReadInt32();
+                this.m_depth = br.ReadUInt32();
+                this.m_mipMapCount = br.ReadUInt32();
+                this.m_reserved1_0 = br.ReadUInt32();
+                this.m_reserved1_1 = br.ReadUInt32();
+                this.m_reserved1_2 = br.ReadUInt32();
+                this.m_reserved1_3 = br.ReadUInt32();
+                this.m_reserved1_4 = br.ReadUInt32();
+                this.m_reserved1_5 = br.ReadUInt32();
+                this.m_reserved1_6 = br.ReadUInt32();
+                this.m_reserved1_7 = br.ReadUInt32();
+                this.m_reserved1_8 = br.ReadUInt32();
+                this.m_reserved1_9 = br.ReadUInt32();
+                this.m_reserved1_10 = br.ReadUInt32();
+                this.m_pixelFormat.Read(br);
+                this.m_surfaceFlags = br.ReadUInt32();
+                this.m_cubemapFlags = br.ReadUInt32();
+                this.m_reserved2_0 = br.ReadUInt32();
+                this.m_reserved2_1 = br.ReadUInt32();
+                this.m_reserved2_2 = br.ReadUInt32();
+
+            }
+
+            public void Write(Stream output)
+            {
+                BinaryWriter writer = new BinaryWriter(output);
+                writer.Write(this.m_size);
+                writer.Write(this.m_headerFlags);
+                writer.Write(this.m_height);
+                writer.Write(this.m_width);
+                writer.Write(this.m_pitchOrLinearSize);
+                writer.Write(this.m_depth);
+                writer.Write(this.m_mipMapCount);
+                writer.Write(this.m_reserved1_0);
+                writer.Write(this.m_reserved1_1);
+                writer.Write(this.m_reserved1_2);
+                writer.Write(this.m_reserved1_3);
+                writer.Write(this.m_reserved1_4);
+                writer.Write(this.m_reserved1_5);
+                writer.Write(this.m_reserved1_6);
+                writer.Write(this.m_reserved1_7);
+                writer.Write(this.m_reserved1_8);
+                writer.Write(this.m_reserved1_9);
+                writer.Write(this.m_reserved1_10);
+                this.m_pixelFormat.Write(writer);
+                writer.Write(this.m_surfaceFlags);
+                writer.Write(this.m_cubemapFlags);
+                writer.Write(this.m_reserved2_0);
+                writer.Write(this.m_reserved2_1);
+                writer.Write(this.m_reserved2_2);
+            }
+        }
+        #endregion
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            baseImage = null;
+            currentImage = null;
+            maskInEffect = false;
+            hsvData = null;
+            hsvShift = HSVShift.Empty;
         }
 
-        public void Write(BinaryWriter output)
-        {
-            output.Write(this.m_size);
-            output.Write(this.m_flags);
-            output.Write(this.m_fourCC);
-            output.Write(this.m_rgbBitCount);
-            output.Write(this.m_rBitMask);
-            output.Write(this.m_gBitMask);
-            output.Write(this.m_bBitMask);
-            output.Write(this.m_aBitMask);
-        }
-    }
-
-    class DdsHeader
-    {
-        public enum HeaderFlags
-        {
-            DDS_HEADER_FLAGS_TEXTURE = 0x00001007,	// DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT 
-            DDS_HEADER_FLAGS_MIPMAP = 0x00020000,	// DDSD_MIPMAPCOUNT
-            DDS_HEADER_FLAGS_VOLUME = 0x00800000,	// DDSD_DEPTH
-            DDS_HEADER_FLAGS_PITCH = 0x00000008,	// DDSD_PITCH
-            DDS_HEADER_FLAGS_LINEARSIZE = 0x00080000,	// DDSD_LINEARSIZE
-        }
-
-        public enum SurfaceFlags
-        {
-            DDS_SURFACE_FLAGS_TEXTURE = 0x00001000,	// DDSCAPS_TEXTURE
-            DDS_SURFACE_FLAGS_MIPMAP = 0x00400008,	// DDSCAPS_COMPLEX | DDSCAPS_MIPMAP
-            DDS_SURFACE_FLAGS_CUBEMAP = 0x00000008,	// DDSCAPS_COMPLEX
-        }
-
-        public enum CubemapFlags
-        {
-            DDS_CUBEMAP_POSITIVEX = 0x00000600, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEX
-            DDS_CUBEMAP_NEGATIVEX = 0x00000a00, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEX
-            DDS_CUBEMAP_POSITIVEY = 0x00001200, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEY
-            DDS_CUBEMAP_NEGATIVEY = 0x00002200, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEY
-            DDS_CUBEMAP_POSITIVEZ = 0x00004200, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEZ
-            DDS_CUBEMAP_NEGATIVEZ = 0x00008200, // DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEZ
-
-            DDS_CUBEMAP_ALLFACES = (DDS_CUBEMAP_POSITIVEX | DDS_CUBEMAP_NEGATIVEX |
-                                                DDS_CUBEMAP_POSITIVEY | DDS_CUBEMAP_NEGATIVEY |
-                                                DDS_CUBEMAP_POSITIVEZ | DDS_CUBEMAP_NEGATIVEZ)
-        }
-
-        public enum VolumeFlags
-        {
-            DDS_FLAGS_VOLUME = 0x00200000,	// DDSCAPS2_VOLUME
-        }
-
-        public DdsHeader()
-        {
-            m_pixelFormat = new DdsPixelFormat();
-        }
-
-        public uint Size()
-        {
-            return (18 * 4) + m_pixelFormat.Size() + (5 * 4);
-        }
-
-        public uint m_size;
-        public uint m_headerFlags;
-        public uint m_height;
-        public uint m_width;
-        public uint m_pitchOrLinearSize;
-        public uint m_depth;
-        public uint m_mipMapCount;
-        public uint m_reserved1_0;
-        public uint m_reserved1_1;
-        public uint m_reserved1_2;
-        public uint m_reserved1_3;
-        public uint m_reserved1_4;
-        public uint m_reserved1_5;
-        public uint m_reserved1_6;
-        public uint m_reserved1_7;
-        public uint m_reserved1_8;
-        public uint m_reserved1_9;
-        public uint m_reserved1_10;
-        public DdsPixelFormat m_pixelFormat;
-        public uint m_surfaceFlags;
-        public uint m_cubemapFlags;
-        public uint m_reserved2_0;
-        public uint m_reserved2_1;
-        public uint m_reserved2_2;
-
-        public void Read(System.IO.Stream input)
-        {
-            BinaryReader br = new BinaryReader(input);
-
-            this.m_size = br.ReadUInt32();
-            this.m_headerFlags = br.ReadUInt32();
-            this.m_height = br.ReadUInt32();
-            this.m_width = br.ReadUInt32();
-            this.m_pitchOrLinearSize = br.ReadUInt32();
-            this.m_depth = br.ReadUInt32();
-            this.m_mipMapCount = br.ReadUInt32();
-            this.m_reserved1_0 = br.ReadUInt32();
-            this.m_reserved1_1 = br.ReadUInt32();
-            this.m_reserved1_2 = br.ReadUInt32();
-            this.m_reserved1_3 = br.ReadUInt32();
-            this.m_reserved1_4 = br.ReadUInt32();
-            this.m_reserved1_5 = br.ReadUInt32();
-            this.m_reserved1_6 = br.ReadUInt32();
-            this.m_reserved1_7 = br.ReadUInt32();
-            this.m_reserved1_8 = br.ReadUInt32();
-            this.m_reserved1_9 = br.ReadUInt32();
-            this.m_reserved1_10 = br.ReadUInt32();
-            this.m_pixelFormat.Read(br);
-            this.m_surfaceFlags = br.ReadUInt32();
-            this.m_cubemapFlags = br.ReadUInt32();
-            this.m_reserved2_0 = br.ReadUInt32();
-            this.m_reserved2_1 = br.ReadUInt32();
-            this.m_reserved2_2 = br.ReadUInt32();
-
-        }
-
-        public void Write(Stream output)
-        {
-            BinaryWriter writer = new BinaryWriter(output);
-            writer.Write(this.m_size);
-            writer.Write(this.m_headerFlags);
-            writer.Write(this.m_height);
-            writer.Write(this.m_width);
-            writer.Write(this.m_pitchOrLinearSize);
-            writer.Write(this.m_depth);
-            writer.Write(this.m_mipMapCount);
-            writer.Write(this.m_reserved1_0);
-            writer.Write(this.m_reserved1_1);
-            writer.Write(this.m_reserved1_2);
-            writer.Write(this.m_reserved1_3);
-            writer.Write(this.m_reserved1_4);
-            writer.Write(this.m_reserved1_5);
-            writer.Write(this.m_reserved1_6);
-            writer.Write(this.m_reserved1_7);
-            writer.Write(this.m_reserved1_8);
-            writer.Write(this.m_reserved1_9);
-            writer.Write(this.m_reserved1_10);
-            this.m_pixelFormat.Write(writer);
-            writer.Write(this.m_surfaceFlags);
-            writer.Write(this.m_cubemapFlags);
-            writer.Write(this.m_reserved2_0);
-            writer.Write(this.m_reserved2_1);
-            writer.Write(this.m_reserved2_2);
-        }
-    }
-
-    /// <summary>
-    /// Represents an image encoded using one of the supported DDS mechanisms.
-    /// </summary>
-    public class DdsFile : IDisposable
-    {
+        #region File I/O
         /// <summary>
         /// Loads the data from an image encoded using one of the supported DDS mechanisms.
         /// If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
@@ -381,37 +408,38 @@ namespace DdsFileTypePlugin
         {
             // Read the DDS tag. If it's not right, then bail.. 
             uint ddsTag = new BinaryReader(input).ReadUInt32();
-            if (ddsTag != 0x20534444)
+            if (ddsTag != fourccDDS_)
                 throw new FormatException("File does not appear to be a DDS image");
 
             // Read everything in.. for now assume it worked like a charm..
-            m_header.Read(input);
+            ddsHeader = new DdsHeader();
+            ddsHeader.Read(input);
 
-            if ((m_header.m_pixelFormat.m_flags & (int)DdsPixelFormat.PixelFormatFlags.DDS_FOURCC) != 0)
+            if ((ddsHeader.m_pixelFormat.m_flags & DdsPixelFormat.PixelFormatFlags.DDS_FOURCC) != 0)
             {
                 #region We can use squish
                 int squishFlags = 0;
 
-                switch (m_header.m_pixelFormat.m_fourCC)
+                switch (ddsHeader.m_pixelFormat.m_fourCC)
                 {
-                    case 0x31545844:
+                    case fourccDXT1:
                         squishFlags = (int)DdsSquish.SquishFlags.kDxt1;
                         break;
 
-                    case 0x33545844:
+                    case fourccDXT3:
                         squishFlags = (int)DdsSquish.SquishFlags.kDxt3;
                         break;
 
-                    case 0x35545844:
+                    case fourccDXT5:
                         squishFlags = (int)DdsSquish.SquishFlags.kDxt5;
                         break;
 
                     default:
-                        throw new FormatException("File is not a squish-supported DDS format");
+                        throw new FormatException("File does not use a squish-supported compression format");
                 }
 
                 // Compute size of compressed block area
-                int blockCount = ((GetWidth() + 3) / 4) * ((GetHeight() + 3) / 4);
+                int blockCount = ((ddsHeader.m_width + 3) / 4) * ((ddsHeader.m_height + 3) / 4);
                 int blockSize = ((squishFlags & (int)DdsSquish.SquishFlags.kDxt1) != 0) ? 8 : 16;
 
                 // Allocate room for compressed blocks, and read data into it.
@@ -419,159 +447,327 @@ namespace DdsFileTypePlugin
                 input.Read(compressedBlocks, 0, compressedBlocks.GetLength(0));
 
                 // Now decompress..
-                m_pixelData = DdsSquish.DecompressImage(compressedBlocks, GetWidth(), GetHeight(), squishFlags);
+                byte[] pixelData = DdsSquish.DecompressImage(compressedBlocks, ddsHeader.m_width, ddsHeader.m_height, squishFlags);
+
+                // Convert R, G, B, A byte array to ARGB uint array...
+                baseImage = new uint[pixelData.Length / sizeof(uint)];
+                for (int i = 0; i < baseImage.Length; i++)
+                {
+                    uint value = BitConverter.ToUInt32(pixelData, i * sizeof(uint));
+                    baseImage[i] = fromDDS_A8B8G8R8(value);// >> 8 | value << 24;
+                }
                 #endregion
             }
             else
             {
                 #region It's a non-squishable one, so try manual methods...
-                #region ...determine which...
-                // We can only deal with the non-DXT formats we know about..  this is a bit of a mess..
-                // Sorry..
-                DdsFileFormat fileFormat = DdsFileFormat.DDS_FORMAT_INVALID;
-                pixelSet setPixel = null;
 
-                if ((m_header.m_pixelFormat.m_flags == (int)DdsPixelFormat.PixelFormatFlags.DDS_RGBA) &&
-                        (m_header.m_pixelFormat.m_rgbBitCount == 32) &&
-                        (m_header.m_pixelFormat.m_rBitMask == 0x00ff0000) && (m_header.m_pixelFormat.m_gBitMask == 0x0000ff00) &&
-                        (m_header.m_pixelFormat.m_bBitMask == 0x000000ff) && (m_header.m_pixelFormat.m_aBitMask == 0xff000000))
-                {
-                    fileFormat = DdsFileFormat.DDS_FORMAT_A8R8G8B8;
-                    setPixel = pixelSetDDS_FORMAT_A8R8G8B8;
-                }
-                else if ((m_header.m_pixelFormat.m_flags == (int)DdsPixelFormat.PixelFormatFlags.DDS_RGB) &&
-                            (m_header.m_pixelFormat.m_rgbBitCount == 32) &&
-                            (m_header.m_pixelFormat.m_rBitMask == 0x00ff0000) && (m_header.m_pixelFormat.m_gBitMask == 0x0000ff00) &&
-                            (m_header.m_pixelFormat.m_bBitMask == 0x000000ff) && (m_header.m_pixelFormat.m_aBitMask == 0x00000000))
-                {
-                    fileFormat = DdsFileFormat.DDS_FORMAT_X8R8G8B8;
-                    setPixel = pixelSetDDS_FORMAT_X8R8G8B8;
-                }
-                else if ((m_header.m_pixelFormat.m_flags == (int)DdsPixelFormat.PixelFormatFlags.DDS_RGBA) &&
-                            (m_header.m_pixelFormat.m_rgbBitCount == 32) &&
-                            (m_header.m_pixelFormat.m_rBitMask == 0x000000ff) && (m_header.m_pixelFormat.m_gBitMask == 0x0000ff00) &&
-                            (m_header.m_pixelFormat.m_bBitMask == 0x00ff0000) && (m_header.m_pixelFormat.m_aBitMask == 0xff000000))
-                {
-                    fileFormat = DdsFileFormat.DDS_FORMAT_A8B8G8R8;
-                    setPixel = pixelSetDDS_FORMAT_A8B8G8R8;
-                }
-                else if ((m_header.m_pixelFormat.m_flags == (int)DdsPixelFormat.PixelFormatFlags.DDS_RGB) &&
-                            (m_header.m_pixelFormat.m_rgbBitCount == 32) &&
-                            (m_header.m_pixelFormat.m_rBitMask == 0x000000ff) && (m_header.m_pixelFormat.m_gBitMask == 0x0000ff00) &&
-                            (m_header.m_pixelFormat.m_bBitMask == 0x00ff0000) && (m_header.m_pixelFormat.m_aBitMask == 0x00000000))
-                {
-                    fileFormat = DdsFileFormat.DDS_FORMAT_X8B8G8R8;
-                    setPixel = pixelSetDDS_FORMAT_X8B8G8R8;
-                }
-                else if ((m_header.m_pixelFormat.m_flags == (int)DdsPixelFormat.PixelFormatFlags.DDS_RGBA) &&
-                            (m_header.m_pixelFormat.m_rgbBitCount == 16) &&
-                            (m_header.m_pixelFormat.m_rBitMask == 0x00007c00) && (m_header.m_pixelFormat.m_gBitMask == 0x000003e0) &&
-                            (m_header.m_pixelFormat.m_bBitMask == 0x0000001f) && (m_header.m_pixelFormat.m_aBitMask == 0x00008000))
-                {
-                    fileFormat = DdsFileFormat.DDS_FORMAT_A1R5G5B5;
-                    setPixel = pixelSetDDS_FORMAT_A1R5G5B5;
-                }
-                else if ((m_header.m_pixelFormat.m_flags == (int)DdsPixelFormat.PixelFormatFlags.DDS_RGBA) &&
-                            (m_header.m_pixelFormat.m_rgbBitCount == 16) &&
-                            (m_header.m_pixelFormat.m_rBitMask == 0x00000f00) && (m_header.m_pixelFormat.m_gBitMask == 0x000000f0) &&
-                            (m_header.m_pixelFormat.m_bBitMask == 0x0000000f) && (m_header.m_pixelFormat.m_aBitMask == 0x0000f000))
-                {
-                    fileFormat = DdsFileFormat.DDS_FORMAT_A4R4G4B4;
-                    setPixel = pixelSetDDS_FORMAT_A4R4G4B4;
-                }
-                else if ((m_header.m_pixelFormat.m_flags == (int)DdsPixelFormat.PixelFormatFlags.DDS_RGB) &&
-                            (m_header.m_pixelFormat.m_rgbBitCount == 24) &&
-                            (m_header.m_pixelFormat.m_rBitMask == 0x00ff0000) && (m_header.m_pixelFormat.m_gBitMask == 0x0000ff00) &&
-                            (m_header.m_pixelFormat.m_bBitMask == 0x000000ff) && (m_header.m_pixelFormat.m_aBitMask == 0x00000000))
-                {
-                    fileFormat = DdsFileFormat.DDS_FORMAT_R8G8B8;
-                    setPixel = pixelSetDDS_FORMAT_R8G8B8;
-                }
-                else if ((m_header.m_pixelFormat.m_flags == (int)DdsPixelFormat.PixelFormatFlags.DDS_RGB) &&
-                            (m_header.m_pixelFormat.m_rgbBitCount == 16) &&
-                            (m_header.m_pixelFormat.m_rBitMask == 0x0000f800) && (m_header.m_pixelFormat.m_gBitMask == 0x000007e0) &&
-                            (m_header.m_pixelFormat.m_bBitMask == 0x0000001f) && (m_header.m_pixelFormat.m_aBitMask == 0x00000000))
-                {
-                    fileFormat = DdsFileFormat.DDS_FORMAT_R5G6B5;
-                    setPixel = pixelSetDDS_FORMAT_R5G6B5;
-                }
-
-                // If fileFormat is still invalid, then it's an unsupported format.
-                if (fileFormat == DdsFileFormat.DDS_FORMAT_INVALID || setPixel == null)
-                    throw new FormatException("File is not a supported non-DXT DDS format");
-                #endregion
-
-                #region pixel size and row pitch
                 // Size of a source pixel, in bytes
-                int srcPixelSize = ((int)m_header.m_pixelFormat.m_rgbBitCount / 8);
+                int srcPixelSize = (int)ddsHeader.m_pixelFormat.m_rgbBitCount / 8;
+                if (srcPixelSize >= 4)
+                    throw new FormatException("Pixel size must be four bytes or less.");
+
+                ToARGB toARGB = null;
+                ToPixel unused;
+                determinePixelFormat(out toARGB, out unused);
+
+                // If toARGB is still null, then it's an unsupported format.
+                if (toARGB == null)
+                    throw new FormatException("File is not a supported non-DXT DDS format");
 
                 // We need the pitch for a row, so we can allocate enough memory for the load.
-                int rowPitch = getRowPitch(srcPixelSize);
-
-                //				System.Diagnostics.Debug.WriteLine( "Image width : " + m_header.m_width + ", rowPitch = " + rowPitch );
-                #endregion
+                int rowPitch = (int)getRowPitch(srcPixelSize);
 
                 // Ok.. now, we need to allocate room for the bytes to read in from.. it's rowPitch bytes * height
-                byte[] readPixelData = new byte[rowPitch * m_header.m_height];
+                byte[] readPixelData = new byte[rowPitch * ddsHeader.m_height];
                 input.Read(readPixelData, 0, readPixelData.GetLength(0));
 
-                // We now need space for the real pixel data.. that's width * height * 4..
-                m_pixelData = new byte[m_header.m_width * m_header.m_height * 4];
+                // ...and for the image
+                baseImage = new uint[ddsHeader.m_width * ddsHeader.m_height];
 
-                #region fill the pixel data array
                 // And now we have the arduous task of filling that up with stuff..
-                for (int destY = 0; destY < (int)m_header.m_height; destY++)
+                for (int destY = 0; destY < ddsHeader.m_height; destY++)
                 {
-                    for (int destX = 0; destX < (int)m_header.m_width; destX++)
+                    for (int destX = 0; destX < (int)ddsHeader.m_width; destX++)
                     {
-                        // Compute source pixel offset
+                        // Compute pixel offsets
                         int srcPixelOffset = (destY * rowPitch) + (destX * srcPixelSize);
+                        int destPixelOffset = (destY * (int)ddsHeader.m_width) + destX;
 
-                        // Read our pixel
+                        // Build our pixel colour as a DWORD
                         uint pixelColour = 0;
-                        uint pixelRed = 0;
-                        uint pixelGreen = 0;
-                        uint pixelBlue = 0;
-                        uint pixelAlpha = 0;
-
-                        // Build our pixel colour as a DWORD	
                         for (int loop = 0; loop < srcPixelSize; loop++)
-                        {
                             pixelColour |= (uint)(readPixelData[srcPixelOffset + loop] << (8 * loop));
-                        }
 
                         // delegate takes care of calculation, set when determining format
-                        setPixel(pixelColour, out pixelRed, out pixelGreen, out pixelBlue, out pixelAlpha);
-
-                        // Write the colours away..
-                        int destPixelOffset = (destY * (int)m_header.m_width * 4) + (destX * 4);
-                        m_pixelData[destPixelOffset + 0] = (byte)pixelRed;
-                        m_pixelData[destPixelOffset + 1] = (byte)pixelGreen;
-                        m_pixelData[destPixelOffset + 2] = (byte)pixelBlue;
-                        m_pixelData[destPixelOffset + 3] = (byte)pixelAlpha;
+                        baseImage[destPixelOffset] = toARGB(pixelColour);
                     }
                 }
                 #endregion
+            }
+
+            currentImage = (uint[])baseImage.Clone();
+            if (supportHSV) UpdateHSVData();
+        }
+
+        ///  <summary>
+        ///  Saves the current image using one of the supported DDS mechanisms.
+        ///  </summary>
+        ///  <param name="output">A <see cref="T:System.IO.Stream"/> to receive the DDS-encoded image.</param>
+        public void Save(Stream output)
+        {
+            uint[] sourcePixels;
+            if (SupportsHSV && !hsvShift.IsEmpty)
+            {
+                sourcePixels = ColorHSVA.ToArrayARGB(hsvData, hsvShift);
+            }
+            else
+            {
+                sourcePixels = currentImage;
+            }
+
+            // Write the DDS tag.
+            new BinaryWriter(output).Write(fourccDDS_);
+
+            // Write the header.
+            ddsHeader.Write(output);
+
+            if ((ddsHeader.m_pixelFormat.m_flags & DdsPixelFormat.PixelFormatFlags.DDS_FOURCC) != 0)
+            {
+                #region We can use squish
+                int flags = 0;
+                switch (ddsHeader.m_pixelFormat.m_fourCC)
+                {
+                    case fourccDXT1:
+                        flags = (int)DdsSquish.SquishFlags.kDxt1;
+                        break;
+
+                    case fourccDXT3:
+                        flags = (int)DdsSquish.SquishFlags.kDxt3;
+                        break;
+
+                    case fourccDXT5:
+                        flags = (int)DdsSquish.SquishFlags.kDxt5;
+                        break;
+
+                    default:
+                        throw new FormatException("File is not a squish-supported DDS format");
+                }
+
+                // Convert ARGB uint array to R, G, B, A byte array...
+                byte[] pixelData = new byte[sourcePixels.Length * sizeof(uint)];
+                for (int i = 0; i < sourcePixels.Length; i++)
+                {
+                    uint value = toDDS_A8B8G8R8(sourcePixels[i]);
+                    Array.Copy(BitConverter.GetBytes(value), 0, pixelData, i * sizeof(uint), sizeof(uint));
+                }
+
+                byte[] compressedBlocks = DdsSquish.CompressImage(pixelData, ddsHeader.m_width, ddsHeader.m_height, flags);
+
+                // Write out compressed data.
+                output.Write(compressedBlocks, 0, compressedBlocks.Length);
+                #endregion
+            }
+            else
+            {
+                #region It's a non-squishable one, so try manual methods...
+
+                // Size of a source pixel, in bytes
+                int destPixelSize = (int)ddsHeader.m_pixelFormat.m_rgbBitCount / 8;
+                if (destPixelSize < 1 || destPixelSize > 4)
+                    throw new FormatException("Pixel size in bytes must be a 1 to 4.");
+
+                ToARGB unused = null;
+                ToPixel toPixel;
+                determinePixelFormat(out unused, out toPixel);
+
+                // If toPixel is still null, then it's an unsupported format.
+                if (toPixel == null)
+                    throw new FormatException("Image is not a supported non-DXT DDS format");
+
+                // We need the pitch for a row, so we can allocate enough memory for the output.
+                int rowPitch = (int)getRowPitch(destPixelSize);
+
+                // Ok.. now, we need to allocate room for the bytes to write out... it's rowPitch bytes * height
+                byte[] pixelData = new byte[rowPitch * ddsHeader.m_height];
+
+                // Convert ARGB uint array to DDS pixel format
+                for (int srcY = 0; srcY < ddsHeader.m_height; srcY++)
+                {
+                    for (int srcX = 0; srcX < ddsHeader.m_width; srcX++)
+                    {
+                        // Compute pixel offsets
+                        int destPixelOffset = (srcY * rowPitch) + (srcX * destPixelSize);
+                        int srcPixelOffset = (srcY * ddsHeader.m_width) + srcX;
+
+                        // delegate takes care of calculation, set when determining format
+                        uint pixelColour = toPixel(sourcePixels[srcPixelOffset]);
+
+                        // Store each computed byte
+                        for (int loop = 0; loop < destPixelSize; loop++)
+                            pixelData[destPixelOffset + loop] = (byte)((pixelColour >> (8 * loop)) & 0xff);
+                    }
+                }
+
+                // And write it...
+                output.Write(pixelData, 0, pixelData.Length);
                 #endregion
             }
 
-            if (supportHSV)
-                hsvData = RGBHSV.ColorRGBA.ConvertToColorHSVAArray(m_pixelData);
+            output.Flush();
         }
+
+        void determinePixelFormat(out ToARGB toARGB, out ToPixel toPixel)
+        {
+            toARGB = null;
+            toPixel = null;
+            if (ddsHeader.m_pixelFormat.m_flags == DdsPixelFormat.PixelFormatFlags.DDS_RGBA)
+            {
+                if (ddsHeader.m_pixelFormat.m_rgbBitCount == 32)
+                {
+                    if ((ddsHeader.m_pixelFormat.m_rBitMask == 0x00ff0000) && (ddsHeader.m_pixelFormat.m_gBitMask == 0x0000ff00) &&
+                        (ddsHeader.m_pixelFormat.m_bBitMask == 0x000000ff) && (ddsHeader.m_pixelFormat.m_aBitMask == 0xff000000))
+                    {
+                        toARGB = fromDDS_A8R8G8B8;
+                        toPixel = toDDS_A8R8G8B8;
+                    }
+                    else if ((ddsHeader.m_pixelFormat.m_rBitMask == 0x000000ff) && (ddsHeader.m_pixelFormat.m_gBitMask == 0x0000ff00) &&
+                        (ddsHeader.m_pixelFormat.m_bBitMask == 0x00ff0000) && (ddsHeader.m_pixelFormat.m_aBitMask == 0xff000000))
+                    {
+                        toARGB = fromDDS_A8B8G8R8;
+                        toPixel = toDDS_A8B8G8R8;
+                    }
+                }
+                else if (ddsHeader.m_pixelFormat.m_rgbBitCount == 16)
+                {
+                    if ((ddsHeader.m_pixelFormat.m_rBitMask == 0x00007c00) && (ddsHeader.m_pixelFormat.m_gBitMask == 0x000003e0) &&
+                        (ddsHeader.m_pixelFormat.m_bBitMask == 0x0000001f) && (ddsHeader.m_pixelFormat.m_aBitMask == 0x00008000))
+                    {
+                        toARGB = fromDDS_A1R5G5B5;
+                        toPixel = toDDS_A1R5G5B5;
+                    }
+                    else if ((ddsHeader.m_pixelFormat.m_rBitMask == 0x00000f00) && (ddsHeader.m_pixelFormat.m_gBitMask == 0x000000f0) &&
+                        (ddsHeader.m_pixelFormat.m_bBitMask == 0x0000000f) && (ddsHeader.m_pixelFormat.m_aBitMask == 0x0000f000))
+                    {
+                        toARGB = fromDDS_A4R4G4B4;
+                        toPixel = toDDS_A4R4G4B4;
+                    }
+                }
+            }
+            else if (ddsHeader.m_pixelFormat.m_flags == DdsPixelFormat.PixelFormatFlags.DDS_RGB)
+            {
+                if (ddsHeader.m_pixelFormat.m_rgbBitCount == 32)
+                {
+                    if ((ddsHeader.m_pixelFormat.m_rBitMask == 0x00ff0000) && (ddsHeader.m_pixelFormat.m_gBitMask == 0x0000ff00) &&
+                        (ddsHeader.m_pixelFormat.m_bBitMask == 0x000000ff) && (ddsHeader.m_pixelFormat.m_aBitMask == 0x00000000))
+                    {
+                        toARGB = fromDDS_X8R8G8B8;
+                        toPixel = toDDS_X8R8G8B8;
+                    }
+                    else if ((ddsHeader.m_pixelFormat.m_rBitMask == 0x000000ff) && (ddsHeader.m_pixelFormat.m_gBitMask == 0x0000ff00) &&
+                        (ddsHeader.m_pixelFormat.m_bBitMask == 0x00ff0000) && (ddsHeader.m_pixelFormat.m_aBitMask == 0x00000000))
+                    {
+                        toARGB = fromDDS_X8B8G8R8;
+                        toPixel = toDDS_X8B8G8R8;
+                    }
+                }
+                else if ((ddsHeader.m_pixelFormat.m_rgbBitCount == 24) &&
+                    (ddsHeader.m_pixelFormat.m_rBitMask == 0x00ff0000) && (ddsHeader.m_pixelFormat.m_gBitMask == 0x0000ff00) &&
+                    (ddsHeader.m_pixelFormat.m_bBitMask == 0x000000ff) && (ddsHeader.m_pixelFormat.m_aBitMask == 0x00000000))
+                {
+                    toARGB = fromDDS_R8G8B8;
+                    toPixel = toDDS_R8G8B8;
+                }
+                else if ((ddsHeader.m_pixelFormat.m_rgbBitCount == 16) &&
+                    (ddsHeader.m_pixelFormat.m_rBitMask == 0x0000f800) && (ddsHeader.m_pixelFormat.m_gBitMask == 0x000007e0) &&
+                    (ddsHeader.m_pixelFormat.m_bBitMask == 0x0000001f) && (ddsHeader.m_pixelFormat.m_aBitMask == 0x00000000))
+                {
+                    toARGB = fromDDS_R5G6B5;
+                    toPixel = toDDS_R5G6B5;
+                }
+            }
+        }
+
+        #region Supported non-DXT1/3/5 conversion methods - decompress
+        delegate uint ToARGB(uint pixelColour);
+        uint fromDDS_A8R8G8B8(uint pixelColour) { return pixelColour; }
+        uint fromDDS_X8R8G8B8(uint pixelColour) { return 0xFF000000 | pixelColour; }
+        uint fromDDS_A8B8G8R8(uint pixelColour) { return (pixelColour & 0xFF00FF00) | (pixelColour & 0x00FF0000) >> 16 | (pixelColour & 0x000000FF) << 16; }
+        uint fromDDS_X8B8G8R8(uint pixelColour) { return 0xFF000000 | (pixelColour & 0x00FF0000) >> 16 | (pixelColour & 0x000000FF) << 16; }
+        uint fromDDS_A1R5G5B5(uint pixelColour)
+        {
+            uint A = (pixelColour >> 15) * 0xff;
+            uint R = (pixelColour >> 10) & 0x1f;
+            uint G = (pixelColour >> 5) & 0x1f;
+            uint B = (pixelColour >> 0) & 0x1f;
+
+            return (A << 24) | ((R << 3) | (R >> 2) << 16) | ((G << 3) | (G >> 2) << 8) | ((B << 3) | (B >> 2));
+        }
+        uint fromDDS_A4R4G4B4(uint pixelColour)
+        {
+            uint A = (pixelColour >> 12) & 0x0f;
+            uint R = (pixelColour >> 8) & 0x0f;
+            uint G = (pixelColour >> 4) & 0x0f;
+            uint B = (pixelColour >> 0) & 0x0f;
+
+            return ((A << 4) | A) << 24 | ((R << 4) | R) << 16 | ((G << 4) | G) << 8 | ((B << 4) | B);
+        }
+        uint fromDDS_R8G8B8(uint pixelColour) { return 0xFF000000 | pixelColour; }
+        uint fromDDS_R5G6B5(uint pixelColour)
+        {
+            uint R = (pixelColour >> 11) & 0x1f;
+            uint G = (pixelColour >> 5) & 0x3f;
+            uint B = (pixelColour >> 0) & 0x1f;
+
+            return ((uint)0xff << 24) | ((R << 3) | (R >> 2)) << 16 | ((G << 2) | (G >> 4)) << 8 | ((B << 3) | (B >> 2));
+        }
+        #endregion
+
+        #region Supported non-DXT1/3/5 conversion methods - compress
+        delegate uint ToPixel(uint argb);
+        uint toDDS_A8R8G8B8(uint argb) { return argb; }
+        uint toDDS_X8R8G8B8(uint argb) { return argb & 0x00FFFFFF; }
+        uint toDDS_A8B8G8R8(uint argb) { return (argb & 0xFF00FF00) | (argb & 0x00FF0000) >> 16 | (argb & 0x000000FF) << 16; }
+        uint toDDS_X8B8G8R8(uint argb) { return (argb & 0x0000FF00) | (argb & 0x00FF0000) >> 16 | (argb & 0x000000FF) << 16; }
+        uint toDDS_A1R5G5B5(uint argb)
+        {
+            uint A = (uint)((argb & 0xFF000000) == 0 ? 0 : 1) << 15;
+            uint R = ((argb & 0x00F80000) >> 3) >> 6;
+            uint G = ((argb & 0x0000F800) >> 3) >> 3;
+            uint B = ((argb & 0x000000F8) >> 3) >> 0;
+            return A | R | G | B;
+        }
+        uint toDDS_A4R4G4B4(uint argb)
+        {
+            uint A = ((argb & 0xF0000000) >> 4) >> 12;
+            uint R = ((argb & 0x00F00000) >> 4) >> 8;
+            uint G = ((argb & 0x0000F000) >> 4) >> 4;
+            uint B = ((argb & 0x000000F0) >> 4);
+            return A | R | G | B;
+        }
+        uint toDDS_R8G8B8(uint argb) { return argb & 0x00FFFFFF; }
+        uint toDDS_R5G6B5(uint argb)
+        {
+            uint R = ((argb & 0x00F80000) >> 3) >> 5;
+            uint G = ((argb & 0x0000FC00) >> 2) >> 3;
+            uint B = (argb & 0x000000F8) >> 3;
+            return (uint)0x00000000 | R | G | B;
+        }
+        #endregion
 
         int getRowPitch(int srcPixelSize)
         {
-            if ((m_header.m_headerFlags & (int)DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_PITCH) != 0)
+            if ((ddsHeader.m_headerFlags & (int)DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_PITCH) != 0)
             {
                 // Pitch specified.. so we can use directly
-                return (int)m_header.m_pitchOrLinearSize;
+                return ddsHeader.m_pitchOrLinearSize;
             }
-            else if ((m_header.m_headerFlags & (int)DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_LINEARSIZE) != 0)
+            else if ((ddsHeader.m_headerFlags & (uint)DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_LINEARSIZE) != 0)
             {
                 // Linear size specified.. compute row pitch. Of course, this should never happen
                 // as linear size is *supposed* to be for compressed textures. But Microsoft don't 
                 // always play by the rules when it comes to DDS output. 
-                return (int)m_header.m_pitchOrLinearSize / (int)m_header.m_height;
+                return ddsHeader.m_pitchOrLinearSize / ddsHeader.m_height;
             }
             else
             {
@@ -580,87 +776,16 @@ namespace DdsFileTypePlugin
                 // or linear size. And - to cap it all off - they leave pitchOrLinearSize as *zero*. Zero??? If
                 // we get this bizarre set of inputs, we just go 'screw it' and compute row pitch ourselves, 
                 // making sure we DWORD align it (if that code path is enabled).
-                return ((int)m_header.m_width * srcPixelSize);
+                return ddsHeader.m_width * srcPixelSize;
 
 #if	APPLY_PITCH_ALIGNMENT
 					rowPitch = ( ( ( int )rowPitch + 3 ) & ( ~3 ) );
 #endif	// APPLY_PITCH_ALIGNMENT
             }
         }
-
-        #region Supported non-DXT conversion methods
-        delegate void pixelSet(uint pixelColour, out uint pixelRed, out uint pixelGreen, out uint pixelBlue, out uint pixelAlpha);
-        void pixelSetDDS_FORMAT_A8R8G8B8(uint pixelColour, out uint pixelRed, out uint pixelGreen, out uint pixelBlue, out uint pixelAlpha)
-        {
-            pixelAlpha = (pixelColour >> 24) & 0xff;
-            pixelRed = (pixelColour >> 16) & 0xff;
-            pixelGreen = (pixelColour >> 8) & 0xff;
-            pixelBlue = (pixelColour >> 0) & 0xff;
-        }
-        void pixelSetDDS_FORMAT_X8R8G8B8(uint pixelColour, out uint pixelRed, out uint pixelGreen, out uint pixelBlue, out uint pixelAlpha)
-        {
-            pixelAlpha = 0xff;
-            pixelRed = (pixelColour >> 16) & 0xff;
-            pixelGreen = (pixelColour >> 8) & 0xff;
-            pixelBlue = (pixelColour >> 0) & 0xff;
-        }
-        void pixelSetDDS_FORMAT_A8B8G8R8(uint pixelColour, out uint pixelRed, out uint pixelGreen, out uint pixelBlue, out uint pixelAlpha)
-        {
-            pixelAlpha = (pixelColour >> 24) & 0xff;
-            pixelRed = (pixelColour >> 0) & 0xff;
-            pixelGreen = (pixelColour >> 8) & 0xff;
-            pixelBlue = (pixelColour >> 16) & 0xff;
-        }
-        void pixelSetDDS_FORMAT_X8B8G8R8(uint pixelColour, out uint pixelRed, out uint pixelGreen, out uint pixelBlue, out uint pixelAlpha)
-        {
-            pixelAlpha = 0xff;
-            pixelRed = (pixelColour >> 0) & 0xff;
-            pixelGreen = (pixelColour >> 8) & 0xff;
-            pixelBlue = (pixelColour >> 16) & 0xff;
-        }
-        void pixelSetDDS_FORMAT_A1R5G5B5(uint pixelColour, out uint pixelRed, out uint pixelGreen, out uint pixelBlue, out uint pixelAlpha)
-        {
-            pixelAlpha = (pixelColour >> 15) * 0xff;
-            pixelRed = (pixelColour >> 10) & 0x1f;
-            pixelGreen = (pixelColour >> 5) & 0x1f;
-            pixelBlue = (pixelColour >> 0) & 0x1f;
-
-            pixelRed = (pixelRed << 3) | (pixelRed >> 2);
-            pixelGreen = (pixelGreen << 3) | (pixelGreen >> 2);
-            pixelBlue = (pixelBlue << 3) | (pixelBlue >> 2);
-        }
-        void pixelSetDDS_FORMAT_A4R4G4B4(uint pixelColour, out uint pixelRed, out uint pixelGreen, out uint pixelBlue, out uint pixelAlpha)
-        {
-            pixelAlpha = (pixelColour >> 12) & 0xff;
-            pixelRed = (pixelColour >> 8) & 0x0f;
-            pixelGreen = (pixelColour >> 4) & 0x0f;
-            pixelBlue = (pixelColour >> 0) & 0x0f;
-
-            pixelAlpha = (pixelAlpha << 4) | (pixelAlpha >> 0);
-            pixelRed = (pixelRed << 4) | (pixelRed >> 0);
-            pixelGreen = (pixelGreen << 4) | (pixelGreen >> 0);
-            pixelBlue = (pixelBlue << 4) | (pixelBlue >> 0);
-        }
-        void pixelSetDDS_FORMAT_R8G8B8(uint pixelColour, out uint pixelRed, out uint pixelGreen, out uint pixelBlue, out uint pixelAlpha)
-        {
-            pixelAlpha = 0xff;
-            pixelRed = (pixelColour >> 16) & 0xff;
-            pixelGreen = (pixelColour >> 8) & 0xff;
-            pixelBlue = (pixelColour >> 0) & 0xff;
-        }
-        void pixelSetDDS_FORMAT_R5G6B5(uint pixelColour, out uint pixelRed, out uint pixelGreen, out uint pixelBlue, out uint pixelAlpha)
-        {
-            pixelAlpha = 0xff;
-            pixelRed = (pixelColour >> 11) & 0x1f;
-            pixelGreen = (pixelColour >> 5) & 0x3f;
-            pixelBlue = (pixelColour >> 0) & 0x1f;
-
-            pixelRed = (pixelRed << 3) | (pixelRed >> 2);
-            pixelGreen = (pixelGreen << 2) | (pixelGreen >> 4);
-            pixelBlue = (pixelBlue << 3) | (pixelBlue >> 2);
-        }
         #endregion
 
+        #region "Constructors", really
         /// <summary>
         /// Creates an image of a single colour, specified by the byte parameters,
         /// with the size given by the int parameters.
@@ -675,19 +800,21 @@ namespace DdsFileTypePlugin
         /// <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
         public void CreateImage(byte r, byte g, byte b, byte a, int width, int height, bool supportHSV)
         {
-            m_header = new DdsHeader();
-            m_header.m_width = (uint)width;
-            m_header.m_height = (uint)height;
-            m_header.m_pixelFormat.Initialise(DdsFileFormat.DDS_FORMAT_DXT1);
-            m_header.m_headerFlags |= (int)DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_PITCH;
-            m_header.m_pitchOrLinearSize = (uint)(m_header.m_width + 3) >> 2;
-            m_pixelData = new byte[m_header.m_width * 4 * m_header.m_height];
-            for (int x = 0; x < width; x++)
-                for (int y = 0; y < height; y++)
-                    setPixelRGBA(m_pixelData, pixelOffset(x, y, width), r, g, b, a);
+            CreateImage((uint)(a << 24 | r << 16 | g << 8 | b), width, height, supportHSV);
+        }
 
-            if (supportHSV)
-                hsvData = RGBHSV.ColorRGBA.ConvertToColorHSVAArray(m_pixelData);
+        /// <summary>
+        /// Creates an image of a single colour, specified by the <seealso cref="Color"/> parameter,
+        /// with the size given by the int parameters.
+        /// If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
+        /// </summary>
+        /// <param name="color"><seealso cref="Color"/> of image.</param>
+        /// <param name="width">Width of image.</param>
+        /// <param name="height">Height of image.</param>
+        /// <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
+        public void CreateImage(Color color, int width, int height, bool supportHSV)
+        {
+            CreateImage((uint)color.ToArgb(), width, height, supportHSV);
         }
 
         /// <summary>
@@ -702,14 +829,48 @@ namespace DdsFileTypePlugin
         /// <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
         public void CreateImage(uint argb, int width, int height, bool supportHSV)
         {
-            CreateImage((byte)((argb >> 16) & 0xff), (byte)((argb >> 8) & 0xff), (byte)(argb & 0xff), (byte)((argb >> 24) & 0xff), width, height, supportHSV);
+            ddsHeader = new DdsHeader();
+            ddsHeader.m_width = width;
+            ddsHeader.m_height = height;
+            ddsHeader.m_pixelFormat.Initialise(DdsFileFormat.DDS_FORMAT_DXT1);
+
+            baseImage = new uint[width * height];
+
+            for (int y = 0; y < height; y++)
+            {
+                int offset = y * width;
+                for (int x = 0; x < width; x++)
+                    baseImage[offset + x] = argb;
+            }
+
+            currentImage = (uint[])baseImage.Clone();
+            if (supportHSV) UpdateHSVData();
         }
 
         /// <summary>
-        /// Creates an image from a given <seealso cref="Image"/>.
+        /// Creates an image from a given <seealso cref="T:DdsFile"/>.
         /// If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
         /// </summary>
-        /// <param name="image"><seealso cref="Image"/> from which to extract image pixel.</param>
+        /// <param name="image"><seealso cref="T:DdsFile"/> to clone.</param>
+        /// <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
+        public void CreateImage(DdsFile image, bool supportHSV)
+        {
+            ddsHeader = new DdsHeader();
+            ddsHeader.m_width = image.ddsHeader.m_width;
+            ddsHeader.m_height = image.ddsHeader.m_height;
+            ddsHeader.m_pixelFormat.Initialise(DdsFileFormat.DDS_FORMAT_DXT1);
+
+            baseImage = (uint[])image.currentImage.Clone();
+
+            currentImage = (uint[])baseImage.Clone();
+            if (supportHSV) UpdateHSVData();
+        }
+
+        /// <summary>
+        /// Creates an image from a given <seealso cref="T:Image"/>.
+        /// If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
+        /// </summary>
+        /// <param name="image"><seealso cref="T:Image"/> from which to extract image pixel.</param>
         /// <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
         public void CreateImage(Image image, bool supportHSV)
         {
@@ -724,19 +885,50 @@ namespace DdsFileTypePlugin
         /// <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
         public void CreateImage(Bitmap image, bool supportHSV)
         {
-            m_header = new DdsHeader();
-            m_header.m_width = (uint)image.Width;
-            m_header.m_height = (uint)image.Height;
-            m_header.m_pixelFormat.Initialise(DdsFileFormat.DDS_FORMAT_DXT1);
-            m_header.m_headerFlags |= (int)DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_PITCH;
-            m_header.m_pitchOrLinearSize = (uint)(m_header.m_width + 3) >> 2;
-            m_pixelData = new byte[m_header.m_width * 4 * m_header.m_height];
-            for (int y = 0; y < image.Height; y++)
-                for (int x = 0; x < image.Width; x++)
-                    setPixelARGB(m_pixelData, pixelOffset(x, y, image.Width), (uint)image.GetPixel(x, y).ToArgb());
+            ddsHeader = new DdsHeader();
+            ddsHeader.m_width = image.Width;
+            ddsHeader.m_height = image.Height;
+            ddsHeader.m_pixelFormat.Initialise(DdsFileFormat.DDS_FORMAT_DXT1);
 
-            if (supportHSV)
-                hsvData = RGBHSV.ColorRGBA.ConvertToColorHSVAArray(m_pixelData);
+            baseImage = image.ToARGBData();
+
+            currentImage = (uint[])baseImage.Clone();
+            if (supportHSV) UpdateHSVData();
+        }
+        #endregion
+
+        #region Set Alpha channel
+        /// <summary>
+        /// Converts the R, G and B channels of the supplied <paramref name="image"/> to greyscale
+        /// and loads this into the Alpha channel of the current image.
+        /// </summary>
+        /// <param name="image"><seealso cref="DdsFile"/> to extract greyscale data from for alpha channel.</param>
+        public void SetAlphaFromGreyscale(DdsFile image)
+        {
+            for (int y = 0; y < ddsHeader.m_height; y++)
+            {
+                int srcOffset = y * ddsHeader.m_width;
+                int dstOffset = (y % image.ddsHeader.m_height) * image.ddsHeader.m_width;
+
+                for (int x = 0; x < ddsHeader.m_width; x++)
+                {
+                    uint argb = image.currentImage[dstOffset + x % image.ddsHeader.m_width];
+                    uint alpha = ((argb.R() + argb.G() + argb.B()) / 3) & 0xff;
+                    currentImage[srcOffset + x] = (currentImage[srcOffset + x] & 0x00FFFFFF) | (alpha << 24);
+                }
+            }
+
+            if (SupportsHSV) UpdateHSVData();
+        }
+
+        /// <summary>
+        /// Converts the R, G and B channels of the supplied <paramref name="image"/> to greyscale
+        /// and loads this into the Alpha channel of the current image.
+        /// </summary>
+        /// <param name="image"><seealso cref="T:Image"/> to extract greyscale data from for alpha channel.</param>
+        public void SetAlphaFromGreyscale(Image image)
+        {
+            SetAlphaFromGreyscale(new Bitmap(image));
         }
 
         // (0 + 0 + 0) / 3 = 0
@@ -745,115 +937,39 @@ namespace DdsFileTypePlugin
         /// Converts the R, G and B channels of the supplied <paramref name="image"/> to greyscale
         /// and loads this into the Alpha channel of the current image.
         /// </summary>
-        /// <param name="image"><seealso cref="DdsFile"/> to extract greyscale data from for alpha channel.</param>
-        public void SetAlphaFromGreyscale(DdsFile image)
-        {
-            for (int x = 0; x < this.GetWidth(); x++)
-                for (int y = 0; y < this.GetHeight(); y++)
-                {
-                    int offset = pixelOffset(x, y, this.GetWidth());
-                    m_pixelData[offset + 3] = (byte)((image.m_pixelData[offset + 0] + image.m_pixelData[offset + 1] + image.m_pixelData[offset + 2]) / 3);
-                }
-        }
-
-        /// <summary>
-        /// Converts the R, G and B channels of the supplied <paramref name="image"/> to greyscale
-        /// and loads this into the Alpha channel of the current image.
-        /// </summary>
-        /// <param name="image"><seealso cref="Image"/> to extract greyscale data from for alpha channel.</param>
-        public void SetAlphaFromGreyscale(Image image)
-        {
-            SetAlphaFromGreyscale(new Bitmap(image));
-        }
-
-        /// <summary>
-        /// Converts the R, G and B channels of the supplied <paramref name="image"/> to greyscale
-        /// and loads this into the Alpha channel of the current image.
-        /// </summary>
         /// <param name="image"><seealso cref="Bitmap"/> to extract greyscale data from for alpha channel.</param>
         public void SetAlphaFromGreyscale(Bitmap image)
         {
-            for (int x = 0; x < this.GetWidth(); x++)
-                for (int y = 0; y < this.GetHeight(); y++)
+            for (int y = 0; y < ddsHeader.m_height; y++)
+            {
+                int srcOffset = y * ddsHeader.m_width;
+
+                for (int x = 0; x < ddsHeader.m_width; x++)
                 {
-                    int offset = pixelOffset(x, y, this.GetWidth());
-                    uint argb = (uint)(image.GetPixel(x, y).ToArgb() & 0x00FFFFFF);
-                    m_pixelData[offset + 3] = (byte)((argb >> 16) + ((argb >> 8) & 0xFF) + (argb & 0xFF) / 3);
+                    Color pixel = image.GetPixel(x % image.Width, y % image.Height);
+                    uint alpha = ((uint)(pixel.R + pixel.G + pixel.B) / 3) & 0xff;
+                    currentImage[srcOffset + x] = (currentImage[srcOffset + x] & 0x00FFFFFF) | (alpha << 24);
                 }
-        }
-
-        void setPixelRGBA(byte[] pixelData, int offset, byte r, byte g, byte b, byte a)
-        {
-            pixelData[offset + 0] = r;
-            pixelData[offset + 1] = g;
-            pixelData[offset + 2] = b;
-            pixelData[offset + 3] = a;
-        }
-
-        void setPixelARGB(byte[] pixelData, int offset, uint argb)
-        {
-            setPixelRGBA(pixelData, offset, (byte)((argb >> 16) & 0xff), (byte)((argb >> 8) & 0xff), (byte)(argb & 0xff), (byte)((argb >> 24) & 0xff));
-        }
-
-        private void copyPixel(byte[] outPixelData, int offset, byte[] inPixelData)
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                outPixelData[offset + i] = inPixelData[offset + i];
-            }
-        }
-
-        int pixelOffset(int x, int y, int width) { return (y * width + x) * 4; }
-
-        ///  <summary>
-        ///  Saves the current image using one of the supported DDS mechanisms.
-        ///  </summary>
-        ///  <param name="output">A <see cref="T:System.IO.Stream"/> to receive the DDS-encoded image.</param>
-        ///  <param name="m_flags">Optional; when null (or omitted), uses the value from the loaded image; currently only 0x04 is supported.</param>
-        ///  <param name="m_fourCC">Optional; when null (or omitted), uses the value from the loaded image; FourCC tags DXT1, DXT3 and DXT5 are supported.</param>
-        public void Save(Stream output, uint? m_flags = null, uint? m_fourCC = null)
-        {
-            if (!m_flags.HasValue) m_flags =  this.m_header.m_pixelFormat.m_flags;
-            if (!m_fourCC.HasValue) m_fourCC = this.m_header.m_pixelFormat.m_fourCC;
-
-            if ((m_flags & (int)DdsPixelFormat.PixelFormatFlags.DDS_FOURCC) == 0)
-                throw new FormatException("Non-squish compression is not currently supported");
-
-            int flags = 0;
-            int ratio = 2;
-            switch (m_fourCC)
-            {
-                case 0x31545844:
-                    flags = (int)DdsSquish.SquishFlags.kDxt1;
-                    ratio = 3;
-                    break;
-
-                case 0x33545844:
-                    flags = (int)DdsSquish.SquishFlags.kDxt3;
-                    break;
-
-                case 0x35545844:
-                    flags = (int)DdsSquish.SquishFlags.kDxt5;
-                    break;
-
-                default:
-                    throw new FormatException("File is not a squish-supported DDS format");
             }
 
-            new BinaryWriter(output).Write((uint)0x20534444);
-            this.m_header.Write(output);
+            if (SupportsHSV) UpdateHSVData();
+        }
+        #endregion
 
-            byte[] pixelData = this.GetPixelData();
-            byte[] writePixelData = new byte[((m_header.m_width + 3) >> ratio) * 4 * m_header.m_height];
-            DdsSquish.CompressImage(pixelData, this.GetWidth(), this.GetHeight(), writePixelData, flags);
-            output.Write(writePixelData, 0, writePixelData.Length);
-            
-            output.Flush();
+        /// <summary>
+        /// Get a greyscale image representing the alpha channel of the current image.
+        /// </summary>
+        /// <returns>A greyscale image representing the alpha channel of the current image.</returns>
+        public Bitmap GetGreyscaleFromAlpha()
+        {
+            uint[] greyscale = new uint[currentImage.Length];
+            for (int i = 0; i < currentImage.Length; i++)
+                greyscale[i] = ((uint)0xFF << 24) | currentImage[i].A() << 16 | currentImage[i].A() << 8 | currentImage[i].A() << 0;
+            return greyscale.ToBitmap(this.Size);
         }
 
         /// <summary>
-        /// Converts the DDS encoded image into a <see cref="System.Drawing.Image"/> representation,
-        /// subject to the provided parameters.
+        /// Extract a <seealso cref="T:Image"/> representing the current image, subject to the filtering requested.
         /// </summary>
         /// <param name="red">When true, the red channel of the DDS contributes to the red pixels of the returned image.</param>
         /// <param name="green">When true, the green channel of the DDS contributes to the green pixels of the returned image.</param>
@@ -862,133 +978,79 @@ namespace DdsFileTypePlugin
         /// <param name="invert">When true, the alpha channel of the DDS is inverted.</param>
         /// <returns>A <see cref="System.Drawing.Image"/> representation of the DDS encoded image in the loaded <see cref="System.IO.Stream"/>.</returns>
         /// <seealso cref="Load"/>
-        public Image Image(bool red = true, bool green = true, bool blue = true, bool alpha = false, bool invert = false)
+        public Bitmap GetImage(bool red, bool green, bool blue, bool alpha, bool invert)
         {
-            Bitmap bitmap = new Bitmap(this.GetWidth(), this.GetHeight(), System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            uint mask = (alpha ? (uint)0xFF000000 : 0) | (red ? (uint)0x00FF0000 : 0) | (green ? (uint)0x0000FF00 : 0) | (blue ? (uint)0x000000FF : 0);
+            Bitmap bitmap = new Bitmap(ddsHeader.m_width, ddsHeader.m_height, Imaging.PixelFormat.Format32bppArgb);
 
-            byte[] readPixelData = this.GetPixelData();
-
-            for (int y = 0; y < this.GetHeight(); y++)
+            uint[] sourcePixels;
+            if (SupportsHSV && !hsvShift.IsEmpty)
             {
-                for (int x = 0; x < this.GetWidth(); x++)
+                sourcePixels = ColorHSVA.ToArrayARGB(hsvData, hsvShift);
+            }
+            else
+            {
+                sourcePixels = currentImage;
+            }
+            for (int y = 0; y < bitmap.Height; y++)
+            {
+                int offset = y * bitmap.Width;
+                for (int x = 0; x < bitmap.Width; x++)
                 {
-                    int readPixelOffset = pixelOffset(x, y, this.GetWidth());
+                    uint pixel = sourcePixels[offset + x] & mask;
+                    if (alpha) { if (invert) pixel = (pixel & 0x00FFFFFF) | (255 - pixel.A()); }
+                    else pixel |= 0xFF000000;
 
-                    int cred = 0;
-                    int cgreen = 0;
-                    int cblue = 0;
-                    int calpha = 0;
-
-                    if (red) { cred = readPixelData[readPixelOffset + 0]; }
-                    if (green) { cgreen = readPixelData[readPixelOffset + 1]; }
-                    if (blue) { cblue = readPixelData[readPixelOffset + 2]; }
-                    if (alpha)
-                    {
-                        calpha = readPixelData[readPixelOffset + 3];
-                        // Inverse the alpha
-                        if (invert)
-                            calpha = (255 - calpha);
-                    }
-
-                    if (alpha)
-                    {
-                        bitmap.SetPixel(x, y, Color.FromArgb(calpha, cred, cgreen, cblue));
-                    }
-                    else
-                    {
-                        bitmap.SetPixel(x, y, Color.FromArgb(cred, cgreen, cblue));
-                    }
+                    bitmap.SetPixel(x, y, Color.FromArgb((int)pixel));
                 }
             }
 
             return bitmap;
         }
 
-        bool maskInEffect = false;
+        /// <summary>
+        /// The current image.
+        /// </summary>
+        public Bitmap Image { get { return GetImage(true, true, true, true, false); } }
 
         /// <summary>
-        /// Clears a previously-applied HSVShift mask.
+        /// Get a new DdsFile of the given size based on the current image.
         /// </summary>
-        public void ClearMask()
+        /// <param name="size">The new size.</param>
+        /// <returns>A new DdsFile of the given size based on the current image.</returns>
+        public DdsFile Resize(Size size)
         {
-            if (!SupportsHSV || !maskInEffect) return;
-            hsvData = RGBHSV.ColorRGBA.ConvertToColorHSVAArray(m_pixelData);
-            maskInEffect = false;
+            Bitmap color = new Bitmap(GetImage(true, true, true, false, false), size);
+            Bitmap greyscale = new Bitmap(GetGreyscaleFromAlpha(), size);
+            DdsFile ddsFile = new DdsFile();
+            ddsFile.CreateImage(color, false);
+            ddsFile.SetAlphaFromGreyscale(greyscale);
+            return ddsFile;
         }
 
         /// <summary>
-        /// Apply <see cref="RGBHSV.HSVShift"/> values to this DDS image based on the
-        /// channels in the <paramref name="mask"/>.
+        /// The image size.
         /// </summary>
-        /// <param name="mask">A DDS image file, each colourway acting as a mask channel.</param>
-        /// <param name="ch1Shift">A shift to apply to the image when the first channel of the mask is active.</param>
-        /// <param name="ch2Shift">A shift to apply to the image when the second channel of the mask is active.</param>
-        /// <param name="ch3Shift">A shift to apply to the image when the third channel of the mask is active.</param>
-        /// <param name="ch4Shift">A shift to apply to the image when the fourth channel of the mask is active.</param>
-        public void MaskedHSVShift(DdsFile mask, RGBHSV.HSVShift ch1Shift, RGBHSV.HSVShift ch2Shift, RGBHSV.HSVShift ch3Shift, RGBHSV.HSVShift ch4Shift)
-        {
-            if (!SupportsHSV) return;
-
-            maskInEffect = maskInEffect || !ch1Shift.IsEmpty || !ch2Shift.IsEmpty || !ch3Shift.IsEmpty || !ch4Shift.IsEmpty;
-
-            if (!maskInEffect) return;
-
-            if (!ch1Shift.IsEmpty)
-                for (int i = 0; i < hsvData.Length; i++)
-                    if (mask.m_pixelData[i * 4 + 0] != 0) hsvData[i] = hsvData[i].HSVShift(ch1Shift);
-
-            if (!ch2Shift.IsEmpty)
-                for (int i = 0; i < hsvData.Length; i++)
-                    if (mask.m_pixelData[i * 4 + 1] != 0) hsvData[i] = hsvData[i].HSVShift(ch2Shift);
-
-            if (!ch3Shift.IsEmpty)
-                for (int i = 0; i < hsvData.Length; i++)
-                    if (mask.m_pixelData[i * 4 + 2] != 0) hsvData[i] = hsvData[i].HSVShift(ch3Shift);
-
-            if (!ch4Shift.IsEmpty)
-                for (int i = 0; i < hsvData.Length; i++)
-                    if (mask.m_pixelData[i * 4 + 3] != 0) hsvData[i] = hsvData[i].HSVShift(ch4Shift);
-        }
+        public Size Size { get { return new Size(ddsHeader.m_width, ddsHeader.m_height); } }
 
         /// <summary>
-        /// Apply <see cref="RGBHSV.HSVShift"/> values to this DDS image based on the
-        /// channels in the <paramref name="mask"/>.
-        /// Each channel of the mask acts independently, in order "R", "G", "B", "A".
+        /// The HSVShift applied to the current image, when supported.
         /// </summary>
-        /// <param name="mask">A DDS image file, each colourway acting as a mask channel.</param>
-        /// <param name="ch1Shift">A shift to apply to the image when the first channel of the mask is active.</param>
-        /// <param name="ch2Shift">A shift to apply to the image when the second channel of the mask is active.</param>
-        /// <param name="ch3Shift">A shift to apply to the image when the third channel of the mask is active.</param>
-        /// <param name="ch4Shift">A shift to apply to the image when the fourth channel of the mask is active.</param>
-        public void MaskedHSVShiftNoBlend(DdsFile mask, RGBHSV.HSVShift ch1Shift, RGBHSV.HSVShift ch2Shift, RGBHSV.HSVShift ch3Shift, RGBHSV.HSVShift ch4Shift)
+        /// <seealso cref="SupportsHSV"/>
+        public HSVShift HSVShift { get { return hsvShift; } set { hsvShift = value; } }
+
+        /// <summary>
+        /// True if the image is prepared to process HSV requests.
+        /// </summary>
+        public bool SupportsHSV
         {
-            if (!SupportsHSV) return;
-
-            maskInEffect = maskInEffect || !ch1Shift.IsEmpty || !ch2Shift.IsEmpty || !ch3Shift.IsEmpty || !ch4Shift.IsEmpty;
-
-            if (!maskInEffect) return;
-
-            RGBHSV.ColorHSVA[] result = new RGBHSV.ColorHSVA[hsvData.Length];
-            Array.Copy(hsvData, 0, result, 0, result.Length);
-
-            if (!ch1Shift.IsEmpty)
-                for (int i = 0; i < hsvData.Length; i++)
-                    if (mask.m_pixelData[i * 4 + 0] != 0) result[i] = hsvData[i].HSVShift(ch1Shift);
-
-            if (!ch2Shift.IsEmpty)
-                for (int i = 0; i < hsvData.Length; i++)
-                    if (mask.m_pixelData[i * 4 + 1] != 0) result[i] = hsvData[i].HSVShift(ch2Shift);
-
-            if (!ch3Shift.IsEmpty)
-                for (int i = 0; i < hsvData.Length; i++)
-                    if (mask.m_pixelData[i * 4 + 2] != 0) result[i] = hsvData[i].HSVShift(ch3Shift);
-
-            if (!ch4Shift.IsEmpty)
-                for (int i = 0; i < hsvData.Length; i++)
-                    if (mask.m_pixelData[i * 4 + 3] != 0) result[i] = hsvData[i].HSVShift(ch4Shift);
-
-            hsvData = result;
+            get { return hsvData != null; }
+            set { if (value != SupportsHSV) { if (value) UpdateHSVData(); else hsvData = null; } }
         }
+
+        void UpdateHSVData() { hsvData = ColorHSVA.ToArrayColorHSVA(currentImage); }
+
+        //----------------------------------------------------------------
 
         /// <summary>
         /// Set the colour of the image based on the channels in the <paramref name="mask"/>.
@@ -1000,26 +1062,21 @@ namespace DdsFileTypePlugin
         /// <param name="ch4Colour">(Nullable) ARGB colour to the image when the fourth channel of the mask is active.</param>
         public void MaskedSetColour(DdsFile mask, uint? ch1Colour, uint? ch2Colour, uint? ch3Colour, uint? ch4Colour)
         {
-            byte[] readPixelData = GetPixelData();
 
-            if (ch1Colour.HasValue)
-                for (int i = 0; i < hsvData.Length; i++)
-                    if (mask.m_pixelData[i * 4 + 0] != 0) setPixelARGB(readPixelData, i * 4, ch1Colour.Value);
+            maskInEffect = maskInEffect || ch1Colour.HasValue || ch2Colour.HasValue || ch3Colour.HasValue || ch4Colour.HasValue;
 
-            if (ch2Colour.HasValue)
-                for (int i = 0; i < hsvData.Length; i++)
-                    if (mask.m_pixelData[i * 4 + 1] != 0) setPixelARGB(readPixelData, i * 4, ch2Colour.Value);
+            if (!maskInEffect) return;
 
-            if (ch3Colour.HasValue)
-                for (int i = 0; i < hsvData.Length; i++)
-                    if (mask.m_pixelData[i * 4 + 2] != 0) setPixelARGB(readPixelData, i * 4, ch3Colour.Value);
+            if (ch1Colour.HasValue) MaskedSetColour(mask, x => x.R() > 0, ch1Colour.Value);
+            if (ch2Colour.HasValue) MaskedSetColour(mask, x => x.G() > 0, ch2Colour.Value);
+            if (ch3Colour.HasValue) MaskedSetColour(mask, x => x.B() > 0, ch3Colour.Value);
+            if (ch4Colour.HasValue) MaskedSetColour(mask, x => x.A() > 0, ch4Colour.Value);
 
-            if (ch4Colour.HasValue)
-                for (int i = 0; i < hsvData.Length; i++)
-                    if (mask.m_pixelData[i * 4 + 3] != 0) setPixelARGB(readPixelData, i * 4, ch4Colour.Value);
-
-            if (SupportsHSV) hsvData = RGBHSV.ColorRGBA.ConvertToColorHSVAArray(readPixelData);
-            m_pixelData = readPixelData;
+            if (SupportsHSV) UpdateHSVData();
+        }
+        void MaskedSetColour(DdsFile mask, Channel channel, uint argb)
+        {
+            MaskedApply(this.currentImage, this.Size, mask.currentImage, mask.Size, channel, (x, y) => argb);
         }
 
         /// <summary>
@@ -1031,21 +1088,12 @@ namespace DdsFileTypePlugin
         /// <param name="ch3DdsFile">DDS image applied to <paramref name="mask"/> channel 3 area.</param>
         /// <param name="ch4DdsFile">DDS image applied to <paramref name="mask"/> channel 4 area.</param>
         public void MaskedApplyImage(DdsFile mask, DdsFile ch1DdsFile, DdsFile ch2DdsFile, DdsFile ch3DdsFile, DdsFile ch4DdsFile)
-		{
-            byte[] readPixelData = GetPixelData();
-
-            for (int y = 0; y < mask.GetHeight(); y++)
-                for (int x = 0; x < mask.GetWidth(); x++)
-                {
-                    int offset = ((y * mask.GetWidth()) * 4) + (x * 4);
-                    if ((ch1DdsFile != null) && (mask.m_pixelData[offset + 0] != 0)) copyPixel(readPixelData, offset, ch1DdsFile.m_pixelData);
-                    if ((ch2DdsFile != null) && (mask.m_pixelData[offset + 1] != 0)) copyPixel(readPixelData, offset, ch2DdsFile.m_pixelData);
-                    if ((ch3DdsFile != null) && (mask.m_pixelData[offset + 2] != 0)) copyPixel(readPixelData, offset, ch3DdsFile.m_pixelData);
-                    if ((ch4DdsFile != null) && (mask.m_pixelData[offset + 3] != 0)) copyPixel(readPixelData, offset, ch4DdsFile.m_pixelData);
-                }
-
-            if (SupportsHSV) hsvData = RGBHSV.ColorRGBA.ConvertToColorHSVAArray(readPixelData);
-            m_pixelData = readPixelData;
+        {
+            this.MaskedApplyImage(mask,
+                (ch1DdsFile == null) ? null : ch1DdsFile.currentImage, (ch1DdsFile == null) ? Size.Empty : ch1DdsFile.Size,
+                (ch2DdsFile == null) ? null : ch2DdsFile.currentImage, (ch2DdsFile == null) ? Size.Empty : ch2DdsFile.Size,
+                (ch3DdsFile == null) ? null : ch3DdsFile.currentImage, (ch3DdsFile == null) ? Size.Empty : ch3DdsFile.Size,
+                (ch4DdsFile == null) ? null : ch4DdsFile.currentImage, (ch4DdsFile == null) ? Size.Empty : ch4DdsFile.Size);
         }
 
         /// <summary>
@@ -1075,89 +1123,243 @@ namespace DdsFileTypePlugin
         /// <param name="ch4Bitmap">Bitmap applied to <paramref name="mask"/> channel 4 area.</param>
         public void MaskedApplyImage(DdsFile mask, Bitmap ch1Bitmap, Bitmap ch2Bitmap, Bitmap ch3Bitmap, Bitmap ch4Bitmap)
 		{
-            byte[] readPixelData = GetPixelData();
+            this.MaskedApplyImage(mask,
+                (ch1Bitmap == null) ? null : ch1Bitmap.ToARGBData(), (ch1Bitmap == null) ? Size.Empty : ch1Bitmap.Size,
+                (ch2Bitmap == null) ? null : ch2Bitmap.ToARGBData(), (ch2Bitmap == null) ? Size.Empty : ch2Bitmap.Size,
+                (ch3Bitmap == null) ? null : ch3Bitmap.ToARGBData(), (ch3Bitmap == null) ? Size.Empty : ch3Bitmap.Size,
+                (ch4Bitmap == null) ? null : ch4Bitmap.ToARGBData(), (ch4Bitmap == null) ? Size.Empty : ch4Bitmap.Size);
+        }
 
-            for (int y = 0; y < mask.GetHeight(); y++)
-                for (int x = 0; x < mask.GetWidth(); x++)
+        void MaskedApplyImage(DdsFile mask,
+            uint[] ch1image, Size ch1imageSize, uint[] ch2image, Size ch2imageSize, uint[] ch3image, Size ch3imageSize, uint[] ch4image, Size ch4imageSize)
+        {
+
+            maskInEffect = maskInEffect || ch1image != null || ch2image != null || ch3image != null || ch4image != null;
+
+            if (!maskInEffect) return;
+
+            if (ch1image != null) MaskedApplyImage(mask, x => x.R() > 0, ch1image, ch1imageSize);
+            if (ch2image != null) MaskedApplyImage(mask, x => x.G() > 0, ch2image, ch2imageSize);
+            if (ch3image != null) MaskedApplyImage(mask, x => x.B() > 0, ch3image, ch3imageSize);
+            if (ch4image != null) MaskedApplyImage(mask, x => x.A() > 0, ch4image, ch4imageSize);
+
+            if (SupportsHSV) UpdateHSVData();
+        }
+        void MaskedApplyImage(DdsFile mask, Channel channel, uint[] image, Size imageSize)
+        {
+            MaskedApply(this.currentImage, this.Size, mask.currentImage, mask.Size, channel, (x, y) => image[((y % imageSize.Height) * imageSize.Width) + (x % imageSize.Width)]);
+        }
+
+        /// <summary>
+        /// Delegate to determine whether a channel of a given UInt32 ARGB format value is active.
+        /// </summary>
+        /// <param name="argb">The UInt32 ARGB format value.</param>
+        /// <returns>True if the channel is active, otherwise false.</returns>
+        delegate bool Channel(uint argb);
+
+        /// <summary>
+        /// Return the UInt32 ARGB format pixel value for a given X/Y coordinate.
+        /// </summary>
+        /// <param name="x">X coordinate.</param>
+        /// <param name="y">Y coordinate.</param>
+        /// <returns>A UInt32 ARGB format pixel value.</returns>
+        delegate uint ARGBAt(int x, int y);
+
+        void MaskedApply(uint[] image, Size imageSize, uint[] mask, Size maskSize, Channel channel, ARGBAt argbAt)
+        {
+            for (int y = 0; y < imageSize.Height; y++)
+            {
+                int imageOffset = y * imageSize.Width;
+                int maskOffset = (y % maskSize.Height) * maskSize.Width;
+
+                for (int x = 0; x < imageSize.Width; x++)
                 {
-                    int offset = ((y * mask.GetWidth()) * 4) + (x * 4);
-
-                    if ((ch1Bitmap != null) && (mask.m_pixelData[offset + 0] != 0))
-                        this.setPixelARGB(readPixelData, offset, (uint)ch1Bitmap.GetPixel(x % ch1Bitmap.Width, y % ch1Bitmap.Height).ToArgb());
-
-                    if ((ch2Bitmap != null) && (mask.m_pixelData[offset + 1] != 0))
-                        this.setPixelARGB(readPixelData, offset, (uint)ch2Bitmap.GetPixel(x % ch2Bitmap.Width, y % ch2Bitmap.Height).ToArgb());
-
-                    if ((ch3Bitmap != null) && (mask.m_pixelData[offset + 2] != 0))
-                        this.setPixelARGB(readPixelData, offset, (uint)ch3Bitmap.GetPixel(x % ch3Bitmap.Width, y % ch3Bitmap.Height).ToArgb());
-
-                    if ((ch4Bitmap != null) && (mask.m_pixelData[offset + 3] != 0))
-                        this.setPixelARGB(readPixelData, offset, (uint)ch4Bitmap.GetPixel(x % ch4Bitmap.Width, y % ch4Bitmap.Height).ToArgb());
+                    uint imagePixel = image[imageOffset + x];
+                    uint maskPixel = mask[maskOffset + x % maskSize.Width];
+                    if (channel(maskPixel)) image[imageOffset + x] = argbAt(x, y);
                 }
-
-            if (SupportsHSV) hsvData = RGBHSV.ColorRGBA.ConvertToColorHSVAArray(readPixelData);
-            m_pixelData = readPixelData;
+            }
         }
 
-        int GetWidth()
-        {
-            return (int)m_header.m_width;
-        }
+        //----------------------------------------------------------------
 
-        int GetHeight()
-        {
-            return (int)m_header.m_height;
-        }
-
-        byte[] GetPixelData()
-        {
-            return SupportsHSV && (!hsvShift.IsEmpty || maskInEffect)
-                ? RGBHSV.ColorRGBA.ConvertToByteArray(hsvData, hsvShift)
-                : m_pixelData
-            ;
-        }
-
-        // Loaded DDS header (also uses storage for save)
-        DdsHeader m_header = new DdsHeader();
-
-        // Pixel data
-        byte[] m_pixelData;
-
-        // HSVa data
-        RGBHSV.ColorHSVA[] hsvData = null;
-
-        RGBHSV.HSVShift hsvShift;
-        /// <summary>
-        /// The HSVShift applied to the current image, when supported.
-        /// </summary>
-        /// <seealso cref="SupportsHSV"/>
-        public RGBHSV.HSVShift HSVShift { get { return hsvShift; } set { hsvShift = value; } }
+        bool maskInEffect = false;
 
         /// <summary>
-        /// The image size.
+        /// Clears a previously-applied HSVShift mask.
         /// </summary>
-        public Size Size
+        public void ClearMask()
         {
-            get { return new Size(GetWidth(), GetHeight()); }
-        }
-
-        /// <summary>
-        /// True if the image is prepared to process HSV requests.
-        /// </summary>
-        public bool SupportsHSV
-        {
-            get { return hsvData != null; }
-            set { if (value != SupportsHSV) { hsvData = value ? RGBHSV.ColorRGBA.ConvertToColorHSVAArray(m_pixelData) : null; } }
-        }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
+            if (!maskInEffect) return;
+            currentImage = (uint[])baseImage.Clone();
+            if (SupportsHSV) UpdateHSVData();
             maskInEffect = false;
-            hsvData = null;
-            m_pixelData = null;
         }
+
+        /// <summary>
+        /// Apply <see cref="HSVShift"/> values to this DDS image based on the
+        /// channels in the <paramref name="mask"/>.
+        /// </summary>
+        /// <param name="mask">A DDS image file, each colourway acting as a mask channel.</param>
+        /// <param name="ch1Shift">A shift to apply to the image when the first channel of the mask is active.</param>
+        /// <param name="ch2Shift">A shift to apply to the image when the second channel of the mask is active.</param>
+        /// <param name="ch3Shift">A shift to apply to the image when the third channel of the mask is active.</param>
+        /// <param name="ch4Shift">A shift to apply to the image when the fourth channel of the mask is active.</param>
+        public void MaskedHSVShift(DdsFile mask, HSVShift ch1Shift, HSVShift ch2Shift, HSVShift ch3Shift, HSVShift ch4Shift)
+        {
+            if (!SupportsHSV) return;
+
+            maskInEffect = maskInEffect || !ch1Shift.IsEmpty || !ch2Shift.IsEmpty || !ch3Shift.IsEmpty || !ch4Shift.IsEmpty;
+
+            if (!maskInEffect) return;
+
+            if (!ch1Shift.IsEmpty) MaskedHSVShift(mask, hsvData, x => x.R() > 0, ch1Shift);
+            if (!ch2Shift.IsEmpty) MaskedHSVShift(mask, hsvData, x => x.G() > 0, ch2Shift);
+            if (!ch3Shift.IsEmpty) MaskedHSVShift(mask, hsvData, x => x.B() > 0, ch3Shift);
+            if (!ch4Shift.IsEmpty) MaskedHSVShift(mask, hsvData, x => x.A() > 0, ch4Shift);
+
+            currentImage = ColorHSVA.ToArrayARGB(hsvData);
+        }
+
+        /// <summary>
+        /// Apply <see cref="HSVShift"/> values to this DDS image based on the
+        /// channels in the <paramref name="mask"/>.
+        /// Each channel of the mask acts independently, in order "R", "G", "B", "A".
+        /// </summary>
+        /// <param name="mask">A DDS image file, each colourway acting as a mask channel.</param>
+        /// <param name="ch1Shift">A shift to apply to the image when the first channel of the mask is active.</param>
+        /// <param name="ch2Shift">A shift to apply to the image when the second channel of the mask is active.</param>
+        /// <param name="ch3Shift">A shift to apply to the image when the third channel of the mask is active.</param>
+        /// <param name="ch4Shift">A shift to apply to the image when the fourth channel of the mask is active.</param>
+        public void MaskedHSVShiftNoBlend(DdsFile mask, HSVShift ch1Shift, HSVShift ch2Shift, HSVShift ch3Shift, HSVShift ch4Shift)
+        {
+            if (!SupportsHSV) return;
+
+            maskInEffect = maskInEffect || !ch1Shift.IsEmpty || !ch2Shift.IsEmpty || !ch3Shift.IsEmpty || !ch4Shift.IsEmpty;
+
+            if (!maskInEffect) return;
+
+            ColorHSVA[] result = new ColorHSVA[hsvData.Length];
+            Array.Copy(hsvData, 0, result, 0, result.Length);
+
+            if (!ch1Shift.IsEmpty) MaskedHSVShift(mask, result, x => x.R() > 0, ch1Shift);
+            if (!ch2Shift.IsEmpty) MaskedHSVShift(mask, result, x => x.G() > 0, ch2Shift);
+            if (!ch3Shift.IsEmpty) MaskedHSVShift(mask, result, x => x.B() > 0, ch3Shift);
+            if (!ch4Shift.IsEmpty) MaskedHSVShift(mask, result, x => x.A() > 0, ch4Shift);
+
+            hsvData = result;
+            currentImage = ColorHSVA.ToArrayARGB(hsvData);
+        }
+
+        void MaskedHSVShift(DdsFile mask, ColorHSVA[] result, Channel channel, HSVShift hsvShift)
+        {
+            for (int y = 0; y < this.Size.Height; y++)
+            {
+                int imageOffset = y * this.Size.Width;
+                int maskOffset = (y % mask.Size.Height) * mask.Size.Width;
+
+                for (int x = 0; x < this.Size.Width; x++)
+                {
+                    uint maskPixel = mask.currentImage[maskOffset + x % mask.Size.Width];
+                    if (channel(maskPixel)) result[imageOffset + x] = hsvData[imageOffset + x].HSVShift(hsvShift);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Convert a <seealso cref="T:Color"/> value into a UInt32 ARGB format pixel value.
+    /// </summary>
+    /// <param name="color">A <seealso cref="T:Color"/> value</param>
+    /// <returns>A UInt32 ARGB format pixel value.</returns>
+    public delegate uint ARGBToPixel(Color color);
+
+    /// <summary>
+    /// Extensions for working with bitmap images.
+    /// </summary>
+    public static class Extensions
+    {
+        /// <summary>
+        /// Convert an array of UInt32 ARGB elements into a <seealso cref="T:Bitmap"/>.
+        /// </summary>
+        /// <param name="argbData">The array of UInt32 ARGB elements to decode.</param>
+        /// <param name="size">The size of the encoded image.</param>
+        /// <returns>The decoded image.</returns>
+        public static Bitmap ToBitmap(this uint[] argbData, Size size) { return argbData.ToBitmap(size.Width, size.Height); }
+        /// <summary>
+        /// Convert an array of UInt32 ARGB elements into a <seealso cref="T:Bitmap"/>.
+        /// </summary>
+        /// <param name="argbData">The array of UInt32 ARGB elements to decode.</param>
+        /// <param name="width">The width of the encoded image.</param>
+        /// <param name="height">The height of the encoded image.</param>
+        /// <returns>The decoded bitmap image.</returns>
+        public static Bitmap ToBitmap(this uint[] argbData, int width, int height)
+        {
+            Bitmap res = new Bitmap(width, height, Imaging.PixelFormat.Format32bppArgb);
+            for (int y = 0; y < height; y++)
+            {
+                int offset = y * width;
+                for (int x = 0; x < width; x++)
+                    res.SetPixel(x, y, Color.FromArgb((int)argbData[offset + x]));
+            }
+            return res;
+        }
+
+        /// <summary>
+        /// Converts a <seealso cref="T:Image"/> into an array of UInt32 ARGB elements.
+        /// </summary>
+        /// <param name="image">The image to encode.</param>
+        /// <returns>An array of UInt32 ARGB elements.</returns>
+        public static uint[] ToARGBData(this Image image) { return new Bitmap(image).ToARGBData(); }
+        /// <summary>
+        /// Converts a <seealso cref="T:Bitmap"/> into an array of UInt32 ARGB elements.
+        /// </summary>
+        /// <param name="bitmap">The bitmap image to encode.</param>
+        /// <returns>An array of UInt32 ARGB elements.</returns>
+        public static uint[] ToARGBData(this Bitmap bitmap) { return bitmap.ToPixelData(x => (uint)x.ToArgb()); }
+
+        /// <summary>
+        /// Converts a <seealso cref="T:Bitmap"/> into a pixel data array,
+        /// using the provided encoder.
+        /// </summary>
+        /// <param name="bitmap">The bitmap image to encode.</param>
+        /// <param name="encoder">The method to invoke to encode bitmap <seealso cref="T:Color"/> pixels.</param>
+        /// <returns>An array of uint elements containing the encoded pixel data.</returns>
+        public static uint[] ToPixelData(this Bitmap bitmap, ARGBToPixel encoder)
+        {
+            uint[] pixelData = new uint[bitmap.Width * bitmap.Height];
+            for (int y = 0; y < bitmap.Height; y++)
+            {
+                int offset = y * bitmap.Width;
+                for (int x = 0; x < bitmap.Width; x++)
+                    pixelData[offset + x] = encoder(bitmap.GetPixel(x, y));
+            }
+            return pixelData;
+        }
+
+        /// <summary>
+        /// Extract the alpha channel from an ARGB format UInt32 value.
+        /// </summary>
+        /// <param name="argb">An ARGB format UInt32 value.</param>
+        /// <returns>The alpha channel extracted.</returns>
+        public static uint A(this uint argb) { return (argb & 0xFF000000) >> 24; }
+        /// <summary>
+        /// Extract the red channel from an ARGB format UInt32 value.
+        /// </summary>
+        /// <param name="argb">An ARGB format UInt32 value.</param>
+        /// <returns>The red channel extracted.</returns>
+        public static uint R(this uint argb) { return (argb & 0x00FF0000) >> 16; }
+        /// <summary>
+        /// Extract the green channel from an ARGB format UInt32 value.
+        /// </summary>
+        /// <param name="argb">An ARGB format UInt32 value.</param>
+        /// <returns>The green channel extracted.</returns>
+        public static uint G(this uint argb) { return (argb & 0x0000FF00) >> 8; }
+        /// <summary>
+        /// Extract the blue channel from an ARGB format UInt32 value.
+        /// </summary>
+        /// <param name="argb">An ARGB format UInt32 value.</param>
+        /// <returns>The blue channel extracted.</returns>
+        public static uint B(this uint argb) { return (argb & 0x000000FF) >> 0; }
     }
 }

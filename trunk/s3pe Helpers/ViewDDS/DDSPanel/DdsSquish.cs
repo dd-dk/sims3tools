@@ -28,11 +28,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Drawing;
 using System.Runtime.InteropServices;
-//using PaintDotNet;
 
-namespace DdsFileTypePlugin
+namespace System.Drawing
 {
 	internal sealed class DdsSquish
 	{
@@ -114,17 +112,19 @@ namespace DdsFileTypePlugin
         //		pixelInput    	:	Source byte array containing decompressed pixel data
         //		width			:	Width of image in pixels
         //		height			:	Height of image in pixels
+        //		byte[]			:	Array of bytes to receive compressed blocks
         //		flags			:	Flags for squish decompression control
-        //
-        //	Return	
-        //		byte[]			:	Array of bytes containing compressed blocks
         //
         // ---------------------------------------------------------------------------------------
 
-        internal static void CompressImage(byte[] pixelInput, int width, int height, byte[] blocks, int flags)
+        internal static byte[] CompressImage(byte[] pixelInput, int width, int height, int flags)
         {
+            byte[] blocks = new byte[((width + 3) >> ((flags & (int)DdsSquish.SquishFlags.kDxt1) == 0 ? 2 : 3)) * 4 * height];
+
             // Invoke squish::CompressImage() with the required parameters
             CallCompressImage(pixelInput, width, height, blocks, flags);
+
+            return blocks;
         }
 
 		// ---------------------------------------------------------------------------------------

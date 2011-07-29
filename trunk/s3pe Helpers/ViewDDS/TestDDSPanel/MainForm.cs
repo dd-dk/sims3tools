@@ -70,7 +70,6 @@ namespace s3pe.DDSTool
             lbImageW.Text = ddsPanel1.ImageSize.Width + "";
             lbImageH.Text = ddsPanel1.ImageSize.Height + "";
             tlpImageSize.Visible = true;
-            checkMaskSize();
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -97,7 +96,6 @@ namespace s3pe.DDSTool
                 lbImageW.Text = ddsPanel1.ImageSize.Width + "";
                 lbImageH.Text = ddsPanel1.ImageSize.Height + "";
                 tlpImageSize.Visible = true;
-                checkMaskSize();
             }
             catch { }
         }
@@ -121,7 +119,6 @@ namespace s3pe.DDSTool
                 lbImageW.Text = ddsPanel1.ImageSize.Width + "";
                 lbImageH.Text = ddsPanel1.ImageSize.Height + "";
                 tlpImageSize.Visible = true;
-                checkMaskSize();
             }
             catch { }
         }
@@ -247,13 +244,15 @@ namespace s3pe.DDSTool
 
             using (FileStream fs = new FileStream(openFileDialog1.FileName, FileMode.Open, FileAccess.Read))
             {
-                using (DdsFileTypePlugin.DdsFile ddsfile = new DdsFileTypePlugin.DdsFile())
+                using (DdsFile ddsfile = new DdsFile())
                 {
                     ddsfile.Load(fs, false); fs.Position = 0;
-                    ddsMaskCh1.DDSLoad(ddsfile);
-                    ddsMaskCh2.DDSLoad(ddsfile);
-                    ddsMaskCh3.DDSLoad(ddsfile);
-                    ddsMaskCh4.DDSLoad(ddsfile);
+
+                    DdsFile ddsfile2 = ddsfile.Resize(ddsMaskCh1.Size);
+                    ddsMaskCh1.DDSLoad(ddsfile2);
+                    ddsMaskCh2.DDSLoad(ddsfile2);
+                    ddsMaskCh3.DDSLoad(ddsfile2);
+                    ddsMaskCh4.DDSLoad(ddsfile2);
                 }
                 
                 ddsPanel1.LoadMask(fs);
@@ -264,7 +263,6 @@ namespace s3pe.DDSTool
 
                 fs.Close();
             }
-            checkMaskSize();
         }
 
         private void btnResetMask_Click(object sender, EventArgs e)
@@ -294,16 +292,11 @@ namespace s3pe.DDSTool
         private void btnApplyShift_Click(object sender, EventArgs e)
         {
             ddsPanel1.ApplyHSVShift(
-                ckbNoCh1.Checked ? RGBHSV.HSVShift.Empty : new RGBHSV.HSVShift { h = (float)numMaskCh1Hue.Value, s = (float)numMaskCh1Saturation.Value, v = (float)numMaskCh1Value.Value, },
-                ckbNoCh2.Checked ? RGBHSV.HSVShift.Empty : new RGBHSV.HSVShift { h = (float)numMaskCh2Hue.Value, s = (float)numMaskCh2Saturation.Value, v = (float)numMaskCh2Value.Value, },
-                ckbNoCh3.Checked ? RGBHSV.HSVShift.Empty : new RGBHSV.HSVShift { h = (float)numMaskCh3Hue.Value, s = (float)numMaskCh3Saturation.Value, v = (float)numMaskCh3Value.Value, },
-                ckbNoCh4.Checked ? RGBHSV.HSVShift.Empty : new RGBHSV.HSVShift { h = (float)numMaskCh4Hue.Value, s = (float)numMaskCh4Saturation.Value, v = (float)numMaskCh4Value.Value, },
+                ckbNoCh1.Checked ? HSVShift.Empty : new HSVShift { h = (float)numMaskCh1Hue.Value, s = (float)numMaskCh1Saturation.Value, v = (float)numMaskCh1Value.Value, },
+                ckbNoCh2.Checked ? HSVShift.Empty : new HSVShift { h = (float)numMaskCh2Hue.Value, s = (float)numMaskCh2Saturation.Value, v = (float)numMaskCh2Value.Value, },
+                ckbNoCh3.Checked ? HSVShift.Empty : new HSVShift { h = (float)numMaskCh3Hue.Value, s = (float)numMaskCh3Saturation.Value, v = (float)numMaskCh3Value.Value, },
+                ckbNoCh4.Checked ? HSVShift.Empty : new HSVShift { h = (float)numMaskCh4Hue.Value, s = (float)numMaskCh4Saturation.Value, v = (float)numMaskCh4Value.Value, },
                 ckbBlend.Checked);
-
-            if (ddsPanel1.ImageSize.Width != ddsPanel1.MaskSize.Width || ddsPanel1.ImageSize.Height != ddsPanel1.MaskSize.Height)
-            {
-                newToolStripMenuItem_Click(null, null);
-            }
         }
 
         uint? GetColour(decimal r, decimal g, decimal b, decimal a)
@@ -402,26 +395,6 @@ namespace s3pe.DDSTool
             }
             finally { openFileDialog1.Filter = oldFilter; openFileDialog1.Title = oldCaption; }
             return openFileDialog1.FileName;
-        }
-
-        void checkMaskSize()
-        {
-            if (ddsPanel1.ImageSize == Size.Empty || !ddsPanel1.MaskLoaded) return;
-
-            if (ddsPanel1.ImageSize.Width == ddsPanel1.MaskSize.Width &&
-                ddsPanel1.ImageSize.Height == ddsPanel1.MaskSize.Height) return;
-
-            DialogResult dr = MessageBox.Show(String.Format("Resize Mask ({0}x{1}) to Image ({2}x{3})?",
-                ddsPanel1.MaskSize.Width, ddsPanel1.MaskSize.Height,
-                ddsPanel1.ImageSize.Width, ddsPanel1.ImageSize.Height),
-                "Resize Mask?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-            if (dr != DialogResult.Yes) return;
-
-            ddsPanel1.ResizeMask();
-
-            lbMaskW.Text = ddsPanel1.MaskSize.Width + "";
-            lbMaskH.Text = ddsPanel1.MaskSize.Height + "";
         }
     }
 }

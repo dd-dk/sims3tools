@@ -1,4 +1,4 @@
-﻿namespace DDSPanel
+﻿namespace System.Windows.Forms
 {
     partial class DDSPanel
     {
@@ -80,7 +80,7 @@
             // pictureBox1
             // 
             this.pictureBox1.BackColor = System.Drawing.SystemColors.Control;
-            this.pictureBox1.BackgroundImage = global::DDSPanel.Properties.Resources.checkerboard;
+            this.pictureBox1.BackgroundImage = global::DDSPanelControl.Properties.Resources.checkerboard;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Margin = new System.Windows.Forms.Padding(0);
             this.pictureBox1.Name = "pictureBox1";

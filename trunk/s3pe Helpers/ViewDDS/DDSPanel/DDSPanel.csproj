@@ -8,7 +8,7 @@
     <ProjectGuid>{901D5F73-7DAC-49C3-9A5F-33EEA1E97F22}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DDSPanel</RootNamespace>
+    <RootNamespace>System.Windows.Forms</RootNamespace>
     <AssemblyName>DDSPanel</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
