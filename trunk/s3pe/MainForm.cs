@@ -1848,10 +1848,10 @@ namespace S3PIDemoFE
         class DDSControl
         {
             static bool channel1 = true, channel2 = true, channel3 = true, channel4 = true, invertch4 = false;
-            DDSPanel.DDSPanel control;
+            DDSPanel control;
             public DDSControl()
             {
-                control = new DDSPanel.DDSPanel()
+                control = new DDSPanel()
                 {
                     Fit = true,
                     Channel1 = channel1, Channel2 = channel2, Channel3 = channel3, Channel4 = channel4,
@@ -1870,7 +1870,7 @@ namespace S3PIDemoFE
             void control_Channel4Changed(object sender, EventArgs e) { channel4 = control.Channel4; }
             void control_InvertCh4Changed(object sender, EventArgs e) { invertch4 = control.InvertCh4; }
 
-            public DDSPanel.DDSPanel Control { get { return control; } }
+            public DDSPanel Control { get { return control; } }
         }
         Control getValueControl()
         {
