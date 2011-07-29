@@ -998,7 +998,7 @@ namespace System.Drawing
                 for (int x = 0; x < bitmap.Width; x++)
                 {
                     uint pixel = sourcePixels[offset + x] & mask;
-                    if (alpha) { if (invert) pixel = (pixel & 0x00FFFFFF) | (255 - pixel.A()); }
+                    if (alpha) { if (invert) pixel = (pixel & 0x00FFFFFF) | ((255 - pixel.A()) << 24); }
                     else pixel |= 0xFF000000;
 
                     bitmap.SetPixel(x, y, Color.FromArgb((int)pixel));
