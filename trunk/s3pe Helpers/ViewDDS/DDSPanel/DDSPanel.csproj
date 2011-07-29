@@ -68,7 +68,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\checkerboard.bmp" />
+    <None Include="Resources\checkerboard.png" />
     <Content Include="squishinterface_Win32.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

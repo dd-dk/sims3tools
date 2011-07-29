@@ -8,8 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace DDSPanelControl.Properties
-{
+namespace System.Windows.Forms.Properties {
     using System;
     
     
