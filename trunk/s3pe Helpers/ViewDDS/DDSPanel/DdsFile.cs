@@ -969,6 +969,19 @@ namespace System.Drawing
         }
 
         /// <summary>
+        /// When true, indicates the DDS image is encoded with an alpha channel.
+        /// </summary>
+        public bool HasAlphaChannel
+        {
+            get
+            {
+                if ((ddsHeader.m_pixelFormat.m_flags & DdsPixelFormat.PixelFormatFlags.DDS_FOURCC) != 0) return true;
+                if (ddsHeader.m_pixelFormat.m_flags == DdsPixelFormat.PixelFormatFlags.DDS_RGBA) return true;
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Extract a <seealso cref="T:Image"/> representing the current image, subject to the filtering requested.
         /// </summary>
         /// <param name="red">When true, the red channel of the DDS contributes to the red pixels of the returned image.</param>

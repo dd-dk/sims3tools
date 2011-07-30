@@ -157,10 +157,10 @@ namespace System.Windows.Forms
         }
 
         /// <summary>
-        /// Indicates that a Mask is currently loaded.
+        /// Returns the image that is displayed by the DDSPanel.
         /// </summary>
-        [ReadOnly(true), Description("Indicates that a Mask is currently loaded.")]
-        public bool MaskLoaded { get { return ddsMask != null; } }
+        [ReadOnly(true), Description("Returns the image that is displayed by the DDSPanel")]
+        public Image Image { get { return pictureBox1.Image; } }
 
         /// <summary>
         /// The size of the current image (or <see cref="Size.Empty"/> if not loaded).
@@ -169,16 +169,22 @@ namespace System.Windows.Forms
         public Size ImageSize { get { return loaded ? ddsFile.Size : Size.Empty; } }
 
         /// <summary>
+        /// When true, indicates the DDS image is encoded with an alpha channel.
+        /// </summary>
+        [ReadOnly(true), Description("When true, indicates the DDS image is encoded with an alpha channel.")]
+        public bool HasAlphaChannel { get { return loaded && ddsFile.HasAlphaChannel; } }
+
+        /// <summary>
+        /// Indicates that a Mask is currently loaded.
+        /// </summary>
+        [ReadOnly(true), Description("Indicates that a Mask is currently loaded.")]
+        public bool MaskLoaded { get { return ddsMask != null; } }
+
+        /// <summary>
         /// The size of the current mask (or <see cref="Size.Empty"/> if no mask loaded).
         /// </summary>
         [ReadOnly(true), Description("The size of the current mask (or Size.Empty if no mask loaded).")]
         public Size MaskSize { get { return MaskLoaded ? ddsMask.Size : Size.Empty; } }
-
-        /// <summary>
-        /// Returns the image that is displayed by the DDSPanel.
-        /// </summary>
-        [ReadOnly(true), Description("Returns the image that is displayed by the DDSPanel")]
-        public Image Image { get { return pictureBox1.Image; } }
         #endregion
 
         #region Events

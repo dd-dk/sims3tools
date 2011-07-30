@@ -96,6 +96,7 @@ namespace s3pe.DDSTool
                 lbImageW.Text = ddsPanel1.ImageSize.Width + "";
                 lbImageH.Text = ddsPanel1.ImageSize.Height + "";
                 tlpImageSize.Visible = true;
+                ddsPanel1.Channel4 = ddsPanel1.HasAlphaChannel;
             }
             catch { }
         }
@@ -119,6 +120,7 @@ namespace s3pe.DDSTool
                 lbImageW.Text = ddsPanel1.ImageSize.Width + "";
                 lbImageH.Text = ddsPanel1.ImageSize.Height + "";
                 tlpImageSize.Visible = true;
+                ddsPanel1.Channel4 = ddsPanel1.HasAlphaChannel;
             }
             catch { }
         }
