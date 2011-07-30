@@ -62,9 +62,9 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DDSPanel, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="DDSPanel, Version=1107.30.815.14868, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\s3pe Helpers\ViewDDS\DDSPanel\bin\Release\DDSPanel.dll</HintPath>
+      <HintPath>..\s3pi\build\bin\Release\DDSPanel.dll</HintPath>
     </Reference>
     <Reference Include="s3pi.Controls">
       <HintPath>..\s3pi\build\bin\Release\s3pi.Controls.dll</HintPath>
@@ -354,14 +354,6 @@
       <Link>STBLResourceEditor.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\s3pe Helpers\ViewDDS\DDSPanel\squishinterface_Win32.dll">
-      <Link>squishinterface_Win32.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\s3pe Helpers\ViewDDS\DDSPanel\squishinterface_x64.dll">
-      <Link>squishinterface_x64.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="..\s3pe Helpers\ViewDDS\HelperApp\bin\ViewDDS\ViewDDS.exe">
       <Link>ViewDDS.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -456,6 +448,14 @@
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.TxtcResource.dll">
       <Link>s3pi.TxtcResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\squishinterface_Win32.dll">
+      <Link>squishinterface_Win32.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\squishinterface_x64.dll">
+      <Link>squishinterface_x64.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\s3pi\build\bin\Release\TextResources.txt">
