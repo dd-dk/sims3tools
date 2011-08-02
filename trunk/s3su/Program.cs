@@ -33,10 +33,17 @@ namespace S3Pack
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+#if DEBUG
+            if (Environment.CommandLine.Contains("/unpack"))
+                Application.Run(new Unpack());
+            else if (Environment.CommandLine.Contains("/pack"))
+                Application.Run(new Pack());
+#else
             if (Path.GetFileNameWithoutExtension(Application.ExecutablePath).ToLower().Equals("unpack"))
                 Application.Run(new Unpack());
             else if (Path.GetFileNameWithoutExtension(Application.ExecutablePath).ToLower().Equals("pack"))
                 Application.Run(new Pack());
+#endif
             else
             {
                 MessageBox.Show(String.Format("{0} is not recognised as a name for this program.", Path.GetFileNameWithoutExtension(Application.ExecutablePath)));

@@ -27,7 +27,8 @@ namespace S3Pack
     public static class Sims3Pack
     {
         static string magic = "TS3Pack";
-        static ushort unknown1 = 0;
+        static string extension = ".Sims3Pack";
+        static ushort unknown1 = 0x0101;
 
         /// <summary>
         /// Extracts the content of a Sims3Pack file (<paramref name="source"/>) into a folder (<paramref name="target"/>).
@@ -50,7 +51,7 @@ namespace S3Pack
             FileStream fs = new FileStream(source, FileMode.Open, FileAccess.Read);
             BinaryReader br = new BinaryReader(fs);
 
-            magic = BitConverter.ToString(br.ReadBytes(br.ReadInt32()));
+            magic = new string(br.ReadChars(br.ReadInt32()));
             unknown1 = br.ReadUInt16();
             MemoryStream ms = new MemoryStream(br.ReadBytes(br.ReadInt32()));
 
@@ -66,12 +67,12 @@ namespace S3Pack
             bw.Close();
 
             System.Xml.XPath.XPathNodeIterator packagedFiles = nav.Select("/Sims3Package/PackagedFile");
-            while(packagedFiles.MoveNext())
+            while (packagedFiles.MoveNext())
             {
+                fs.Position = basePos + Convert.ToInt64(packagedFiles.Current.SelectSingleNode("Offset").Value);
                 filename = Path.Combine(target, packagedFiles.Current.SelectSingleNode("Name").Value);
                 if (File.Exists(filename)) File.Delete(filename);
                 bw = new BinaryWriter(new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write));
-                fs.Position = basePos + Convert.ToInt64(packagedFiles.Current.SelectSingleNode("Offset").Value);
                 bw.Write(br.ReadBytes(Convert.ToInt32(packagedFiles.Current.SelectSingleNode("Length").Value)));
                 bw.Close();
             }
@@ -89,79 +90,95 @@ namespace S3Pack
             if (!Directory.Exists(target))
                 throw new DirectoryNotFoundException(String.Format("Directory not found: {0}", target));
 
-            bool loaded = false;
             System.Xml.XmlDocument xdoc = new XmlDocument();
+            string xmlName = "";
             foreach (string xmlFile in Directory.GetFiles(source, "*.xml"))
             {
                 try
                 {
                     xdoc.Load(xmlFile);
-                    loaded = true;
+                    if (!(xdoc.FirstChild is XmlDeclaration) || xdoc.SelectSingleNode("/Sims3Package") == null)
+                        continue;
+                    xmlName = xmlFile;
                     break;
                 }
                 catch { }
             }
-            if (!loaded)
+            if (xmlName == "")
+                throw new FileNotFoundException(String.Format("No Sims3Pack manifest file found in {0}.", source));
+
+            XmlNode packageId = xdoc.SelectSingleNode("/Sims3Package/PackageId");
+            if (packageId != null)
             {
-                throw new FileNotFoundException(String.Format("No XML files loaded from {0}.", source));
+                string[] packages = Directory.GetFiles(source, "*.package");
+                if (packages.Length == 0)
+                    throw new FileNotFoundException(String.Format("No package files found in {0}.", source));
+                else if (packages.Length > 1)
+                    throw new FileNotFoundException(String.Format("Multiple package files found in {0}.", source));
+
+                if (packageId.InnerText != Path.GetFileNameWithoutExtension(packages[0]))
+                    throw new InvalidDataException(String.Format("Package ID is {0}; package name should match but found {1}",
+                        packageId.InnerText, Path.GetFileNameWithoutExtension(packages[0])));
             }
 
-            if (!(xdoc.FirstChild is XmlDeclaration) || xdoc.FirstChild.NextSibling.Name != "Sims3Package")
+            long Offset = 0;
+            string outfile = Path.Combine(target, xdoc.FirstChild.NextSibling.SelectSingleNode("DisplayName").InnerText + extension);
+            using (Stream sw = new FileStream(outfile, FileMode.Create, FileAccess.Write, FileShare.None))
             {
-                throw new InvalidDataException(String.Format("XML file loaded from {0} is not a Sims3Pack manifest.", source));
-            }
-
-            XmlNode packageId = xdoc.FirstChild.NextSibling.SelectSingleNode("PackageId");
-            XmlNode packagedFile = xdoc.FirstChild.NextSibling.SelectSingleNode("PackagedFile");
-
-            if (packagedFile.SelectSingleNode("Name").InnerText != packageId.InnerText + ".package")
-            {
-                throw new InvalidDataException(
-                    String.Format("{0} contains invalid data - PackageId '{1}' should match PackagedFile Name '{2}'.",
-                    source, packageId.InnerText, packagedFile.SelectSingleNode("Name").InnerText));
-            }
-
-            if (packagedFile.SelectSingleNode("Guid").InnerText != packageId.InnerText)
-            {
-                throw new InvalidDataException(
-                    String.Format("{0} contains invalid data - PackageId '{1}' should match PackagedFile Guid '{2}'.",
-                    source, packageId.InnerText, packagedFile.SelectSingleNode("Guid").InnerText));
-            }
-
-            string file = Path.Combine(source, packagedFile.SelectSingleNode("Name").InnerText);
-            Stream s = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
-            try
-            {
-                string Magic = "S3Pack";
-                long Length = s.Length;
-                long Offset = 0;
-                UInt64 Crc = System.Security.Cryptography.Sims3PackCRC.CalculateCRC(s);
-
-                packagedFile.SelectSingleNode("Length").InnerText = s.Length + "";
-                packagedFile.SelectSingleNode("Offset").InnerText = Offset + "";
-                packagedFile.SelectSingleNode("Crc").InnerText = Crc.ToString("X");
-
-                string outfile = Path.Combine(target, xdoc.FirstChild.NextSibling.SelectSingleNode("DisplayName").InnerText + ".sims3pack");
-                Stream sw = new FileStream(outfile, FileMode.Create, FileAccess.Write, FileShare.None);
                 BinaryWriter bw = new BinaryWriter(sw);
 
                 try
                 {
-                    bw.Write((int)Magic.Length);
-                    bw.Write(Magic.ToCharArray());
-                    bw.Write((short)0x0101);
+                    // Write the header
+                    bw.Write((int)magic.Length);
+                    bw.Write(magic.ToCharArray());
+                    bw.Write(unknown1);
+
+                    // First pass: calculate the data for the XML document, as we write that first.
+                    foreach (XmlNode node in xdoc.SelectNodes("/Sims3Package/PackagedFile"))
+                    {
+                        string filename = Path.Combine(source, node.SelectSingleNode("Name").InnerText);
+                        if (!File.Exists(filename))
+                            throw new FileNotFoundException("File referenced in manifest not found", filename);
+
+                        using (Stream sr = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+                        {
+                            try
+                            {
+                                UInt64 Crc = System.Security.Cryptography.Sims3PackCRC.CalculateCRC(sr);
+
+                                node.SelectSingleNode("Length").InnerText = sr.Length + "";
+                                node.SelectSingleNode("Offset").InnerText = Offset + "";
+                                node.SelectSingleNode("Crc").InnerText = Crc.ToString("x");
+
+                                Offset += sr.Length;
+                            }
+                            catch (Exception e) { throw e; }
+                            finally { sr.Close(); }
+                        }
+                    }
+
+                    // Write the XML
                     MemoryStream ms = new MemoryStream();
                     xdoc.Save(ms);
                     bw.Write((int)ms.Length);
                     bw.Write(ms.ToArray());
-                    s.Position = 0;
-                    sw.Write(new BinaryReader(s).ReadBytes((int)s.Length), 0, (int)s.Length);
+
+                    // Second pass: copy the data into the Sims3Pack
+                    foreach (XmlNode node in xdoc.SelectNodes("/Sims3Package/PackagedFile"))
+                    {
+                        string filename = Path.Combine(source, node.SelectSingleNode("Name").InnerText);
+                        using (Stream sr = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+                        {
+                            try { sw.Write(new BinaryReader(sr).ReadBytes((int)sr.Length), 0, (int)sr.Length); }
+                            catch (Exception e) { throw e; }
+                            finally { sr.Close(); }
+                        }
+                    }
                 }
                 catch (Exception e) { throw e; }
                 finally { sw.Close(); }
             }
-            catch (Exception e) { throw e; }
-            finally { s.Close(); }
         }
     }
 }
