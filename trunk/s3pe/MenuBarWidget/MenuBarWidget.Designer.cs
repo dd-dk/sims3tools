@@ -79,10 +79,12 @@
             this.searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.automaticUpdateChecksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.enableDDSPreviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.askToAutosaveDBCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
             this.organiseBookmarksSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.externalProgramsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.manageWrappersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.enableDDSPreviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.saveSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -118,8 +120,6 @@
             this.tpcmCopy = new System.Windows.Forms.ToolStripMenuItem();
             this.tpcmFloat = new System.Windows.Forms.ToolStripMenuItem();
             this.tpcmOTE = new System.Windows.Forms.ToolStripMenuItem();
-            this.askToAutosaveDBCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.browserWidgetContextMenuStrip.SuspendLayout();
             this.textPreviewContextMenuStrip.SuspendLayout();
@@ -571,47 +571,59 @@
             // automaticUpdateChecksToolStripMenuItem
             // 
             this.automaticUpdateChecksToolStripMenuItem.Name = "automaticUpdateChecksToolStripMenuItem";
-            this.automaticUpdateChecksToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.automaticUpdateChecksToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
             this.automaticUpdateChecksToolStripMenuItem.Text = "Automatic &Update Checks";
             this.automaticUpdateChecksToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
+            // enableDDSPreviewToolStripMenuItem
+            // 
+            this.enableDDSPreviewToolStripMenuItem.Name = "enableDDSPreviewToolStripMenuItem";
+            this.enableDDSPreviewToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.enableDDSPreviewToolStripMenuItem.Text = "Enable &DDS Preview";
+            this.enableDDSPreviewToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
+            // askToAutosaveDBCToolStripMenuItem
+            // 
+            this.askToAutosaveDBCToolStripMenuItem.Name = "askToAutosaveDBCToolStripMenuItem";
+            this.askToAutosaveDBCToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.askToAutosaveDBCToolStripMenuItem.Text = "Pro&mpt for dbc autosaving";
+            this.askToAutosaveDBCToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
+            // toolStripSeparator11
+            // 
+            this.toolStripSeparator11.Name = "toolStripSeparator11";
+            this.toolStripSeparator11.Size = new System.Drawing.Size(198, 6);
             // 
             // organiseBookmarksSettingsToolStripMenuItem
             // 
             this.organiseBookmarksSettingsToolStripMenuItem.Name = "organiseBookmarksSettingsToolStripMenuItem";
-            this.organiseBookmarksSettingsToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.organiseBookmarksSettingsToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
             this.organiseBookmarksSettingsToolStripMenuItem.Text = "Organise Boo&kmarks...";
             this.organiseBookmarksSettingsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // externalProgramsToolStripMenuItem
             // 
             this.externalProgramsToolStripMenuItem.Name = "externalProgramsToolStripMenuItem";
-            this.externalProgramsToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.externalProgramsToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
             this.externalProgramsToolStripMenuItem.Text = "External &Programs...";
             this.externalProgramsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // manageWrappersToolStripMenuItem
             // 
             this.manageWrappersToolStripMenuItem.Name = "manageWrappersToolStripMenuItem";
-            this.manageWrappersToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.manageWrappersToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
             this.manageWrappersToolStripMenuItem.Text = "Manage &Wrappers...";
             this.manageWrappersToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
-            // 
-            // enableDDSPreviewToolStripMenuItem
-            // 
-            this.enableDDSPreviewToolStripMenuItem.Name = "enableDDSPreviewToolStripMenuItem";
-            this.enableDDSPreviewToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
-            this.enableDDSPreviewToolStripMenuItem.Text = "Enable &DDS Preview";
-            this.enableDDSPreviewToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // toolStripSeparator8
             // 
             this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(194, 6);
+            this.toolStripSeparator8.Size = new System.Drawing.Size(198, 6);
             // 
             // saveSettingsToolStripMenuItem
             // 
             this.saveSettingsToolStripMenuItem.Name = "saveSettingsToolStripMenuItem";
-            this.saveSettingsToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.saveSettingsToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
             this.saveSettingsToolStripMenuItem.Text = "&Save settings";
             this.saveSettingsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
@@ -893,18 +905,6 @@
             this.tpcmOTE.Size = new System.Drawing.Size(167, 22);
             this.tpcmOTE.Text = "Open in Text &Editor";
             this.tpcmOTE.Click += new System.EventHandler(this.tsCMSTP_Click);
-            // 
-            // askToAutosaveDBCToolStripMenuItem
-            // 
-            this.askToAutosaveDBCToolStripMenuItem.Name = "askToAutosaveDBCToolStripMenuItem";
-            this.askToAutosaveDBCToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
-            this.askToAutosaveDBCToolStripMenuItem.Text = "As&k to autosave DBC";
-            this.askToAutosaveDBCToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
-            // 
-            // toolStripSeparator11
-            // 
-            this.toolStripSeparator11.Name = "toolStripSeparator11";
-            this.toolStripSeparator11.Size = new System.Drawing.Size(194, 6);
             // 
             // MenuBarWidget
             // 
