@@ -44,7 +44,7 @@ rem there shouldn't be any to delete...
 del /q /f %out%%TargetName%*%suffix%.*
 
 pushd ..
-7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" "s3pi S3Pack"
+7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" s3su
 popd
 
 
