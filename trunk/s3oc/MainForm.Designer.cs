@@ -193,11 +193,11 @@
             // toolStripContainer1.ContentPanel
             // 
             this.toolStripContainer1.ContentPanel.Controls.Add(this.splitContainer1);
-            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(924, 590);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(924, 662);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
             this.toolStripContainer1.Name = "toolStripContainer1";
-            this.toolStripContainer1.Size = new System.Drawing.Size(924, 614);
+            this.toolStripContainer1.Size = new System.Drawing.Size(924, 686);
             this.toolStripContainer1.TabIndex = 3;
             this.toolStripContainer1.Text = "toolStripContainer1";
             // 
@@ -217,7 +217,7 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.tlpTask);
             this.splitContainer1.Panel2.Controls.Add(this.tabControl1);
-            this.splitContainer1.Size = new System.Drawing.Size(924, 590);
+            this.splitContainer1.Size = new System.Drawing.Size(924, 662);
             this.splitContainer1.SplitterDistance = 200;
             this.splitContainer1.TabIndex = 0;
             this.splitContainer1.TabStop = false;
@@ -232,7 +232,7 @@
             this.tlpTask.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tlpTask.Controls.Add(this.flowLayoutPanel1, 1, 1);
             this.tlpTask.Controls.Add(this.btnStart, 1, 2);
-            this.tlpTask.Location = new System.Drawing.Point(1, 496);
+            this.tlpTask.Location = new System.Drawing.Point(1, 568);
             this.tlpTask.Name = "tlpTask";
             this.tlpTask.RowCount = 5;
             this.tlpTask.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -378,7 +378,7 @@
             this.tabControl1.Location = new System.Drawing.Point(1, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(712, 490);
+            this.tabControl1.Size = new System.Drawing.Size(712, 562);
             this.tabControl1.TabIndex = 1;
             // 
             // tpMain
@@ -1244,7 +1244,7 @@
             this.tpCASP.Location = new System.Drawing.Point(4, 22);
             this.tpCASP.Name = "tpCASP";
             this.tpCASP.Padding = new System.Windows.Forms.Padding(3);
-            this.tpCASP.Size = new System.Drawing.Size(704, 464);
+            this.tpCASP.Size = new System.Drawing.Size(704, 536);
             this.tpCASP.TabIndex = 6;
             this.tpCASP.Text = "CAS Part";
             this.tpCASP.UseVisualStyleBackColor = true;
@@ -1261,19 +1261,9 @@
             this.tableLayoutPanel5.Controls.Add(this.label28, 0, 2);
             this.tableLayoutPanel5.Controls.Add(this.cbCASPClothingType, 1, 2);
             this.tableLayoutPanel5.Controls.Add(this.label29, 0, 1);
-            this.tableLayoutPanel5.Controls.Add(this.label27, 0, 3);
             this.tableLayoutPanel5.Controls.Add(this.tbCASPUnknown1, 1, 1);
-            this.tableLayoutPanel5.Controls.Add(this.clbCASPTypeFlags, 1, 3);
-            this.tableLayoutPanel5.Controls.Add(this.label30, 0, 4);
-            this.tableLayoutPanel5.Controls.Add(this.label31, 0, 5);
             this.tableLayoutPanel5.Controls.Add(this.label32, 0, 8);
-            this.tableLayoutPanel5.Controls.Add(this.clbCASPAgeFlags, 1, 4);
-            this.tableLayoutPanel5.Controls.Add(this.clbCASPGenderFlags, 1, 5);
             this.tableLayoutPanel5.Controls.Add(this.clbCASPCategory, 1, 8);
-            this.tableLayoutPanel5.Controls.Add(this.label33, 0, 6);
-            this.tableLayoutPanel5.Controls.Add(this.label34, 0, 7);
-            this.tableLayoutPanel5.Controls.Add(this.clbCASPHandedness, 1, 7);
-            this.tableLayoutPanel5.Controls.Add(this.clbCASPSpeciesFlags, 1, 6);
             this.tableLayoutPanel5.Controls.Add(this.label35, 0, 0);
             this.tableLayoutPanel5.Controls.Add(this.tbCASPResourceName, 1, 0);
             this.tableLayoutPanel5.Controls.Add(this.label36, 0, 10);
@@ -1281,6 +1271,16 @@
             this.tableLayoutPanel5.Controls.Add(this.tbCASPUnknown4, 1, 9);
             this.tableLayoutPanel5.Controls.Add(this.label37, 0, 9);
             this.tableLayoutPanel5.Controls.Add(this.tableLayoutPanel6, 2, 3);
+            this.tableLayoutPanel5.Controls.Add(this.clbCASPHandedness, 1, 3);
+            this.tableLayoutPanel5.Controls.Add(this.clbCASPGenderFlags, 1, 4);
+            this.tableLayoutPanel5.Controls.Add(this.clbCASPSpeciesFlags, 1, 5);
+            this.tableLayoutPanel5.Controls.Add(this.clbCASPTypeFlags, 1, 6);
+            this.tableLayoutPanel5.Controls.Add(this.clbCASPAgeFlags, 1, 7);
+            this.tableLayoutPanel5.Controls.Add(this.label30, 0, 7);
+            this.tableLayoutPanel5.Controls.Add(this.label31, 0, 4);
+            this.tableLayoutPanel5.Controls.Add(this.label33, 0, 5);
+            this.tableLayoutPanel5.Controls.Add(this.label27, 0, 6);
+            this.tableLayoutPanel5.Controls.Add(this.label34, 0, 3);
             this.tableLayoutPanel5.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 12;
@@ -1296,7 +1296,7 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(704, 461);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(704, 533);
             this.tableLayoutPanel5.TabIndex = 0;
             // 
             // label28
@@ -1334,7 +1334,7 @@
             // 
             this.label27.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label27.AutoSize = true;
-            this.label27.Location = new System.Drawing.Point(56, 115);
+            this.label27.Location = new System.Drawing.Point(56, 220);
             this.label27.Name = "label27";
             this.label27.Size = new System.Drawing.Size(31, 13);
             this.label27.TabIndex = 7;
@@ -1355,7 +1355,7 @@
             this.clbCASPTypeFlags.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.clbCASPTypeFlags.Enabled = false;
             this.clbCASPTypeFlags.FormattingEnabled = true;
-            this.clbCASPTypeFlags.Location = new System.Drawing.Point(93, 82);
+            this.clbCASPTypeFlags.Location = new System.Drawing.Point(93, 187);
             this.clbCASPTypeFlags.MultiColumn = true;
             this.clbCASPTypeFlags.Name = "clbCASPTypeFlags";
             this.clbCASPTypeFlags.Size = new System.Drawing.Size(355, 79);
@@ -1365,7 +1365,7 @@
             // 
             this.label30.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label30.AutoSize = true;
-            this.label30.Location = new System.Drawing.Point(61, 192);
+            this.label30.Location = new System.Drawing.Point(61, 297);
             this.label30.Name = "label30";
             this.label30.Size = new System.Drawing.Size(26, 13);
             this.label30.TabIndex = 9;
@@ -1375,7 +1375,7 @@
             // 
             this.label31.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label31.AutoSize = true;
-            this.label31.Location = new System.Drawing.Point(45, 247);
+            this.label31.Location = new System.Drawing.Point(45, 132);
             this.label31.Name = "label31";
             this.label31.Size = new System.Drawing.Size(42, 13);
             this.label31.TabIndex = 11;
@@ -1395,12 +1395,13 @@
             // clbCASPAgeFlags
             // 
             this.clbCASPAgeFlags.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel5.SetColumnSpan(this.clbCASPAgeFlags, 2);
             this.clbCASPAgeFlags.Enabled = false;
             this.clbCASPAgeFlags.FormattingEnabled = true;
-            this.clbCASPAgeFlags.Location = new System.Drawing.Point(93, 167);
+            this.clbCASPAgeFlags.Location = new System.Drawing.Point(93, 272);
             this.clbCASPAgeFlags.MultiColumn = true;
             this.clbCASPAgeFlags.Name = "clbCASPAgeFlags";
-            this.clbCASPAgeFlags.Size = new System.Drawing.Size(355, 64);
+            this.clbCASPAgeFlags.Size = new System.Drawing.Size(608, 64);
             this.clbCASPAgeFlags.TabIndex = 10;
             // 
             // clbCASPGenderFlags
@@ -1408,7 +1409,7 @@
             this.clbCASPGenderFlags.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.clbCASPGenderFlags.Enabled = false;
             this.clbCASPGenderFlags.FormattingEnabled = true;
-            this.clbCASPGenderFlags.Location = new System.Drawing.Point(93, 237);
+            this.clbCASPGenderFlags.Location = new System.Drawing.Point(93, 122);
             this.clbCASPGenderFlags.MultiColumn = true;
             this.clbCASPGenderFlags.Name = "clbCASPGenderFlags";
             this.clbCASPGenderFlags.Size = new System.Drawing.Size(355, 34);
@@ -1424,14 +1425,14 @@
             this.clbCASPCategory.Location = new System.Drawing.Point(93, 342);
             this.clbCASPCategory.MultiColumn = true;
             this.clbCASPCategory.Name = "clbCASPCategory";
-            this.clbCASPCategory.Size = new System.Drawing.Size(608, 64);
+            this.clbCASPCategory.Size = new System.Drawing.Size(608, 136);
             this.clbCASPCategory.TabIndex = 16;
             // 
             // label33
             // 
             this.label33.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label33.AutoSize = true;
-            this.label33.Location = new System.Drawing.Point(42, 280);
+            this.label33.Location = new System.Drawing.Point(42, 165);
             this.label33.Name = "label33";
             this.label33.Size = new System.Drawing.Size(45, 13);
             this.label33.TabIndex = 13;
@@ -1441,7 +1442,7 @@
             // 
             this.label34.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label34.AutoSize = true;
-            this.label34.Location = new System.Drawing.Point(20, 312);
+            this.label34.Location = new System.Drawing.Point(20, 92);
             this.label34.Name = "label34";
             this.label34.Size = new System.Drawing.Size(67, 13);
             this.label34.TabIndex = 0;
@@ -1452,7 +1453,7 @@
             this.clbCASPHandedness.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.clbCASPHandedness.Enabled = false;
             this.clbCASPHandedness.FormattingEnabled = true;
-            this.clbCASPHandedness.Location = new System.Drawing.Point(93, 302);
+            this.clbCASPHandedness.Location = new System.Drawing.Point(93, 82);
             this.clbCASPHandedness.MultiColumn = true;
             this.clbCASPHandedness.Name = "clbCASPHandedness";
             this.clbCASPHandedness.Size = new System.Drawing.Size(355, 34);
@@ -1463,7 +1464,7 @@
             this.clbCASPSpeciesFlags.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.clbCASPSpeciesFlags.Enabled = false;
             this.clbCASPSpeciesFlags.FormattingEnabled = true;
-            this.clbCASPSpeciesFlags.Location = new System.Drawing.Point(93, 277);
+            this.clbCASPSpeciesFlags.Location = new System.Drawing.Point(93, 162);
             this.clbCASPSpeciesFlags.MultiColumn = true;
             this.clbCASPSpeciesFlags.Name = "clbCASPSpeciesFlags";
             this.clbCASPSpeciesFlags.Size = new System.Drawing.Size(355, 19);
@@ -1493,7 +1494,7 @@
             // 
             this.label36.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label36.AutoSize = true;
-            this.label36.Location = new System.Drawing.Point(37, 441);
+            this.label36.Location = new System.Drawing.Point(37, 513);
             this.label36.Name = "label36";
             this.label36.Size = new System.Drawing.Size(50, 13);
             this.label36.TabIndex = 17;
@@ -1503,7 +1504,7 @@
             // 
             this.tbCASPPackage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel5.SetColumnSpan(this.tbCASPPackage, 2);
-            this.tbCASPPackage.Location = new System.Drawing.Point(93, 438);
+            this.tbCASPPackage.Location = new System.Drawing.Point(93, 510);
             this.tbCASPPackage.Name = "tbCASPPackage";
             this.tbCASPPackage.ReadOnly = true;
             this.tbCASPPackage.Size = new System.Drawing.Size(608, 20);
@@ -1513,7 +1514,7 @@
             // 
             this.tbCASPUnknown4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel5.SetColumnSpan(this.tbCASPUnknown4, 2);
-            this.tbCASPUnknown4.Location = new System.Drawing.Point(93, 412);
+            this.tbCASPUnknown4.Location = new System.Drawing.Point(93, 484);
             this.tbCASPUnknown4.Name = "tbCASPUnknown4";
             this.tbCASPUnknown4.ReadOnly = true;
             this.tbCASPUnknown4.Size = new System.Drawing.Size(608, 20);
@@ -1523,7 +1524,7 @@
             // 
             this.label37.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label37.AutoSize = true;
-            this.label37.Location = new System.Drawing.Point(28, 415);
+            this.label37.Location = new System.Drawing.Point(28, 487);
             this.label37.Name = "label37";
             this.label37.Size = new System.Drawing.Size(59, 13);
             this.label37.TabIndex = 3;
@@ -1543,7 +1544,7 @@
             this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 2;
-            this.tableLayoutPanel5.SetRowSpan(this.tableLayoutPanel6, 5);
+            this.tableLayoutPanel5.SetRowSpan(this.tableLayoutPanel6, 4);
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 128F));
@@ -1615,7 +1616,7 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripProgressBar1,
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 614);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 686);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(924, 22);
             this.statusStrip1.TabIndex = 2;
@@ -1691,7 +1692,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(924, 636);
+            this.ClientSize = new System.Drawing.Size(924, 708);
             this.Controls.Add(this.toolStripContainer1);
             this.Controls.Add(this.statusStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
