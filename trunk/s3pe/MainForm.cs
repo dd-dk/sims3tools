@@ -204,9 +204,26 @@ namespace S3PIDemoFE
                 }
                 catch (InvalidDataException idex)
                 {
-                    CopyableMessageBox.Show(
-                            String.Format("Could not open package:\n{0}\n{1}", Filename, idex.Message),
-                            "Invalid data in file", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                    if (idex.Message.Contains("magic tag"))
+                    {
+                        CopyableMessageBox.Show(
+                            "Could not open package:\n" + Filename + "\n\n" +
+                            "This file does not contain the expected package identifier in the header.\n" +
+                            "This could be because it is a protected package (e.g. a Store item).\n\n" +
+                            idex.Message, myName + ": Unable to open file", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                    }
+                    else if (idex.Message.Contains("major version"))
+                    {
+                        CopyableMessageBox.Show(
+                            "Could not open package:\n" + Filename + "\n\n" +
+                            "This file does not contain the expected package major version number in the header.\n" +
+                            "This could be because it is a package for Sims2 or Spore.\n\n" +
+                            idex.Message, myName + ": Unable to open file", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                    }
+                    else
+                    {
+                        IssueException(idex, "Could not open package:\n" + Filename);
+                    }
                     Filename = "";
                 }
                 catch (Exception ex)
@@ -1176,6 +1193,30 @@ namespace S3PIDemoFE
                     replace = res == 0;
                 }
 
+            }
+            catch (InvalidDataException idex)
+            {
+                if (idex.Message.Contains("magic tag"))
+                {
+                    CopyableMessageBox.Show(
+                        "Export cannot begin.  Could not open target package:\n" + exportToPackageDialog.FileName + "\n\n" +
+                        "This file does not contain the expected package identifier in the header.\n" +
+                        "This could be because it is a protected package (e.g. a Store item).\n\n" +
+                        idex.Message, myName + ": Unable to open file", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                }
+                else if (idex.Message.Contains("major version"))
+                {
+                    CopyableMessageBox.Show(
+                        "Export cannot begin.  Could not open target package:\n" + exportToPackageDialog.FileName + "\n\n" +
+                        "This file does not contain the expected package major version number in the header.\n" +
+                        "This could be because it is a package for Sims2 or Spore.\n\n" +
+                        idex.Message, myName + ": Unable to open file", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                }
+                else
+                {
+                    IssueException(idex, "Export cannot begin.  Could not open target package:\n" + exportToPackageDialog.FileName);
+                }
+                return;
             }
             catch (Exception ex)
             {
