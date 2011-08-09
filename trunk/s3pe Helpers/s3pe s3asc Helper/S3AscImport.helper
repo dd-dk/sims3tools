@@ -1,6 +1,6 @@
 ResourceType: 0x01661233 0x01D10F34
 Label: From s3asc
-Command: S3AscExpImp
+Command: S3AscExpImp.exe
 Arguments: /import "{}"
 Desc: Import the MODL from s3asc format
 
