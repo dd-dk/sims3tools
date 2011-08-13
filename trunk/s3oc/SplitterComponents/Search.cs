@@ -567,8 +567,8 @@ namespace ObjectCloner.SplitterComponents
             {
                 match = match.ResourceIndexEntry.ResourceType == (uint)CatalogType.ModularResource ? MainForm.ItemForTGIBlock0(match) : match;
                 if (criteria.resourceName && MatchResourceName(match)) return true;
-                
-                if (criteria.catalogType == CatalogType.CAS_Part) return false;
+
+                if (criteria.catalogType == CatalogType.CAS_Part || match.ResourceIndexEntry.ResourceType == (uint)CatalogType.CAS_Part) return false;
 
                 if (criteria.objectName && MatchObjectName(match)) return true;
                 if (criteria.objectDesc && MatchObjectDesc(match)) return true;
