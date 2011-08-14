@@ -110,7 +110,7 @@ namespace s3ascHelper
             {
                 mesh.JointReferences.AddRange(added);
 
-                System.Windows.Forms.CopyableMessageBox.Show(String.Format("Mesh: 0x{0}\nJointReferences added (at end): {1}\n({2})",
+                System.Windows.Forms.CopyableMessageBox.Show(String.Format("Mesh: 0x{0:X8}\nJointReferences with newly assigned (via BlendIndex) vertex: {1}\n({2})",
                     mesh.Name,
                     added.Count,
                     String.Join(", ", added.ConvertAll<string>(a => "0x" + a.ToString("X8")).ToArray())),
@@ -124,7 +124,7 @@ namespace s3ascHelper
                 removed.ForEach(j => mesh.JointReferences[mesh.JointReferences.IndexOf(j)] = 0);
 #endif
                 // However, OM felt more comfortable if there was some indication something a little odd was going on.
-                System.Windows.Forms.CopyableMessageBox.Show(String.Format("Mesh: 0x{0}\nUnused JointReferences: {1}\n({2})",
+                System.Windows.Forms.CopyableMessageBox.Show(String.Format("Mesh: 0x{0:X8}\nJointReferences with no assigned (via BlendIndex) vertex: {1}\n({2})",
                     mesh.Name,
                     removed.Count,
                     String.Join(", ", removed.ConvertAll<string>(a => "0x" + a.ToString("X8")).ToArray())),
