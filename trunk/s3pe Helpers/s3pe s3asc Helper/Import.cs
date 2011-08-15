@@ -64,9 +64,12 @@ namespace s3ascHelper
             #endregion
 
             #region Import SKIN
+            // we need to read the data in the file...
             SKIN skin = new SKIN(rcolResource.RequestedApiVersion, null) { Version = 1, Bones = null, };
             r.Import_SKIN(mpb, skin);
 
+            // However, we do *NOT* want to update the RCOL with what we read - we are not replacing the object skeleton here
+#if UNDEF
             if (skin.Bones != null)
             {
                 IResourceKey skinRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mesh.SkinControllerIndex);
@@ -75,6 +78,7 @@ namespace s3ascHelper
 
                 rcolResource.ReplaceChunk(mesh, "SkinControllerIndex", skinRK, skin);
             }
+#endif
             #endregion
 
             mverts = Import_VBUF_Main(r, mlod, mesh, vrtf, isDefaultVRTF);
