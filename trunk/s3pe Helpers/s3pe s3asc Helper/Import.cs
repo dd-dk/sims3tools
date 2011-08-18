@@ -274,58 +274,20 @@ namespace s3ascHelper
 
         public void VertsToVBUFs(GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, List<s3piwrappers.Vertex[]> lmverts, List<List<s3piwrappers.Vertex[]>> llverts)
         {
-            #region Find all the meshes using the same MaterialIndex
+            // Find everything for each mesh group
             Dictionary<GenericRCOLResource.ChunkReference, List<int>> meshGroups = new Dictionary<GenericRCOLResource.ChunkReference, List<int>>();
+            Dictionary<int, VRTF> meshVRTF = new Dictionary<int, VRTF>();
+            Dictionary<int, float[]> meshUVScales = new Dictionary<int, float[]>();
             for (int m = 0; m < mlod.Meshes.Count; m++)
             {
                 if (meshGroups.ContainsKey(mlod.Meshes[m].MaterialIndex)) meshGroups[mlod.Meshes[m].MaterialIndex].Add(m);
                 else meshGroups.Add(mlod.Meshes[m].MaterialIndex, new List<int> { m });
+                VRTF vrtf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexFormatIndex) as VRTF ?? VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
+                meshVRTF.Add(m, vrtf);
+                meshUVScales.Add(m, rcolResource.GetUVScales(mlod.Meshes[m]));
             }
-            #endregion
 
-            #region Find the MaxUVs for each MaterialIndex
-            Dictionary<GenericRCOLResource.ChunkReference, float[]> matdMaxUVs = new Dictionary<GenericRCOLResource.ChunkReference, float[]>();
-            foreach (var key in meshGroups.Keys)
-            {
-                List<s3piwrappers.Vertex> verts = new List<s3piwrappers.Vertex>();
-                foreach (int m in meshGroups[key])
-                {
-                    verts.AddRange(lmverts[m]);
-                    if (llverts[m] != null) llverts[m].FindAll(l => l != null).ForEach(l => verts.AddRange(l));
-                }
-                matdMaxUVs.Add(key, s3piwrappers.UVCompressor.GetMaxUVs(verts));
-            }
-            #endregion
-
-            #region Set the uvScales for each MaterialIndex and cache the VRTFs
-            Dictionary<GenericRCOLResource.ChunkReference, float[]> matdUVScales = new Dictionary<GenericRCOLResource.ChunkReference, float[]>();
-            Dictionary<int, VRTF> meshVRTF = new Dictionary<int, VRTF>();
-            foreach (var key in meshGroups.Keys)
-            {
-                int uvs = 0;
-                VRTF scaleVRTF = null;
-                foreach (int m in meshGroups[key])
-                {
-                    VRTF vrtf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexFormatIndex) as VRTF ?? VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
-                    int meshUVs = vrtf.Layouts.FindAll(x => x.Usage == VRTF.ElementUsage.UV).Count;
-                    meshVRTF.Add(m, vrtf);
-                    if (scaleVRTF == null || meshUVs > uvs)
-                    {
-                        scaleVRTF = vrtf;
-                        uvs = meshUVs;
-                    }
-                }
-
-                if (scaleVRTF == null) continue;// assume nothing to do
-
-                float[] uvScales = s3piwrappers.UVCompressor.GetUVScales(scaleVRTF, matdMaxUVs[key]);
-
-                matdUVScales.Add(key, uvScales);
-                if (uvScales != null) SetUVScales(rcolResource, key, uvScales);
-            }
-            #endregion
-
-            #region Create the VBUF for each mesh
+            // Update the VBUFs for each mesh group
             foreach (var key in meshGroups.Keys)
             {
                 foreach (int m in meshGroups[key])
@@ -333,8 +295,12 @@ namespace s3ascHelper
                     VBUF vbuf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexBufferIndex) as VBUF;
                     if (vbuf == null)
                         vbuf = new VBUF(rcolResource.RequestedApiVersion, null) { Version = 0x00000101, Flags = VBUF.FormatFlags.None, SwizzleInfo = new GenericRCOLResource.ChunkReference(0, null, 0), };
-                    vbuf.SetVertices(mlod, m, meshVRTF[m], lmverts[m], matdUVScales[key]);
-                    if (llverts[m] != null) for (int i = 0; i < llverts[m].Count; i++) if (llverts[m][i] != null) vbuf.SetVertices(mlod, mlod.Meshes[m], i, meshVRTF[m], llverts[m][i], matdUVScales[key]);
+                    vbuf.SetVertices(mlod, m, meshVRTF[m], lmverts[m], meshUVScales[m]);
+
+                    if (llverts[m] != null)
+                        for (int i = 0; i < llverts[m].Count; i++)
+                            if (llverts[m][i] != null)
+                                vbuf.SetVertices(mlod, mlod.Meshes[m], i, meshVRTF[m], llverts[m][i], meshUVScales[m]);
 
                     IResourceKey vbufRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].VertexBufferIndex);
                     if (vbufRK == null)//means we created the VBUF: create a RK and add it
@@ -343,45 +309,6 @@ namespace s3ascHelper
                     rcolResource.ReplaceChunk(mlod.Meshes[m], "VertexBufferIndex", vbufRK, vbuf);
                 }
             }
-            #endregion
-        }
-
-        void SetUVScales(GenericRCOLResource rcolResource, GenericRCOLResource.ChunkReference materialIndex, float[] uvScales)
-        {
-            MATD.ShaderData data;
-            switch (uvScales.Length)
-            {
-                case 1: data = new MATD.ElementFloat(0, null, MATD.FieldType.UVScales, uvScales[0]); break;
-                case 2: data = new MATD.ElementFloat2(0, null, MATD.FieldType.UVScales, uvScales[0], uvScales[1]); break;
-                case 3: data = new MATD.ElementFloat3(0, null, MATD.FieldType.UVScales, uvScales[0], uvScales[1], uvScales[2]); break;
-                case 4: data = new MATD.ElementFloat4(0, null, MATD.FieldType.UVScales, uvScales[0], uvScales[1], uvScales[2], uvScales[4]); break;
-                default:
-                    throw new ArgumentException(String.Format("Found {0} UVScales; expected 1 to 4.", uvScales.Length));
-            }
-            SetUVScales(rcolResource, materialIndex, data);
-        }
-        void SetUVScales(GenericRCOLResource rcolResource, GenericRCOLResource.ChunkReference materialIndex, MATD.ShaderData data)
-        {
-            IRCOLBlock rcolBlock = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, materialIndex);
-            if (rcolBlock is MATD)
-            {
-                SetUVScales(rcolBlock as MATD, data);
-                return;
-            }
-
-            if (!(rcolBlock is MTST))
-                throw new InvalidOperationException(String.Format("Expected {0}, found {1}.", typeof(MTST).Name, rcolBlock.GetType().Name));
-
-            MTST mtst = rcolBlock as MTST;
-            SetUVScales(rcolResource, mtst.Index, data);
-            foreach (var entry in mtst.Entries.FindAll(e => e.Index != mtst.Index)) SetUVScales(rcolResource, entry.Index, data);
-        }
-        void SetUVScales(MATD matd, MATD.ShaderData data)
-        {
-            MATD.ShaderDataList sdList = (matd.Version < 0x0103 ? matd.Mtrl.SData : matd.Mtnf.SData);
-            int i = sdList.FindIndex(x => x.Field == MATD.FieldType.UVScales);
-            if (i >= 0) sdList[i] = data;
-            //else sdList.Add(data);
         }
     }
 }
