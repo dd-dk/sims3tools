@@ -70,7 +70,9 @@ namespace s3ascHelper
             //Referenced bones
             foreach (var bone in skin.Bones.FindAll(x => mesh.JointReferences.Contains(x.NameHash)))
             {
-                w.WriteLine(string.Format("{0} {1:X8} {2:R} {3:R} {4:R} {5:R} {6:R} {7:R} {8:R} {9:R} {10:R} {11:R} {12:R} {13:R}",
+                w.WriteLine(string.Format(
+                    //"{0} {1:X8} {2:R} {3:R} {4:R} {5:R} {6:R} {7:R} {8:R} {9:R} {10:R} {11:R} {12:R} {13:R}",
+                    "{0} {1:X8} {2:F6} {3:F6} {4:F6} {5:F6} {6:F6} {7:F6} {8:F6} {9:F6} {10:F6} {11:F6} {12:F6} {13:F6}",
                     i++,
                     bone.NameHash,
                     bone.InverseBindPose.Right.X, bone.InverseBindPose.Right.Y, bone.InverseBindPose.Right.Z, bone.InverseBindPose.Translate.X,
@@ -81,7 +83,9 @@ namespace s3ascHelper
             //Unreferenced bones
             foreach (var bone in skin.Bones.FindAll(x => !mesh.JointReferences.Contains(x.NameHash)))
             {
-                w.WriteLine(string.Format("{0} {1:X8} {2:R} {3:R} {4:R} {5:R} {6:R} {7:R} {8:R} {9:R} {10:R} {11:R} {12:R} {13:R}",
+                w.WriteLine(string.Format(
+                    //"{0} {1:X8} {2:R} {3:R} {4:R} {5:R} {6:R} {7:R} {8:R} {9:R} {10:R} {11:R} {12:R} {13:R}",
+                    "{0} {1:X8} {2:F6} {3:F6} {4:F6} {5:F6} {6:F6} {7:F6} {8:F6} {9:F6} {10:F6} {11:F6} {12:F6} {13:F6}",
                     i++,
                     bone.NameHash,
                     bone.InverseBindPose.Right.X, bone.InverseBindPose.Right.Y, bone.InverseBindPose.Right.Z, bone.InverseBindPose.Translate.X,
