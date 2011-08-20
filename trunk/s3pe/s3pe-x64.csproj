@@ -490,6 +490,14 @@
       <Link>Helpers\S3AscImport.helper</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="..\s3pe Helpers\s3pe s3asc Helper\S3AscExportSN.helper">
+      <Link>Helpers\S3AscExportSN.helper</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\s3pe Helpers\s3pe s3asc Helper\S3AscImportSN.helper">
+      <Link>Helpers\S3AscImportSN.helper</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="..\s3pe Helpers\ViewDDS\HelperApp\bin\ViewDDS\Helpers\sim3tools_ViewDDS.helper">
       <Link>Helpers\sim3tools_ViewDDS.helper</Link>
     </None>
