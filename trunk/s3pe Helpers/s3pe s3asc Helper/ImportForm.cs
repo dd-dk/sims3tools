@@ -34,7 +34,7 @@ namespace s3ascHelper
         public ImportForm()
         {
             InitializeComponent();
-            ofdImport.FileName = string.Format("{0}_filebase.s3asc", Program.Filename);
+            ofdImport.FileName = string.Format("{0}_filebase.s3asc", Program.ShortNames ? Program.GetShortName() : Program.Filename);
         }
 
         Stream stream;

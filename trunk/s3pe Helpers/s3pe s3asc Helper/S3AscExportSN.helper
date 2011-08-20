@@ -1,0 +1,6 @@
+ResourceType: 0x01661233 0x01D10F34
+Label: To s3asc (short names)
+Command: S3AscExpImp.exe
+Arguments: /short /export "{}"
+ReadOnly: yes
+Desc: Export the MODL to s3asc format (using short names for Blender)

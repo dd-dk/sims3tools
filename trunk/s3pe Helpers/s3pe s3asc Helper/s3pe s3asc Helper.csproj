@@ -112,6 +112,12 @@
       <Name>s3piwrappers.ModelResources</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="S3AscExportSN.helper" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="S3AscImportSN.helper" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>"$(SolutionDir)..\..\s3pi\CreateAssemblyVersion\bin\Release\CreateAssemblyVersion.exe" "$(ProjectDir)\"</PreBuildEvent>

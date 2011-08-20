@@ -35,6 +35,9 @@ namespace s3ascHelper
         {
             List<string> largs = new List<string>(args);
 
+            ShortNames = largs.Contains("/short");
+            if (ShortNames) largs.Remove("/short");
+
             bool export = largs.Contains("/export");
             if (export) largs.Remove("/export");
 
@@ -69,5 +72,18 @@ namespace s3ascHelper
         }
 
         public static string Filename { get; private set; }
+        public static bool ShortNames { get; private set; }
+        public static string GetShortName()
+        {
+            //S3_01661233_00000001_0000000000D0F4DF_doorSingleTransomContemporary%%+MODL.model
+            string[] split = Program.Filename.Split(new char[] { '_', }, 5);
+            if (split.Length == 5)
+            {
+                string[] latter = split[4].Split(new char[] { '%', }, 2, StringSplitOptions.RemoveEmptyEntries);
+                if (latter.Length == 2)
+                    return string.Format("grp{0}_{1}{2}", split[2], latter[0], Path.GetExtension(Program.Filename));
+            }
+            return Filename;
+        }
     }
 }

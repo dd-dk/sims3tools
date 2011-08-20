@@ -35,7 +35,7 @@ namespace s3ascHelper
         public ExportForm()
         {
             InitializeComponent();
-            sfdExport.FileName = string.Format("{0}_filebase.s3asc", Program.Filename);
+            sfdExport.FileName = string.Format("{0}_filebase.s3asc", Program.ShortNames ? Program.GetShortName() : Program.Filename);
         }
 
         Stream stream;
