@@ -96,7 +96,7 @@ namespace s3ascHelper
             rcolResource.ReplaceChunk(mesh, "IndexBufferIndex", ibufRK, ibuf);
             #endregion
 
-            // This reads both VBUF Vertex[]s and the ibufs; but the ibufs just go straigh in quite happily
+            // This reads both VBUF Vertex[]s and the ibufs; but the ibufs just go straight in quite happily
             lverts = Import_MeshGeoStates(r, mlod, mesh, vrtf, isDefaultVRTF, ibuf);
 
             #region Update the JointReferences
@@ -272,7 +272,7 @@ namespace s3ascHelper
         //--
 
 
-        public void VertsToVBUFs(GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, List<s3piwrappers.Vertex[]> lmverts, List<List<s3piwrappers.Vertex[]>> llverts)
+        public void VertsToVBUFs(GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, List<s3piwrappers.Vertex[]> lmverts, List<List<s3piwrappers.Vertex[]>> llverts, bool updateBBs)
         {
             // Find everything for each mesh group
             Dictionary<GenericRCOLResource.ChunkReference, List<int>> meshGroups = new Dictionary<GenericRCOLResource.ChunkReference, List<int>>();
@@ -287,7 +287,7 @@ namespace s3ascHelper
                 meshUVScales.Add(m, rcolResource.GetUVScales(mlod.Meshes[m]));
             }
 
-            // Update the VBUFs for each mesh group
+            // Update the VBUFs for each mesh group and set the mesh bounds whilst we're here
             foreach (var key in meshGroups.Keys)
             {
                 foreach (int m in meshGroups[key])
@@ -307,6 +307,9 @@ namespace s3ascHelper
                         vbufRK = new TGIBlock(0, null, defaultRK) { ResourceType = vbuf.ResourceType, };
 
                     rcolResource.ReplaceChunk(mlod.Meshes[m], "VertexBufferIndex", vbufRK, vbuf);
+
+                    if (updateBBs)
+                        mlod.Meshes[m].Bounds = vbuf.GetBoundingBox(mlod.Meshes[m], meshVRTF[m]);
                 }
             }
         }

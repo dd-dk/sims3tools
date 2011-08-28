@@ -27,6 +27,11 @@ namespace s3ascHelper
 {
     static class Program
     {
+        public enum Format
+        {
+            s3asc,
+            s3m2b,
+        }
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -35,8 +40,26 @@ namespace s3ascHelper
         {
             List<string> largs = new List<string>(args);
 
-            ShortNames = largs.Contains("/short");
-            if (ShortNames) largs.Remove("/short");
+            UseFormat = Format.s3asc;
+            int index = largs.IndexOf("/format");
+            if (index >= 0)
+            {
+                largs.Remove("/format");
+                if (index < largs.Count)
+                {
+                    string fmt = largs[index];
+                    if (new List<string>(Enum.GetNames(typeof(Format))).Contains(fmt))
+                    {
+                        UseFormat = (Format)Enum.Parse(typeof(Format), fmt);
+                        largs.RemoveAt(index);
+                    }
+                    else
+                    {
+                        CopyableMessageBox.Show("Unrecognised format '" + fmt + "'.", Application.ProductName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                        Environment.Exit(1);
+                    }
+                }
+            }
 
             bool export = largs.Contains("/export");
             if (export) largs.Remove("/export");
@@ -46,7 +69,7 @@ namespace s3ascHelper
 
             if ((export && import) || (!export && !import))
             {
-                CopyableMessageBox.Show("Invalid command line.", Application.ProductName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                CopyableMessageBox.Show("Missing /export or /import on command line.", Application.ProductName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
                 Environment.Exit(1);
             }
 
@@ -72,7 +95,7 @@ namespace s3ascHelper
         }
 
         public static string Filename { get; private set; }
-        public static bool ShortNames { get; private set; }
+        public static Format UseFormat { get; private set; }
         public static string GetShortName()
         {
             //S3_01661233_00000001_0000000000D0F4DF_doorSingleTransomContemporary%%+MODL.model
@@ -85,5 +108,7 @@ namespace s3ascHelper
             }
             return Filename;
         }
+        public static string GetExtension() { return UseFormat.ToString(); }
+        public static string GetFilter() { return string.Format("{0} base files|*_filebase.{0}|All files|*.*", GetExtension()); }
     }
 }

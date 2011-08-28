@@ -35,7 +35,11 @@ namespace s3ascHelper
         public ExportForm()
         {
             InitializeComponent();
-            sfdExport.FileName = string.Format("{0}_filebase.s3asc", Program.ShortNames ? Program.GetShortName() : Program.Filename);
+
+            sfdExport.Filter = Program.GetFilter();
+            sfdExport.FileName = string.Format("{0}_filebase.{1}",
+                Program.UseFormat == Program.Format.s3m2b ? Program.GetShortName() : Program.Filename,
+                Program.GetExtension());
         }
 
         Stream stream;
@@ -65,7 +69,7 @@ namespace s3ascHelper
 
                 try
                 {
-                    using (FileStream fs = new FileStream(Path.Combine(folder, string.Format("{0}_filebase.s3asc", filebase)), FileMode.Create, FileAccess.Write))
+                    using (FileStream fs = new FileStream(Path.Combine(folder, string.Format("{0}_filebase.{1}", filebase, Program.GetExtension())), FileMode.Create, FileAccess.Write))
                     {
                         fs.Close();
                     }
@@ -106,7 +110,7 @@ namespace s3ascHelper
 
                     for (int m = 0; m < mlod.Meshes.Count; m++)
                     {
-                        string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.s3ascg", filebase, m));
+                        string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.{2}g", filebase, m, Program.GetExtension()));
 
                         using (FileStream fsMesh = new FileStream(fnMesh, FileMode.Create, FileAccess.Write))
                         {

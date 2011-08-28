@@ -34,7 +34,11 @@ namespace s3ascHelper
         public ImportForm()
         {
             InitializeComponent();
-            ofdImport.FileName = string.Format("{0}_filebase.s3asc", Program.ShortNames ? Program.GetShortName() : Program.Filename);
+
+            ofdImport.Filter = Program.GetFilter();
+            ofdImport.FileName = string.Format("{0}_filebase.{1}",
+                Program.UseFormat == Program.Format.s3m2b ? Program.GetShortName() : Program.Filename,
+                Program.GetExtension());
         }
 
         Stream stream;
@@ -62,9 +66,20 @@ namespace s3ascHelper
                 string folder = Path.GetDirectoryName(ofdImport.FileName);
                 string filebase = Path.GetFileNameWithoutExtension(ofdImport.FileName).Replace("_filebase", "");
 
-                if (!File.Exists(Path.Combine(folder, string.Format("{0}_filebase.s3asc", filebase))))
+                if (!File.Exists(Path.Combine(folder, string.Format("{0}_filebase.{1}", filebase, Program.GetExtension()))))
                 {
-                    CopyableMessageBox.Show("File name must end \"_filebase.s3asc\"", "Base file not found", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                    CopyableMessageBox.Show("File name must end \"_filebase." + Program.GetExtension() + "\"",
+                        "Base file not found", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                    Environment.ExitCode = 1;
+                    return;
+                }
+
+                bool updateBBs = false;
+                int q = System.Windows.Forms.CopyableMessageBox.Show("Update mesh bounding boxes?", Application.ProductName, CopyableMessageBoxButtons.YesNoCancel, CopyableMessageBoxIcon.Question);
+                if (q == 0)
+                    updateBBs = true;
+                else if (q == 2)
+                {
                     Environment.ExitCode = 1;
                     return;
                 }
@@ -111,7 +126,7 @@ namespace s3ascHelper
                     List<List<s3piwrappers.Vertex[]>> llverts = new List<List<s3piwrappers.Vertex[]>>();
                     while (true)
                     {
-                        string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.s3ascg", filebase, m));
+                        string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.{2}g", filebase, m, Program.GetExtension()));
                         if (!File.Exists(fnMesh)) break;
 
                         using (FileStream fsMesh = new FileStream(fnMesh, FileMode.Open, FileAccess.Read))
@@ -125,7 +140,7 @@ namespace s3ascHelper
                         }
                     }
 
-                    import.VertsToVBUFs(rcolResource, mlod, rk, lmverts, llverts);
+                    import.VertsToVBUFs(rcolResource, mlod, rk, lmverts, llverts, updateBBs);
 
                     result = (byte[])rcolResource.AsBytes.Clone();
 

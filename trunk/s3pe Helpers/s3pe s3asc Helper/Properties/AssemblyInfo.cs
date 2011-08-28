@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("s3pe s3asc Helper")]
-[assembly: AssemblyDescription("s3pe's own s3asc Export/Import tool")]
+[assembly: AssemblyTitle("s3pe MODL/MLOD Helper")]
+[assembly: AssemblyDescription("A mesh Export/Import tool for s3pe")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Peter L Jones")]
-[assembly: AssemblyProduct("s3pe s3asc Helper")]
+[assembly: AssemblyProduct("s3pe Mesher's Little Helper")]
 [assembly: AssemblyCopyright("Copyright © 2011  Peter L Jones  Released under the GPL 3.0")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
