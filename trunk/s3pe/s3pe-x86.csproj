@@ -342,8 +342,8 @@
       <Link>OBJKResourceEditor.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\s3pe Helpers\s3pe s3asc Helper\bin\Release\S3AscExpImp.exe">
-      <Link>S3AscExpImp.exe</Link>
+    <Content Include="..\s3pe Helpers\s3pe s3asc Helper\bin\Release\meshExpImp.exe">
+      <Link>meshExpImp.exe</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\s3pe Helpers\S3SA DLL ExpImp\bin\Release\S3SADLLExpImp.exe">
@@ -503,20 +503,20 @@
       <Link>Helpers\CLIPexportAsNewName.helper</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\s3pe Helpers\s3pe s3asc Helper\S3AscExport.helper">
-      <Link>Helpers\S3AscExport.helper</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\s3pe Helpers\s3pe s3asc Helper\S3AscImport.helper">
-      <Link>Helpers\S3AscImport.helper</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <None Include="..\s3pe Helpers\s3pe s3asc Helper\S3AscExportSN.helper">
-      <Link>Helpers\S3AscExportSN.helper</Link>
+    <None Include="..\s3pe Helpers\s3pe s3asc Helper\s3ascExport.helper">
+      <Link>Helpers\s3ascExport.helper</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\s3pe Helpers\s3pe s3asc Helper\S3AscImportSN.helper">
-      <Link>Helpers\S3AscImportSN.helper</Link>
+    <None Include="..\s3pe Helpers\s3pe s3asc Helper\s3ascImport.helper">
+      <Link>Helpers\s3ascImport.helper</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\s3pe Helpers\s3pe s3asc Helper\s3m2bExport.helper">
+      <Link>Helpers\s3m2bExport.helper</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\s3pe Helpers\s3pe s3asc Helper\s3m2bImport.helper">
+      <Link>Helpers\s3m2bImport.helper</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\s3pe Helpers\ViewDDS\HelperApp\bin\ViewDDS\Helpers\sim3tools_ViewDDS.helper">
