@@ -3368,7 +3368,7 @@ namespace ObjectCloner
                     {
                         Diagnostics.Log("CAS_Part: " + item.LongName);
                         #region CAS Part
-                        CASPartResource.CASPartResource casp = selectedItem.Resource as CASPartResource.CASPartResource;
+                        CASPartResource.CASPartResource casp = item.Resource as CASPartResource.CASPartResource;
                         // put all the details from the tab page into the resource
                         //...
                         casp.Unknown1 = tbCASPUnknown1.Text;
