@@ -1,6 +1,5 @@
 ResourceType: 0x01661233 0x01D10F34
-Label: From s3asc (short names)
-Command: S3AscExpImp.exe
-Arguments: /short /import "{}"
-Desc: Import the MODL from s3asc format (using short names for Blender)
-
+Label: Import from s3m2b
+Command: meshExpImp.exe
+Arguments: /format s3m2b /import "{}"
+Desc: Read s3m2b files from CMOMoney's Blender plug-in

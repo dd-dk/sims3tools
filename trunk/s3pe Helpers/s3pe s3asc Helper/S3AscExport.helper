@@ -1,6 +1,6 @@
 ResourceType: 0x01661233 0x01D10F34
-Label: To s3asc
-Command: S3AscExpImp.exe
-Arguments: /export "{}"
+Label: Export to s3asc
+Command: meshExpImp.exe
+Arguments: /format s3asc /export "{}"
 ReadOnly: yes
-Desc: Export the MODL to s3asc format
+Desc: Create s3asc files for Wes Howe's MilkShape plug-in
