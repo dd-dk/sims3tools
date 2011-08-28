@@ -9,7 +9,7 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>s3ascHelper</RootNamespace>
-    <AssemblyName>S3AscExpImp</AssemblyName>
+    <AssemblyName>meshExpImp</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -103,20 +103,16 @@
       <Link>RCOLResources.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="S3AscExport.helper" />
-    <Content Include="S3AscImport.helper" />
+    <Content Include="s3ascExport.helper" />
+    <Content Include="s3ascImport.helper" />
+    <Content Include="s3m2bExport.helper" />
+    <Content Include="s3m2bImport.helper" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Atavera\s3piwrappers.ModelResources\s3piwrappers.ModelResources.csproj">
       <Project>{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}</Project>
       <Name>s3piwrappers.ModelResources</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="S3AscExportSN.helper" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="S3AscImportSN.helper" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
