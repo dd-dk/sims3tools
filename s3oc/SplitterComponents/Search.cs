@@ -25,6 +25,7 @@ using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
 using s3pi.Interfaces;
+using s3pi.Filetable;
 
 namespace ObjectCloner.SplitterComponents
 {
@@ -36,8 +37,8 @@ namespace ObjectCloner.SplitterComponents
         MainForm.updateProgressCallback updateProgressCB;
         MainForm.listViewAddCallBack listViewAddCB;
 
-        bool useEA = FileTable.AppendFileTable;
-        bool useCC = FileTable.UseCustomContent;
+        bool useEA = FileTable.FileTableEnabled;
+        bool useCC = FileTable.CustomContentEnabled;
         PathPackageTuple current = FileTable.Current;
         public Search()
         {
@@ -57,7 +58,7 @@ namespace ObjectCloner.SplitterComponents
             cbCatalogType.SelectedIndex = 0;
             ckbUseEA.Enabled = ckbUseCC.Enabled = ObjectCloner.Properties.Settings.Default.CCEnabled;
             ckbUseEA.Checked = true;
-            ckbUseCC.Checked = ckbUseCC.Enabled && FileTable.UseCustomContent;
+            ckbUseCC.Checked = ckbUseCC.Enabled && FileTable.CustomContentEnabled;
         }
 
         public Search(MainForm.CheckInstallDirsCB checkInstallDirsCB, MainForm.updateProgressCallback updateProgressCB, MainForm.listViewAddCallBack listViewAddCB)
@@ -204,8 +205,8 @@ namespace ObjectCloner.SplitterComponents
                 AbortSearch(false);
             else
             {
-                useEA = FileTable.AppendFileTable;
-                useCC = FileTable.UseCustomContent;
+                useEA = FileTable.FileTableEnabled;
+                useCC = FileTable.CustomContentEnabled;
                 current = FileTable.Current;
                 FileTable.Current = null;
                 if (!MainForm.SetFT(ckbUseCC.Checked, ckbUseEA.Checked, checkInstallDirsCB, this))
@@ -491,16 +492,16 @@ namespace ObjectCloner.SplitterComponents
                 List<SpecificResource> lres = new List<SpecificResource>();
                 try
                 {
-                    updateProgress(true, "Searching...", true, FileTable.fb0.Count, true, 0);
-                    for (int p = 0; p < FileTable.fb0.Count; p++)
+                    updateProgress(true, "Searching...", true, FileTable.GameContent.Count, true, 0);
+                    for (int p = 0; p < FileTable.GameContent.Count; p++)
                     {
                         if (stopSearch) return;
-                        PathPackageTuple ppt = FileTable.fb0[p];
+                        PathPackageTuple ppt = FileTable.GameContent[p];
 
                         #region Fetch name map
                         if (criteria.resourceName)
                         {
-                            updateProgress(true, String.Format("Retrieving name map for package {0} of {1}...", p + 1, FileTable.fb0.Count), false, -1, false, -1);
+                            updateProgress(true, String.Format("Retrieving name map for package {0} of {1}...", p + 1, FileTable.GameContent.Count), false, -1, false, -1);
                             SpecificResource sr = ppt.Find(rie => rie.ResourceType == 0x0166038C);
                             nameMap = sr == null ? null : sr.Resource as IDictionary<ulong, string>;
                             if (stopSearch) return;
@@ -511,7 +512,7 @@ namespace ObjectCloner.SplitterComponents
                         if (criteria.catalogType!= CatalogType.CAS_Part)
                             if (criteria.catalogName || criteria.catalogDesc)
                             {
-                                updateProgress(true, String.Format("Retrieving string tables for package {0} of {1}...", p + 1, FileTable.fb0.Count), true, -1, false, 0);
+                                updateProgress(true, String.Format("Retrieving string tables for package {0} of {1}...", p + 1, FileTable.GameContent.Count), true, -1, false, 0);
                                 stbls = ppt.FindAll(rie => rie.ResourceType == 0x220557DA && (criteria.allLanguages || rie.Instance >> 56 == 0x00))
                                     .ConvertAll<IDictionary<ulong, string>>(sr => sr.Resource as IDictionary<ulong, string>);
                                 if (stopSearch) return;
@@ -519,17 +520,17 @@ namespace ObjectCloner.SplitterComponents
                         #endregion
 
                         // Find the right type of resource to search
-                        updateProgress(true, String.Format("Retrieving resource list {0} of {1}...", p + 1, FileTable.fb0.Count), false, -1, false, -1);
+                        updateProgress(true, String.Format("Retrieving resource list {0} of {1}...", p + 1, FileTable.GameContent.Count), false, -1, false, -1);
                         List<SpecificResource> lsr = Find(ppt);
                         if (stopSearch) return;
 
                         // Find the matches
-                        updateProgress(true, String.Format("Finding matching resources {0} of {1}...", p + 1, FileTable.fb0.Count), false, -1, false, -1);
+                        updateProgress(true, String.Format("Finding matching resources {0} of {1}...", p + 1, FileTable.GameContent.Count), false, -1, false, -1);
                         List<SpecificResource> matches = lsr.FindAll(Match);
                         if (stopSearch) return;
 
                         // Avoid duplicates
-                        updateProgress(true, String.Format("De-duplicating matches {0} of {1}...", p + 1, FileTable.fb0.Count), false, -1, false, -1);
+                        updateProgress(true, String.Format("De-duplicating matches {0} of {1}...", p + 1, FileTable.GameContent.Count), false, -1, false, -1);
                         lres = matches.FindAll(match =>
                             {
                                 if (stopSearch) return false;

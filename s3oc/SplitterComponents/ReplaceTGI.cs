@@ -25,6 +25,7 @@ using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
 using s3pi.Interfaces;
+using s3pi.Filetable;
 
 namespace ObjectCloner.SplitterComponents
 {

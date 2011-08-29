@@ -20,9 +20,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using s3pi.Interfaces;
 using System.Drawing;
 using System.Windows.Forms;
+using s3pi.Interfaces;
+using s3pi.Filetable;
 
 namespace ObjectCloner
 {
@@ -76,14 +77,14 @@ namespace ObjectCloner
         {
             get
             {
-                SpecificResource item = getItem(isPNGInstance ? FileTable.fb0 : FileTable.tmb, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
+                SpecificResource item = getItem(isPNGInstance ? FileTable.GameContent : FileTable.Thumbnails, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
                 if (item != null && item.Resource != null)
                     return Image.FromStream(item.Resource.Stream);
                 return null;
             }
             set
             {
-                SpecificResource item = getItem(isPNGInstance ? FileTable.fb0 : FileTable.tmb, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
+                SpecificResource item = getItem(isPNGInstance ? FileTable.GameContent : FileTable.Thumbnails, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
                 if (item == null || item.Resource == null)
                     throw new ArgumentException();
 
@@ -110,11 +111,11 @@ namespace ObjectCloner
 
         public static IResourceKey getImageRK(THUMSize size, SpecificResource item)
         {
-            if (item.CType == CatalogType.ModularResource)
+            if (item.CType() == CatalogType.ModularResource)
             {
                 return RK.NULL;
             }
-            else if (item.CType == CatalogType.CAS_Part)
+            else if (item.CType() == CatalogType.CAS_Part)
             {
                 SpecificResource sr = getRK(item.RequestedRK.ResourceType, item.RequestedRK.Instance, size, false);
                 return sr == null ? RK.NULL : sr.RequestedRK;
@@ -128,11 +129,11 @@ namespace ObjectCloner
         }
         public static SpecificResource getTHUM(THUMSize size, SpecificResource item)
         {
-            if (item.CType == CatalogType.ModularResource)
+            if (item.CType() == CatalogType.ModularResource)
             {
                 return null;
             }
-            else if (item.CType == CatalogType.CAS_Part)
+            else if (item.CType() == CatalogType.CAS_Part)
             {
                 return getRK(item.RequestedRK.ResourceType, item.RequestedRK.Instance, size, false);
             }
@@ -144,16 +145,16 @@ namespace ObjectCloner
         }
         static SpecificResource getRK(uint type, ulong instance, THUMSize size, bool isPNGInstance)
         {
-            return getItem(isPNGInstance ? FileTable.tmb : FileTable.tmb, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
+            return getItem(isPNGInstance ? FileTable.Thumbnails : FileTable.Thumbnails, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
         }
 
         public static IResourceKey getNewRK(THUMSize size, SpecificResource item)
         {
-            if (item.CType == CatalogType.ModularResource)
+            if (item.CType() == CatalogType.ModularResource)
             {
                 return RK.NULL;
             }
-            else if (item.CType == CatalogType.CAS_Part)
+            else if (item.CType() == CatalogType.CAS_Part)
             {
                 return getNewRK(item.RequestedRK.ResourceType, item.RequestedRK.Instance, size, false);
             }
@@ -184,11 +185,11 @@ namespace ObjectCloner
         }
         public static Image getImage(THUMSize size, SpecificResource item)
         {
-            if (item.CType == CatalogType.ModularResource)
+            if (item.CType() == CatalogType.ModularResource)
             {
                 return getImage(size, MainForm.ItemForTGIBlock0(item));
             }
-            else if (item.CType == CatalogType.CAS_Part)
+            else if (item.CType() == CatalogType.CAS_Part)
             {
                 return Thumb[item.RequestedRK.ResourceType, item.RequestedRK.Instance, size, false];
             }
@@ -212,7 +213,7 @@ namespace ObjectCloner
 
         /*public static IResourceKey makeImage(THUMSize size, SpecificResource item)
         {
-            if (item.CType == CatalogType.ModularResource)
+            if (item.CType() == CatalogType.ModularResource)
                 return RK.NULL;
             else
             {

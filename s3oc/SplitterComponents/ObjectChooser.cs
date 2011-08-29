@@ -25,6 +25,7 @@ using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
 using s3pi.Interfaces;
+using s3pi.Filetable;
 
 namespace ObjectCloner.SplitterComponents
 {
@@ -380,9 +381,9 @@ namespace ObjectCloner.SplitterComponents
                     updateProgress(true, "Please wait, searching for objects...", true, -1, false, 0);
 
                     List<SpecificResource> lres = new List<SpecificResource>();
-                    updateProgress(true, "Please wait, finding objects... 0%", true, FileTable.fb0.Count, true, 0);
+                    updateProgress(true, "Please wait, finding objects... 0%", true, FileTable.GameContent.Count, true, 0);
                     int i = 0;
-                    foreach (PathPackageTuple ppt in FileTable.fb0)
+                    foreach (PathPackageTuple ppt in FileTable.GameContent)
                     {
                         if (stopFilling) return;
 
@@ -394,7 +395,7 @@ namespace ObjectCloner.SplitterComponents
                         if (stopFilling) return;
 
                         lres.AddRange(matches);
-                        updateProgress(true, "Please wait, finding objects... " + i * 100 / FileTable.fb0.Count + "%", false, -1, true, i++);
+                        updateProgress(true, "Please wait, finding objects... " + i * 100 / FileTable.GameContent.Count + "%", false, -1, true, i++);
                     }
 
                     updateProgress(true, "Please wait, loading objects... 0%", true, lres.Count, true, 0);

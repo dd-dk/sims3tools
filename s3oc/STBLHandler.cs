@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using s3pi.Interfaces;
+using s3pi.Filetable;
 
 namespace ObjectCloner
 {
@@ -39,8 +40,8 @@ namespace ObjectCloner
                 if (_STBLs == null)
                 {
                     _STBLs = new Dictionary<byte, List<SpecificResource>>();
-                    if (FileTable.fb0 != null)
-                        FileTable.fb0.ForEach(ppt => ppt
+                    if (FileTable.GameContent != null)
+                        FileTable.GameContent.ForEach(ppt => ppt
                             .FindAll(rie => rie.ResourceType == 0x220557DA)
                             .ForEach(sr =>
                             {
