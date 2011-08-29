@@ -25,6 +25,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Threading;
 using s3pi.Interfaces;
+using s3pi.Filetable;
 
 namespace ObjectCloner.SplitterComponents
 {
@@ -36,8 +37,8 @@ namespace ObjectCloner.SplitterComponents
         MainForm.updateProgressCallback updateProgressCB;
 
 
-        bool useEA = FileTable.AppendFileTable;
-        bool useCC = FileTable.UseCustomContent;
+        bool useEA = FileTable.FileTableEnabled;
+        bool useCC = FileTable.CustomContentEnabled;
         PathPackageTuple current = FileTable.Current;
         public TGISearch()
         {
@@ -56,7 +57,7 @@ namespace ObjectCloner.SplitterComponents
 
             ckbUseEA.Enabled = ckbUseCC.Enabled = ObjectCloner.Properties.Settings.Default.CCEnabled;
             ckbUseEA.Checked = true;
-            ckbUseCC.Checked = ckbUseCC.Enabled && FileTable.UseCustomContent;
+            ckbUseCC.Checked = ckbUseCC.Enabled && FileTable.CustomContentEnabled;
         }
 
         public TGISearch(MainForm.CheckInstallDirsCB checkInstallDirsCB, MainForm.updateProgressCallback updateProgressCB)
@@ -250,8 +251,8 @@ namespace ObjectCloner.SplitterComponents
                 AbortTGISearch(false);
             else
             {
-                useEA = FileTable.AppendFileTable;
-                useCC = FileTable.UseCustomContent;
+                useEA = FileTable.FileTableEnabled;
+                useCC = FileTable.CustomContentEnabled;
                 current = FileTable.Current;
                 FileTable.Current = null;
                 if (!MainForm.SetFT(ckbUseCC.Checked, ckbUseEA.Checked, checkInstallDirsCB, this))
@@ -562,7 +563,7 @@ namespace ObjectCloner.SplitterComponents
                 try
                 {
                     List<string> pathsSeen = new List<string>();
-                    List<List<PathPackageTuple>> pptLists = new List<List<PathPackageTuple>>(new List<PathPackageTuple>[] { FileTable.fb0, FileTable.dds, FileTable.tmb, });
+                    List<List<PathPackageTuple>> pptLists = new List<List<PathPackageTuple>>(new List<PathPackageTuple>[] { FileTable.GameContent, FileTable.DDSImages, FileTable.Thumbnails, });
                     int searchCount = 0;
                     int searched = 0;
 

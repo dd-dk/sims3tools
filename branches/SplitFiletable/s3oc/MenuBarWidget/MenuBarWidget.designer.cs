@@ -75,6 +75,7 @@
             this.checkForUpdateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.packageEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SuspendLayout();
             // 
             // fileToolStripMenuItem
@@ -345,6 +346,7 @@
             // 
             this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.gameFoldersToolStripMenuItem,
+            this.packageEditorToolStripMenuItem,
             this.userNameToopStripMenuItem,
             this.langSearchToolStripMenuItem,
             this.automaticUpdateCheckToolStripMenuItem,
@@ -363,6 +365,13 @@
             this.gameFoldersToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
             this.gameFoldersToolStripMenuItem.Text = "Game &Folders...";
             this.gameFoldersToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
+            // packageEditorToolStripMenuItem
+            // 
+            this.packageEditorToolStripMenuItem.Name = "packageEditorToolStripMenuItem";
+            this.packageEditorToolStripMenuItem.Size = new System.Drawing.Size(192, 22);
+            this.packageEditorToolStripMenuItem.Text = "Package &Editor...";
+            this.packageEditorToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // userNameToopStripMenuItem
             // 
@@ -505,6 +514,7 @@
         private System.Windows.Forms.ToolStripMenuItem cwstToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem crstToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem crmtToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem caspToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem searchToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem tgiSearchToolStripMenuItem;
@@ -512,6 +522,7 @@
         private System.Windows.Forms.ToolStripMenuItem fixIntegrityToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gameFoldersToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem packageEditorToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem userNameToopStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem langSearchToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem automaticUpdateCheckToolStripMenuItem;
@@ -528,6 +539,5 @@
         private System.Windows.Forms.ToolStripMenuItem licenceToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator advCloningToolStripSeparator;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
-        private System.Windows.Forms.ToolStripMenuItem caspToolStripMenuItem;
     }
 }

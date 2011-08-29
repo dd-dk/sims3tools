@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using s3pi.Interfaces;
+using s3pi.Filetable;
 
 namespace ObjectCloner
 {
@@ -64,7 +65,7 @@ namespace ObjectCloner
             get
             {
                 if (nmap == null)
-                    nmap = new NameMap(FileTable.fb0);
+                    nmap = new NameMap(FileTable.GameContent);
                 return nmap;
             }
         }

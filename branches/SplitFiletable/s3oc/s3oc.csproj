@@ -58,6 +58,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.Extensions.dll</HintPath>
     </Reference>
+    <Reference Include="s3pi.Filetable">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.Filetable.dll</HintPath>
+    </Reference>
     <Reference Include="s3pi.GenericRCOLResource">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.GenericRCOLResource.dll</HintPath>
@@ -78,7 +82,6 @@
       <HintPath>..\s3pi\build\bin\Release\s3pi.RCOLChunks.dll</HintPath>
     </Reference>
     <Reference Include="s3pi.WrapperDealer">
-      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.WrapperDealer.dll</HintPath>
     </Reference>
     <Reference Include="SemWeb">
@@ -117,28 +120,24 @@
     </Compile>
     <Compile Include="Diagnostics.cs" />
     <Compile Include="NameMap.cs" />
-    <Compile Include="RK.cs" />
     <Compile Include="SaveList.cs" />
-    <Compile Include="SettingsForms\EPsDisabled.cs" />
-    <Compile Include="FileTable.cs" />
     <Compile Include="MenuBarWidget\MenuBarWidget.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="MenuBarWidget\MenuBarWidget.designer.cs">
       <DependentUpon>MenuBarWidget.cs</DependentUpon>
     </Compile>
-    <Compile Include="PathPackageTuple.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="s3ocTTL.cs" />
-    <Compile Include="SettingsForms\GameFolders.cs">
+    <Compile Include="SettingsForms\PackageEditorDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SettingsForms\GameFolders.Designer.cs">
-      <DependentUpon>GameFolders.cs</DependentUpon>
+    <Compile Include="SettingsForms\PackageEditorDialog.Designer.cs">
+      <DependentUpon>PackageEditorDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="SettingsForms\StringInputDialog.cs">
       <SubType>Form</SubType>
@@ -155,7 +154,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SpecificResource.cs" />
     <Compile Include="SplitterComponents\FixIntegrityResults.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -214,6 +212,10 @@
       <Link>Acknowledgements.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\s3pi\build\bin\Release\GameFolders.xml">
+      <Link>GameFolders.xml</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="s3ocUpdate.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -238,8 +240,8 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="SettingsForms\GameFolders.resx">
-      <DependentUpon>GameFolders.cs</DependentUpon>
+    <EmbeddedResource Include="SettingsForms\PackageEditorDialog.resx">
+      <DependentUpon>PackageEditorDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SettingsForms\StringInputDialog.resx">
       <DependentUpon>StringInputDialog.cs</DependentUpon>
