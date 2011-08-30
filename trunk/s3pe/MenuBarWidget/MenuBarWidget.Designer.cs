@@ -50,6 +50,7 @@
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editCopyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editSavePreviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editFloatToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editOTEToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -118,6 +119,7 @@
             this.bwcmTextEditor = new System.Windows.Forms.ToolStripMenuItem();
             this.textPreviewContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tpcmCopy = new System.Windows.Forms.ToolStripMenuItem();
+            this.tpcmSavePreview = new System.Windows.Forms.ToolStripMenuItem();
             this.tpcmFloat = new System.Windows.Forms.ToolStripMenuItem();
             this.tpcmOTE = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
@@ -292,6 +294,7 @@
             // 
             this.editToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.editCopyToolStripMenuItem,
+            this.editSavePreviewToolStripMenuItem,
             this.editFloatToolStripMenuItem,
             this.editOTEToolStripMenuItem});
             this.editToolStripMenuItem.Enabled = false;
@@ -308,6 +311,14 @@
             this.editCopyToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.editCopyToolStripMenuItem.Text = "&Copy";
             this.editCopyToolStripMenuItem.Click += new System.EventHandler(this.tsMBE_Click);
+            // 
+            // editSavePreviewToolStripMenuItem
+            // 
+            this.editSavePreviewToolStripMenuItem.Enabled = false;
+            this.editSavePreviewToolStripMenuItem.Name = "editSavePreviewToolStripMenuItem";
+            this.editSavePreviewToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.editSavePreviewToolStripMenuItem.Text = "&Save preview...";
+            this.editSavePreviewToolStripMenuItem.Click += new System.EventHandler(this.tsMBE_Click);
             // 
             // editFloatToolStripMenuItem
             // 
@@ -875,10 +886,11 @@
             // 
             this.textPreviewContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tpcmCopy,
+            this.tpcmSavePreview,
             this.tpcmFloat,
             this.tpcmOTE});
             this.textPreviewContextMenuStrip.Name = "textPreviewContextMenuStrip";
-            this.textPreviewContextMenuStrip.Size = new System.Drawing.Size(168, 70);
+            this.textPreviewContextMenuStrip.Size = new System.Drawing.Size(168, 92);
             this.textPreviewContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.cmsTP_Opening);
             // 
             // tpcmCopy
@@ -889,6 +901,14 @@
             this.tpcmCopy.Size = new System.Drawing.Size(167, 22);
             this.tpcmCopy.Text = "&Copy";
             this.tpcmCopy.Click += new System.EventHandler(this.tsCMSTP_Click);
+            // 
+            // tpcmSavePreview
+            // 
+            this.tpcmSavePreview.Enabled = false;
+            this.tpcmSavePreview.Name = "tpcmSavePreview";
+            this.tpcmSavePreview.Size = new System.Drawing.Size(167, 22);
+            this.tpcmSavePreview.Text = "&Save preview...";
+            this.tpcmSavePreview.Click += new System.EventHandler(this.tsCMSTP_Click);
             // 
             // tpcmFloat
             // 
@@ -1014,5 +1034,7 @@
         private System.Windows.Forms.ToolStripMenuItem organiseBookmarksToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem askToAutosaveDBCToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
+        private System.Windows.Forms.ToolStripMenuItem tpcmSavePreview;
+        private System.Windows.Forms.ToolStripMenuItem editSavePreviewToolStripMenuItem;
     }
 }

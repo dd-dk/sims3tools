@@ -47,7 +47,7 @@ namespace S3PIDemoFE
                 setMaxRecentToolStripMenuItem, bookmarkCurrentToolStripMenuItem, setMaxBookmarksToolStripMenuItem, organiseBookmarksToolStripMenuItem,
                 exitToolStripMenuItem,
                 //Edit
-                editCopyToolStripMenuItem, editFloatToolStripMenuItem, editOTEToolStripMenuItem,
+                editCopyToolStripMenuItem, editSavePreviewToolStripMenuItem, editFloatToolStripMenuItem, editOTEToolStripMenuItem,
                 //Resource
                 addToolStripMenuItem, resCopyToolStripMenuItem1, resPasteToolStripMenuItem1, duplicateToolStripMenuItem, replaceToolStripMenuItem,
                 compressedToolStripMenuItem, deletedToolStripMenuItem, detailsToolStripMenuItem, selectAllToolStripMenuItem,
@@ -64,7 +64,7 @@ namespace S3PIDemoFE
             });
             cmsTP = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //TextPreviewContextMenuStrip
-                tpcmCopy, tpcmFloat, tpcmOTE,
+                tpcmCopy, tpcmSavePreview, tpcmFloat, tpcmOTE,
             });
             cmsBW = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //BrowserWidgetContextMenuStrip
@@ -100,7 +100,7 @@ namespace S3PIDemoFE
             MBF_new = 0, MBF_open, MBF_save, MBF_saveAs, MBF_saveCopyAs, MBF_close,
             MBF_setMaxRecent, MBF_bookmarkCurrent, MBF_setMaxBookmarks, MBF_organiseBookmarks,
             MBF_exit,
-            MBE_copy, MBE_float, MBE_ote,
+            MBE_copy, MBE_save, MBE_float, MBE_ote,
             MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_replace,
             MBR_compressed, MBR_isdeleted, MBR_details, MBR_selectAll,
             MBR_importResources, MBR_importPackages, MBR_importAsDBC, MBR_exportResources, MBR_exportToPackage,
@@ -114,7 +114,7 @@ namespace S3PIDemoFE
 
         public enum CMS_TP
         {
-            MBE_copy = (int)MB.MBE_copy, MBE_float, MBE_ote,
+            MBE_copy = (int)MB.MBE_copy, MBE_save, MBE_float, MBE_ote,
         }
 
         public enum CMS_BW

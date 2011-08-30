@@ -629,6 +629,7 @@ namespace S3PIDemoFE
             Application.DoEvents();
             bool enable = resException == null && resource != null;
             menuBarWidget1.Enable(MenuBarWidget.MB.MBE_copy, enable && canCopy());
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBE_save, enable && canSavePreview());
             menuBarWidget1.Enable(MenuBarWidget.MB.MBE_float, enable && canFloat());
             menuBarWidget1.Enable(MenuBarWidget.MB.MBE_ote, enable && canOTE());
         }
@@ -642,6 +643,7 @@ namespace S3PIDemoFE
                 switch (mn.mn)
                 {
                     case MenuBarWidget.MB.MBE_copy: editCopy(); break;
+                    case MenuBarWidget.MB.MBE_save: editSavePreview(); break;
                     case MenuBarWidget.MB.MBE_float: editFloat(); break;
                     case MenuBarWidget.MB.MBE_ote: editOTE(); break;
                 }
@@ -677,6 +679,46 @@ namespace S3PIDemoFE
             TextReader t = new StringReader(selectedText);
             for (var line = t.ReadLine(); line != null; line = t.ReadLine()) s.AppendLine(line);
             Clipboard.SetText(s.ToString(), TextDataFormat.UnicodeText);
+        }
+
+        bool canSavePreview()
+        {
+            if (browserWidget1.SelectedResource as AResourceIndexEntry == null) return false;
+            if (pnAuto.Controls.Count < 1) return false;
+
+            if (pnAuto.Controls[0] is RichTextBox) return true;
+            if (pnAuto.Controls[0] is HexWidget) return true;
+            return false;
+        }
+        private void editSavePreview()
+        {
+            if (!canSavePreview()) return;
+            TGIN tgin = browserWidget1.SelectedResource as AResourceIndexEntry;
+            tgin.ResName = resourceName;
+
+            SaveFileDialog sfd = new SaveFileDialog()
+            {
+                DefaultExt = pnAuto.Controls[0] is RichTextBox ? ".txt" : ".hex",
+                AddExtension = true,
+                CheckPathExists = true,
+                FileName = tgin + (pnAuto.Controls[0] is RichTextBox ? ".txt" : ".hex"),
+                Filter = pnAuto.Controls[0] is RichTextBox ? "Text documents (*.txt*)|*.txt|All files (*.*)|*.*" : "Hex dumps (*.hex)|*.hex|All files (*.*)|*.*",
+                FilterIndex = 1,
+                OverwritePrompt = true,
+                Title = "Save preview content",
+                ValidateNames = true
+            };
+            DialogResult dr = sfd.ShowDialog();
+            if (dr != DialogResult.OK)
+                return;
+
+            using (StreamWriter sw = new StreamWriter(sfd.FileName))
+            {
+                if (pnAuto.Controls[0] is RichTextBox) { sw.Write((pnAuto.Controls[0] as RichTextBox).Text); }
+                else { sw.Write((pnAuto.Controls[0] as HexWidget).Text); }
+                sw.Flush();
+                sw.Close();
+            }
         }
 
         bool canFloat()
