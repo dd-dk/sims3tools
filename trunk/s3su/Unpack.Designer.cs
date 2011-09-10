@@ -29,8 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Unpack));
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
+            this.ofdSims3Pack = new System.Windows.Forms.OpenFileDialog();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -41,18 +40,15 @@
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.tbStatus = new System.Windows.Forms.TextBox();
+            this.sfdTarget = new System.Windows.Forms.SaveFileDialog();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // openFileDialog1
+            // ofdSims3Pack
             // 
-            this.openFileDialog1.Filter = "Sims3Pack files|*.Sims3Pack|All files|*.*";
-            this.openFileDialog1.SupportMultiDottedExtensions = true;
-            this.openFileDialog1.Title = "Open Sims3Pack";
-            // 
-            // folderBrowserDialog1
-            // 
-            this.folderBrowserDialog1.Description = "Select the folder into which the Sims3Pack should be extracted.";
+            this.ofdSims3Pack.Filter = "Sims3Pack files|*.Sims3Pack|All files|*.*";
+            this.ofdSims3Pack.SupportMultiDottedExtensions = true;
+            this.ofdSims3Pack.Title = "Select Sims3Pack";
             // 
             // tableLayoutPanel1
             // 
@@ -76,7 +72,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(456, 61);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(564, 61);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // label1
@@ -105,7 +101,7 @@
             this.tbSource.Location = new System.Drawing.Point(76, 4);
             this.tbSource.Name = "tbSource";
             this.tbSource.ReadOnly = true;
-            this.tbSource.Size = new System.Drawing.Size(296, 20);
+            this.tbSource.Size = new System.Drawing.Size(404, 20);
             this.tbSource.TabIndex = 2;
             // 
             // tbTarget
@@ -114,24 +110,24 @@
             this.tbTarget.Location = new System.Drawing.Point(76, 33);
             this.tbTarget.Name = "tbTarget";
             this.tbTarget.ReadOnly = true;
-            this.tbTarget.Size = new System.Drawing.Size(296, 20);
+            this.tbTarget.Size = new System.Drawing.Size(404, 20);
             this.tbTarget.TabIndex = 5;
             // 
             // btnSource
             // 
             this.btnSource.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnSource.Location = new System.Drawing.Point(378, 3);
+            this.btnSource.Location = new System.Drawing.Point(486, 3);
             this.btnSource.Name = "btnSource";
             this.btnSource.Size = new System.Drawing.Size(75, 23);
             this.btnSource.TabIndex = 3;
-            this.btnSource.Text = "Browse...";
+            this.btnSource.Text = "Select...";
             this.btnSource.UseVisualStyleBackColor = true;
             this.btnSource.Click += new System.EventHandler(this.btnSource_Click);
             // 
             // btnTarget
             // 
             this.btnTarget.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnTarget.Location = new System.Drawing.Point(378, 32);
+            this.btnTarget.Location = new System.Drawing.Point(486, 32);
             this.btnTarget.Name = "btnTarget";
             this.btnTarget.Size = new System.Drawing.Size(75, 23);
             this.btnTarget.TabIndex = 6;
@@ -144,7 +140,7 @@
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnOK.Enabled = false;
-            this.btnOK.Location = new System.Drawing.Point(393, 79);
+            this.btnOK.Location = new System.Drawing.Point(501, 79);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 2;
@@ -156,7 +152,7 @@
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(312, 79);
+            this.btnCancel.Location = new System.Drawing.Point(420, 79);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 3;
@@ -172,9 +168,17 @@
             this.tbStatus.Location = new System.Drawing.Point(12, 81);
             this.tbStatus.Name = "tbStatus";
             this.tbStatus.ReadOnly = true;
-            this.tbStatus.Size = new System.Drawing.Size(294, 20);
+            this.tbStatus.Size = new System.Drawing.Size(402, 20);
             this.tbStatus.TabIndex = 0;
             this.tbStatus.TabStop = false;
+            // 
+            // sfdTarget
+            // 
+            this.sfdTarget.AddExtension = false;
+            this.sfdTarget.FileName = "Filename will be ignored";
+            this.sfdTarget.Filter = "*|*.*";
+            this.sfdTarget.OverwritePrompt = false;
+            this.sfdTarget.Title = "Select target folder";
             // 
             // Unpack
             // 
@@ -182,7 +186,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(480, 114);
+            this.ClientSize = new System.Drawing.Size(588, 114);
             this.Controls.Add(this.tbStatus);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
@@ -203,8 +207,7 @@
 
         #endregion
 
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
+        private System.Windows.Forms.OpenFileDialog ofdSims3Pack;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
@@ -215,6 +218,7 @@
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.TextBox tbStatus;
+        private System.Windows.Forms.SaveFileDialog sfdTarget;
     }
 }
 

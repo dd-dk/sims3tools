@@ -51,5 +51,7 @@ namespace S3Pack
             }
             return 0;
         }
+
+        public static string extension = ".Sims3Pack";
     }
 }

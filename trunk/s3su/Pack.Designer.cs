@@ -42,9 +42,6 @@
             this.tbTitle = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
@@ -54,37 +51,34 @@
             this.tbArchiveVersion = new System.Windows.Forms.TextBox();
             this.tbCodeVersion = new System.Windows.Forms.TextBox();
             this.tbGameVersion = new System.Windows.Forms.TextBox();
-            this.tbPackageId = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.ckbArchiveVersion = new System.Windows.Forms.CheckBox();
+            this.ckbCodeVersion = new System.Windows.Forms.CheckBox();
+            this.ckbGameVersion = new System.Windows.Forms.CheckBox();
+            this.label18 = new System.Windows.Forms.Label();
+            this.tbDisplayName = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
+            this.ckbOWLocalName = new System.Windows.Forms.CheckBox();
             this.tbMinReqVersion = new System.Windows.Forms.TextBox();
             this.label14 = new System.Windows.Forms.Label();
             this.tbAssetVersion = new System.Windows.Forms.TextBox();
+            this.ckbMinReqVersion = new System.Windows.Forms.CheckBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
             this.tbDate = new System.Windows.Forms.TextBox();
-            this.label15 = new System.Windows.Forms.Label();
-            this.ckbArchiveVersion = new System.Windows.Forms.CheckBox();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.checkBox2 = new System.Windows.Forms.CheckBox();
-            this.checkBox3 = new System.Windows.Forms.CheckBox();
-            this.checkBox4 = new System.Windows.Forms.CheckBox();
-            this.label17 = new System.Windows.Forms.Label();
-            this.tbThumbnail = new System.Windows.Forms.TextBox();
-            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.btnThumbnail = new System.Windows.Forms.Button();
-            this.btnClearThumbnail = new System.Windows.Forms.Button();
-            this.label18 = new System.Windows.Forms.Label();
+            this.ckbAssetVersion = new System.Windows.Forms.CheckBox();
+            this.tbPackageId = new System.Windows.Forms.TextBox();
             this.label19 = new System.Windows.Forms.Label();
-            this.tbDisplayName = new System.Windows.Forms.TextBox();
             this.tbDescription = new System.Windows.Forms.TextBox();
+            this.btnNewGUID = new System.Windows.Forms.Button();
+            this.ckbOWLocalDesc = new System.Windows.Forms.CheckBox();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.tbStatus = new System.Windows.Forms.TextBox();
             this.ofdSelectPackage = new System.Windows.Forms.OpenFileDialog();
             this.ofdThumbnail = new System.Windows.Forms.OpenFileDialog();
             this.sfdSims3Pack = new System.Windows.Forms.SaveFileDialog();
-            this.label16 = new System.Windows.Forms.Label();
-            this.tbEPFlags = new System.Windows.Forms.TextBox();
-            this.checkBox5 = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
-            this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -108,9 +102,6 @@
             this.tableLayoutPanel1.Controls.Add(this.tbTitle, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.label5, 0, 6);
             this.tableLayoutPanel1.Controls.Add(this.label6, 0, 7);
-            this.tableLayoutPanel1.Controls.Add(this.label11, 0, 15);
-            this.tableLayoutPanel1.Controls.Add(this.label10, 0, 13);
-            this.tableLayoutPanel1.Controls.Add(this.label9, 0, 12);
             this.tableLayoutPanel1.Controls.Add(this.label8, 0, 11);
             this.tableLayoutPanel1.Controls.Add(this.label7, 0, 10);
             this.tableLayoutPanel1.Controls.Add(this.label12, 0, 8);
@@ -120,30 +111,30 @@
             this.tableLayoutPanel1.Controls.Add(this.tbArchiveVersion, 1, 9);
             this.tableLayoutPanel1.Controls.Add(this.tbCodeVersion, 1, 10);
             this.tableLayoutPanel1.Controls.Add(this.tbGameVersion, 1, 11);
-            this.tableLayoutPanel1.Controls.Add(this.tbPackageId, 1, 12);
-            this.tableLayoutPanel1.Controls.Add(this.tbMinReqVersion, 1, 15);
-            this.tableLayoutPanel1.Controls.Add(this.label14, 0, 14);
-            this.tableLayoutPanel1.Controls.Add(this.tbAssetVersion, 1, 14);
-            this.tableLayoutPanel1.Controls.Add(this.tbDate, 1, 13);
             this.tableLayoutPanel1.Controls.Add(this.label15, 2, 6);
             this.tableLayoutPanel1.Controls.Add(this.ckbArchiveVersion, 2, 9);
-            this.tableLayoutPanel1.Controls.Add(this.checkBox1, 2, 10);
-            this.tableLayoutPanel1.Controls.Add(this.checkBox2, 2, 11);
-            this.tableLayoutPanel1.Controls.Add(this.checkBox3, 2, 14);
-            this.tableLayoutPanel1.Controls.Add(this.checkBox4, 2, 15);
-            this.tableLayoutPanel1.Controls.Add(this.label17, 0, 19);
-            this.tableLayoutPanel1.Controls.Add(this.tbThumbnail, 1, 19);
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 2, 19);
-            this.tableLayoutPanel1.Controls.Add(this.label18, 0, 16);
-            this.tableLayoutPanel1.Controls.Add(this.label19, 0, 17);
-            this.tableLayoutPanel1.Controls.Add(this.tbDisplayName, 1, 16);
-            this.tableLayoutPanel1.Controls.Add(this.tbDescription, 1, 17);
-            this.tableLayoutPanel1.Controls.Add(this.label16, 0, 18);
-            this.tableLayoutPanel1.Controls.Add(this.tbEPFlags, 1, 18);
-            this.tableLayoutPanel1.Controls.Add(this.checkBox5, 2, 18);
+            this.tableLayoutPanel1.Controls.Add(this.ckbCodeVersion, 2, 10);
+            this.tableLayoutPanel1.Controls.Add(this.ckbGameVersion, 2, 11);
+            this.tableLayoutPanel1.Controls.Add(this.label18, 0, 12);
+            this.tableLayoutPanel1.Controls.Add(this.tbDisplayName, 1, 12);
+            this.tableLayoutPanel1.Controls.Add(this.label11, 0, 17);
+            this.tableLayoutPanel1.Controls.Add(this.ckbOWLocalName, 2, 12);
+            this.tableLayoutPanel1.Controls.Add(this.tbMinReqVersion, 1, 17);
+            this.tableLayoutPanel1.Controls.Add(this.label14, 0, 16);
+            this.tableLayoutPanel1.Controls.Add(this.tbAssetVersion, 1, 16);
+            this.tableLayoutPanel1.Controls.Add(this.ckbMinReqVersion, 2, 17);
+            this.tableLayoutPanel1.Controls.Add(this.label10, 0, 15);
+            this.tableLayoutPanel1.Controls.Add(this.label9, 0, 14);
+            this.tableLayoutPanel1.Controls.Add(this.tbDate, 1, 15);
+            this.tableLayoutPanel1.Controls.Add(this.ckbAssetVersion, 2, 16);
+            this.tableLayoutPanel1.Controls.Add(this.tbPackageId, 1, 14);
+            this.tableLayoutPanel1.Controls.Add(this.label19, 0, 13);
+            this.tableLayoutPanel1.Controls.Add(this.tbDescription, 1, 13);
+            this.tableLayoutPanel1.Controls.Add(this.btnNewGUID, 2, 14);
+            this.tableLayoutPanel1.Controls.Add(this.ckbOWLocalDesc, 2, 13);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 12);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 21;
+            this.tableLayoutPanel1.RowCount = 19;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -162,11 +153,9 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(665, 509);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(665, 449);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // label1
@@ -256,7 +245,6 @@
             this.tbCreatorName.Name = "tbCreatorName";
             this.tbCreatorName.Size = new System.Drawing.Size(478, 20);
             this.tbCreatorName.TabIndex = 5;
-            this.tbCreatorName.TextChanged += new System.EventHandler(this.CreatorNameTitle_TextChanged);
             // 
             // tbTitle
             // 
@@ -265,7 +253,6 @@
             this.tbTitle.Name = "tbTitle";
             this.tbTitle.Size = new System.Drawing.Size(478, 20);
             this.tbTitle.TabIndex = 7;
-            this.tbTitle.TextChanged += new System.EventHandler(this.CreatorNameTitle_TextChanged);
             // 
             // label5
             // 
@@ -288,36 +275,6 @@
             this.label6.Size = new System.Drawing.Size(31, 13);
             this.label6.TabIndex = 13;
             this.label6.Text = "Type";
-            // 
-            // label11
-            // 
-            this.label11.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(18, 350);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(79, 13);
-            this.label11.TabIndex = 33;
-            this.label11.Text = "MinReqVersion";
-            // 
-            // label10
-            // 
-            this.label10.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(67, 298);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(30, 13);
-            this.label10.TabIndex = 28;
-            this.label10.Text = "Date";
-            // 
-            // label9
-            // 
-            this.label9.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(38, 272);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(59, 13);
-            this.label9.TabIndex = 26;
-            this.label9.Text = "PackageId";
             // 
             // label8
             // 
@@ -365,13 +322,13 @@
             this.cbType.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.cbType.FormattingEnabled = true;
             this.cbType.Items.AddRange(new object[] {
+            "lot",
             "object",
             "pattern"});
             this.cbType.Location = new System.Drawing.Point(103, 138);
             this.cbType.Name = "cbType";
             this.cbType.Size = new System.Drawing.Size(478, 21);
             this.cbType.TabIndex = 14;
-            this.cbType.SelectionChangeCommitted += new System.EventHandler(this.cbType_SelectionChangeCommitted);
             this.cbType.Leave += new System.EventHandler(this.cbType_Leave);
             // 
             // tbSubType
@@ -401,7 +358,7 @@
             this.tbCodeVersion.ReadOnly = true;
             this.tbCodeVersion.Size = new System.Drawing.Size(478, 20);
             this.tbCodeVersion.TabIndex = 21;
-            this.tbCodeVersion.Text = "0.108.0.428";
+            this.tbCodeVersion.Text = "0.2.0.128";
             // 
             // tbGameVersion
             // 
@@ -411,55 +368,7 @@
             this.tbGameVersion.ReadOnly = true;
             this.tbGameVersion.Size = new System.Drawing.Size(478, 20);
             this.tbGameVersion.TabIndex = 24;
-            this.tbGameVersion.Text = "0.0.0.0";
-            // 
-            // tbPackageId
-            // 
-            this.tbPackageId.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbPackageId.Location = new System.Drawing.Point(103, 269);
-            this.tbPackageId.Name = "tbPackageId";
-            this.tbPackageId.ReadOnly = true;
-            this.tbPackageId.Size = new System.Drawing.Size(478, 20);
-            this.tbPackageId.TabIndex = 27;
-            // 
-            // tbMinReqVersion
-            // 
-            this.tbMinReqVersion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbMinReqVersion.Location = new System.Drawing.Point(103, 347);
-            this.tbMinReqVersion.Name = "tbMinReqVersion";
-            this.tbMinReqVersion.ReadOnly = true;
-            this.tbMinReqVersion.Size = new System.Drawing.Size(478, 20);
-            this.tbMinReqVersion.TabIndex = 34;
-            this.tbMinReqVersion.Text = "1.0.0.000000";
-            // 
-            // label14
-            // 
-            this.label14.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(29, 324);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(68, 13);
-            this.label14.TabIndex = 30;
-            this.label14.Text = "AssetVersion";
-            // 
-            // tbAssetVersion
-            // 
-            this.tbAssetVersion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbAssetVersion.Location = new System.Drawing.Point(103, 321);
-            this.tbAssetVersion.Name = "tbAssetVersion";
-            this.tbAssetVersion.ReadOnly = true;
-            this.tbAssetVersion.Size = new System.Drawing.Size(478, 20);
-            this.tbAssetVersion.TabIndex = 31;
-            this.tbAssetVersion.Text = "0";
-            // 
-            // tbDate
-            // 
-            this.tbDate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbDate.Location = new System.Drawing.Point(103, 295);
-            this.tbDate.Name = "tbDate";
-            this.tbDate.ReadOnly = true;
-            this.tbDate.Size = new System.Drawing.Size(478, 20);
-            this.tbDate.TabIndex = 29;
+            this.tbGameVersion.Text = "6.1.11.009001";
             // 
             // label15
             // 
@@ -471,6 +380,7 @@
             this.label15.Size = new System.Drawing.Size(46, 13);
             this.label15.TabIndex = 12;
             this.label15.Text = "Enable";
+            this.label15.Visible = false;
             // 
             // ckbArchiveVersion
             // 
@@ -482,151 +392,212 @@
             this.ckbArchiveVersion.Size = new System.Drawing.Size(15, 14);
             this.ckbArchiveVersion.TabIndex = 19;
             this.ckbArchiveVersion.UseVisualStyleBackColor = true;
+            this.ckbArchiveVersion.Visible = false;
             // 
-            // checkBox1
+            // ckbCodeVersion
             // 
-            this.checkBox1.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Enabled = false;
-            this.checkBox1.Location = new System.Drawing.Point(617, 220);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(15, 14);
-            this.checkBox1.TabIndex = 22;
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.ckbCodeVersion.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbCodeVersion.AutoSize = true;
+            this.ckbCodeVersion.Enabled = false;
+            this.ckbCodeVersion.Location = new System.Drawing.Point(617, 220);
+            this.ckbCodeVersion.Name = "ckbCodeVersion";
+            this.ckbCodeVersion.Size = new System.Drawing.Size(15, 14);
+            this.ckbCodeVersion.TabIndex = 22;
+            this.ckbCodeVersion.UseVisualStyleBackColor = true;
+            this.ckbCodeVersion.Visible = false;
             // 
-            // checkBox2
+            // ckbGameVersion
             // 
-            this.checkBox2.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.checkBox2.AutoSize = true;
-            this.checkBox2.Enabled = false;
-            this.checkBox2.Location = new System.Drawing.Point(617, 246);
-            this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(15, 14);
-            this.checkBox2.TabIndex = 25;
-            this.checkBox2.UseVisualStyleBackColor = true;
-            // 
-            // checkBox3
-            // 
-            this.checkBox3.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.checkBox3.AutoSize = true;
-            this.checkBox3.Enabled = false;
-            this.checkBox3.Location = new System.Drawing.Point(617, 324);
-            this.checkBox3.Name = "checkBox3";
-            this.checkBox3.Size = new System.Drawing.Size(15, 14);
-            this.checkBox3.TabIndex = 32;
-            this.checkBox3.UseVisualStyleBackColor = true;
-            // 
-            // checkBox4
-            // 
-            this.checkBox4.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.checkBox4.AutoSize = true;
-            this.checkBox4.Enabled = false;
-            this.checkBox4.Location = new System.Drawing.Point(617, 350);
-            this.checkBox4.Name = "checkBox4";
-            this.checkBox4.Size = new System.Drawing.Size(15, 14);
-            this.checkBox4.TabIndex = 35;
-            this.checkBox4.UseVisualStyleBackColor = true;
-            // 
-            // label17
-            // 
-            this.label17.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(41, 470);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(56, 13);
-            this.label17.TabIndex = 43;
-            this.label17.Text = "Thumbnail";
-            // 
-            // tbThumbnail
-            // 
-            this.tbThumbnail.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbThumbnail.Location = new System.Drawing.Point(103, 467);
-            this.tbThumbnail.Name = "tbThumbnail";
-            this.tbThumbnail.ReadOnly = true;
-            this.tbThumbnail.Size = new System.Drawing.Size(478, 20);
-            this.tbThumbnail.TabIndex = 44;
-            // 
-            // tableLayoutPanel2
-            // 
-            this.tableLayoutPanel2.AutoSize = true;
-            this.tableLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel2.ColumnCount = 1;
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel2.Controls.Add(this.btnThumbnail, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.btnClearThumbnail, 0, 1);
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(584, 448);
-            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 2;
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(81, 58);
-            this.tableLayoutPanel2.TabIndex = 45;
-            // 
-            // btnThumbnail
-            // 
-            this.btnThumbnail.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnThumbnail.Location = new System.Drawing.Point(3, 3);
-            this.btnThumbnail.Name = "btnThumbnail";
-            this.btnThumbnail.Size = new System.Drawing.Size(75, 23);
-            this.btnThumbnail.TabIndex = 1;
-            this.btnThumbnail.Text = "Select...";
-            this.btnThumbnail.UseVisualStyleBackColor = true;
-            this.btnThumbnail.Click += new System.EventHandler(this.btnThumbnail_Click);
-            // 
-            // btnClearThumbnail
-            // 
-            this.btnClearThumbnail.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnClearThumbnail.Location = new System.Drawing.Point(3, 32);
-            this.btnClearThumbnail.Name = "btnClearThumbnail";
-            this.btnClearThumbnail.Size = new System.Drawing.Size(75, 23);
-            this.btnClearThumbnail.TabIndex = 2;
-            this.btnClearThumbnail.Text = "Clear";
-            this.btnClearThumbnail.UseVisualStyleBackColor = true;
-            this.btnClearThumbnail.Click += new System.EventHandler(this.btnClearThumbnail_Click);
+            this.ckbGameVersion.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbGameVersion.AutoSize = true;
+            this.ckbGameVersion.Enabled = false;
+            this.ckbGameVersion.Location = new System.Drawing.Point(617, 246);
+            this.ckbGameVersion.Name = "ckbGameVersion";
+            this.ckbGameVersion.Size = new System.Drawing.Size(15, 14);
+            this.ckbGameVersion.TabIndex = 25;
+            this.ckbGameVersion.UseVisualStyleBackColor = true;
+            this.ckbGameVersion.Visible = false;
             // 
             // label18
             // 
             this.label18.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(28, 376);
+            this.label18.Location = new System.Drawing.Point(28, 272);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(69, 13);
-            this.label18.TabIndex = 36;
+            this.label18.TabIndex = 37;
             this.label18.Text = "DisplayName";
+            // 
+            // tbDisplayName
+            // 
+            this.tbDisplayName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbDisplayName.Location = new System.Drawing.Point(103, 269);
+            this.tbDisplayName.Name = "tbDisplayName";
+            this.tbDisplayName.Size = new System.Drawing.Size(478, 20);
+            this.tbDisplayName.TabIndex = 38;
+            // 
+            // label11
+            // 
+            this.label11.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(18, 427);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(79, 13);
+            this.label11.TabIndex = 34;
+            this.label11.Text = "MinReqVersion";
+            // 
+            // ckbOWLocalName
+            // 
+            this.ckbOWLocalName.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbOWLocalName.AutoSize = true;
+            this.ckbOWLocalName.Location = new System.Drawing.Point(592, 270);
+            this.ckbOWLocalName.Name = "ckbOWLocalName";
+            this.ckbOWLocalName.Size = new System.Drawing.Size(65, 17);
+            this.ckbOWLocalName.TabIndex = 39;
+            this.ckbOWLocalName.Text = "All langs";
+            this.ckbOWLocalName.UseVisualStyleBackColor = true;
+            this.ckbOWLocalName.Visible = false;
+            // 
+            // tbMinReqVersion
+            // 
+            this.tbMinReqVersion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbMinReqVersion.Location = new System.Drawing.Point(103, 424);
+            this.tbMinReqVersion.Name = "tbMinReqVersion";
+            this.tbMinReqVersion.ReadOnly = true;
+            this.tbMinReqVersion.Size = new System.Drawing.Size(478, 20);
+            this.tbMinReqVersion.TabIndex = 35;
+            this.tbMinReqVersion.Text = "0.0.0.000000";
+            // 
+            // label14
+            // 
+            this.label14.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(29, 401);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(68, 13);
+            this.label14.TabIndex = 31;
+            this.label14.Text = "AssetVersion";
+            // 
+            // tbAssetVersion
+            // 
+            this.tbAssetVersion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbAssetVersion.Location = new System.Drawing.Point(103, 398);
+            this.tbAssetVersion.Name = "tbAssetVersion";
+            this.tbAssetVersion.ReadOnly = true;
+            this.tbAssetVersion.Size = new System.Drawing.Size(478, 20);
+            this.tbAssetVersion.TabIndex = 32;
+            this.tbAssetVersion.Text = "0";
+            // 
+            // ckbMinReqVersion
+            // 
+            this.ckbMinReqVersion.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbMinReqVersion.AutoSize = true;
+            this.ckbMinReqVersion.Enabled = false;
+            this.ckbMinReqVersion.Location = new System.Drawing.Point(617, 427);
+            this.ckbMinReqVersion.Name = "ckbMinReqVersion";
+            this.ckbMinReqVersion.Size = new System.Drawing.Size(15, 14);
+            this.ckbMinReqVersion.TabIndex = 36;
+            this.ckbMinReqVersion.UseVisualStyleBackColor = true;
+            this.ckbMinReqVersion.Visible = false;
+            // 
+            // label10
+            // 
+            this.label10.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(67, 375);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(30, 13);
+            this.label10.TabIndex = 29;
+            this.label10.Text = "Date";
+            // 
+            // label9
+            // 
+            this.label9.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(38, 348);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(59, 13);
+            this.label9.TabIndex = 26;
+            this.label9.Text = "PackageId";
+            // 
+            // tbDate
+            // 
+            this.tbDate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbDate.Location = new System.Drawing.Point(103, 372);
+            this.tbDate.Name = "tbDate";
+            this.tbDate.ReadOnly = true;
+            this.tbDate.Size = new System.Drawing.Size(478, 20);
+            this.tbDate.TabIndex = 30;
+            // 
+            // ckbAssetVersion
+            // 
+            this.ckbAssetVersion.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbAssetVersion.AutoSize = true;
+            this.ckbAssetVersion.Enabled = false;
+            this.ckbAssetVersion.Location = new System.Drawing.Point(617, 401);
+            this.ckbAssetVersion.Name = "ckbAssetVersion";
+            this.ckbAssetVersion.Size = new System.Drawing.Size(15, 14);
+            this.ckbAssetVersion.TabIndex = 33;
+            this.ckbAssetVersion.UseVisualStyleBackColor = true;
+            this.ckbAssetVersion.Visible = false;
+            // 
+            // tbPackageId
+            // 
+            this.tbPackageId.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbPackageId.Location = new System.Drawing.Point(103, 344);
+            this.tbPackageId.Name = "tbPackageId";
+            this.tbPackageId.ReadOnly = true;
+            this.tbPackageId.Size = new System.Drawing.Size(478, 20);
+            this.tbPackageId.TabIndex = 27;
             // 
             // label19
             // 
             this.label19.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(37, 402);
+            this.label19.Location = new System.Drawing.Point(37, 309);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(60, 13);
-            this.label19.TabIndex = 38;
+            this.label19.TabIndex = 40;
             this.label19.Text = "Description";
-            // 
-            // tbDisplayName
-            // 
-            this.tbDisplayName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbDisplayName.Location = new System.Drawing.Point(103, 373);
-            this.tbDisplayName.Name = "tbDisplayName";
-            this.tbDisplayName.Size = new System.Drawing.Size(478, 20);
-            this.tbDisplayName.TabIndex = 37;
             // 
             // tbDescription
             // 
             this.tbDescription.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbDescription.Location = new System.Drawing.Point(103, 399);
+            this.tbDescription.Location = new System.Drawing.Point(103, 295);
+            this.tbDescription.Multiline = true;
             this.tbDescription.Name = "tbDescription";
-            this.tbDescription.Size = new System.Drawing.Size(478, 20);
-            this.tbDescription.TabIndex = 39;
+            this.tbDescription.Size = new System.Drawing.Size(478, 42);
+            this.tbDescription.TabIndex = 41;
+            // 
+            // btnNewGUID
+            // 
+            this.btnNewGUID.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnNewGUID.Location = new System.Drawing.Point(587, 343);
+            this.btnNewGUID.Name = "btnNewGUID";
+            this.btnNewGUID.Size = new System.Drawing.Size(75, 23);
+            this.btnNewGUID.TabIndex = 28;
+            this.btnNewGUID.Text = "New ID";
+            this.btnNewGUID.UseVisualStyleBackColor = true;
+            this.btnNewGUID.Click += new System.EventHandler(this.btnNewGUID_Click);
+            // 
+            // ckbOWLocalDesc
+            // 
+            this.ckbOWLocalDesc.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbOWLocalDesc.AutoSize = true;
+            this.ckbOWLocalDesc.Location = new System.Drawing.Point(592, 307);
+            this.ckbOWLocalDesc.Name = "ckbOWLocalDesc";
+            this.ckbOWLocalDesc.Size = new System.Drawing.Size(65, 17);
+            this.ckbOWLocalDesc.TabIndex = 42;
+            this.ckbOWLocalDesc.Text = "All langs";
+            this.ckbOWLocalDesc.UseVisualStyleBackColor = true;
+            this.ckbOWLocalDesc.Visible = false;
             // 
             // btnOK
             // 
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnOK.Enabled = false;
-            this.btnOK.Location = new System.Drawing.Point(602, 527);
+            this.btnOK.Location = new System.Drawing.Point(602, 467);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 2;
@@ -638,7 +609,7 @@
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(521, 527);
+            this.btnCancel.Location = new System.Drawing.Point(521, 467);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 3;
@@ -651,7 +622,7 @@
             this.tbStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tbStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tbStatus.Location = new System.Drawing.Point(12, 530);
+            this.tbStatus.Location = new System.Drawing.Point(12, 470);
             this.tbStatus.Name = "tbStatus";
             this.tbStatus.ReadOnly = true;
             this.tbStatus.Size = new System.Drawing.Size(503, 20);
@@ -661,7 +632,8 @@
             // ofdSelectPackage
             // 
             this.ofdSelectPackage.FileName = "*.package";
-            this.ofdSelectPackage.Filter = "Sims3 Packages|*.package;*.world;*.nhd|All files (*.*)|*.*";
+            this.ofdSelectPackage.Filter = "Sims3 Packages|*.package;*.world;*.nhd|Sims3Pack XML (0x*.xml)|0x*.xml|All files " +
+    "(*.*)|*.*";
             this.ofdSelectPackage.Title = "Select Sims3 Package";
             // 
             // ofdThumbnail
@@ -675,44 +647,13 @@
             this.sfdSims3Pack.Filter = "Sims3Packs (*.Sims3Pack)|*.Sims3Pack|All files (*.*)|*.*";
             this.sfdSims3Pack.Title = "Create Sims3Pack";
             // 
-            // label16
-            // 
-            this.label16.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(51, 428);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(46, 13);
-            this.label16.TabIndex = 40;
-            this.label16.Text = "EPFlags";
-            // 
-            // tbEPFlags
-            // 
-            this.tbEPFlags.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbEPFlags.Location = new System.Drawing.Point(103, 425);
-            this.tbEPFlags.Name = "tbEPFlags";
-            this.tbEPFlags.ReadOnly = true;
-            this.tbEPFlags.Size = new System.Drawing.Size(478, 20);
-            this.tbEPFlags.TabIndex = 41;
-            this.tbEPFlags.Text = "0x00000000";
-            // 
-            // checkBox5
-            // 
-            this.checkBox5.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.checkBox5.AutoSize = true;
-            this.checkBox5.Enabled = false;
-            this.checkBox5.Location = new System.Drawing.Point(617, 428);
-            this.checkBox5.Name = "checkBox5";
-            this.checkBox5.Size = new System.Drawing.Size(15, 14);
-            this.checkBox5.TabIndex = 42;
-            this.checkBox5.UseVisualStyleBackColor = true;
-            // 
             // Pack
             // 
             this.AcceptButton = this.btnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(689, 562);
+            this.ClientSize = new System.Drawing.Size(689, 502);
             this.Controls.Add(this.tbStatus);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
@@ -726,7 +667,6 @@
             this.Shown += new System.EventHandler(this.Pack_Shown);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
-            this.tableLayoutPanel2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -770,24 +710,19 @@
         private System.Windows.Forms.TextBox tbDate;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.CheckBox ckbArchiveVersion;
-        private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.CheckBox checkBox2;
-        private System.Windows.Forms.CheckBox checkBox3;
-        private System.Windows.Forms.CheckBox checkBox4;
-        private System.Windows.Forms.Label label17;
-        private System.Windows.Forms.TextBox tbThumbnail;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
-        private System.Windows.Forms.Button btnThumbnail;
-        private System.Windows.Forms.Button btnClearThumbnail;
+        private System.Windows.Forms.CheckBox ckbCodeVersion;
+        private System.Windows.Forms.CheckBox ckbGameVersion;
+        private System.Windows.Forms.CheckBox ckbAssetVersion;
+        private System.Windows.Forms.CheckBox ckbMinReqVersion;
         private System.Windows.Forms.OpenFileDialog ofdThumbnail;
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.Label label19;
         private System.Windows.Forms.TextBox tbDisplayName;
         private System.Windows.Forms.TextBox tbDescription;
         private System.Windows.Forms.SaveFileDialog sfdSims3Pack;
-        private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.TextBox tbEPFlags;
-        private System.Windows.Forms.CheckBox checkBox5;
+        private System.Windows.Forms.Button btnNewGUID;
+        private System.Windows.Forms.CheckBox ckbOWLocalName;
+        private System.Windows.Forms.CheckBox ckbOWLocalDesc;
     }
 }
 

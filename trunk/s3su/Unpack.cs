@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace S3Pack
@@ -36,28 +37,27 @@ namespace S3Pack
 
         private void Unpack_Shown(object sender, EventArgs e)
         {
-            btnSource_Click(null, null);
-            btnTarget_Click(null, null);
+            OKforOK();
         }
 
         private void btnSource_Click(object sender, EventArgs e)
         {
-            //openFileDialog1.FileName = tbSource.Text;
-            if (openFileDialog1.ShowDialog() != DialogResult.OK) return;
+            ofdSims3Pack.FilterIndex = 1;
+            if (ofdSims3Pack.ShowDialog() != DialogResult.OK) return;
+            tbSource.Text = Path.GetFullPath(ofdSims3Pack.FileName);
+
             haveSource = true;
-            btnOK.Enabled = haveSource && haveTarget;
-            tbSource.Text = openFileDialog1.FileName;
-            tbStatus.Text = btnOK.Enabled ? "Click 'Unpack...' to unpack the Sims3Pack." : "";
+            OKforOK();
         }
 
         private void btnTarget_Click(object sender, EventArgs e)
         {
-            //folderBrowserDialog1.SelectedPath = tbTarget.Text;
-            if (folderBrowserDialog1.ShowDialog() != DialogResult.OK) return;
+            sfdTarget.FilterIndex = 1;
+            if (sfdTarget.ShowDialog() != DialogResult.OK) return;
+            tbTarget.Text = Path.GetDirectoryName(Path.GetFullPath(sfdTarget.FileName));
+
             haveTarget = true;
-            btnOK.Enabled = haveSource && haveTarget;
-            tbTarget.Text = folderBrowserDialog1.SelectedPath;
-            tbStatus.Text = btnOK.Enabled ? "Click 'Unpack...' to unpack the Sims3Pack." : "";
+            OKforOK();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -67,11 +67,19 @@ namespace S3Pack
 
         private void btnOK_Click(object sender, EventArgs e)
         {
-            S3Pack.Sims3Pack.Unpack(openFileDialog1.FileName, folderBrowserDialog1.SelectedPath);
+            S3Pack.Sims3Pack.Unpack(tbSource.Text, tbTarget.Text);
+
+            CopyableMessageBox.Show("Done!", "Sims3Pack unpacked", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
+
             tbSource.Text = tbTarget.Text = "";
-            btnOK.Enabled = haveSource = haveTarget = false;
-            tbStatus.Text = "Done.  Select another Sims3Pack and target folder, or Exit.";
-            //MainForm_Shown(null, null);
+            haveSource = haveTarget = false;
+            OKforOK();
+        }
+
+        void OKforOK()
+        {
+            btnOK.Enabled = haveSource && haveTarget;
+            tbStatus.Text = btnOK.Enabled ? "Click 'Unpack...' to unpack the Sims3Pack." : "Select Sim3Pack and folder to contain output folder.";
         }
     }
 }

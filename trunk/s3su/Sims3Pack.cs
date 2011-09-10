@@ -21,13 +21,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using System.Xml.XPath;
 
 namespace S3Pack
 {
     public static class Sims3Pack
     {
         static string magic = "TS3Pack";
-        static string extension = ".Sims3Pack";
         static ushort unknown1 = 0x0101;
 
         /// <summary>
@@ -57,16 +57,29 @@ namespace S3Pack
 
             long basePos = fs.Position;
 
-            System.Xml.XPath.XPathDocument xdoc = new System.Xml.XPath.XPathDocument(ms);
-            System.Xml.XPath.XPathNavigator nav = xdoc.CreateNavigator();
+            XPathDocument xdoc = new XPathDocument(ms);
+            XPathNavigator nav = xdoc.CreateNavigator();
 
-            string filename = Path.Combine(target, nav.SelectSingleNode("/Sims3Package/DisplayName").Value + ".xml");
+            string filename;
+            XPathNavigator pkgId = nav.SelectSingleNode("/Sims3Package/PackageId");
+            if (pkgId != null)
+                filename = pkgId.Value;
+            else
+            {
+                pkgId = nav.SelectSingleNode("/Sims3Package/PackagedFile[Guid!=\"0x0000000000000000\"]/Guid");
+                if (pkgId != null)
+                    filename = pkgId.Value;
+                else
+                    filename = Path.GetFileNameWithoutExtension(source);
+            }
+            filename = Path.Combine(target, filename + ".xml");
+
             if (File.Exists(filename)) File.Delete(filename);
             BinaryWriter bw = new BinaryWriter(new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write));
             bw.Write(ms.ToArray());
             bw.Close();
 
-            System.Xml.XPath.XPathNodeIterator packagedFiles = nav.Select("/Sims3Package/PackagedFile");
+            XPathNodeIterator packagedFiles = nav.Select("/Sims3Package/PackagedFile");
             while (packagedFiles.MoveNext())
             {
                 fs.Position = basePos + Convert.ToInt64(packagedFiles.Current.SelectSingleNode("Offset").Value);
@@ -78,260 +91,374 @@ namespace S3Pack
             }
         }
 
-        public static void Pack(XmlValues v)
+        public static void Pack(string Package, string Target, XmlValues v)
         {
-            XmlDocument xdoc = new XmlDocument();
-            xdoc.PreserveWhitespace = true;
-            xdoc.AppendChild(xdoc.CreateXmlDeclaration("1.0", "UTF-8", String.Empty));
-            xdoc.AppendChild(xdoc.CreateSignificantWhitespace("\n"));
-
-            XmlElement xe = xdoc.CreateElement("Sims3Package");
-            xe.SetAttribute("Type", v.Sims3PackType);
-            xe.SetAttribute("SubType", v.SubType);
-            xdoc.AppendChild(xe);
-
-            #region All the up front gubbins
-            xe = xdoc.CreateElement("ArchiveVersion");
-            xe.InnerText = v.ArchiveVersion;
-            xdoc.DocumentElement.AppendChild(xdoc.CreateSignificantWhitespace("\n  "));
-            xdoc.DocumentElement.AppendChild(xe);
-
-            xe = xdoc.CreateElement("CodeVersion");
-            xe.InnerText = v.CodeVersion;
-            xdoc.DocumentElement.AppendChild(xdoc.CreateSignificantWhitespace("\n  "));
-            xdoc.DocumentElement.AppendChild(xe);
-
-            xe = xdoc.CreateElement("GameVersion");
-            xe.InnerText = v.GameVersion;
-            xdoc.DocumentElement.AppendChild(xdoc.CreateSignificantWhitespace("\n  "));
-            xdoc.DocumentElement.AppendChild(xe);
-
-            xe = xdoc.CreateElement("PackageId");
-            xe.InnerText = v.PackageId;
-            xdoc.DocumentElement.AppendChild(xdoc.CreateSignificantWhitespace("\n  "));
-            xdoc.DocumentElement.AppendChild(xe);
-
-            xe = xdoc.CreateElement("Date");
-            xe.InnerText = v.Date;
-            xdoc.DocumentElement.AppendChild(xdoc.CreateSignificantWhitespace("\n  "));
-            xdoc.DocumentElement.AppendChild(xe);
-
-            xe = xdoc.CreateElement("AssetVersion");
-            xe.InnerText = v.AssetVersion;
-            xdoc.DocumentElement.AppendChild(xdoc.CreateSignificantWhitespace("\n  "));
-            xdoc.DocumentElement.AppendChild(xe);
-
-            xe = xdoc.CreateElement("MinReqVersion");
-            xe.InnerText = v.MinReqVersion;
-            xdoc.DocumentElement.AppendChild(xdoc.CreateSignificantWhitespace("\n  "));
-            xdoc.DocumentElement.AppendChild(xe);
-
-            xe = xdoc.CreateElement("DisplayName");
-            xe.AppendChild(xdoc.CreateCDataSection(v.DisplayName));
-            xdoc.DocumentElement.AppendChild(xdoc.CreateSignificantWhitespace("\n  "));
-            xdoc.DocumentElement.AppendChild(xe);
-
-            xe = xdoc.CreateElement("Description");
-            xe.AppendChild(xdoc.CreateCDataSection(v.Description));
-            xdoc.DocumentElement.AppendChild(xdoc.CreateSignificantWhitespace("\n  "));
-            xdoc.DocumentElement.AppendChild(xe);
-
-            xdoc.DocumentElement.AppendChild(xdoc.CreateSignificantWhitespace("\n  "));
-            xdoc.DocumentElement.AppendChild(xdoc.CreateElement("LocalizedNames"));
-
-            xdoc.DocumentElement.AppendChild(xdoc.CreateSignificantWhitespace("\n  "));
-            xdoc.DocumentElement.AppendChild(xdoc.CreateElement("LocalizedDescriptions"));
-            #endregion
-
             long Offset = 0;
-            using (Stream sw = new FileStream(v.Target, FileMode.Create, FileAccess.Write, FileShare.None))
+            // Update the XML
+            foreach (PackagedFile pf in v.PackagedFiles)
+            {
+                string filename = GetFilename(pf.Name, v.PackageId, Package);
+                using (Stream sr = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    try
+                    {
+                        pf.SetInnerText("Length", sr.Length + "");
+                        pf.SetInnerText("Offset", Offset + "");
+
+                        UInt64 Crc = System.Security.Cryptography.Sims3PackCRC.CalculateCRC(sr);
+                        pf.SetInnerText("Crc", Crc.ToString("x"));
+
+                        Offset += sr.Length;
+                    }
+                    finally { sr.Close(); }
+                }
+            }
+
+            using (Stream sw = new FileStream(Target, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 BinaryWriter bw = new BinaryWriter(sw);
 
                 try
                 {
-                    #region Package - first pass: XML
-                    XmlElement pf = xdoc.CreateElement("PackagedFile");
-                    
-                    xe = xdoc.CreateElement("Name");
-                    xe.InnerText = v.PackageId + ".package";
-                    pf.AppendChild(xdoc.CreateSignificantWhitespace("\n    "));
-                    pf.AppendChild(xe);
-
-                    xe = xdoc.CreateElement("Guid");
-                    xe.InnerText = v.PackageId;
-                    pf.AppendChild(xdoc.CreateSignificantWhitespace("\n    "));
-                    pf.AppendChild(xe);
-
-                    xe = xdoc.CreateElement("ContentType");
-                    xe.InnerText = v.Sims3PackType;
-                    pf.AppendChild(xdoc.CreateSignificantWhitespace("\n    "));
-                    pf.AppendChild(xe);
-
-                    xe = xdoc.CreateElement("EPFlags");
-                    xe.InnerText = v.EPFlags;
-                    pf.AppendChild(xdoc.CreateSignificantWhitespace("\n    "));
-                    pf.AppendChild(xe);
-
-                    XmlElement mt = xdoc.CreateElement("metatags");
-                    if (v.Thumbnail != null)
-                    {
-                        xe = xdoc.CreateElement("numOfThumbs");
-                        xe.InnerText = "1";
-                        mt.AppendChild(xdoc.CreateSignificantWhitespace("\n      "));
-                        mt.AppendChild(xe);
-                    }
-                    pf.AppendChild(xdoc.CreateSignificantWhitespace("\n    "));
-                    pf.AppendChild(mt);
-
-                    using (Stream sr = new FileStream(v.Package, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    {
-                        try
-                        {
-                            xe = xdoc.CreateElement("Length");
-                            xe.InnerText = sr.Length + "";
-                            pf.AppendChild(xdoc.CreateSignificantWhitespace("\n    "));
-                            pf.AppendChild(xe);
-
-                            xe = xdoc.CreateElement("Offset");
-                            xe.InnerText = Offset + "";
-                            pf.AppendChild(xdoc.CreateSignificantWhitespace("\n    "));
-                            pf.AppendChild(xe);
-
-                            UInt64 Crc = System.Security.Cryptography.Sims3PackCRC.CalculateCRC(sr);
-                            xe = xdoc.CreateElement("Crc");
-                            xe.InnerText = Crc.ToString("x");
-                            pf.AppendChild(xdoc.CreateSignificantWhitespace("\n    "));
-                            pf.AppendChild(xe);
-
-                            Offset += sr.Length;
-                        }
-                        catch (Exception e) { throw e; }
-                        finally { sr.Close(); }
-                    }
-
-                    pf.AppendChild(xdoc.CreateSignificantWhitespace("\n  "));
-                    xdoc.DocumentElement.AppendChild(xdoc.CreateSignificantWhitespace("\n  "));
-                    xdoc.DocumentElement.AppendChild(pf);
-                    #endregion
-
-                    if (v.Thumbnail != null)
-                    {
-                        #region Thumbnail - first pass: XML
-                        pf = xdoc.CreateElement("PackagedFile");
-
-                        xe = xdoc.CreateElement("Name");
-                        xe.InnerText = Path.GetFileName(v.Thumbnail);
-                        pf.AppendChild(xdoc.CreateSignificantWhitespace("\n    "));
-                        pf.AppendChild(xe);
-
-                        xe = xdoc.CreateElement("Guid");
-                        xe.InnerText = "0x0000000000000000";
-                        pf.AppendChild(xdoc.CreateSignificantWhitespace("\n    "));
-                        pf.AppendChild(xe);
-
-                        xe = xdoc.CreateElement("ContentType");
-                        xe.InnerText = "unknown";
-                        pf.AppendChild(xdoc.CreateSignificantWhitespace("\n    "));
-                        pf.AppendChild(xe);
-
-                        xe = xdoc.CreateElement("EPFlags");
-                        xe.InnerText = v.EPFlags;
-                        pf.AppendChild(xdoc.CreateSignificantWhitespace("\n    "));
-                        pf.AppendChild(xe);
-
-                        pf.AppendChild(xdoc.CreateSignificantWhitespace("\n    "));
-                        pf.AppendChild(xdoc.CreateElement("metatags"));
-
-                        using (Stream sr = new FileStream(v.Thumbnail, FileMode.Open, FileAccess.Read, FileShare.Read))
-                        {
-                            try
-                            {
-                                xe = xdoc.CreateElement("Length");
-                                xe.InnerText = sr.Length + "";
-                                pf.AppendChild(xdoc.CreateSignificantWhitespace("\n    "));
-                                pf.AppendChild(xe);
-
-                                xe = xdoc.CreateElement("Offset");
-                                xe.InnerText = Offset + "";
-                                pf.AppendChild(xdoc.CreateSignificantWhitespace("\n    "));
-                                pf.AppendChild(xe);
-
-                                UInt64 Crc = System.Security.Cryptography.Sims3PackCRC.CalculateCRC(sr);
-                                xe = xdoc.CreateElement("Crc");
-                                xe.InnerText = Crc.ToString("x");
-                                pf.AppendChild(xdoc.CreateSignificantWhitespace("\n    "));
-                                pf.AppendChild(xe);
-
-                                Offset += sr.Length;
-                            }
-                            catch (Exception e) { throw e; }
-                            finally { sr.Close(); }
-                        }
-
-                        pf.AppendChild(xdoc.CreateSignificantWhitespace("\n  "));
-                        xdoc.DocumentElement.AppendChild(xdoc.CreateSignificantWhitespace("\n  "));
-                        xdoc.DocumentElement.AppendChild(pf);
-                        #endregion
-                    }
-                    xdoc.DocumentElement.AppendChild(xdoc.CreateSignificantWhitespace("\n"));
-
                     // Write the header
                     bw.Write((int)magic.Length);
                     bw.Write(magic.ToCharArray());
                     bw.Write(unknown1);
 
                     // Write the XML
-                    MemoryStream ms = new MemoryStream();
-                    xdoc.Save(ms);
-                    bw.Write((int)ms.Length);
-                    bw.Write(ms.ToArray());
-
-                    #region Package - second pass: data
-                    using (Stream sr = new FileStream(v.Package, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    using (MemoryStream ms = new MemoryStream())
+                    using (XmlWriter xw = XmlWriter.Create(ms, new XmlWriterSettings() { CloseOutput = false, Indent = true, IndentChars = "  ", }))
                     {
-                        try { sw.Write(new BinaryReader(sr).ReadBytes((int)sr.Length), 0, (int)sr.Length); }
-                        catch (Exception e) { throw e; }
-                        finally { sr.Close(); }
+                        v.Sims3PackType.OwnerDocument.WriteContentTo(xw);
+                        xw.Flush();
+                        xw.Close();
+                        byte[] xml = ms.ToArray();
+                        bw.Write((int)xml.Length);
+                        bw.Write(xml);
+                        ms.Close();
                     }
-                    #endregion
 
-                    if (v.Thumbnail != null)
+                    // Write all the packaged files
+                    foreach (PackagedFile pf in v.PackagedFiles)
                     {
-                        #region Thumbnail - second pass: data
-                        using (Stream sr = new FileStream(v.Thumbnail, FileMode.Open, FileAccess.Read, FileShare.Read))
+                        string filename = GetFilename(pf.Name, v.PackageId, Package);
+                        using (Stream sr = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
                         {
                             try { sw.Write(new BinaryReader(sr).ReadBytes((int)sr.Length), 0, (int)sr.Length); }
                             catch (Exception e) { throw e; }
                             finally { sr.Close(); }
                         }
-                        #endregion
                     }
                 }
                 catch (Exception e) { throw e; }
                 finally { sw.Close(); }
             }
         }
+
+        static string GetFilename(XmlElement name, XmlElement pkgId, string pkg)
+        {
+            string filename = Path.Combine(Path.GetDirectoryName(pkg), name.InnerText);
+
+            if (
+                pkg.ToLower().EndsWith(".package") && //user selected a package
+                name.InnerText.ToLower() == pkgId.InnerText.ToLower() + ".package" && //we're looking for the main package
+                !File.Exists(filename) //but can't find it
+                ) return pkg; //return the package selected by the user
+
+            return filename;
+        }
+    }
+
+    public class PackagedFile
+    {
+        XmlDocument Document;
+        XmlElement Self;
+        public PackagedFile(XmlElement root)
+        {
+            Document = root.OwnerDocument;
+            Self = root;
+
+            foreach (XmlAttribute attr in root.Attributes)
+                Attributes.Add(attr);
+
+            metatags = new List<XmlElement>();
+            Elements = new List<XmlElement>();
+            foreach (XmlElement elem in root.ChildNodes)
+            {
+                switch (elem.LocalName)
+                {
+                    case "Name": Name = elem; break;
+                    case "Length": Length = elem; break;
+                    case "Offset": Offset = elem; break;
+                    case "Crc": Crc = elem; break;
+                    case "Guid": Guid = elem; break;
+                    case "ContentType": ContentType = elem; break;
+                    case "EPFlags": EPFlags = elem; break;
+                    case "metatags": foreach(XmlElement tag in elem.ChildNodes) metatags.Add(tag); break;
+                    default: Elements.Add(elem); break;
+                }
+            }
+        }
+
+        public void SetAttributeValue(string attrName, string value)
+        {
+            if (Document.DocumentElement.HasAttribute(attrName))
+            {
+                Document.DocumentElement.SetAttribute(attrName, value);
+            }
+            else
+            {
+                XmlAttribute attr = Document.CreateAttribute(attrName);
+                Document.DocumentElement.Attributes.Append(attr);
+                Attributes.Add(attr);
+                attr.Value = value;
+            }
+        }
+        public string GetAttributeValue(XmlAttribute attr, string attrName, string defValue)
+        {
+            if (attr == null)
+                SetAttributeValue(attrName, defValue);
+            return attr.Value;
+        }
+
+        public void SetInnerText(string elemName, string value)
+        {
+            XmlElement elem;
+            XmlElement existing = Self.SelectSingleNode(elemName) as XmlElement;
+            if (existing != null)
+            {
+                elem = existing;
+            }
+            else
+            {
+                elem = Document.CreateElement(elemName);
+                Self.AppendChild(elem);
+                switch (elem.LocalName)
+                {
+                    case "Name": Name = elem; break;
+                    case "Length": Length = elem; break;
+                    case "Offset": Offset = elem; break;
+                    case "Crc": Crc = elem; break;
+                    case "Guid": Guid = elem; break;
+                    case "ContentType": ContentType = elem; break;
+                    case "EPFlags": EPFlags = elem; break;
+                    case "metatags": foreach (XmlElement tag in elem.ChildNodes) metatags.Add(tag); break;
+                    default: Elements.Add(elem); break;
+                }
+            }
+            elem.InnerText = value;
+        }
+        public string GetInnerText(XmlElement elem, string elemName, string defValue)
+        {
+            if (elem == null)
+            {
+                SetInnerText(elemName, defValue);
+                return defValue;
+            }
+            return elem.InnerText;
+        }
+
+        public List<XmlAttribute> Attributes { get; set; }
+
+        public XmlElement Name { get; set; }
+        public XmlElement Length { get; set; }
+        public XmlElement Offset { get; set; }
+        public XmlElement Crc { get; set; }
+        public XmlElement Guid { get; set; }
+        public XmlElement ContentType { get; set; }
+        public XmlElement EPFlags { get; set; }
+        public List<XmlElement> metatags { get; set; }
+        public List<XmlElement> Elements { get; set; }
     }
 
     public class XmlValues
     {
-        public string Package { get; set; }
-        public string CreatorName { get; set; }
-        public string Title { get; set; }
-        public string Target { get; set; }
-        public string Sims3PackType { get; set; }
-        public string SubType { get; set; }
-        public string ArchiveVersion { get; set; }
-        public string CodeVersion { get; set; }
-        public string GameVersion { get; set; }
-        public string PackageId { get; set; }
-        public string Date { get; set; }
-        public string AssetVersion { get; set; }
-        public string MinReqVersion { get; set; }
-        public string DisplayName { get; set; }
-        public string Description { get; set; }
-        public string EPFlags { get; set; }
-        public string Thumbnail { get; set; }
+        public static XmlValues GetXmlValues(string filename)
+        {
+            string xmlFile = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename) + ".xml");
+            try { return File.Exists(xmlFile) ? new XmlValues(xmlFile) : null; }
+            catch (XmlException) { return null; }
+        }
+
+        public XmlValues() : this(new StringReader(@"<Sims3Package>
+  <Dependencies>
+    <Dependency>0x050cffe800000000050cffe800000000</Dependency>
+  </Dependencies>
+  <LocalisedNames/>
+  <LocalizedDescriptions/>
+</Sims3Package>")) { }
+        public XmlValues(string manifest) : this(new StreamReader(manifest)) { }
+        public XmlValues(TextReader tr) { Parse(tr); }
+
+        void Parse(TextReader tr)
+        {
+            Document = new XmlDocument();
+            Document.Load(tr);
+            XmlElement root = Document.DocumentElement;
+
+            foreach (XmlAttribute attr in root.Attributes)
+            {
+                switch (attr.LocalName)
+                {
+                    case "Type": Sims3PackType = attr; break;
+                    case "SubType": SubType = attr; break;
+                    default: Attributes.Add(attr); break;
+                }
+            }
+
+            PackagedFiles = new List<PackagedFile>();
+            Elements = new List<XmlElement>();
+            foreach (XmlElement elem in root.ChildNodes)
+            {
+                switch (elem.LocalName)
+                {
+                    case "ArchiveVersion": ArchiveVersion = elem; break;
+                    case "CodeVersion": CodeVersion = elem; break;
+                    case "GameVersion": GameVersion = elem; break;
+                    case "PackageId": PackageId = elem; break;
+                    case "Date": Date = elem; break;
+                    case "AssetVersion": AssetVersion = elem; break;
+                    case "MinReqVersion": MinReqVersion = elem; break;
+                    case "DisplayName": DisplayName = elem; break;
+                    case "Description": Description = elem; break;
+                    case "Dependencies": Dependencies = elem; break;
+                    case "LocalisedNames": LocalisedNames = elem; break;
+                    case "LocalizedDescriptions": LocalizedDescriptions = elem; break;
+                    case "PackagedFile": PackagedFiles.Add(new PackagedFile(elem)); break;
+                    default: Elements.Add(elem); break;
+                }
+            }
+        }
+
+        public void SetAttributeValue(string attrName, string value)
+        {
+            if (Document.DocumentElement.HasAttribute(attrName))
+            {
+                Document.DocumentElement.SetAttribute(attrName, value);
+            }
+            else
+            {
+                XmlAttribute attr = Document.CreateAttribute(attrName);
+                Document.DocumentElement.Attributes.Append(attr);
+                switch (attrName)
+                {
+                    case "Type": Sims3PackType = attr; break;
+                    case "SubType": SubType = attr; break;
+                    default: Attributes.Add(attr); break;
+                }
+                attr.Value = value;
+            }
+        }
+        public string GetAttributeValue(XmlAttribute attr, string attrName, string defValue)
+        {
+            if (attr == null)
+                SetAttributeValue(attrName, defValue);
+            return attr.Value;
+        }
+
+        public void SetInnerText(string elemName, string value)
+        {
+            XmlElement elem;
+            XmlElement existing = Document.DocumentElement.SelectSingleNode(elemName) as XmlElement;
+            if (existing != null)
+            {
+                elem = existing;
+            }
+            else
+            {
+                elem = Document.CreateElement(elemName);
+                Document.DocumentElement.AppendChild(elem);
+                switch (elemName)
+                {
+                    case "ArchiveVersion": ArchiveVersion = elem; break;
+                    case "CodeVersion": CodeVersion = elem; break;
+                    case "GameVersion": GameVersion = elem; break;
+                    case "PackageId": PackageId = elem; break;
+                    case "Date": Date = elem; break;
+                    case "AssetVersion": AssetVersion = elem; break;
+                    case "MinReqVersion": MinReqVersion = elem; break;
+                    case "DisplayName": DisplayName = elem; break;
+                    case "Description": Description = elem; break;
+                    case "Dependencies": Dependencies = elem; break;
+                    case "LocalisedNames": LocalisedNames = elem; break;
+                    case "LocalisedDescs": LocalizedDescriptions = elem; break;
+                    case "PackagedFile": PackagedFiles.Add(new PackagedFile(elem)); break;
+                    default: Elements.Add(elem); break;
+                }
+            }
+            elem.InnerText = value;
+        }
+        public string GetInnerText(XmlElement elem, string elemName, string defValue)
+        {
+            if (elem == null)
+            {
+                SetInnerText(elemName, defValue);
+                return defValue;
+            }
+            return elem.InnerText;
+        }
+
+        public PackagedFile CreatePackagedFile(string name)
+        {
+            PackagedFile pf = PackagedFiles.Find(x => x.Name.InnerText.Equals(name));
+            if (pf != null) return pf;
+
+            XmlElement _pf = Document.CreateElement("PackagedFile");
+            Document.DocumentElement.AppendChild(_pf);
+            pf = new PackagedFile(_pf);
+            pf.SetInnerText("Name", name);
+            pf.SetInnerText("EPFlags", "0x00000000");
+            _pf.AppendChild(Document.CreateElement("metatags"));
+            PackagedFiles.Add(pf);
+
+            return pf;
+        }
+
+        public XmlNode RemovePackagedFile(string name)
+        {
+            PackagedFile pf = PackagedFiles.Find(x => x.Name.InnerText.Equals(name));
+            if (pf == null) return null;
+
+            PackagedFiles.Remove(pf);
+            return Document.DocumentElement.RemoveChild(pf.Name.ParentNode);
+        }
+
+        public XmlDocument Document { get; private set; }
+
+        public XmlAttribute Sims3PackType { get; set; }
+        public XmlAttribute SubType { get; set; }
+        public List<XmlAttribute> Attributes { get; set; }
+
+        public XmlElement ArchiveVersion { get; set; }
+        public XmlElement CodeVersion { get; set; }
+        public XmlElement GameVersion { get; set; }
+        public XmlElement PackageId { get; set; }
+        public XmlElement Date { get; set; }
+        public XmlElement AssetVersion { get; set; }
+        public XmlElement MinReqVersion { get; set; }
+        public XmlElement DisplayName { get; set; }
+        public XmlElement Description { get; set; }
+        public XmlElement Dependencies { get; set; }
+        public XmlElement LocalisedNames { get; set; }
+        public XmlElement LocalizedDescriptions { get; set; }
+        public List<XmlElement> Elements { get; set; }
+        public List<PackagedFile> PackagedFiles { get; set; }
+    }
+
+    public static class Extensions
+    {
+        public static IEnumerable<XmlElement> FindAll(this XmlElement root, Predicate<XmlElement> Match)
+        {
+            List<XmlElement> res = new List<XmlElement>();
+            foreach (XmlElement elem in root.ChildNodes)
+                if (Match(elem)) yield return elem;
+        }
+
+        public static bool TrueForAll(this XmlElement root, Predicate<XmlElement> Match)
+        {
+            foreach (XmlElement elem in root.ChildNodes)
+                if (!Match(elem)) return false;
+            return true;
+        }
     }
 }
