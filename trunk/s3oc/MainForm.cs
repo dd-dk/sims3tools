@@ -30,6 +30,7 @@ using s3pi.Interfaces;
 using s3pi.Extensions;
 using s3pi.GenericRCOLResource;
 using ObjectCloner.SplitterComponents;
+using s3pi.Filetable;
 
 namespace ObjectCloner
 {
@@ -62,6 +63,9 @@ namespace ObjectCloner
 
             this.Text = myName;
             pleaseWait = new PleaseWait();
+
+            GameFolders.InstallDirs = ObjectCloner.Properties.Settings.Default.InstallDirs;
+            GameFolders.EPsDisabled = ObjectCloner.Properties.Settings.Default.EPsDisabled;
 
             MainForm_LoadFormSettings();
 
@@ -130,6 +134,9 @@ namespace ObjectCloner
             Abort(true);
             //CloseCurrent();//needed?
 
+            ObjectCloner.Properties.Settings.Default.EPsDisabled = GameFolders.EPsDisabled;
+            ObjectCloner.Properties.Settings.Default.InstallDirs = GameFolders.InstallDirs;
+
             ObjectCloner.Properties.Settings.Default.PersistentLocation = this.WindowState == FormWindowState.Normal ? this.Location : new Point(-1, -1);
             ObjectCloner.Properties.Settings.Default.PersistentHeight = this.WindowState == FormWindowState.Normal ? this.Height : -1;
             ObjectCloner.Properties.Settings.Default.PersistentWidth = this.WindowState == FormWindowState.Normal ? this.Width : -1;
@@ -183,14 +190,14 @@ namespace ObjectCloner
         public static bool SetFT(bool useCC, bool useEA, CheckInstallDirsCB checkInstallDirsCB = null, Control control = null)
         {
             bool changed = false;
-            if (useCC != FileTable.UseCustomContent)
+            if (useCC != FileTable.CustomContentEnabled)
             {
-                FileTable.UseCustomContent = useCC;
+                FileTable.CustomContentEnabled = useCC;
                 changed = true;
             }
-            if (useEA != FileTable.AppendFileTable)
+            if (useEA != FileTable.FileTableEnabled)
             {
-                FileTable.AppendFileTable = useEA;
+                FileTable.FileTableEnabled = useEA;
                 changed = true;
             }
             if (changed)
@@ -203,18 +210,18 @@ namespace ObjectCloner
 
         public static void SetUseCC(bool value)
         {
-            if (FileTable.UseCustomContent != value)
+            if (FileTable.CustomContentEnabled != value)
             {
-                FileTable.UseCustomContent = value;
+                FileTable.CustomContentEnabled = value;
                 Reset();
             }
         }
 
         public static void SetAppendEA(bool value)
         {
-            if (FileTable.AppendFileTable != value)
+            if (FileTable.FileTableEnabled != value)
             {
-                FileTable.AppendFileTable = value;
+                FileTable.FileTableEnabled = value;
                 Reset();
             }
         }
@@ -287,7 +294,7 @@ namespace ObjectCloner
         public static SpecificResource ItemForTGIBlock0(SpecificResource item)
         {
             IResourceKey rk = ((TGIBlockList)item.Resource["TGIBlocks"].Value)[0];
-            return new SpecificResource(FileTable.fb0, rk);
+            return new SpecificResource(FileTable.GameContent, rk);
         }
 
         #region SplitterComponents
@@ -339,7 +346,7 @@ namespace ObjectCloner
         public void ListViewAdd(SpecificResource sr, ListView listView)
         {
             #region CatalogTerrainPaintBrush pair
-            if (sr.CType == CatalogType.CatalogTerrainPaintBrush)
+            if (sr.CType() == CatalogType.CatalogTerrainPaintBrush)
             {
                 byte status = (byte)sr.Resource["CommonBlock.BuildBuyProductStatusFlags"].Value;
                 if ((status & 0x01) == 0) // do not list
@@ -541,7 +548,7 @@ namespace ObjectCloner
         }
         bool hasOBJDs()
         {
-            switch (selectedItem.CType)
+            switch (selectedItem.CType())
             {
                 case CatalogType.ModularResource:
                 case CatalogType.CatalogFireplace:
@@ -562,7 +569,7 @@ namespace ObjectCloner
             if (searchPane != null)
                 mode = Mode.FromGame;
 
-            cloneFixOptions = new CloneFixOptions(this, mode == Mode.FromGame, selectedItem.CType == CatalogType.CAS_Part, hasOBJDs(), itemName == null || itemDesc == null);
+            cloneFixOptions = new CloneFixOptions(this, mode == Mode.FromGame, selectedItem.CType() == CatalogType.CAS_Part, hasOBJDs(), itemName == null || itemDesc == null);
             cloneFixOptions.CancelClicked += new EventHandler(cloneFixOptions_CancelClicked);
             cloneFixOptions.StartClicked += new EventHandler(cloneFixOptions_StartClicked);
 
@@ -1224,10 +1231,10 @@ namespace ObjectCloner
                     return;
                 }
 
-                InitialiseTabs(item.CType);
+                InitialiseTabs(item.CType());
                 if (formClosing) return;
 
-                SpecificResource catlg = (item.CType == CatalogType.ModularResource) ? ItemForTGIBlock0(item) : item;
+                SpecificResource catlg = (item.CType() == CatalogType.ModularResource) ? ItemForTGIBlock0(item) : item;
 
                 if (catlg.ResourceIndexEntry != null)
                 {
@@ -1240,7 +1247,7 @@ namespace ObjectCloner
                         if (tabControl1.Contains(tpDetail))
                             fillDetails(catlg);
                         if (formClosing) return;
-                        if (item.CType == CatalogType.CatalogObject)
+                        if (item.CType() == CatalogType.CatalogObject)
                         {
                             fillFlags(catlg);
                             if (formClosing) return;
@@ -1819,6 +1826,7 @@ namespace ObjectCloner
                 switch (mn.mn)
                 {
                     case MenuBarWidget.MB.MBS_sims3Folder: settingsGameFolders(); break;
+                    case MenuBarWidget.MB.MBS_editor: settingsPackageEditor(); break;
                     case MenuBarWidget.MB.MBS_userName: settingsUserName(); break;
                     case MenuBarWidget.MB.MBS_langSearch: settingsLangSearch(); break;
                     case MenuBarWidget.MB.MBS_updates: settingsAutomaticUpdates(); break;
@@ -1842,14 +1850,44 @@ namespace ObjectCloner
             Abort(true);
             DisplayNothing();
 
+            GameFoldersForm gf;
             while (true)
             {
-                SettingsForms.GameFolders gf = new ObjectCloner.SettingsForms.GameFolders();
+                gf = new GameFoldersForm();
+                gf.CustomContent = ObjectCloner.Properties.Settings.Default.CustomContent;
+                gf.CCEnabled = ObjectCloner.Properties.Settings.Default.CCEnabled;
+                gf.InstallDirs = ObjectCloner.Properties.Settings.Default.InstallDirs;
+                gf.EPsDisabled = ObjectCloner.Properties.Settings.Default.EPsDisabled;
+
                 DialogResult dr = gf.ShowDialog();
                 if (dr != DialogResult.OK && dr != DialogResult.Retry) return;
                 if (dr != DialogResult.Retry) break;
             }
+            ObjectCloner.Properties.Settings.Default.CustomContent = gf.CustomContent;
+            ObjectCloner.Properties.Settings.Default.CCEnabled = gf.CCEnabled;
+            ObjectCloner.Properties.Settings.Default.InstallDirs = gf.InstallDirs;
+            GameFolders.EPsDisabled = ObjectCloner.Properties.Settings.Default.EPsDisabled = gf.EPsDisabled;
+
             FileTable.Reset();//needed!
+        }
+
+        private void settingsPackageEditor()
+        {
+            Diagnostics.Log("settingsPackageEditor");
+
+            PackageEditorDialog pe;
+            while (true)
+            {
+                pe = new PackageEditorDialog();
+                pe.PkgEditorPath = ObjectCloner.Properties.Settings.Default.pkgEditorPath;
+                pe.PkgEditorEnabled = ObjectCloner.Properties.Settings.Default.pkgEditorEnabled;
+
+                DialogResult dr = pe.ShowDialog();
+                if (dr != DialogResult.OK && dr != DialogResult.Retry) return;
+                if (dr != DialogResult.Retry) break;
+            }
+            ObjectCloner.Properties.Settings.Default.pkgEditorPath = pe.PkgEditorPath;
+            ObjectCloner.Properties.Settings.Default.pkgEditorEnabled = pe.PkgEditorEnabled;
         }
 
         private void settingsUserName()
@@ -2323,7 +2361,7 @@ namespace ObjectCloner
 
         private void SlurpRKsFromRK(string key, IResourceKey rk)
         {
-            SpecificResource item = new SpecificResource(FileTable.fb0, rk);
+            SpecificResource item = new SpecificResource(FileTable.GameContent, rk);
             if (item.Resource != null) SlurpRKsFromField(key, (AResource)item.Resource);
             else Diagnostics.Show(String.Format("RK {0} not found", key));
         }
@@ -2401,7 +2439,7 @@ namespace ObjectCloner
         {
             List<SpecificResource> seen = new List<SpecificResource>();
             int i = 0;
-            foreach (var ppt in FileTable.fb0)
+            foreach (var ppt in FileTable.GameContent)
                 foreach (var sr in ppt.FindAll(x => Match(x) && !seen.Exists(s => new RK(x).Equals(s.ResourceIndexEntry))))
                 {
                     seen.Add(sr);
@@ -2430,7 +2468,7 @@ namespace ObjectCloner
             Step lastStepInChain = None;
             stepList = new List<Step>(new Step[] { Item_addSelf, });
 
-            switch (item.CType)
+            switch (item.CType())
             {
                 case CatalogType.CatalogProxyProduct:
                 case CatalogType.CatalogFountainPool:
@@ -2717,7 +2755,7 @@ namespace ObjectCloner
             foreach (IResourceKey rk in (TGIBlockList)selectedItem.Resource["TGIBlocks"].Value)
             {
                 if (rk.ResourceType != 0x736884F1) continue;
-                SpecificResource vpxy = new SpecificResource(FileTable.fb0, rk);
+                SpecificResource vpxy = new SpecificResource(FileTable.GameContent, rk);
                 if (vpxy.Resource != null)
                     vpxyItems.Add(vpxy);
                 else
@@ -2753,7 +2791,7 @@ namespace ObjectCloner
             uint index = (uint)selectedItem.Resource["OBJKIndex"].Value;
             IList<TGIBlock> ltgi = (IList<TGIBlock>)selectedItem.Resource["TGIBlocks"].Value;
             TGIBlock objkTGI = ltgi[(int)index];
-            objkItem = new SpecificResource(FileTable.fb0, objkTGI);
+            objkItem = new SpecificResource(FileTable.GameContent, objkTGI);
             if (objkItem == null || objkItem.ResourceIndexEntry == null)
             {
                 Diagnostics.Show(String.Format("OBJK {0} -> OBJK {1}: not found\n", (IResourceKey)selectedItem.ResourceIndexEntry, objkTGI), "Missing OBJK");
@@ -2791,7 +2829,7 @@ namespace ObjectCloner
             string s = "";
             foreach (var rk in objk.TGIBlocks.FindAll(x => x.ResourceType == 0x00B552EA))//_SPT
             {
-                SpecificResource spt2 = new SpecificResource(FileTable.fb0, new RK(rk) { ResourceType = 0x021D7E8C });//SPT2
+                SpecificResource spt2 = new SpecificResource(FileTable.GameContent, new RK(rk) { ResourceType = 0x021D7E8C });//SPT2
                 if (spt2.ResourceIndexEntry != null && spt2.Resource != null)
                 {
                     spt2Items.Add(spt2);//SPT2
@@ -2832,7 +2870,7 @@ namespace ObjectCloner
 
             foreach (IResourceKey rk in tgibl.FindAll(x => x.ResourceType == 0x736884F1))//VPXY
             {
-                SpecificResource vpxy = new SpecificResource(FileTable.fb0, rk);
+                SpecificResource vpxy = new SpecificResource(FileTable.GameContent, rk);
                 if (vpxy.ResourceIndexEntry != null && vpxy.Resource != null)
                 {
                     vpxyItems.Add(vpxy);
@@ -2912,7 +2950,7 @@ namespace ObjectCloner
         void VPXYKin_SlurpRKs(uint type, string prefix)
         {
             int i = 0;
-            foreach (var ppt in FileTable.fb0)
+            foreach (var ppt in FileTable.GameContent)
                 foreach (var item in ppt.FindAll(rie => IsVPXYKin(rie, type)).FindAll(sr => sr.Resource != null))
                     SlurpRKsFromField(prefix + "[" + i++ + "]", item.Resource as AApiVersionedFields);
         }
@@ -2932,7 +2970,7 @@ namespace ObjectCloner
                     {
                         TGIBlock tgib = vpxychunk.TGIBlocks[k];
                         if (tgib.ResourceType != 0x01661233) continue;
-                        SpecificResource modl = new SpecificResource(FileTable.fb0, tgib);
+                        SpecificResource modl = new SpecificResource(FileTable.GameContent, tgib);
                         if (modl.Resource != null)
                         {
                             found = true;
@@ -2999,7 +3037,7 @@ namespace ObjectCloner
         {
             if (!_match(_rk)) return;
             Add(_key, _rk);
-            SpecificResource sr = new SpecificResource(FileTable.fb0, _rk);
+            SpecificResource sr = new SpecificResource(FileTable.GameContent, _rk);
             if (sr.ResourceIndexEntry == null) return;
 
             int i = 0;
@@ -3044,7 +3082,7 @@ namespace ObjectCloner
             foreach (IResourceKey rk in (TGIBlockList)selectedItem.Resource["TGIBlocks"].Value)
             {
                 if (rk.ResourceType != 0x319E4F1D) continue;
-                SpecificResource objd = new SpecificResource(FileTable.fb0, rk);
+                SpecificResource objd = new SpecificResource(FileTable.GameContent, rk);
                 if (objd.Resource != null)
                 {
                     objdList.Add(objd);
@@ -3099,7 +3137,7 @@ namespace ObjectCloner
                 IResourceKey rk = THUM.getImageRK(size, selectedItem);
                 if (THUM.PNGTypes[(int)size] == rk.ResourceType)
                     Add(size + "PNG", rk);
-                else if (selectedItem.CType == CatalogType.CatalogRoofPattern)
+                else if (selectedItem.CType() == CatalogType.CatalogRoofPattern)
                     Add(size + "Icon", rk);
                 else
                     Add(size + "Thumb", rk);
@@ -3118,7 +3156,7 @@ namespace ObjectCloner
             {
                 int i = 0;
                 uint type = CWALThumbTypes[size];
-                foreach (var ppt in FileTable.tmb)
+                foreach (var ppt in FileTable.Thumbnails)
                     foreach (var sr in ppt.FindAll(rie => rie.ResourceType == type && rie.Instance == selectedItem.ResourceIndexEntry.Instance))
                     {
                         if (seen.Exists(sr.ResourceIndexEntry.Equals)) continue;
@@ -3164,7 +3202,7 @@ namespace ObjectCloner
             {
                 if (kvp.Value == RK.NULL) continue;
                 if (rkToItem.ContainsKey(kvp.Value)) continue; // seen this TGI before
-                SpecificResource item = new SpecificResource(FileTable.fb0, kvp.Value);
+                SpecificResource item = new SpecificResource(FileTable.GameContent, kvp.Value);
                 if (item.ResourceIndexEntry == null) continue; // TGI is not a packed resource
                 rkToItem.Add(kvp.Value, item);
             }
@@ -3234,7 +3272,7 @@ namespace ObjectCloner
             ulong PngInstance = 0;
             if (isRenumber)
             {
-                if (selectedItem.CType == CatalogType.ModularResource)
+                if (selectedItem.CType() == CatalogType.ModularResource)
                     oldToNew.Add(selectedItem.ResourceIndexEntry.Instance, FNV64.GetHash(UniqueObject));//MDLR needs its IID as a specific hash value
                 else
                 {
@@ -3279,7 +3317,7 @@ namespace ObjectCloner
                         }
             }
 
-            SpecificResource catlgItem = selectedItem.CType == CatalogType.ModularResource
+            SpecificResource catlgItem = selectedItem.CType() == CatalogType.ModularResource
                 ? ItemForTGIBlock0(selectedItem)
                 : selectedItem;
 
@@ -3308,7 +3346,7 @@ namespace ObjectCloner
         void StartFixing()
         {
             MapRKtoSpecificResource();
-            if (selectedItem.CType == CatalogType.CAS_Part)
+            if (selectedItem.CType() == CatalogType.CAS_Part)
                 CASP_GenerateNewIIDs();
             else
                 Catlg_GenerateNewIIDs();
@@ -3317,7 +3355,7 @@ namespace ObjectCloner
 
             Dictionary<IResourceKey, SpecificResource> rkToItemAdded = new Dictionary<IResourceKey, SpecificResource>();
 
-            SpecificResource catlgRes = (selectedItem.CType == CatalogType.ModularResource || selectedItem.CType == CatalogType.CatalogFireplace)
+            SpecificResource catlgRes = (selectedItem.CType() == CatalogType.ModularResource || selectedItem.CType() == CatalogType.CatalogFireplace)
                 ? ItemForTGIBlock0(selectedItem) : selectedItem;
             try
             {
@@ -3364,7 +3402,7 @@ namespace ObjectCloner
                         dirty = ReplaceRKsInResourceStream(item, FixMatch, IIDReplacer);
                         Diagnostics.Log("_XML: " + item.LongName + " is" + (dirty ? "" : " not") + " dirty.");
                     }
-                    else if (item.RequestedRK.Equals(selectedItem.RequestedRK) && item.CType == CatalogType.CAS_Part)//Deal with CASP separately..!
+                    else if (item.RequestedRK.Equals(selectedItem.RequestedRK) && item.CType() == CatalogType.CAS_Part)//Deal with CASP separately..!
                     {
                         Diagnostics.Log("CAS_Part: " + item.LongName);
                         #region CAS Part
@@ -3415,9 +3453,9 @@ namespace ObjectCloner
                         #endregion
                         Diagnostics.Log("CAS_Part: " + item.LongName + " is" + (dirty ? "" : " not") + " dirty.");
                     }
-                    else if ((item.RequestedRK.Equals(selectedItem.RequestedRK) && item.CType != CatalogType.ModularResource)//Selected CatlgItem
-                    || item.CType == CatalogType.CatalogObject//all OBJDs (i.e. from MDLR or CFIR)
-                    || item.CType == CatalogType.CatalogTerrainPaintBrush//all CTPTs (i.e. pair of selectedItem)
+                    else if ((item.RequestedRK.Equals(selectedItem.RequestedRK) && item.CType() != CatalogType.ModularResource)//Selected CatlgItem
+                    || item.CType() == CatalogType.CatalogObject//all OBJDs (i.e. from MDLR or CFIR)
+                    || item.CType() == CatalogType.CatalogTerrainPaintBrush//all CTPTs (i.e. pair of selectedItem)
                     )
                     {
                         Diagnostics.Log("Selected CatlgItem || any OBJD || any CTPT: " + item.LongName);
@@ -3426,9 +3464,9 @@ namespace ObjectCloner
 
                         #region Selected CatlgItem || all MDLR OBJDs || both CTPTs || 0th CFIR OBJD
                         if (item.RequestedRK.Equals(selectedItem.RequestedRK)//Selected CatlgItem
-                            || selectedItem.CType == CatalogType.ModularResource//all MDLR OBJDs
-                            || selectedItem.CType == CatalogType.CatalogTerrainPaintBrush//both CTPTs
-                            || (selectedItem.CType == CatalogType.CatalogFireplace && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th CFIR OBJD
+                            || selectedItem.CType() == CatalogType.ModularResource//all MDLR OBJDs
+                            || selectedItem.CType() == CatalogType.CatalogTerrainPaintBrush//both CTPTs
+                            || (selectedItem.CType() == CatalogType.CatalogFireplace && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th CFIR OBJD
                             )
                         {
                             commonBlock["NameGUID"] = new TypedValue(typeof(ulong), newNameGUID);
@@ -3444,7 +3482,7 @@ namespace ObjectCloner
                         #endregion
 
                         if (item.RequestedRK.Equals(selectedItem.RequestedRK)//Selected CatlgItem
-                            || (selectedItem.CType == CatalogType.ModularResource && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th MDLR OBJD
+                            || (selectedItem.CType() == CatalogType.ModularResource && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th MDLR OBJD
                             //-- only selected CTPT
                             //-- none of the OBJDs for CFIR
                             )
@@ -3454,9 +3492,9 @@ namespace ObjectCloner
 
                         #region Selected CatlgItem; 0th OBJD from MDLR or CFIR
                         if (item.RequestedRK.Equals(selectedItem.RequestedRK)//Selected CatlgItem
-                            || (selectedItem.CType == CatalogType.ModularResource && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th MDLR OBJD
+                            || (selectedItem.CType() == CatalogType.ModularResource && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th MDLR OBJD
                             //-- only selected CTPT
-                            || (selectedItem.CType == CatalogType.CatalogFireplace && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th CFIR OBJD
+                            || (selectedItem.CType() == CatalogType.CatalogFireplace && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th CFIR OBJD
                             )
                         {
                             ulong PngInstance = (ulong)commonBlock["PngInstance"].Value;
@@ -3493,7 +3531,7 @@ namespace ObjectCloner
                                 IterateTLP(tlpObjectDetail, (l, c) => UpdateItem(item, l, c));
 
                             #region Selected OBJD only
-                            if (selectedItem.CType == CatalogType.CatalogObject)//Selected OBJD only
+                            if (selectedItem.CType() == CatalogType.CatalogObject)//Selected OBJD only
                             {
                                 foreach (flagField ff in flagFields)
                                 {
@@ -3517,7 +3555,7 @@ namespace ObjectCloner
                         if (isRenumber)
                         {
                             #region Keep brushes together
-                            if (item.CType == CatalogType.CatalogTerrainPaintBrush)//Both CTPTs
+                            if (item.CType() == CatalogType.CatalogTerrainPaintBrush)//Both CTPTs
                             {
                                 byte status = (byte)commonBlock["BuildBuyProductStatusFlags"].Value;
                                 uint brushIndex = FNV32.GetHash(UniqueObject) << 1;
@@ -3528,7 +3566,7 @@ namespace ObjectCloner
                             }
                             #endregion
 
-                            if (item.CType == CatalogType.CatalogObject)
+                            if (item.CType() == CatalogType.CatalogObject)
                             {
                                 #region Avoid renumbering Fallback TGI
                                 int fallbackIndex = (int)(uint)item.Resource["FallbackIndex"].Value;
@@ -3634,7 +3672,7 @@ namespace ObjectCloner
         void CreateSTBL(IResourceKey newRK, ulong newGuid, string value, byte lang)
         {
             newRK.Instance = (newRK.Instance & 0x00FFFFFFFFFFFFFF) | ((ulong)lang << 56);
-            SpecificResource newstbl = new SpecificResource(FileTable.fb0, newRK);
+            SpecificResource newstbl = new SpecificResource(FileTable.GameContent, newRK);
             if (newstbl.ResourceIndexEntry == null) newstbl = FileTable.Current.AddResource(newRK);
 
             IDictionary<ulong, string> stbl = (IDictionary<ulong, string>)newstbl.Resource;
@@ -3670,7 +3708,7 @@ namespace ObjectCloner
 
             SaveList sl = new SaveList(this,
                 selectedItem, rkLookup,
-                target, disableCompression, selectedItem.CType != CatalogType.CAS_Part,
+                target, disableCompression, selectedItem.CType() != CatalogType.CAS_Part,
                 isPadSTBLs, false/*mode == Mode.FromGame/**/, null, //cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
                 updateProgress, () => !saving, OnSavingComplete);
 
@@ -3717,7 +3755,7 @@ namespace ObjectCloner
                     s3pi.Package.Package.ClosePackage(0, target.Package);
 
                     isCreateNewPackage = false;
-                    fileReOpenToFix(target.Path, selectedItem.CType);
+                    fileReOpenToFix(target.Path, selectedItem.CType());
                 }
                 else
                 {
@@ -3751,7 +3789,7 @@ namespace ObjectCloner
 
             DoWait("Please wait, adding missing resources...");
             SaveList sl = new SaveList(this, selectedItem, rkLookup,
-                FileTable.Current, disableCompression, selectedItem.CType != CatalogType.CAS_Part,
+                FileTable.Current, disableCompression, selectedItem.CType() != CatalogType.CAS_Part,
                 isPadSTBLs, false/*mode == Mode.FromGame/**/, null, //cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
                 updateProgress, () => !repairing, OnRepairingComplete);
 
@@ -4036,7 +4074,7 @@ namespace ObjectCloner
             if (rk.ResourceType == 0x220557DA) return false; // STBL - dealt with separately, not a reference
             if (oldToNew.ContainsKey(rk.Instance)) return true; // Already seen this old IID
 
-            SpecificIndexEntry sie = new SpecificIndexEntry(FileTable.fb0, rk);
+            SpecificIndexEntry sie = new SpecificIndexEntry(FileTable.GameContent, rk);
             if (sie.ResourceIndexEntry == null || sie.PathPackage != FileTable.Current) return false; // Not found in current package, so we don't renumber it here
 
             if (rk.ResourceType == 0x736884F1 && rk.Instance >> 32 == 0) // It's a request for a VPXY using version...
@@ -4085,6 +4123,8 @@ namespace ObjectCloner
     static class Extensions
     {
         public static bool Contains(this IEnumerable<string> haystack, string needle) { foreach (var x in haystack) if (x.Equals(needle)) return true; return false; }
+
+        public static CatalogType CType(this SpecificIndexEntry sr) { return (CatalogType)sr.ResourceIndexEntry.ResourceType; }
     }
 
     class EnumerableResource : IEnumerable<IResourceKey>

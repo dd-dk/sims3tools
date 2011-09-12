@@ -48,7 +48,7 @@ namespace ObjectCloner
                 //Tools
                 tgiSearchToolStripMenuItem, searchToolStripMenuItem, replaceTGIToolStripMenuItem, fixIntegrityToolStripMenuItem,
                 //Settings
-                gameFoldersToolStripMenuItem, userNameToopStripMenuItem, langSearchToolStripMenuItem, automaticUpdateCheckToolStripMenuItem,
+                gameFoldersToolStripMenuItem, packageEditorToolStripMenuItem, userNameToopStripMenuItem, langSearchToolStripMenuItem, automaticUpdateCheckToolStripMenuItem,
                 advancedCloningToolStripMenuItem,
                 diagnosticsToolStripMenuItem, loggingToolStripMenuItem,
                 //Help
@@ -95,7 +95,7 @@ namespace ObjectCloner
             MBC_cfnd, MBC_objd, MBC_cwal, MBC_cwst,
             MBC_crst, MBC_mdlr, MBC_crmt,
             MBT_tgiSearch, MBT_search, MBT_replaceTGI, MBT_fixIntegrity,
-            MBS_sims3Folder, MBS_userName, MBS_langSearch, MBS_updates, MBS_advanced, MBS_popups, MBS_logging,
+            MBS_sims3Folder, MBS_editor, MBS_userName, MBS_langSearch, MBS_updates, MBS_advanced, MBS_popups, MBS_logging,
             MBH_contents, MBH_about, MBH_update, MBH_warranty, MBH_licence,
         }
 

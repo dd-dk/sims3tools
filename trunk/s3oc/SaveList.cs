@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using s3pi.Interfaces;
 using System.Threading;
+using s3pi.Filetable;
 
 namespace ObjectCloner
 {
@@ -72,8 +73,8 @@ namespace ObjectCloner
 
             updateProgress(true, "Please wait...", false, -1, false, -1);
 
-            NameMap fb0nm = new NameMap(FileTable.fb0);
-            NameMap ddsnm = new NameMap(FileTable.dds);
+            NameMap fb0nm = new NameMap(FileTable.GameContent);
+            NameMap ddsnm = new NameMap(FileTable.DDSImages);
 
             SpecificResource newnmap = target.Find(rie => rie.ResourceType == 0x0166038C);
             if (newnmap == null)
@@ -131,9 +132,9 @@ namespace ObjectCloner
                 foreach (var kvp in rkList)
                 {
                     List<PathPackageTuple> lppt =
-                        (selectedItem.RequestedRK.ResourceType != 0x04ED4BB2 && kvp.Value.ResourceType == 0x00B2D882) ? FileTable.dds
-                        : kvp.Key.EndsWith("Thumb") ? FileTable.tmb
-                        : FileTable.fb0;
+                        (selectedItem.RequestedRK.ResourceType != 0x04ED4BB2 && kvp.Value.ResourceType == 0x00B2D882) ? FileTable.DDSImages
+                        : kvp.Key.EndsWith("Thumb") ? FileTable.Thumbnails
+                        : FileTable.GameContent;
                     NameMap nm = kvp.Value.ResourceType == 0x00B2D882 ? ddsnm : fb0nm;
 
                     if (stopSaving) return;
@@ -192,7 +193,7 @@ namespace ObjectCloner
         void AddSTBLs(IDictionary<ulong, string> newnamemap)
         {
             #region Determine whether anything should be done
-            SpecificResource catlgItem = selectedItem.CType == CatalogType.ModularResource
+            SpecificResource catlgItem = selectedItem.CType() == CatalogType.ModularResource
                 ? MainForm.ItemForTGIBlock0(selectedItem)
                 : selectedItem;
 
