@@ -56,6 +56,9 @@ namespace S3Pack
             haveSource = true;
             tbSource.Text = Path.GetFullPath(ofdSelectPackage.FileName);
 
+            ckbCreateManifest.Enabled = Path.GetExtension(ofdSelectPackage.FileName).ToLower().Equals(".package");
+            ckbCreateManifest.Checked = ckbCreateManifest.Enabled;
+
             string filename = Path.GetFileNameWithoutExtension(ofdSelectPackage.FileName);
             string[] split = filename.Split(new char[] { '_', }, 2);
             if (split.Length == 2)
@@ -101,11 +104,6 @@ namespace S3Pack
                     tbDisplayName.Text = xv.GetInnerText(xv.DisplayName, "DisplayName", tbTitle.Text);
                     tbDescription.Text = xv.GetInnerText(xv.Description, "Description", "");
 
-                    //ckbOWLocalDesc.Checked = xv.LocalisedNames != null && xv.LocalisedNames.TrueForAll(el => el.InnerText == xv.DisplayName.InnerText);
-                    //ckbOWLocalName.Checked = xv.LocalisedDescs != null && xv.LocalisedDescs.TrueForAll(el => el.InnerText == xv.Description.InnerText);
-
-                    //tbEPFlags.Text = CommonEPFlags() ?? "0x00000000";
-
                     if (tbTitle.Text.Length == 0) tbTitle.Text = tbDisplayName.Text;
 
                     UpdatePackagedFiles(Path.GetDirectoryName(ofdSelectPackage.FileName));
@@ -123,11 +121,11 @@ namespace S3Pack
 
         private void btnTarget_Click(object sender, EventArgs e)
         {
-            if (tbTarget.Text == "")
+            if (tbTarget.Text == "Select...")
                 tbTarget.Text = (tbSource.Text != "" ? Directory.GetParent(Path.GetDirectoryName(tbSource.Text)) + "\\" : "") +
                     tbCreatorName.Text.Replace(" ", "") + "_" + tbTitle.Text.Replace(" ", "");
 
-            try { sfdSims3Pack.InitialDirectory = Path.GetDirectoryName(tbTarget.Text); }
+            try { sfdSims3Pack.InitialDirectory = tbTarget.Text == "Select..." ? "" : Path.GetDirectoryName(tbTarget.Text); }
             catch { sfdSims3Pack.InitialDirectory = ""; }
 
             try { sfdSims3Pack.FileName = File.Exists(tbSource.Text) ? Path.GetFileName(tbTarget.Text) : "*.Sims3Pack"; }
@@ -162,6 +160,7 @@ namespace S3Pack
         {
             if (xv == null)
                 xv = XmlValues.GetXmlValues(tbSource.Text);
+
             if (xv == null)
                 xv = new XmlValues();
 
@@ -178,8 +177,11 @@ namespace S3Pack
             xv.SetInnerText("AssetVersion", tbAssetVersion.Text);
             xv.SetInnerText("MinReqVersion", tbMinReqVersion.Text);
 
-            if (tbSource.Text.ToLower().EndsWith(".package"))
+            if (Path.GetExtension(tbSource.Text).ToLower().Equals(".package"))
             {
+                if (ckbCreateManifest.Checked)
+                    Manifest.UpdatePackage(tbSource.Text, tbPackageId.Text, cbType.Text, ckbCreateMissingIcon.Checked);
+
                 //Ensure a minimal entry for the package exists but don't override existing values
                 PackagedFile pf = xv.PackagedFiles.Find(p => p.Guid.InnerText.ToLower().Equals(tbPackageId.Text.ToLower()));
                 if (pf == null)
@@ -191,17 +193,18 @@ namespace S3Pack
                 }
             }
 
-            //if (ckbOWLocalDesc.Checked) xv.LocalisedNames.IsEmpty = true;
-            //if (ckbOWLocalName.Checked) xv.LocalisedDescs.IsEmpty = true;
-
             S3Pack.Sims3Pack.Pack(ofdSelectPackage.FileName, sfdSims3Pack.FileName, xv);
 
             CopyableMessageBox.Show("Done!", "Sims3Pack created", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
 
-            tbSource.Text = tbCreatorName.Text = tbTitle.Text =
-                tbTarget.Text = cbType.Text = tbPackageId.Text =
-                tbDisplayName.Text = tbDescription.Text = "";
+            tbSource.Text = tbTarget.Text = "Select...";
+            haveSource = haveTarget = false;
+
+            tbCreatorName.Text = tbTitle.Text = cbType.Text = tbPackageId.Text = tbDisplayName.Text = tbDescription.Text = "";
             tbSubType.Text = "0x00000000";
+
+            ckbCreateManifest.Enabled = false;
+            ckbCreateManifest.Checked = ckbCreateManifest.Enabled;
 
             OKforOK();
         }
@@ -255,6 +258,12 @@ namespace S3Pack
             return pf.Name != null &&
                 pf.Name.InnerText.Length != 0 &&
                 File.Exists(Path.Combine(folder, Path.GetFileName(pf.Name.InnerText)));
+        }
+
+        private void ckbCreateManifest_CheckedChanged(object sender, EventArgs e)
+        {
+            ckbCreateMissingIcon.Enabled = ckbCreateManifest.Checked;
+            ckbCreateMissingIcon.Checked = false;
         }
     }
 }
