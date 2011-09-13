@@ -32,6 +32,9 @@ namespace S3Pack
         PathPackageTuple ppt = null;
         string packageid = null;
         string packagetype = null;
+        string subtype = null;
+        string title = null;
+        string desc = null;
         bool createMissingThumb;
 
         XmlDocument Document = null;
@@ -39,27 +42,32 @@ namespace S3Pack
         XmlElement NumOfThumbs = null;
         int numofthumbs = 0;
 
-        public static void UpdatePackage(string path, string packageid, string packagetype, bool createMissingThumb)
+        public static void UpdatePackage(string path, string packageid, string packagetype, string subtype, string title, string desc, bool createMissingThumb)
         {
             PathPackageTuple ppt = new PathPackageTuple(path, true);
             FileTable.Current = ppt;
             ppt.FindAll(rie => rie.ResourceType == 0x73E93EEB).ForEach(x => x.ResourceIndexEntry.IsDeleted = true);
 
-            Manifest mf = new Manifest();
-            mf.ppt = ppt;
-            mf.packageid = packageid;
-            mf.packagetype = packagetype;
-            mf.createMissingThumb = createMissingThumb;
+            Manifest mf = new Manifest(ppt, packageid, packagetype, subtype, title, desc, createMissingThumb);
 
-            var r = ppt.Package.AddResource(new TGIBlock(0, null, 0x73E93EEB, 0, 0), null, false);
-            ppt.Package.ReplaceResource(r, mf);
+            var r = ppt.Package.AddResource(new TGIBlock(0, null, 0x73E93EEB, 0, 0), mf.Stream, false);
             ppt.Package.SavePackage();
             s3pi.Package.Package.ClosePackage(0, ppt.Package);
 
             FileTable.Current = null;
         }
 
-        Manifest() : base(0, null) { }
+        Manifest(PathPackageTuple ppt, string packageid, string packagetype, string subtype, string title, string desc, bool createMissingThumb)
+            : base(0, null)
+        {
+            this.ppt = ppt;
+            this.packageid = packageid;
+            this.packagetype = packagetype;
+            this.subtype = subtype;
+            this.title = title;
+            this.desc = desc;
+            this.createMissingThumb = createMissingThumb;
+        }
 
         protected override Stream UnParse()
         {
@@ -76,7 +84,7 @@ namespace S3Pack
             XmlElement root = Document.CreateElement("manifest");
             Document.AppendChild(root);
 
-            root.SetAttribute("packagesubtype", "00000000");
+            root.SetAttribute("packagesubtype", subtype);
             root.SetAttribute("packagetype", packagetype);
             root.SetAttribute("version", "3");
             root.SetAttribute("true", "false");
@@ -128,10 +136,10 @@ namespace S3Pack
                 Add(ppt.AddResource(newRK, ms).ResourceIndexEntry);
             }
 
-            root.AppendChild(CreateLanguageElementWithChild("localizednames", "localizedname", "packagetitle"));
-            root.AppendChild(CreateElement("packagetitle", ""));
-            root.AppendChild(CreateLanguageElementWithChild("localizeddescriptions", "localizeddescription", "packagedesc"));
-            root.AppendChild(CreateElement("packagedesc", ""));
+            root.AppendChild(CreateLanguageElementWithChild("localizednames", "localizedname", title));
+            root.AppendChild(CreateElement("packagetitle", title));
+            root.AppendChild(CreateLanguageElementWithChild("localizeddescriptions", "localizeddescription", desc));
+            root.AppendChild(CreateElement("packagedesc", desc));
 
             byte[] res;
             MemoryStream msXml = new MemoryStream();

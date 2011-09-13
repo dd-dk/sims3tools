@@ -177,10 +177,16 @@ namespace S3Pack
             xv.SetInnerText("AssetVersion", tbAssetVersion.Text);
             xv.SetInnerText("MinReqVersion", tbMinReqVersion.Text);
 
-            if (Path.GetExtension(tbSource.Text).ToLower().Equals(".package"))
+            string source = tbSource.Text;
+            bool deleteSource = false;
+            if (Path.GetExtension(source).ToLower().Equals(".package"))
             {
                 if (ckbCreateManifest.Checked)
-                    Manifest.UpdatePackage(tbSource.Text, tbPackageId.Text, cbType.Text, ckbCreateMissingIcon.Checked);
+                {
+                    source = CopyToTemp(source, tbPackageId.Text);
+                    deleteSource = true;
+                    Manifest.UpdatePackage(source, tbPackageId.Text, cbType.Text, tbSubType.Text, tbDisplayName.Text, tbDescription.Text, ckbCreateMissingIcon.Checked);
+                }
 
                 //Ensure a minimal entry for the package exists but don't override existing values
                 PackagedFile pf = xv.PackagedFiles.Find(p => p.Guid.InnerText.ToLower().Equals(tbPackageId.Text.ToLower()));
@@ -193,7 +199,9 @@ namespace S3Pack
                 }
             }
 
-            S3Pack.Sims3Pack.Pack(ofdSelectPackage.FileName, sfdSims3Pack.FileName, xv);
+            S3Pack.Sims3Pack.Pack(source, sfdSims3Pack.FileName, xv);
+            if (deleteSource)
+                File.Delete(source);
 
             CopyableMessageBox.Show("Done!", "Sims3Pack created", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
 
@@ -207,6 +215,13 @@ namespace S3Pack
             ckbCreateManifest.Checked = ckbCreateManifest.Enabled;
 
             OKforOK();
+        }
+
+        string CopyToTemp(string from, string pkgid)
+        {
+            string target = Path.Combine(Path.GetTempPath(), pkgid + ".package");
+            File.Copy(from, target, true);
+            return target;
         }
 
         void OKforOK()
