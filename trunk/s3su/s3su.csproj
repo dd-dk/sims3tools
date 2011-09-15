@@ -89,6 +89,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChooseMode.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChooseMode.Designer.cs">
+      <DependentUpon>ChooseMode.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Repack.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Repack.Designer.cs">
+      <DependentUpon>Repack.cs</DependentUpon>
+    </Compile>
     <Compile Include="Manifest.cs" />
     <Compile Include="Properties\AssemblyVersion.cs" />
     <Compile Include="Pack.cs">
@@ -133,6 +145,12 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="ChooseMode.resx">
+      <DependentUpon>ChooseMode.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Repack.resx">
+      <DependentUpon>Repack.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Pack.resx">
       <DependentUpon>Pack.cs</DependentUpon>
     </EmbeddedResource>

@@ -93,6 +93,8 @@ namespace S3Pack
 
         public static void Pack(string Package, string Target, XmlValues v)
         {
+            v.SetInnerText("Date", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss"));
+
             long Offset = 0;
             // Update the XML
             foreach (PackagedFile pf in v.PackagedFiles)

@@ -1,6 +1,6 @@
 ﻿namespace S3Pack
 {
-    partial class Unpack
+    partial class Repack
     {
         /// <summary>
         /// Required designer variable.
@@ -28,8 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Unpack));
-            this.ofdSims3Pack = new System.Windows.Forms.OpenFileDialog();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Repack));
+            this.ofdSims3PackXML = new System.Windows.Forms.OpenFileDialog();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -40,16 +40,16 @@
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.tbStatus = new System.Windows.Forms.TextBox();
-            this.sfdTarget = new System.Windows.Forms.SaveFileDialog();
+            this.sfdSims3Pack = new System.Windows.Forms.SaveFileDialog();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // ofdSims3Pack
+            // ofdSims3PackXML
             // 
-            this.ofdSims3Pack.FileName = "*.Sims3Pack";
-            this.ofdSims3Pack.Filter = "Sims3Pack files (*.Sims3Pack)|*.Sims3Pack|All files (*.*)|*.*";
-            this.ofdSims3Pack.SupportMultiDottedExtensions = true;
-            this.ofdSims3Pack.Title = "Select Sims3Pack";
+            this.ofdSims3PackXML.FileName = "0x*.xml";
+            this.ofdSims3PackXML.Filter = "Sims3Pack XML (0x*.xml)|0x*.xml|All files (*.*)|*.*";
+            this.ofdSims3PackXML.SupportMultiDottedExtensions = true;
+            this.ofdSims3PackXML.Title = "Select Sims3Pack XML";
             // 
             // tableLayoutPanel1
             // 
@@ -80,30 +80,30 @@
             // 
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(18, 8);
+            this.label1.Location = new System.Drawing.Point(3, 8);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(86, 13);
+            this.label1.Size = new System.Drawing.Size(111, 13);
             this.label1.TabIndex = 1;
-            this.label1.Text = "From Sims3Pack";
+            this.label1.Text = "From Sims3Pack XML";
             // 
             // label2
             // 
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 37);
+            this.label2.Location = new System.Drawing.Point(19, 37);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(101, 13);
+            this.label2.Size = new System.Drawing.Size(95, 13);
             this.label2.TabIndex = 4;
-            this.label2.Text = "Output parent folder";
+            this.label2.Text = "Output Sims3Pack";
             // 
             // tbSource
             // 
             this.tbSource.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tbSource.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.tbSource.Location = new System.Drawing.Point(110, 4);
+            this.tbSource.Location = new System.Drawing.Point(120, 4);
             this.tbSource.Name = "tbSource";
             this.tbSource.ReadOnly = true;
-            this.tbSource.Size = new System.Drawing.Size(370, 20);
+            this.tbSource.Size = new System.Drawing.Size(360, 20);
             this.tbSource.TabIndex = 3;
             this.tbSource.Text = "Select...";
             // 
@@ -111,10 +111,10 @@
             // 
             this.tbTarget.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tbTarget.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.tbTarget.Location = new System.Drawing.Point(110, 33);
+            this.tbTarget.Location = new System.Drawing.Point(120, 33);
             this.tbTarget.Name = "tbTarget";
             this.tbTarget.ReadOnly = true;
-            this.tbTarget.Size = new System.Drawing.Size(370, 20);
+            this.tbTarget.Size = new System.Drawing.Size(360, 20);
             this.tbTarget.TabIndex = 6;
             this.tbTarget.Text = "Select...";
             // 
@@ -149,7 +149,7 @@
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 2;
-            this.btnOK.Text = "&Unpack";
+            this.btnOK.Text = "&Repack";
             this.btnOK.UseVisualStyleBackColor = true;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
             // 
@@ -177,15 +177,15 @@
             this.tbStatus.TabIndex = 4;
             this.tbStatus.TabStop = false;
             // 
-            // sfdTarget
+            // sfdSims3Pack
             // 
-            this.sfdTarget.AddExtension = false;
-            this.sfdTarget.FileName = "Filename will be ignored";
-            this.sfdTarget.Filter = "*|*.*";
-            this.sfdTarget.OverwritePrompt = false;
-            this.sfdTarget.Title = "Select target folder";
+            this.sfdSims3Pack.AddExtension = false;
+            this.sfdSims3Pack.FileName = "*.Sims3Pack";
+            this.sfdSims3Pack.Filter = "Sims3Packs (*.Sims3Pack)|*.Sims3Pack|All files (*.*)|*.*";
+            this.sfdSims3Pack.OverwritePrompt = false;
+            this.sfdSims3Pack.Title = "Output Sims3Pack";
             // 
-            // Unpack
+            // Repack
             // 
             this.AcceptButton = this.btnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -199,10 +199,10 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.Name = "Unpack";
+            this.Name = "Repack";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "s3su Unpack";
-            this.Shown += new System.EventHandler(this.Unpack_Shown);
+            this.Text = "s3su Repack";
+            this.Shown += new System.EventHandler(this.Repack_Shown);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
@@ -212,7 +212,7 @@
 
         #endregion
 
-        private System.Windows.Forms.OpenFileDialog ofdSims3Pack;
+        private System.Windows.Forms.OpenFileDialog ofdSims3PackXML;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
@@ -223,7 +223,7 @@
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.TextBox tbStatus;
-        private System.Windows.Forms.SaveFileDialog sfdTarget;
+        private System.Windows.Forms.SaveFileDialog sfdSims3Pack;
     }
 }
 

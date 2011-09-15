@@ -30,11 +30,18 @@ namespace S3Pack
     {
         bool haveSource = false;
         bool haveTarget = false;
-        XmlValues xv = null;
+        bool havePackageId = false;
 
         public Pack()
         {
             InitializeComponent();
+        }
+
+        public Pack(string source)
+            : this()
+        {
+            if (File.Exists(source))
+                setSource(Path.GetFullPath(source));
         }
 
         private void Pack_Shown(object sender, EventArgs e)
@@ -44,98 +51,33 @@ namespace S3Pack
 
         private void btnSource_Click(object sender, EventArgs e)
         {
-            try { ofdSelectPackage.InitialDirectory = Path.GetDirectoryName(tbSource.Text); }
+            try { ofdSelectPackage.InitialDirectory = haveSource ? Path.GetDirectoryName(tbSource.Text) : ""; }
             catch { ofdSelectPackage.InitialDirectory = ""; }
 
-            try { ofdSelectPackage.FileName = File.Exists(tbSource.Text) ? Path.GetFileName(tbSource.Text) : "*.package"; }
+            try { ofdSelectPackage.FileName = haveSource && File.Exists(tbSource.Text) ? Path.GetFileName(tbSource.Text) : "*.package"; }
             catch { ofdSelectPackage.FileName = "*.package"; }
 
             ofdSelectPackage.FilterIndex = 1;
             if (ofdSelectPackage.ShowDialog() != DialogResult.OK) return;
 
-            haveSource = true;
-            tbSource.Text = Path.GetFullPath(ofdSelectPackage.FileName);
-
-            ckbCreateManifest.Enabled = Path.GetExtension(ofdSelectPackage.FileName).ToLower().Equals(".package");
-            ckbCreateManifest.Checked = ckbCreateManifest.Enabled;
-
-            string filename = Path.GetFileNameWithoutExtension(ofdSelectPackage.FileName);
-            string[] split = filename.Split(new char[] { '_', }, 2);
-            if (split.Length == 2)
-            {
-                if (tbCreatorName.Text.Length == 0) tbCreatorName.Text = split[0];
-                if (tbTitle.Text.Length == 0) tbTitle.Text = split[1];
-                if (tbDisplayName.Text.Length == 0) tbDisplayName.Text = split[1];
-            }
-            else
-                if (tbCreatorName.Text.Length == 0) tbCreatorName.Text = Environment.UserName;
-
-            try
-            {
-                xv = XmlValues.GetXmlValues(tbSource.Text);
-                if (xv != null)
-                {
-                    cbType.Text = xv.GetAttributeValue(xv.Sims3PackType, "Type", "");
-                    tbSubType.Text = xv.GetAttributeValue(xv.SubType, "SubType", "0x00000000");
-
-                    tbArchiveVersion.Text = xv.GetInnerText(xv.ArchiveVersion, "ArchiveVersion", "1.4");
-                    tbCodeVersion.Text = xv.GetInnerText(xv.CodeVersion, "CodeVersion", "0.0.0.1");
-                    tbGameVersion.Text = xv.GetInnerText(xv.GameVersion, "GameVersion", "0.0.0.0");
-
-                    if (xv.PackageId != null)
-                        tbPackageId.Text = xv.PackageId.InnerText;
-                    else
-                    {
-                        PackagedFile pf = xv.PackagedFiles.Find(x => x.Guid.InnerText != "0x0000000000000000");
-                        if (pf != null)
-                            tbPackageId.Text = pf.Guid.InnerText;
-                        else
-                        {
-                            tbPackageId.Text = Path.GetFileNameWithoutExtension(tbSource.Text);
-                            tbPackageId.Text = "0x" + NewGUID().ToString("n");
-                        }
-                        xv.SetInnerText("PackageId", tbPackageId.Text);
-                    }
-
-                    //Date gets overwritten always
-                    tbAssetVersion.Text = xv.GetInnerText(xv.AssetVersion, "AssetVersion", "0");
-                    tbMinReqVersion.Text = xv.GetInnerText(xv.MinReqVersion, "MinReqVersion", "1.0.0.0");
-
-                    tbDisplayName.Text = xv.GetInnerText(xv.DisplayName, "DisplayName", tbTitle.Text);
-                    tbDescription.Text = xv.GetInnerText(xv.Description, "Description", "");
-
-                    if (tbTitle.Text.Length == 0) tbTitle.Text = tbDisplayName.Text;
-
-                    UpdatePackagedFiles(Path.GetDirectoryName(ofdSelectPackage.FileName));
-                }
-            }
-            catch (System.Xml.XmlException xe)
-            {
-                CopyableMessageBox.IssueException(xe, "There is a problem with the XML found.", "XML error");
-                tbSource.Text = "";
-                haveSource = false;
-            }
-
-            OKforOK();
+            setSource(Path.GetFullPath(ofdSelectPackage.FileName));
         }
 
         private void btnTarget_Click(object sender, EventArgs e)
         {
-            if (tbTarget.Text == "Select...")
-                tbTarget.Text = (tbSource.Text != "" ? Directory.GetParent(Path.GetDirectoryName(tbSource.Text)) + "\\" : "") +
-                    tbCreatorName.Text.Replace(" ", "") + "_" + tbTitle.Text.Replace(" ", "");
+            string defaultTarget = haveSource ? Path.Combine(Path.GetDirectoryName(tbSource.Text), Path.GetFileNameWithoutExtension(tbSource.Text) + ".Sims3Pack") : "";
 
-            try { sfdSims3Pack.InitialDirectory = tbTarget.Text == "Select..." ? "" : Path.GetDirectoryName(tbTarget.Text); }
+            try { sfdSims3Pack.InitialDirectory = haveTarget ? Path.GetDirectoryName(tbTarget.Text) : haveSource ? Path.GetDirectoryName(defaultTarget) : ""; }
             catch { sfdSims3Pack.InitialDirectory = ""; }
 
-            try { sfdSims3Pack.FileName = File.Exists(tbSource.Text) ? Path.GetFileName(tbTarget.Text) : "*.Sims3Pack"; }
+            try { sfdSims3Pack.FileName = haveTarget ? Path.GetFileName(tbTarget.Text) : haveSource ? Path.GetFileName(defaultTarget) : "*.Sims3Pack"; }
             catch { sfdSims3Pack.FileName = "*.Sims3Pack"; }
 
             sfdSims3Pack.FilterIndex = 1;
             if (sfdSims3Pack.ShowDialog() != DialogResult.OK) return;
 
-            haveTarget = true;
             tbTarget.Text = Path.GetFullPath(sfdSims3Pack.FileName);
+            haveTarget = true;
 
             OKforOK();
         }
@@ -145,10 +87,36 @@ namespace S3Pack
             OKforOK();
         }
 
-        private void btnNewGUID_Click(object sender, EventArgs e)
+        private void btnUseSource_Click(object sender, EventArgs e)
         {
-            tbPackageId.Text = "0x" + NewGUID().ToString("n");
+            if (haveSource)
+            {
+                Guid? guid = TryParse(Path.GetFileNameWithoutExtension(tbSource.Text));
+                if (guid.HasValue)
+                {
+                    tbPackageId.Text = "0x" + guid.Value.ToString("n");
+                    havePackageId = true;
+                }
+                else
+                    ResetPackageId();
+            }
+
+            btnUseSource.Enabled = false;
             OKforOK();
+        }
+
+        private void btnGenerate_Click(object sender, EventArgs e)
+        {
+            tbPackageId.Text = "0x" + Guid.NewGuid().ToString("n");
+            havePackageId = true;
+
+            btnUseSource.Enabled = haveSource && TryParse(Path.GetFileNameWithoutExtension(tbSource.Text)) != null;
+            OKforOK();
+        }
+
+        private void ckbCreateManifest_CheckedChanged(object sender, EventArgs e)
+        {
+            ckbCreateMissingIcon.Checked = ckbCreateMissingIcon.Enabled = ckbCreateManifest.Checked;
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -158,34 +126,38 @@ namespace S3Pack
 
         private void btnOK_Click(object sender, EventArgs e)
         {
-            if (xv == null)
-                xv = XmlValues.GetXmlValues(tbSource.Text);
-
-            if (xv == null)
-                xv = new XmlValues();
-
-            xv.SetAttributeValue("Type", cbType.Text);
-            xv.SetAttributeValue("SubType", tbSubType.Text);
-
-            xv.SetInnerText("ArchiveVersion", tbArchiveVersion.Text);
-            xv.SetInnerText("CodeVersion", tbCodeVersion.Text);
-            xv.SetInnerText("GameVersion", tbGameVersion.Text);
-            xv.SetInnerText("DisplayName", tbDisplayName.Text);
-            xv.SetInnerText("Description", tbDescription.Text);
-            xv.SetInnerText("PackageId", tbPackageId.Text);
-            xv.SetInnerText("Date", tbDate.Text);
-            xv.SetInnerText("AssetVersion", tbAssetVersion.Text);
-            xv.SetInnerText("MinReqVersion", tbMinReqVersion.Text);
-
             string source = tbSource.Text;
             bool deleteSource = false;
-            if (Path.GetExtension(source).ToLower().Equals(".package"))
+            try
             {
+                XmlValues xv = new XmlValues();
+
+                xv.SetAttributeValue("Type", tbType.Text);
+                xv.SetAttributeValue("SubType", tbSubType.Text);
+
+                xv.SetInnerText("ArchiveVersion", tbArchiveVersion.Text);
+                xv.SetInnerText("CodeVersion", tbCodeVersion.Text);
+                xv.SetInnerText("GameVersion", tbGameVersion.Text);
+                xv.SetInnerText("DisplayName", tbDisplayName.Text);
+                xv.SetInnerText("Description", tbDescription.Text);
+                xv.SetInnerText("PackageId", tbPackageId.Text);
+                //Date gets set by packer
+                xv.SetInnerText("AssetVersion", tbAssetVersion.Text);
+                xv.SetInnerText("MinReqVersion", tbMinReqVersion.Text);
+
                 if (ckbCreateManifest.Checked)
                 {
                     source = CopyToTemp(source, tbPackageId.Text);
                     deleteSource = true;
-                    Manifest.UpdatePackage(source, tbPackageId.Text, cbType.Text, tbSubType.Text, tbDisplayName.Text, tbDescription.Text, ckbCreateMissingIcon.Checked);
+                    try
+                    {
+                        Manifest.UpdatePackage(source, tbPackageId.Text, tbType.Text, tbSubType.Text, tbDisplayName.Text, tbDescription.Text, ckbCreateMissingIcon.Checked);
+                    }
+                    catch (ApplicationException aex)
+                    {
+                        CopyableMessageBox.Show(aex.Message, "s3su", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
+                        return;
+                    }
                 }
 
                 //Ensure a minimal entry for the package exists but don't override existing values
@@ -194,27 +166,31 @@ namespace S3Pack
                 {
                     pf = xv.CreatePackagedFile(tbPackageId.Text + ".package");
                     pf.GetInnerText(pf.Guid, "Guid", tbPackageId.Text);
-                    pf.GetInnerText(pf.ContentType, "ContentType", cbType.Text);
+                    pf.GetInnerText(pf.ContentType, "ContentType", tbType.Text);
                     pf.GetInnerText(pf.EPFlags, "EPFlags", "0x00000000");
                 }
+
+                S3Pack.Sims3Pack.Pack(source, tbTarget.Text, xv);
+
+                CopyableMessageBox.Show("Done!", "Sims3Pack created", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
             }
+            finally
+            {
+                if (deleteSource)
+                    File.Delete(source);
 
-            S3Pack.Sims3Pack.Pack(source, sfdSims3Pack.FileName, xv);
-            if (deleteSource)
-                File.Delete(source);
+                ResetSource();
+                ResetTarget();
+                ResetPackageId();
 
-            CopyableMessageBox.Show("Done!", "Sims3Pack created", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
+                tbDisplayName.Text = tbDescription.Text = "";
+                tbSubType.Text = "0x00000000";
 
-            tbSource.Text = tbTarget.Text = "Select...";
-            haveSource = haveTarget = false;
+                ckbCreateManifest.Enabled = false;
+                ckbCreateManifest.Checked = ckbCreateManifest.Enabled;
 
-            tbCreatorName.Text = tbTitle.Text = cbType.Text = tbPackageId.Text = tbDisplayName.Text = tbDescription.Text = "";
-            tbSubType.Text = "0x00000000";
-
-            ckbCreateManifest.Enabled = false;
-            ckbCreateManifest.Checked = ckbCreateManifest.Enabled;
-
-            OKforOK();
+                OKforOK();
+            }
         }
 
         string CopyToTemp(string from, string pkgid)
@@ -224,61 +200,50 @@ namespace S3Pack
             return target;
         }
 
+        void setSource(string source)
+        {
+            tbSource.Text = source;
+            haveSource = true;
+
+            try
+            {
+                var pkg = s3pi.Package.Package.OpenPackage(0, source);
+                s3pi.Package.Package.ClosePackage(0, pkg);
+            }
+            catch (InvalidDataException ex)
+            {
+                CopyableMessageBox.IssueException(ex, "There is a problem with the package.", "s3su pack");
+                ResetSource();
+                return;
+            }
+
+            btnUseSource.Enabled = TryParse(Path.GetFileNameWithoutExtension(tbSource.Text)) != null;
+
+            OKforOK();
+        }
+
         void OKforOK()
         {
-            tbDate.Text = DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss");
-            btnOK.Enabled = haveSource && haveTarget && cbType.Text.Length > 0 && tbPackageId.Text.Length > 0;
-            tbStatus.Text = btnOK.Enabled ? "Click 'Pack...' to create a Sims3Pack." : "Source, Target, Type and PackageId are required.";
+            btnOK.Enabled = haveSource && haveTarget && havePackageId;
+            tbStatus.Text = btnOK.Enabled ?
+                "Click 'Pack' to create the Sims3Pack." :
+                "'From package', 'Output Sims3Pack' and 'PackageId' are required.";
         }
 
-        Guid NewGUID()
+        void ResetSource() { tbSource.Text = "Select..."; haveSource = false; btnUseSource.Enabled = false; ResetPackageId(); }
+        void ResetTarget() { tbTarget.Text = "Select..."; haveTarget = false; }
+        void ResetPackageId() { tbPackageId.Text = ""; havePackageId = false; }
+
+        Guid? TryParse(string value)
         {
-            Guid guid = new Guid();
-            if (tbPackageId.Text.ToLower().StartsWith("0x"))
-                guid = new Guid(tbPackageId.Text.Substring(2));
-
-            ulong fnv64a = 0, fnv64b = 0;
-            string guidStr = guid.ToString("n");
-            fnv64a = tbCreatorName.Text.Length > 0
-                ? System.Security.Cryptography.FNV64.GetHash(tbCreatorName.Text)
-                : ulong.Parse(guidStr.Substring(0, 16), System.Globalization.NumberStyles.HexNumber);
-            fnv64b = tbTitle.Text.Length > 0
-                ? System.Security.Cryptography.FNV64.GetHash(tbTitle.Text)
-                : ulong.Parse(guidStr.Substring(16), System.Globalization.NumberStyles.HexNumber);
-
-            guid = new Guid(fnv64a.ToString("x16") + fnv64b.ToString("x16"));
-
-            return guid;
-        }
-
-        string CommonEPFlags() { return null; }
-
-        void UpdatePackagedFiles(string folder)
-        {
-            List<PackagedFile> notFound = xv.PackagedFiles.FindAll(x => !PackagedFileExists(folder, x));
-            if (notFound.Count == 0) return;
-
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            sb.AppendLine("The following files in the Sims3Pack manifest XML cannot be found:");
-            foreach (PackagedFile pf in notFound)
-            {
-                sb.AppendLine(pf.Name.InnerText);
-                xv.RemovePackagedFile(pf.Name.InnerText);
-            }
-            CopyableMessageBox.Show(sb.ToString(), "Missing files", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
-        }
-
-        bool PackagedFileExists(string folder, PackagedFile pf)
-        {
-            return pf.Name != null &&
-                pf.Name.InnerText.Length != 0 &&
-                File.Exists(Path.Combine(folder, Path.GetFileName(pf.Name.InnerText)));
-        }
-
-        private void ckbCreateManifest_CheckedChanged(object sender, EventArgs e)
-        {
-            ckbCreateMissingIcon.Enabled = ckbCreateManifest.Checked;
-            ckbCreateMissingIcon.Checked = false;
+            if (value.ToLower().StartsWith("0x") && value.Length == 34)
+                try
+                {
+                    Guid guid = new Guid(value.Substring(2));
+                    return guid;
+                }
+                catch { }
+            return null;
         }
     }
 }

@@ -41,20 +41,27 @@ namespace S3Pack
         XmlElement KeyList = null;
         XmlElement NumOfThumbs = null;
         int numofthumbs = 0;
+        int numofCatlgResources = 0;
 
         public static void UpdatePackage(string path, string packageid, string packagetype, string subtype, string title, string desc, bool createMissingThumb)
         {
             PathPackageTuple ppt = new PathPackageTuple(path, true);
-            FileTable.Current = ppt;
-            ppt.FindAll(rie => rie.ResourceType == 0x73E93EEB).ForEach(x => x.ResourceIndexEntry.IsDeleted = true);
+            try
+            {
+                FileTable.Current = ppt;
+                ppt.FindAll(rie => rie.ResourceType == 0x73E93EEB).ForEach(x => x.ResourceIndexEntry.IsDeleted = true);
 
-            Manifest mf = new Manifest(ppt, packageid, packagetype, subtype, title, desc, createMissingThumb);
-
-            var r = ppt.Package.AddResource(new TGIBlock(0, null, 0x73E93EEB, 0, 0), mf.Stream, false);
-            ppt.Package.SavePackage();
-            s3pi.Package.Package.ClosePackage(0, ppt.Package);
-
-            FileTable.Current = null;
+                Manifest mf = new Manifest(ppt, packageid, packagetype, subtype, title, desc, createMissingThumb);
+                var r = ppt.Package.AddResource(new TGIBlock(0, null, 0x73E93EEB, 0, 0), mf.Stream, false);
+                if (mf.numofCatlgResources == 0)
+                    throw new ApplicationException("No objects found in package.  Cannot create Sims3Pack.");
+                ppt.Package.SavePackage();
+            }
+            finally
+            {
+                s3pi.Package.Package.ClosePackage(0, ppt.Package);
+                FileTable.Current = null;
+            }
         }
 
         Manifest(PathPackageTuple ppt, string packageid, string packagetype, string subtype, string title, string desc, bool createMissingThumb)
@@ -218,6 +225,15 @@ namespace S3Pack
         }
 
         static uint[] icons = new uint[] { 0x2E75C764, 0x2E75C765, 0x2E75C766, 0x2E75C767, };
+        static uint[] catlgResTypes = new uint[] {
+            //CatalogResource
+            0x0418FE2A, 0x04F3CC01, 0x316C78F2, 0x319E4F1D,
+            0x0A36F07A, 0x04AC5D93, 0x04C58103, 0xF1EDBD86,
+            0x91EDBD3E, 0x049CA4CD, 0x04B30669, 0x060B390C,
+            0x04ED4BB2, 0x9151E6BC, 0x515CA4CD,
+            //ModularResource
+            0xCF9A4ACE,
+        };
         void Add(IResourceIndexEntry rie)
         {
             XmlElement key = CreateElement("reskey", string.Format("1:{0:x8}:{1:x8}:{2:x16}", rie.ResourceType, rie.ResourceGroup, rie.Instance));
@@ -227,6 +243,8 @@ namespace S3Pack
                 NumOfThumbs.InnerText = "" + ++numofthumbs;
                 Document.DocumentElement.AppendChild(CreateElement("thumbnail", string.Format("{0:x8}:{1:x8}:{2:x16}", rie.ResourceType, rie.ResourceGroup, rie.Instance)));
             }
+            if (catlgResTypes.Contains(rie.ResourceType))
+                numofCatlgResources++;
         }
     }
 }

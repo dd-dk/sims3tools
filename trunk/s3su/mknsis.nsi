@@ -1,5 +1,5 @@
 ;!include "MUI.nsh"
-
+!include "FileAssociationCmd.nsh"
 
 !define tla "s3su"
 !ifndef INSTFILES
@@ -15,24 +15,24 @@
 Var wasInUse
 Var wantAll
 Var wantSM
-
-
+Var wantAssoc
+;Var wantSendTo
 ;Var delSettings
 
 
-InstallDir $PROGRAMFILES64\${tla}
-!define PROGRAM_NAME "Sims3Pack Utility"
+  InstallDir $PROGRAMFILES64\${tla}
+  !define PROGRAM_NAME "Sims3Pack Utility"
+  !define INSTREGKEY "${tla}"
+  !define SMDIR "$SMPROGRAMS\${tla}"
+  !define EXE S3Pack.exe
+  !define LNK1 "${tla} unpack.lnk"
+  !define LNK2 "${tla} repack.lnk"
+  !define LNK3 "${tla} pack.lnk"
 
 
-!define EXE1 unpack.exe
-!define LNK1 "${tla} unpack.lnk"
 
 
 
-!define INSTREGKEY "${tla}"
-!define SMDIR "$SMPROGRAMS\${tla}"
-!define EXE2 pack.exe
-!define LNK2 "${tla} pack.lnk"
 
 
 SetCompressor /SOLID LZMA
@@ -65,9 +65,9 @@ Section "Create Start Menu entry"
   StrCpy $wantSM "Y"
 SectionEnd
 
-
-
-
+Section /o "Create file associations?"
+  StrCpy $wantAssoc "Y"
+SectionEnd
 
 
 
@@ -88,7 +88,7 @@ gotAll:
   WriteUninstaller uninst-${tla}.exe
   
   ; Write the uninstall keys for Windows
-  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "DisplayIcon" "$INSTDIR\${EXE1}"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "DisplayIcon" "$INSTDIR\${EXE}"
   WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "DisplayName" "${PROGRAM_NAME}"
   WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "DisplayVersion" "${VSN}"
   WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "HelpLink" "http://dino.drealm.info/den/denforum/index.php?topic=198.0"
@@ -103,21 +103,21 @@ gotAll:
   StrCmp "Y" $wantSM wantSM noWantSM
 wantSM:
   CreateDirectory "${SMDIR}"
-  CreateShortCut "${SMDIR}\${LNK1}" "$INSTDIR\${EXE1}" "" "" "" SW_SHOWNORMAL "" "${PROGRAM_NAME} Unpacker"
-  CreateShortCut "${SMDIR}\${LNK2}" "$INSTDIR\${EXE2}" "" "" "" SW_SHOWNORMAL "" "${PROGRAM_NAME} Packer"
+  CreateShortCut "${SMDIR}\${LNK1}" "$INSTDIR\${EXE}" "/unpack" "" "" SW_SHOWNORMAL "" "${PROGRAM_NAME} Unpacker"
+  CreateShortCut "${SMDIR}\${LNK2}" "$INSTDIR\${EXE}" "/repack" "" "" SW_SHOWNORMAL "" "${PROGRAM_NAME} Repacker"
+  CreateShortCut "${SMDIR}\${LNK3}" "$INSTDIR\${EXE}" "/pack" "" "" SW_SHOWNORMAL "" "${PROGRAM_NAME} Packer"
   CreateShortCut "${SMDIR}\Uninstall.lnk" "$INSTDIR\uninst-${tla}.exe" "" "" "" SW_SHOWNORMAL "" "Uninstall"
   CreateShortCut "${SMDIR}\${tla}-Version.lnk" "$INSTDIR\${tla}-Version.txt" "" "" "" SW_SHOWNORMAL "" "Show version"
 noWantSM:
 
-
-
-
-
-
-
-
-
-
+  StrCmp "Y" $wantAssoc wantAssoc noWantAssoc
+wantAssoc:
+; ${RegisterCmdExtension} "[extension]" "[filetype name]" "[action]" "[executable]" "[arguments]"
+  ${RegisterCmdExtension} ".Sims3Pack" "Sims3™ Custom Content" "Unpack" "$INSTDIR\${EXE}" "/unpack"
+  ${RegisterCmdExtension} ".xml" "Sims3Pack XML" "Create Sims3Pack from" "$INSTDIR\${EXE}" "/repack"
+  ${RegisterCmdExtension} ".package" "Sims3 package" "Create Sims3Pack from" "$INSTDIR\${EXE}" "/pack"
+  WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "RemoveAssociation" "Y"
+noWantAssoc:
 
 
 SectionEnd
@@ -128,8 +128,7 @@ Function .onGUIInit
   SetBrandingImage $TEMP\s3pe.ico
   Delete $TEMP\s3pe.ico
   Call GetInstDir
-  Call CheckInUse1
-  Call CheckInUse2
+  Call CheckInUse
   Call CheckOldVersion
 FunctionEnd
 
@@ -137,11 +136,11 @@ Function GetInstDir
   Push $0
   ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
   StrCmp $0 "" gidNotCU
-  IfFileExists "$0${EXE1}" gidSetINSTDIR
+  IfFileExists "$0${EXE}" gidSetINSTDIR
 gidNotCU:
   ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
   StrCmp $0 "" gidDone
-  IfFileExists "$0${EXE1}" gidSetINSTDIR gidDone
+  IfFileExists "$0${EXE}" gidSetINSTDIR gidDone
 gidSetINSTDIR:
   StrCpy $INSTDIR $0
 gidDone:
@@ -149,47 +148,25 @@ gidDone:
   ClearErrors
 FunctionEnd
 
-Function CheckInUse1
+Function CheckInUse
   StrCpy $wasInUse 0
-cui1Retry:
-  IfFileExists "$INSTDIR\${EXE1}" cui1Exists
+cuiRetry:
+  IfFileExists "$INSTDIR\${EXE}" cuiExists
   Return
-cui1Exists:
+cuiExists:
   ClearErrors
-  FileOpen $0 "$INSTDIR\${EXE1}" a
-  IfErrors cui1InUse
+  FileOpen $0 "$INSTDIR\${EXE}" a
+  IfErrors cuiInUse
   FileClose $0
   Return
-cui1InUse:
+cuiInUse:
   StrCpy $wasInUse 1
 
   MessageBox MB_RETRYCANCEL|MB_ICONQUESTION \
-    "${EXE1} is running.$\r$\nPlease close it and retry.$\r$\n$INSTDIR\${EXE1}" \
-    IDRETRY cui1Retry
+    "${EXE} is running.$\r$\nPlease close it and retry.$\r$\n$INSTDIR\${EXE}" \
+    IDRETRY cuiRetry
 
-  MessageBox MB_OK|MB_ICONSTOP "Cannot continue to install if ${EXE1} is running."
-  Quit
-FunctionEnd
-
-Function CheckInUse2
-  StrCpy $wasInUse 0
-cui2Retry:
-  IfFileExists "$INSTDIR\${EXE1}" cui2Exists
-  Return
-cui2Exists:
-  ClearErrors
-  FileOpen $0 "$INSTDIR\${EXE1}" a
-  IfErrors cui2InUse
-  FileClose $0
-  Return
-cui2InUse:
-  StrCpy $wasInUse 1
-
-  MessageBox MB_RETRYCANCEL|MB_ICONQUESTION \
-    "${EXE2} is running.$\r$\nPlease close it and retry.$\r$\n$INSTDIR\${EXE2}" \
-    IDRETRY cui2Retry
-
-  MessageBox MB_OK|MB_ICONSTOP "Cannot continue to install if ${EXE2} is running."
+  MessageBox MB_OK|MB_ICONSTOP "Cannot continue to install if ${EXE} is running."
   Quit
 FunctionEnd
 
@@ -215,8 +192,8 @@ FunctionEnd
 
 Function un.onGUIInit
   Call un.GetInstDir
-  Call un.CheckInUse1
-  Call un.CheckInUse2
+  Call un.CheckInUse
+  Call un.GetWantAssoc
 
 FunctionEnd
 
@@ -245,53 +222,47 @@ ungidSetINSTDIR:
   Pop $0
 FunctionEnd
 
-Function un.CheckInUse1
+Function un.CheckInUse
   StrCpy $wasInUse 0
 
-uncui1Retry:
-  IfFileExists "$INSTDIR" uncui1Exists
+uncuiRetry:
+  IfFileExists "$INSTDIR" uncuiExists
   MessageBox MB_OK|MB_ICONSTOP "Cannot find $INSTDIR to uninstall."
   Abort
-uncui1Exists:
+uncuiExists:
   ClearErrors
-  FileOpen $0 "$INSTDIR\${EXE1}" a
-  IfErrors uncui1InUse
+  FileOpen $0 "$INSTDIR\${EXE}" a
+  IfErrors uncuiInUse
   FileClose $0
   Return
-uncui1InUse:
+uncuiInUse:
   StrCpy $wasInUse 1
 
   MessageBox MB_RETRYCANCEL|MB_ICONQUESTION \
-    "${EXE1} is running.$\r$\nPlease close it and retry.$\r$\n$INSTDIR\${EXE1}" \
-    IDRETRY uncui1Retry
+    "${EXE} is running.$\r$\nPlease close it and retry.$\r$\n$INSTDIR\${EXE}" \
+    IDRETRY uncuiRetry
 
-  MessageBox MB_OK|MB_ICONSTOP "Cannot continue to uninstall if ${EXE1} is running."
+  MessageBox MB_OK|MB_ICONSTOP "Cannot continue to uninstall if ${EXE} is running."
   Abort
 FunctionEnd
 
-Function un.CheckInUse2
-  StrCpy $wasInUse 0
-
-uncui2Retry:
-  IfFileExists "$INSTDIR" uncui2Exists
-  MessageBox MB_OK|MB_ICONSTOP "Cannot find $INSTDIR to uninstall."
-  Abort
-uncui2Exists:
-  ClearErrors
-  FileOpen $0 "$INSTDIR\${EXE2}" a
-  IfErrors uncui2InUse
-  FileClose $0
-  Return
-uncui2InUse:
-  StrCpy $wasInUse 1
-
-  MessageBox MB_RETRYCANCEL|MB_ICONQUESTION \
-    "${EXE2} is running.$\r$\nPlease close it and retry.$\r$\n$INSTDIR\${EXE2}" \
-    IDRETRY uncui2Retry
-
-  MessageBox MB_OK|MB_ICONSTOP "Cannot continue to uninstall if ${EXE1} is running."
-  Abort
+Function un.GetWantAssoc
+  Push $0
+  ReadRegStr $0 SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "RemoveAssociation"
+  StrCmp $0 "" ungwaDone
+  StrCpy $wantAssoc $0
+ungwaDone:
+  Pop $0
 FunctionEnd
+
+
+
+
+
+
+
+
+
 
 UninstPage uninstConfirm
 PageEx un.components
@@ -308,15 +279,15 @@ Section "Uninstall"
   DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}"
   DeleteRegKey SHCTX Software\s3pi\${tla}
 
-  RMDir /r "$SMPROGRAMS\${tla}"
+  RMDir /r "${SMDIR}"
 
-
-
-
-
-
-
-
+  StrCmp "Y" $wantAssoc wantAssoc noWantAssoc
+wantAssoc:
+; ${UnRegisterCmdExtension} "[extension]" "[filetype name]" "[action]"
+  ${unregisterCmdExtension} ".Sims3Pack" "Sims3™ Custom Content" "Unpack"
+  ${unregisterCmdExtension} ".package" "Sims3 package" "Create Sims3Pack from"
+  ${unregisterCmdExtension} ".xml" "Sims3Pack XML" "Create Sims3Pack from"
+noWantAssoc:
 
 
 
@@ -331,7 +302,7 @@ Section "Uninstall"
 SectionEnd
 
 ;Function un.InstallUserSettings
-;  Push "${EXE1}_Url_*"
+;  Push "${EXE}_Url_*"
 ;  Push "$LOCALAPPDATA"
 ;
 ;  Push $0
@@ -356,7 +327,7 @@ SectionEnd
 ;FunctionEnd
 
 
-;----------------------------------------------------------------------------
+/*----------------------------------------------------------------------------
 ; Title             : Search file or directory (alternative)
 ; Short Name        : SearchFile
 ; Last Changed      : 22/Feb/2005
@@ -402,6 +373,7 @@ SectionEnd
 ; Author            : Diego Pedroso
 ; Author Reg. Name  : deguix
 ;----------------------------------------------------------------------------
+*/
  
 Function un.SearchFile
  

@@ -5,7 +5,6 @@ set base=%TargetName%
 rem -%ConfigurationName%
 set src=%TargetName%-Source
 
-
 set out=S:\Sims3\Tools\s3su\
 
 
@@ -47,16 +46,14 @@ pushd ..
 7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" s3su
 popd
 
-
 pushd bin\%ConfigurationName%
 echo %suffix% >%TargetName%-Version.txt
 attrib +r %TargetName%-Version.txt
-copy S3Pack.exe unpack.exe
-copy S3Pack.exe pack.exe
-7za a -r -t7z -mx9 -ms -xr!.?* -xr!S3Pack.exe -xr!*vshost* -xr!*.Config %pdb% "%out%%base%_%suffix%.7z" *
+
+
+7za a -r -t7z -mx9 -ms -xr!.?* -xr!*vshost* -xr!*.Config %pdb% "%out%%base%_%suffix%.7z" *
 del /f %TargetName%-Version.txt
-del /f unpack.exe
-del /f pack.exe
+
 popd
 
 7za x -o"%base%-%suffix%" "%out%%base%_%suffix%.7z"
