@@ -192,6 +192,8 @@ namespace ObjectCloner.SplitterComponents
             }
         }
 
+
+        
         private bool allowSearch()
         {
             return tbText.Text.Length > 0 &&
@@ -199,8 +201,13 @@ namespace ObjectCloner.SplitterComponents
                 (ckbResourceName.Checked || ckbCatalogDesc.Checked || ckbCatalogName.Checked || ckbObjectDesc.Checked || ckbObjectName.Checked);
         }
 
+
+        
+        
+        
         private void btnSearch_Click(object sender, EventArgs e)
         {
+            btnSearch.Enabled = false;
             if (searching)
                 AbortSearch(false);
             else
@@ -387,6 +394,7 @@ namespace ObjectCloner.SplitterComponents
 
             searchThread = new Thread(new ThreadStart(st.Search));
             searching = true;
+            btnSearch.Enabled = true;
             searchThread.Start();
         }
 
@@ -402,7 +410,7 @@ namespace ObjectCloner.SplitterComponents
 
             updateProgressCB(true, "", true, -1, false, 0);
 
-            btnCancel.Enabled = listView1.Enabled = searchContextMenu.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = true;
+            btnSearch.Enabled = btnCancel.Enabled = listView1.Enabled = searchContextMenu.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = true;
             btnSearch.Text = "&Search";
             
             
@@ -559,9 +567,9 @@ namespace ObjectCloner.SplitterComponents
             List<SpecificResource> Find(PathPackageTuple ppt)
             {
                 if (criteria.catalogType == 0)
-                    return ppt.FindAll(rie => Enum.IsDefined(typeof(CatalogType), rie.ResourceType));
+                    return ppt.FindAll(rie => stopSearch ? false : Enum.IsDefined(typeof(CatalogType), rie.ResourceType));
                 else
-                    return ppt.FindAll(rie => criteria.catalogType == (CatalogType)rie.ResourceType);
+                    return ppt.FindAll(rie => stopSearch ? false : criteria.catalogType == (CatalogType)rie.ResourceType);
             }
 
             bool Match(SpecificResource match)

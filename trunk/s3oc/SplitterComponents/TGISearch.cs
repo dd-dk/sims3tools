@@ -247,6 +247,7 @@ namespace ObjectCloner.SplitterComponents
 
         private void btnSearch_Click(object sender, EventArgs e)
         {
+            btnSearch.Enabled = false;
             if (searching)
                 AbortTGISearch(false);
             else
@@ -266,8 +267,6 @@ namespace ObjectCloner.SplitterComponents
 
         public event EventHandler CancelClicked;
         private void btnCancel_Click(object sender, EventArgs e) { if (CancelClicked != null) CancelClicked(this, EventArgs.Empty); }
-
-
 
 
         #endregion
@@ -419,6 +418,7 @@ namespace ObjectCloner.SplitterComponents
 
             searchThread = new Thread(new ThreadStart(st.Search));
             searching = true;
+            btnSearch.Enabled = true;
             searchThread.Start();
         }
 
@@ -434,7 +434,7 @@ namespace ObjectCloner.SplitterComponents
 
             updateProgressCB(true, "", true, -1, false, 0);
 
-            btnCancel.Enabled = listView1.Enabled = tlpTGIContextMenu.Enabled = ckbUseCC.Enabled = tlpTGIValues.Enabled = true;
+            btnSearch.Enabled = btnCancel.Enabled = listView1.Enabled = tlpTGIContextMenu.Enabled = ckbUseCC.Enabled = tlpTGIValues.Enabled = true;
             btnSearch.Text = "&Search";
 
 
