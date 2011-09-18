@@ -70,7 +70,7 @@ namespace ObjectCloner.SplitterComponents
         public bool IsRepair { get { return ckbRepair.Checked; } }
         public bool IsClone { get { return ckbClone.Checked; } }
         public bool IsDeepClone { get { return ckbDeepClone.Checked; } }
-        //public bool IsExcludeCommon { get { return ckbExclCommon.Checked; } }
+        public bool IsExcludeCommon { get { return false /*ckbExclCommon.Checked/**/; } }
         //public bool IsIncludePresets { get { return ckbIncludePresets.Checked; } }
         public bool IsPadSTBLs { get { return ckbPadSTBLs.Checked; } }
         public bool IsIncludeThumbnails { get { return ckbThumbs.Checked; } }

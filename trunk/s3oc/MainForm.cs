@@ -585,6 +585,7 @@ namespace ObjectCloner
             {
                 cloneFixOptions.UniqueName = Path.GetFileNameWithoutExtension(openPackageDialog.FileName);
             }
+            cloneFixOptions.UniqueName += "_" + FNV32.GetHash(cloneFixOptions.UniqueName + DateTime.UtcNow.ToBinary().ToString("X16")).ToString("X8");
 
             StopWait();
             splitContainer1.Panel1.Controls.Clear();
@@ -3709,7 +3710,7 @@ namespace ObjectCloner
             SaveList sl = new SaveList(this,
                 selectedItem, rkLookup,
                 target, disableCompression, selectedItem.CType() != CatalogType.CAS_Part,
-                isPadSTBLs, false/*mode == Mode.FromGame/**/, null, //cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
+                isPadSTBLs, false/*mode == Mode.FromGame/**/, cloneFixOptions.IsExcludeCommon,
                 updateProgress, () => !saving, OnSavingComplete);
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
@@ -3790,7 +3791,7 @@ namespace ObjectCloner
             DoWait("Please wait, adding missing resources...");
             SaveList sl = new SaveList(this, selectedItem, rkLookup,
                 FileTable.Current, disableCompression, selectedItem.CType() != CatalogType.CAS_Part,
-                isPadSTBLs, false/*mode == Mode.FromGame/**/, null, //cloneFixOptions.IsExcludeCommon ? lS3ocResourceList : null,
+                isPadSTBLs, false/*mode == Mode.FromGame/**/, cloneFixOptions.IsExcludeCommon,
                 updateProgress, () => !repairing, OnRepairingComplete);
 
             repairThread = new Thread(new ThreadStart(sl.SavePackage));

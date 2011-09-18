@@ -36,7 +36,7 @@ namespace ObjectCloner
         bool addSTBLs;
         bool padSTBLs;
         bool zeroSTBLIID;
-        List<Dictionary<String, TypedValue>> commonResources;
+        bool excludeCommonResources;
         MainForm.updateProgressCallback updateProgressCB;
         StopSavingCallback stopSavingCB;
         SaveListComplete savingCompleteCB;
@@ -45,7 +45,7 @@ namespace ObjectCloner
         public delegate void SaveListComplete(bool complete);
 
         public SaveList(MainForm mainForm, SpecificResource selectedItem, Dictionary<string, IResourceKey> rkList,
-            PathPackageTuple target, bool compress, bool addSTBLs, bool padSTBLs, bool zeroSTBLIID, List<Dictionary<String, TypedValue>> commonResources,
+            PathPackageTuple target, bool compress, bool addSTBLs, bool padSTBLs, bool zeroSTBLIID, bool excludeCommonResources,
                 MainForm.updateProgressCallback updateProgressCB, StopSavingCallback stopSavingCB, SaveListComplete savingCompleteCB)
         {
             this.mainForm = mainForm;
@@ -56,7 +56,7 @@ namespace ObjectCloner
             this.addSTBLs = addSTBLs;
             this.padSTBLs = padSTBLs;
             this.zeroSTBLIID = zeroSTBLIID;
-            this.commonResources = commonResources;
+            this.excludeCommonResources = excludeCommonResources;
             this.updateProgressCB = updateProgressCB;
             this.stopSavingCB = stopSavingCB;
             this.savingCompleteCB = savingCompleteCB;
@@ -86,7 +86,7 @@ namespace ObjectCloner
             List<ulong> missingNameMapEntries = new List<ulong>();
             foreach (var kvp in rkList)
             {
-                if (target.Find(rie => rie.Equals(kvp.Value)) != null || excludeResource(kvp.Value))
+                if (target.Find(rie => rie.Equals(kvp.Value)) != null || (excludeCommonResources && Exclusions.Contains(kvp.Value)))
                 {
                     if (!newnamemap.ContainsKey(kvp.Value.Instance) && !missingNameMapEntries.Contains(kvp.Value.Instance)) missingNameMapEntries.Add(kvp.Value.Instance);
                     Diagnostics.Log(String.Format(target.Find(rie => rie.Equals(kvp.Value)) != null ? "{1} ({0}) already exists" : "{0} ({1}) is excluded", kvp.Key, kvp.Value));
@@ -306,21 +306,6 @@ namespace ObjectCloner
             Thread.Sleep(0);
             if (mainForm.IsHandleCreated)
                 mainForm.BeginInvoke(savingCompleteCB, new object[] { complete, });
-        }
-
-        bool excludeResource(IResourceKey rk)
-        {
-            if (commonResources == null) return false;
-
-            TGIBlock tgib = new TGIBlock(0, null, rk);
-            foreach (var dict in commonResources)
-            {
-                bool match = true;
-                foreach (string key in dict.Keys)
-                    if (!tgib[key].Equals(dict[key])) { match = false; break; };
-                if (match) return true;
-            }
-            return false;
         }
     }
 }
