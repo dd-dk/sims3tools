@@ -583,7 +583,11 @@ namespace ObjectCloner
             }
             else
             {
-                cloneFixOptions.UniqueName = Path.GetFileNameWithoutExtension(openPackageDialog.FileName);
+                cloneFixOptions.UniqueName = Path.GetFileNameWithoutExtension(FileTable.Current.Path);
+                string[] split = cloneFixOptions.UniqueName.Split('_');
+                uint oldHash;
+                if (split.Length > 1 && split[split.Length - 1].Length == 8 && uint.TryParse(split[split.Length - 1], System.Globalization.NumberStyles.HexNumber, null, out oldHash))
+                    cloneFixOptions.UniqueName = string.Join("_", split, 0, split.Length - 1);
             }
             cloneFixOptions.UniqueName += "_" + FNV32.GetHash(cloneFixOptions.UniqueName + DateTime.UtcNow.ToBinary().ToString("X16")).ToString("X8");
 
