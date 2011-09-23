@@ -49,7 +49,7 @@ namespace S3Pack
             try
             {
                 FileTable.Current = ppt;
-                ppt.FindAll(rie => rie.ResourceType == 0x73E93EEB).ForEach(x => x.ResourceIndexEntry.IsDeleted = true);
+                ppt.Package.FindAll(rie => rie.ResourceType == 0x73E93EEB).ForEach(rie => rie.IsDeleted = true);
 
                 Manifest mf = new Manifest(ppt, packageid, packagetype, subtype, title, desc, createMissingThumb);
                 var r = ppt.Package.AddResource(new TGIBlock(0, null, 0x73E93EEB, 0, 0), mf.Stream, false);
