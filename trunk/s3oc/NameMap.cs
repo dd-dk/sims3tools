@@ -19,6 +19,7 @@
  ***************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using s3pi.Interfaces;
 using s3pi.Filetable;
@@ -27,22 +28,19 @@ namespace ObjectCloner
 {
     public class NameMap
     {
-        SpecificResource latest;
+        SpecificResource latest = null;
         List<IDictionary<ulong, string>> namemaps;
         public NameMap(List<PathPackageTuple> nameMapPPTs)
         {
             namemaps = new List<IDictionary<ulong, string>>();
             if (nameMapPPTs == null) return;
-            nameMapPPTs.ForEach(ppt => namemaps.AddRange(ppt
-                    .FindAll(rie => rie.ResourceType == 0x0166038C)
-                    .ConvertAll<IDictionary<ulong, string>>(sr =>
-                    {
-                        if (sr.Resource as IDictionary<ulong, string> == null) Diagnostics.Log(String.Format("Package {0} ResourceIndexEntry {1} is not a NameMap (accoring to s3pi).", ppt.Path, sr.ResourceIndexEntry));
-                        else if (latest == null) latest = sr;
-                        return sr.Resource as IDictionary<ulong, string>;
-                    })
-                    .FindAll(nm => nm != null)
-            ));
+            foreach (var sr in nameMapPPTs.SelectMany(ppt => ppt.FindAll(rie => rie.ResourceType == 0x0166038C)))
+            {
+                IDictionary<ulong, string> nmp = sr.Resource as IDictionary<ulong, string>;
+                if (nmp == null) continue;
+                if (latest == null) latest = sr;
+                namemaps.Add(nmp);
+            }
         }
         public string this[ulong instance]
         {

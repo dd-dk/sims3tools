@@ -61,12 +61,16 @@
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.ckbUseCC = new System.Windows.Forms.CheckBox();
             this.ckbUseEA = new System.Windows.Forms.CheckBox();
+            this.tlpCount = new System.Windows.Forms.TableLayoutPanel();
+            this.label5 = new System.Windows.Forms.Label();
+            this.lbCount = new System.Windows.Forms.Label();
             this.tlpSearch.SuspendLayout();
             this.lvContextMenu.SuspendLayout();
             this.tlpTGIValues.SuspendLayout();
             this.tlpTGIContextMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
+            this.tlpCount.SuspendLayout();
             this.SuspendLayout();
             // 
             // tlpSearch
@@ -81,6 +85,7 @@
             this.tlpSearch.Controls.Add(this.tlpTGIValues, 1, 0);
             this.tlpSearch.Controls.Add(this.tableLayoutPanel1, 2, 1);
             this.tlpSearch.Controls.Add(this.tableLayoutPanel2, 1, 1);
+            this.tlpSearch.Controls.Add(this.tlpCount, 2, 0);
             this.tlpSearch.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tlpSearch.Location = new System.Drawing.Point(0, 0);
             this.tlpSearch.Name = "tlpSearch";
@@ -149,7 +154,7 @@
             this.lvcmFix,
             this.lvcmEdit});
             this.lvContextMenu.Name = "lvContextMenu";
-            this.lvContextMenu.Size = new System.Drawing.Size(205, 114);
+            this.lvContextMenu.Size = new System.Drawing.Size(205, 92);
             this.lvContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.lvContextMenu_Opening);
             // 
             // lvcmCopyRK
@@ -426,6 +431,44 @@
             this.ckbUseEA.UseVisualStyleBackColor = true;
             this.ckbUseEA.CheckedChanged += new System.EventHandler(this.ckbUse_CheckedChanged);
             // 
+            // tlpCount
+            // 
+            this.tlpCount.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.tlpCount.AutoSize = true;
+            this.tlpCount.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tlpCount.ColumnCount = 1;
+            this.tlpCount.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpCount.Controls.Add(this.lbCount, 0, 1);
+            this.tlpCount.Controls.Add(this.label5, 0, 0);
+            this.tlpCount.Location = new System.Drawing.Point(420, 31);
+            this.tlpCount.Name = "tlpCount";
+            this.tlpCount.RowCount = 2;
+            this.tlpCount.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpCount.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpCount.Size = new System.Drawing.Size(129, 26);
+            this.tlpCount.TabIndex = 6;
+            this.tlpCount.Visible = false;
+            // 
+            // label5
+            // 
+            this.label5.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(3, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(123, 13);
+            this.label5.TabIndex = 1;
+            this.label5.Text = "Number of entries found:";
+            // 
+            // lbCount
+            // 
+            this.lbCount.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.lbCount.AutoSize = true;
+            this.lbCount.Location = new System.Drawing.Point(57, 13);
+            this.lbCount.Name = "lbCount";
+            this.lbCount.Size = new System.Drawing.Size(14, 13);
+            this.lbCount.TabIndex = 2;
+            this.lbCount.Text = "X";
+            // 
             // TGISearch
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -442,6 +485,8 @@
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
+            this.tlpCount.ResumeLayout(false);
+            this.tlpCount.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -480,5 +525,8 @@
         private System.Windows.Forms.ToolStripMenuItem lvcmActivate;
         private System.Windows.Forms.ToolStripMenuItem lvcmFix;
         private System.Windows.Forms.ToolStripMenuItem lvcmEdit;
+        private System.Windows.Forms.TableLayoutPanel tlpCount;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label lbCount;
     }
 }

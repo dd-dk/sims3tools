@@ -41,16 +41,14 @@ namespace ObjectCloner
                 {
                     _STBLs = new Dictionary<byte, List<SpecificResource>>();
                     if (FileTable.GameContent != null)
-                        FileTable.GameContent.ForEach(ppt => ppt
-                            .FindAll(rie => rie.ResourceType == 0x220557DA)
-                            .ForEach(sr =>
+                        foreach (var ppt in FileTable.GameContent)
+                            foreach (var sr in ppt.FindAll(rie => rie.ResourceType == 0x220557DA))
                             {
                                 //note that we do not want to actually run the resource wrapper here, it's too slow
                                 byte lang = (byte)(sr.ResourceIndexEntry.Instance >> 56);
                                 if (!_STBLs.ContainsKey(lang)) _STBLs.Add(lang, new List<SpecificResource>());
                                 _STBLs[lang].Add(sr);
-                            })
-                        );
+                            }
                 }
                 return _STBLs;
             }

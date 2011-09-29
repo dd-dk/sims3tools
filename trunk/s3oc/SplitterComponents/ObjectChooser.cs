@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using s3pi.Interfaces;
@@ -37,10 +38,8 @@ namespace ObjectCloner.SplitterComponents
         MainForm.StopWaitCallback stopWaitCB;
         MainForm.updateProgressCallback updateProgressCB;
         MainForm.listViewAddCallBack listViewAddCB;
-
         public CatalogType ResourceType { get; private set; }
         bool isFix;
-
         public ObjectChooser()
         {
             InitializeComponent();
@@ -51,8 +50,7 @@ namespace ObjectCloner.SplitterComponents
         }
 
         public ObjectChooser(MainForm.DoWaitCallback doWaitCB, MainForm.StopWaitCallback stopWaitCB,
-            MainForm.updateProgressCallback updateProgressCB, MainForm.listViewAddCallBack listViewAddCB,
-            CatalogType resourceType, bool isFix)
+            MainForm.updateProgressCallback updateProgressCB, MainForm.listViewAddCallBack listViewAddCB, CatalogType resourceType, bool isFix)
             : this()
         {
             this.doWaitCB = doWaitCB;
@@ -91,7 +89,6 @@ namespace ObjectCloner.SplitterComponents
                 );
         }
 
-
         public ListViewItem SelectedItem { get { return listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0] : null; } set { listView1.SelectedItems.Clear(); if (value != null && listView1.Items.Contains(value)) try { value.Selected = true; } catch { } } }
 
         #region Occurs whenever the 'SelectedIndex' for the Object Chooser changes
@@ -113,6 +110,7 @@ namespace ObjectCloner.SplitterComponents
         private void listView1_SelectedIndexChanged(object sender, EventArgs e) { OnSelectedIndexChanged(this, new MainForm.SelectedIndexChangedEventArgs(sender as ListView)); }
         private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(sender as ListView)); }
 
+        #region Context menu
         private void omCopyRK_Click(object sender, EventArgs e)
         {
             if (SelectedItem != null && SelectedItem.Tag as SpecificResource != null)
@@ -123,6 +121,9 @@ namespace ObjectCloner.SplitterComponents
         {
             omCopyRK.Enabled = SelectedItem != null;
         }
+        #endregion
+
+
 
         #region ListViewColumnSorter
         /// <summary>
@@ -302,10 +303,14 @@ namespace ObjectCloner.SplitterComponents
                 fillThread.Join(100);
             fillThread = null;
 
+
+
             updateProgressCB(true, "", true, -1, false, 0);
+
+
+
             if (!isFix) stopWaitCB(this);
             listView1.Visible = !isFix;
-
 
             if (e.arg)
             {
@@ -380,35 +385,43 @@ namespace ObjectCloner.SplitterComponents
                 {
                     updateProgress(true, "Please wait, searching for objects...", true, -1, false, 0);
 
-                    List<SpecificResource> lres = new List<SpecificResource>();
+                    List<ulong> lres = new List<ulong>();
+                    List<IEnumerable<SpecificResource>> found = new List<IEnumerable<SpecificResource>>();
                     updateProgress(true, "Please wait, finding objects... 0%", true, FileTable.GameContent.Count, true, 0);
                     int i = 0;
                     foreach (PathPackageTuple ppt in FileTable.GameContent)
                     {
                         if (stopFilling) return;
 
-                        List<SpecificResource> matches;
-                        if (resourceType != 0)
-                            matches = ppt.FindAll(rie => rie.ResourceType == (uint)resourceType && !lres.Exists(sr => rie.Instance == sr.ResourceIndexEntry.Instance));
-                        else
-                            matches = ppt.FindAll(rie => Enum.IsDefined(typeof(CatalogType), rie.ResourceType) && !lres.Exists(sr => rie.Instance == sr.ResourceIndexEntry.Instance));
-                        if (stopFilling) return;
+                        List<SpecificResource> matches = new List<SpecificResource>();
+                        foreach (var rie in ppt.Package.FindAll(rie => !lres.Contains(rie.Instance) &&
+                            (resourceType != 0 ? rie.ResourceType == (uint)resourceType : Enum.IsDefined(typeof(CatalogType), rie.ResourceType))))
+                        {
+                            if (stopFilling) return;
+                            matches.Add(new SpecificResource(ppt, rie));
+                            lres.Add(rie.Instance);
+                        }
+                        found.Add(matches);
 
-                        lres.AddRange(matches);
                         updateProgress(true, "Please wait, finding objects... " + i * 100 / FileTable.GameContent.Count + "%", false, -1, true, i++);
                     }
 
                     updateProgress(true, "Please wait, loading objects... 0%", true, lres.Count, true, 0);
+                    DateTime next = DateTime.UtcNow.AddMilliseconds(250);
                     int freq = Math.Max(1, lres.Count / 50);
                     i = 0;
-                    foreach (SpecificResource res in lres)
+                    foreach (SpecificResource sr in found.SelectMany(x => x))
                     {
                         if (stopFilling) return;
 
-                        Add(res);
-
-                        if (++i % freq == 0)
+                        i++;
+                        if (DateTime.UtcNow > next)
+                        {
                             updateProgress(true, "Please wait, loading objects... " + i * 100 / lres.Count + "%", false, -1, true, i);
+                            next = DateTime.UtcNow.AddMilliseconds(250);
+                        }
+
+                        Add(sr);
                     }
                     complete = true;
                 }

@@ -23,6 +23,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Windows.Forms;
@@ -346,7 +347,7 @@ namespace ObjectCloner
         public void ListViewAdd(SpecificResource sr, ListView listView)
         {
             #region CatalogTerrainPaintBrush pair
-            if (sr.CType() == CatalogType.CatalogTerrainPaintBrush)
+            if (sr.RequestedRK.CType() == CatalogType.CatalogTerrainPaintBrush)
             {
                 byte status = (byte)sr.Resource["CommonBlock.BuildBuyProductStatusFlags"].Value;
                 if ((status & 0x01) == 0) // do not list
@@ -401,6 +402,7 @@ namespace ObjectCloner
                 name, tag, sr.RGVsn, "" + (AResourceKey)sr.ResourceIndexEntry,
                 sr.PathPackage.Path + " (" + sr.PPSource + ")",
             }) { Tag = sr });
+            listView.EnsureVisible(listView.Items.Count - 1);
         }
 
         #region flowLayoutPanel1 prompt labels and buttons
@@ -548,7 +550,7 @@ namespace ObjectCloner
         }
         bool hasOBJDs()
         {
-            switch (selectedItem.CType())
+            switch (selectedItem.RequestedRK.CType())
             {
                 case CatalogType.ModularResource:
                 case CatalogType.CatalogFireplace:
@@ -569,7 +571,7 @@ namespace ObjectCloner
             if (searchPane != null)
                 mode = Mode.FromGame;
 
-            cloneFixOptions = new CloneFixOptions(this, mode == Mode.FromGame, selectedItem.CType() == CatalogType.CAS_Part, hasOBJDs(), itemName == null || itemDesc == null);
+            cloneFixOptions = new CloneFixOptions(this, mode == Mode.FromGame, selectedItem.RequestedRK.CType() == CatalogType.CAS_Part, hasOBJDs(), itemName == null || itemDesc == null);
             cloneFixOptions.CancelClicked += new EventHandler(cloneFixOptions_CancelClicked);
             cloneFixOptions.StartClicked += new EventHandler(cloneFixOptions_StartClicked);
 
@@ -1236,10 +1238,10 @@ namespace ObjectCloner
                     return;
                 }
 
-                InitialiseTabs(item.CType());
+                InitialiseTabs(item.RequestedRK.CType());
                 if (formClosing) return;
 
-                SpecificResource catlg = (item.CType() == CatalogType.ModularResource) ? ItemForTGIBlock0(item) : item;
+                SpecificResource catlg = (item.RequestedRK.CType() == CatalogType.ModularResource) ? ItemForTGIBlock0(item) : item;
 
                 if (catlg.ResourceIndexEntry != null)
                 {
@@ -1252,7 +1254,7 @@ namespace ObjectCloner
                         if (tabControl1.Contains(tpDetail))
                             fillDetails(catlg);
                         if (formClosing) return;
-                        if (item.CType() == CatalogType.CatalogObject)
+                        if (item.RequestedRK.CType() == CatalogType.CatalogObject)
                         {
                             fillFlags(catlg);
                             if (formClosing) return;
@@ -2473,7 +2475,7 @@ namespace ObjectCloner
             Step lastStepInChain = None;
             stepList = new List<Step>(new Step[] { Item_addSelf, });
 
-            switch (item.CType())
+            switch (item.RequestedRK.CType())
             {
                 case CatalogType.CatalogProxyProduct:
                 case CatalogType.CatalogFountainPool:
@@ -2956,7 +2958,7 @@ namespace ObjectCloner
         {
             int i = 0;
             foreach (var ppt in FileTable.GameContent)
-                foreach (var item in ppt.FindAll(rie => IsVPXYKin(rie, type)).FindAll(sr => sr.Resource != null))
+                foreach (var item in ppt.FindAll(rie => IsVPXYKin(rie, type)).Where(sr => sr.Resource != null))
                     SlurpRKsFromField(prefix + "[" + i++ + "]", item.Resource as AApiVersionedFields);
         }
         void VPXYs_getMODLs()
@@ -3142,7 +3144,7 @@ namespace ObjectCloner
                 IResourceKey rk = THUM.getImageRK(size, selectedItem);
                 if (THUM.PNGTypes[(int)size] == rk.ResourceType)
                     Add(size + "PNG", rk);
-                else if (selectedItem.CType() == CatalogType.CatalogRoofPattern)
+                else if (selectedItem.RequestedRK.CType() == CatalogType.CatalogRoofPattern)
                     Add(size + "Icon", rk);
                 else
                     Add(size + "Thumb", rk);
@@ -3237,8 +3239,8 @@ namespace ObjectCloner
                 foreach (var kvp in rcolChunks) rkToItem.Add(kvp.Key, kvp.Value);
 
                 // Add newest namemap
-                FileTable.Current.FindAll(rie => rie.ResourceType == 0x0166038C && !rkToItem.ContainsKey(rie))
-                    .ForEach(sr => rkToItem.Add(sr.ResourceIndexEntry, sr));
+                foreach(var sr in FileTable.Current.FindAll(rie => rie.ResourceType == 0x0166038C && !rkToItem.ContainsKey(rie)))
+                    rkToItem.Add(sr.ResourceIndexEntry, sr);
             }
         }
 
@@ -3277,7 +3279,7 @@ namespace ObjectCloner
             ulong PngInstance = 0;
             if (isRenumber)
             {
-                if (selectedItem.CType() == CatalogType.ModularResource)
+                if (selectedItem.RequestedRK.CType() == CatalogType.ModularResource)
                     oldToNew.Add(selectedItem.ResourceIndexEntry.Instance, FNV64.GetHash(UniqueObject));//MDLR needs its IID as a specific hash value
                 else
                 {
@@ -3322,7 +3324,7 @@ namespace ObjectCloner
                         }
             }
 
-            SpecificResource catlgItem = selectedItem.CType() == CatalogType.ModularResource
+            SpecificResource catlgItem = selectedItem.RequestedRK.CType() == CatalogType.ModularResource
                 ? ItemForTGIBlock0(selectedItem)
                 : selectedItem;
 
@@ -3351,7 +3353,7 @@ namespace ObjectCloner
         void StartFixing()
         {
             MapRKtoSpecificResource();
-            if (selectedItem.CType() == CatalogType.CAS_Part)
+            if (selectedItem.RequestedRK.CType() == CatalogType.CAS_Part)
                 CASP_GenerateNewIIDs();
             else
                 Catlg_GenerateNewIIDs();
@@ -3360,7 +3362,7 @@ namespace ObjectCloner
 
             Dictionary<IResourceKey, SpecificResource> rkToItemAdded = new Dictionary<IResourceKey, SpecificResource>();
 
-            SpecificResource catlgRes = (selectedItem.CType() == CatalogType.ModularResource || selectedItem.CType() == CatalogType.CatalogFireplace)
+            SpecificResource catlgRes = (selectedItem.RequestedRK.CType() == CatalogType.ModularResource || selectedItem.RequestedRK.CType() == CatalogType.CatalogFireplace)
                 ? ItemForTGIBlock0(selectedItem) : selectedItem;
             try
             {
@@ -3374,7 +3376,7 @@ namespace ObjectCloner
                 }
 
                 //Need to take a copy of the ResourceList as it can get modified, which messes up the enumerator
-                List<SpecificResource> lsr = FileTable.Current.FindAll(rie => true);
+                List<SpecificResource> lsr = FileTable.Current.FindAll(rie => true).ToList();
                 foreach (SpecificResource item in lsr)
                 {
                     bool dirty = false;
@@ -3407,7 +3409,7 @@ namespace ObjectCloner
                         dirty = ReplaceRKsInResourceStream(item, FixMatch, IIDReplacer);
                         Diagnostics.Log("_XML: " + item.LongName + " is" + (dirty ? "" : " not") + " dirty.");
                     }
-                    else if (item.RequestedRK.Equals(selectedItem.RequestedRK) && item.CType() == CatalogType.CAS_Part)//Deal with CASP separately..!
+                    else if (item.RequestedRK.Equals(selectedItem.RequestedRK) && item.RequestedRK.CType() == CatalogType.CAS_Part)//Deal with CASP separately..!
                     {
                         Diagnostics.Log("CAS_Part: " + item.LongName);
                         #region CAS Part
@@ -3458,9 +3460,9 @@ namespace ObjectCloner
                         #endregion
                         Diagnostics.Log("CAS_Part: " + item.LongName + " is" + (dirty ? "" : " not") + " dirty.");
                     }
-                    else if ((item.RequestedRK.Equals(selectedItem.RequestedRK) && item.CType() != CatalogType.ModularResource)//Selected CatlgItem
-                    || item.CType() == CatalogType.CatalogObject//all OBJDs (i.e. from MDLR or CFIR)
-                    || item.CType() == CatalogType.CatalogTerrainPaintBrush//all CTPTs (i.e. pair of selectedItem)
+                    else if ((item.RequestedRK.Equals(selectedItem.RequestedRK) && item.RequestedRK.CType() != CatalogType.ModularResource)//Selected CatlgItem
+                    || item.RequestedRK.CType() == CatalogType.CatalogObject//all OBJDs (i.e. from MDLR or CFIR)
+                    || item.RequestedRK.CType() == CatalogType.CatalogTerrainPaintBrush//all CTPTs (i.e. pair of selectedItem)
                     )
                     {
                         Diagnostics.Log("Selected CatlgItem || any OBJD || any CTPT: " + item.LongName);
@@ -3469,9 +3471,9 @@ namespace ObjectCloner
 
                         #region Selected CatlgItem || all MDLR OBJDs || both CTPTs || 0th CFIR OBJD
                         if (item.RequestedRK.Equals(selectedItem.RequestedRK)//Selected CatlgItem
-                            || selectedItem.CType() == CatalogType.ModularResource//all MDLR OBJDs
-                            || selectedItem.CType() == CatalogType.CatalogTerrainPaintBrush//both CTPTs
-                            || (selectedItem.CType() == CatalogType.CatalogFireplace && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th CFIR OBJD
+                            || selectedItem.RequestedRK.CType() == CatalogType.ModularResource//all MDLR OBJDs
+                            || selectedItem.RequestedRK.CType() == CatalogType.CatalogTerrainPaintBrush//both CTPTs
+                            || (selectedItem.RequestedRK.CType() == CatalogType.CatalogFireplace && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th CFIR OBJD
                             )
                         {
                             commonBlock["NameGUID"] = new TypedValue(typeof(ulong), newNameGUID);
@@ -3487,7 +3489,7 @@ namespace ObjectCloner
                         #endregion
 
                         if (item.RequestedRK.Equals(selectedItem.RequestedRK)//Selected CatlgItem
-                            || (selectedItem.CType() == CatalogType.ModularResource && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th MDLR OBJD
+                            || (selectedItem.RequestedRK.CType() == CatalogType.ModularResource && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th MDLR OBJD
                             //-- only selected CTPT
                             //-- none of the OBJDs for CFIR
                             )
@@ -3497,9 +3499,9 @@ namespace ObjectCloner
 
                         #region Selected CatlgItem; 0th OBJD from MDLR or CFIR
                         if (item.RequestedRK.Equals(selectedItem.RequestedRK)//Selected CatlgItem
-                            || (selectedItem.CType() == CatalogType.ModularResource && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th MDLR OBJD
+                            || (selectedItem.RequestedRK.CType() == CatalogType.ModularResource && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th MDLR OBJD
                             //-- only selected CTPT
-                            || (selectedItem.CType() == CatalogType.CatalogFireplace && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th CFIR OBJD
+                            || (selectedItem.RequestedRK.CType() == CatalogType.CatalogFireplace && item.RequestedRK.Equals(catlgRes.RequestedRK))//0th CFIR OBJD
                             )
                         {
                             ulong PngInstance = (ulong)commonBlock["PngInstance"].Value;
@@ -3536,7 +3538,7 @@ namespace ObjectCloner
                                 IterateTLP(tlpObjectDetail, (l, c) => UpdateItem(item, l, c));
 
                             #region Selected OBJD only
-                            if (selectedItem.CType() == CatalogType.CatalogObject)//Selected OBJD only
+                            if (selectedItem.RequestedRK.CType() == CatalogType.CatalogObject)//Selected OBJD only
                             {
                                 foreach (flagField ff in flagFields)
                                 {
@@ -3560,7 +3562,7 @@ namespace ObjectCloner
                         if (isRenumber)
                         {
                             #region Keep brushes together
-                            if (item.CType() == CatalogType.CatalogTerrainPaintBrush)//Both CTPTs
+                            if (item.RequestedRK.CType() == CatalogType.CatalogTerrainPaintBrush)//Both CTPTs
                             {
                                 byte status = (byte)commonBlock["BuildBuyProductStatusFlags"].Value;
                                 uint brushIndex = FNV32.GetHash(UniqueObject) << 1;
@@ -3571,7 +3573,7 @@ namespace ObjectCloner
                             }
                             #endregion
 
-                            if (item.CType() == CatalogType.CatalogObject)
+                            if (item.RequestedRK.CType() == CatalogType.CatalogObject)
                             {
                                 #region Avoid renumbering Fallback TGI
                                 int fallbackIndex = (int)(uint)item.Resource["FallbackIndex"].Value;
@@ -3713,7 +3715,7 @@ namespace ObjectCloner
 
             SaveList sl = new SaveList(this,
                 selectedItem, rkLookup,
-                target, disableCompression, selectedItem.CType() != CatalogType.CAS_Part,
+                target, disableCompression, selectedItem.RequestedRK.CType() != CatalogType.CAS_Part,
                 isPadSTBLs, false/*mode == Mode.FromGame/**/, cloneFixOptions.IsExcludeCommon,
                 updateProgress, () => !saving, OnSavingComplete);
 
@@ -3760,7 +3762,7 @@ namespace ObjectCloner
                     s3pi.Package.Package.ClosePackage(0, target.Package);
 
                     isCreateNewPackage = false;
-                    fileReOpenToFix(target.Path, selectedItem.CType());
+                    fileReOpenToFix(target.Path, selectedItem.RequestedRK.CType());
                 }
                 else
                 {
@@ -3794,7 +3796,7 @@ namespace ObjectCloner
 
             DoWait("Please wait, adding missing resources...");
             SaveList sl = new SaveList(this, selectedItem, rkLookup,
-                FileTable.Current, disableCompression, selectedItem.CType() != CatalogType.CAS_Part,
+                FileTable.Current, disableCompression, selectedItem.RequestedRK.CType() != CatalogType.CAS_Part,
                 isPadSTBLs, false/*mode == Mode.FromGame/**/, cloneFixOptions.IsExcludeCommon,
                 updateProgress, () => !repairing, OnRepairingComplete);
 
@@ -3929,12 +3931,12 @@ namespace ObjectCloner
             }
 
             // 2. Delete GUID->Catlg entries where STBL not found (i.e. not current package, so not eligible for renumber)
-            List<IDictionary<ulong, string>> stbls = FileTable.Current
+            IEnumerable<IDictionary<ulong, string>> stbls = FileTable.Current
                 .FindAll(rie => rie.ResourceType == 0x220557DA)
-                .ConvertAll<IDictionary<ulong, string>>(sr => sr.Resource as IDictionary<ulong, string>)
-                .FindAll(stbl => stbl != null);
-            new List<ulong>(guidsSeen)// Don't think it's safe updating guidsSeen whilst it's enumerating itself
-                .FindAll(g => stbls.FindAll(d => d.ContainsKey(g)).Count == 0)// Old GUID not in current package
+                .Select(sr => sr.Resource as IDictionary<ulong, string>)
+                .Where(stbl => stbl != null);
+            guidsSeen.Where(g => !stbls.Any(stbl => stbl.ContainsKey(g)))// Old GUID not in current package
+                .ToList()// Don't think it's safe updating guidsSeen whilst it's enumerating itself
                 .ForEach(g => guidsSeen.Remove(g));// So remove from those we'll renumber
 
             // 3. Generate new GUIDs
@@ -4003,8 +4005,8 @@ namespace ObjectCloner
             // RenumberingMatch doesn't work for RCOL ChunkEntries, so find these first and generate new IIDs
             foreach (var rcol in FileTable.Current
                 .FindAll(rie => true)
-                .ConvertAll<GenericRCOLResource>(sr => sr.Resource as GenericRCOLResource)
-                .FindAll(rcol => rcol != null))
+                .Select(sr => sr.Resource as GenericRCOLResource)
+                .Where(rcol => rcol != null))
             {
                 foreach (var ce in rcol.ChunkEntries)
                 {
@@ -4129,7 +4131,7 @@ namespace ObjectCloner
     {
         public static bool Contains(this IEnumerable<string> haystack, string needle) { foreach (var x in haystack) if (x.Equals(needle)) return true; return false; }
 
-        public static CatalogType CType(this SpecificIndexEntry sr) { return (CatalogType)sr.ResourceIndexEntry.ResourceType; }
+        public static CatalogType CType(this IResourceKey rk) { return (CatalogType)rk.ResourceType; }
     }
 
     class EnumerableResource : IEnumerable<IResourceKey>

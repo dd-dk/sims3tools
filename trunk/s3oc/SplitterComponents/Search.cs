@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using s3pi.Interfaces;
@@ -69,6 +70,8 @@ namespace ObjectCloner.SplitterComponents
             this.listViewAddCB = listViewAddCB;
         }
 
+
+
         void Search_LoadListViewSettings()
         {
             string cw = ObjectCloner.Properties.Settings.Default.ColumnWidths;
@@ -80,6 +83,7 @@ namespace ObjectCloner.SplitterComponents
             listView1.Columns[2].Width = cws.Length > 2 && int.TryParse(cws[2], out w) && w > 0 ? w : (this.listView1.Width - 32) / 6;
             listView1.Columns[3].Width = cws.Length > 3 && int.TryParse(cws[3], out w) && w > 0 ? w : (this.listView1.Width - 32) / 3;/**/
         }
+
 
         public ListViewItem SelectedItem { get { return listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0] : null; } set { listView1.SelectedItems.Clear(); if (value != null && listView1.Items.Contains(value)) try { value.Selected = true; } catch { } } }
 
@@ -221,6 +225,7 @@ namespace ObjectCloner.SplitterComponents
 
                 btnCancel.Enabled = listView1.Enabled = searchContextMenu.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = false;
                 btnSearch.Text = "&Stop";
+                tlpCount.Visible = false;
                 StartSearch();
             }
         }
@@ -412,9 +417,11 @@ namespace ObjectCloner.SplitterComponents
 
             btnSearch.Enabled = btnCancel.Enabled = listView1.Enabled = searchContextMenu.Enabled = tbText.Enabled = tlpWhere.Enabled = cbCatalogType.Enabled = true;
             btnSearch.Text = "&Search";
-            
-            
-            
+            tlpCount.Visible = true;
+            lbCount.Text = "" + listView1.Items.Count;
+ 
+
+
             if (listView1.Items.Count > 0) { SelectedItem = listView1.Items[0]; SelectedItem.EnsureVisible(); listView1.Focus(); }
 
 
@@ -497,10 +504,10 @@ namespace ObjectCloner.SplitterComponents
             {
                 bool complete = false;
                 bool abort = false;
-                List<SpecificResource> lres = new List<SpecificResource>();
+                List<ulong> lres = new List<ulong>();
                 try
                 {
-                    updateProgress(true, "Searching...", true, FileTable.GameContent.Count, true, 0);
+                    updateProgress(true, "Searching...", true, FileTable.GameContent.Count + 1, true, 1);
                     for (int p = 0; p < FileTable.GameContent.Count; p++)
                     {
                         if (stopSearch) return;
@@ -521,34 +528,28 @@ namespace ObjectCloner.SplitterComponents
                             if (criteria.catalogName || criteria.catalogDesc)
                             {
                                 updateProgress(true, String.Format("Retrieving string tables for package {0} of {1}...", p + 1, FileTable.GameContent.Count), true, -1, false, 0);
-                                stbls = ppt.FindAll(rie => rie.ResourceType == 0x220557DA && (criteria.allLanguages || rie.Instance >> 56 == 0x00))
-                                    .ConvertAll<IDictionary<ulong, string>>(sr => sr.Resource as IDictionary<ulong, string>);
-                                if (stopSearch) return;
+                                stbls = new List<IDictionary<ulong, string>>();
+                                foreach (var rk in ppt.Package.FindAll(rie => rie.ResourceType == 0x220557DA && (criteria.allLanguages || rie.Instance >> 56 == 0x00)))
+                                {
+                                    if (stopSearch) return;
+                                    SpecificResource sr = new SpecificResource(ppt, rk);
+                                    var stbl = sr.Resource as IDictionary<ulong, string>;
+                                    if (stbl == null) continue;
+                                    stbls.Add(stbl);
+                                }
                             }
                         #endregion
 
-                        // Find the right type of resource to search
-                        updateProgress(true, String.Format("Retrieving resource list {0} of {1}...", p + 1, FileTable.GameContent.Count), false, -1, false, -1);
-                        List<SpecificResource> lsr = Find(ppt);
-                        if (stopSearch) return;
+                        // Find the right type of resource to search and apply matching
+                        updateProgress(true, String.Format("Searching package {0} of {1}...", p + 1, FileTable.GameContent.Count), false, -1, false, -1);
+                        foreach (var match in Find(ppt).Where(sr => stopSearch || (!lres.Contains(sr.RequestedRK.Instance) && Match(sr))))
+                        {
+                            if (stopSearch) return;
+                            lres.Add(match.RequestedRK.Instance);
+                            Add(match);
+                        }
 
-                        // Find the matches
-                        updateProgress(true, String.Format("Finding matching resources {0} of {1}...", p + 1, FileTable.GameContent.Count), false, -1, false, -1);
-                        List<SpecificResource> matches = lsr.FindAll(Match);
-                        if (stopSearch) return;
-
-                        // Avoid duplicates
-                        updateProgress(true, String.Format("De-duplicating matches {0} of {1}...", p + 1, FileTable.GameContent.Count), false, -1, false, -1);
-                        lres = matches.FindAll(match =>
-                            {
-                                if (stopSearch) return false;
-                                if (lres.Exists(x => match.ResourceIndexEntry.Instance == x.ResourceIndexEntry.Instance)) return false;
-                                Add(match);
-                                return true;
-                            }
-                        );
-
-                        updateProgress(false, "", false, -1, true, p + 1);
+                        updateProgress(false, "", false, -1, true, p + 2);
                     }
                     complete = true;
                 }
@@ -564,12 +565,12 @@ namespace ObjectCloner.SplitterComponents
             }
 
             #region Search criteria matching
-            List<SpecificResource> Find(PathPackageTuple ppt)
+            IEnumerable<SpecificResource> Find(PathPackageTuple ppt)
             {
-                if (criteria.catalogType == 0)
-                    return ppt.FindAll(rie => stopSearch ? false : Enum.IsDefined(typeof(CatalogType), rie.ResourceType));
-                else
-                    return ppt.FindAll(rie => stopSearch ? false : criteria.catalogType == (CatalogType)rie.ResourceType);
+                return ppt.FindAll(rie => stopSearch ? false :
+                    criteria.catalogType == 0
+                    ? Enum.IsDefined(typeof(CatalogType), rie.ResourceType)
+                    : criteria.catalogType == (CatalogType)rie.ResourceType);
             }
 
             bool Match(SpecificResource match)
@@ -577,7 +578,7 @@ namespace ObjectCloner.SplitterComponents
                 match = match.ResourceIndexEntry.ResourceType == (uint)CatalogType.ModularResource ? MainForm.ItemForTGIBlock0(match) : match;
                 if (criteria.resourceName && MatchResourceName(match)) return true;
 
-                if (criteria.catalogType == CatalogType.CAS_Part || match.ResourceIndexEntry.ResourceType == (uint)CatalogType.CAS_Part) return false;
+                if (criteria.catalogType == CatalogType.CAS_Part || match.RequestedRK.ResourceType == (uint)CatalogType.CAS_Part) return false;
 
                 if (criteria.objectName && MatchObjectName(match)) return true;
                 if (criteria.objectDesc && MatchObjectDesc(match)) return true;
@@ -585,7 +586,7 @@ namespace ObjectCloner.SplitterComponents
                 if (criteria.catalogDesc && MatchCatalogDesc(match)) return true;
                 return false;
             }
-            bool MatchResourceName(SpecificResource item) { return nameMap != null && nameMap.ContainsKey(item.ResourceIndexEntry.Instance) && nameMap[item.ResourceIndexEntry.Instance].Trim().ToLowerInvariant().Contains(criteria.text); }
+            bool MatchResourceName(SpecificResource item) { return nameMap != null && nameMap.ContainsKey(item.RequestedRK.Instance) && nameMap[item.RequestedRK.Instance].Trim().ToLowerInvariant().Contains(criteria.text); }
             bool MatchObjectName(SpecificResource item) { return ((string)item.Resource["CommonBlock.Name"].Value).Trim().ToLowerInvariant().Contains(criteria.text); }
             bool MatchObjectDesc(SpecificResource item) { return ((string)item.Resource["CommonBlock.Desc"].Value).Trim().ToLowerInvariant().Contains(criteria.text); }
             bool MatchCatalogName(SpecificResource item) { return MatchStbl((ulong)item.Resource["CommonBlock.NameGUID"].Value); }

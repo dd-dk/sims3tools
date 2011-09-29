@@ -193,7 +193,7 @@ namespace ObjectCloner
         void AddSTBLs(IDictionary<ulong, string> newnamemap)
         {
             #region Determine whether anything should be done
-            SpecificResource catlgItem = selectedItem.CType() == CatalogType.ModularResource
+            SpecificResource catlgItem = selectedItem.RequestedRK.CType() == CatalogType.ModularResource
                 ? MainForm.ItemForTGIBlock0(selectedItem)
                 : selectedItem;
 

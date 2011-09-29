@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using s3pi.Interfaces;
 using s3pi.Filetable;
@@ -100,22 +101,22 @@ namespace ObjectCloner
             if (type == 0x00000000) return null;
             foreach (var ppt in ppts)
             {
-                List<SpecificResource> lsr = ppt.FindAll(rie => rie.ResourceType == type && rie.Instance == instance);
-                lsr.Sort((x, y) => (x.ResourceIndexEntry.ResourceGroup & 0x07FFFFFF).CompareTo(y.ResourceIndexEntry.ResourceGroup & 0x07FFFFFF));
-                foreach (var sr in lsr)
-                    if (!new List<uint>(thumTypes[0x515CA4CD]).Contains(type) || (sr.ResourceIndexEntry.ResourceGroup & 0x00FFFFFF) > 0)
-                        return sr;
+                List<IResourceIndexEntry> lsr = ppt.Package.FindAll(rie => rie.ResourceType == type && rie.Instance == instance);
+                lsr.Sort((x, y) => (x.ResourceGroup & 0x07FFFFFF).CompareTo(y.ResourceGroup & 0x07FFFFFF));
+                foreach (var rie in lsr)
+                    if (!thumTypes[0x515CA4CD].Contains(type) || (rie.ResourceGroup & 0x00FFFFFF) > 0)
+                        return new SpecificResource(ppt, rie);
             }
             return null;
         }
 
         public static IResourceKey getImageRK(THUMSize size, SpecificResource item)
         {
-            if (item.CType() == CatalogType.ModularResource)
+            if (item.RequestedRK.CType() == CatalogType.ModularResource)
             {
                 return RK.NULL;
             }
-            else if (item.CType() == CatalogType.CAS_Part)
+            else if (item.RequestedRK.CType() == CatalogType.CAS_Part)
             {
                 SpecificResource sr = getRK(item.RequestedRK.ResourceType, item.RequestedRK.Instance, size, false);
                 return sr == null ? RK.NULL : sr.RequestedRK;
@@ -129,11 +130,11 @@ namespace ObjectCloner
         }
         public static SpecificResource getTHUM(THUMSize size, SpecificResource item)
         {
-            if (item.CType() == CatalogType.ModularResource)
+            if (item.RequestedRK.CType() == CatalogType.ModularResource)
             {
                 return null;
             }
-            else if (item.CType() == CatalogType.CAS_Part)
+            else if (item.RequestedRK.CType() == CatalogType.CAS_Part)
             {
                 return getRK(item.RequestedRK.ResourceType, item.RequestedRK.Instance, size, false);
             }
@@ -150,11 +151,11 @@ namespace ObjectCloner
 
         public static IResourceKey getNewRK(THUMSize size, SpecificResource item)
         {
-            if (item.CType() == CatalogType.ModularResource)
+            if (item.RequestedRK.CType() == CatalogType.ModularResource)
             {
                 return RK.NULL;
             }
-            else if (item.CType() == CatalogType.CAS_Part)
+            else if (item.RequestedRK.CType() == CatalogType.CAS_Part)
             {
                 return getNewRK(item.RequestedRK.ResourceType, item.RequestedRK.Instance, size, false);
             }
@@ -185,11 +186,11 @@ namespace ObjectCloner
         }
         public static Image getImage(THUMSize size, SpecificResource item)
         {
-            if (item.CType() == CatalogType.ModularResource)
+            if (item.RequestedRK.CType() == CatalogType.ModularResource)
             {
                 return getImage(size, MainForm.ItemForTGIBlock0(item));
             }
-            else if (item.CType() == CatalogType.CAS_Part)
+            else if (item.RequestedRK.CType() == CatalogType.CAS_Part)
             {
                 return Thumb[item.RequestedRK.ResourceType, item.RequestedRK.Instance, size, false];
             }

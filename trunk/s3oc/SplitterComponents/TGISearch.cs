@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using System.Threading;
 using s3pi.Interfaces;
@@ -66,6 +67,9 @@ namespace ObjectCloner.SplitterComponents
             this.checkInstallDirsCB = checkInstallDirsCB;
             this.updateProgressCB = updateProgressCB;
         }
+
+
+
 
 
 
@@ -261,6 +265,7 @@ namespace ObjectCloner.SplitterComponents
 
                 btnCancel.Enabled = listView1.Enabled = tlpTGIContextMenu.Enabled = ckbUseCC.Enabled = tlpTGIValues.Enabled = false;
                 btnSearch.Text = "&Stop";
+                tlpCount.Visible = false;
                 StartTGISearch();
             }
         }
@@ -436,6 +441,8 @@ namespace ObjectCloner.SplitterComponents
 
             btnSearch.Enabled = btnCancel.Enabled = listView1.Enabled = tlpTGIContextMenu.Enabled = ckbUseCC.Enabled = tlpTGIValues.Enabled = true;
             btnSearch.Text = "&Search";
+            tlpCount.Visible = true;
+            lbCount.Text = "" + listView1.Items.Count;
 
 
 
@@ -563,28 +570,31 @@ namespace ObjectCloner.SplitterComponents
                 try
                 {
                     List<string> pathsSeen = new List<string>();
-                    List<List<PathPackageTuple>> pptLists = new List<List<PathPackageTuple>>(new List<PathPackageTuple>[] { FileTable.GameContent, FileTable.DDSImages, FileTable.Thumbnails, });
-                    int searchCount = 0;
+                    List<PathPackageTuple> pptList = (new List<PathPackageTuple>[] { FileTable.GameContent, FileTable.DDSImages, FileTable.Thumbnails, }).SelectMany(x => x).ToList();
+
+                    updateProgress(true, "Searching " + pptList.Count + " packages...", true, pptList.Count + 1, true, 1);
+
                     int searched = 0;
-
-                    pptLists.ForEach(x => searchCount += x.Count);
-                    updateProgress(true, "Searching " + searchCount + " packages...", true, searchCount, true, 0);
-
-                    pptLists.ForEach(ppts => ppts.ForEach(ppt => {
-                        if (stopSearch) return;
+                    foreach (var ppt in pptList)
+                    {
                         ++searched;
-                        if (!pathsSeen.Contains(ppt.Path))
+                        if (stopSearch || !pathsSeen.Contains(ppt.Path))
                         {
+                            if (stopSearch) return;
                             pathsSeen.Add(ppt.Path);
-                            updateProgress(true, String.Format("Searching package {0} of {1}...", searched, searchCount), false, -1, true, searched);
+                            updateProgress(true, String.Format("Searching package {0} of {1}...", searched, pptList.Count), false, -1, true, searched + 1);
 
-                            ppt.FindAll(sr => !stopSearch
-                                && (!criteria.useResourceType || sr.ResourceType.Equals(criteria.resourceType))
-                                && (!criteria.useResourceGroup || sr.ResourceGroup.Equals(criteria.resourceGroup))
-                                && (!criteria.useInstance || sr.Instance.Equals(criteria.instance))
-                            ).ForEach(sr => Add(sr));
+                            foreach (var sr in ppt.FindAll(rie => !stopSearch &&
+                                (!criteria.useResourceType || rie.ResourceType.Equals(criteria.resourceType)) &&
+                                (!criteria.useResourceGroup || rie.ResourceGroup.Equals(criteria.resourceGroup)) &&
+                                (!criteria.useInstance || rie.Instance.Equals(criteria.instance))
+                             ))
+                            {
+                                Add(sr);
+                                if (stopSearch) return;
+                            }
                         }
-                    }));
+                    }
 
                     complete = true;
                 }
