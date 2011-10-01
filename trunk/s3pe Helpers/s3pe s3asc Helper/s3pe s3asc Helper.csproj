@@ -103,10 +103,18 @@
       <Link>RCOLResources.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="s3ascExport.helper" />
-    <Content Include="s3ascImport.helper" />
-    <Content Include="s3m2bExport.helper" />
-    <Content Include="s3m2bImport.helper" />
+    <Content Include="Helpers\s3ascExport.helper">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Helpers\s3ascImport.helper">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Helpers\s3m2bExport.helper">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Helpers\s3m2bImport.helper">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Atavera\s3piwrappers.ModelResources\s3piwrappers.ModelResources.csproj">

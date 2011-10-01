@@ -1,5 +1,5 @@
 ResourceType: 0x01661233 0x01D10F34
 Label: Import from s3m2b
-Command: meshExpImp.exe
+Command: C:\Program Files\meshExpImp\meshExpImp.exe
 Arguments: /format s3m2b /import "{}"
 Desc: Read s3m2b files from CMOMoney's Blender plug-in

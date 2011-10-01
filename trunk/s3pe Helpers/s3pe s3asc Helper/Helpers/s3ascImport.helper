@@ -1,6 +1,6 @@
 ResourceType: 0x01661233 0x01D10F34
 Label: Import from s3asc
-Command: meshExpImp.exe
+Command: C:\Program Files\meshExpImp\meshExpImp.exe
 Arguments: /format s3asc /import "{}"
 Desc: Read s3asc files from Wes Howe's MilkShape plug-in
 
