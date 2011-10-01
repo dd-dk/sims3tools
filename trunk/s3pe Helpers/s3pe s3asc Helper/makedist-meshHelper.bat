@@ -1,5 +1,5 @@
 @echo off
-set TargetName=meshHelper
+set TargetName=meshExpImpHelper
 set ConfigurationName=Release
 set base=%TargetName%
 rem -%ConfigurationName%
