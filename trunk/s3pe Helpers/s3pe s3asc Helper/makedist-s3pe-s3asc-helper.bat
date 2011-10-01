@@ -1,5 +1,5 @@
 @echo off
-set TargetName=s3pe-s3asc-helper
+set TargetName=meshHelper
 set ConfigurationName=Release
 set base=%TargetName%
 rem -%ConfigurationName%
