@@ -43,7 +43,7 @@ rem there shouldn't be any to delete...
 del /q /f %out%%TargetName%*%suffix%.*
 
 pushd ..
-7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" s3pe "s3pe Helpers"
+7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config -xr!"s3pe s3asc Helper" "%out%%src%_%suffix%.7z" s3pe "s3pe Helpers"
 popd
 
 pushd bin\%ConfigurationName%
