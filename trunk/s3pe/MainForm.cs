@@ -714,8 +714,8 @@ namespace S3PIDemoFE
 
             using (StreamWriter sw = new StreamWriter(sfd.FileName))
             {
-                if (pnAuto.Controls[0] is RichTextBox) { sw.Write((pnAuto.Controls[0] as RichTextBox).Text); }
-                else { sw.Write((pnAuto.Controls[0] as HexWidget).Text); }
+                if (pnAuto.Controls[0] is RichTextBox) { sw.Write((pnAuto.Controls[0] as RichTextBox).Text.Replace("\n", "\r\n")); }
+                else { sw.Write((pnAuto.Controls[0] as HexWidget).Text.Replace("\n", "\r\n")); }
                 sw.Flush();
                 sw.Close();
             }
