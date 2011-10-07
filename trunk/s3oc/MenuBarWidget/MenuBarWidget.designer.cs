@@ -299,7 +299,7 @@
             // 
             this.caspToolStripMenuItem.Name = "caspToolStripMenuItem";
             this.caspToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
-            this.caspToolStripMenuItem.Text = "CAS Part";
+            this.caspToolStripMenuItem.Text = "(experimental) CAS Part";
             this.caspToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
             // 
             // toolsToolStripMenuItem
