@@ -182,7 +182,6 @@
             this.sfdSims3Pack.AddExtension = false;
             this.sfdSims3Pack.FileName = "*.Sims3Pack";
             this.sfdSims3Pack.Filter = "Sims3Packs (*.Sims3Pack)|*.Sims3Pack|All files (*.*)|*.*";
-            this.sfdSims3Pack.OverwritePrompt = false;
             this.sfdSims3Pack.Title = "Output Sims3Pack";
             // 
             // Repack
