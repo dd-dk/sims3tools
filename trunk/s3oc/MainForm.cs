@@ -1853,8 +1853,6 @@ namespace ObjectCloner
                 if (!IsOkayToThrowAwayWork())
                     return;
 
-            tabType = 0;
-            Reset();//needed!
             Abort(true);
 
             GameFoldersForm gf;
@@ -1895,9 +1893,11 @@ namespace ObjectCloner
 
             if (changed)
             {
+                tabType = 0;
                 DisplayNothing();
                 ObjectCloner.Properties.Settings.Default.Save();
                 FileTable.Reset();//needed!
+                Reset();//needed!
             }
         }
 
