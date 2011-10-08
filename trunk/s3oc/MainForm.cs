@@ -65,6 +65,7 @@ namespace ObjectCloner
             this.Text = myName;
             pleaseWait = new PleaseWait();
 
+            FileTable.CustomContentPath = ObjectCloner.Properties.Settings.Default.CustomContent;
             GameFolders.InstallDirs = ObjectCloner.Properties.Settings.Default.InstallDirs;
             GameFolders.EPsDisabled = ObjectCloner.Properties.Settings.Default.EPsDisabled;
 
@@ -1855,7 +1856,6 @@ namespace ObjectCloner
             tabType = 0;
             Reset();//needed!
             Abort(true);
-            DisplayNothing();
 
             GameFoldersForm gf;
             while (true)
@@ -1870,12 +1870,35 @@ namespace ObjectCloner
                 if (dr != DialogResult.OK && dr != DialogResult.Retry) return;
                 if (dr != DialogResult.Retry) break;
             }
-            ObjectCloner.Properties.Settings.Default.CustomContent = gf.CustomContent;
-            ObjectCloner.Properties.Settings.Default.CCEnabled = gf.CCEnabled;
-            ObjectCloner.Properties.Settings.Default.InstallDirs = gf.InstallDirs;
-            GameFolders.EPsDisabled = ObjectCloner.Properties.Settings.Default.EPsDisabled = gf.EPsDisabled;
 
-            FileTable.Reset();//needed!
+            bool changed = false;
+            if (ObjectCloner.Properties.Settings.Default.CustomContent != gf.CustomContent)
+            {
+                FileTable.CustomContentPath = ObjectCloner.Properties.Settings.Default.CustomContent = gf.CustomContent;
+                changed = true;
+            }
+            if (ObjectCloner.Properties.Settings.Default.CCEnabled != gf.CCEnabled)
+            {
+                ObjectCloner.Properties.Settings.Default.CCEnabled = gf.CCEnabled;
+                changed = true;
+            }
+            if (ObjectCloner.Properties.Settings.Default.InstallDirs != gf.InstallDirs)
+            {
+                GameFolders.InstallDirs = ObjectCloner.Properties.Settings.Default.InstallDirs = gf.InstallDirs;
+                changed = true;
+            }
+            if (ObjectCloner.Properties.Settings.Default.EPsDisabled != gf.EPsDisabled)
+            {
+                GameFolders.EPsDisabled = ObjectCloner.Properties.Settings.Default.EPsDisabled = gf.EPsDisabled;
+                changed = true;
+            }
+
+            if (changed)
+            {
+                DisplayNothing();
+                ObjectCloner.Properties.Settings.Default.Save();
+                FileTable.Reset();//needed!
+            }
         }
 
         private void settingsPackageEditor()
