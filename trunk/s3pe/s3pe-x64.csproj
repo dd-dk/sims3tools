@@ -41,7 +41,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DDSPanel, Version=1107.30.815.14868, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="DDSPanel">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\DDSPanel.dll</HintPath>
     </Reference>
@@ -75,11 +75,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.WrapperDealer.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
     <Reference Include="System.Custom">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\System.Custom.dll</HintPath>
     </Reference>
+    <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -403,6 +403,10 @@
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.RCOLChunks.dll">
       <Link>s3pi.RCOLChunks.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.RigResource.dll">
+      <Link>s3pi.RigResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.ScriptResource.dll">
