@@ -365,35 +365,31 @@ namespace ObjectCloner
 
             string name = NameMap.NMap[sr.ResourceIndexEntry.Instance];
             if (name == null)
-                //name = "";
             {
-                SpecificResource ctlg = sr.ResourceIndexEntry.ResourceType == (uint)CatalogType.ModularResource ? ItemForTGIBlock0(sr) : sr;
-                if (ctlg.Resource != null)
+                try
                 {
-                    name = ctlg.Resource["CommonBlock.Name"];
-                    name = (name.IndexOf(':') < 0) ? name : name.Substring(name.LastIndexOf(':') + 1);
+                    if (sr.RequestedRK.ResourceType == (uint)CatalogType.CAS_Part)
+                        name = sr.Resource["Unknown1"];
+                    else
+                    {
+                        SpecificResource ctlg = sr.ResourceIndexEntry.ResourceType == (uint)CatalogType.ModularResource ? ItemForTGIBlock0(sr) : sr;
+                        if (ctlg.Resource != null)
+                        {
+                            name = ctlg.Resource["CommonBlock.Name"];
+                            name = (name.IndexOf(':') < 0) ? name : name.Substring(name.LastIndexOf(':') + 1);
+                        }
+                        else
+                        {
+                            name = ctlg.Exception.Message;
+                            for (Exception ex = ctlg.Exception.InnerException; ex != null; ex = ex.InnerException) name = ex.Message + "|  " + name;
+                        }
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    name = ctlg.Exception.Message;
-                    for (Exception ex = ctlg.Exception.InnerException; ex != null; ex = ex.InnerException) name = ex.Message + "|  " + name;
+                    name = e.Message;// Don't crash...
                 }
             }
-            /**/
-            /*
-            string name;
-            SpecificResource ctlg = sr.ResourceIndexEntry.ResourceType == (uint)CatalogType.ModularResource ? ItemForTGIBlock0(sr) : sr;
-            if (ctlg.Resource != null)
-            {
-                name = ctlg.Resource["CommonBlock.Name"];
-                name = (name.IndexOf(':') < 0) ? name : name.Substring(name.LastIndexOf(':') + 1);
-            }
-            else
-            {
-                name = ctlg.Exception.Message;
-                for (Exception ex = ctlg.Exception.InnerException; ex != null; ex = ex.InnerException) name = ex.Message + "|  " + name;
-            }
-            /**/
 
             List<string> exts;
             string tag = "UNKN";
@@ -1853,8 +1849,6 @@ namespace ObjectCloner
                 if (!IsOkayToThrowAwayWork())
                     return;
 
-            Abort(true);
-
             GameFoldersForm gf;
             while (true)
             {
@@ -1893,6 +1887,7 @@ namespace ObjectCloner
 
             if (changed)
             {
+                Abort(true);
                 tabType = 0;
                 DisplayNothing();
                 ObjectCloner.Properties.Settings.Default.Save();
@@ -2288,7 +2283,7 @@ namespace ObjectCloner
                 item.Resource.Stream.SetLength(0);
                 item.Resource.Stream.Write(ms.ToArray(), 0, (int)ms.Length);
             }
-            
+
             return dirty;
         }
         private bool ReplaceRKsInField(SpecificResource item, string fn, Predicate<IResourceKey> match, Converter<IResourceKey, IResourceKey> replacer, AApiVersionedFields field)
@@ -2482,7 +2477,7 @@ namespace ObjectCloner
         SpecificResource objkItem;
         List<SpecificResource> vpxyItems;
         List<SpecificResource> modlItems;
-        
+
         delegate void Step();
         List<Step> stepList;
         Step step;
@@ -3262,7 +3257,7 @@ namespace ObjectCloner
                 foreach (var kvp in rcolChunks) rkToItem.Add(kvp.Key, kvp.Value);
 
                 // Add newest namemap
-                foreach(var sr in FileTable.Current.FindAll(rie => rie.ResourceType == 0x0166038C && !rkToItem.ContainsKey(rie)))
+                foreach (var sr in FileTable.Current.FindAll(rie => rie.ResourceType == 0x0166038C && !rkToItem.ContainsKey(rie)))
                     rkToItem.Add(sr.ResourceIndexEntry, sr);
             }
         }
@@ -3666,7 +3661,7 @@ namespace ObjectCloner
         {
             IDictionary<ulong, string> stbl = (IDictionary<ulong, string>)item.Resource;
             if (!stbl.ContainsKey(guid)) return false;
-            
+
             string text = stbl[guid];
             stbl.Remove(guid);
             if (ckbCopyToAll.Checked || item.ResourceIndexEntry.Instance >> 56 == 0x00) text = value;
