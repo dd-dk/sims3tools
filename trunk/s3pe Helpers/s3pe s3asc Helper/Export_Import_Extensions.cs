@@ -22,12 +22,12 @@ using System.Collections.Generic;
 using System.IO;
 using s3pi.Interfaces;
 using s3pi.GenericRCOLResource;
-using s3piwrappers;
+using meshExpImp.ModelBlocks;
 
-namespace s3ascHelper
+namespace meshExpImp.Helper
 {
     // make this extend StreamWriter
-    public static class s3asc_Export_Extensions
+    public static class Export_Extensions
     {
         public static void Export_VRTF(this StreamWriter w, MyProgressBar mpb, VRTF vrtf)
         {
@@ -97,12 +97,12 @@ namespace s3ascHelper
             mpb.Done();
         }
 
-        public static void Export_VBUF(this StreamWriter w, MyProgressBar mpb, s3piwrappers.Vertex[] av, VRTF vrtf)
+        public static void Export_VBUF(this StreamWriter w, MyProgressBar mpb, meshExpImp.ModelBlocks.Vertex[] av, VRTF vrtf)
         {
             mpb.Init("Export VBUF...", av.Length);
             for (int i = 0; i < av.Length; i++)
             {
-                s3piwrappers.Vertex v = av[i];
+                meshExpImp.ModelBlocks.Vertex v = av[i];
                 int nUV = 0;
                 foreach (var layout in vrtf.Layouts)
                 {
@@ -174,7 +174,7 @@ namespace s3ascHelper
     }
 
     // make this extend StreamReader
-    public static class s3asc_Import_Extensions
+    public static class Import_Extensions
     {
         public static void Import_VRTF(this StreamReader r, MyProgressBar mpb, VRTF vrtf)
         {
@@ -264,9 +264,9 @@ namespace s3ascHelper
             mpb.Done();
         }
 
-        public static s3piwrappers.Vertex[] Import_VBUF(this StreamReader r, MyProgressBar mpb, int count, VRTF vrtf)
+        public static meshExpImp.ModelBlocks.Vertex[] Import_VBUF(this StreamReader r, MyProgressBar mpb, int count, VRTF vrtf)
         {
-            s3piwrappers.Vertex[] vertices = new s3piwrappers.Vertex[count];
+            meshExpImp.ModelBlocks.Vertex[] vertices = new meshExpImp.ModelBlocks.Vertex[count];
             int uvLength = vrtf.Layouts.FindAll(x => x.Usage == VRTF.ElementUsage.UV).Count;
 
             int line = 0;
@@ -274,7 +274,7 @@ namespace s3ascHelper
             mpb.Init("Import VBUF...", count);
             for (int v = 0; v < count; v++)
             {
-                s3piwrappers.Vertex vertex = new s3piwrappers.Vertex();
+                meshExpImp.ModelBlocks.Vertex vertex = new meshExpImp.ModelBlocks.Vertex();
                 int nUV = 0;
                 vertex.UV = new float[uvLength][];
 

@@ -22,7 +22,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace s3ascHelper
+namespace meshExpImp.Helper
 {
     public class MyProgressBar
     {

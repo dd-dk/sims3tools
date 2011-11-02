@@ -1,4 +1,4 @@
-﻿namespace s3ascHelper
+﻿namespace meshExpImp.Helper
 {
     partial class ExportForm
     {

@@ -23,7 +23,7 @@ using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace s3ascHelper
+namespace meshExpImp.Helper
 {
     static class Program
     {
@@ -83,7 +83,7 @@ namespace s3ascHelper
                 FileStream fs = new FileStream(Application.ExecutablePath, FileMode.Open, FileAccess.Read);
                 BinaryReader br = new BinaryReader(fs);
                 s3pi.GenericRCOLResource.GenericRCOLResource modl = new s3pi.GenericRCOLResource.GenericRCOLResource(0, null);
-                modl.ChunkEntries.Add(new s3piwrappers.MODL(0, null));
+                modl.ChunkEntries.Add(new meshExpImp.ModelBlocks.MODL(0, null));
                 Clipboard.SetData(DataFormats.Serializable, modl.Stream);
                 br.Close();
                 fs.Close();

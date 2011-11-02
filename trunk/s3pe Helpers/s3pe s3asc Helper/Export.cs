@@ -22,9 +22,9 @@ using System.Collections.Generic;
 using System.IO;
 using s3pi.Interfaces;
 using s3pi.GenericRCOLResource;
-using s3piwrappers;
+using meshExpImp.ModelBlocks;
 
-namespace s3ascHelper
+namespace meshExpImp.Helper
 {
     public class Export
     {
@@ -66,7 +66,7 @@ namespace s3ascHelper
         {
             if (vbuf == null) { w.WriteLine("; vbuf is null"); w.WriteLine("vbuf 0"); return; }
 
-            s3piwrappers.Vertex[] av = vbuf.GetVertices(mesh, vrtf, uvScales);
+            meshExpImp.ModelBlocks.Vertex[] av = vbuf.GetVertices(mesh, vrtf, uvScales);
 
             w.WriteLine(string.Format("vbuf {0}", av.Length));
             w.Export_VBUF(mpb, av, vrtf);
@@ -109,7 +109,7 @@ namespace s3ascHelper
             if (vbuf == null) { w.WriteLine("; vbuf is null for geoState"); w.WriteLine(string.Format("vbuf {0} 0 0", geoStateIndex)); return; }
 
             MLOD.GeometryState geoState = mesh.GeometryStates[geoStateIndex];
-            s3piwrappers.Vertex[] av = vbuf.GetVertices(mesh, vrtf, geoState, uvScales);
+            meshExpImp.ModelBlocks.Vertex[] av = vbuf.GetVertices(mesh, vrtf, geoState, uvScales);
 
             if (geosIsContained(geoState, mesh)) w.WriteLine("; vbuf is contained within main mesh");
             w.WriteLine(string.Format("vbuf {0} {1} {2}", geoStateIndex, geoState.MinVertexIndex, geoState.VertexCount));

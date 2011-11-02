@@ -22,9 +22,9 @@ using System.Collections.Generic;
 using System.IO;
 using s3pi.Interfaces;
 using s3pi.GenericRCOLResource;
-using s3piwrappers;
+using meshExpImp.ModelBlocks;
 
-namespace s3ascHelper
+namespace meshExpImp.Helper
 {
     public class Import
     {
@@ -35,7 +35,7 @@ namespace s3ascHelper
         //--
 
 
-        public void Import_Mesh(StreamReader r, MLOD.Mesh mesh, GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, out s3piwrappers.Vertex[] mverts, out List<s3piwrappers.Vertex[]> lverts)
+        public void Import_Mesh(StreamReader r, MLOD.Mesh mesh, GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, out meshExpImp.ModelBlocks.Vertex[] mverts, out List<meshExpImp.ModelBlocks.Vertex[]> lverts)
         {
             #region Import VRTF
             bool isDefaultVRTF = false;
@@ -100,7 +100,7 @@ namespace s3ascHelper
             lverts = Import_MeshGeoStates(r, mlod, mesh, vrtf, isDefaultVRTF, ibuf);
 
             #region Update the JointReferences
-            UIntList joints = CreateJointReferences(mesh, mverts, lverts ?? new List<s3piwrappers.Vertex[]>(), skin);
+            UIntList joints = CreateJointReferences(mesh, mverts, lverts ?? new List<meshExpImp.ModelBlocks.Vertex[]>(), skin);
 
             List<uint> added = new List<uint>(joints);
             List<uint> removed = new List<uint>();
@@ -138,7 +138,7 @@ namespace s3ascHelper
         }
 
 
-        s3piwrappers.Vertex[] Import_VBUF_Main(StreamReader r, MLOD mlod, MLOD.Mesh mesh, VRTF vrtf, bool isDefaultVRTF)
+        meshExpImp.ModelBlocks.Vertex[] Import_VBUF_Main(StreamReader r, MLOD mlod, MLOD.Mesh mesh, VRTF vrtf, bool isDefaultVRTF)
         {
             string tagLine = r.ReadTag();
             string[] split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
@@ -168,13 +168,13 @@ namespace s3ascHelper
             ibuf.SetIndices(mlod, mesh, r.Import_IBUF(mpb, MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType), count));
         }
 
-        List<s3piwrappers.Vertex[]> Import_MeshGeoStates(StreamReader r, MLOD mlod, MLOD.Mesh mesh, VRTF vrtf, bool isDefaultVRTF, IBUF ibuf)
+        List<meshExpImp.ModelBlocks.Vertex[]> Import_MeshGeoStates(StreamReader r, MLOD mlod, MLOD.Mesh mesh, VRTF vrtf, bool isDefaultVRTF, IBUF ibuf)
         {
             MLOD.GeometryStateList oldGeos = new MLOD.GeometryStateList(null, mesh.GeometryStates);
             r.Import_GEOS(mpb, mesh);
             if (mesh.GeometryStates.Count <= 0) return null;
 
-            List<s3piwrappers.Vertex[]> lverts = new List<s3piwrappers.Vertex[]>();
+            List<meshExpImp.ModelBlocks.Vertex[]> lverts = new List<meshExpImp.ModelBlocks.Vertex[]>();
             for (int g = 0; g < mesh.GeometryStates.Count; g++)
             {
                 lverts.Add(Import_VBUF_Geos(r, mlod, mesh, g, vrtf, isDefaultVRTF));
@@ -183,7 +183,7 @@ namespace s3ascHelper
             return lverts;
         }
 
-        UIntList CreateJointReferences(MLOD.Mesh mesh, s3piwrappers.Vertex[] mverts, List<s3piwrappers.Vertex[]> lverts, SKIN skin)
+        UIntList CreateJointReferences(MLOD.Mesh mesh, meshExpImp.ModelBlocks.Vertex[] mverts, List<meshExpImp.ModelBlocks.Vertex[]> lverts, SKIN skin)
         {
             if (skin == null || skin.Bones == null) return new UIntList(null);
 
@@ -201,7 +201,7 @@ namespace s3ascHelper
         }
 
 
-        s3piwrappers.Vertex[] Import_VBUF_Geos(StreamReader r, MLOD mlod, MLOD.Mesh mesh, int geoStateIndex, VRTF vrtf, bool isDefaultVRTF)
+        meshExpImp.ModelBlocks.Vertex[] Import_VBUF_Geos(StreamReader r, MLOD mlod, MLOD.Mesh mesh, int geoStateIndex, VRTF vrtf, bool isDefaultVRTF)
         {
             //w.WriteLine(string.Format("vbuf {0} {1} {2}", geoStateIndex, mesh.GeometryStates[geoStateIndex].MinVertexIndex, mesh.GeometryStates[geoStateIndex].VertexCount));
             string tagLine = r.ReadTag();
@@ -272,7 +272,7 @@ namespace s3ascHelper
         //--
 
 
-        public void VertsToVBUFs(GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, List<s3piwrappers.Vertex[]> lmverts, List<List<s3piwrappers.Vertex[]>> llverts, bool updateBBs)
+        public void VertsToVBUFs(GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, List<meshExpImp.ModelBlocks.Vertex[]> lmverts, List<List<meshExpImp.ModelBlocks.Vertex[]>> llverts, bool updateBBs)
         {
             // Find everything for each mesh group
             Dictionary<GenericRCOLResource.ChunkReference, List<int>> meshGroups = new Dictionary<GenericRCOLResource.ChunkReference, List<int>>();

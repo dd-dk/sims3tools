@@ -20,9 +20,9 @@
 using System;
 using s3pi.Interfaces;
 using s3pi.GenericRCOLResource;
-using s3piwrappers;
+using meshExpImp.ModelBlocks;
 
-namespace s3ascHelper
+namespace meshExpImp.Helper
 {
     public static class MODL_MLOD_Extensions
     {

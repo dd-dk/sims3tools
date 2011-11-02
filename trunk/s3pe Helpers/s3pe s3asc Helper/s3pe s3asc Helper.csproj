@@ -8,7 +8,7 @@
     <ProjectGuid>{64A133EB-18DF-43C1-B31A-8CEC1AF851A0}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>s3ascHelper</RootNamespace>
+    <RootNamespace>meshExpImp.Helper</RootNamespace>
     <AssemblyName>meshExpImp</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
@@ -88,7 +88,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="s3asc_Import_Extensions.cs" />
+    <Compile Include="Export_Import_Extensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ExportForm.resx">
@@ -120,9 +120,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Atavera\s3piwrappers.ModelResources\s3piwrappers.ModelResources.csproj">
+    <ProjectReference Include="..\..\Atavera\s3piwrappers.ModelResources\meshExpImp.ModelBlocks.csproj">
       <Project>{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}</Project>
-      <Name>s3piwrappers.ModelResources</Name>
+      <Name>meshExpImp.ModelBlocks</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

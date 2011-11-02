@@ -6,7 +6,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3pe s3asc Helper", "s3pe s
 		{B1E4D2EC-5027-4F44-8C46-A0485DFF7060} = {B1E4D2EC-5027-4F44-8C46-A0485DFF7060}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3piwrappers.ModelResources", "..\..\Atavera\s3piwrappers.ModelResources\s3piwrappers.ModelResources.csproj", "{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "meshExpImp.ModelBlocks", "..\..\Atavera\s3piwrappers.ModelResources\meshExpImp.ModelBlocks.csproj", "{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

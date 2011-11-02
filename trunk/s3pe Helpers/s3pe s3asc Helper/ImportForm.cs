@@ -25,9 +25,9 @@ using System.IO;
 using System.Windows.Forms;
 using s3pi.Interfaces;
 using s3pi.GenericRCOLResource;
-using s3piwrappers;
+using meshExpImp.ModelBlocks;
 
-namespace s3ascHelper
+namespace meshExpImp.Helper
 {
     public partial class ImportForm : Form, s3pi.Helpers.IRunHelper
     {
@@ -122,8 +122,8 @@ namespace s3ascHelper
                     Import import = new Import(new MyProgressBar(label1, pb));
 
                     int m = 0;
-                    List<s3piwrappers.Vertex[]> lmverts = new List<s3piwrappers.Vertex[]>();
-                    List<List<s3piwrappers.Vertex[]>> llverts = new List<List<s3piwrappers.Vertex[]>>();
+                    List<meshExpImp.ModelBlocks.Vertex[]> lmverts = new List<meshExpImp.ModelBlocks.Vertex[]>();
+                    List<List<meshExpImp.ModelBlocks.Vertex[]>> llverts = new List<List<meshExpImp.ModelBlocks.Vertex[]>>();
                     while (true)
                     {
                         string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.{2}g", filebase, m, Program.GetExtension()));
@@ -131,8 +131,8 @@ namespace s3ascHelper
 
                         using (FileStream fsMesh = new FileStream(fnMesh, FileMode.Open, FileAccess.Read))
                         {
-                            s3piwrappers.Vertex[] mverts;
-                            List<s3piwrappers.Vertex[]> lverts;
+                            meshExpImp.ModelBlocks.Vertex[] mverts;
+                            List<meshExpImp.ModelBlocks.Vertex[]> lverts;
                             import.Import_Mesh(new StreamReader(fsMesh), mlod.Meshes[m++], rcolResource, mlod, rk, out mverts, out lverts);
                             lmverts.Add(mverts);
                             llverts.Add(lverts);
