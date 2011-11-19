@@ -75,7 +75,7 @@ namespace meshExpImp.Helper
                 }
 
                 bool updateBBs = false;
-                int q = System.Windows.Forms.CopyableMessageBox.Show("Update mesh bounding boxes?", Application.ProductName, CopyableMessageBoxButtons.YesNoCancel, CopyableMessageBoxIcon.Question);
+                int q = CopyableMessageBox.Show("Update mesh bounding boxes?", Application.ProductName, CopyableMessageBoxButtons.YesNoCancel, CopyableMessageBoxIcon.Question);
                 if (q == 0)
                     updateBBs = true;
                 else if (q == 2)
@@ -140,7 +140,20 @@ namespace meshExpImp.Helper
                         }
                     }
 
-                    import.VertsToVBUFs(rcolResource, mlod, rk, lmverts, llverts, updateBBs);
+                    if (!import.VertsToVBUFs(rcolResource, mlod, rk, lmverts, llverts, updateBBs))
+                    {
+                        if (0 !=
+                            CopyableMessageBox.Show(
+                            Application.ProductName + " has detected some off-scale UV mappings.\n" +
+                            "This may mean your mapping is not stored as you intended.\n" +
+                            "This is often caused by UV-mapping too close to the edge of the map.\n\n" +
+                            "Click 'Commit' to commit the change or 'Cancel' to abandon.",
+                            Application.ProductName, CopyableMessageBoxIcon.Warning, new String[] { "C&ommit", "C&ancel", }, 0, 1))
+                        {
+                            Environment.ExitCode = 1;
+                            return;
+                        }
+                    }
 
                     result = (byte[])rcolResource.AsBytes.Clone();
 

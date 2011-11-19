@@ -192,9 +192,9 @@ namespace meshExpImp.Helper
             lverts.Insert(0, mverts);
             foreach (var vertices in lverts)
                 if (vertices != null) foreach (var vert in vertices)
-                    if (vert.BlendIndices != null)
-                        foreach (var reference in vert.BlendIndices)
-                            if ((sbyte)reference > maxReference) maxReference = reference;
+                        if (vert.BlendIndices != null)
+                            foreach (var reference in vert.BlendIndices)
+                                if ((sbyte)reference > maxReference) maxReference = reference;
             lverts.Remove(mverts);
 
             return maxReference > -1 ? new UIntList(null, skin.Bones.GetRange(0, maxReference + 1).ConvertAll<uint>(x => x.NameHash)) : new UIntList(null);
@@ -272,8 +272,11 @@ namespace meshExpImp.Helper
         //--
 
 
-        public void VertsToVBUFs(GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, List<meshExpImp.ModelBlocks.Vertex[]> lmverts, List<List<meshExpImp.ModelBlocks.Vertex[]>> llverts, bool updateBBs)
+        public bool VertsToVBUFs(GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, List<meshExpImp.ModelBlocks.Vertex[]> lmverts, List<List<meshExpImp.ModelBlocks.Vertex[]>> llverts, bool updateBBs)
         {
+            // Indicator for uvmap clipping
+            bool okay = true;
+
             // Find everything for each mesh group
             Dictionary<GenericRCOLResource.ChunkReference, List<int>> meshGroups = new Dictionary<GenericRCOLResource.ChunkReference, List<int>>();
             Dictionary<int, VRTF> meshVRTF = new Dictionary<int, VRTF>();
@@ -295,12 +298,14 @@ namespace meshExpImp.Helper
                     VBUF vbuf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexBufferIndex) as VBUF;
                     if (vbuf == null)
                         vbuf = new VBUF(rcolResource.RequestedApiVersion, null) { Version = 0x00000101, Flags = VBUF.FormatFlags.None, SwizzleInfo = new GenericRCOLResource.ChunkReference(0, null, 0), };
-                    vbuf.SetVertices(mlod, m, meshVRTF[m], lmverts[m], meshUVScales[m]);
+                    if (!vbuf.SetVertices(mlod, m, meshVRTF[m], lmverts[m], meshUVScales[m]))
+                        okay = false;
 
                     if (llverts[m] != null)
                         for (int i = 0; i < llverts[m].Count; i++)
                             if (llverts[m][i] != null)
-                                vbuf.SetVertices(mlod, mlod.Meshes[m], i, meshVRTF[m], llverts[m][i], meshUVScales[m]);
+                                if (!vbuf.SetVertices(mlod, mlod.Meshes[m], i, meshVRTF[m], llverts[m][i], meshUVScales[m]))
+                                    okay = false;
 
                     IResourceKey vbufRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].VertexBufferIndex);
                     if (vbufRK == null)//means we created the VBUF: create a RK and add it
@@ -312,6 +317,8 @@ namespace meshExpImp.Helper
                         mlod.Meshes[m].Bounds = vbuf.GetBoundingBox(mlod.Meshes[m], meshVRTF[m]);
                 }
             }
+
+            return okay;
         }
     }
 }
