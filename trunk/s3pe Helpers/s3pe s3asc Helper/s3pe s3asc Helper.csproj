@@ -120,7 +120,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Atavera\s3piwrappers.ModelResources\meshExpImp.ModelBlocks.csproj">
+    <ProjectReference Include="..\..\s3pi Wrappers\meshExpImp.ModelBlocks\meshExpImp.ModelBlocks.csproj">
       <Project>{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}</Project>
       <Name>meshExpImp.ModelBlocks</Name>
     </ProjectReference>
