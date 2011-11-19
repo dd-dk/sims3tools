@@ -55,6 +55,7 @@ namespace meshExpImp.Helper
 
         private void Export_Shown(object sender, EventArgs e)
         {
+            CopyableMessageBox.Show("Test version " + typeof(ExportForm).Assembly.GetName().Version.ToString());
             try
             {
                 DialogResult dr = sfdExport.ShowDialog();

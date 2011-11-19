@@ -54,6 +54,7 @@ namespace meshExpImp.Helper
 
         private void Import_Shown(object sender, EventArgs e)
         {
+            CopyableMessageBox.Show("Test version " + typeof(ImportForm).Assembly.GetName().Version.ToString());
             try
             {
                 DialogResult dr = ofdImport.ShowDialog();
@@ -140,21 +141,35 @@ namespace meshExpImp.Helper
                         }
                     }
 
-                    if (!import.VertsToVBUFs(rcolResource, mlod, rk, lmverts, llverts, updateBBs))
+                    List<Import.offScale> offScales = import.VertsToVBUFs(rcolResource, mlod, rk, lmverts, llverts, updateBBs);
+                    if (offScales.Count > 0)
                     {
-                        if (0 !=
-                            CopyableMessageBox.Show(
-                            Application.ProductName + " has detected some off-scale UV mappings.\n" +
-                            "This may mean your mapping is not stored as you intended.\n" +
-                            "This is often caused by UV-mapping too close to the edge of the map.\n\n" +
-                            "Click 'Commit' to commit the change or 'Cancel' to abandon.",
-                            Application.ProductName, CopyableMessageBoxIcon.Warning, new String[] { "C&ommit", "C&ancel", }, 0, 1))
+                        while (true)
                         {
-                            Environment.ExitCode = 1;
-                            return;
+                            switch (
+                                CopyableMessageBox.Show(
+                                Application.ProductName + " has detected some off-scale UV mappings.\n" +
+                                "This may mean your mapping is not stored as you intended.\n" +
+                                "This is often caused by UV-mapping too close to the edge of the map.\n\n" +
+                                "Click 'Commit' to commit the change or 'Cancel' to abandon.",
+                                Application.ProductName, CopyableMessageBoxIcon.Warning, new String[] { "C&ommit", "&View", "C&ancel", }, 0, 2))
+                            {
+                                case 0: //commit
+                                    goto Commit;
+                                case 1: //view
+                                    System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                                    offScales.ForEach(x => sb.AppendLine(x.ToString()));
+                                    CopyableMessageBox.Show(sb.ToString(), 
+                                        Application.ProductName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
+                                    break;
+                                default: //cancel
+                                    Environment.ExitCode = 1;
+                                    return;
+                            }
                         }
                     }
 
+                Commit:
                     result = (byte[])rcolResource.AsBytes.Clone();
 
                     Environment.ExitCode = 0;
