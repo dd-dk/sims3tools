@@ -36,6 +36,7 @@
             this.btnRevise = new System.Windows.Forms.Button();
             this.ckbFilter = new System.Windows.Forms.CheckBox();
             this.btnQBE = new System.Windows.Forms.Button();
+            this.btnPasteRK = new System.Windows.Forms.Button();
             this.lbCount = new System.Windows.Forms.Label();
             this.tlpResourceInfo.SuspendLayout();
             this.tlpControls.SuspendLayout();
@@ -73,7 +74,7 @@
             this.tlpControls.Name = "tlpControls";
             this.tlpControls.RowCount = 1;
             this.tlpControls.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpControls.Size = new System.Drawing.Size(247, 64);
+            this.tlpControls.Size = new System.Drawing.Size(285, 64);
             this.tlpControls.TabIndex = 1;
             // 
             // label1
@@ -91,19 +92,21 @@
             // 
             this.tableLayoutPanel1.AutoSize = true;
             this.tableLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel1.ColumnCount = 2;
+            this.tableLayoutPanel1.ColumnCount = 3;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.Controls.Add(this.btnSet, 1, 1);
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.Controls.Add(this.btnSet, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.btnRevise, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.ckbFilter, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.btnQBE, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.btnQBE, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.btnPasteRK, 1, 0);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(113, 3);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(131, 58);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(169, 58);
             this.tableLayoutPanel1.TabIndex = 3;
             // 
             // btnSet
@@ -111,7 +114,7 @@
             this.btnSet.AutoSize = true;
             this.btnSet.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnSet.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnSet.Location = new System.Drawing.Point(89, 32);
+            this.btnSet.Location = new System.Drawing.Point(127, 32);
             this.btnSet.Name = "btnSet";
             this.btnSet.Size = new System.Drawing.Size(39, 23);
             this.btnSet.TabIndex = 4;
@@ -126,7 +129,7 @@
             this.btnRevise.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnRevise.Location = new System.Drawing.Point(3, 3);
             this.btnRevise.Name = "btnRevise";
-            this.btnRevise.Size = new System.Drawing.Size(80, 23);
+            this.btnRevise.Size = new System.Drawing.Size(50, 23);
             this.btnRevise.TabIndex = 1;
             this.btnRevise.Text = "Revise";
             this.btnRevise.UseVisualStyleBackColor = true;
@@ -134,8 +137,9 @@
             // 
             // ckbFilter
             // 
-            this.ckbFilter.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbFilter.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.ckbFilter.AutoSize = true;
+            this.tableLayoutPanel1.SetColumnSpan(this.ckbFilter, 2);
             this.ckbFilter.Location = new System.Drawing.Point(3, 35);
             this.ckbFilter.Name = "ckbFilter";
             this.ckbFilter.Size = new System.Drawing.Size(80, 17);
@@ -149,13 +153,24 @@
             this.btnQBE.AutoSize = true;
             this.btnQBE.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnQBE.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnQBE.Location = new System.Drawing.Point(89, 3);
+            this.btnQBE.Location = new System.Drawing.Point(127, 3);
             this.btnQBE.Name = "btnQBE";
             this.btnQBE.Size = new System.Drawing.Size(39, 23);
             this.btnQBE.TabIndex = 2;
             this.btnQBE.Text = "QBE";
             this.btnQBE.UseVisualStyleBackColor = true;
             this.btnQBE.Click += new System.EventHandler(this.btnQBE_Click);
+            // 
+            // btnPasteRK
+            // 
+            this.btnPasteRK.AutoSize = true;
+            this.btnPasteRK.Location = new System.Drawing.Point(59, 3);
+            this.btnPasteRK.Name = "btnPasteRK";
+            this.btnPasteRK.Size = new System.Drawing.Size(62, 23);
+            this.btnPasteRK.TabIndex = 5;
+            this.btnPasteRK.Text = "Paste RK";
+            this.btnPasteRK.UseVisualStyleBackColor = true;
+            this.btnPasteRK.Click += new System.EventHandler(this.btnPasteRK_Click);
             // 
             // lbCount
             // 
@@ -196,5 +211,6 @@
         private System.Windows.Forms.Button btnSet;
         private System.Windows.Forms.Button btnRevise;
         private System.Windows.Forms.Button btnQBE;
+        private System.Windows.Forms.Button btnPasteRK;
     }
 }

@@ -97,6 +97,11 @@ namespace S3PIDemoFE.Filter
         [DefaultValue(false)]
         public bool FilterEnabled { get { return ckbFilter.Checked; } set { ckbFilter.Checked = value; } }
 
+        [Browsable(true)]
+        [Category("Behavior")]
+        [DefaultValue(false)]
+        public bool PasteButtonEnabled { get { return btnPasteRK.Enabled; } set { btnPasteRK.Enabled = value; } }
+
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public IResourceIndexEntry IndexEntry
@@ -158,6 +163,16 @@ namespace S3PIDemoFE.Filter
         public event EventHandler FilterChanged;
         protected virtual void OnFilterChanged(object sender, EventArgs e) { if (FilterChanged != null) FilterChanged(sender, e); }
 
+        [Description("Raised when the 'Paste RK' button is clicked")]
+        [Category("Action")]
+        public event EventHandler PasteClicked;
+        protected virtual void OnPasteClicked(object sender, EventArgs e) { if (PasteClicked != null) PasteClicked(sender, e); }
+
+        public void PasteResourceKey(AResourceKey rk)
+        {
+            foreach (string s in new String[] { "ResourceType", "ResourceGroup", "Instance", })
+                if (fields.Contains(s)) values[s].Value = new Regex(rk[s].ToString("X"));
+        }
 
         private void ckbFilter_CheckedChanged(object sender, EventArgs e) { OnFilterChanged(this, new EventArgs()); }
 
@@ -177,6 +192,8 @@ namespace S3PIDemoFE.Filter
         }
 
         private void bw_ListUpdated(object sender, EventArgs e) { lbCount.Text = (sender as BrowserWidget).Count.ToString(); }
+
+        private void btnPasteRK_Click(object sender, EventArgs e) { OnPasteClicked(sender, e); }
     }
 
     static class Extension

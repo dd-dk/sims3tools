@@ -122,9 +122,14 @@
             this.tpcmSavePreview = new System.Windows.Forms.ToolStripMenuItem();
             this.tpcmFloat = new System.Windows.Forms.ToolStripMenuItem();
             this.tpcmOTE = new System.Windows.Forms.ToolStripMenuItem();
+            this.filterContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.flcmPasteResourceKey = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyResourceKeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bwcmCopyResourceKey = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.browserWidgetContextMenuStrip.SuspendLayout();
             this.textPreviewContextMenuStrip.SuspendLayout();
+            this.filterContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -350,6 +355,7 @@
             this.detailsToolStripMenuItem,
             this.toolStripSeparator9,
             this.selectAllToolStripMenuItem,
+            this.copyResourceKeyToolStripMenuItem,
             this.importToolStripMenuItem1,
             this.exportToolStripMenuItem1,
             this.tsSepHelpers,
@@ -706,15 +712,16 @@
             this.bwcmCompressed,
             this.bwcmDeleted,
             this.bwcmDetails,
-            this.bwcmSelectAll,
             this.toolStripSeparator10,
+            this.bwcmSelectAll,
+            this.bwcmCopyResourceKey,
             this.bwcmImport,
             this.bwcmExport,
             this.bwcmSepHelpers,
             this.bwcmHexEditor,
             this.bwcmTextEditor});
             this.browserWidgetContextMenuStrip.Name = "browserWidgetContextMenuStrip";
-            this.browserWidgetContextMenuStrip.Size = new System.Drawing.Size(156, 308);
+            this.browserWidgetContextMenuStrip.Size = new System.Drawing.Size(205, 352);
             this.browserWidgetContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.cmsBW_Opening);
             // 
             // bwcmAdd
@@ -722,7 +729,7 @@
             this.bwcmAdd.Enabled = false;
             this.bwcmAdd.Name = "bwcmAdd";
             this.bwcmAdd.ShortcutKeys = System.Windows.Forms.Keys.Insert;
-            this.bwcmAdd.Size = new System.Drawing.Size(155, 22);
+            this.bwcmAdd.Size = new System.Drawing.Size(204, 22);
             this.bwcmAdd.Text = "&Add...";
             this.bwcmAdd.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -730,7 +737,7 @@
             // 
             this.bwcmCopy.Enabled = false;
             this.bwcmCopy.Name = "bwcmCopy";
-            this.bwcmCopy.Size = new System.Drawing.Size(155, 22);
+            this.bwcmCopy.Size = new System.Drawing.Size(204, 22);
             this.bwcmCopy.Text = "Cop&y";
             this.bwcmCopy.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -738,7 +745,7 @@
             // 
             this.bwcmPaste.Enabled = false;
             this.bwcmPaste.Name = "bwcmPaste";
-            this.bwcmPaste.Size = new System.Drawing.Size(155, 22);
+            this.bwcmPaste.Size = new System.Drawing.Size(204, 22);
             this.bwcmPaste.Text = "&Paste...";
             this.bwcmPaste.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -746,7 +753,7 @@
             // 
             this.bwcmDuplicate.Enabled = false;
             this.bwcmDuplicate.Name = "bwcmDuplicate";
-            this.bwcmDuplicate.Size = new System.Drawing.Size(155, 22);
+            this.bwcmDuplicate.Size = new System.Drawing.Size(204, 22);
             this.bwcmDuplicate.Text = "D&uplicate";
             this.bwcmDuplicate.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -754,20 +761,20 @@
             // 
             this.bwcmReplace.Enabled = false;
             this.bwcmReplace.Name = "bwcmReplace";
-            this.bwcmReplace.Size = new System.Drawing.Size(155, 22);
+            this.bwcmReplace.Size = new System.Drawing.Size(204, 22);
             this.bwcmReplace.Text = "&Replace...";
             this.bwcmReplace.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(152, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(201, 6);
             // 
             // bwcmCompressed
             // 
             this.bwcmCompressed.Enabled = false;
             this.bwcmCompressed.Name = "bwcmCompressed";
-            this.bwcmCompressed.Size = new System.Drawing.Size(155, 22);
+            this.bwcmCompressed.Size = new System.Drawing.Size(204, 22);
             this.bwcmCompressed.Text = "&Compressed";
             this.bwcmCompressed.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -776,7 +783,7 @@
             this.bwcmDeleted.Enabled = false;
             this.bwcmDeleted.Name = "bwcmDeleted";
             this.bwcmDeleted.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-            this.bwcmDeleted.Size = new System.Drawing.Size(155, 22);
+            this.bwcmDeleted.Size = new System.Drawing.Size(204, 22);
             this.bwcmDeleted.Text = "De&leted";
             this.bwcmDeleted.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -785,7 +792,7 @@
             this.bwcmDetails.Enabled = false;
             this.bwcmDetails.Name = "bwcmDetails";
             this.bwcmDetails.ShortcutKeyDisplayString = "Enter";
-            this.bwcmDetails.Size = new System.Drawing.Size(155, 22);
+            this.bwcmDetails.Size = new System.Drawing.Size(204, 22);
             this.bwcmDetails.Text = "&Details...";
             this.bwcmDetails.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -794,14 +801,14 @@
             this.bwcmSelectAll.Enabled = false;
             this.bwcmSelectAll.Name = "bwcmSelectAll";
             this.bwcmSelectAll.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
-            this.bwcmSelectAll.Size = new System.Drawing.Size(155, 22);
+            this.bwcmSelectAll.Size = new System.Drawing.Size(204, 22);
             this.bwcmSelectAll.Text = "S&elect all";
             this.bwcmSelectAll.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
             // toolStripSeparator10
             // 
             this.toolStripSeparator10.Name = "toolStripSeparator10";
-            this.toolStripSeparator10.Size = new System.Drawing.Size(152, 6);
+            this.toolStripSeparator10.Size = new System.Drawing.Size(201, 6);
             // 
             // bwcmImport
             // 
@@ -811,7 +818,7 @@
             this.bwcmAsDBC});
             this.bwcmImport.Enabled = false;
             this.bwcmImport.Name = "bwcmImport";
-            this.bwcmImport.Size = new System.Drawing.Size(155, 22);
+            this.bwcmImport.Size = new System.Drawing.Size(204, 22);
             this.bwcmImport.Text = "I&mport";
             // 
             // bwcmFromFile
@@ -842,7 +849,7 @@
             this.bwcmToPackage});
             this.bwcmExport.Enabled = false;
             this.bwcmExport.Name = "bwcmExport";
-            this.bwcmExport.Size = new System.Drawing.Size(155, 22);
+            this.bwcmExport.Size = new System.Drawing.Size(204, 22);
             this.bwcmExport.Text = "E&xport";
             // 
             // bwcmToFile
@@ -864,13 +871,13 @@
             // bwcmSepHelpers
             // 
             this.bwcmSepHelpers.Name = "bwcmSepHelpers";
-            this.bwcmSepHelpers.Size = new System.Drawing.Size(152, 6);
+            this.bwcmSepHelpers.Size = new System.Drawing.Size(201, 6);
             // 
             // bwcmHexEditor
             // 
             this.bwcmHexEditor.Enabled = false;
             this.bwcmHexEditor.Name = "bwcmHexEditor";
-            this.bwcmHexEditor.Size = new System.Drawing.Size(155, 22);
+            this.bwcmHexEditor.Size = new System.Drawing.Size(204, 22);
             this.bwcmHexEditor.Text = "&Hex Editor";
             this.bwcmHexEditor.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -878,7 +885,7 @@
             // 
             this.bwcmTextEditor.Enabled = false;
             this.bwcmTextEditor.Name = "bwcmTextEditor";
-            this.bwcmTextEditor.Size = new System.Drawing.Size(155, 22);
+            this.bwcmTextEditor.Size = new System.Drawing.Size(204, 22);
             this.bwcmTextEditor.Text = "&Text Editor";
             this.bwcmTextEditor.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
@@ -926,6 +933,38 @@
             this.tpcmOTE.Text = "Open in Text &Editor";
             this.tpcmOTE.Click += new System.EventHandler(this.tsCMSTP_Click);
             // 
+            // filterContextMenuStrip
+            // 
+            this.filterContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.flcmPasteResourceKey});
+            this.filterContextMenuStrip.Name = "filterContextMenuStrip";
+            this.filterContextMenuStrip.Size = new System.Drawing.Size(206, 26);
+            this.filterContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.cmsFL_Opening);
+            // 
+            // flcmPasteResourceKey
+            // 
+            this.flcmPasteResourceKey.Name = "flcmPasteResourceKey";
+            this.flcmPasteResourceKey.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
+            this.flcmPasteResourceKey.Size = new System.Drawing.Size(205, 22);
+            this.flcmPasteResourceKey.Text = "&Paste ResourceKey";
+            this.flcmPasteResourceKey.Click += new System.EventHandler(this.tsCMF_Click);
+            // 
+            // copyResourceKeyToolStripMenuItem
+            // 
+            this.copyResourceKeyToolStripMenuItem.Name = "copyResourceKeyToolStripMenuItem";
+            this.copyResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.copyResourceKeyToolStripMenuItem.Text = "&Copy ResourceKey";
+            this.copyResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
+            // 
+            // bwcmCopyResourceKey
+            // 
+            this.bwcmCopyResourceKey.Enabled = false;
+            this.bwcmCopyResourceKey.Name = "bwcmCopyResourceKey";
+            this.bwcmCopyResourceKey.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.bwcmCopyResourceKey.Size = new System.Drawing.Size(204, 22);
+            this.bwcmCopyResourceKey.Text = "&Copy ResourceKey";
+            this.bwcmCopyResourceKey.Click += new System.EventHandler(this.tsCMSBW_Click);
+            // 
             // MenuBarWidget
             // 
             this.ContextMenuStrip = this.browserWidgetContextMenuStrip;
@@ -936,6 +975,7 @@
             this.menuStrip1.PerformLayout();
             this.browserWidgetContextMenuStrip.ResumeLayout(false);
             this.textPreviewContextMenuStrip.ResumeLayout(false);
+            this.filterContextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1036,5 +1076,9 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
         private System.Windows.Forms.ToolStripMenuItem tpcmSavePreview;
         private System.Windows.Forms.ToolStripMenuItem editSavePreviewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem flcmPasteResourceKey;
+        private System.Windows.Forms.ToolStripMenuItem copyResourceKeyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem bwcmCopyResourceKey;
+        public System.Windows.Forms.ContextMenuStrip filterContextMenuStrip;
     }
 }

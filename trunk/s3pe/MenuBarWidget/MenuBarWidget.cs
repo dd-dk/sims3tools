@@ -50,7 +50,7 @@ namespace S3PIDemoFE
                 editCopyToolStripMenuItem, editSavePreviewToolStripMenuItem, editFloatToolStripMenuItem, editOTEToolStripMenuItem,
                 //Resource
                 addToolStripMenuItem, resCopyToolStripMenuItem1, resPasteToolStripMenuItem1, duplicateToolStripMenuItem, replaceToolStripMenuItem,
-                compressedToolStripMenuItem, deletedToolStripMenuItem, detailsToolStripMenuItem, selectAllToolStripMenuItem,
+                compressedToolStripMenuItem, deletedToolStripMenuItem, detailsToolStripMenuItem, copyResourceKeyToolStripMenuItem, selectAllToolStripMenuItem,
                 fromFileToolStripMenuItem, fromPackageToolStripMenuItem, asDBCToolStripMenuItem, toFileToolStripMenuItem, toPackageToolStripMenuItem,
                 hexEditorToolStripMenuItem, textEditorToolStripMenuItem,
                 //Tools
@@ -61,6 +61,8 @@ namespace S3PIDemoFE
                 saveSettingsToolStripMenuItem,
                 //Help
                 contentsToolStripMenuItem, aboutToolStripMenuItem, checkForUpdateToolStripMenuItem, warrantyToolStripMenuItem, licenceToolStripMenuItem,
+                //Filter context menu
+                flcmPasteResourceKey,
             });
             cmsTP = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //TextPreviewContextMenuStrip
@@ -69,7 +71,7 @@ namespace S3PIDemoFE
             cmsBW = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //BrowserWidgetContextMenuStrip
                 bwcmAdd, bwcmCopy, bwcmPaste, bwcmDuplicate, bwcmReplace,
-                bwcmCompressed, bwcmDeleted, bwcmDetails, bwcmSelectAll,
+                bwcmCompressed, bwcmDeleted, bwcmDetails, bwcmCopyResourceKey, bwcmSelectAll,
                 bwcmFromFile, bwcmFromPackage, bwcmAsDBC, bwcmToFile, bwcmToPackage,
                 bwcmHexEditor, bwcmTextEditor,
             });
@@ -93,6 +95,7 @@ namespace S3PIDemoFE
             MBR,
             MBS,
             MBH,
+            CMF,
         }
 
         public enum MB
@@ -102,7 +105,7 @@ namespace S3PIDemoFE
             MBF_exit,
             MBE_copy, MBE_save, MBE_float, MBE_ote,
             MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_replace,
-            MBR_compressed, MBR_isdeleted, MBR_details, MBR_selectAll,
+            MBR_compressed, MBR_isdeleted, MBR_details, MBR_copyRK, MBR_selectAll,
             MBR_importResources, MBR_importPackages, MBR_importAsDBC, MBR_exportResources, MBR_exportToPackage,
             MBR_hexEditor, MBR_textEditor,
             MBT_fnvHash, MBT_search,
@@ -110,6 +113,7 @@ namespace S3PIDemoFE
             MBS_bookmarks, MBS_externals, MBS_wrappers,
             MBS_saveSettings,
             MBH_contents, MBH_about, MBH_update, MBH_warranty, MBH_licence,
+            CMF_pasteRK,
         }
 
         public enum CMS_TP
@@ -120,7 +124,7 @@ namespace S3PIDemoFE
         public enum CMS_BW
         {
             MBR_add = (int)MB.MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_replace,
-            MBR_compressed, MBR_isdeleted, MBR_details, MBR_selectAll,
+            MBR_compressed, MBR_isdeleted, MBR_details, MBR_copyRK, MBR_selectAll,
             MBR_importResources, MBR_importPackages, MBR_importAsDBC, MBR_exportResources, MBR_exportToPackage,
             MBR_hexEditor, MBR_textEditor,
         }
@@ -138,13 +142,23 @@ namespace S3PIDemoFE
         {
             tsMB[(int)mn].Checked = state;
             tsMB[(int)mn].CheckState = state ? CheckState.Checked : CheckState.Unchecked;
+            if (isCMSTP(mn))
+            {
+                cmsTP[(int)mn - (int)CMS_TP.MBE_copy].Checked = state;
+                cmsTP[(int)mn - (int)CMS_TP.MBE_copy].CheckState = state ? CheckState.Checked : CheckState.Unchecked;
+            }
             if (isCMSBW(mn))
             {
                 cmsBW[(int)mn - (int)CMS_BW.MBR_add].Checked = state;
                 cmsBW[(int)mn - (int)CMS_BW.MBR_add].CheckState = state ? CheckState.Checked : CheckState.Unchecked;
             }
         }
-        public void Indeterminate(MB mn) { tsMB[(int)mn].CheckState = CheckState.Indeterminate; if (isCMSBW(mn)) cmsBW[(int)mn - (int)CMS_BW.MBR_add].CheckState = CheckState.Indeterminate; ; }
+        public void Indeterminate(MB mn)
+        {
+            tsMB[(int)mn].CheckState = CheckState.Indeterminate;
+            if (isCMSTP(mn)) cmsTP[(int)mn - (int)CMS_TP.MBE_copy].CheckState = CheckState.Indeterminate;
+            if (isCMSBW(mn)) cmsBW[(int)mn - (int)CMS_BW.MBR_add].CheckState = CheckState.Indeterminate;
+        }
         public bool IsChecked(MB mn) { return tsMB[(int)mn].Checked; }
 
         public class MBDropDownOpeningEventArgs : EventArgs { public readonly MD mn; public MBDropDownOpeningEventArgs(MD mn) { this.mn = mn; } }
@@ -154,6 +168,7 @@ namespace S3PIDemoFE
         private void tsMD_DropDownOpening(object sender, EventArgs e) { OnMBDropDownOpening(sender, (MD)tsMD.IndexOf(sender as ToolStripMenuItem)); }
         private void cmsTP_Opening(object sender, CancelEventArgs e) { OnMBDropDownOpening(sender, MD.MBE); }
         private void cmsBW_Opening(object sender, CancelEventArgs e) { OnMBDropDownOpening(sender, MD.MBR); }
+        private void cmsFL_Opening(object sender, CancelEventArgs e) { OnMBDropDownOpening(sender, MD.CMF); }
 
         public class MBClickEventArgs : EventArgs { public readonly MB mn; public MBClickEventArgs(MB mn) { this.mn = mn; } }
         public delegate void MBClickEventHandler(object sender, MBClickEventArgs mn);
@@ -181,6 +196,10 @@ namespace S3PIDemoFE
         public event MBClickEventHandler MBHelp_Click;
         protected void OnMBHelp_Click(object sender, MB mn) { if (MBHelp_Click != null) MBHelp_Click(sender, new MBClickEventArgs(mn)); }
         private void tsMBH_Click(object sender, EventArgs e) { OnMBHelp_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
+
+        public event MBClickEventHandler CMFilter_Click;
+        protected void OnCMFilter_Click(object sender, MB mn) { if (CMFilter_Click != null) CMFilter_Click(sender, new MBClickEventArgs(mn)); }
+        private void tsCMF_Click(object sender, EventArgs e) { OnCMFilter_Click(sender, (MB)tsMB.IndexOf(sender as ToolStripMenuItem)); }
 
         private void tsCMSTP_Click(object sender, EventArgs e) { OnMBEdit_Click(sender, (MB)(cmsTP.IndexOf(sender as ToolStripMenuItem)) + (int)MB.MBE_copy); }
         private void tsCMSBW_Click(object sender, EventArgs e) { OnMBResource_Click(sender, (MB)(cmsBW.IndexOf(sender as ToolStripMenuItem)) + (int)MB.MBR_add); }

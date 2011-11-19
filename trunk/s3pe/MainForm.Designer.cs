@@ -147,9 +147,9 @@
             // 
             // pnAuto
             // 
-            this.pnAuto.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnAuto.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.pnAuto.Location = new System.Drawing.Point(-2, 0);
             this.pnAuto.Name = "pnAuto";
             this.pnAuto.Size = new System.Drawing.Size(290, 512);
@@ -192,13 +192,18 @@
             // 
             // controlPanel1
             // 
+            this.controlPanel1.AutoOff = false;
+            this.controlPanel1.AutoValue = true;
             this.controlPanel1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.controlPanel1.Location = new System.Drawing.Point(0, 74);
             this.controlPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.controlPanel1.Name = "controlPanel1";
             this.controlPanel1.Padding = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.controlPanel1.Size = new System.Drawing.Size(919, 29);
+            this.controlPanel1.Sort = true;
             this.controlPanel1.TabIndex = 1;
+            this.controlPanel1.UseNames = true;
+            this.controlPanel1.UseTags = true;
             this.controlPanel1.SortChanged += new System.EventHandler(this.controlPanel1_SortChanged);
             this.controlPanel1.HexClick += new System.EventHandler(this.controlPanel1_HexClick);
             this.controlPanel1.AutoChanged += new System.EventHandler(this.controlPanel1_AutoChanged);
@@ -220,6 +225,7 @@
             this.resourceFilterWidget1.Size = new System.Drawing.Size(919, 103);
             this.resourceFilterWidget1.TabIndex = 0;
             this.resourceFilterWidget1.FilterChanged += new System.EventHandler(this.resourceFilterWidget1_FilterChanged);
+            this.resourceFilterWidget1.PasteClicked += new System.EventHandler(this.resourceFilterWidget1_PasteClicked);
             // 
             // saveAsFileDialog
             // 

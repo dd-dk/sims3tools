@@ -43,6 +43,12 @@ namespace S3PIDemoFE
             }
             UseNames = S3PIDemoFE.Properties.Settings.Default.UseNames;
             UseTags = S3PIDemoFE.Properties.Settings.Default.UseTags;
+
+            OnSortChanged(this, EventArgs.Empty);
+            OnHexOnlyChanged(this, EventArgs.Empty);
+            OnAutoChanged(this, EventArgs.Empty);
+            OnUseNamesChanged(this, EventArgs.Empty);
+            OnUseTagsChanged(this, EventArgs.Empty);
         }
         public void ControlPanel_SaveSettings(object sender, EventArgs e)
         {

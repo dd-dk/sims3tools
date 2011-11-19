@@ -58,7 +58,7 @@ namespace S3PIDemoFE
             if (S3PIDemoFE.Properties.Settings.Default.DisabledWrappers != null)
                 foreach (var v in S3PIDemoFE.Properties.Settings.Default.DisabledWrappers)
                 {
-                    string[] kv = v.Trim().Split(new char[] { ':', },2);
+                    string[] kv = v.Trim().Split(new char[] { ':', }, 2);
                     KeyValuePair<string, Type> kvp = typeMap.Find(x => x.Key == kv[0] && x.Value.FullName == kv[1]);
                     if (!kvp.Equals(default(KeyValuePair<string, Type>)))
                         s3pi.WrapperDealer.WrapperDealer.Disabled.Add(kvp);
@@ -80,7 +80,7 @@ namespace S3PIDemoFE
             InitializeComponent();
 
             this.Text = myName;
-            
+
             this.lbProgress.Text = "";
 
             browserWidget1.Fields = new List<string>(fields.ToArray());
@@ -93,6 +93,8 @@ namespace S3PIDemoFE
             filterFields.Insert(0, "Name");
             resourceFilterWidget1.BrowserWidget = browserWidget1;
             resourceFilterWidget1.Fields = filterFields;
+            resourceFilterWidget1.ContextMenuStrip = menuBarWidget1.filterContextMenuStrip;
+            menuBarWidget1.CMFilter_Click += new MenuBarWidget.MBClickEventHandler(menuBarWidget1_CMFilter_Click);
 
             packageInfoWidget1.Fields = packageInfoFields1.Fields;
             this.PackageFilenameChanged += new EventHandler(MainForm_PackageFilenameChanged);
@@ -107,7 +109,7 @@ namespace S3PIDemoFE
         }
 
         public MainForm(params string[] args)
-            :this()
+            : this()
         {
             CmdLine(args);
 
@@ -153,7 +155,7 @@ namespace S3PIDemoFE
                 splitContainer2.SplitterDistance = s2 < 0 ? defaultSplitterDistance2 : s2;
 
                 // everything else assumed valid -- any problems, use the iconise/exit/run trick to fix
-                
+
                 this.StartPosition = FormStartPosition.Manual;
                 this.Location = S3PIDemoFE.Properties.Settings.Default.PersistentLocation;
                 this.WindowState = s;
@@ -441,7 +443,7 @@ namespace S3PIDemoFE
                     IsPackageDirty = false;
                 }
                 if (package != null) Package.ClosePackage(0, package);
-                
+
                 package = value;
                 OnPackageChanged(this, new EventArgs());
             }
@@ -471,7 +473,9 @@ namespace S3PIDemoFE
                 case MenuBarWidget.MD.MBF: break;
                 case MenuBarWidget.MD.MBE: editDropDownOpening(); break;
                 case MenuBarWidget.MD.MBR: resourceDropDownOpening(); break;
+                case MenuBarWidget.MD.MBS: break;
                 case MenuBarWidget.MD.MBH: break;
+                case MenuBarWidget.MD.CMF: filterContextMenuOpening(); break;
                 default: break;
             }
         }
@@ -797,7 +801,8 @@ namespace S3PIDemoFE
         void cleanUpTemp()
         {
             foreach (var file in Directory.GetFiles(Path.GetTempPath(), String.Format("{0}*.txt", tempName)))
-                try {
+                try
+                {
                     File.SetAttributes(file, FileAttributes.Normal);
                     File.Delete(file);
                 }
@@ -806,46 +811,25 @@ namespace S3PIDemoFE
         #endregion
 
         #region Resource menu
-        private void menuBarWidget1_MBResource_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
-        {
-            try
-            {
-                //this.Enabled = false;
-                Application.DoEvents();
-                switch (mn.mn)
-                {
-                    case MenuBarWidget.MB.MBR_add: resourceAdd(); break;
-                    case MenuBarWidget.MB.MBR_copy: resourceCopy(); break;
-                    case MenuBarWidget.MB.MBR_paste: resourcePaste(); break;
-                    case MenuBarWidget.MB.MBR_duplicate: resourceDuplicate(); break;
-                    case MenuBarWidget.MB.MBR_compressed: resourceCompressed(); break;
-                    case MenuBarWidget.MB.MBR_isdeleted: resourceIsDeleted(); break;
-                    case MenuBarWidget.MB.MBR_details: resourceDetails(); break;
-                    case MenuBarWidget.MB.MBR_selectAll: resourceSelectAll(); break;
-                    case MenuBarWidget.MB.MBR_replace: resourceReplace(); break;
-                    case MenuBarWidget.MB.MBR_importResources: resourceImport(); break;
-                    case MenuBarWidget.MB.MBR_importPackages: resourceImportPackages(); break;
-                    case MenuBarWidget.MB.MBR_importAsDBC: resourceImportAsDBC(); break;
-                    case MenuBarWidget.MB.MBR_exportResources: resourceExport(); break;
-                    case MenuBarWidget.MB.MBR_exportToPackage: resourceExportToPackage(); break;
-                    case MenuBarWidget.MB.MBR_hexEditor: resourceHexEdit(); break;
-                    case MenuBarWidget.MB.MBR_textEditor: resourceTextEdit(); break;
-                }
-            }
-            finally { /*this.Enabled = true;/**/ }
-        }
-
         private void resourceDropDownOpening()
         {
-            bool state;
-            state = CurrentPackage != null &&
-                (
-                Clipboard.ContainsData(myDataFormatSingleFile)
-                || Clipboard.ContainsData(myDataFormatBatch)
-                || Clipboard.ContainsFileDropList()
-                //|| Clipboard.ContainsText()
-                );
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_paste, state);
+            //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_add, true);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copy, browserWidget1.SelectedResources.Count != 0);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_paste, canPasteResource());
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_duplicate, resource != null);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_replace, browserWidget1.SelectedResource != null);
+            //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_compressed, true);
+            //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_isdeleted, true);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_details, browserWidget1.SelectedResource != null);
+            //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_selectAll, true);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copyRK, browserWidget1.SelectedResources.Count == 1);
+            //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importResources, true);
+            //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importPackages, true);
+            //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importAsDBC, true);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_exportResources, browserWidget1.SelectedResources.Count != 0);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_exportToPackage, browserWidget1.SelectedResources.Count != 0);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_hexEditor, hasHexEditor && resource != null);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_textEditor, hasTextEditor && resource != null);
 
             CheckState res = CompressedCheckState();
             if (res == CheckState.Indeterminate)
@@ -866,7 +850,20 @@ namespace S3PIDemoFE
             {
                 menuBarWidget1.Checked(MenuBarWidget.MB.MBR_isdeleted, res == CheckState.Checked);
             }
+
         }
+
+        bool canPasteResource()
+        {
+            return CurrentPackage != null &&
+                (
+                Clipboard.ContainsData(myDataFormatSingleFile)
+                || Clipboard.ContainsData(myDataFormatBatch)
+                || Clipboard.ContainsFileDropList()
+                //|| Clipboard.ContainsText()
+                );
+        }
+
         private CheckState CompressedCheckState()
         {
             if (browserWidget1.SelectedResources.Count == 0)
@@ -892,8 +889,38 @@ namespace S3PIDemoFE
             foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources) if (rie.IsDeleted) state++;
             if (state == 0 || state == browserWidget1.SelectedResources.Count)
                 return state == browserWidget1.SelectedResources.Count ? CheckState.Checked : CheckState.Unchecked;
-            
+
             return CheckState.Indeterminate;
+        }
+
+        private void menuBarWidget1_MBResource_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
+        {
+            try
+            {
+                //this.Enabled = false;
+                Application.DoEvents();
+                switch (mn.mn)
+                {
+                    case MenuBarWidget.MB.MBR_add: resourceAdd(); break;
+                    case MenuBarWidget.MB.MBR_copy: resourceCopy(); break;
+                    case MenuBarWidget.MB.MBR_paste: resourcePaste(); break;
+                    case MenuBarWidget.MB.MBR_duplicate: resourceDuplicate(); break;
+                    case MenuBarWidget.MB.MBR_replace: resourceReplace(); break;
+                    case MenuBarWidget.MB.MBR_compressed: resourceCompressed(); break;
+                    case MenuBarWidget.MB.MBR_isdeleted: resourceIsDeleted(); break;
+                    case MenuBarWidget.MB.MBR_details: resourceDetails(); break;
+                    case MenuBarWidget.MB.MBR_selectAll: resourceSelectAll(); break;
+                    case MenuBarWidget.MB.MBR_copyRK: resourceCopyRK(); break;
+                    case MenuBarWidget.MB.MBR_importResources: resourceImport(); break;
+                    case MenuBarWidget.MB.MBR_importPackages: resourceImportPackages(); break;
+                    case MenuBarWidget.MB.MBR_importAsDBC: resourceImportAsDBC(); break;
+                    case MenuBarWidget.MB.MBR_exportResources: resourceExport(); break;
+                    case MenuBarWidget.MB.MBR_exportToPackage: resourceExportToPackage(); break;
+                    case MenuBarWidget.MB.MBR_hexEditor: resourceHexEdit(); break;
+                    case MenuBarWidget.MB.MBR_textEditor: resourceTextEdit(); break;
+                }
+            }
+            finally { /*this.Enabled = true;/**/ }
         }
 
         private void resourceAdd()
@@ -1005,7 +1032,7 @@ namespace S3PIDemoFE
             ResourceDetails ir = new ResourceDetails(resourceName != null && resourceName.Length > 0, false, browserWidget1.SelectedResource);
             ir.Compress = browserWidget1.SelectedResource.Compressed != 0;
             if (ir.UseName) ir.ResourceName = resourceName;
-            
+
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;
 
@@ -1021,6 +1048,12 @@ namespace S3PIDemoFE
         private void resourceSelectAll()
         {
             browserWidget1.SelectAll();
+        }
+
+        private void resourceCopyRK()
+        {
+            if (browserWidget1.SelectedResources.Count != 1) return;
+            Clipboard.SetText(browserWidget1.SelectedResource + "");
         }
 
         private void resourceReplace()
@@ -1320,7 +1353,6 @@ namespace S3PIDemoFE
             if (resource == null) return;
             TextEdit(browserWidget1.SelectedResource, resource);
         }
-        #endregion
 
         private void menuBarWidget1_HelperClick(object sender, MenuBarWidget.HelperClickEventArgs helper)
         {
@@ -1332,6 +1364,7 @@ namespace S3PIDemoFE
             }
             finally { this.Enabled = true; }
         }
+        #endregion
 
         #region Tools menu
         private void menuBarWidget1_MBTools_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
@@ -1574,7 +1607,7 @@ namespace S3PIDemoFE
                 "Please see Acknowledgements.txt and Acknowledgements-s3pe.txt\n" +
                 "for acknowledgements and licence details of libraries used.\n";
             CopyableMessageBox.Show(String.Format(
-                "{0}\n"+
+                "{0}\n" +
                 "Front-end Distribution: {1}\n" +
                 "Library Distribution: {2}"
                 , copyright
@@ -1616,7 +1649,7 @@ namespace S3PIDemoFE
                 " EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER" +
                 " PARTIES PROVIDE THE PROGRAM \"AS IS\" WITHOUT WARRANTY OF ANY KIND," +
                 " EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO," +
-                " THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE." + 
+                " THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE." +
                 " THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU." +
                 " SHOULD THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.\n" +
                 "\n" +
@@ -1648,6 +1681,35 @@ namespace S3PIDemoFE
                 CopyableMessageBoxButtons.YesNo, CopyableMessageBoxIcon.Question, 1);
             if (dr != 0) return;
             Help.ShowHelp(this, "http://www.fsf.org/licensing/licenses/gpl.html");
+        }
+        #endregion
+
+        #region Filter context menu
+        private void filterContextMenuOpening()
+        {
+            Application.DoEvents();
+            menuBarWidget1.Enable(MenuBarWidget.MB.CMF_pasteRK, AResourceKey.TryParse(Clipboard.GetText(), new TGIBlock(0, null)));
+        }
+
+        private void menuBarWidget1_CMFilter_Click(object sender, MenuBarWidget.MBClickEventArgs mn)
+        {
+            try
+            {
+                this.Enabled = false;
+                Application.DoEvents();
+                switch (mn.mn)
+                {
+                    case MenuBarWidget.MB.CMF_pasteRK: filterPaste(); break;
+                }
+            }
+            finally { this.Enabled = true; }
+        }
+
+        private void filterPaste()
+        {
+            TGIBlock value = new TGIBlock(0, null);
+            if (!AResourceKey.TryParse(Clipboard.GetText(), value)) return;
+            resourceFilterWidget1.PasteResourceKey(value);
         }
         #endregion
 
@@ -1689,7 +1751,7 @@ namespace S3PIDemoFE
                 {
                     resource = s3pi.WrapperDealer.WrapperDealer.GetResource(0, CurrentPackage, browserWidget1.SelectedResource, controlPanel1.HexOnly);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     resException = ex;
                 }
@@ -1774,6 +1836,11 @@ namespace S3PIDemoFE
                 browserWidget1.Filter = resourceFilterWidget1.FilterEnabled ? resourceFilterWidget1.Filter : null;
             }
             finally { this.Enabled = true; }
+        }
+
+        private void resourceFilterWidget1_PasteClicked(object sender, EventArgs e)
+        {
+            filterPaste();
         }
         #endregion
 
@@ -1937,7 +2004,10 @@ namespace S3PIDemoFE
                 control = new DDSPanel()
                 {
                     Fit = true,
-                    Channel1 = channel1, Channel2 = channel2, Channel3 = channel3, Channel4 = channel4,
+                    Channel1 = channel1,
+                    Channel2 = channel2,
+                    Channel3 = channel3,
+                    Channel4 = channel4,
                     InvertCh4 = invertch4,
                     Margin = new Padding(3),
                 };
@@ -1966,7 +2036,7 @@ namespace S3PIDemoFE
                     dds.Control.DDSLoad(resource.Stream);
                     res = (Control)dds.Control;
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     if (!ddsFailedWarningIssued)
                     {
