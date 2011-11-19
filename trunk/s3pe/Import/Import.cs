@@ -97,7 +97,8 @@ namespace S3PIDemoFE
         // See http://dino.drealm.info/den/denforum/index.php?topic=244.0
         static List<uint> deleteList = new List<uint>(new uint[] {
             0x73E93EEB, //xml: sims3pack manifest
-            0x626F60CD, //THUM: sims3pack
+            //http://dino.drealm.info/den/denforum/index.php?topic=724.0
+            //-Anach: no, this is needed by CAS 0x626F60CD, //THUM: sims3pack
             //http://dino.drealm.info/den/denforum/index.php?topic=253.msg1234#msg1234
             //-Anach: no, this is needed by roofing 0x2E75C765, //ICON: sims3pack
         });
