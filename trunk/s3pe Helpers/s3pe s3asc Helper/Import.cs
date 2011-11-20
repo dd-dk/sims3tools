@@ -110,6 +110,9 @@ namespace meshExpImp.Helper
                 else removed.Add(j);
             }
 
+            // Remove root
+            removed.Remove(0xCD68F001);
+
             if (added.Count != 0)
             {
                 mesh.JointReferences.AddRange(added);
@@ -275,17 +278,17 @@ namespace meshExpImp.Helper
         public struct offScale
         {
             public int meshGroup { get; set; }
-            public int subGroup { get; set; }
+            public int geoState { get; set; }
             public int vertex { get; set; }
             public int nUV { get; set; }
             public float actual { get; set; }
             public float max { get; set; }
             public override string ToString()
             {
-                return String.Format("MeshGroup: {0}" + (subGroup >= 0 ? " (SG: {5})" : "") + "; Vertex[{1}].UV[{2}]: {3}; Max: {4} (from UVScales)", meshGroup, vertex, nUV, actual, max, subGroup);
+                return String.Format("MeshGroup: {0}" + (geoState >= 0 ? " (Geo: {5})" : "") + "; Vertex[{1}].UV[{2}]: {3}; Max: {4} (from UVScales)", meshGroup, vertex, nUV, actual, max, geoState);
             }
         }
-        public List<offScale> VertsToVBUFs(GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, List<meshExpImp.ModelBlocks.Vertex[]> lmverts, List<List<meshExpImp.ModelBlocks.Vertex[]>> llverts, bool updateBBs)
+        public List<offScale> VertsToVBUFs(GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, List<meshExpImp.ModelBlocks.Vertex[]> lmverts, List<List<meshExpImp.ModelBlocks.Vertex[]>> llverts, bool updateBBs, bool updateUVs)
         {
             // List of UV elements going off scale
             List<offScale> offScales = new List<offScale>();
@@ -300,6 +303,9 @@ namespace meshExpImp.Helper
                 else meshGroups.Add(mlod.Meshes[m].MaterialIndex, new List<int> { m });
                 VRTF vrtf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mlod.Meshes[m].VertexFormatIndex) as VRTF ?? VRTF.CreateDefaultForMesh(mlod.Meshes[m]);
                 meshVRTF.Add(m, vrtf);
+
+                if (updateUVs)
+                    rcolResource.FixUVScales(mlod.Meshes[m]);
                 meshUVScales.Add(m, rcolResource.GetUVScales(mlod.Meshes[m]));
             }
 
@@ -312,15 +318,15 @@ namespace meshExpImp.Helper
                     if (vbuf == null)
                         vbuf = new VBUF(rcolResource.RequestedApiVersion, null) { Version = 0x00000101, Flags = VBUF.FormatFlags.None, SwizzleInfo = new GenericRCOLResource.ChunkReference(0, null, 0), };
 
-                    offScales.AddRange(getOffScale(m, -1, lmverts[m], meshUVScales[m]));
+                    offScales.AddRange(getOffScales(m, -1, lmverts[m], meshUVScales[m]));
                     vbuf.SetVertices(mlod, m, meshVRTF[m], lmverts[m], meshUVScales[m]);
 
                     if (llverts[m] != null)
-                        for (int i = 0; i < llverts[m].Count; i++)
-                            if (llverts[m][i] != null)
+                        for (int g = 0; g < llverts[m].Count; g++)
+                            if (llverts[m][g] != null)
                             {
-                                offScales.AddRange(getOffScale(m, i, llverts[m][i], meshUVScales[m]));
-                                vbuf.SetVertices(mlod, mlod.Meshes[m], i, meshVRTF[m], llverts[m][i], meshUVScales[m]);
+                                offScales.AddRange(getOffScales(m, g, llverts[m][g], meshUVScales[m]));
+                                vbuf.SetVertices(mlod, mlod.Meshes[m], g, meshVRTF[m], llverts[m][g], meshUVScales[m]);
                             }
 
                     IResourceKey vbufRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].VertexBufferIndex);
@@ -337,15 +343,15 @@ namespace meshExpImp.Helper
             return offScales;
         }
 
-        private IEnumerable<offScale> getOffScale(int meshGroup, int subGroup, meshExpImp.ModelBlocks.Vertex[] verts, float[] uvScales)
+        private IEnumerable<offScale> getOffScales(int meshGroup, int geoState, meshExpImp.ModelBlocks.Vertex[] verts, float[] uvScales)
         {
             for (int v = 0; v < verts.Length; v++)
                 foreach (float[] uvs in verts[v].UV)
                     for (int u = 0; u < uvs.Length; u++)
                     {
-                        float max = (u < uvScales.Length ? uvScales[u] : uvScales[0]) * short.MaxValue;
+                        float max = (u < uvScales.Length && uvScales[u] != 0 ? uvScales[u] : uvScales[0]) * short.MaxValue;
                         if (uvs[u] > max)
-                            yield return new offScale() { meshGroup = meshGroup, subGroup = subGroup, vertex = v, nUV = u, actual = uvs[u], max = max };
+                            yield return new offScale() { meshGroup = meshGroup, geoState = geoState, vertex = v, nUV = u, actual = uvs[u], max = max };
                     }
         }
     }

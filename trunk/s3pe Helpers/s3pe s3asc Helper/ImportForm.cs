@@ -54,9 +54,9 @@ namespace meshExpImp.Helper
 
         private void Import_Shown(object sender, EventArgs e)
         {
-            CopyableMessageBox.Show("Test version " + typeof(ImportForm).Assembly.GetName().Version.ToString());
             try
             {
+                ofdImport.Title += " -- Test version " + typeof(ImportForm).Assembly.GetName().Version.ToString();
                 DialogResult dr = ofdImport.ShowDialog();
                 if (dr != DialogResult.OK)
                 {
@@ -79,6 +79,16 @@ namespace meshExpImp.Helper
                 int q = CopyableMessageBox.Show("Update mesh bounding boxes?", Application.ProductName, CopyableMessageBoxButtons.YesNoCancel, CopyableMessageBoxIcon.Question);
                 if (q == 0)
                     updateBBs = true;
+                else if (q == 2)
+                {
+                    Environment.ExitCode = 1;
+                    return;
+                }
+
+                bool updateUVs = false;
+                q = CopyableMessageBox.Show("Maximise mapping area?", Application.ProductName, CopyableMessageBoxButtons.YesNoCancel, CopyableMessageBoxIcon.Question);
+                if (q == 0)
+                    updateUVs = true;
                 else if (q == 2)
                 {
                     Environment.ExitCode = 1;
@@ -141,7 +151,7 @@ namespace meshExpImp.Helper
                         }
                     }
 
-                    List<Import.offScale> offScales = import.VertsToVBUFs(rcolResource, mlod, rk, lmverts, llverts, updateBBs);
+                    List<Import.offScale> offScales = import.VertsToVBUFs(rcolResource, mlod, rk, lmverts, llverts, updateBBs, updateUVs);
                     if (offScales.Count > 0)
                     {
                         while (true)

@@ -72,7 +72,30 @@ namespace meshExpImp.Helper
                     else throw new InvalidOperationException(String.Format("Found UVScales of type '{0}'; expected 'ElementFloat3'.", data.GetType().Name));
                 }
             }
-            return new float[] { 1f / 32767f, };
+            return new float[] { 1f / 32767f, 0f, 0f, };
+        }
+
+        //Match what Wes's compiler does
+        public static void FixUVScales(this GenericRCOLResource rcolResource, MLOD.Mesh mesh)
+        {
+            MATD matd = GetMATDforMesh(rcolResource, mesh.MaterialIndex);
+            if (matd == null)
+                throw new ArgumentException("No MATD found for requested mesh");
+
+            foreach (MATD.FieldType ft in new MATD.FieldType[] { MATD.FieldType.UVScales, MATD.FieldType.DiffuseUVSelector, MATD.FieldType.SpecularUVSelector, })
+            {
+                MATD.ShaderData data = (matd.Version < 0x0103 ? matd.Mtrl.SData : matd.Mtnf.SData).Find(x => x.Field == ft);
+                if (data == null)
+                    continue;
+
+                if (!(data is MATD.ElementFloat3))
+                    throw new InvalidOperationException(String.Format("Found " + ft + " of type '{0}'; expected 'ElementFloat3'.", data.GetType().Name));
+
+                MATD.ElementFloat3 e = data as MATD.ElementFloat3;
+                e.Data0 = 1f / short.MaxValue;
+                e.Data1 = 0f;
+                e.Data2 = 0f;
+            }
         }
 
         public static MATD GetMATDforMesh(this GenericRCOLResource rcolResource, GenericRCOLResource.ChunkReference reference)
