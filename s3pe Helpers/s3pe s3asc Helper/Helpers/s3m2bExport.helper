@@ -1,6 +1,0 @@
-ResourceType: 0x01661233 0x01D10F34
-Label: Export to s3m2b
-Command: C:\Program Files\meshExpImp\meshExpImp.exe
-Arguments: /format s3m2b /export "{}"
-ReadOnly: yes
-Desc: Create s3m2b files for CMOMoney's Blender plug-in
