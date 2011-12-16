@@ -34,6 +34,7 @@
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.s3PIPropertyGrid1 = new S3PIDemoFE.S3PIPropertyGrid();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.btnCollAll = new System.Windows.Forms.Button();
             this.btnExpAll = new System.Windows.Forms.Button();
             this.flpMainButtons = new System.Windows.Forms.FlowLayoutPanel();
             this.btnCancel = new System.Windows.Forms.Button();
@@ -43,7 +44,7 @@
             this.btnCopy = new System.Windows.Forms.Button();
             this.btnDelete = new System.Windows.Forms.Button();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.btnCollAll = new System.Windows.Forms.Button();
+            this.btnInsert = new System.Windows.Forms.Button();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -67,9 +68,9 @@
             // 
             // splitContainer1
             // 
-            this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer1.Location = new System.Drawing.Point(12, 12);
             this.splitContainer1.Name = "splitContainer1";
             // 
@@ -128,6 +129,17 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(411, 23);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
+            // btnCollAll
+            // 
+            this.btnCollAll.Location = new System.Drawing.Point(0, 0);
+            this.btnCollAll.Margin = new System.Windows.Forms.Padding(0, 0, 12, 0);
+            this.btnCollAll.Name = "btnCollAll";
+            this.btnCollAll.Size = new System.Drawing.Size(75, 23);
+            this.btnCollAll.TabIndex = 3;
+            this.btnCollAll.Text = "Collapse All";
+            this.btnCollAll.UseVisualStyleBackColor = true;
+            this.btnCollAll.Click += new System.EventHandler(this.btnCollAll_Click);
+            // 
             // btnExpAll
             // 
             this.btnExpAll.Anchor = System.Windows.Forms.AnchorStyles.None;
@@ -184,27 +196,30 @@
             this.tlpAddDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.tlpAddDelete.AutoSize = true;
             this.tlpAddDelete.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tlpAddDelete.ColumnCount = 3;
+            this.tlpAddDelete.ColumnCount = 5;
+            this.tlpAddDelete.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpAddDelete.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlpAddDelete.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpAddDelete.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpAddDelete.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tlpAddDelete.Controls.Add(this.btnAdd, 1, 0);
+            this.tlpAddDelete.Controls.Add(this.btnAdd, 2, 0);
             this.tlpAddDelete.Controls.Add(this.btnCopy, 0, 0);
-            this.tlpAddDelete.Controls.Add(this.btnDelete, 2, 0);
+            this.tlpAddDelete.Controls.Add(this.btnDelete, 4, 0);
+            this.tlpAddDelete.Controls.Add(this.btnInsert, 3, 0);
             this.tlpAddDelete.Location = new System.Drawing.Point(12, 263);
             this.tlpAddDelete.Margin = new System.Windows.Forms.Padding(0);
             this.tlpAddDelete.Name = "tlpAddDelete";
             this.tlpAddDelete.RowCount = 1;
             this.tlpAddDelete.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpAddDelete.Size = new System.Drawing.Size(255, 23);
+            this.tlpAddDelete.Size = new System.Drawing.Size(254, 23);
             this.tlpAddDelete.TabIndex = 1;
             // 
             // btnAdd
             // 
-            this.btnAdd.Location = new System.Drawing.Point(93, 0);
+            this.btnAdd.Location = new System.Drawing.Point(86, 0);
             this.btnAdd.Margin = new System.Windows.Forms.Padding(9, 0, 6, 0);
             this.btnAdd.Name = "btnAdd";
-            this.btnAdd.Size = new System.Drawing.Size(75, 23);
+            this.btnAdd.Size = new System.Drawing.Size(48, 23);
             this.btnAdd.TabIndex = 1;
             this.btnAdd.Text = "&Add";
             this.btnAdd.UseVisualStyleBackColor = true;
@@ -216,7 +231,7 @@
             this.btnCopy.Location = new System.Drawing.Point(0, 0);
             this.btnCopy.Margin = new System.Windows.Forms.Padding(0, 0, 9, 0);
             this.btnCopy.Name = "btnCopy";
-            this.btnCopy.Size = new System.Drawing.Size(75, 23);
+            this.btnCopy.Size = new System.Drawing.Size(48, 23);
             this.btnCopy.TabIndex = 2;
             this.btnCopy.Text = "Cop&y";
             this.btnCopy.UseVisualStyleBackColor = true;
@@ -225,10 +240,10 @@
             // btnDelete
             // 
             this.btnDelete.Enabled = false;
-            this.btnDelete.Location = new System.Drawing.Point(180, 0);
+            this.btnDelete.Location = new System.Drawing.Point(206, 0);
             this.btnDelete.Margin = new System.Windows.Forms.Padding(6, 0, 0, 0);
             this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(75, 23);
+            this.btnDelete.Size = new System.Drawing.Size(48, 23);
             this.btnDelete.TabIndex = 2;
             this.btnDelete.Text = "De&lete";
             this.btnDelete.UseVisualStyleBackColor = true;
@@ -239,16 +254,17 @@
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
-            // btnCollAll
+            // btnInsert
             // 
-            this.btnCollAll.Location = new System.Drawing.Point(0, 0);
-            this.btnCollAll.Margin = new System.Windows.Forms.Padding(0, 0, 12, 0);
-            this.btnCollAll.Name = "btnCollAll";
-            this.btnCollAll.Size = new System.Drawing.Size(75, 23);
-            this.btnCollAll.TabIndex = 3;
-            this.btnCollAll.Text = "Collapse All";
-            this.btnCollAll.UseVisualStyleBackColor = true;
-            this.btnCollAll.Click += new System.EventHandler(this.btnCollAll_Click);
+            this.btnInsert.Enabled = false;
+            this.btnInsert.Location = new System.Drawing.Point(146, 0);
+            this.btnInsert.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.btnInsert.Name = "btnInsert";
+            this.btnInsert.Size = new System.Drawing.Size(48, 23);
+            this.btnInsert.TabIndex = 2;
+            this.btnInsert.Text = "I&nsert";
+            this.btnInsert.UseVisualStyleBackColor = true;
+            this.btnInsert.Click += new System.EventHandler(this.btnInsert_Click);
             // 
             // NewGridForm
             // 
@@ -292,5 +308,6 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.Button btnExpAll;
         private System.Windows.Forms.Button btnCollAll;
+        private System.Windows.Forms.Button btnInsert;
     }
 }

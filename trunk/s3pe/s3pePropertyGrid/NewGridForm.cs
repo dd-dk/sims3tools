@@ -149,7 +149,7 @@ namespace S3PIDemoFE
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             s3PIPropertyGrid1.s3piObject = (AHandlerElement)(listBox1.SelectedIndex >= 0 ? fieldList[listBox1.SelectedIndex] : null);
-            btnCopy.Enabled = btnDelete.Enabled = listBox1.SelectedIndex >= 0;
+            btnCopy.Enabled = btnInsert.Enabled = btnDelete.Enabled = listBox1.SelectedIndex >= 0;
         }
 
         private void btnCopy_Click(object sender, EventArgs e)
@@ -173,8 +173,14 @@ namespace S3PIDemoFE
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            if (contextMenuStrip1.Items.Count == 0) simple_btnAdd_Click(sender, e);
-            else contextMenuStrip1.Show((Control)sender, new Point(3, 3));
+            if (contextMenuStrip1.Items.Count == 0) simpleAddInsert(true);
+            else { contextMenuStrip1.Tag = "Add"; contextMenuStrip1.Show((Control)sender, new Point(3, 3)); }
+        }
+
+        private void btnInsert_Click(object sender, EventArgs e)
+        {
+            if (contextMenuStrip1.Items.Count == 0) simpleAddInsert(false);
+            else { contextMenuStrip1.Tag = "Insert"; contextMenuStrip1.Show((Control)sender, new Point(3, 3)); }
         }
 
         void contextMenuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -186,7 +192,10 @@ namespace S3PIDemoFE
             try
             {
                 fieldList.Add((type.GetCustomAttributes(typeof(ConstructorParametersAttribute), true)[0] as ConstructorParametersAttribute).parameters);
-                selectedIndex = fieldList.Count - 1;
+                if ("Add".Equals(contextMenuStrip1.Tag))
+                    selectedIndex = fieldList.Count - 1;
+                else
+                    doInsert();
             }
             catch (Exception ex)
             {
@@ -195,19 +204,30 @@ namespace S3PIDemoFE
             fillListBox(selectedIndex);
         }
 
-        private void simple_btnAdd_Click(object sender, EventArgs e)
+        private void simpleAddInsert(bool add)
         {
             int selectedIndex = listBox1.SelectedIndex;
             try
             {
                 fieldList.Add();
-                selectedIndex = fieldList.Count - 1;
+                if (add)
+                    selectedIndex = fieldList.Count - 1;
+                else
+                    doInsert();
             }
             catch(Exception ex)
             {
                 MainForm.IssueException(ex, "");
             }
             fillListBox(selectedIndex);
+        }
+
+        private void doInsert()
+        {
+            int selectedIndex = listBox1.SelectedIndex;
+            object added = fieldList[fieldList.Count - 1];
+            fieldList.RemoveAt(fieldList.Count - 1);
+            fieldList.Insert(selectedIndex, added);
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
