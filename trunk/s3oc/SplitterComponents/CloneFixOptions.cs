@@ -85,7 +85,7 @@ namespace ObjectCloner.SplitterComponents
         private void ckbClone_CheckedChanged(object sender, EventArgs e)
         {
             ckbDeepClone.Enabled = !ckbClone.Enabled && ckbClone.Checked;
-            if (!ckbDeepClone.Enabled) ckbDeepClone.Checked = false;
+            if (!ckbDeepClone.Enabled) ckbDeepClone.CheckState = CheckState.Indeterminate;// ckbDeepClone.Checked = false;
         }
 
         private void ckbRenumber_CheckedChanged(object sender, EventArgs e)
