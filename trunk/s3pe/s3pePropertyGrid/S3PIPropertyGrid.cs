@@ -1,5 +1,5 @@
 ﻿/***************************************************************************
- *  Copyright (C) 2009 by Peter L Jones                                    *
+ *  Copyright (C) 2011 by Peter L Jones                                    *
  *  pljones@users.sf.net                                                   *
  *                                                                         *
  *  This file is part of the Sims 3 Package Interface (s3pi)               *
@@ -364,6 +364,7 @@ namespace S3PIDemoFE
                         owner[index] = new TypedValue(value.GetType(), value);
                     else
                         ((IGenericAdd)owner[GetFieldName(Name)].Value)[Convert.ToInt32("0x" + index.Substring(1, index.Length - 2), 16)] = value;
+                    OnValueChanged(owner, EventArgs.Empty);
                 }
                 catch (Exception ex) { throw ex; }
             }
@@ -463,7 +464,7 @@ namespace S3PIDemoFE
             {
                 if (value != null && value.GetType().Equals(typeof(string)))
                 {
-                    string str = (string)value;
+                    string str = ((string)value).Trim();
                     try
                     {
                         AApiVersionedFieldsCTD.TypedValuePropertyDescriptor pd = (AApiVersionedFieldsCTD.TypedValuePropertyDescriptor)context.PropertyDescriptor;
@@ -547,7 +548,7 @@ namespace S3PIDemoFE
             {
                 if (value != null && value.GetType().Equals(typeof(string)))
                 {
-                    string str = (string)value;
+                    string str = ((string)value).Trim();
                     try
                     {
                         AApiVersionedFieldsCTD.TypedValuePropertyDescriptor pd = (AApiVersionedFieldsCTD.TypedValuePropertyDescriptor)context.PropertyDescriptor;
@@ -880,6 +881,7 @@ namespace S3PIDemoFE
                 public override void SetValue(object component, object value)
                 {
                     setFlags(owner, field, mask, (bool)value);
+                    OnValueChanged(owner, EventArgs.Empty);
                 }
 
                 public override bool ShouldSerializeValue(object component) { return false; }
@@ -894,6 +896,46 @@ namespace S3PIDemoFE
 
         public class IResourceKeyConverter : AApiVersionedFieldsCTD.AApiVersionedFieldsCTDConverter
         {
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
+                if (sourceType == typeof(string) || typeof(IResourceKey).IsAssignableFrom(sourceType))
+                    return true;
+                return base.CanConvertTo(context, sourceType);
+            }
+
+            public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+            {
+                AApiVersionedFieldsCTD.TypedValuePropertyDescriptor pd = (AApiVersionedFieldsCTD.TypedValuePropertyDescriptor)context.PropertyDescriptor;
+                IResourceKeyCTD rkCTD = (IResourceKeyCTD)pd.GetValue(null);
+                AApiVersionedFields owner = rkCTD.owner;
+                string field = rkCTD.field;
+                object component = rkCTD.component;
+                IResourceKey rk = (IResourceKey)AApiVersionedFieldsCTD.GetFieldValue(owner, field).Value;
+
+                if (typeof(IResourceKey).IsAssignableFrom(value.GetType()))
+                {
+                    IResourceKey rkNew = (IResourceKey)value;
+                    rk.ResourceType = rkNew.ResourceType;
+                    rk.ResourceGroup = rkNew.ResourceGroup;
+                    rk.Instance = rkNew.Instance;
+                    return rk;
+                }
+                if (value != null && value is string)
+                {
+                    if (AResourceKey.TryParse((string)value, rk))
+                        return rk;
+                    else
+                        throw new NotSupportedException("Invalid data: " + (string)value);
+                }
+                return base.ConvertFrom(context, culture, value);
+            }
+
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (destinationType.Equals(typeof(string))) return true;
+                return base.CanConvertTo(context, destinationType);
+            }
+
             public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
             {
                 if (destinationType.Equals(typeof(string)))
