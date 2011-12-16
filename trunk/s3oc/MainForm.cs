@@ -2604,6 +2604,9 @@ namespace ObjectCloner
                 }
                 else
                 {
+                    stepList.InsertRange(stepList.IndexOf(Catlg_getVPXYs), new Step[] {
+                        Catlg_IncludePresets,
+                    });
                 }
                 if (WantThumbs)
                     stepList.Add(SlurpThumbnails);
@@ -2636,7 +2639,6 @@ namespace ObjectCloner
                 {
                     stepList.InsertRange(stepList.IndexOf(OBJK_SlurpRKs), new Step[] {
                         OBJD_addOBJKref,
-                        Catlg_IncludePresets,
                         OBJD_SlurpDDSes,
                     });
                 }
@@ -2654,9 +2656,6 @@ namespace ObjectCloner
                 }
                 else
                 {
-                    stepList.InsertRange(stepList.IndexOf(Catlg_getVPXYs), new Step[] {
-                        Catlg_IncludePresets,
-                    });
                 }
                 if (WantThumbs)
                 {
@@ -2933,6 +2932,11 @@ namespace ObjectCloner
         void Catlg_IncludePresets()
         {
             Diagnostics.Log("Catlg_IncludePresets");
+            if (!selectedItem.Resource.ContentFields.Contains("Materials"))
+            {
+                Diagnostics.Log("Catlg_IncludePresets - field not found");
+                return;
+            }
             int i = 0;
             System.Collections.IEnumerable materials = (System.Collections.IEnumerable)selectedItem.Resource["Materials"].Value;
             foreach (CatalogResource.CatalogResource.Material material in materials)
