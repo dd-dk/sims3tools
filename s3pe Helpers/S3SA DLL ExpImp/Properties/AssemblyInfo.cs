@@ -5,12 +5,16 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("S3SA DLL ExpImp")]
-[assembly: AssemblyDescription("S3SA Assembly Export/Import helper")]
+[assembly: AssemblyTitle("s3pe S3SA Export/Import tool")]
+[assembly: AssemblyDescription("s3pe helper for export/import of Assemblies from/to S3SA resources")]
+#if DEBUG
+[assembly: AssemblyConfiguration("[DEBUG]")]
+#else
 [assembly: AssemblyConfiguration("")]
+#endif
 [assembly: AssemblyCompany("Peter L Jones")]
-[assembly: AssemblyProduct("S3SA DLL ExpImp")]
-[assembly: AssemblyCopyright("Copyright © 2011  Peter L Jones  Released under the GPL 3.0")]
+[assembly: AssemblyProduct("sims3tools")]
+[assembly: AssemblyCopyright("Copyright © 2011  Peter L Jones.  Released under GPL 3.  See gpl-3.0.txt")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

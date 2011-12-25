@@ -7,10 +7,14 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("GetClips")]
 [assembly: AssemblyDescription("")]
+#if DEBUG
+[assembly: AssemblyConfiguration("[DEBUG]")]
+#else
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyProduct("GetClips")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2011")]
+#endif
+[assembly: AssemblyCompany("Peter L Jones")]
+[assembly: AssemblyProduct("sims3tools")]
+[assembly: AssemblyCopyright("Copyright © 2011  Peter L Jones.  Released under GPL 3.  See gpl-3.0.txt")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

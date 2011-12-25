@@ -6,11 +6,15 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("s3pe OBJK Resource Editor")]
-[assembly: AssemblyDescription("A tool to make editing ObjKey resources easier")]
+[assembly: AssemblyDescription("s3pe helper for editing ObjKey resources")]
+#if DEBUG
+[assembly: AssemblyConfiguration("[DEBUG]")]
+#else
 [assembly: AssemblyConfiguration("")]
+#endif
 [assembly: AssemblyCompany("Peter L Jones")]
-[assembly: AssemblyProduct("s3pe OBJK Resource Editor")]
-[assembly: AssemblyCopyright("Copyright © 2009  Peter L Jones  Released under the GPL 3.0")]
+[assembly: AssemblyProduct("sims3tools")]
+[assembly: AssemblyCopyright("Copyright © 2011  Peter L Jones.  Released under GPL 3.  See gpl-3.0.txt")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
