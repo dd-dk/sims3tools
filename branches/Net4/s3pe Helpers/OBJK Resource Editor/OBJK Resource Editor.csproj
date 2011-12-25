@@ -101,7 +101,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="OBJKResourceEditor.helper" />
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Resources\s3pe.ico" />
   </ItemGroup>
   <ItemGroup>
