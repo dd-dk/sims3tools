@@ -985,24 +985,23 @@ namespace ObjectCloner
         {
             cbCASPClothingType.Items.Clear();
             cbCASPClothingType.Items.AddRange(Enum.GetNames(typeof(CASPartResource.ClothingType)));
-            clbCASPTypeFlags.Items.Clear();
-            clbCASPTypeFlags.Items.AddRange(Enum.GetNames(typeof(CASPartResource.DataTypeFlags)));
 
-            List<string> flags = new List<string>(Enum.GetNames(typeof(CASPartResource.AgeGenderFlags)));
-            flags.RemoveAt(0);
-            clbCASPAgeFlags.Items.Clear();
-            clbCASPGenderFlags.Items.Clear();
-            clbCASPSpeciesFlags.Items.Clear();
-            clbCASPHandedness.Items.Clear();
-            for (int i = 0; i < 8; i++) if (!flags[i].StartsWith("Unknown")) clbCASPAgeFlags.Items.Add(flags[i]);
-            for (int i = 8; i < 16; i++) if (!flags[i].StartsWith("Unknown")) clbCASPGenderFlags.Items.Add(flags[i]);
-            for (int i = 16; i < 20; i++) if (!flags[i].StartsWith("Unknown")) clbCASPSpeciesFlags.Items.Add(flags[i]);
-            for (int i = 20; i < 24; i++) if (!flags[i].StartsWith("Unknown")) clbCASPHandedness.Items.Add(flags[i]);
+            InitialiseCASPFlags(clbCASPTypeFlags, typeof(CASPartResource.DataTypeFlags));
+            InitialiseCASPFlags(clbCASPAgeFlags, typeof(CASPartResource.AgeFlags));
 
-            flags = new List<string>(Enum.GetNames(typeof(CASPartResource.ClothingCategoryFlags)));
-            flags.RemoveAt(0);
-            clbCASPCategory.Items.Clear();
-            clbCASPCategory.Items.AddRange(flags.FindAll(x => !x.StartsWith("Unknown")).ToArray());
+            cbCASPSpeciesType.Items.Clear();
+            cbCASPSpeciesType.Items.AddRange(Enum.GetNames(typeof(CASPartResource.SpeciesType)));
+
+            InitialiseCASPFlags(clbCASPGenderFlags, typeof(CASPartResource.GenderFlags));
+            InitialiseCASPFlags(clbCASPHandednessFlags, typeof(CASPartResource.HandednessFlags));
+            InitialiseCASPFlags(clbCASPCategory, typeof(CASPartResource.ClothingCategoryFlags));
+        }
+        void InitialiseCASPFlags(CheckedListBox clb, Type enumType)
+        {
+            clb.Items.Clear();
+            foreach (string name in Enum.GetNames(enumType))
+                if (!name.StartsWith("Unknown"))
+                    clb.Items.Add(name);
         }
 
         bool ffInitialised = false;
@@ -1197,9 +1196,9 @@ namespace ObjectCloner
             cbCASPClothingType.SelectedIndex = -1;
             for (int i = 0; i < clbCASPTypeFlags.Items.Count; i++) clbCASPTypeFlags.SetItemChecked(i, false);
             for (int i = 0; i < clbCASPAgeFlags.Items.Count; i++) clbCASPAgeFlags.SetItemChecked(i, false);
+            cbCASPSpeciesType.SelectedIndex = -1;
             for (int i = 0; i < clbCASPGenderFlags.Items.Count; i++) clbCASPGenderFlags.SetItemChecked(i, false);
-            for (int i = 0; i < clbCASPSpeciesFlags.Items.Count; i++) clbCASPSpeciesFlags.SetItemChecked(i, false);
-            for (int i = 0; i < clbCASPHandedness.Items.Count; i++) clbCASPHandedness.SetItemChecked(i, false);
+            for (int i = 0; i < clbCASPHandednessFlags.Items.Count; i++) clbCASPHandednessFlags.SetItemChecked(i, false);
             for (int i = 0; i < clbCASPCategory.Items.Count; i++) clbCASPCategory.SetItemChecked(i, false);
             tbCASPUnknown4.Text = "";
             tbCASPPackage.Text = "";
@@ -1363,24 +1362,22 @@ namespace ObjectCloner
             tbCASPUnknown4.Text = casp.Unknown4;
 
             cbCASPClothingType.SelectedIndex = Enum.IsDefined(typeof(CASPartResource.ClothingType), casp.Clothing) ? (int)casp.Clothing : -1;
-
-            IList<CASPartResource.DataTypeFlags> dtFlags = (CASPartResource.DataTypeFlags[])Enum.GetValues(typeof(CASPartResource.DataTypeFlags));
-            for (int i = 0; i < dtFlags.Count; i++) clbCASPTypeFlags.SetItemChecked(i, (casp.DataType & dtFlags[i]) != 0);
-
-            List<string> flags = new List<string>(Enum.GetNames(typeof(CASPartResource.AgeGenderFlags)));
-            flags.RemoveAt(0);
-            int j;
-            j = 0; for (int i = 0; i < 8; i++) if (!flags[i].StartsWith("Unknown")) clbCASPAgeFlags.SetItemChecked(j++, bitset((uint)casp.AgeGender, i));
-            j = 0; for (int i = 8; i < 16; i++) if (!flags[i].StartsWith("Unknown")) clbCASPGenderFlags.SetItemChecked(j++, bitset((uint)casp.AgeGender, i));
-            j = 0; for (int i = 16; i < 20; i++) if (!flags[i].StartsWith("Unknown")) clbCASPSpeciesFlags.SetItemChecked(j++, bitset((uint)casp.AgeGender, i));
-            j = 0; for (int i = 20; i < 24; i++) if (!flags[i].StartsWith("Unknown")) clbCASPHandedness.SetItemChecked(j++, bitset((uint)casp.AgeGender, i));
-
-
-            flags = new List<string>(Enum.GetNames(typeof(CASPartResource.ClothingCategoryFlags)));
-            flags.RemoveAt(0);
-            j = 0; for (int i = 0; i < flags.Count; i++) if (!flags[i].StartsWith("Unknown")) clbCASPCategory.SetItemChecked(j++, bitset((uint)casp.ClothingCategory, i));
+            fillCASPFlags(clbCASPTypeFlags, typeof(CASPartResource.DataTypeFlags), (uint)casp.DataType);
+            fillCASPFlags(clbCASPAgeFlags, typeof(CASPartResource.AgeFlags), (uint)casp.AgeGender.Age);
+            cbCASPSpeciesType.SelectedIndex = Enum.IsDefined(typeof(CASPartResource.SpeciesType), casp.AgeGender.Species) ? (int)casp.AgeGender.Species : -1;
+            fillCASPFlags(clbCASPAgeFlags, typeof(CASPartResource.GenderFlags), (uint)casp.AgeGender.Gender);
+            fillCASPFlags(clbCASPHandednessFlags, typeof(CASPartResource.HandednessFlags), (uint)casp.AgeGender.Handedness);
+            fillCASPFlags(clbCASPCategory, typeof(CASPartResource.ClothingCategoryFlags), (uint)casp.ClothingCategory);
         }
-        bool bitset(uint value, int bit) { return (value & (uint)Math.Pow(2, bit)) != 0; }
+        void fillCASPFlags(CheckedListBox clb, Type enumType, uint value)
+        {
+            string[] names = Enum.GetNames(enumType);
+
+            int index = 0;
+            for (int bit = 0; bit < names.Length; bit++)
+                if (!names[bit].StartsWith("Unknown")) clb.SetItemChecked(index++, bitset(value, bit));
+        }
+        bool bitset(uint value, int bit) { return (value & (1 << bit)) != 0; }
 
         void fillDetails(SpecificResource item) { IterateTLP(tlpObjectDetail, (l, c) => fillControl(item, l, c)); }
         void fillOther(SpecificResource item) { IterateTLP(tlpOther, (l, c) => fillControl(item, l, c)); }
@@ -1509,8 +1506,8 @@ namespace ObjectCloner
             clbCASPTypeFlags.Enabled = enabled;
             clbCASPAgeFlags.Enabled = enabled;
             clbCASPGenderFlags.Enabled = enabled;
-            clbCASPSpeciesFlags.Enabled = enabled;
-            clbCASPHandedness.Enabled = enabled;
+            cbCASPSpeciesType.Enabled = enabled;
+            clbCASPHandednessFlags.Enabled = enabled;
             clbCASPCategory.Enabled = enabled;
             tbCASPUnknown4.ReadOnly = !enabled;
             //tbCASPPackage.Text = "";
@@ -3448,15 +3445,20 @@ namespace ObjectCloner
                         foreach (var typeFlag in clbCASPTypeFlags.CheckedItems)
                             casp.DataType |= (CASPartResource.DataTypeFlags)Enum.Parse(typeof(CASPartResource.DataTypeFlags), typeFlag + "");
 
-                        casp.AgeGender = 0;
+                        casp.AgeGender.Age = 0;
                         foreach (var typeFlag in clbCASPAgeFlags.CheckedItems)
-                            casp.AgeGender |= (CASPartResource.AgeGenderFlags)Enum.Parse(typeof(CASPartResource.AgeGenderFlags), typeFlag + "");
+                            casp.AgeGender.Age |= (CASPartResource.AgeFlags)Enum.Parse(typeof(CASPartResource.AgeFlags), typeFlag + "");
+
+                        if (cbCASPSpeciesType.SelectedIndex != -1)
+                            casp.AgeGender.Species = (CASPartResource.SpeciesType)Enum.Parse(typeof(CASPartResource.SpeciesType), cbCASPSpeciesType.SelectedItem + "");
+
+                        casp.AgeGender.Gender = 0;
                         foreach (var typeFlag in clbCASPGenderFlags.CheckedItems)
-                            casp.AgeGender |= (CASPartResource.AgeGenderFlags)Enum.Parse(typeof(CASPartResource.AgeGenderFlags), typeFlag + "");
-                        foreach (var typeFlag in clbCASPSpeciesFlags.CheckedItems)
-                            casp.AgeGender |= (CASPartResource.AgeGenderFlags)Enum.Parse(typeof(CASPartResource.AgeGenderFlags), typeFlag + "");
-                        foreach (var typeFlag in clbCASPHandedness.CheckedItems)
-                            casp.AgeGender |= (CASPartResource.AgeGenderFlags)Enum.Parse(typeof(CASPartResource.AgeGenderFlags), typeFlag + "");
+                            casp.AgeGender.Gender |= (CASPartResource.GenderFlags)Enum.Parse(typeof(CASPartResource.GenderFlags), typeFlag + "");
+
+                        casp.AgeGender.Handedness = 0;
+                        foreach (var typeFlag in clbCASPHandednessFlags.CheckedItems)
+                            casp.AgeGender.Handedness |= (CASPartResource.HandednessFlags)Enum.Parse(typeof(CASPartResource.HandednessFlags), typeFlag + "");
 
                         casp.ClothingCategory = 0;
                         foreach (var typeFlag in clbCASPCategory.CheckedItems)
