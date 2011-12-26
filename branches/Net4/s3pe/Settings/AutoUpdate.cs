@@ -60,7 +60,7 @@ namespace AutoUpdate
                     xrs.IgnoreComments = true;
                     xrs.IgnoreProcessingInstructions = true;
                     xrs.IgnoreWhitespace = true;
-                    xrs.ProhibitDtd = false;
+                    xrs.DtdProcessing = DtdProcessing.Ignore;
                     xrs.ValidationType = ValidationType.None;
                     XmlReader xr = XmlReader.Create(url, xrs);
 
