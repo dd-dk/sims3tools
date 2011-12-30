@@ -153,7 +153,8 @@ namespace meshExpImp.Helper
             if (!int.TryParse(split[1], out count))
                 throw new InvalidDataException("'vbuf' line has invalid count.");
 
-            return r.Import_VBUF(mpb, count, vrtf);
+            //Wes's MilkShape plug-in sends back the first line in all subsequent lines of a dropShadow.
+            return r.Import_VBUF(mpb, count, vrtf, Program.UseFormat == Program.Format.s3asc && !mesh.IsShadowCaster);
         }
 
         void Import_IBUF_Main(StreamReader r, MLOD mlod, MLOD.Mesh mesh, IBUF ibuf)
@@ -234,7 +235,9 @@ namespace meshExpImp.Helper
 
             if (minVertexIndex != mesh.GeometryStates[geoStateIndex].MinVertexIndex)
                 throw new InvalidDataException(string.Format("geoState {0} 'vbuf' line has unexpected MinVertexIndex {1}; expected {2}.", geoStateIndex, minVertexIndex, mesh.GeometryStates[geoStateIndex].MinVertexIndex));
-            return r.Import_VBUF(mpb, vertexCount, vrtf);
+            //Wes's MilkShape plug-in sends back the first line in all subsequent lines of a dropShadow.
+            //Geostates aren't supported, so this must be Blender.
+            return r.Import_VBUF(mpb, vertexCount, vrtf, false);
         }
 
         void Import_IBUF_Geos(StreamReader r, MLOD mlod, MLOD.Mesh mesh, int geoStateIndex, IBUF ibuf)

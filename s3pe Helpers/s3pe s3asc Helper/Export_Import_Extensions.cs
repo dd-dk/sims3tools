@@ -264,7 +264,7 @@ namespace meshExpImp.Helper
             mpb.Done();
         }
 
-        public static meshExpImp.ModelBlocks.Vertex[] Import_VBUF(this StreamReader r, MyProgressBar mpb, int count, VRTF vrtf)
+        public static meshExpImp.ModelBlocks.Vertex[] Import_VBUF(this StreamReader r, MyProgressBar mpb, int count, VRTF vrtf, bool milkShapeFix)
         {
             meshExpImp.ModelBlocks.Vertex[] vertices = new meshExpImp.ModelBlocks.Vertex[count];
             int uvLength = vrtf.Layouts.FindAll(x => x.Usage == VRTF.ElementUsage.UV).Count;
@@ -304,6 +304,11 @@ namespace meshExpImp.Helper
                             break;
                         case (byte)VRTF.ElementUsage.UV:
                             vertex.UV[nUV++] = GetFloats(layout.Format, line, split.ConvertAll<Single>(2));
+                            //Wes's MilkShape plug-in sends back the first line in all subsequent lines of a dropShadow.
+                            //Usually the values should be zero, so zero them. Program.UseFormat == Program.Format.s3asc && 
+                            if (nUV > 1 && milkShapeFix)
+                                for (int u = 0; u < vertex.UV[nUV-1].Length; u++)
+                                    vertex.UV[nUV-1][u] = 0f;
                             break;
                         case (byte)VRTF.ElementUsage.BlendIndex:
                             byte[] BlendIndices = split.ConvertAll<byte>(2);
