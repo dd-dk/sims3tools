@@ -5,7 +5,6 @@ set base=%TargetName%
 rem -%ConfigurationName%
 set src=%TargetName%-Source
 
-
 set out=S:\Sims3\Tools\s3oc\
 set helpFolder=%out%HelpFiles
 
@@ -47,7 +46,6 @@ pushd ..
 7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" "s3oc"
 popd
 
-
 pushd bin\%ConfigurationName%
 echo %suffix% >%TargetName%-Version.txt
 attrib +r %TargetName%-Version.txt
@@ -57,7 +55,6 @@ xcopy "%helpFolder%\*" HelpFiles /s /i /y
 del /f %TargetName%-Version.txt
 del /f /q HelpFiles
 popd
-
 
 7za x -o"%base%-%suffix%" "%out%%base%_%suffix%.7z"
 pushd "%base%-%suffix%"
@@ -93,8 +90,8 @@ popd
 
 "%MAKENSIS%" "/DINSTFILES=INSTFILES.txt" "/DUNINSTFILES=UNINST.LOG" "/DVSN=%suffix%" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%.exe"
 
-:done:
 rmdir /s/q %base%-%suffix%
 del INSTFILES.txt
+
 :noNSIS:
 pause
