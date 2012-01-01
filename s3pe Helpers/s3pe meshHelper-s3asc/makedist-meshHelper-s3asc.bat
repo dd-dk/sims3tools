@@ -1,5 +1,5 @@
 @echo off
-set TargetName=meshExpImpHelper
+set TargetName=meshHelper-s3asc
 set ConfigurationName=Release
 set base=%TargetName%
 rem -%ConfigurationName%
@@ -43,16 +43,24 @@ rem there shouldn't be any to delete...
 del /q /f %out%%TargetName%*%suffix%.*
 
 pushd ..
-7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config -xr!*.csproj.user "%out%%src%_%suffix%.7z" "s3pe s3asc Helper"
+7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config -xr!*.csproj.user "%out%%src%_%suffix%.7z" "s3pe meshHelper-s3asc"
 popd
 
 pushd bin\%ConfigurationName%
 echo %suffix% >%TargetName%-Version.txt
 attrib +r %TargetName%-Version.txt
-
-
-7za a -r -t7z -mx9 -ms -xr!.?* -xr!*vshost* -xr!*.Config -xr!*.xml %pdb% "%out%%base%_%suffix%.7z" *
+7za a -r -t7z -mx9 -ms -xr!.?* -xr!*vshost* -xr!*.Config -xr!*.xml -xr!Helpers %pdb% ..\bin.7z *
 del /f %TargetName%-Version.txt
+
+cd ..
+mkdir Helpers
+copy %ConfigurationName%\Helpers\. Helpers\
+7za x -o"Helpers\%TargetName%" bin.7z
+del bin.7z
+cd Helpers
+7za a -r -t7z -mx9 -ms "%out%%base%_%suffix%.7z" .
+cd ..
+rmdir /s/q Helpers
 
 popd
 
@@ -61,14 +69,9 @@ pushd "%base%-%suffix%"
 (
 echo !cd %base%-%suffix%
 for %%f in (*) do echo File /a %%f
-
-
-
-
-
-pushd Helpers
-echo SetOutPath $INSTDIR\Helpers
-for %%f in (*) do echo File /a Helpers\%%f
+pushd %TargetName%
+echo SetOutPath $INSTDIR\%TargetName%
+for %%f in (*) do echo File /a %TargetName%\%%f
 echo SetOutPath $INSTDIR
 popd
 dir /-c "..\%base%-%suffix%" | find " bytes" | for /f "tokens=3" %%f in ('find /v " free"') do @echo StrCpy $0 %%f
@@ -76,13 +79,9 @@ dir /-c "..\%base%-%suffix%" | find " bytes" | for /f "tokens=3" %%f in ('find /
 
 (
 for %%f in (*) do echo Delete $INSTDIR\%%f
-
-
-
-
-pushd Helpers
-for %%f in (*) do echo Delete $INSTDIR\Helpers\%%f
-echo RmDir Helpers
+pushd %TargetName%
+for %%f in (*) do echo Delete $INSTDIR\%TargetName%\%%f
+echo RmDir %TargetName%
 popd
 ) > UNINST.LOG
 attrib +r +h UNINST.LOG

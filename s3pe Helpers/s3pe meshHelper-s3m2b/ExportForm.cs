@@ -36,10 +36,9 @@ namespace meshExpImp.Helper
         {
             InitializeComponent();
 
-            sfdExport.Filter = Program.GetFilter();
-            sfdExport.FileName = string.Format("{0}_filebase.{1}",
-                Program.UseFormat == Program.Format.s3m2b ? Program.GetShortName() : Program.Filename,
-                Program.GetExtension());
+            sfdExport.Filter = "s3m2b base files|*_filebase.s3m2b|All files|*.*";
+            sfdExport.FileName = string.Format("{0}_filebase.s3m2b",
+                Program.GetShortName());
         }
 
         Stream stream;
@@ -70,7 +69,7 @@ namespace meshExpImp.Helper
 
                 try
                 {
-                    using (FileStream fs = new FileStream(Path.Combine(folder, string.Format("{0}_filebase.{1}", filebase, Program.GetExtension())), FileMode.Create, FileAccess.Write))
+                    using (FileStream fs = new FileStream(Path.Combine(folder, string.Format("{0}_filebase.s3m2b", filebase)), FileMode.Create, FileAccess.Write))
                     {
                         fs.Close();
                     }
@@ -111,7 +110,7 @@ namespace meshExpImp.Helper
 
                     for (int m = 0; m < mlod.Meshes.Count; m++)
                     {
-                        string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.{2}g", filebase, m, Program.GetExtension()));
+                        string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.s3m2bg", filebase, m));
 
                         using (FileStream fsMesh = new FileStream(fnMesh, FileMode.Create, FileAccess.Write))
                         {

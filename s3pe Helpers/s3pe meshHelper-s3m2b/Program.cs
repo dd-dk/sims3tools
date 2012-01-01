@@ -27,11 +27,6 @@ namespace meshExpImp.Helper
 {
     static class Program
     {
-        public enum Format
-        {
-            s3asc,
-            s3m2b,
-        }
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -39,27 +34,6 @@ namespace meshExpImp.Helper
         static int Main(params string[] args)
         {
             List<string> largs = new List<string>(args);
-
-            UseFormat = Format.s3asc;
-            int index = largs.IndexOf("/format");
-            if (index >= 0)
-            {
-                largs.Remove("/format");
-                if (index < largs.Count)
-                {
-                    string fmt = largs[index];
-                    if (new List<string>(Enum.GetNames(typeof(Format))).Contains(fmt))
-                    {
-                        UseFormat = (Format)Enum.Parse(typeof(Format), fmt);
-                        largs.RemoveAt(index);
-                    }
-                    else
-                    {
-                        CopyableMessageBox.Show("Unrecognised format '" + fmt + "'.", Application.ProductName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
-                        Environment.Exit(1);
-                    }
-                }
-            }
 
             bool export = largs.Contains("/export");
             if (export) largs.Remove("/export");
@@ -95,7 +69,6 @@ namespace meshExpImp.Helper
         }
 
         public static string Filename { get; private set; }
-        public static Format UseFormat { get; private set; }
         public static string GetShortName()
         {
             //S3_01661233_00000001_0000000000D0F4DF_doorSingleTransomContemporary%%+MODL.model
@@ -108,7 +81,5 @@ namespace meshExpImp.Helper
             }
             return Filename;
         }
-        public static string GetExtension() { return UseFormat.ToString(); }
-        public static string GetFilter() { return string.Format("{0} base files|*_filebase.{0}|All files|*.*", GetExtension()); }
     }
 }

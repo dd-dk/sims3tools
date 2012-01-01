@@ -35,10 +35,9 @@ namespace meshExpImp.Helper
         {
             InitializeComponent();
 
-            ofdImport.Filter = Program.GetFilter();
-            ofdImport.FileName = string.Format("{0}_filebase.{1}",
-                Program.UseFormat == Program.Format.s3m2b ? Program.GetShortName() : Program.Filename,
-                Program.GetExtension());
+            ofdImport.Filter = "s3m2b base files|*_filebase.s3m2b|All files|*.*";
+            ofdImport.FileName = string.Format("{0}_filebase.s3m2b",
+                Program.GetShortName());
         }
 
         Stream stream;
@@ -67,9 +66,9 @@ namespace meshExpImp.Helper
                 string folder = Path.GetDirectoryName(ofdImport.FileName);
                 string filebase = Path.GetFileNameWithoutExtension(ofdImport.FileName).Replace("_filebase", "");
 
-                if (!File.Exists(Path.Combine(folder, string.Format("{0}_filebase.{1}", filebase, Program.GetExtension()))))
+                if (!File.Exists(Path.Combine(folder, string.Format("{0}_filebase.s3m2b", filebase))))
                 {
-                    CopyableMessageBox.Show("File name must end \"_filebase." + Program.GetExtension() + "\"",
+                    CopyableMessageBox.Show("File name must end \"_filebase.s3m2b\"",
                         "Base file not found", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
                     Environment.ExitCode = 1;
                     return;
@@ -137,7 +136,7 @@ namespace meshExpImp.Helper
                     List<List<meshExpImp.ModelBlocks.Vertex[]>> llverts = new List<List<meshExpImp.ModelBlocks.Vertex[]>>();
                     while (true)
                     {
-                        string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.{2}g", filebase, m, Program.GetExtension()));
+                        string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.s3m2bg", filebase, m));
                         if (!File.Exists(fnMesh)) break;
 
                         using (FileStream fsMesh = new FileStream(fnMesh, FileMode.Open, FileAccess.Read))

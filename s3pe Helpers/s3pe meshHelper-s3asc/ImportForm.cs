@@ -35,10 +35,9 @@ namespace meshExpImp.Helper
         {
             InitializeComponent();
 
-            ofdImport.Filter = Program.GetFilter();
-            ofdImport.FileName = string.Format("{0}_filebase.{1}",
-                Program.UseFormat == Program.Format.s3m2b ? Program.GetShortName() : Program.Filename,
-                Program.GetExtension());
+            ofdImport.Filter = "s3asc base files|*_filebase.s3asc|All files|*.*";
+            ofdImport.FileName = string.Format("{0}_filebase.s3asc",
+                Program.Filename);
         }
 
         Stream stream;
@@ -67,9 +66,9 @@ namespace meshExpImp.Helper
                 string folder = Path.GetDirectoryName(ofdImport.FileName);
                 string filebase = Path.GetFileNameWithoutExtension(ofdImport.FileName).Replace("_filebase", "");
 
-                if (!File.Exists(Path.Combine(folder, string.Format("{0}_filebase.{1}", filebase, Program.GetExtension()))))
+                if (!File.Exists(Path.Combine(folder, string.Format("{0}_filebase.s3asc", filebase))))
                 {
-                    CopyableMessageBox.Show("File name must end \"_filebase." + Program.GetExtension() + "\"",
+                    CopyableMessageBox.Show("File name must end \"_filebase.s3asc\"",
                         "Base file not found", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
                     Environment.ExitCode = 1;
                     return;
@@ -134,24 +133,21 @@ namespace meshExpImp.Helper
 
                     int m = 0;
                     List<meshExpImp.ModelBlocks.Vertex[]> lmverts = new List<meshExpImp.ModelBlocks.Vertex[]>();
-                    List<List<meshExpImp.ModelBlocks.Vertex[]>> llverts = new List<List<meshExpImp.ModelBlocks.Vertex[]>>();
                     while (true)
                     {
-                        string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.{2}g", filebase, m, Program.GetExtension()));
+                        string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.s3ascg", filebase, m));
                         if (!File.Exists(fnMesh)) break;
 
                         using (FileStream fsMesh = new FileStream(fnMesh, FileMode.Open, FileAccess.Read))
                         {
                             meshExpImp.ModelBlocks.Vertex[] mverts;
-                            List<meshExpImp.ModelBlocks.Vertex[]> lverts;
-                            import.Import_Mesh(new StreamReader(fsMesh), mlod.Meshes[m++], rcolResource, mlod, rk, out mverts, out lverts);
+                            import.Import_Mesh(new StreamReader(fsMesh), mlod.Meshes[m++], rcolResource, mlod, rk, out mverts);
                             lmverts.Add(mverts);
-                            llverts.Add(lverts);
                             fsMesh.Close();
                         }
                     }
 
-                    List<Import.offScale> offScales = import.VertsToVBUFs(rcolResource, mlod, rk, lmverts, llverts, updateBBs, updateUVs);
+                    List<Import.offScale> offScales = import.VertsToVBUFs(rcolResource, mlod, rk, lmverts, updateBBs, updateUVs);
                     if (offScales.Count > 0)
                     {
                         while (true)
