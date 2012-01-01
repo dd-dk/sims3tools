@@ -2006,7 +2006,7 @@ namespace ObjectCloner
         private void helpAbout()
         {
             string copyright = "\n" +
-                this.Text + "  Copyright (C) 2009  Peter L Jones\n" +
+                myName + "  Copyright (C) 2012  Peter L Jones\n" +
                 "\n" +
                 "This program comes with ABSOLUTELY NO WARRANTY; for details see Help->Warranty.\n" +
                 "\n" +
@@ -2017,30 +2017,16 @@ namespace ObjectCloner
                 "Front-end Distribution: {1}\n" +
                 "Library Distribution: {2}"
                 , copyright
-                , getVersion(typeof(MainForm), "s3oc")
-                , getVersion(typeof(s3pi.Interfaces.AApiVersionedFields), "s3oc")
-                ), this.Text);
-        }
-
-        private string getVersion(Type type, string p)
-        {
-            string s = getString(Path.Combine(Path.GetDirectoryName(type.Assembly.Location), p + "-Version.txt"));
-            return s == null ? "Unknown" : s;
-        }
-
-        private string getString(string file)
-        {
-            if (!File.Exists(file)) return null;
-            FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read);
-            StreamReader t = new StreamReader(fs);
-            return t.ReadLine();
+                , AutoUpdate.Version.CurrentVersion
+                , AutoUpdate.Version.LibraryVersion
+                ), myName);
         }
 
         private void helpUpdate()
         {
             bool msgDisplayed = AutoUpdate.Checker.GetUpdate(false);
             if (!msgDisplayed)
-                CopyableMessageBox.Show("Your " + Application.ProductName + " is up to date", this.Text,
+                CopyableMessageBox.Show("Your " + System.Configuration.PortableSettingsProvider.ExecutableName + " is up to date", myName,
                     CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
         }
 
