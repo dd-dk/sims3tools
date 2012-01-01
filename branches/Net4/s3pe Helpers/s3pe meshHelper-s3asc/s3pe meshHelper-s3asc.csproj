@@ -9,7 +9,7 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>meshExpImp.Helper</RootNamespace>
-    <AssemblyName>meshExpImp</AssemblyName>
+    <AssemblyName>meshHelper-s3asc</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -53,6 +53,9 @@
     </Reference>
     <Reference Include="s3pi.Interfaces">
       <HintPath>..\..\s3pi\build\bin\Release\s3pi.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.MeshChunks">
+      <HintPath>..\..\s3pi\build\bin\Release\s3pi.MeshChunks.dll</HintPath>
     </Reference>
     <Reference Include="s3pi.RCOLChunks">
       <HintPath>..\..\s3pi\build\bin\Release\s3pi.RCOLChunks.dll</HintPath>
@@ -109,21 +112,9 @@
     <Content Include="Helpers\s3ascImport.helper">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Helpers\s3m2bExport.helper">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Helpers\s3m2bImport.helper">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="readme.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\s3pi Wrappers\meshExpImp.ModelBlocks\meshExpImp.ModelBlocks.csproj">
-      <Project>{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}</Project>
-      <Name>meshExpImp.ModelBlocks</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

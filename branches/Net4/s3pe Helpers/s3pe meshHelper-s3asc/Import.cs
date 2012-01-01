@@ -35,7 +35,7 @@ namespace meshExpImp.Helper
         //--
 
 
-        public void Import_Mesh(StreamReader r, MLOD.Mesh mesh, GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, out meshExpImp.ModelBlocks.Vertex[] mverts, out List<meshExpImp.ModelBlocks.Vertex[]> lverts)
+        public void Import_Mesh(StreamReader r, MLOD.Mesh mesh, GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, out meshExpImp.ModelBlocks.Vertex[] mverts)
         {
             #region Import VRTF
             bool isDefaultVRTF = false;
@@ -96,11 +96,8 @@ namespace meshExpImp.Helper
             rcolResource.ReplaceChunk(mesh, "IndexBufferIndex", ibufRK, ibuf);
             #endregion
 
-            // This reads both VBUF Vertex[]s and the ibufs; but the ibufs just go straight in quite happily
-            lverts = Import_MeshGeoStates(r, mlod, mesh, vrtf, isDefaultVRTF, ibuf);
-
             #region Update the JointReferences
-            UIntList joints = CreateJointReferences(mesh, mverts, lverts ?? new List<meshExpImp.ModelBlocks.Vertex[]>(), skin);
+            UIntList joints = CreateJointReferences(mesh, mverts, skin);
 
             List<uint> added = new List<uint>(joints);
             List<uint> removed = new List<uint>();
@@ -141,7 +138,7 @@ namespace meshExpImp.Helper
         }
 
 
-        meshExpImp.ModelBlocks.Vertex[] Import_VBUF_Main(StreamReader r, MLOD mlod, MLOD.Mesh mesh, VRTF vrtf, bool isDefaultVRTF)
+        ModelBlocks.Vertex[] Import_VBUF_Main(StreamReader r, MLOD mlod, MLOD.Mesh mesh, VRTF vrtf, bool isDefaultVRTF)
         {
             string tagLine = r.ReadTag();
             string[] split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
@@ -154,7 +151,7 @@ namespace meshExpImp.Helper
                 throw new InvalidDataException("'vbuf' line has invalid count.");
 
             //Wes's MilkShape plug-in sends back the first line in all subsequent lines of a dropShadow.
-            return r.Import_VBUF(mpb, count, vrtf, Program.UseFormat == Program.Format.s3asc && !mesh.IsShadowCaster);
+            return r.Import_VBUF(mpb, count, vrtf, !mesh.IsShadowCaster);
         }
 
         void Import_IBUF_Main(StreamReader r, MLOD mlod, MLOD.Mesh mesh, IBUF ibuf)
@@ -172,106 +169,18 @@ namespace meshExpImp.Helper
             ibuf.SetIndices(mlod, mesh, r.Import_IBUF(mpb, MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType), count));
         }
 
-        List<meshExpImp.ModelBlocks.Vertex[]> Import_MeshGeoStates(StreamReader r, MLOD mlod, MLOD.Mesh mesh, VRTF vrtf, bool isDefaultVRTF, IBUF ibuf)
-        {
-            MLOD.GeometryStateList oldGeos = new MLOD.GeometryStateList(null, mesh.GeometryStates);
-            r.Import_GEOS(mpb, mesh);
-            if (mesh.GeometryStates.Count <= 0) return null;
-
-            List<meshExpImp.ModelBlocks.Vertex[]> lverts = new List<meshExpImp.ModelBlocks.Vertex[]>();
-            for (int g = 0; g < mesh.GeometryStates.Count; g++)
-            {
-                lverts.Add(Import_VBUF_Geos(r, mlod, mesh, g, vrtf, isDefaultVRTF));
-                Import_IBUF_Geos(r, mlod, mesh, g, ibuf);
-            }
-            return lverts;
-        }
-
-        UIntList CreateJointReferences(MLOD.Mesh mesh, meshExpImp.ModelBlocks.Vertex[] mverts, List<meshExpImp.ModelBlocks.Vertex[]> lverts, SKIN skin)
+        UIntList CreateJointReferences(MLOD.Mesh mesh, ModelBlocks.Vertex[] mverts, SKIN skin)
         {
             if (skin == null || skin.Bones == null) return new UIntList(null);
 
             int maxReference = -1;
 
-            lverts.Insert(0, mverts);
-            foreach (var vertices in lverts)
-                if (vertices != null) foreach (var vert in vertices)
-                        if (vert.BlendIndices != null)
-                            foreach (var reference in vert.BlendIndices)
-                                if ((sbyte)reference > maxReference) maxReference = reference;
-            lverts.Remove(mverts);
+            foreach (var vert in mverts)
+                if (vert.BlendIndices != null)
+                    foreach (var reference in vert.BlendIndices)
+                        if ((sbyte)reference > maxReference) maxReference = reference;
 
             return maxReference > -1 ? new UIntList(null, skin.Bones.GetRange(0, maxReference + 1).ConvertAll<uint>(x => x.NameHash)) : new UIntList(null);
-        }
-
-
-        meshExpImp.ModelBlocks.Vertex[] Import_VBUF_Geos(StreamReader r, MLOD mlod, MLOD.Mesh mesh, int geoStateIndex, VRTF vrtf, bool isDefaultVRTF)
-        {
-            //w.WriteLine(string.Format("vbuf {0} {1} {2}", geoStateIndex, mesh.GeometryStates[geoStateIndex].MinVertexIndex, mesh.GeometryStates[geoStateIndex].VertexCount));
-            string tagLine = r.ReadTag();
-            string[] split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
-            if (split.Length != 4)
-                throw new InvalidDataException(string.Format("Invalid tag line read for geoState {0} 'vbuf'.", geoStateIndex));
-            if (split[0] != "vbuf")
-                throw new InvalidDataException("Expected line tag 'vbuf' not found.");
-            int lineIndex;
-            if (!int.TryParse(split[1], out lineIndex))
-                throw new InvalidDataException(string.Format("geoState {0} 'vbuf' line has invalid geoStateIndex.", geoStateIndex));
-            if (lineIndex != geoStateIndex)
-                throw new InvalidDataException(string.Format("geoState {0} 'vbuf' line has incorrect geoStateIndex value {1}.", geoStateIndex, lineIndex));
-            int minVertexIndex;
-            if (!int.TryParse(split[2], out minVertexIndex))
-                throw new InvalidDataException(string.Format("geoState {0} 'vbuf' line has invalid MinVertexIndex.", geoStateIndex));
-            int vertexCount;
-            if (!int.TryParse(split[3], out vertexCount))
-                throw new InvalidDataException(string.Format("geoState {0} 'vbuf' line has invalid VertexCount.", geoStateIndex));
-
-            if (minVertexIndex + vertexCount <= mesh.MinVertexIndex + mesh.VertexCount)
-            {
-                mesh.GeometryStates[geoStateIndex].MinVertexIndex = minVertexIndex;
-                mesh.GeometryStates[geoStateIndex].VertexCount = vertexCount;
-                return null;
-            }
-
-            if (minVertexIndex != mesh.GeometryStates[geoStateIndex].MinVertexIndex)
-                throw new InvalidDataException(string.Format("geoState {0} 'vbuf' line has unexpected MinVertexIndex {1}; expected {2}.", geoStateIndex, minVertexIndex, mesh.GeometryStates[geoStateIndex].MinVertexIndex));
-            //Wes's MilkShape plug-in sends back the first line in all subsequent lines of a dropShadow.
-            //Geostates aren't supported, so this must be Blender.
-            return r.Import_VBUF(mpb, vertexCount, vrtf, false);
-        }
-
-        void Import_IBUF_Geos(StreamReader r, MLOD mlod, MLOD.Mesh mesh, int geoStateIndex, IBUF ibuf)
-        {
-            //w.WriteLine(string.Format("ibuf {0} {1} {2}", geoStateIndex, mesh.GeometryStates[geoStateIndex].StartIndex, mesh.GeometryStates[geoStateIndex].PrimitiveCount));
-            string tagLine = r.ReadTag();
-            string[] split = tagLine.Split(new char[] { ' ', }, StringSplitOptions.RemoveEmptyEntries);
-            if (split.Length != 4)
-                throw new InvalidDataException("Invalid tag line read for 'ibuf'.");
-            if (split[0] != "ibuf")
-                throw new InvalidDataException("Expected line tag 'ibuf' not found.");
-            int lineIndex;
-            if (!int.TryParse(split[1], out lineIndex))
-                throw new InvalidDataException(string.Format("geoState {0} 'ibuf' line has invalid geoStateIndex.", geoStateIndex));
-            if (lineIndex != geoStateIndex)
-                throw new InvalidDataException(string.Format("geoState {0} 'ibuf' line has incorrect geoStateIndex value {1}.", geoStateIndex, lineIndex));
-            int startIndex;
-            if (!int.TryParse(split[2], out startIndex))
-                throw new InvalidDataException(string.Format("geoState {0} 'ibuf' line has invalid StartIndex.", geoStateIndex));
-            int primitiveCount;
-            if (!int.TryParse(split[3], out primitiveCount))
-                throw new InvalidDataException(string.Format("geoState {0} 'ibuf' line has invalid PrimitiveCount.", geoStateIndex));
-
-            int sizePerPrimitive = MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType);
-            if (startIndex + primitiveCount * sizePerPrimitive <= mesh.StartIndex + mesh.PrimitiveCount * sizePerPrimitive)
-            {
-                mesh.GeometryStates[geoStateIndex].StartIndex = startIndex;
-                mesh.GeometryStates[geoStateIndex].PrimitiveCount = primitiveCount;
-                return;
-            }
-
-            if (startIndex != mesh.GeometryStates[geoStateIndex].StartIndex)
-                throw new InvalidDataException(string.Format("geoState {0} 'ibuf' line has unexpected StartIndex {1}; expected {2}.", geoStateIndex, startIndex, mesh.GeometryStates[geoStateIndex].StartIndex));
-            ibuf.SetIndices(mlod, mesh, geoStateIndex, r.Import_IBUF(mpb, MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType), primitiveCount));
         }
 
 
@@ -291,7 +200,7 @@ namespace meshExpImp.Helper
                 return String.Format("MeshGroup: {0}" + (geoState >= 0 ? " (Geo: {5})" : "") + "; Vertex[{1}].UV[{2}]: {3}; Max: {4} (from UVScales)", meshGroup, vertex, nUV, actual, max, geoState);
             }
         }
-        public List<offScale> VertsToVBUFs(GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, List<meshExpImp.ModelBlocks.Vertex[]> lmverts, List<List<meshExpImp.ModelBlocks.Vertex[]>> llverts, bool updateBBs, bool updateUVs)
+        public List<offScale> VertsToVBUFs(GenericRCOLResource rcolResource, MLOD mlod, IResourceKey defaultRK, List<meshExpImp.ModelBlocks.Vertex[]> lmverts, bool updateBBs, bool updateUVs)
         {
             // List of UV elements going off scale
             List<offScale> offScales = new List<offScale>();
@@ -323,14 +232,6 @@ namespace meshExpImp.Helper
 
                     offScales.AddRange(getOffScales(m, -1, lmverts[m], meshUVScales[m]));
                     vbuf.SetVertices(mlod, m, meshVRTF[m], lmverts[m], meshUVScales[m]);
-
-                    if (llverts[m] != null)
-                        for (int g = 0; g < llverts[m].Count; g++)
-                            if (llverts[m][g] != null)
-                            {
-                                offScales.AddRange(getOffScales(m, g, llverts[m][g], meshUVScales[m]));
-                                vbuf.SetVertices(mlod, mlod.Meshes[m], g, meshVRTF[m], llverts[m][g], meshUVScales[m]);
-                            }
 
                     IResourceKey vbufRK = GenericRCOLResource.ChunkReference.GetKey(rcolResource, mlod.Meshes[m].VertexBufferIndex);
                     if (vbufRK == null)//means we created the VBUF: create a RK and add it

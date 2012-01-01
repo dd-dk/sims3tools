@@ -35,13 +35,6 @@ namespace meshExpImp.Helper
         {
             float[] uvScales = rcolResource.GetUVScales(mesh);
 
-            if (mesh.GeometryStates.Count > 0)
-            {
-                w.WriteLine(";");
-                w.WriteLine("; Extended format: GeoStates follow IBUF");
-                w.WriteLine(";");
-            }
-
             VRTF vrtf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mesh.VertexFormatIndex) as VRTF;
             bool isDefault = vrtf == null;
             if (isDefault)
@@ -54,11 +47,6 @@ namespace meshExpImp.Helper
             w.Export_SKIN(mpb, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mesh.SkinControllerIndex) as SKIN, mesh);
             Export_VBUF_Main(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mesh.VertexBufferIndex) as VBUF, vrtf, uvScales, mesh);
             Export_IBUF_Main(w, GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mesh.IndexBufferIndex) as IBUF, mesh);
-
-            //For backward compatibility, these come after the IBUFs
-            Export_MeshGeoStates(w, vrtf, uvScales, mlod, mesh,
-                GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mesh.VertexBufferIndex) as VBUF,
-                GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mesh.IndexBufferIndex) as IBUF);
         }
 
 
@@ -78,57 +66,6 @@ namespace meshExpImp.Helper
 
             w.WriteLine(string.Format("ibuf {0}", mesh.PrimitiveCount));
             w.Export_IBUF(mpb, ibuf.GetIndices(mesh), MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType), mesh.PrimitiveCount);
-        }
-
-        void Export_MeshGeoStates(StreamWriter w, VRTF vrtf, float[] uvScales, MLOD mlod, MLOD.Mesh mesh, VBUF vbuf, IBUF ibuf)
-        {
-            if (mesh.GeometryStates.Count <= 0) return;
-
-            w.WriteLine(";");
-            w.WriteLine("; Extended format: GeoStates");
-            w.WriteLine(";");
-
-            w.Export_GEOS(mpb, mesh);
-
-            for (int g = 0; g < mesh.GeometryStates.Count; g++)
-            {
-                Export_VBUF_Geos(w, vbuf, vrtf, uvScales, mesh, g);
-                Export_IBUF_Geos(w, ibuf, mesh, vrtf, g);
-            }
-
-            w.Flush();
-        }
-
-
-        bool geosIsContained(MLOD.GeometryState geoState, MLOD.Mesh mesh)
-        {
-            return geoState.MinVertexIndex + geoState.VertexCount <= mesh.MinVertexIndex + mesh.VertexCount;
-        }
-        void Export_VBUF_Geos(StreamWriter w, VBUF vbuf, VRTF vrtf, float[] uvScales, MLOD.Mesh mesh, int geoStateIndex)
-        {
-            if (vbuf == null) { w.WriteLine("; vbuf is null for geoState"); w.WriteLine(string.Format("vbuf {0} 0 0", geoStateIndex)); return; }
-
-            MLOD.GeometryState geoState = mesh.GeometryStates[geoStateIndex];
-            meshExpImp.ModelBlocks.Vertex[] av = vbuf.GetVertices(mesh, vrtf, geoState, uvScales);
-
-            if (geosIsContained(geoState, mesh)) w.WriteLine("; vbuf is contained within main mesh");
-            w.WriteLine(string.Format("vbuf {0} {1} {2}", geoStateIndex, geoState.MinVertexIndex, geoState.VertexCount));
-            if (geosIsContained(geoState, mesh)) return;
-
-            w.Export_VBUF(mpb, av, vrtf);
-        }
-
-        void Export_IBUF_Geos(StreamWriter w, IBUF ibuf, MLOD.Mesh mesh, VRTF vrtf, int geoStateIndex)
-        {
-            if (ibuf == null) { w.WriteLine("; ibuf is null for geoState"); w.WriteLine(string.Format("ibuf {0} 0 0", geoStateIndex)); return; }
-
-            int sizePerPrimitive = MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType);
-            MLOD.GeometryState geoState = mesh.GeometryStates[geoStateIndex];
-
-            w.WriteLine(string.Format("ibuf {0} {1} {2}", geoStateIndex, geoState.StartIndex, geoState.PrimitiveCount));
-            if (geoState.StartIndex + geoState.PrimitiveCount * sizePerPrimitive <= mesh.StartIndex + mesh.PrimitiveCount * sizePerPrimitive) return;
-
-            w.Export_IBUF(mpb, ibuf.GetIndices(mesh, vrtf, geoStateIndex), sizePerPrimitive, geoState.PrimitiveCount);
         }
     }
 }

@@ -1,7 +1,7 @@
 ;!include "MUI.nsh"
 
 
-!define tla "meshExpImp"
+!define tla "meshHelper-s3m2b"
 !ifndef INSTFILES
   !error "Caller didn't define INSTFILES"
 !endif
@@ -21,7 +21,7 @@ Var wantAll
 
 
 InstallDir $PROGRAMFILES64\${tla}
-!define PROGRAM_NAME "s3pe Mesh Export/Import Helper"
+!define PROGRAM_NAME "s3pe meshHelper for Blender"
 !define INSTREGKEY "${tla}"
 
 !define EXE ${tla}.exe
@@ -116,11 +116,22 @@ Function GetInstDir
   Push $0
   ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
   StrCmp $0 "" gidNotCU
-  IfFileExists "$0${EXE}" gidSetINSTDIR
+  IfFileExists "$0\${tla}\${EXE}" gidSetINSTDIR
 gidNotCU:
   ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
+  StrCmp $0 "" gidNotLM
+  IfFileExists "$0\${tla}\${EXE}" gidSetINSTDIR
+gidNotLM:
+  ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\s3pe" "InstallLocation"
+  StrCmp $0 "" gidNotCUs3pe
+  IfFileExists "$0\s3pe.exe" gidSetINSTDIRSub
+gidNotCUs3pe:
+  ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\s3pe" "InstallLocation"
   StrCmp $0 "" gidDone
-  IfFileExists "$0${EXE}" gidSetINSTDIR gidDone
+  IfFileExists "$0\s3pe.exe" gidSetINSTDIRSub gidDone
+gidSetINSTDIRSub:
+  StrCpy $INSTDIR $0\Helpers
+  Goto gidDone
 gidSetINSTDIR:
   StrCpy $INSTDIR $0
 gidDone:
@@ -155,6 +166,12 @@ Function CheckOldVersion
   StrCmp $R0 "" covNotCU covFound
 covNotCU:
   ReadRegStr $R0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "UninstallString"
+  StrCmp $R0 "" covNotLM covFound
+covNotLM:
+  ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\meshExpImp" "UninstallString"
+  StrCmp $R0 "" covNotOldCU covFound
+covNotOldCU:
+  ReadRegStr $R0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\meshExpImp" "UninstallString"
   StrCmp $R0 "" covDone
 covFound:
   MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
