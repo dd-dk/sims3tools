@@ -79,7 +79,7 @@ namespace S3PIDemoFE
             this.btnHex.Name = "btnHex";
             this.btnHex.Size = new System.Drawing.Size(50, 23);
             this.btnHex.TabIndex = 7;
-            this.btnHex.Text = "&Hex";
+            this.btnHex.Text = "Hex";
             this.btnHex.UseVisualStyleBackColor = true;
             this.btnHex.Click += new System.EventHandler(this.btnHex_Click);
             // 
@@ -107,7 +107,7 @@ namespace S3PIDemoFE
             this.ckbNoUnWrap.Name = "ckbNoUnWrap";
             this.ckbNoUnWrap.Size = new System.Drawing.Size(69, 17);
             this.ckbNoUnWrap.TabIndex = 2;
-            this.ckbNoUnWrap.Text = "Hex Only";
+            this.ckbNoUnWrap.Text = "He&x Only";
             this.ckbNoUnWrap.UseVisualStyleBackColor = true;
             this.ckbNoUnWrap.CheckedChanged += new System.EventHandler(this.ckbNoUnWrap_CheckedChanged);
             // 
@@ -191,7 +191,7 @@ namespace S3PIDemoFE
             this.btnGrid.Name = "btnGrid";
             this.btnGrid.Size = new System.Drawing.Size(50, 23);
             this.btnGrid.TabIndex = 9;
-            this.btnGrid.Text = "Grid";
+            this.btnGrid.Text = "&Grid";
             this.btnGrid.UseVisualStyleBackColor = true;
             this.btnGrid.Click += new System.EventHandler(this.btnGrid_Click);
             // 
@@ -363,7 +363,7 @@ namespace S3PIDemoFE
             this.rb1Hex.Name = "rb1Hex";
             this.rb1Hex.Size = new System.Drawing.Size(44, 17);
             this.rb1Hex.TabIndex = 5;
-            this.rb1Hex.Text = "Hex";
+            this.rb1Hex.Text = "&Hex";
             this.rb1Hex.UseVisualStyleBackColor = true;
             this.rb1Hex.CheckedChanged += new System.EventHandler(this.rb1Hex_CheckedChanged);
             // 
@@ -376,7 +376,7 @@ namespace S3PIDemoFE
             this.rb1Value.Name = "rb1Value";
             this.rb1Value.Size = new System.Drawing.Size(52, 17);
             this.rb1Value.TabIndex = 6;
-            this.rb1Value.Text = "Value";
+            this.rb1Value.Text = "&Value";
             this.rb1Value.UseVisualStyleBackColor = true;
             this.rb1Value.CheckedChanged += new System.EventHandler(this.rb1Value_CheckedChanged);
             // 

@@ -117,7 +117,7 @@
             this.btnSet.Location = new System.Drawing.Point(127, 32);
             this.btnSet.Name = "btnSet";
             this.btnSet.Size = new System.Drawing.Size(39, 23);
-            this.btnSet.TabIndex = 4;
+            this.btnSet.TabIndex = 5;
             this.btnSet.Text = "Set";
             this.btnSet.UseVisualStyleBackColor = true;
             this.btnSet.Click += new System.EventHandler(this.btnSet_Click);
@@ -131,7 +131,7 @@
             this.btnRevise.Name = "btnRevise";
             this.btnRevise.Size = new System.Drawing.Size(50, 23);
             this.btnRevise.TabIndex = 1;
-            this.btnRevise.Text = "Revise";
+            this.btnRevise.Text = "Re&vise";
             this.btnRevise.UseVisualStyleBackColor = true;
             this.btnRevise.Click += new System.EventHandler(this.btnRevise_Click);
             // 
@@ -143,8 +143,8 @@
             this.ckbFilter.Location = new System.Drawing.Point(3, 35);
             this.ckbFilter.Name = "ckbFilter";
             this.ckbFilter.Size = new System.Drawing.Size(80, 17);
-            this.ckbFilter.TabIndex = 3;
-            this.ckbFilter.Text = "Filter active";
+            this.ckbFilter.TabIndex = 4;
+            this.ckbFilter.Text = "Filter &active";
             this.ckbFilter.UseVisualStyleBackColor = true;
             this.ckbFilter.CheckedChanged += new System.EventHandler(this.ckbFilter_CheckedChanged);
             // 
@@ -156,8 +156,8 @@
             this.btnQBE.Location = new System.Drawing.Point(127, 3);
             this.btnQBE.Name = "btnQBE";
             this.btnQBE.Size = new System.Drawing.Size(39, 23);
-            this.btnQBE.TabIndex = 2;
-            this.btnQBE.Text = "QBE";
+            this.btnQBE.TabIndex = 3;
+            this.btnQBE.Text = "Q&BE";
             this.btnQBE.UseVisualStyleBackColor = true;
             this.btnQBE.Click += new System.EventHandler(this.btnQBE_Click);
             // 
@@ -167,8 +167,8 @@
             this.btnPasteRK.Location = new System.Drawing.Point(59, 3);
             this.btnPasteRK.Name = "btnPasteRK";
             this.btnPasteRK.Size = new System.Drawing.Size(62, 23);
-            this.btnPasteRK.TabIndex = 5;
-            this.btnPasteRK.Text = "Paste RK";
+            this.btnPasteRK.TabIndex = 2;
+            this.btnPasteRK.Text = "Paste R&K";
             this.btnPasteRK.UseVisualStyleBackColor = true;
             this.btnPasteRK.Click += new System.EventHandler(this.btnPasteRK_Click);
             // 

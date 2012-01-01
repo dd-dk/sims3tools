@@ -944,7 +944,6 @@
             // flcmPasteResourceKey
             // 
             this.flcmPasteResourceKey.Name = "flcmPasteResourceKey";
-            this.flcmPasteResourceKey.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
             this.flcmPasteResourceKey.Size = new System.Drawing.Size(205, 22);
             this.flcmPasteResourceKey.Text = "&Paste ResourceKey";
             this.flcmPasteResourceKey.Click += new System.EventHandler(this.tsCMF_Click);
