@@ -374,6 +374,10 @@
       <Link>s3pi.JazzResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.MeshChunks.dll">
+      <Link>s3pi.MeshChunks.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.ModularResource.dll">
       <Link>s3pi.ModularResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
