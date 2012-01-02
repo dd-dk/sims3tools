@@ -117,7 +117,7 @@
             this.bwcmSepHelpers = new System.Windows.Forms.ToolStripSeparator();
             this.bwcmHexEditor = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmTextEditor = new System.Windows.Forms.ToolStripMenuItem();
-            this.textPreviewContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.previewContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tpcmCopy = new System.Windows.Forms.ToolStripMenuItem();
             this.tpcmSavePreview = new System.Windows.Forms.ToolStripMenuItem();
             this.tpcmFloat = new System.Windows.Forms.ToolStripMenuItem();
@@ -128,7 +128,7 @@
             this.bwcmCopyResourceKey = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.browserWidgetContextMenuStrip.SuspendLayout();
-            this.textPreviewContextMenuStrip.SuspendLayout();
+            this.previewContextMenuStrip.SuspendLayout();
             this.filterContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -891,14 +891,14 @@
             // 
             // textPreviewContextMenuStrip
             // 
-            this.textPreviewContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.previewContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tpcmCopy,
             this.tpcmSavePreview,
             this.tpcmFloat,
             this.tpcmOTE});
-            this.textPreviewContextMenuStrip.Name = "textPreviewContextMenuStrip";
-            this.textPreviewContextMenuStrip.Size = new System.Drawing.Size(168, 92);
-            this.textPreviewContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.cmsTP_Opening);
+            this.previewContextMenuStrip.Name = "textPreviewContextMenuStrip";
+            this.previewContextMenuStrip.Size = new System.Drawing.Size(168, 92);
+            this.previewContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.cmsTP_Opening);
             // 
             // tpcmCopy
             // 
@@ -973,7 +973,7 @@
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.browserWidgetContextMenuStrip.ResumeLayout(false);
-            this.textPreviewContextMenuStrip.ResumeLayout(false);
+            this.previewContextMenuStrip.ResumeLayout(false);
             this.filterContextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -1067,7 +1067,7 @@
         private System.Windows.Forms.ToolStripMenuItem tpcmCopy;
         private System.Windows.Forms.ToolStripMenuItem tpcmFloat;
         private System.Windows.Forms.ToolStripMenuItem tpcmOTE;
-        public System.Windows.Forms.ContextMenuStrip textPreviewContextMenuStrip;
+        public System.Windows.Forms.ContextMenuStrip previewContextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem selectAllToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bwcmSelectAll;
         private System.Windows.Forms.ToolStripMenuItem organiseBookmarksToolStripMenuItem;

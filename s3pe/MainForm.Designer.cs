@@ -149,12 +149,11 @@
             // 
             // pnAuto
             // 
-            this.pnAuto.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnAuto.Location = new System.Drawing.Point(-2, 0);
+            this.pnAuto.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnAuto.Location = new System.Drawing.Point(0, 0);
+            this.pnAuto.Margin = new System.Windows.Forms.Padding(0);
             this.pnAuto.Name = "pnAuto";
-            this.pnAuto.Size = new System.Drawing.Size(290, 512);
+            this.pnAuto.Size = new System.Drawing.Size(286, 510);
             this.pnAuto.TabIndex = 4;
             // 
             // packageInfoWidget1
@@ -299,8 +298,7 @@
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             this.ClientSize = new System.Drawing.Size(923, 677);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.menuBarWidget1);
