@@ -227,53 +227,56 @@ FunctionEnd
 
 
 
-Function un.onGUIInit
+Function un.onInit
   Call un.GetInstDir
-  Call un.CheckInUse
+  StrCmp $INSTDIR "" 0 unoiGotInstDir
+  Abort
+unoiGotInstDir:
+  IfSilent 0 unoiNotSilent1
+  Call un.testInUse
+  StrCmp $wasInUse 1 0 unoiNotSilent1
+  Abort
+unoiNotSilent1:
   Call un.GetWantAssoc
   Call un.GetWantSendTo
 FunctionEnd
 
+Function un.OnGUIInit
+  StrCmp $INSTDIR "" 0 unogiGotInstDir
+  MessageBox MB_OK|MB_ICONSTOP "Cannot find Install Location."
+  Abort
+
+unogiGotInstDir:
+  Call un.CheckInUse
+FunctionEnd
+
 Function un.GetInstDir
-  SetShellVarContext all
-  ClearErrors
   Push $0
+
+  SetShellVarContext all
+
+  ClearErrors
   ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
-  Pop $0
+
   IfErrors notCU
   SetShellVarContext current
 notCU:  
   ClearErrors
 
-  Push $0
-
   ReadRegStr $0 SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${INSTREGKEY}" "InstallLocation"
-  StrCmp $0 "" ungidBadInstallLocation
-  IfFileExists "$0" ungidSetINSTDIR
-ungidBadInstallLocation:
-  MessageBox MB_OK|MB_ICONSTOP "Cannot find Install Location."
-  Abort
-  
-ungidSetINSTDIR:
+
+  StrCmp $0 "" ungidDone
+  IfFileExists "$0" 0 ungidDone
   StrCpy $INSTDIR $0
+
+ungidDone:
   Pop $0
 FunctionEnd
 
 Function un.CheckInUse
-  StrCpy $wasInUse 0
-
 uncuiRetry:
-  IfFileExists "$INSTDIR" uncuiExists
-  MessageBox MB_OK|MB_ICONSTOP "Cannot find $INSTDIR to uninstall."
-  Abort
-uncuiExists:
-  ClearErrors
-  FileOpen $0 "$INSTDIR\${EXE}" a
-  IfErrors uncuiInUse
-  FileClose $0
-  Return
-uncuiInUse:
-  StrCpy $wasInUse 1
+  Call un.testInUse
+  StrCmp $wasInUse 1 0 ciuNotInUse
 
   MessageBox MB_RETRYCANCEL|MB_ICONQUESTION \
     "${EXE} is running.$\r$\nPlease close it and retry.$\r$\n$INSTDIR\${EXE}" \
@@ -281,6 +284,21 @@ uncuiInUse:
 
   MessageBox MB_OK|MB_ICONSTOP "Cannot continue to uninstall if ${EXE} is running."
   Abort
+
+ciuNotInUse:
+FunctionEnd
+
+Function un.testInUse
+  StrCpy $wasInUse 0
+
+  ClearErrors
+  FileOpen $0 "$INSTDIR\${EXE}" a
+  IfErrors untiuInUse
+  FileClose $0
+  Return
+
+untiuInUse:
+  StrCpy $wasInUse 1
 FunctionEnd
 
 Function un.GetWantAssoc
