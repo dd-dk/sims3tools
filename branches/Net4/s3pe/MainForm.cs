@@ -1845,34 +1845,38 @@ namespace S3PIDemoFE
         {
             pnAuto.SuspendLayout();
             pnAutoCleanUp();
+
             if (resException != null)
-            {
-                Control c = getExceptionControl(resException);
-                c.Dock = DockStyle.Fill;
-                c.ContextMenuStrip = menuBarWidget1.textPreviewContextMenuStrip;
-                pnAuto.Controls.Add(c);
-            }
-            else if (resource != null)
+                pnAuto.Controls.Add(getExceptionControl(resException));
+            else
             {
                 if (controlPanel1.AutoOff) { }
-                else if (controlPanel1.AutoHex)
+                else if (resource != null)
                 {
-                    HexWidget hw = new HexWidget();
-                    hw.Dock = DockStyle.Fill;
-                    hw.Resource = resource;
-                    hw.ContextMenuStrip = menuBarWidget1.textPreviewContextMenuStrip;
-                    pnAuto.Controls.Add(hw);
-                }
-                else if (!controlPanel1.HexOnly && controlPanel1.AutoValue && hasValueContentField())
-                {
-                    Control c = getValueControl();
-                    if (c != null)
+                    if (controlPanel1.AutoHex)
                     {
-                        c.ContextMenuStrip = menuBarWidget1.textPreviewContextMenuStrip;
-                        pnAuto.Controls.Add(c);
+                        HexWidget hw = new HexWidget();
+                        hw.Resource = resource;
+                        pnAuto.Controls.Add(hw);
+                    }
+                    else
+                    {
+                        if (controlPanel1.AutoValue && hasValueContentField())
+                        {
+                            Control c = getValueControl();
+                            if (c != null)
+                                pnAuto.Controls.Add(c);
+                        }
                     }
                 }
             }
+
+            foreach (Control c in pnAuto.Controls)
+            {
+                c.ContextMenuStrip = menuBarWidget1.previewContextMenuStrip;
+                c.Dock = DockStyle.Fill;
+            }
+
             pnAuto.ResumeLayout();
         }
 
