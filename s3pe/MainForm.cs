@@ -2044,7 +2044,7 @@ namespace S3PIDemoFE
         {
             IResourceIndexEntry rie = browserWidget1.SelectedResource;
             string s = "";
-            if (rie != null) s += String.Format("Error reading resource {0:X8}:{1:X8}:{2:X16}", rie.ResourceType, rie.ResourceGroup, rie.Instance);
+            if (rie != null) s += "Error reading resource " + ((IResourceKey)rie);
             s += String.Format("\r\nFront-end Distribution: {0}\r\nLibrary Distribution: {1}\r\n",
                 AutoUpdate.Version.CurrentVersion, AutoUpdate.Version.LibraryVersion);
             for (Exception inex = ex; inex != null; inex = inex.InnerException)
