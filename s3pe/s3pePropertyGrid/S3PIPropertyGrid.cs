@@ -271,17 +271,17 @@ namespace S3PIDemoFE
                 try
                 {
                     Type t = PropertyType;
-                    if (t.Equals(typeof(EnumChooserCTD))) return new EnumChooserCTD(owner, Name, component);
-                    if (t.Equals(typeof(EnumFlagsCTD))) return new EnumFlagsCTD(owner, Name, component);
-                    if (t.Equals(typeof(AsHexCTD))) return new AsHexCTD(owner, Name, component);
-                    if (t.Equals(typeof(IResourceKeyCTD))) return new IResourceKeyCTD(owner, Name, component);
-                    if (t.Equals(typeof(AApiVersionedFieldsCTD))) return new AApiVersionedFieldsCTD(owner, Name, component);
+                    if (t.Equals(typeof(ReaderCTD))) return new ReaderCTD(owner, Name, component);
+                    if (t.Equals(typeof(IDictionaryCTD))) return new IDictionaryCTD(owner, Name, component);
+                    if (t.Equals(typeof(ICollectionAApiVersionedFieldsCTD))) return new ICollectionAApiVersionedFieldsCTD(owner, Name, component);
                     if (t.Equals(typeof(TGIBlockListCTD))) return new TGIBlockListCTD(owner, Name, component);
                     if (t.Equals(typeof(ArrayCTD))) return new ArrayCTD(owner, Name, component);
-                    if (t.Equals(typeof(ICollectionAApiVersionedFieldsCTD))) return new ICollectionAApiVersionedFieldsCTD(owner, Name, component);
+                    if (t.Equals(typeof(AApiVersionedFieldsCTD))) return new AApiVersionedFieldsCTD(owner, Name, component);
+                    if (t.Equals(typeof(IResourceKeyCTD))) return new IResourceKeyCTD(owner, Name, component);
                     if (t.Equals(typeof(TGIBlockListIndexCTD))) return new TGIBlockListIndexCTD(owner, Name, tgiBlocks, component);
-                    if (t.Equals(typeof(IDictionaryCTD))) return new IDictionaryCTD(owner, Name, component);
-                    if (t.Equals(typeof(ReaderCTD))) return new ReaderCTD(owner, Name, component);
+                    if (t.Equals(typeof(AsHexCTD))) return new AsHexCTD(owner, Name, component);
+                    if (t.Equals(typeof(EnumChooserCTD))) return new EnumChooserCTD(owner, Name, component);
+                    if (t.Equals(typeof(EnumFlagsCTD))) return new EnumFlagsCTD(owner, Name, component);
                     return GetFieldValue(owner, Name);
                 }
                 catch (Exception ex) { throw ex; }
