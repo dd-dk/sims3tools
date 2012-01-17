@@ -4142,18 +4142,17 @@ namespace ObjectCloner
         public static CatalogType CType(this IResourceKey rk) { return (CatalogType)rk.ResourceType; }
 
         static string[] excludes = new string[] { "Value", "Stream", "AsBytes", };
-        public static IEnumerable Enumerate(this AApiVersionedFields resource, Predicate<object> match, Func<TextReader, IEnumerable> enumerateTextReader = null)
+        public static IEnumerable FindAll(this AApiVersionedFields resource, Predicate<object> match,
+            Func<TextReader, IEnumerable> findAllTextReader = null,
+            Func<BinaryReader, IEnumerable> findAllBinaryReader = null)
         {
             if (match(resource))
                 yield return resource;
 
             foreach (TypedValue tv in resource.ContentFields.Where(x => !excludes.Contains(x)).Select(x => resource[x]))
 
-                if (typeof(AApiVersionedFields).IsAssignableFrom(tv.Type))
-                    foreach (var value in (tv.Value as AApiVersionedFields).Enumerate(match, enumerateTextReader))
-                        yield return value;
-
-                else if (tv.Value is string)
+                // string is enumerable but we want to treat it as a single value
+                if (tv.Value is string)
                 {
                     if (match(tv.Value))
                         yield return tv.Value;
@@ -4163,18 +4162,40 @@ namespace ObjectCloner
                     foreach (var e in tv.Value as IEnumerable)
                     {
                         if (e is AApiVersionedFields)
-                            foreach (var value in (e as AApiVersionedFields).Enumerate(match, enumerateTextReader))
+                            foreach (var value in (e as AApiVersionedFields).FindAll(match, findAllTextReader, findAllBinaryReader))
                                 yield return value;
+
+                        else if (e is TextReader && findAllTextReader != null)
+                            foreach (var value in findAllTextReader(e as TextReader))
+                                yield return value;
+
+                        else if (e is BinaryReader && findAllBinaryReader != null)
+                            foreach (var value in findAllBinaryReader(e as BinaryReader))
+                                yield return value;
+
+                        else if (match(e))
+                            yield return e;
                     }
 
-                else if (typeof(TextReader).IsAssignableFrom(tv.Type) && enumerateTextReader != null)
-                    foreach (var value in enumerateTextReader(tv.Value as TextReader))
+                else if (typeof(AApiVersionedFields).IsAssignableFrom(tv.Type))
+                    foreach (var value in (tv.Value as AApiVersionedFields).FindAll(match, findAllTextReader, findAllBinaryReader))
                         yield return value;
+
+                else if (typeof(TextReader).IsAssignableFrom(tv.Type) && findAllTextReader != null)
+                    foreach (var value in findAllTextReader(tv.Value as TextReader))
+                        yield return value;
+
+                else if (typeof(BinaryReader).IsAssignableFrom(tv.Type) && findAllBinaryReader != null)
+                    foreach (var value in findAllBinaryReader(tv.Value as BinaryReader))
+                        yield return value;
+
+                else if (match(tv.Value))
+                    yield return tv.Value;
         }
 
         public static IEnumerable<IResourceKey> SlurpRKs(this AApiVersionedFields resource)
         {
-            foreach (IResourceKey rk in resource.Enumerate(x => x is IResourceKey, SlurpRKs))
+            foreach (IResourceKey rk in resource.FindAll(x => x is IResourceKey, SlurpRKs))
                 yield return rk;
         }
 
