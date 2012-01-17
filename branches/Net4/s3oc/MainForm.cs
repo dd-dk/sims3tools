@@ -3056,11 +3056,11 @@ namespace ObjectCloner
             IEnumerable<IResourceKey> ierk;
             if (_rk.ResourceType == 0x0333406C)
             {
-                ierk = new EnumerableTextReader(new StreamReader(sr.Resource.Stream, true));
+                ierk = (new StreamReader(sr.Resource.Stream, true)).SlurpRKs();
             }
             else
             {
-                ierk = new EnumerableResource(sr.Resource as AResource);
+                ierk = (sr.Resource as AResource).SlurpRKs();
             }
             foreach (IResourceKey rk in ierk)
                 deepClone(_key + ": " + sr.LongName.Substring(0, 4) + " RK " + i++, rk, _match);
@@ -3071,7 +3071,7 @@ namespace ObjectCloner
             CASPartResource.CASPartResource casp = selectedItem.Resource as CASPartResource.CASPartResource;
             if (casp == null) return;
 
-            IEnumerable<IResourceKey> ierk = new EnumerableResource(casp);
+            IEnumerable<IResourceKey> ierk = casp.SlurpRKs();
             int i = 0;
             List<IResourceKey> seen = new List<IResourceKey>();
             foreach (IResourceKey rk in ierk)
@@ -4139,197 +4139,61 @@ namespace ObjectCloner
 
     static class Extensions
     {
-        public static bool Contains(this IEnumerable<string> haystack, string needle) { foreach (var x in haystack) if (x.Equals(needle)) return true; return false; }
-
         public static CatalogType CType(this IResourceKey rk) { return (CatalogType)rk.ResourceType; }
-    }
 
-    class EnumerableResource : IEnumerable<IResourceKey>
-    {
-        AApiVersionedFields resource;
-
-        public EnumerableResource(AApiVersionedFields resource) { this.resource = resource; }
-        public static explicit operator EnumerableResource(AApiVersionedFields resource) { return new EnumerableResource(resource); }
-
-        public IEnumerator<IResourceKey> GetEnumerator() { return new Enumerator(resource); }
-        IEnumerator IEnumerable.GetEnumerator() { return (IEnumerator<IResourceKey>)GetEnumerator(); }
-
-        public struct Enumerator : IEnumerator<IResourceKey>
+        static string[] excludes = new string[] { "Value", "Stream", "AsBytes", };
+        public static IEnumerable Enumerate(this AApiVersionedFields resource, Predicate<object> match, Func<TextReader, IEnumerable> enumerateTextReader = null)
         {
-            AApiVersionedFields resource;
-            IResourceKey rk;
-            TypedValue current;
-            IEnumerator<string> contentFieldsEnumerator;
-            DependentList<TGIBlock> tgiDependentList;
-            IEnumerator<TGIBlock> tgiEnumerator;
-            IEnumerable<IResourceKey> rkEnumerable;
-            IEnumerator<IResourceKey> rkEnumerator;
-            IEnumerable<GenericRCOLResource.ChunkEntry> ceEnumerable;
-            IEnumerator<GenericRCOLResource.ChunkEntry> ceEnumerator;
-            public Enumerator(AApiVersionedFields resource)
-            {
-                this.resource = resource;
-                rk = null;
-                current = null;
-                contentFieldsEnumerator = resource.ContentFields.GetEnumerator();
-                tgiDependentList = null;
-                tgiEnumerator = null;
-                rkEnumerable = null;
-                rkEnumerator = null;
-                ceEnumerable = null;
-                ceEnumerator = null;
-            }
+            if (match(resource))
+                yield return resource;
 
-            public IResourceKey Current { get { return rk; } }
-            object IEnumerator.Current { get { return (IResourceKey)Current; } }
+            foreach (TypedValue tv in resource.ContentFields.Where(x => !excludes.Contains(x)).Select(x => resource[x]))
 
-            public void Dispose()
-            {
-                this.resource = null;
-                rk = null;
-                current = null;
-                contentFieldsEnumerator = null;
-                tgiDependentList = null;
-                tgiEnumerator = null;
-                rkEnumerable = null;
-                rkEnumerator = null;
-                ceEnumerable = null;
-                ceEnumerator = null;
-            }
+                if (typeof(AApiVersionedFields).IsAssignableFrom(tv.Type))
+                    foreach (var value in (tv.Value as AApiVersionedFields).Enumerate(match, enumerateTextReader))
+                        yield return value;
 
-            public bool MoveNext()
-            {
-                while (true)
+                else if (tv.Value is string)
                 {
-                    if (current == null)
-                    {
-                        if (!contentFieldsEnumerator.MoveNext()) break;
-                        current = resource[contentFieldsEnumerator.Current];
-                        tgiDependentList = null;
-                        rkEnumerable = null;
-                        ceEnumerable = null;
-                    }
-                    if (typeof(IResourceKey).IsAssignableFrom(current.Type))
-                    {
-                        rk = current.Value as IResourceKey;
-                        current = null;
-                        return true;
-                    }
-                    else if (typeof(DependentList<TGIBlock>).IsAssignableFrom(current.Type))
-                    {
-                        if (tgiDependentList == null)
-                        {
-                            tgiDependentList = current.Value as DependentList<TGIBlock>;
-                            tgiEnumerator = tgiDependentList.GetEnumerator();
-                        }
-                        if (tgiEnumerator.MoveNext())
-                        {
-                            rk = tgiEnumerator.Current;
-                            return true;
-                        }
-                    }
-                    else if (typeof(TextReader).IsAssignableFrom(current.Type))
-                    {
-                        if (rkEnumerable == null)
-                        {
-                            rkEnumerable = new EnumerableTextReader(current.Value as TextReader);
-                            rkEnumerator = rkEnumerable.GetEnumerator();
-                        }
-                        if (rkEnumerator.MoveNext())
-                        {
-                            rk = rkEnumerator.Current;
-                            return true;
-                        }
-                    }
-                    else if (typeof(AApiVersionedFields).IsAssignableFrom(current.Type))
-                    {
-                        if (rkEnumerable == null)
-                        {
-                            rkEnumerable = new EnumerableResource(current.Value as AApiVersionedFields);
-                            rkEnumerator = rkEnumerable.GetEnumerator();
-                        }
-                        if (rkEnumerator.MoveNext())
-                        {
-                            rk = rkEnumerator.Current;
-                            return true;
-                        }
-                    }
-                    else if (typeof(IEnumerable<GenericRCOLResource.ChunkEntry>).IsAssignableFrom(current.Type))
-                    {
-                        if (ceEnumerable == null)
-                        {
-                            ceEnumerable = current.Value as IEnumerable<GenericRCOLResource.ChunkEntry>;
-                            ceEnumerator = ceEnumerable.GetEnumerator();
-                            rkEnumerable = null;
-                        }
-                        if (rkEnumerable == null)
-                        {
-                            if (!ceEnumerator.MoveNext())
-                            {
-                                current = null;
-                                continue;
-                            }
-                            rkEnumerable = new EnumerableResource(ceEnumerator.Current);
-                            rkEnumerator = rkEnumerable.GetEnumerator();
-                        }
-                        if (!rkEnumerator.MoveNext())
-                        {
-                            rkEnumerable = null;
-                            continue;
-                        }
-                        rk = rkEnumerator.Current;
-                        return true;
-                    }
-                    current = null;
+                    if (match(tv.Value))
+                        yield return tv.Value;
                 }
-                return false;
-            }
 
-            public void Reset() { contentFieldsEnumerator = resource.ContentFields.GetEnumerator(); current = null; }
+                else if (typeof(IEnumerable).IsAssignableFrom(tv.Type))
+                    foreach (var e in tv.Value as IEnumerable)
+                    {
+                        if (e is AApiVersionedFields)
+                            foreach (var value in (e as AApiVersionedFields).Enumerate(match, enumerateTextReader))
+                                yield return value;
+                    }
+
+                else if (typeof(TextReader).IsAssignableFrom(tv.Type) && enumerateTextReader != null)
+                    foreach (var value in enumerateTextReader(tv.Value as TextReader))
+                        yield return value;
         }
-    }
 
-    class EnumerableTextReader : IEnumerable<IResourceKey>
-    {
-        TextReader tr;
+        public static IEnumerable<IResourceKey> SlurpRKs(this AApiVersionedFields resource)
+        {
+            foreach (IResourceKey rk in resource.Enumerate(x => x is IResourceKey, SlurpRKs))
+                yield return rk;
+        }
 
-        public EnumerableTextReader(TextReader tr) { this.tr = tr; }
-        public static explicit operator EnumerableTextReader(TextReader tr) { return new EnumerableTextReader(tr); }
-
-        public IEnumerator<IResourceKey> GetEnumerator() { return new Enumerator(tr); }
-        IEnumerator IEnumerable.GetEnumerator() { return (IEnumerator<IResourceKey>)GetEnumerator(); }
-
-        public struct Enumerator : IEnumerator<IResourceKey>
+        public static IEnumerable<IResourceKey> SlurpRKs(this TextReader tr)
         {
             const int keyLen = 3 + 1 + 8 + 1 + 8 + 1 + 16;//key:TTTTTTTT:GGGGGGGG:IIIIIIIIIIIIIIII
-            TextReader tr;
-            string line;
-            IResourceKey rk;
-            int linePos;
-            int index;
-            public Enumerator(TextReader tr)
+            string line = tr.ReadLine();
+            IResourceKey rk = null;
+            int linePos = 0;
+            int index = -1;
+
+            while (line != null)
             {
-                this.tr = tr;
-                line = tr.ReadLine();
-                rk = null;
-                linePos = 0;
-                index = -1;
-            }
-
-            public IResourceKey Current { get { return rk; } }
-            object IEnumerator.Current { get { return (IResourceKey)Current; } }
-
-            public void Dispose() { tr = null; }
-
-            public bool MoveNext()
-            {
-                if (line == null) return false;
-
                 index = line.IndexOf("key:", linePos);
                 while (index == -1)
                 {
                     line = tr.ReadLine();
-                    if (line == null) return false;
+                    if (line == null)
+                        yield break;
 
                     linePos = 0;
                     index = line.IndexOf("key:", linePos);
@@ -4338,15 +4202,14 @@ namespace ObjectCloner
                 if (linePos > line.Length)
                 {
                     line = tr.ReadLine();
-                    return MoveNext();
+                    continue;
                 }
 
                 string oldKey = line.Substring(index, keyLen).Substring(4).Replace('-', ':');
                 string RKkey = "0x" + oldKey.Replace(":", "-0x");//translate to s3pi format
-                return RK.TryParse(RKkey, out rk);
+                if (RK.TryParse(RKkey, out rk))
+                    yield return rk;
             }
-
-            public void Reset() { throw new InvalidOperationException(); }
         }
     }
 }
