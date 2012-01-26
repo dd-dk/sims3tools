@@ -47,16 +47,17 @@ namespace ObjectCloner.SplitterComponents
 
             if (isCASP)
             {
-                ckbDeepClone.Checked = true;
-                ckbDeepClone.Enabled = false;
+                //ckbDeepClone.Checked = true;
+                //ckbDeepClone.Enabled = false;
                 ckbPadSTBLs.Checked = false;
                 ckbPadSTBLs.Enabled = false;
             }
             else
             {
-                ckbClone_CheckedChanged(null, EventArgs.Empty);
+                //ckbClone_CheckedChanged(null, EventArgs.Empty);
                 ckbPadSTBLs.Checked = shouldPad;
             }
+            ckbClone_CheckedChanged(null, EventArgs.Empty);
 
             ckbRenumber.Checked = mustClone;
             this.allow32bitIIDs = allow32bitIIDs;
