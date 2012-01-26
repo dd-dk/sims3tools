@@ -30,6 +30,9 @@
         {
             this.components = new System.ComponentModel.Container();
             this.tlpSearch = new System.Windows.Forms.TableLayoutPanel();
+            this.tlpTGIContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tgisCopyRK = new System.Windows.Forms.ToolStripMenuItem();
+            this.tgisPasteRK = new System.Windows.Forms.ToolStripMenuItem();
             this.listView1 = new System.Windows.Forms.ListView();
             this.catlgName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.TagID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -43,9 +46,6 @@
             this.lvcmEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
             this.tlpTGIValues = new System.Windows.Forms.TableLayoutPanel();
-            this.tlpTGIContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.tgisCopyRK = new System.Windows.Forms.ToolStripMenuItem();
-            this.tgisPasteRK = new System.Windows.Forms.ToolStripMenuItem();
             this.label2 = new System.Windows.Forms.Label();
             this.tbInstance = new System.Windows.Forms.TextBox();
             this.tbResourceGroup = new System.Windows.Forms.TextBox();
@@ -61,15 +61,18 @@
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.ckbUseCC = new System.Windows.Forms.CheckBox();
             this.ckbUseEA = new System.Windows.Forms.CheckBox();
+            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.tlpCount = new System.Windows.Forms.TableLayoutPanel();
-            this.label5 = new System.Windows.Forms.Label();
             this.lbCount = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.btnPasteRK = new System.Windows.Forms.Button();
             this.tlpSearch.SuspendLayout();
+            this.tlpTGIContextMenu.SuspendLayout();
             this.lvContextMenu.SuspendLayout();
             this.tlpTGIValues.SuspendLayout();
-            this.tlpTGIContextMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
+            this.tableLayoutPanel3.SuspendLayout();
             this.tlpCount.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -80,12 +83,13 @@
             this.tlpSearch.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpSearch.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpSearch.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlpSearch.ContextMenuStrip = this.tlpTGIContextMenu;
             this.tlpSearch.Controls.Add(this.listView1, 0, 2);
             this.tlpSearch.Controls.Add(this.label1, 0, 0);
             this.tlpSearch.Controls.Add(this.tlpTGIValues, 1, 0);
             this.tlpSearch.Controls.Add(this.tableLayoutPanel1, 2, 1);
             this.tlpSearch.Controls.Add(this.tableLayoutPanel2, 1, 1);
-            this.tlpSearch.Controls.Add(this.tlpCount, 2, 0);
+            this.tlpSearch.Controls.Add(this.tableLayoutPanel3, 2, 0);
             this.tlpSearch.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tlpSearch.Location = new System.Drawing.Point(0, 0);
             this.tlpSearch.Name = "tlpSearch";
@@ -96,6 +100,31 @@
             this.tlpSearch.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlpSearch.Size = new System.Drawing.Size(800, 232);
             this.tlpSearch.TabIndex = 0;
+            // 
+            // tlpTGIContextMenu
+            // 
+            this.tlpTGIContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tgisCopyRK,
+            this.tgisPasteRK});
+            this.tlpTGIContextMenu.Name = "tgiSearchContextMenu";
+            this.tlpTGIContextMenu.Size = new System.Drawing.Size(206, 48);
+            this.tlpTGIContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.tgiSearchContextMenu_Opening);
+            // 
+            // tgisCopyRK
+            // 
+            this.tgisCopyRK.Name = "tgisCopyRK";
+            this.tgisCopyRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.tgisCopyRK.Size = new System.Drawing.Size(205, 22);
+            this.tgisCopyRK.Text = "&Copy ResourceKey";
+            this.tgisCopyRK.Click += new System.EventHandler(this.tgisCopyRK_Click);
+            // 
+            // tgisPasteRK
+            // 
+            this.tgisPasteRK.Name = "tgisPasteRK";
+            this.tgisPasteRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
+            this.tgisPasteRK.Size = new System.Drawing.Size(205, 22);
+            this.tgisPasteRK.Text = "&Paste ResourceKey";
+            this.tgisPasteRK.Click += new System.EventHandler(this.tgisPasteRK_Click);
             // 
             // listView1
             // 
@@ -154,7 +183,7 @@
             this.lvcmFix,
             this.lvcmEdit});
             this.lvContextMenu.Name = "lvContextMenu";
-            this.lvContextMenu.Size = new System.Drawing.Size(205, 92);
+            this.lvContextMenu.Size = new System.Drawing.Size(205, 114);
             this.lvContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.lvContextMenu_Opening);
             // 
             // lvcmCopyRK
@@ -205,7 +234,6 @@
             this.tlpTGIValues.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpTGIValues.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpTGIValues.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 229F));
-            this.tlpTGIValues.ContextMenuStrip = this.tlpTGIContextMenu;
             this.tlpTGIValues.Controls.Add(this.label2, 0, 0);
             this.tlpTGIValues.Controls.Add(this.tbInstance, 2, 2);
             this.tlpTGIValues.Controls.Add(this.tbResourceGroup, 2, 1);
@@ -225,31 +253,6 @@
             this.tlpTGIValues.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tlpTGIValues.Size = new System.Drawing.Size(333, 83);
             this.tlpTGIValues.TabIndex = 2;
-            // 
-            // tlpTGIContextMenu
-            // 
-            this.tlpTGIContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tgisCopyRK,
-            this.tgisPasteRK});
-            this.tlpTGIContextMenu.Name = "tgiSearchContextMenu";
-            this.tlpTGIContextMenu.Size = new System.Drawing.Size(206, 48);
-            this.tlpTGIContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.tgiSearchContextMenu_Opening);
-            // 
-            // tgisCopyRK
-            // 
-            this.tgisCopyRK.Name = "tgisCopyRK";
-            this.tgisCopyRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.tgisCopyRK.Size = new System.Drawing.Size(205, 22);
-            this.tgisCopyRK.Text = "&Copy ResourceKey";
-            this.tgisCopyRK.Click += new System.EventHandler(this.tgisCopyRK_Click);
-            // 
-            // tgisPasteRK
-            // 
-            this.tgisPasteRK.Name = "tgisPasteRK";
-            this.tgisPasteRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
-            this.tgisPasteRK.Size = new System.Drawing.Size(205, 22);
-            this.tgisPasteRK.Text = "&Paste ResourceKey";
-            this.tgisPasteRK.Click += new System.EventHandler(this.tgisPasteRK_Click);
             // 
             // label2
             // 
@@ -431,16 +434,34 @@
             this.ckbUseEA.UseVisualStyleBackColor = true;
             this.ckbUseEA.CheckedChanged += new System.EventHandler(this.ckbUse_CheckedChanged);
             // 
+            // tableLayoutPanel3
+            // 
+            this.tableLayoutPanel3.AutoSize = true;
+            this.tableLayoutPanel3.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tableLayoutPanel3.ColumnCount = 1;
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel3.Controls.Add(this.tlpCount, 0, 0);
+            this.tableLayoutPanel3.Controls.Add(this.btnPasteRK, 0, 1);
+            this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(404, 0);
+            this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
+            this.tableLayoutPanel3.RowCount = 2;
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(162, 89);
+            this.tableLayoutPanel3.TabIndex = 7;
+            // 
             // tlpCount
             // 
-            this.tlpCount.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.tlpCount.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.tlpCount.AutoSize = true;
             this.tlpCount.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tlpCount.ColumnCount = 1;
             this.tlpCount.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpCount.Controls.Add(this.lbCount, 0, 1);
             this.tlpCount.Controls.Add(this.label5, 0, 0);
-            this.tlpCount.Location = new System.Drawing.Point(420, 31);
+            this.tlpCount.Location = new System.Drawing.Point(16, 31);
             this.tlpCount.Name = "tlpCount";
             this.tlpCount.RowCount = 2;
             this.tlpCount.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -448,16 +469,6 @@
             this.tlpCount.Size = new System.Drawing.Size(129, 26);
             this.tlpCount.TabIndex = 6;
             this.tlpCount.Visible = false;
-            // 
-            // label5
-            // 
-            this.label5.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(3, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(123, 13);
-            this.label5.TabIndex = 1;
-            this.label5.Text = "Number of entries found:";
             // 
             // lbCount
             // 
@@ -469,6 +480,27 @@
             this.lbCount.TabIndex = 2;
             this.lbCount.Text = "X";
             // 
+            // label5
+            // 
+            this.label5.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(3, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(123, 13);
+            this.label5.TabIndex = 1;
+            this.label5.Text = "Number of entries found:";
+            // 
+            // btnPasteRK
+            // 
+            this.btnPasteRK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnPasteRK.Location = new System.Drawing.Point(3, 63);
+            this.btnPasteRK.Name = "btnPasteRK";
+            this.btnPasteRK.Size = new System.Drawing.Size(75, 23);
+            this.btnPasteRK.TabIndex = 7;
+            this.btnPasteRK.Text = "&Paste RK";
+            this.btnPasteRK.UseVisualStyleBackColor = true;
+            this.btnPasteRK.Click += new System.EventHandler(this.btnPasteRK_Click);
+            // 
             // TGISearch
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -478,13 +510,15 @@
             this.Size = new System.Drawing.Size(800, 232);
             this.tlpSearch.ResumeLayout(false);
             this.tlpSearch.PerformLayout();
+            this.tlpTGIContextMenu.ResumeLayout(false);
             this.lvContextMenu.ResumeLayout(false);
             this.tlpTGIValues.ResumeLayout(false);
             this.tlpTGIValues.PerformLayout();
-            this.tlpTGIContextMenu.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
+            this.tableLayoutPanel3.ResumeLayout(false);
+            this.tableLayoutPanel3.PerformLayout();
             this.tlpCount.ResumeLayout(false);
             this.tlpCount.PerformLayout();
             this.ResumeLayout(false);
@@ -528,5 +562,7 @@
         private System.Windows.Forms.TableLayoutPanel tlpCount;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label lbCount;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
+        private System.Windows.Forms.Button btnPasteRK;
     }
 }
