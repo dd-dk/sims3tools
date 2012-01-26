@@ -32,6 +32,7 @@ using s3pi.Extensions;
 using s3pi.GenericRCOLResource;
 using ObjectCloner.SplitterComponents;
 using s3pi.Filetable;
+using System.Xml.Linq;
 
 namespace ObjectCloner
 {
@@ -135,6 +136,9 @@ namespace ObjectCloner
             AbortSaving(true);
             Abort(true);
             //CloseCurrent();//needed?
+
+            foreach (string temp in Directory.EnumerateFiles(Environment.GetEnvironmentVariable("TEMP"), string.Format("s3oc_0x{0:X8}_*.package", System.Diagnostics.Process.GetCurrentProcess().Id)))
+                File.Delete(temp);
 
             ObjectCloner.Properties.Settings.Default.EPsDisabled = GameFolders.EPsDisabled;
             ObjectCloner.Properties.Settings.Default.InstallDirs = GameFolders.InstallDirs;
@@ -2375,75 +2379,15 @@ namespace ObjectCloner
         }
         private void SlurpRKsFromField(string key, AApiVersionedFields field)
         {
-            Type t = field.GetType();
-            if (typeof(GenericRCOLResource.ChunkEntry).IsAssignableFrom(t)) { }
-            else if (typeof(TGIBlock).IsAssignableFrom(t))
+            foreach (var tuple in field
+                .FindAll(key, x => x is TGIBlock || x is GenericRCOLResource.ChunkEntry)//Don't look inside ChunkEntries
+                .Where(x => x.Item2 is TGIBlock))//but we only actually want TGIBlocks
             {
-                Add(key, (IResourceKey)field);
-            }
-            else
-            {
-                if (typeof(IEnumerable).IsAssignableFrom(t))
-                    SlurpRKsFromIEnumerable(key, (IEnumerable)field);
-                SlurpRKsFromAApiVersionedFields(key, field);
-            }
-        }
-        private void SlurpRKsFromAApiVersionedFields(string key, AApiVersionedFields field)
-        {
-            List<string> fields = field.ContentFields;
-            foreach (string f in fields)
-            {
-                if ((new List<string>(new string[] { "Stream", "AsBytes", "Value", })).Contains(f)) continue;
-
-                Type t = AApiVersionedFields.GetContentFieldTypes(0, field.GetType())[f];
-                if (!t.IsClass || t.Equals(typeof(string))) continue;
-                if (t.IsArray && (!t.GetElementType().IsClass || t.GetElementType().Equals(typeof(string)))) continue;
-
-                if (typeof(IEnumerable).IsAssignableFrom(t))
-                    SlurpRKsFromIEnumerable(key + "." + f, (IEnumerable)field[f].Value);
-                else if (typeof(AApiVersionedFields).IsAssignableFrom(t))
-                    SlurpRKsFromField(key + "." + f, (AApiVersionedFields)field[f].Value);
-            }
-        }
-        private void SlurpRKsFromIEnumerable(string key, IEnumerable list)
-        {
-            if (list == null) return;
-            int i = 0;
-            foreach (object o in list)
-            {
-                if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
-                {
-                    SlurpRKsFromField(key + "[" + i + "]", (AApiVersionedFields)o);
-                    i++;
-                }
-                else if (typeof(IEnumerable).IsAssignableFrom(o.GetType()))
-                {
-                    SlurpRKsFromIEnumerable(key + "[" + i + "]", (IEnumerable)o);
-                    i++;
-                }
-            }
-        }
-        private void SlurpRKsFromTextReader(string key, TextReader tr)
-        {
-            int j = 0;
-            string line = tr.ReadLine();
-            while (line != null)
-            {
-                int i = line.IndexOf("key:");
-                while (i >= 0 && i + 38 < line.Length)
-                {
-                    TGIN field = new TGIN();
-                    if (uint.TryParse(line.Substring(i + 4, 8), System.Globalization.NumberStyles.HexNumber, null, out field.ResType)
-                        && uint.TryParse(line.Substring(i + 13, 8), System.Globalization.NumberStyles.HexNumber, null, out field.ResGroup)
-                        && ulong.TryParse(line.Substring(i + 22, 16), System.Globalization.NumberStyles.HexNumber, null, out field.ResInstance))
-                        Add(key + "[" + (j++) + "]", (AResourceKey)field);
-                    i = line.IndexOf("key:", i + 38);
-                }
-                line = tr.ReadLine();
+                Add(tuple.Item1, tuple.Item2 as IResourceKey);
             }
         }
 
-        private void SlurpKindred(string key, Predicate<IResourceIndexEntry> Match)
+        private void SlurpKinRKs(string key, Predicate<IResourceIndexEntry> Match)
         {
             List<SpecificResource> seen = new List<SpecificResource>();
             int i = 0;
@@ -2458,6 +2402,8 @@ namespace ObjectCloner
 
         #region Steps
         SpecificResource objkItem;
+        SpecificResource geomItem;
+        SpecificResource caspXMLItem;
         List<SpecificResource> vpxyItems;
         List<SpecificResource> modlItems;
 
@@ -2670,11 +2616,23 @@ namespace ObjectCloner
             lastStepInChain = None;
             if (!JustSelf)
             {
-                stepList.AddRange(new Step[] {
-                    CASP_deepClone,
-                    CASP_getKinXML,
-                });
-                lastStepInChain = CASP_getKinXML;
+                if (IsDeepClone)
+                {
+                    stepList.AddRange(new Step[] {
+                        CASP_deepClone,
+                        CASP_SlurpKinXML,
+                    });
+                }
+                else
+                {
+                    stepList.AddRange(new Step[] {
+                        CASP_cloneNoDDS,
+                        CASP_getKinXML,
+                        CASPKinXML_getDDSes,
+                        GEOM_getNormalMap,
+                    });
+                }
+                lastStepInChain = CASP_SlurpKinXML;
                 if (WantThumbs)
                     stepList.Add(SlurpThumbnails);
             }
@@ -2721,7 +2679,11 @@ namespace ObjectCloner
             StepText.Add(CWAL_SlurpThumbnails, "Add thumbnails");
 
             StepText.Add(CASP_deepClone, "Deep clone of resources referenced by CASP");
-            StepText.Add(CASP_getKinXML, "Preset XML (same instances as CASP)");
+            StepText.Add(CASP_SlurpKinXML, "Preset XML (same instances as CASP) (method 1)");
+            StepText.Add(CASP_cloneNoDDS, "Deep clone of resources referenced by CASP, excluding DDSes, and spot the GEOM");
+            StepText.Add(CASP_getKinXML, "Preset XML (same instance as CASP) (method 2)");
+            StepText.Add(CASPKinXML_getDDSes, "Add specific XML-referenced DDSes");
+            StepText.Add(GEOM_getNormalMap, "Add GEOM-referenced NormalMap");
         }
 
         void None() { }
@@ -2946,17 +2908,17 @@ namespace ObjectCloner
                 SlurpRKsFromField("vpxy[" + i + "]", vpxyChunk);
             }
         }
-        void VPXYs_getKinMTST() { Diagnostics.Log("VPXYs_getKinMTST"); VPXYs_getKin("VPXYs_getKinMTST", 0x02019972, "mtst"); }
-        void VPXYs_getKinXML() { Diagnostics.Log("VPXYs_getKinXML"); VPXYs_getKin("VPXYs_getKinXML", 0x0333406C, "PresetXML"); }
+        void VPXYs_getKinMTST() { Diagnostics.Log("VPXYs_getKinMTST"); VPXYs_getKinRKs("VPXYs_getKinMTST", 0x02019972, "mtst"); }
+        void VPXYs_getKinXML() { Diagnostics.Log("VPXYs_getKinXML"); VPXYs_getKinRKs("VPXYs_getKinXML", 0x0333406C, "PresetXML"); }
         void VPXYKinMTST_SlurpRKs() { Diagnostics.Log("VPXYKinMTST_SlurpRKs"); VPXYKin_SlurpRKs(0x02019972, "mtst"); }
         void VPXYKinXML_SlurpRKs() { Diagnostics.Log("VPXYKinXML_SlurpRKs"); VPXYKin_SlurpRKs(0x0333406C, "PresetXML"); }
         bool IsVPXYKin(IResourceKey rk, uint type) { return rk.ResourceType == type && vpxyItems.Exists(item => item.ResourceIndexEntry.Instance == rk.Instance); }
-        void VPXYs_getKin(string log, uint type, string suffix)
+        void VPXYs_getKinRKs(string log, uint type, string suffix)
         {
             for (int i = 0; i < vpxyItems.Count; i++)
             {
                 Diagnostics.Log(String.Format(log + ": 0x{0:X8}-*-0x{1:X16}", type, vpxyItems[i].ResourceIndexEntry.Instance));
-                SlurpKindred("vpxy[" + i + "]." + suffix, rie => IsVPXYKin(rie, type));
+                SlurpKinRKs("vpxy[" + i + "]." + suffix, rie => IsVPXYKin(rie, type));
             }
         }
         void VPXYKin_SlurpRKs(uint type, string prefix)
@@ -3045,43 +3007,148 @@ namespace ObjectCloner
             Diagnostics.Show(s, "No TXTC items");
         }
 
-        void deepClone(string _key, IResourceKey _rk, Predicate<IResourceKey> _match)
+        void deepClone(Tuple<string, object> _tuple, Predicate<IResourceKey> _match)
         {
+            IResourceKey _rk = _tuple.Item2 as IResourceKey;
             if (!_match(_rk)) return;
-            Add(_key, _rk);
+            Add(_tuple.Item1, _rk);
             SpecificResource sr = new SpecificResource(FileTable.GameContent, _rk);
             if (sr.ResourceIndexEntry == null) return;
 
-            int i = 0;
-            IEnumerable<IResourceKey> ierk;
+            string key = _tuple.Item1 + ": " + sr.LongName.Substring(0, 4);
+            IEnumerable<Tuple<string, object>> iet;
             if (_rk.ResourceType == 0x0333406C)
             {
-                ierk = (new StreamReader(sr.Resource.Stream, true)).SlurpRKs();
+                iet = (new StreamReader(sr.Resource.Stream, true)).SlurpRKs(key);
             }
             else
             {
-                ierk = (sr.Resource as AResource).SlurpRKs();
+                iet = (sr.Resource as AResource).FindAll(key, x => x is IResourceKey, (tr, k) => tr.SlurpRKs(k));
             }
-            foreach (IResourceKey rk in ierk)
-                deepClone(_key + ": " + sr.LongName.Substring(0, 4) + " RK " + i++, rk, _match);
+            foreach (var tuple in iet)
+                deepClone(tuple, _match);
         }
+
         void CASP_deepClone()
         {
             Diagnostics.Log("CASP_deepClone");
             CASPartResource.CASPartResource casp = selectedItem.Resource as CASPartResource.CASPartResource;
             if (casp == null) return;
 
-            IEnumerable<IResourceKey> ierk = casp.SlurpRKs();
-            int i = 0;
             List<IResourceKey> seen = new List<IResourceKey>();
-            foreach (IResourceKey rk in ierk)
-                deepClone("casp RK " + i++, rk, x => { if (seen.Contains(x) || x.ResourceType == 0x034AEECB) return false; seen.Add(x); return true; });
+            foreach (var tuple in casp.FindAll("casp", x => x is IResourceKey, (tr, k) => tr.SlurpRKs(k)))
+                deepClone(tuple, x => { if (seen.Contains(x) || x.ResourceType == 0x034AEECB) return false; seen.Add(x); return true; });
+        }
+
+        void CASP_cloneNoDDS()
+        {
+            Diagnostics.Log("CASP_cloneNoDDS");
+            CASPartResource.CASPartResource casp = selectedItem.Resource as CASPartResource.CASPartResource;
+            if (casp == null) return;
+
+            geomItem = null;
+            List<IResourceKey> seen = new List<IResourceKey>();
+            foreach (var tuple in casp.FindAll("casp", x => x is IResourceKey, (tr, k) => tr.SlurpRKs(k)))
+                deepClone(tuple,
+                    x => {
+                        if (seen.Contains(x) || x.ResourceType == 0x034AEECB || x.ResourceType == 0x00B2D882)
+                            return false;
+                        seen.Add(x);
+                        if (x.ResourceType == 0x015A1849 && geomItem == null)
+                            geomItem = new SpecificResource(FileTable.GameContent, x);
+
+                        return true;
+                    });
+        }
+
+        void CASP_SlurpKinXML()
+        {
+            Diagnostics.Log(String.Format("CASP_getKinXML" + ": 0x{0:X8}-*-0x{1:X16}", 0x0333406C, selectedItem.ResourceIndexEntry.Instance));
+            SlurpKinRKs("casp.PresetXML", rie => rie.ResourceType == 0x0333406C && rie.Instance == selectedItem.ResourceIndexEntry.Instance);
         }
 
         void CASP_getKinXML()
         {
-            Diagnostics.Log(String.Format("CASP_getKinXML" + ": 0x{0:X8}-*-0x{1:X16}", 0x0333406C, selectedItem.ResourceIndexEntry.Instance));
-            SlurpKindred("casp.PresetXML", rie => rie.ResourceType == 0x0333406C && rie.Instance == selectedItem.ResourceIndexEntry.Instance);
+            Diagnostics.Log("CASP_getKinXML");
+            caspXMLItem = new SpecificResource(FileTable.GameContent, new RK(selectedItem.RequestedRK) { ResourceType = 0x0333406C });//_XML
+            if (caspXMLItem.ResourceIndexEntry != null)
+                Add("casp.PresetXML", caspXMLItem.ResourceIndexEntry);
+            else
+                Diagnostics.Show("CASP _XML resource not found");
+        }
+
+        /*
+<preset>
+  <complate name="CasRgbMask" reskey="blah">
+    <value key="..." value="key:00B2D882:00000000:B5683B98CA67ECFC" />
+  </complate>
+</preset>
+        /**/
+        static string[] CasRgbMaskWantedKeys = new string[] {
+             "Overlay"          
+            ,"Mask"             
+            ,"Transparency Map" 
+            ,"Multiplier"       
+            ,"Clothing Specular"
+            ,"Clothing Ambient" 
+            ,"Stencil A"        
+            ,"Stencil B"        
+            ,"Stencil C"        
+            ,"Stencil D"        
+            ,"Stencil E"        
+            ,"Stencil F"        
+            ,"Logo Texture"     
+            ,"Logo 2 Texture"   
+            ,"Logo 3 Texture"   
+            ,
+        };
+        void CASPKinXML_getDDSes()
+        {
+            Diagnostics.Log("CASP_getXMLDDSes");
+            if (caspXMLItem.Resource == null) return;
+            XElement casp = XElement.Load(caspXMLItem.Resource.Stream);
+            foreach (Tuple<string,string> tuple in
+                casp.Descendants("value")
+                .Where(v => CasRgbMaskWantedKeys.Contains(v.Attribute("key").Value))
+                .Select(v => Tuple.Create(v.Attribute("key").Value, v.Attribute("value").Value)))
+            {
+                IResourceKey rk;
+                string oldKey = tuple.Item2.Substring(4).Replace('-', ':');
+                string RKkey = "0x" + oldKey.Replace(":", "-0x");//translate to s3pi format
+                if (RK.TryParse(RKkey, out rk))
+                    Add("casp.PresetXML." + tuple.Item1, rk);
+            }
+        }
+
+        void GEOM_getNormalMap()
+        {
+            Diagnostics.Log("GEOM_getNormalMap");
+            if (geomItem == null) { Diagnostics.Show("GEOM reference not found"); return; }
+            if (geomItem.Resource == null) { Diagnostics.Show("GEOM resource not found"); return; }
+            if (geomItem.Resource as meshExpImp.ModelBlocks.GeometryResource == null) { Diagnostics.Show("GEOM resource is not a GeometryResource"); return; }
+            meshExpImp.ModelBlocks.GeometryResource geomResource = geomItem.Resource as meshExpImp.ModelBlocks.GeometryResource;
+            if (geomResource.ChunkEntries.Count != 1) { Diagnostics.Show("GeometryResource should have 1 Chunk, found " + geomResource.ChunkEntries.Count); return; }
+            meshExpImp.ModelBlocks.GEOM geom = geomResource.ChunkEntries[0].RCOLBlock as meshExpImp.ModelBlocks.GEOM;
+            if (geom == null) { Diagnostics.Show("GEOM RCOL block not found"); return; }
+            if (geom.Shader == 0) return;
+            MATD.MTNF mtnf = geom.Mtnf;
+            if (mtnf == null) { Diagnostics.Show("MTNF expected but was null"); return; }
+            MATD.ShaderData sd = mtnf.SData.Find(e => e.Field == MATD.FieldType.NormalMap);
+            if (sd == null) { Diagnostics.Show("NormalMap not found"); return; }
+            MATD.ElementTextureRef tr = sd as MATD.ElementTextureRef;
+            if (tr == null) { Diagnostics.Show("NormalMap not an ElementTextureRef"); return; }
+            //This will break when Data stops being a ChunkRef and turns into a plain int...
+            int index = -2;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                tr.Data.UnParse(ms);
+                ms.Position = 0;
+                index = new BinaryReader(ms).ReadInt32();
+            }
+            if (index < 0) { Diagnostics.Show(String.Format("NormalMap index read {0}, expected >= 0", index)); return; }
+            if (index >= geom.TGIBlocks.Count) { Diagnostics.Show(String.Format("NormalMap index read {0}, expected < {1}", index, geom.TGIBlocks.Count)); return; }
+            if (rkLookup.ContainsValue(geom.TGIBlocks[index])) { Diagnostics.Show("Already seen NormalMap " + geom.TGIBlocks[index]); }
+            Add("casp.GEOM.NormalMap", geom.TGIBlocks[index]);
         }
 
 
@@ -4142,70 +4209,73 @@ namespace ObjectCloner
         public static CatalogType CType(this IResourceKey rk) { return (CatalogType)rk.ResourceType; }
 
         static string[] excludes = new string[] { "Value", "Stream", "AsBytes", };
-        public static IEnumerable FindAll(this AApiVersionedFields resource, Predicate<object> match,
-            Func<TextReader, IEnumerable> findAllTextReader = null,
-            Func<BinaryReader, IEnumerable> findAllBinaryReader = null)
+        public static IEnumerable<Tuple<string, object>> FindAll(this AApiVersionedFields resource, string key, Predicate<object> match,
+            Func<TextReader, string, IEnumerable<Tuple<string, object>>> findAllTextReader = null,
+            Func<BinaryReader, string, IEnumerable<Tuple<string, object>>> findAllBinaryReader = null)
         {
             if (match(resource))
-                yield return resource;
+                yield return Tuple.Create<string, object>(key, resource);
 
-            foreach (TypedValue tv in resource.ContentFields.Where(x => !excludes.Contains(x)).Select(x => resource[x]))
-
-                // string is enumerable but we want to treat it as a single value
-                if (tv.Value is string)
+            else foreach (string field in resource.ContentFields.Where(x => !excludes.Contains(x)))
                 {
-                    if (match(tv.Value))
-                        yield return tv.Value;
-                }
+                    TypedValue tv = resource[field];
+                    string name = key + "." + field;
 
-                else if (typeof(IEnumerable).IsAssignableFrom(tv.Type))
-                    foreach (var e in tv.Value as IEnumerable)
+                    // string is enumerable but we want to treat it as a single value
+                    if (typeof(string).IsAssignableFrom(tv.Type))
                     {
-                        if (e is AApiVersionedFields)
-                            foreach (var value in (e as AApiVersionedFields).FindAll(match, findAllTextReader, findAllBinaryReader))
-                                yield return value;
-
-                        else if (e is TextReader && findAllTextReader != null)
-                            foreach (var value in findAllTextReader(e as TextReader))
-                                yield return value;
-
-                        else if (e is BinaryReader && findAllBinaryReader != null)
-                            foreach (var value in findAllBinaryReader(e as BinaryReader))
-                                yield return value;
-
-                        else if (match(e))
-                            yield return e;
+                        if (match(tv.Value))
+                            yield return Tuple.Create<string, object>(name, tv.Value);
                     }
 
-                else if (typeof(AApiVersionedFields).IsAssignableFrom(tv.Type))
-                    foreach (var value in (tv.Value as AApiVersionedFields).FindAll(match, findAllTextReader, findAllBinaryReader))
-                        yield return value;
+                    else if (typeof(IEnumerable).IsAssignableFrom(tv.Type))
+                    {
+                        int i = 0;
+                        foreach (var e in tv.Value as IEnumerable)
+                        {
+                            string elem = name + "[" + (i++) + "]";
+                            if (e is AApiVersionedFields)
+                                foreach (var tuple in (e as AApiVersionedFields).FindAll(elem, match, findAllTextReader, findAllBinaryReader))
+                                    yield return tuple;
 
-                else if (typeof(TextReader).IsAssignableFrom(tv.Type) && findAllTextReader != null)
-                    foreach (var value in findAllTextReader(tv.Value as TextReader))
-                        yield return value;
+                            else if (e is TextReader && findAllTextReader != null)
+                                foreach (var tuple in findAllTextReader(e as TextReader, elem))
+                                    yield return tuple;
 
-                else if (typeof(BinaryReader).IsAssignableFrom(tv.Type) && findAllBinaryReader != null)
-                    foreach (var value in findAllBinaryReader(tv.Value as BinaryReader))
-                        yield return value;
+                            else if (e is BinaryReader && findAllBinaryReader != null)
+                                foreach (var tuple in findAllBinaryReader(e as BinaryReader, elem))
+                                    yield return tuple;
 
-                else if (match(tv.Value))
-                    yield return tv.Value;
+                            else if (match(e))
+                                yield return Tuple.Create<string, object>(elem, e);
+                        }
+                    }
+
+                    else if (typeof(AApiVersionedFields).IsAssignableFrom(tv.Type))
+                        foreach (var tuple in (tv.Value as AApiVersionedFields).FindAll(name, match, findAllTextReader, findAllBinaryReader))
+                            yield return tuple;
+
+                    else if (typeof(TextReader).IsAssignableFrom(tv.Type) && findAllTextReader != null)
+                        foreach (var value in findAllTextReader(tv.Value as TextReader, name))
+                            yield return value;
+
+                    else if (typeof(BinaryReader).IsAssignableFrom(tv.Type) && findAllBinaryReader != null)
+                        foreach (var tuple in findAllBinaryReader(tv.Value as BinaryReader, name))
+                            yield return tuple;
+
+                    else if (match(tv.Value))
+                        yield return Tuple.Create<string, object>(name, tv.Value);
+                }
         }
 
-        public static IEnumerable<IResourceKey> SlurpRKs(this AApiVersionedFields resource)
-        {
-            foreach (IResourceKey rk in resource.FindAll(x => x is IResourceKey, SlurpRKs))
-                yield return rk;
-        }
-
-        public static IEnumerable<IResourceKey> SlurpRKs(this TextReader tr)
+        public static IEnumerable<Tuple<string, object>> SlurpRKs(this TextReader tr, string key)
         {
             const int keyLen = 3 + 1 + 8 + 1 + 8 + 1 + 16;//key:TTTTTTTT:GGGGGGGG:IIIIIIIIIIIIIIII
             string line = tr.ReadLine();
             IResourceKey rk = null;
             int linePos = 0;
             int index = -1;
+            int ctr = 0;
 
             while (line != null)
             {
@@ -4229,7 +4299,7 @@ namespace ObjectCloner
                 string oldKey = line.Substring(index, keyLen).Substring(4).Replace('-', ':');
                 string RKkey = "0x" + oldKey.Replace(":", "-0x");//translate to s3pi format
                 if (RK.TryParse(RKkey, out rk))
-                    yield return rk;
+                    yield return Tuple.Create<string, object>(key + "[" + (ctr++) + "]", rk);
             }
         }
     }
