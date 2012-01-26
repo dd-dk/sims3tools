@@ -152,14 +152,31 @@ namespace ObjectCloner.SplitterComponents
         {
             SpecificResource sr = listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0].Tag as SpecificResource : null;
             if (sr != null
-                && sr.PPSource == "cc"
+                //&& sr.PPSource == "cc"
                 && System.IO.File.Exists(sr.PathPackage.Path)
                 && ObjectCloner.Properties.Settings.Default.pkgEditorEnabled
                 && ObjectCloner.Properties.Settings.Default.pkgEditorPath != null
                 && System.IO.File.Exists(ObjectCloner.Properties.Settings.Default.pkgEditorPath))
             {
+                if (sr.ResourceIndexEntry == null)
+                {
+                    CopyableMessageBox.Show("Resource could not be found!", "Cannot open in editor", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                    return;
+                }
+
+                string filename = System.IO.Path.Combine(Environment.GetEnvironmentVariable("TEMP"),
+                    string.Format("s3oc_0x{0:X8}_{1}_{2}.package",
+                    System.Diagnostics.Process.GetCurrentProcess().Id,
+                    NameMap.NMap[sr.ResourceIndexEntry.Instance],
+                    Guid.NewGuid().ToString()
+                    ));
+                s3pi.Package.Package.NewPackage(0).SaveAs(filename);
+                PathPackageTuple ppt = new PathPackageTuple(filename, readwrite: true);
+                ppt.AddResource(sr.ResourceIndexEntry, sr.Resource.Stream);
+                ppt.Package.SavePackage();
+
                 string command = ObjectCloner.Properties.Settings.Default.pkgEditorPath;
-                string arguments = String.Format(@"""{0}""", sr.PathPackage.Path);
+                string arguments = String.Format(@"""{0}""", filename);
 
                 System.Diagnostics.Process p = new System.Diagnostics.Process();
 
@@ -185,7 +202,7 @@ namespace ObjectCloner.SplitterComponents
                 && sr.PPSource == "cc"
                 && System.IO.File.Exists(sr.PathPackage.Path);
             lvcmEdit.Enabled = sr != null
-                && sr.PPSource == "cc"
+                //&& sr.PPSource == "cc"
                 && System.IO.File.Exists(sr.PathPackage.Path)
                 && ObjectCloner.Properties.Settings.Default.pkgEditorEnabled
                 && ObjectCloner.Properties.Settings.Default.pkgEditorPath != null
@@ -273,7 +290,7 @@ namespace ObjectCloner.SplitterComponents
         public event EventHandler CancelClicked;
         private void btnCancel_Click(object sender, EventArgs e) { if (CancelClicked != null) CancelClicked(this, EventArgs.Empty); }
 
-
+        private void btnPasteRK_Click(object sender, EventArgs e) { tgisPasteRK_Click(sender, e); }
         #endregion
 
         #region ListViewColumnSorter
