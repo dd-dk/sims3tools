@@ -38,33 +38,72 @@ namespace ObjectCloner.SplitterComponents
         MainForm.StopWaitCallback stopWaitCB;
         MainForm.updateProgressCallback updateProgressCB;
         MainForm.listViewAddCallBack listViewAddCB;
-        public CatalogType ResourceType { get; private set; }
-        bool isFix;
-        public ObjectChooser()
+        CatalogType resourceType;
+        private ObjectChooser()
         {
             InitializeComponent();
             lvwColumnSorter = new ListViewColumnSorter();
-            this.listView1.ListViewItemSorter = lvwColumnSorter;
             ObjectChooser_LoadListViewSettings();
             this.Load += new EventHandler(ObjectChooser_Load);
         }
 
-        public ObjectChooser(MainForm.DoWaitCallback doWaitCB, MainForm.StopWaitCallback stopWaitCB,
-            MainForm.updateProgressCallback updateProgressCB, MainForm.listViewAddCallBack listViewAddCB, CatalogType resourceType, bool isFix)
+        private ObjectChooser(MainForm.DoWaitCallback doWaitCB, MainForm.StopWaitCallback stopWaitCB,
+            MainForm.updateProgressCallback updateProgressCB, MainForm.listViewAddCallBack listViewAddCB, CatalogType resourceType)
             : this()
         {
             this.doWaitCB = doWaitCB;
             this.stopWaitCB = stopWaitCB;
             this.updateProgressCB = updateProgressCB;
             this.listViewAddCB = listViewAddCB;
-            this.ResourceType = resourceType;
-            this.isFix = isFix;
+            this.resourceType = resourceType;
+        }
+
+        static Dictionary<CatalogType, ObjectChooser> objectChooserCache = new Dictionary<CatalogType, ObjectChooser>();
+        public static ObjectChooser CreateObjectChooser(MainForm.DoWaitCallback doWaitCB, MainForm.StopWaitCallback stopWaitCB,
+            MainForm.updateProgressCallback updateProgressCB, MainForm.listViewAddCallBack listViewAddCB, CatalogType resourceType,
+            EventHandler<MainForm.SelectedIndexChangedEventArgs> selectedIndexChangedHandler,
+            EventHandler<MainForm.ItemActivateEventArgs> itemActivateHandler)
+        {
+            ObjectChooser res;
+            if (!objectChooserCache.ContainsKey(resourceType))
+            {
+                res = new ObjectChooser(doWaitCB, stopWaitCB, updateProgressCB, listViewAddCB, resourceType);
+                res.SelectedIndexChanged += selectedIndexChangedHandler;
+                res.ItemActivate += itemActivateHandler;
+                return res;
+            }
+
+            res = objectChooserCache[resourceType];
+            res.SelectedIndexChanged = null;
+            res.SelectedItem = null;
+            res.listView1.SelectedItems.Clear();
+            res.SelectedIndexChanged += selectedIndexChangedHandler;
+
+            res.ItemActivate = null;
+            res.ItemActivate += itemActivateHandler;
+
+            return res;
         }
 
         void ObjectChooser_Load(object sender, EventArgs e)
         {
             if (filling) { AbortFilling(false); }//this can never happen
             StartFilling();
+        }
+
+        public void GetReady()
+        {
+            if (filling) return;
+
+            listView1.ListViewItemSorter = lvwColumnSorter;
+            listView1.Visible = true;
+            listView1.Focus();
+            if (listView1.Items.Count > 0)
+            {
+                listView1.Items[0].EnsureVisible();
+                listView1.Items[0].Focused = true;
+                //listView1.Items[0].Selected = true;
+            }
         }
 
         void ObjectChooser_LoadListViewSettings()
@@ -279,15 +318,14 @@ namespace ObjectCloner.SplitterComponents
 
         void StartFilling()
         {
-            Diagnostics.Log(String.Format("StartFilling ResourceType: {0}", ResourceType));
-            listView1.Visible = false;
-            if (!isFix)
-            {
-                doWaitCB("Please wait, loading object catalog...");
-            }
-            listView1.Items.Clear();
+            Diagnostics.Log(String.Format("StartFilling ResourceType: {0}", resourceType));
 
-            FillThread ft = new FillThread(this, ResourceType, Add, updateProgressCB, stopFilling, OnFillingComplete);
+            doWaitCB("Please wait, loading object catalog...");
+            listView1.Visible = false;
+            listView1.Items.Clear();
+            this.listView1.ListViewItemSorter = null;
+
+            FillThread ft = new FillThread(this, resourceType, Add, updateProgressCB, stopFilling, OnFillingComplete);
             FillingComplete += new EventHandler<MainForm.BoolEventArgs>(ObjectChooser_FillingComplete);
 
             fillThread = new Thread(new ThreadStart(ft.Fill));
@@ -309,14 +347,17 @@ namespace ObjectCloner.SplitterComponents
 
 
 
-            if (!isFix) stopWaitCB(this);
-            listView1.Visible = !isFix;
+            stopWaitCB(this);
 
-            if (e.arg)
+            if (e.arg && resourceType != 0)
             {
-                if (listView1.Items.Count > 0) { SelectedItem = listView1.Items[0]; if (!isFix) { SelectedItem.EnsureVisible(); listView1.Focus(); } }
-                if (isFix && listView1.Items.Count == 1) listView1_ItemActivate(listView1, EventArgs.Empty);
+                if (objectChooserCache.ContainsKey(resourceType))
+                    objectChooserCache[resourceType] = this;
+                else
+                    objectChooserCache.Add(resourceType, this);
             }
+
+            GetReady();
         }
 
         public void AbortFilling(bool abort)
@@ -377,52 +418,42 @@ namespace ObjectCloner.SplitterComponents
             }
 
 
+            IEnumerable<SpecificResource> Find()
+            {
+                List<ulong> lres = new List<ulong>();
+                int i = 0;
+
+                updateProgress(true, "Please wait, finding objects... 0%", true, FileTable.GameContent.Count, true, 0);
+
+                foreach (PathPackageTuple ppt in FileTable.GameContent)
+                {
+                    if (stopFilling) break;
+
+                    List<SpecificResource> matches = new List<SpecificResource>();
+                    foreach (var rie in ppt.Package.FindAll(rie => !lres.Contains(rie.Instance) &&
+                        (resourceType != 0 ? rie.ResourceType == (uint)resourceType : Enum.IsDefined(typeof(CatalogType), rie.ResourceType))))
+                    {
+                        if (stopFilling) yield break;
+                        lres.Add(rie.Instance);
+                        yield return new SpecificResource(ppt, rie);
+                    }
+
+                    updateProgress(true, "Please wait, finding objects... " + i * 100 / FileTable.GameContent.Count + "%", false, -1, true, i++);
+                }
+
+                updateProgress(true, "", true, -1, false, 0);
+            }
+
             public void Fill()
             {
                 bool complete = false;
                 bool abort = false;
                 try
                 {
-                    updateProgress(true, "Please wait, searching for objects...", true, -1, false, 0);
-
-                    List<ulong> lres = new List<ulong>();
-                    List<IEnumerable<SpecificResource>> found = new List<IEnumerable<SpecificResource>>();
-                    updateProgress(true, "Please wait, finding objects... 0%", true, FileTable.GameContent.Count, true, 0);
-                    int i = 0;
-                    foreach (PathPackageTuple ppt in FileTable.GameContent)
-                    {
-                        if (stopFilling) return;
-
-                        List<SpecificResource> matches = new List<SpecificResource>();
-                        foreach (var rie in ppt.Package.FindAll(rie => !lres.Contains(rie.Instance) &&
-                            (resourceType != 0 ? rie.ResourceType == (uint)resourceType : Enum.IsDefined(typeof(CatalogType), rie.ResourceType))))
-                        {
-                            if (stopFilling) return;
-                            matches.Add(new SpecificResource(ppt, rie));
-                            lres.Add(rie.Instance);
-                        }
-                        found.Add(matches);
-
-                        updateProgress(true, "Please wait, finding objects... " + i * 100 / FileTable.GameContent.Count + "%", false, -1, true, i++);
-                    }
-
-                    updateProgress(true, "Please wait, loading objects... 0%", true, lres.Count, true, 0);
-                    DateTime next = DateTime.UtcNow.AddMilliseconds(250);
-                    int freq = Math.Max(1, lres.Count / 50);
-                    i = 0;
-                    foreach (SpecificResource sr in found.SelectMany(x => x))
-                    {
-                        if (stopFilling) return;
-
-                        i++;
-                        if (DateTime.UtcNow > next)
-                        {
-                            updateProgress(true, "Please wait, loading objects... " + i * 100 / lres.Count + "%", false, -1, true, i);
-                            next = DateTime.UtcNow.AddMilliseconds(250);
-                        }
-
+                    foreach (SpecificResource sr in Find())
                         Add(sr);
-                    }
+
+                    if (stopFilling) return;
                     complete = true;
                 }
                 catch (ThreadAbortException) { abort = true; Thread.Sleep(0); }
