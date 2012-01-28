@@ -61,28 +61,34 @@ namespace ObjectCloner
 
         public MainForm()
         {
-            InitializeComponent();
+            using (Splash form = new Splash() { Message = "Starting s3oc...", })
+            {
+                form.Show();
+                Application.DoEvents();
 
-            this.Text = myName;
-            pleaseWait = new PleaseWait();
+                InitializeComponent();
 
-            FileTable.CustomContentPath = ObjectCloner.Properties.Settings.Default.CustomContent;
-            GameFolders.InstallDirs = ObjectCloner.Properties.Settings.Default.InstallDirs;
-            GameFolders.EPsDisabled = ObjectCloner.Properties.Settings.Default.EPsDisabled;
+                this.Text = myName;
+                pleaseWait = new PleaseWait();
 
-            MainForm_LoadFormSettings();
+                FileTable.CustomContentPath = ObjectCloner.Properties.Settings.Default.CustomContent;
+                GameFolders.InstallDirs = ObjectCloner.Properties.Settings.Default.InstallDirs;
+                GameFolders.EPsDisabled = ObjectCloner.Properties.Settings.Default.EPsDisabled;
 
-            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_langSearch, STBLHandler.LangSearch);
+                MainForm_LoadFormSettings();
 
-            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_advanced, ObjectCloner.Properties.Settings.Default.AdvanceCloning);
+                menuBarWidget1.Checked(MenuBarWidget.MB.MBS_langSearch, STBLHandler.LangSearch);
 
-            Diagnostics.Popups = ObjectCloner.Properties.Settings.Default.Diagnostics;
-            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_popups, Diagnostics.Popups);
+                menuBarWidget1.Checked(MenuBarWidget.MB.MBS_advanced, ObjectCloner.Properties.Settings.Default.AdvanceCloning);
 
-            SetStepText();
+                Diagnostics.Popups = ObjectCloner.Properties.Settings.Default.Diagnostics;
+                menuBarWidget1.Checked(MenuBarWidget.MB.MBS_popups, Diagnostics.Popups);
 
-            InitialiseTabs(CatalogType.CatalogProxyProduct);//Use the Proxy Product as it has pretty much nothing on it
-            TabEnable(false);
+                SetStepText();
+
+                InitialiseTabs(CatalogType.CatalogProxyProduct);//Use the Proxy Product as it has pretty much nothing on it
+                TabEnable(false);
+            }
         }
 
         string GetMyName()
@@ -100,7 +106,99 @@ namespace ObjectCloner
             if (cmdlineTest)
             {
             }
+
+            // /select 0x319E4F1D-0x00000000-0x000000000000040B
+            if (pkgs.Count == 0 && cmdLineSelect)
+            {
+                cmdLineSelect = false;
+                using (Splash form = new Splash() { Message = "Initialising FileTable...", })
+                {
+                    form.Show();
+                    InitialiseFileTable();
+                }
+
+                bool okay = false;
+                using (Splash form = new Splash() { Message = "Refreshing packages cache...", })
+                {
+                    form.Show();
+                    okay = CheckInstallDirs(null);
+                }
+
+                if (okay)
+                {
+                    int i = 0;
+                    using (Splash form = new Splash() { Message = "Searching...", })
+                    {
+                        form.Show();
+                        selectedItem = FileTable.GameContent.Select(ppt =>
+                            {
+                                form.Message = "Searching package " + ++i + "...";
+                                return ppt.Find(rie => cmdLineSelectRK.Equals(rie));
+                            }).Where(x => x != null).FirstOrDefault();
+                    }
+
+                    if (selectedItem == null)
+                        CopyableMessageBox.Show(this, "Resource " + cmdLineSelectRK + " not found.", "Error", CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
+                    else
+                    {
+                        mode = Mode.FromGame;
+                        FillTabs(selectedItem);
+
+                        using (Splash form = new Splash() { Message = "Displaying form...", })
+                        {
+                            form.Show();
+                            btnStart_Click(this, EventArgs.Empty);
+                        }
+                    }
+                }
+            }
+            // "D:\My Documents\Sims\CreatorNameHere_ToiletExpensive_NR.package"
+            else if (pkgs.Count == 1)
+            {
+                using (Splash form = new Splash() { Message = "Displaying form...", })
+                {
+                    form.Show();
+                    mode = Mode.FromUser;
+                    fileReOpenToFix(pkgs[0]);
+                }
+            }
         }
+
+        #region Splash Form
+        class Splash : Form
+        {
+            Panel panel = new Panel()
+            {
+                BackColor = System.Drawing.SystemColors.Window,
+                BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D,
+                Dock = DockStyle.Fill,
+            };
+
+            Label label = new Label()
+            {
+                Anchor = AnchorStyles.None,
+                AutoSize = true,
+                Font = new System.Drawing.Font(new Label().Font.FontFamily, 18),
+                ForeColor = System.Drawing.SystemColors.WindowText,
+            };
+
+            public Splash()
+            {
+                BackColor = System.Drawing.SystemColors.WindowFrame;
+                ShowInTaskbar = false;
+                FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+                Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+                Height = 150;
+                Width = 400;
+                StartPosition = FormStartPosition.CenterScreen;
+
+                panel.Controls.Add(label);
+                Controls.Add(panel);
+            }
+
+            public string Message { get { return label.Text; } set { label.Text = value; } }
+        }
+        #endregion
 
         private void MainForm_LoadFormSettings()
         {
@@ -175,6 +273,7 @@ namespace ObjectCloner
         {
             Diagnostics.Log("Abort abort:" + abort);
 
+            btnStart.Enabled = false;
             if (objectChooser != null)
             {
                 objectChooser.AbortFilling(abort);
@@ -252,12 +351,13 @@ namespace ObjectCloner
         {
             Options = new Dictionary<string, CmdInfo>();
             Options.Add("test", new CmdInfo(CmdLineTest, "Enable facilities still undergoing initial testing"));
+            Options.Add("select", new CmdInfo(CmdLineSelect, "Select the specified the resourceKey to clone"));
             Options.Add("help", new CmdInfo(CmdLineHelp, "Display this help"));
         }
+        List<string> pkgs = new List<string>();
         void CmdLine(params string[] args)
         {
             SetOptions();
-            List<string> pkgs = new List<string>();
             List<string> cmdline = new List<string>(args);
             while (cmdline.Count > 0)
             {
@@ -277,12 +377,43 @@ namespace ObjectCloner
                     }
                 }
                 else
+                {
+                    if (!File.Exists(cmdline[0]))
+                    {
+                        CopyableMessageBox.Show(this, "Package not found:\n'" + cmdline[0] + "'",
+                            myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
+                        Environment.Exit(1);
+                    }
                     pkgs.Add(cmdline[0]);
+                }
                 cmdline.RemoveAt(0);
             }
         }
         bool cmdlineTest = false;
         bool CmdLineTest(ref List<string> cmdline) { cmdlineTest = true; return false; }
+        bool cmdLineSelect = false;
+        IResourceKey cmdLineSelectRK = new RK(RK.NULL);
+        bool CmdLineSelect(ref List<string> cmdline)
+        {
+            if (cmdline.Count < 2)
+            {
+                CopyableMessageBox.Show(this, "Missing 'resourceKey' parameter.", "Error", CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
+                return true;
+            }
+            if (!RK.TryParse(cmdline[1], cmdLineSelectRK))
+            {
+                CopyableMessageBox.Show(this, "'resourceKey' parameter in incorrect format.", "Error", CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
+                return true;
+            }
+            if (!Enum.IsDefined(typeof(CatalogType), cmdLineSelectRK.ResourceType))
+            {
+                CopyableMessageBox.Show(this, "Resource Type 0x" + cmdLineSelectRK.ResourceType.ToString("X8") + " is not supported.", "Error", CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
+                return true;
+            }
+            cmdline.RemoveAt(1);
+            cmdLineSelect = true;
+            return false;
+        }
         bool CmdLineHelp(ref List<string> cmdline)
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
@@ -344,13 +475,32 @@ namespace ObjectCloner
                 }
             }
             if (changeValue)
-                toolStripProgressBar1.Value = value;
+            {
+                if (value > toolStripProgressBar1.Maximum) { }
+                else
+                    toolStripProgressBar1.Value = value;
+            }
         }
 
         Dictionary<UInt64, SpecificResource> CTPTBrushIndexToPair;
+        Dictionary<uint, Dictionary<SpecificResource, ListViewItem>> ListViewCache = new Dictionary<uint, Dictionary<SpecificResource, ListViewItem>>();
         public delegate void listViewAddCallBack(SpecificResource sr, ListView listView);
         public void ListViewAdd(SpecificResource sr, ListView listView)
         {
+            if (!ListViewCache.ContainsKey(sr.RequestedRK.ResourceType))
+            {
+                ListViewCache.Add(sr.RequestedRK.ResourceType, new Dictionary<SpecificResource, ListViewItem>());
+            }
+            Dictionary<SpecificResource, ListViewItem> cache = ListViewCache[sr.RequestedRK.ResourceType];
+            KeyValuePair<SpecificResource, ListViewItem> kvp = cache.Where(x => x.Key.Equals(sr)).FirstOrDefault();
+            if (kvp.Key != null)
+            {
+                if (kvp.Value.ListView != null)
+                    kvp.Value.ListView.Items.Remove(kvp.Value);
+                listView.Items.Add(kvp.Value);
+                return;
+            }
+
             #region CatalogTerrainPaintBrush pair
             if (sr.RequestedRK.CType() == CatalogType.CatalogTerrainPaintBrush)
             {
@@ -367,6 +517,25 @@ namespace ObjectCloner
             }
             #endregion
 
+            string name = GetResourceName(sr);
+
+            List<string> exts;
+            string tag = "UNKN";
+            if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + sr.ResourceIndexEntry.ResourceType.ToString("X8"), out exts)) tag = exts[0];
+
+            ListViewItem lvi = new ListViewItem(new string[] {
+                name, tag, sr.RGVsn, "" + (AResourceKey)sr.ResourceIndexEntry,
+                sr.PathPackage.Path + " (" + sr.PPSource + ")",
+            }) { Tag = sr };
+
+            listView.Items.Add(lvi);
+            //listView.EnsureVisible(listView.Items.Count - 1);
+
+            cache.Add(sr, lvi);
+        }
+
+        string GetResourceName(SpecificResource sr)
+        {
             string name = NameMap.NMap[sr.ResourceIndexEntry.Instance];
             if (name == null)
             {
@@ -394,16 +563,7 @@ namespace ObjectCloner
                     name = e.Message;// Don't crash...
                 }
             }
-
-            List<string> exts;
-            string tag = "UNKN";
-            if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + sr.ResourceIndexEntry.ResourceType.ToString("X8"), out exts)) tag = exts[0];
-
-            listView.Items.Add(new ListViewItem(new string[] {
-                name, tag, sr.RGVsn, "" + (AResourceKey)sr.ResourceIndexEntry,
-                sr.PathPackage.Path + " (" + sr.PPSource + ")",
-            }) { Tag = sr });
-            listView.EnsureVisible(listView.Items.Count - 1);
+            return name;
         }
 
         #region flowLayoutPanel1 prompt labels and buttons
@@ -433,7 +593,6 @@ namespace ObjectCloner
             lbSaveCancel.Visible = testPrompt(which, Prompt.SaveCancel);
 
             btnStart.Visible = testPrompt(which, Prompt.CloneFix | Prompt.Search);
-            btnStart.Enabled = false;
 
             flowLayoutPanel1.ResumeLayout();
         }
@@ -449,17 +608,12 @@ namespace ObjectCloner
             StopWait();
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(listView);
-            //Ensure there's only one place for DisplayOptions to drop back to on Cancel
-            if (listView == searchPane) { searchPane.SelectedItem = null; objectChooser = null; }
-            else { objectChooser.SelectedItem = null; searchPane = null; }
             listView.Dock = DockStyle.Fill;
             listView.Focus();
         }
 
         private void listView_SelectedIndexChanged(object sender, SelectedIndexChangedEventArgs e)
         {
-            if (isFix) return;
-
             replacementForThumbs = null;// might as well be here; needed after FillTabs, really.
             rkLookup = null;//Indicate that we're not working on the same resource any more
             if (formClosing || e.SelectedItem == null)
@@ -484,7 +638,7 @@ namespace ObjectCloner
             {
                 ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(selectedItem.PathPackage.Path);
                 mode = Mode.FromUser;
-                fileReOpenToFix(selectedItem.PathPackage.Path, 0);
+                fileReOpenToFix(selectedItem.PathPackage.Path);
             }
         }
 
@@ -505,14 +659,21 @@ namespace ObjectCloner
 
             if (!CheckInstallDirs(null)) return;
 
+            //Ensure there's only one place for DisplayOptions to drop back to on Cancel
+            searchPane = null;
+            
             DisplayListView(objectChooser);
+            objectChooser.GetReady();
         }
 
         private void DisplaySearch()
         {
             Diagnostics.Log("DisplaySearch");
 
-            isFix = false;
+            //Ensure there's only one place for DisplayOptions to drop back to on Cancel
+            objectChooser = null;
+
+            searchPane.SelectedItem = null;
             DisplayListView(searchPane);
         }
 
@@ -579,10 +740,9 @@ namespace ObjectCloner
             if (mode == Mode.FromGame)
             {
                 string prefix = CreatorName;
+                string name = GetResourceName(selectedItem);
                 prefix = (prefix != null) ? prefix + "_" : "";
-                cloneFixOptions.UniqueName = prefix + (searchPane == null ?
-                    objectChooser.SelectedItem.Text
-                    : searchPane.SelectedItem.Text);
+                cloneFixOptions.UniqueName = prefix + name;
             }
             else
             {
@@ -622,7 +782,7 @@ namespace ObjectCloner
         {
             ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(e.SelectedItem.PathPackage.Path);
             mode = Mode.FromUser;
-            fileReOpenToFix(e.SelectedItem.PathPackage.Path, 0);
+            fileReOpenToFix(e.SelectedItem.PathPackage.Path);
         }
 
         private void DisplayReplaceTGIResults()
@@ -667,6 +827,9 @@ namespace ObjectCloner
         {
             Diagnostics.Log("DisplayNothing");
 
+            objectChooser = null;
+            searchPane = null;
+
             this.AcceptButton = null;
             this.CancelButton = null;
 
@@ -674,7 +837,7 @@ namespace ObjectCloner
 
             StopWait();
             ClearTabs();
-            TabEnable(false);
+            //TabEnable(false);
             splitContainer1.Panel1.Controls.Clear();
             if (cloneFixOptions != null)
             {
@@ -695,7 +858,7 @@ namespace ObjectCloner
             pleaseWait.Label = waitText;
             splitContainer1.Panel2.Enabled = false;
             TabEnable(false);//?
-            this.Text = GetMyName() + " [busy]";
+            this.Text = GetMyName() + " [busy]" + " " + waitText;
 
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(pleaseWait);
@@ -724,6 +887,7 @@ namespace ObjectCloner
 
         #region CloneFixOptions
         string uniqueName = null;
+        bool isFix = false;
         bool isRepair = false;
         bool isCreateNewPackage = false;
         bool isDeepClone = false;
@@ -770,13 +934,17 @@ namespace ObjectCloner
             TabEnable(false);
             if (searchPane != null)
                 DisplaySearch();
-            else
+            else if (objectChooser != null)
                 DisplayObjectChooser();
+            else
+                DisplayNothing();
         }
 
         void CloneStart()
         {
             Diagnostics.Log("CloneStart");
+
+            isFix = false;
 
             uniqueObject = null;
             if (UniqueObject == null)
@@ -800,6 +968,8 @@ namespace ObjectCloner
         void FixStart()
         {
             Diagnostics.Log("FixStart");
+
+            isFix = true;
 
             uniqueObject = null;
             if (isRenumber && UniqueObject == null)
@@ -941,10 +1111,11 @@ namespace ObjectCloner
 
         void InitialiseTabs(CatalogType resourceType)
         {
+            Diagnostics.Log("InitialiseTabs: " + resourceType);
             if (tabType == resourceType) return;
 
             string appWas = this.Text;
-            this.Text = GetMyName() + " [busy]";
+            this.Text = GetMyName() + " [busy] Initialising tabs...";
             Application.UseWaitCursor = true;
             Application.DoEvents();
             try
@@ -967,16 +1138,20 @@ namespace ObjectCloner
                     {
                         InitialiseDetailsTab(res);
                         this.tabControl1.TabPages.Add(this.tpDetail);
-                    }
-                    if (tabType == CatalogType.CatalogObject)
-                    {
-                        InitialiseFlagTabs(res);
-                        if (tlpOther.Visible)
-                            InitialiseOtherTab(res);
-                        this.tabControl1.TabPages.Add(this.tpFlagsRoom);
-                        this.tabControl1.TabPages.Add(this.tpFlagsFunc);
-                        this.tabControl1.TabPages.Add(this.tpFlagsBuild);
-                        this.tabControl1.TabPages.Add(this.tpFlagsMisc);
+                        if (tabType == CatalogType.CatalogObject)
+                        {
+                            using (Splash splash = new Splash() { Message = "Initialising tabs...", })
+                            {
+                                splash.Show();
+                                InitialiseFlagTabs(res);
+                                if (tlpOther.Visible)
+                                    InitialiseOtherTab(res);
+                                this.tabControl1.TabPages.Add(this.tpFlagsRoom);
+                                this.tabControl1.TabPages.Add(this.tpFlagsFunc);
+                                this.tabControl1.TabPages.Add(this.tpFlagsBuild);
+                                this.tabControl1.TabPages.Add(this.tpFlagsMisc);
+                            }
+                        }
                     }
                 }
             }
@@ -1156,8 +1331,10 @@ namespace ObjectCloner
 
         void ClearTabs()
         {
+            Diagnostics.Log("ClearTabs");
             string appWas = this.Text;
-            this.Text = GetMyName() + " [busy]";
+            this.Text = GetMyName() + " [busy] Clearing tabs...";
+
             Application.UseWaitCursor = true;
             Application.DoEvents();
             try
@@ -1226,8 +1403,10 @@ namespace ObjectCloner
 
         void FillTabs(SpecificResource item)
         {
+            Diagnostics.Log("FillTabs: " + item);
             string appWas = this.Text;
-            this.Text = GetMyName() + " [busy]";
+            this.Text = GetMyName() + " [busy] Filling tabs...";
+
             Application.UseWaitCursor = true;
             Application.DoEvents();
             try
@@ -1467,8 +1646,10 @@ namespace ObjectCloner
 
         void TabEnable(bool enabled)
         {
+            Diagnostics.Log((enabled ? "En" : "Dis") + "abling tabs...");
             string appWas = this.Text;
-            this.Text = GetMyName() + " [busy]";
+            this.Text = GetMyName() + " [busy] " + (enabled ? "En" : "Dis") + "abling tabs...";
+
             Application.UseWaitCursor = true;
             Application.DoEvents();
             try
@@ -1665,7 +1846,7 @@ namespace ObjectCloner
 
             mode = Mode.FromUser;
 
-            fileReOpenToFix(openPackageDialog.FileName, 0);
+            fileReOpenToFix(openPackageDialog.FileName);
         }
 
         private void fileReloadCurrent()
@@ -1718,7 +1899,7 @@ namespace ObjectCloner
                 CloseCurrent();//needed
                 InitialiseFileTable();
 
-                LoadObjectChooser(FromCloningMenuEntry(mn.mn), false);
+                LoadObjectChooser(FromCloningMenuEntry(mn.mn));
             }
             finally { this.Enabled = true; }
         }
@@ -2080,16 +2261,17 @@ namespace ObjectCloner
 
         bool HaveUnsavedWork()
         {
-            return cloneFixOptions != null
-                || lbSaveCancel.Visible;// && splitContainer1.Panel1.Controls.Contains(cloneFixOptions);
+            return cloneFixOptions != null ||
+                lbSaveCancel.Visible;// && splitContainer1.Panel1.Controls.Contains(cloneFixOptions);
         }
         bool IsOkayToThrowAwayWork()
         {
-            int dr = CopyableMessageBox.Show("Continuing will lose any changes.", GetMyName(), CopyableMessageBoxButtons.OKCancel, CopyableMessageBoxIcon.Warning, 1);
+            return true;
+            /*int dr = CopyableMessageBox.Show("Continuing will lose any changes.", GetMyName(), CopyableMessageBoxButtons.OKCancel, CopyableMessageBoxIcon.Warning, 1);
             if (dr != 0) return false;
 
             cloneFixOptions = null;
-            return true;
+            return true;/**/
         }
 
 
@@ -2099,15 +2281,15 @@ namespace ObjectCloner
             {
                 ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(FileTable.Current.Path);
                 mode = Mode.FromUser;
-                fileReOpenToFix(FileTable.Current.Path, 0);
+                fileReOpenToFix(FileTable.Current.Path);
             }
             else
                 DisplayNothing();
         }
 
-        void fileReOpenToFix(string filename, CatalogType type)
+        void fileReOpenToFix(string filename, IResourceKey rk = null)
         {
-            Diagnostics.Log(String.Format("fileReOpenToFix filename: {0}, type: {1}", filename, type));
+            Diagnostics.Log(String.Format("fileReOpenToFix filename: {0}, rk: {1}", filename, rk));
 
             cloneFixOptions = null;//This should be a safe and sensible place to do this...
 
@@ -2129,29 +2311,29 @@ namespace ObjectCloner
 
             this.Text = GetMyName();
 
-            LoadObjectChooser(type, type != 0);
-        }
-
-        bool isFix = false;
-        void LoadObjectChooser(CatalogType resourceType, bool IsFixPass)
-        {
-            Diagnostics.Log(String.Format("LoadObjectChooser resourceType: {0}, IsFixPass: {1}", resourceType, IsFixPass));
-
-            isFix = IsFixPass;
-
-            CTPTBrushIndexToPair = new Dictionary<ulong, SpecificResource>();
-            objectChooser = new ObjectChooser(DoWait, StopWait, updateProgress, ListViewAdd, resourceType, isFix);
-            if (isFix)
+            if (rk != null)
             {
-                objectChooser.SelectedIndexChanged += new EventHandler<SelectedIndexChangedEventArgs>((sender, e) => selectedItem = e.SelectedItem);
-                objectChooser.ItemActivate += new EventHandler<ItemActivateEventArgs>((sender, e) => FixStart());
+                selectedItem = FileTable.Current.Find(rie => rk.Equals(rie));
+                if (selectedItem == null)
+                    CopyableMessageBox.Show(this, "Resource " + rk + " not found.", "Error", CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
+                else
+                    FixStart();
             }
             else
-            {
-                ClearTabs();
-                objectChooser.SelectedIndexChanged += new EventHandler<SelectedIndexChangedEventArgs>(listView_SelectedIndexChanged);
-                objectChooser.ItemActivate += new EventHandler<ItemActivateEventArgs>(listView_ItemActivate);
-            }
+                LoadObjectChooser(0);
+        }
+
+        void LoadObjectChooser(CatalogType resourceType)
+        {
+            Diagnostics.Log("LoadObjectChooser resourceType: " + resourceType);
+
+            CTPTBrushIndexToPair = new Dictionary<ulong, SpecificResource>();
+
+            ClearTabs();
+
+            btnStart.Enabled = false;
+            objectChooser = ObjectChooser.CreateObjectChooser(DoWait, StopWait, updateProgress, ListViewAdd, resourceType,
+                listView_SelectedIndexChanged, listView_ItemActivate);
 
             DisplayObjectChooser();
         }
@@ -2162,14 +2344,16 @@ namespace ObjectCloner
             Diagnostics.Log("CheckInstallDirs");
             try
             {
-                DoWait("Setting up folders...");
+                DoWait("Refreshing packages cache...");
                 if (!FileTable.IsOK)
                 {
                     CopyableMessageBox.Show("Found no packages\nPlease check your Game Folder settings.", "No objects to clone",
                         CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Stop);
                     return false;
                 }
+                DoWait("Refreshing STBL cache...");
                 bool loadedSTBLs = STBLHandler.IsOK;
+                DoWait("Refreshing _KEY cache...");
                 bool loadedNMaps = NameMap.IsOK;
                 return true;
             }
@@ -2341,6 +2525,8 @@ namespace ObjectCloner
         }
 
         #region Fetch resources
+        // This is used for both Clone and Fix
+        // Fix is basically DeepClone with a slight change in OBJD
         Dictionary<string, IResourceKey> rkLookup = null;
         void RunRKLookup()
         {
@@ -3704,12 +3890,14 @@ namespace ObjectCloner
                 StopWait();
             }
 
-            int dr = CopyableMessageBox.Show("Your updated package is ready.\nDo you wish to continue working\non it in s3oc?",
+            /*int dr = CopyableMessageBox.Show("Your updated package is ready.\nDo you wish to continue working\non it in s3oc?",
                 myName, CopyableMessageBoxButtons.YesNo, CopyableMessageBoxIcon.Question);
 
             if (dr == 0)
                 ReloadCurrentPackage();
-            else
+            else/**/
+                CopyableMessageBox.Show("Your updated package is ready.",
+                    myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
                 fileClose();
         }
 
@@ -3839,7 +4027,7 @@ namespace ObjectCloner
                     s3pi.Package.Package.ClosePackage(0, target.Package);
 
                     isCreateNewPackage = false;
-                    fileReOpenToFix(target.Path, selectedItem.RequestedRK.CType());
+                    fileReOpenToFix(target.Path, selectedItem.RequestedRK);
                 }
                 else
                 {
