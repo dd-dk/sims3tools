@@ -133,8 +133,18 @@ namespace s3pe.DDSTool
             if (filename == null || filename == "" || !File.Exists(filename))
                 return;
 
-            Image alphaChannelGreyScale = Image.FromFile(filename, true);
-            ddsPanel1.SetAlphaFromGreyscale(alphaChannelGreyScale);
+            if (Path.GetExtension(filename).ToLower().Equals(".dds"))
+            {
+                using (Stream file = new FileStream(filename, FileMode.Open, FileAccess.Read))
+                {
+                    ddsPanel1.SetAlphaFromGreyscale(file);
+                }
+            }
+            else
+            {
+                Image alphaChannelGreyScale = Image.FromFile(filename, true);
+                ddsPanel1.SetAlphaFromGreyscale(alphaChannelGreyScale);
+            }
         }
 
         private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
@@ -219,6 +229,23 @@ namespace s3pe.DDSTool
             this.Close();
         }
 
+        private void btnResize_Click(object sender, EventArgs e)
+        {
+            if (ddsPanel1.ImageSize == Size.Empty) return;
+
+            int width = ddsPanel1.ImageSize.Width;
+            int height = ddsPanel1.ImageSize.Height;
+
+            NewDDSParameters parms = new NewDDSParameters(ddsPanel1.ImageSize.Width, ddsPanel1.ImageSize.Height, true);
+            DialogResult dr = parms.ShowDialog();
+            if (dr != DialogResult.OK) return;
+
+            ddsPanel1.ImageSize = new System.Drawing.Size(parms.Value.Width, parms.Value.Height);
+
+            lbImageW.Text = ddsPanel1.ImageSize.Width + "";
+            lbImageH.Text = ddsPanel1.ImageSize.Height + "";
+            tlpImageSize.Visible = true;
+        }
 
         private void btnHSVReset_Click(object sender, EventArgs e)
         {
