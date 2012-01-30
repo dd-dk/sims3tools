@@ -32,10 +32,13 @@ namespace s3pe.DDSTool
             InitializeComponent();
         }
 
-        public NewDDSParameters(int width, int height) : this()
+        public NewDDSParameters(int width, int height, bool disableColour = false) : this()
         {
             nudWidth.Value = width;
             nudHeight.Value = height;
+
+            if (disableColour)
+                nudRed.Enabled = nudGreen.Enabled = nudBlue.Enabled = nudAlpha.Enabled = false;
         }
 
         public Result Value
