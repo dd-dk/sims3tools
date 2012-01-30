@@ -276,7 +276,7 @@ namespace S3PIDemoFE
         {
             CopyableMessageBox.IssueException(ex,
                 String.Format("{0}\nFront-end Distribution: {1}\nLibrary Distribution: {2}",
-                prefix, getVersion(typeof(MainForm), "s3pe"), getVersion(typeof(s3pi.Interfaces.AApiVersionedFields), "s3pe")),
+                prefix, AutoUpdate.Version.CurrentVersion, AutoUpdate.Version.LibraryVersion),
                 myName);
         }
 
@@ -1430,16 +1430,8 @@ namespace S3PIDemoFE
             AutoUpdate.Checker.AutoUpdateChoice = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_updates);
         }
 
-        bool ddsEnableWarningIssued = false;
         private void settingsEnableDDSPreview()
         {
-            if (!S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview && !ddsEnableWarningIssued)
-            {
-                ddsEnableWarningIssued = true;
-                if (CopyableMessageBox.Show("The DDS Preview feature is in early testing.\n" + "Please save your work frequently if you enable it.\n" +
-                    "\nClick OK to continue or Cancel to leave the feature disabled.", "Enable DDS Preview",
-                    CopyableMessageBoxButtons.OKCancel, CopyableMessageBoxIcon.Warning) != 0) return;
-            }
             S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_previewDDS);
             menuBarWidget1.Checked(MenuBarWidget.MB.MBS_previewDDS, S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview);
             if (S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview)
@@ -1611,32 +1603,16 @@ namespace S3PIDemoFE
                 "Front-end Distribution: {1}\n" +
                 "Library Distribution: {2}"
                 , copyright
-                , getVersion(typeof(MainForm), "s3pe")
-                , getVersion(typeof(s3pi.Interfaces.AApiVersionedFields), "s3pe")
+                , AutoUpdate.Version.CurrentVersion
+                , AutoUpdate.Version.LibraryVersion
                 ), myName);
-        }
-
-        private static string getVersion(Type type, string p)
-        {
-            string s = getString(Path.Combine(Path.GetDirectoryName(type.Assembly.Location), p + "-Version.txt"));
-            return s == null ? "Unknown" : s;
-        }
-
-        private static string getString(string file)
-        {
-            if (!File.Exists(file)) return null;
-            FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read);
-            StreamReader t = new StreamReader(fs);
-            string res = t.ReadLine();
-            fs.Close();
-            return res;
         }
 
         private void helpUpdate()
         {
             bool msgDisplayed = AutoUpdate.Checker.GetUpdate(false);
             if (!msgDisplayed)
-                CopyableMessageBox.Show("Your " + Application.ProductName + " is up to date", myName,
+                CopyableMessageBox.Show("Your " + System.Configuration.PortableSettingsProvider.ExecutableName + " is up to date", myName,
                     CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
         }
 
@@ -1739,7 +1715,6 @@ namespace S3PIDemoFE
             }
         }
 
-        bool ddsFailedWarningIssued = false;
         private void browserWidget1_SelectedResourceChanged(object sender, BrowserWidget.ResourceChangedEventArgs e)
         {
             resourceName = e.name;
@@ -1870,49 +1845,38 @@ namespace S3PIDemoFE
         {
             pnAuto.SuspendLayout();
             pnAutoCleanUp();
+
             if (resException != null)
-            {
-                IResourceIndexEntry rie = browserWidget1.SelectedResource;
-                string s = "";
-                if (rie != null) s += String.Format("Error reading resource {0:X8}:{1:X8}:{2:X16}", rie.ResourceType, rie.ResourceGroup, rie.Instance);
-                s += String.Format("\r\nFront-end Distribution: {0}\r\nLibrary Distribution: {1}\r\n",
-                    getVersion(typeof(MainForm), "s3pe"), getVersion(typeof(s3pi.Interfaces.AApiVersionedFields), "s3pe"));
-                for (Exception inex = resException; inex != null; inex = inex.InnerException)
-                {
-                    s += "\r\nSource: " + inex.Source;
-                    s += "\r\nAssembly: " + inex.TargetSite.DeclaringType.Assembly.FullName;
-                    s += "\r\n" + inex.Message;
-                    s += "\r\n----\r\nStack trace:\r\n" + inex.StackTrace + "\r\n----\r\n";
-                }
-                TextBox tb = new TextBox();
-                tb.Dock = DockStyle.Fill;
-                tb.Multiline = true;
-                tb.ReadOnly = true;
-                tb.ScrollBars = ScrollBars.Vertical;
-                tb.Text = s;
-                pnAuto.Controls.Add(tb);
-            }
-            else if (resource != null)
+                pnAuto.Controls.Add(getExceptionControl(resException));
+            else
             {
                 if (controlPanel1.AutoOff) { }
-                else if (controlPanel1.AutoHex)
+                else if (resource != null)
                 {
-                    HexWidget hw = new HexWidget();
-                    hw.Dock = DockStyle.Fill;
-                    hw.Resource = resource;
-                    hw.ContextMenuStrip = menuBarWidget1.textPreviewContextMenuStrip;
-                    pnAuto.Controls.Add(hw);
-                }
-                else if (!controlPanel1.HexOnly && controlPanel1.AutoValue && hasValueContentField())
-                {
-                    Control c = getValueControl();
-                    if (c != null)
+                    if (controlPanel1.AutoHex)
                     {
-                        c.ContextMenuStrip = menuBarWidget1.textPreviewContextMenuStrip;
-                        pnAuto.Controls.Add(c);
+                        HexWidget hw = new HexWidget();
+                        hw.Resource = resource;
+                        pnAuto.Controls.Add(hw);
+                    }
+                    else
+                    {
+                        if (controlPanel1.AutoValue && hasValueContentField())
+                        {
+                            Control c = getValueControl();
+                            if (c != null)
+                                pnAuto.Controls.Add(c);
+                        }
                     }
                 }
             }
+
+            foreach (Control c in pnAuto.Controls)
+            {
+                c.ContextMenuStrip = menuBarWidget1.previewContextMenuStrip;
+                c.Dock = DockStyle.Fill;
+            }
+
             pnAuto.ResumeLayout();
         }
 
@@ -2027,52 +1991,76 @@ namespace S3PIDemoFE
         }
         Control getValueControl()
         {
-            Control res = null;
-            if (ddsResources.Contains(browserWidget1.SelectedResource["ResourceType"] + "") && S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview)
+            bool waiting = Application.UseWaitCursor;
+            try
             {
+                Application.UseWaitCursor = true;
+                Application.DoEvents();
+                Control res = null;
                 try
                 {
-                    DDSControl dds = new DDSControl();
-                    dds.Control.DDSLoad(resource.Stream);
-                    res = (Control)dds.Control;
-                }
-                catch (Exception e)
-                {
-                    if (!ddsFailedWarningIssued)
+                    if (ddsResources.Contains(browserWidget1.SelectedResource["ResourceType"] + "") && S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview)
                     {
-                        ddsFailedWarningIssued = true;
-                        ddsEnableWarningIssued = false;
-                        CopyableMessageBox.IssueException(e, "DDS Preview failed:\n" + e.Message + "\n\nDDS Preview has been disabled\n"
-                            , "Cannot preview DDS");
-                        S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview = false;
-                        menuBarWidget1.Checked(MenuBarWidget.MB.MBS_previewDDS, S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview);
+                        DDSControl dds = new DDSControl();
+                        dds.Control.DDSLoad(resource.Stream);
+                        res = (Control)dds.Control;
                     }
-                    return null;
+                    else if (hasValueContentField())
+                    {
+                        Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
+                        if (typeof(String).IsAssignableFrom(t))
+                        {
+                            RichTextBox rtb = new RichTextBox();
+                            rtb.Text = "" + resource["Value"];
+                            rtb.Font = new Font(FontFamily.GenericMonospace, 8);
+                            rtb.Size = new Size(this.Width - (this.Width / 5), this.Height - (this.Height / 5));
+                            rtb.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+                            rtb.ReadOnly = true;
+                            res = rtb;
+                        }
+                        else if (typeof(Image).IsAssignableFrom(t))
+                        {
+                            PictureBox pb = new PictureBox();
+                            pb.Image = (Image)resource["Value"].Value;
+                            pb.Size = pb.Image.Size;
+                            res = pb;
+                        }
+                    }
                 }
+                catch (Exception ex)
+                {
+                    res = getExceptionControl(ex);
+                }
+                if (res != null) res.Dock = DockStyle.Fill;
+                return res;
             }
-            else if (hasValueContentField())
+            finally
             {
-                Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
-                if (typeof(String).IsAssignableFrom(t))
-                {
-                    RichTextBox rtb = new RichTextBox();
-                    rtb.Text = "" + resource["Value"];
-                    rtb.Font = new Font(FontFamily.GenericMonospace, 8);
-                    rtb.Size = new Size(this.Width - (this.Width / 5), this.Height - (this.Height / 5));
-                    rtb.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
-                    rtb.ReadOnly = true;
-                    res = rtb;
-                }
-                else if (typeof(Image).IsAssignableFrom(t))
-                {
-                    PictureBox pb = new PictureBox();
-                    pb.Image = (Image)resource["Value"].Value;
-                    pb.Size = pb.Image.Size;
-                    res = pb;
-                }
+                Application.UseWaitCursor = waiting;
+                Application.DoEvents();
             }
-            if (res != null) res.Dock = DockStyle.Fill;
-            return res;
+        }
+        Control getExceptionControl(Exception ex)
+        {
+            IResourceIndexEntry rie = browserWidget1.SelectedResource;
+            string s = "";
+            if (rie != null) s += "Error reading resource " + ((IResourceKey)rie);
+            s += String.Format("\r\nFront-end Distribution: {0}\r\nLibrary Distribution: {1}\r\n",
+                AutoUpdate.Version.CurrentVersion, AutoUpdate.Version.LibraryVersion);
+            for (Exception inex = ex; inex != null; inex = inex.InnerException)
+            {
+                s += "\r\nSource: " + inex.Source;
+                s += "\r\nAssembly: " + inex.TargetSite.DeclaringType.Assembly.FullName;
+                s += "\r\n" + inex.Message;
+                s += "\r\n----\r\nStack trace:\r\n" + inex.StackTrace + "\r\n----\r\n";
+            }
+            TextBox tb = new TextBox();
+            tb.Multiline = true;
+            tb.ReadOnly = true;
+            tb.ScrollBars = ScrollBars.Vertical;
+            tb.Text = s;
+
+            return tb;
         }
 
 

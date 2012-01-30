@@ -1,0 +1,6 @@
+ResourceType: 0x01661233 0x01D10F34
+Label: Export to s3m2b
+Command: Helpers\meshHelper-s3m2b\meshHelper-s3m2b.exe
+Arguments: /export "{}"
+ReadOnly: yes
+Desc: Create s3m2b files for CMOMoney's Blender plug-in

@@ -231,7 +231,7 @@ namespace S3PIDemoFE
             AApiVersionedFields owner;
             int priority = int.MaxValue;
             bool expandable = false;
-            string tgiBlockListContentField = null;
+            DependentList<TGIBlock> tgiBlocks = null;
             Type fieldType;
             public TypedValuePropertyDescriptor(AApiVersionedFields owner, string field, Attribute[] attrs)
                 : base(field, attrs)
@@ -245,12 +245,9 @@ namespace S3PIDemoFE
                     {
                         string name = GetFieldName(field);
                         fieldType = GetFieldType(owner, field);
-                        priority = AApiVersionedFields.GetPriority(owner.GetType(), name);
-                        PropertyInfo pi = owner.GetType().GetProperty(name);
-                        foreach (Attribute attr in pi.GetCustomAttributes(typeof(DataGridExpandableAttribute), true))
-                            expandable = (attr as DataGridExpandableAttribute).DataGridExpandable;
-                        foreach (Attribute attr in pi.GetCustomAttributes(typeof(TGIBlockListContentFieldAttribute), true))
-                            tgiBlockListContentField = (attr as TGIBlockListContentFieldAttribute).TGIBlockListContentField;
+                        priority = ElementPriorityAttribute.GetPriority(owner.GetType(), name);
+                        tgiBlocks = owner.GetTGIBlocks(name);
+                        expandable = DataGridExpandableAttribute.GetDataGridExpandable(owner.GetType(), name);
                     }
                 }
                 catch (Exception ex) { throw ex; }
@@ -260,8 +257,8 @@ namespace S3PIDemoFE
 
             public bool Expandable { get { return expandable; } }
 
-            public bool hasTGIBlockListContentField { get { return tgiBlockListContentField != null; } }
-            public string TGIBlockListContentField { get { return tgiBlockListContentField; } }
+            public bool hasTGIBlocks { get { return tgiBlocks != null; } }
+            public DependentList<TGIBlock> TGIBlocks { get { return tgiBlocks; } }
 
             public Type FieldType { get { return fieldType; } }
 
@@ -274,17 +271,17 @@ namespace S3PIDemoFE
                 try
                 {
                     Type t = PropertyType;
-                    if (t.Equals(typeof(EnumChooserCTD))) return new EnumChooserCTD(owner, Name, component);
-                    if (t.Equals(typeof(EnumFlagsCTD))) return new EnumFlagsCTD(owner, Name, component);
-                    if (t.Equals(typeof(AsHexCTD))) return new AsHexCTD(owner, Name, component);
-                    if (t.Equals(typeof(IResourceKeyCTD))) return new IResourceKeyCTD(owner, Name, component);
-                    if (t.Equals(typeof(AApiVersionedFieldsCTD))) return new AApiVersionedFieldsCTD(owner, Name, component);
+                    if (t.Equals(typeof(ReaderCTD))) return new ReaderCTD(owner, Name, component);
+                    if (t.Equals(typeof(IDictionaryCTD))) return new IDictionaryCTD(owner, Name, component);
+                    if (t.Equals(typeof(ICollectionAApiVersionedFieldsCTD))) return new ICollectionAApiVersionedFieldsCTD(owner, Name, component);
                     if (t.Equals(typeof(TGIBlockListCTD))) return new TGIBlockListCTD(owner, Name, component);
                     if (t.Equals(typeof(ArrayCTD))) return new ArrayCTD(owner, Name, component);
-                    if (t.Equals(typeof(ICollectionAApiVersionedFieldsCTD))) return new ICollectionAApiVersionedFieldsCTD(owner, Name, component);
-                    if (t.Equals(typeof(TGIBlockListIndexCTD))) return new TGIBlockListIndexCTD(owner, Name, tgiBlockListContentField, component);
-                    if (t.Equals(typeof(IDictionaryCTD))) return new IDictionaryCTD(owner, Name, component);
-                    if (t.Equals(typeof(ReaderCTD))) return new ReaderCTD(owner, Name, component);
+                    if (t.Equals(typeof(AApiVersionedFieldsCTD))) return new AApiVersionedFieldsCTD(owner, Name, component);
+                    if (t.Equals(typeof(IResourceKeyCTD))) return new IResourceKeyCTD(owner, Name, component);
+                    if (t.Equals(typeof(TGIBlockListIndexCTD))) return new TGIBlockListIndexCTD(owner, Name, tgiBlocks, component);
+                    if (t.Equals(typeof(AsHexCTD))) return new AsHexCTD(owner, Name, component);
+                    if (t.Equals(typeof(EnumChooserCTD))) return new EnumChooserCTD(owner, Name, component);
+                    if (t.Equals(typeof(EnumFlagsCTD))) return new EnumFlagsCTD(owner, Name, component);
                     return GetFieldValue(owner, Name);
                 }
                 catch (Exception ex) { throw ex; }
@@ -316,7 +313,7 @@ namespace S3PIDemoFE
                             return fieldType.GetCustomAttributes(typeof(FlagsAttribute), true).Length == 0 ? typeof(EnumChooserCTD) : typeof(EnumFlagsCTD);
 
                         if (typeof(IConvertible).IsAssignableFrom(fieldType))
-                            return hasTGIBlockListContentField ? typeof(TGIBlockListIndexCTD) : typeof(AsHexCTD);
+                            return hasTGIBlocks ? typeof(TGIBlockListIndexCTD) : typeof(AsHexCTD);
 
                         if (typeof(IResourceKey).IsAssignableFrom(fieldType)) return typeof(IResourceKeyCTD);
 
@@ -393,13 +390,13 @@ namespace S3PIDemoFE
     {
         protected AApiVersionedFields owner;
         protected string field;
-        protected string tgiBlockList;
+        protected DependentList<TGIBlock> tgiBlocks;
         protected object component;
-        public TGIBlockListIndexCTD(AApiVersionedFields owner, string field, string tgiBlockList, object component)
+        public TGIBlockListIndexCTD(AApiVersionedFields owner, string field, DependentList<TGIBlock> tgiBlocks, object component)
         {
             this.owner = owner;
             this.field = field;
-            this.tgiBlockList = tgiBlockList;
+            this.tgiBlocks = tgiBlocks;
             this.component = component;
         }
 
@@ -443,7 +440,7 @@ namespace S3PIDemoFE
                     ui = new TGIBlockSelection();
 
                 TGIBlockListIndexCTD o = value as TGIBlockListIndexCTD;
-                ui.SetField(o.owner, o.field, o.tgiBlockList);
+                ui.SetField(o.owner, o.field, o.tgiBlocks);
                 ui.EdSvc = edSvc;
                 edSvc.DropDownControl(ui);
                 // the ui (a) updates the value and (b) closes the dropdown

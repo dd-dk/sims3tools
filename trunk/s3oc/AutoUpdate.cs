@@ -19,6 +19,7 @@
  ***************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
@@ -29,17 +30,34 @@ namespace AutoUpdate
     public class Version
     {
         static String timestamp;
+        public static String CurrentVersion { get { return timestamp; } }
+
+        static String libraryTimestamp;
+        public static String LibraryVersion { get { return libraryTimestamp; } }
+
         static Version()
         {
-            String version_txt = Path.Combine(Path.GetDirectoryName(typeof(Version).Assembly.Location), Application.ProductName + "-Version.txt");
-            System.IO.StreamReader sr = new StreamReader(version_txt);
-            String line1 = sr.ReadLine();
-            sr.Close();
-
-            timestamp = line1.Trim();
+            timestamp = VersionFor(System.Reflection.Assembly.GetEntryAssembly());
+            libraryTimestamp = VersionFor(typeof(s3pi.Interfaces.AApiVersionedFields).Assembly);
         }
 
-        public static String CurrentVersion { get { return timestamp; } }
+        public static String VersionFor(System.Reflection.Assembly a)
+        {
+#if DEBUG
+            string[] v = a.GetName().Version.ToString().Split('.');
+            return String.Format("{0}-{1}{2}-{3}", v[0].Substring(0, 2), v[0].Substring(2), v[1], v[2]);
+#else
+            string version_txt = Path.Combine(Path.GetDirectoryName(PortableSettingsProvider.ExecutablePath), PortableSettingsProvider.ExecutableName + "-Version.txt");
+            if (!File.Exists(version_txt))
+                return "Unknown";
+            using (System.IO.StreamReader sr = new StreamReader(version_txt))
+            {
+                String line1 = sr.ReadLine();
+                sr.Close();
+                return line1.Trim();
+            }
+#endif
+        }
     }
     public class UpdateInfo
     {
@@ -51,53 +69,24 @@ namespace AutoUpdate
 
         public UpdateInfo(String url)
         {
-            if (url.ToLower().EndsWith(".xml"))
+            TextReader tr = new StreamReader(new System.Net.WebClient().OpenRead(url));
+            string line1 = tr.ReadLine().Trim();
+            bool reset = false;
+            if (bool.TryParse(line1, out reset))
             {
-                try
-                {
-                    XmlReaderSettings xrs = new XmlReaderSettings();
-                    xrs.CloseInput = true;
-                    xrs.IgnoreComments = true;
-                    xrs.IgnoreProcessingInstructions = true;
-                    xrs.IgnoreWhitespace = true;
-                    xrs.ProhibitDtd = false;
-                    xrs.ValidationType = ValidationType.None;
-                    XmlReader xr = XmlReader.Create(url, xrs);
-
-                    xr.MoveToContent();
-                    if (!xr.Name.Equals(Application.ProductName + "Update"))
-                        xr.Skip();
-
-                    while (xr.Read())
-                        if (xr.MoveToContent() == XmlNodeType.Element)
-                            pgmUpdate.Add(xr.Name, xr.ReadString());
-                    xr.Close();
-                }
-                catch (XmlException xe) { throw new System.Net.WebException("Invalid Update Info file found:\n" + xe.Message); }
-
-                if (!pgmUpdate.ContainsKey("Version") || !pgmUpdate.ContainsKey("UpdateURL") || !pgmUpdate.ContainsKey("Message"))
-                    throw new System.Net.WebException("Invalid Update Info file found:\nData content invalid.");
+                pgmUpdate.Add("Reset", reset ? Boolean.TrueString : Boolean.FalseString);
+                pgmUpdate.Add("Version", tr.ReadLine().Trim());
             }
             else
             {
-                TextReader tr = new StreamReader(new System.Net.WebClient().OpenRead(url));
-                string line1 = tr.ReadLine().Trim();
-                bool reset = false;
-                if (bool.TryParse(line1, out reset))
-                {
-                    pgmUpdate.Add("Reset", reset ? Boolean.TrueString : Boolean.FalseString);
-                    pgmUpdate.Add("Version", tr.ReadLine().Trim());
-                }
-                else
-                {
-                    pgmUpdate.Add("Version", line1);
-                }
-                pgmUpdate.Add("UpdateURL", tr.ReadLine().Trim());
-                pgmUpdate.Add("Message", tr.ReadToEnd().Trim());
-                tr.Close();
+                pgmUpdate.Add("Version", line1);
             }
+            pgmUpdate.Add("UpdateURL", tr.ReadLine().Trim());
+            pgmUpdate.Add("Message", tr.ReadToEnd().Trim());
+            tr.Close();
         }
     }
+
     public class Checker
     {
         static ObjectCloner.Properties.Settings pgmSettings = ObjectCloner.Properties.Settings.Default;
@@ -108,11 +97,11 @@ namespace AutoUpdate
             if (pgmSettings.AutoUpdateChoice == 0) // AskMe
             {
                 int dr = CopyableMessageBox.Show(
-                    Application.ProductName + " is under development.\n"
+                    PortableSettingsProvider.ExecutableName + " is under development.\n"
                     + "It is recommended you allow automated update checking\n"
                     + "(no more than once per day, when the program is run).\n\n"
-                    + "Do you want " + Application.ProductName + " to check for updates automatically?"
-                    , Application.ProductName + " AutoUpdate Setting"
+                    + "Do you want " + PortableSettingsProvider.ExecutableName + " to check for updates automatically?"
+                    , PortableSettingsProvider.ExecutableName + " AutoUpdate Setting"
                     , CopyableMessageBoxButtons.YesNo, CopyableMessageBoxIcon.Question, -1, 1
                 );
                 if (dr == 0)
@@ -122,7 +111,7 @@ namespace AutoUpdate
                     AutoUpdateChoice = false; // Manual
                     CopyableMessageBox.Show("You can enable AutoUpdate checking under the Settings Menu.\n" +
                         "Manual update checking is under the Help Menu."
-                        , Application.ProductName + " AutoUpdate Setting"
+                        , PortableSettingsProvider.ExecutableName + " AutoUpdate Setting"
                         , CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information
                     );
                 }
@@ -149,13 +138,13 @@ namespace AutoUpdate
         public static bool GetUpdate(bool autoCheck)
         {
             UpdateInfo ui = null;
-            string ini = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), Application.ProductName + "Update.ini");
+            string ini = PortableSettingsProvider.GetApplicationIniFile("Update");
             if (!File.Exists(ini))
             {
                 CopyableMessageBox.Show(
                     "Problem checking for update" + (autoCheck ? " - will try again later" : "") + "\n"
                     + ini + " - not found"
-                    , Application.ProductName + " AutoUpdate"
+                    , PortableSettingsProvider.ExecutableName + " AutoUpdate"
                     , CopyableMessageBoxButtons.OK
                     , CopyableMessageBoxIcon.Error);
                 return true;
@@ -180,7 +169,7 @@ namespace AutoUpdate
                             "Problem checking for update" + (autoCheck ? " - will try again later" : "") + "\n"
                             + (we.Response != null ? "\nURL: " + we.Response.ResponseUri : "")
                             + "\n" + we.Message
-                            , Application.ProductName + " AutoUpdate"
+                            , PortableSettingsProvider.ExecutableName + " AutoUpdate"
                             , CopyableMessageBoxButtons.OK
                             , CopyableMessageBoxIcon.Error);
                         return true;
@@ -192,7 +181,7 @@ namespace AutoUpdate
                 CopyableMessageBox.Show(
                     "Problem checking for update" + (autoCheck ? " - will try again later" : "") + "\n"
                     + ioe.Message
-                    , Application.ProductName + " AutoUpdate"
+                    , PortableSettingsProvider.ExecutableName + " AutoUpdate"
                     , CopyableMessageBoxButtons.OK
                     , CopyableMessageBoxIcon.Error);
                 return true;
@@ -203,7 +192,7 @@ namespace AutoUpdate
                 int dr = CopyableMessageBox.Show(
                     String.Format("{0}\n{3}\n\nCurrent version: {1}\nAvailable version: {2}",
                     ui.Message, Version.CurrentVersion, ui.AvailableVersion, ui.UpdateURL)
-                    , Application.ProductName + " update available"
+                    , PortableSettingsProvider.ExecutableName + " update available"
                     , CopyableMessageBoxIcon.Question
                     , new List<string>(new string[] { "&Visit link", "&Later", "&Skip version", }), 1, 2
                     );

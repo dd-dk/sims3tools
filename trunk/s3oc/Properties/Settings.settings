@@ -2,76 +2,76 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ObjectCloner.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="View" Type="System.Int32" Scope="User">
+    <Setting Name="View" Provider="System.Configuration.PortableSettingsProvider" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">-1</Value>
     </Setting>
-    <Setting Name="UpgradeRequired" Type="System.Boolean" Scope="User">
+    <Setting Name="UpgradeRequired" Provider="System.Configuration.PortableSettingsProvider" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="PersistentHeight" Type="System.Int32" Scope="User">
+    <Setting Name="PersistentHeight" Provider="System.Configuration.PortableSettingsProvider" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">-1</Value>
     </Setting>
-    <Setting Name="PersistentWidth" Type="System.Int32" Scope="User">
+    <Setting Name="PersistentWidth" Provider="System.Configuration.PortableSettingsProvider" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">-1</Value>
     </Setting>
-    <Setting Name="ColumnWidths" Type="System.String" Scope="User">
+    <Setting Name="ColumnWidths" Provider="System.Configuration.PortableSettingsProvider" Type="System.String" Scope="User">
       <Value Profile="(Default)">-1:-1</Value>
     </Setting>
-    <Setting Name="Splitter1Width" Type="System.Int32" Scope="User">
+    <Setting Name="Splitter1Width" Provider="System.Configuration.PortableSettingsProvider" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">-1</Value>
     </Setting>
-    <Setting Name="ColumnToSort" Type="System.Int32" Scope="User">
+    <Setting Name="ColumnToSort" Provider="System.Configuration.PortableSettingsProvider" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">-1</Value>
     </Setting>
-    <Setting Name="SortOrder" Type="System.Int32" Scope="User">
+    <Setting Name="SortOrder" Provider="System.Configuration.PortableSettingsProvider" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">-1</Value>
     </Setting>
-    <Setting Name="ShowThumbs" Type="System.Boolean" Scope="User">
+    <Setting Name="ShowThumbs" Provider="System.Configuration.PortableSettingsProvider" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="LastSaveFolder" Type="System.String" Scope="User">
+    <Setting Name="LastSaveFolder" Provider="System.Configuration.PortableSettingsProvider" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="CreatorName" Type="System.String" Scope="User">
+    <Setting Name="CreatorName" Provider="System.Configuration.PortableSettingsProvider" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="InstallDirs" Type="System.String" Scope="User">
+    <Setting Name="InstallDirs" Provider="System.Configuration.PortableSettingsProvider" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="EPsDisabled" Type="System.String" Scope="User">
+    <Setting Name="EPsDisabled" Provider="System.Configuration.PortableSettingsProvider" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="Diagnostics" Type="System.Boolean" Scope="User">
+    <Setting Name="Diagnostics" Provider="System.Configuration.PortableSettingsProvider" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="AutoUpdateChoice" Type="System.Int32" Scope="User">
+    <Setting Name="AutoUpdateChoice" Provider="System.Configuration.PortableSettingsProvider" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="AULastUpdateTS" Type="System.DateTime" Scope="User">
+    <Setting Name="AULastUpdateTS" Provider="System.Configuration.PortableSettingsProvider" Type="System.DateTime" Scope="User">
       <Value Profile="(Default)">2010-07-01</Value>
     </Setting>
-    <Setting Name="AULastIgnoredVsn" Type="System.String" Scope="User">
+    <Setting Name="AULastIgnoredVsn" Provider="System.Configuration.PortableSettingsProvider" Type="System.String" Scope="User">
       <Value Profile="(Default)">1007-01-0000</Value>
     </Setting>
-    <Setting Name="PersistentLocation" Type="System.Drawing.Point" Scope="User">
+    <Setting Name="PersistentLocation" Provider="System.Configuration.PortableSettingsProvider" Type="System.Drawing.Point" Scope="User">
       <Value Profile="(Default)">-1, -1</Value>
     </Setting>
-    <Setting Name="AdvanceCloning" Type="System.Boolean" Scope="User">
+    <Setting Name="AdvanceCloning" Provider="System.Configuration.PortableSettingsProvider" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="LangSearch" Type="System.Boolean" Scope="User">
+    <Setting Name="LangSearch" Provider="System.Configuration.PortableSettingsProvider" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="CustomContent" Type="System.String" Scope="User">
+    <Setting Name="CustomContent" Provider="System.Configuration.PortableSettingsProvider" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="CCEnabled" Type="System.Boolean" Scope="User">
+    <Setting Name="CCEnabled" Provider="System.Configuration.PortableSettingsProvider" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="pkgEditorPath" Type="System.String" Scope="User">
+    <Setting Name="pkgEditorPath" Provider="System.Configuration.PortableSettingsProvider" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="pkgEditorEnabled" Type="System.Boolean" Scope="User">
+    <Setting Name="pkgEditorEnabled" Provider="System.Configuration.PortableSettingsProvider" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>

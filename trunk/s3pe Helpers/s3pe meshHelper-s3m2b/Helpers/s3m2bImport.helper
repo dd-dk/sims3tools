@@ -1,0 +1,5 @@
+ResourceType: 0x01661233 0x01D10F34
+Label: Import from s3m2b
+Command: Helpers\meshHelper-s3m2b\meshHelper-s3m2b.exe
+Arguments: /import "{}"
+Desc: Read s3m2b files from CMOMoney's Blender plug-in

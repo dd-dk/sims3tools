@@ -111,19 +111,9 @@
             this.label28 = new System.Windows.Forms.Label();
             this.cbCASPClothingType = new System.Windows.Forms.ComboBox();
             this.label29 = new System.Windows.Forms.Label();
-            this.label27 = new System.Windows.Forms.Label();
             this.tbCASPUnknown1 = new System.Windows.Forms.TextBox();
-            this.clbCASPTypeFlags = new System.Windows.Forms.CheckedListBox();
-            this.label30 = new System.Windows.Forms.Label();
-            this.label31 = new System.Windows.Forms.Label();
             this.label32 = new System.Windows.Forms.Label();
-            this.clbCASPAgeFlags = new System.Windows.Forms.CheckedListBox();
-            this.clbCASPGenderFlags = new System.Windows.Forms.CheckedListBox();
             this.clbCASPCategory = new System.Windows.Forms.CheckedListBox();
-            this.label33 = new System.Windows.Forms.Label();
-            this.label34 = new System.Windows.Forms.Label();
-            this.clbCASPHandedness = new System.Windows.Forms.CheckedListBox();
-            this.clbCASPSpeciesFlags = new System.Windows.Forms.CheckedListBox();
             this.label35 = new System.Windows.Forms.Label();
             this.tbCASPResourceName = new System.Windows.Forms.TextBox();
             this.label36 = new System.Windows.Forms.Label();
@@ -134,6 +124,16 @@
             this.lbTGICASPThum = new System.Windows.Forms.Label();
             this.pbCASPThum = new System.Windows.Forms.PictureBox();
             this.btnReplCASPThum = new System.Windows.Forms.Button();
+            this.clbCASPTypeFlags = new System.Windows.Forms.CheckedListBox();
+            this.label30 = new System.Windows.Forms.Label();
+            this.clbCASPAgeFlags = new System.Windows.Forms.CheckedListBox();
+            this.label27 = new System.Windows.Forms.Label();
+            this.cbCASPSpeciesType = new System.Windows.Forms.ComboBox();
+            this.label33 = new System.Windows.Forms.Label();
+            this.label31 = new System.Windows.Forms.Label();
+            this.label34 = new System.Windows.Forms.Label();
+            this.clbCASPHandednessFlags = new System.Windows.Forms.CheckedListBox();
+            this.clbCASPGenderFlags = new System.Windows.Forms.CheckedListBox();
             this.menuBarWidget1 = new ObjectCloner.MenuBarWidget();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -147,6 +147,7 @@
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.tlpTask.SuspendLayout();
@@ -388,7 +389,7 @@
             this.tpMain.Location = new System.Drawing.Point(4, 22);
             this.tpMain.Name = "tpMain";
             this.tpMain.Padding = new System.Windows.Forms.Padding(3);
-            this.tpMain.Size = new System.Drawing.Size(704, 464);
+            this.tpMain.Size = new System.Drawing.Size(704, 536);
             this.tpMain.TabIndex = 0;
             this.tpMain.Text = "Overview";
             this.tpMain.UseVisualStyleBackColor = true;
@@ -439,7 +440,7 @@
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpOverview.Size = new System.Drawing.Size(704, 460);
+            this.tlpOverview.Size = new System.Drawing.Size(704, 532);
             this.tlpOverview.TabIndex = 0;
             // 
             // tableLayoutPanel2
@@ -508,7 +509,7 @@
             // tbPrice
             // 
             this.tbPrice.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tbPrice.Location = new System.Drawing.Point(93, 385);
+            this.tbPrice.Location = new System.Drawing.Point(93, 457);
             this.tbPrice.Name = "tbPrice";
             this.tbPrice.ReadOnly = true;
             this.tbPrice.Size = new System.Drawing.Size(100, 20);
@@ -519,7 +520,7 @@
             // 
             this.label12.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(56, 388);
+            this.label12.Location = new System.Drawing.Point(56, 460);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(31, 13);
             this.label12.TabIndex = 16;
@@ -540,7 +541,7 @@
             // 
             this.ckbCopyToAll.AutoSize = true;
             this.ckbCopyToAll.Enabled = false;
-            this.ckbCopyToAll.Location = new System.Drawing.Point(93, 362);
+            this.ckbCopyToAll.Location = new System.Drawing.Point(93, 434);
             this.ckbCopyToAll.Name = "ckbCopyToAll";
             this.ckbCopyToAll.Size = new System.Drawing.Size(164, 17);
             this.ckbCopyToAll.TabIndex = 15;
@@ -553,7 +554,7 @@
             this.tbCatlgDesc.Location = new System.Drawing.Point(93, 287);
             this.tbCatlgDesc.Name = "tbCatlgDesc";
             this.tbCatlgDesc.ReadOnly = true;
-            this.tbCatlgDesc.Size = new System.Drawing.Size(608, 69);
+            this.tbCatlgDesc.Size = new System.Drawing.Size(608, 141);
             this.tbCatlgDesc.TabIndex = 14;
             this.tbCatlgDesc.Text = "";
             // 
@@ -580,7 +581,7 @@
             // 
             this.label23.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(10, 414);
+            this.label23.Location = new System.Drawing.Point(10, 486);
             this.label23.Name = "label23";
             this.label23.Size = new System.Drawing.Size(77, 13);
             this.label23.TabIndex = 18;
@@ -589,7 +590,7 @@
             // tbProductStatus
             // 
             this.tbProductStatus.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.tbProductStatus.Location = new System.Drawing.Point(93, 411);
+            this.tbProductStatus.Location = new System.Drawing.Point(93, 483);
             this.tbProductStatus.Name = "tbProductStatus";
             this.tbProductStatus.ReadOnly = true;
             this.tbProductStatus.Size = new System.Drawing.Size(35, 20);
@@ -697,7 +698,7 @@
             // 
             this.label26.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label26.AutoSize = true;
-            this.label26.Location = new System.Drawing.Point(37, 440);
+            this.label26.Location = new System.Drawing.Point(37, 512);
             this.label26.Name = "label26";
             this.label26.Size = new System.Drawing.Size(50, 13);
             this.label26.TabIndex = 20;
@@ -706,7 +707,7 @@
             // tbPackage
             // 
             this.tbPackage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbPackage.Location = new System.Drawing.Point(93, 437);
+            this.tbPackage.Location = new System.Drawing.Point(93, 509);
             this.tbPackage.Name = "tbPackage";
             this.tbPackage.ReadOnly = true;
             this.tbPackage.Size = new System.Drawing.Size(608, 20);
@@ -719,7 +720,7 @@
             this.tpDetail.Location = new System.Drawing.Point(4, 22);
             this.tpDetail.Name = "tpDetail";
             this.tpDetail.Padding = new System.Windows.Forms.Padding(3);
-            this.tpDetail.Size = new System.Drawing.Size(704, 464);
+            this.tpDetail.Size = new System.Drawing.Size(704, 536);
             this.tpDetail.TabIndex = 1;
             this.tpDetail.Text = "Details";
             this.tpDetail.UseVisualStyleBackColor = true;
@@ -832,7 +833,7 @@
             this.tpFlagsRoom.Controls.Add(this.tlpFlagsRoom);
             this.tpFlagsRoom.Location = new System.Drawing.Point(4, 22);
             this.tpFlagsRoom.Name = "tpFlagsRoom";
-            this.tpFlagsRoom.Size = new System.Drawing.Size(704, 464);
+            this.tpFlagsRoom.Size = new System.Drawing.Size(704, 536);
             this.tpFlagsRoom.TabIndex = 2;
             this.tpFlagsRoom.Text = "Room Flags";
             this.tpFlagsRoom.UseVisualStyleBackColor = true;
@@ -950,7 +951,7 @@
             this.tpFlagsFunc.Controls.Add(this.tlpFlagsFunc);
             this.tpFlagsFunc.Location = new System.Drawing.Point(4, 22);
             this.tpFlagsFunc.Name = "tpFlagsFunc";
-            this.tpFlagsFunc.Size = new System.Drawing.Size(704, 464);
+            this.tpFlagsFunc.Size = new System.Drawing.Size(704, 536);
             this.tpFlagsFunc.TabIndex = 3;
             this.tpFlagsFunc.Text = "Function Flags";
             this.tpFlagsFunc.UseVisualStyleBackColor = true;
@@ -1068,7 +1069,7 @@
             this.tpFlagsBuild.Controls.Add(this.tlpFlagsBuildEtc);
             this.tpFlagsBuild.Location = new System.Drawing.Point(4, 22);
             this.tpFlagsBuild.Name = "tpFlagsBuild";
-            this.tpFlagsBuild.Size = new System.Drawing.Size(704, 464);
+            this.tpFlagsBuild.Size = new System.Drawing.Size(704, 536);
             this.tpFlagsBuild.TabIndex = 4;
             this.tpFlagsBuild.Text = "Build Flags";
             this.tpFlagsBuild.UseVisualStyleBackColor = true;
@@ -1126,7 +1127,7 @@
             this.tpFlagsMisc.Controls.Add(this.tableLayoutPanel4);
             this.tpFlagsMisc.Location = new System.Drawing.Point(4, 22);
             this.tpFlagsMisc.Name = "tpFlagsMisc";
-            this.tpFlagsMisc.Size = new System.Drawing.Size(704, 464);
+            this.tpFlagsMisc.Size = new System.Drawing.Size(704, 536);
             this.tpFlagsMisc.TabIndex = 5;
             this.tpFlagsMisc.Text = "Misc Flags";
             this.tpFlagsMisc.UseVisualStyleBackColor = true;
@@ -1271,16 +1272,16 @@
             this.tableLayoutPanel5.Controls.Add(this.tbCASPUnknown4, 1, 9);
             this.tableLayoutPanel5.Controls.Add(this.label37, 0, 9);
             this.tableLayoutPanel5.Controls.Add(this.tableLayoutPanel6, 2, 3);
-            this.tableLayoutPanel5.Controls.Add(this.clbCASPHandedness, 1, 3);
-            this.tableLayoutPanel5.Controls.Add(this.clbCASPGenderFlags, 1, 4);
-            this.tableLayoutPanel5.Controls.Add(this.clbCASPSpeciesFlags, 1, 5);
-            this.tableLayoutPanel5.Controls.Add(this.clbCASPTypeFlags, 1, 6);
-            this.tableLayoutPanel5.Controls.Add(this.clbCASPAgeFlags, 1, 7);
-            this.tableLayoutPanel5.Controls.Add(this.label30, 0, 7);
-            this.tableLayoutPanel5.Controls.Add(this.label31, 0, 4);
-            this.tableLayoutPanel5.Controls.Add(this.label33, 0, 5);
-            this.tableLayoutPanel5.Controls.Add(this.label27, 0, 6);
-            this.tableLayoutPanel5.Controls.Add(this.label34, 0, 3);
+            this.tableLayoutPanel5.Controls.Add(this.clbCASPTypeFlags, 1, 7);
+            this.tableLayoutPanel5.Controls.Add(this.label30, 0, 3);
+            this.tableLayoutPanel5.Controls.Add(this.clbCASPAgeFlags, 1, 3);
+            this.tableLayoutPanel5.Controls.Add(this.label27, 0, 7);
+            this.tableLayoutPanel5.Controls.Add(this.cbCASPSpeciesType, 1, 4);
+            this.tableLayoutPanel5.Controls.Add(this.label33, 0, 4);
+            this.tableLayoutPanel5.Controls.Add(this.label31, 0, 5);
+            this.tableLayoutPanel5.Controls.Add(this.label34, 0, 6);
+            this.tableLayoutPanel5.Controls.Add(this.clbCASPHandednessFlags, 1, 6);
+            this.tableLayoutPanel5.Controls.Add(this.clbCASPGenderFlags, 1, 5);
             this.tableLayoutPanel5.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 12;
@@ -1296,6 +1297,7 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel5.Size = new System.Drawing.Size(704, 533);
             this.tableLayoutPanel5.TabIndex = 0;
             // 
@@ -1330,16 +1332,6 @@
             this.label29.TabIndex = 3;
             this.label29.Text = "Unknown1";
             // 
-            // label27
-            // 
-            this.label27.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label27.AutoSize = true;
-            this.label27.Location = new System.Drawing.Point(56, 220);
-            this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(31, 13);
-            this.label27.TabIndex = 7;
-            this.label27.Text = "Type";
-            // 
             // tbCASPUnknown1
             // 
             this.tbCASPUnknown1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
@@ -1350,70 +1342,16 @@
             this.tbCASPUnknown1.Size = new System.Drawing.Size(608, 20);
             this.tbCASPUnknown1.TabIndex = 4;
             // 
-            // clbCASPTypeFlags
-            // 
-            this.clbCASPTypeFlags.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.clbCASPTypeFlags.Enabled = false;
-            this.clbCASPTypeFlags.FormattingEnabled = true;
-            this.clbCASPTypeFlags.Location = new System.Drawing.Point(93, 187);
-            this.clbCASPTypeFlags.MultiColumn = true;
-            this.clbCASPTypeFlags.Name = "clbCASPTypeFlags";
-            this.clbCASPTypeFlags.Size = new System.Drawing.Size(355, 79);
-            this.clbCASPTypeFlags.TabIndex = 8;
-            // 
-            // label30
-            // 
-            this.label30.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label30.AutoSize = true;
-            this.label30.Location = new System.Drawing.Point(61, 297);
-            this.label30.Name = "label30";
-            this.label30.Size = new System.Drawing.Size(26, 13);
-            this.label30.TabIndex = 9;
-            this.label30.Text = "Age";
-            // 
-            // label31
-            // 
-            this.label31.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label31.AutoSize = true;
-            this.label31.Location = new System.Drawing.Point(45, 132);
-            this.label31.Name = "label31";
-            this.label31.Size = new System.Drawing.Size(42, 13);
-            this.label31.TabIndex = 11;
-            this.label31.Text = "Gender";
-            // 
             // label32
             // 
             this.label32.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label32.AutoSize = true;
-            this.label32.Location = new System.Drawing.Point(38, 345);
+            this.label32.Location = new System.Drawing.Point(38, 273);
             this.label32.Margin = new System.Windows.Forms.Padding(3, 6, 3, 0);
             this.label32.Name = "label32";
             this.label32.Size = new System.Drawing.Size(49, 13);
             this.label32.TabIndex = 15;
             this.label32.Text = "Category";
-            // 
-            // clbCASPAgeFlags
-            // 
-            this.clbCASPAgeFlags.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel5.SetColumnSpan(this.clbCASPAgeFlags, 2);
-            this.clbCASPAgeFlags.Enabled = false;
-            this.clbCASPAgeFlags.FormattingEnabled = true;
-            this.clbCASPAgeFlags.Location = new System.Drawing.Point(93, 272);
-            this.clbCASPAgeFlags.MultiColumn = true;
-            this.clbCASPAgeFlags.Name = "clbCASPAgeFlags";
-            this.clbCASPAgeFlags.Size = new System.Drawing.Size(608, 64);
-            this.clbCASPAgeFlags.TabIndex = 10;
-            // 
-            // clbCASPGenderFlags
-            // 
-            this.clbCASPGenderFlags.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.clbCASPGenderFlags.Enabled = false;
-            this.clbCASPGenderFlags.FormattingEnabled = true;
-            this.clbCASPGenderFlags.Location = new System.Drawing.Point(93, 122);
-            this.clbCASPGenderFlags.MultiColumn = true;
-            this.clbCASPGenderFlags.Name = "clbCASPGenderFlags";
-            this.clbCASPGenderFlags.Size = new System.Drawing.Size(355, 34);
-            this.clbCASPGenderFlags.TabIndex = 12;
             // 
             // clbCASPCategory
             // 
@@ -1422,53 +1360,11 @@
             this.clbCASPCategory.Enabled = false;
             this.clbCASPCategory.FormattingEnabled = true;
             this.clbCASPCategory.IntegralHeight = false;
-            this.clbCASPCategory.Location = new System.Drawing.Point(93, 342);
+            this.clbCASPCategory.Location = new System.Drawing.Point(93, 270);
             this.clbCASPCategory.MultiColumn = true;
             this.clbCASPCategory.Name = "clbCASPCategory";
-            this.clbCASPCategory.Size = new System.Drawing.Size(608, 136);
+            this.clbCASPCategory.Size = new System.Drawing.Size(608, 208);
             this.clbCASPCategory.TabIndex = 16;
-            // 
-            // label33
-            // 
-            this.label33.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label33.AutoSize = true;
-            this.label33.Location = new System.Drawing.Point(42, 165);
-            this.label33.Name = "label33";
-            this.label33.Size = new System.Drawing.Size(45, 13);
-            this.label33.TabIndex = 13;
-            this.label33.Text = "Species";
-            // 
-            // label34
-            // 
-            this.label34.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label34.AutoSize = true;
-            this.label34.Location = new System.Drawing.Point(20, 92);
-            this.label34.Name = "label34";
-            this.label34.Size = new System.Drawing.Size(67, 13);
-            this.label34.TabIndex = 0;
-            this.label34.Text = "Handedness";
-            // 
-            // clbCASPHandedness
-            // 
-            this.clbCASPHandedness.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.clbCASPHandedness.Enabled = false;
-            this.clbCASPHandedness.FormattingEnabled = true;
-            this.clbCASPHandedness.Location = new System.Drawing.Point(93, 82);
-            this.clbCASPHandedness.MultiColumn = true;
-            this.clbCASPHandedness.Name = "clbCASPHandedness";
-            this.clbCASPHandedness.Size = new System.Drawing.Size(355, 34);
-            this.clbCASPHandedness.TabIndex = 2;
-            // 
-            // clbCASPSpeciesFlags
-            // 
-            this.clbCASPSpeciesFlags.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.clbCASPSpeciesFlags.Enabled = false;
-            this.clbCASPSpeciesFlags.FormattingEnabled = true;
-            this.clbCASPSpeciesFlags.Location = new System.Drawing.Point(93, 162);
-            this.clbCASPSpeciesFlags.MultiColumn = true;
-            this.clbCASPSpeciesFlags.Name = "clbCASPSpeciesFlags";
-            this.clbCASPSpeciesFlags.Size = new System.Drawing.Size(355, 19);
-            this.clbCASPSpeciesFlags.TabIndex = 14;
             // 
             // label35
             // 
@@ -1589,6 +1485,110 @@
             this.btnReplCASPThum.UseVisualStyleBackColor = true;
             this.btnReplCASPThum.Click += new System.EventHandler(this.btnReplCASPThum_Click);
             // 
+            // clbCASPTypeFlags
+            // 
+            this.clbCASPTypeFlags.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel5.SetColumnSpan(this.clbCASPTypeFlags, 2);
+            this.clbCASPTypeFlags.Enabled = false;
+            this.clbCASPTypeFlags.FormattingEnabled = true;
+            this.clbCASPTypeFlags.Location = new System.Drawing.Point(93, 230);
+            this.clbCASPTypeFlags.MultiColumn = true;
+            this.clbCASPTypeFlags.Name = "clbCASPTypeFlags";
+            this.clbCASPTypeFlags.Size = new System.Drawing.Size(608, 34);
+            this.clbCASPTypeFlags.TabIndex = 8;
+            // 
+            // label30
+            // 
+            this.label30.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label30.AutoSize = true;
+            this.label30.Location = new System.Drawing.Point(61, 107);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(26, 13);
+            this.label30.TabIndex = 9;
+            this.label30.Text = "Age";
+            // 
+            // clbCASPAgeFlags
+            // 
+            this.clbCASPAgeFlags.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.clbCASPAgeFlags.Enabled = false;
+            this.clbCASPAgeFlags.FormattingEnabled = true;
+            this.clbCASPAgeFlags.Location = new System.Drawing.Point(93, 82);
+            this.clbCASPAgeFlags.MultiColumn = true;
+            this.clbCASPAgeFlags.Name = "clbCASPAgeFlags";
+            this.clbCASPAgeFlags.Size = new System.Drawing.Size(355, 64);
+            this.clbCASPAgeFlags.TabIndex = 10;
+            // 
+            // label27
+            // 
+            this.label27.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(56, 240);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(31, 13);
+            this.label27.TabIndex = 7;
+            this.label27.Text = "Type";
+            // 
+            // cbCASPSpeciesType
+            // 
+            this.cbCASPSpeciesType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbCASPSpeciesType.FormattingEnabled = true;
+            this.cbCASPSpeciesType.Location = new System.Drawing.Point(93, 152);
+            this.cbCASPSpeciesType.Name = "cbCASPSpeciesType";
+            this.cbCASPSpeciesType.Size = new System.Drawing.Size(355, 21);
+            this.cbCASPSpeciesType.TabIndex = 20;
+            // 
+            // label33
+            // 
+            this.label33.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label33.AutoSize = true;
+            this.label33.Location = new System.Drawing.Point(42, 156);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(45, 13);
+            this.label33.TabIndex = 13;
+            this.label33.Text = "Species";
+            // 
+            // label31
+            // 
+            this.label31.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(45, 182);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(42, 13);
+            this.label31.TabIndex = 11;
+            this.label31.Text = "Gender";
+            // 
+            // label34
+            // 
+            this.label34.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(20, 207);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(67, 13);
+            this.label34.TabIndex = 0;
+            this.label34.Text = "Handedness";
+            // 
+            // clbCASPHandednessFlags
+            // 
+            this.clbCASPHandednessFlags.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.clbCASPHandednessFlags.Enabled = false;
+            this.clbCASPHandednessFlags.FormattingEnabled = true;
+            this.clbCASPHandednessFlags.Location = new System.Drawing.Point(93, 204);
+            this.clbCASPHandednessFlags.MultiColumn = true;
+            this.clbCASPHandednessFlags.Name = "clbCASPHandednessFlags";
+            this.clbCASPHandednessFlags.Size = new System.Drawing.Size(355, 19);
+            this.clbCASPHandednessFlags.TabIndex = 2;
+            // 
+            // clbCASPGenderFlags
+            // 
+            this.clbCASPGenderFlags.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.clbCASPGenderFlags.Enabled = false;
+            this.clbCASPGenderFlags.FormattingEnabled = true;
+            this.clbCASPGenderFlags.Location = new System.Drawing.Point(93, 179);
+            this.clbCASPGenderFlags.MultiColumn = true;
+            this.clbCASPGenderFlags.Name = "clbCASPGenderFlags";
+            this.clbCASPGenderFlags.Size = new System.Drawing.Size(355, 19);
+            this.clbCASPGenderFlags.TabIndex = 12;
+            // 
             // menuBarWidget1
             // 
             this.menuBarWidget1.Dock = System.Windows.Forms.DockStyle.None;
@@ -1690,8 +1690,7 @@
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             this.ClientSize = new System.Drawing.Size(924, 708);
             this.Controls.Add(this.toolStripContainer1);
             this.Controls.Add(this.statusStrip1);
@@ -1707,6 +1706,7 @@
             this.toolStripContainer1.ResumeLayout(false);
             this.toolStripContainer1.PerformLayout();
             this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.tlpTask.ResumeLayout(false);
             this.tlpTask.PerformLayout();
@@ -1879,14 +1879,11 @@
         private System.Windows.Forms.TextBox tbCASPUnknown1;
         private System.Windows.Forms.Label label30;
         private System.Windows.Forms.Label label31;
-        private System.Windows.Forms.Label label32;
         private System.Windows.Forms.CheckedListBox clbCASPAgeFlags;
         private System.Windows.Forms.CheckedListBox clbCASPGenderFlags;
-        private System.Windows.Forms.CheckedListBox clbCASPCategory;
         private System.Windows.Forms.Label label33;
         private System.Windows.Forms.Label label34;
-        private System.Windows.Forms.CheckedListBox clbCASPHandedness;
-        private System.Windows.Forms.CheckedListBox clbCASPSpeciesFlags;
+        private System.Windows.Forms.CheckedListBox clbCASPHandednessFlags;
         private System.Windows.Forms.Label label35;
         private System.Windows.Forms.TextBox tbCASPResourceName;
         private System.Windows.Forms.Label label36;
@@ -1897,6 +1894,9 @@
         private System.Windows.Forms.Label lbTGICASPThum;
         private System.Windows.Forms.Button btnReplCASPThum;
         private System.Windows.Forms.PictureBox pbCASPThum;
+        private System.Windows.Forms.Label label32;
+        private System.Windows.Forms.CheckedListBox clbCASPCategory;
+        private System.Windows.Forms.ComboBox cbCASPSpeciesType;
     }
 }
 

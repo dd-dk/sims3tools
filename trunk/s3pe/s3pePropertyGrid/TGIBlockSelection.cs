@@ -37,14 +37,14 @@ namespace S3PIDemoFE
 
         AApiVersionedFields owner = null;
         string field;
-        string tgiBlockList;
-        public void SetField(AApiVersionedFields owner, string field, string tgiBlockList)
+        DependentList<TGIBlock> tgiBlocks;
+        public void SetField(AApiVersionedFields owner, string field, DependentList<TGIBlock> tgiBlocks)
         {
             this.owner = owner;
             this.field = field;
-            this.tgiBlockList = tgiBlockList;
+            this.tgiBlocks = tgiBlocks;
 
-            tgiBlockCombo1.TGIBlocks = this.owner[this.tgiBlockList].Value as DependentList<TGIBlock>;
+            tgiBlockCombo1.TGIBlocks = this.tgiBlocks;
             tgiBlockCombo1.SelectedIndex = Convert.ToInt32(this.owner[this.field].Value);
         }
 

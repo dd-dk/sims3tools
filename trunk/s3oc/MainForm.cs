@@ -32,6 +32,7 @@ using s3pi.Extensions;
 using s3pi.GenericRCOLResource;
 using ObjectCloner.SplitterComponents;
 using s3pi.Filetable;
+using System.Xml.Linq;
 
 namespace ObjectCloner
 {
@@ -60,28 +61,34 @@ namespace ObjectCloner
 
         public MainForm()
         {
-            InitializeComponent();
+            using (Splash form = new Splash() { Message = "Starting s3oc...", })
+            {
+                form.Show();
+                Application.DoEvents();
 
-            this.Text = myName;
-            pleaseWait = new PleaseWait();
+                InitializeComponent();
 
-            FileTable.CustomContentPath = ObjectCloner.Properties.Settings.Default.CustomContent;
-            GameFolders.InstallDirs = ObjectCloner.Properties.Settings.Default.InstallDirs;
-            GameFolders.EPsDisabled = ObjectCloner.Properties.Settings.Default.EPsDisabled;
+                this.Text = myName;
+                pleaseWait = new PleaseWait();
 
-            MainForm_LoadFormSettings();
+                FileTable.CustomContentPath = ObjectCloner.Properties.Settings.Default.CustomContent;
+                GameFolders.InstallDirs = ObjectCloner.Properties.Settings.Default.InstallDirs;
+                GameFolders.EPsDisabled = ObjectCloner.Properties.Settings.Default.EPsDisabled;
 
-            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_langSearch, STBLHandler.LangSearch);
+                MainForm_LoadFormSettings();
 
-            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_advanced, ObjectCloner.Properties.Settings.Default.AdvanceCloning);
+                menuBarWidget1.Checked(MenuBarWidget.MB.MBS_langSearch, STBLHandler.LangSearch);
 
-            Diagnostics.Popups = ObjectCloner.Properties.Settings.Default.Diagnostics;
-            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_popups, Diagnostics.Popups);
+                menuBarWidget1.Checked(MenuBarWidget.MB.MBS_advanced, ObjectCloner.Properties.Settings.Default.AdvanceCloning);
 
-            SetStepText();
+                Diagnostics.Popups = ObjectCloner.Properties.Settings.Default.Diagnostics;
+                menuBarWidget1.Checked(MenuBarWidget.MB.MBS_popups, Diagnostics.Popups);
 
-            InitialiseTabs(CatalogType.CatalogProxyProduct);//Use the Proxy Product as it has pretty much nothing on it
-            TabEnable(false);
+                SetStepText();
+
+                InitialiseTabs(CatalogType.CatalogProxyProduct);//Use the Proxy Product as it has pretty much nothing on it
+                TabEnable(false);
+            }
         }
 
         string GetMyName()
@@ -99,7 +106,99 @@ namespace ObjectCloner
             if (cmdlineTest)
             {
             }
+
+            // /select 0x319E4F1D-0x00000000-0x000000000000040B
+            if (pkgs.Count == 0 && cmdLineSelect)
+            {
+                cmdLineSelect = false;
+                using (Splash form = new Splash() { Message = "Initialising FileTable...", })
+                {
+                    form.Show();
+                    InitialiseFileTable();
+                }
+
+                bool okay = false;
+                using (Splash form = new Splash() { Message = "Refreshing packages cache...", })
+                {
+                    form.Show();
+                    okay = CheckInstallDirs(null);
+                }
+
+                if (okay)
+                {
+                    int i = 0;
+                    using (Splash form = new Splash() { Message = "Searching...", })
+                    {
+                        form.Show();
+                        selectedItem = FileTable.GameContent.Select(ppt =>
+                            {
+                                form.Message = "Searching package " + ++i + "...";
+                                return ppt.Find(rie => cmdLineSelectRK.Equals(rie));
+                            }).Where(x => x != null).FirstOrDefault();
+                    }
+
+                    if (selectedItem == null)
+                        CopyableMessageBox.Show(this, "Resource " + cmdLineSelectRK + " not found.", "Error", CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
+                    else
+                    {
+                        mode = Mode.FromGame;
+                        FillTabs(selectedItem);
+
+                        using (Splash form = new Splash() { Message = "Displaying form...", })
+                        {
+                            form.Show();
+                            btnStart_Click(this, EventArgs.Empty);
+                        }
+                    }
+                }
+            }
+            // "D:\My Documents\Sims\CreatorNameHere_ToiletExpensive_NR.package"
+            else if (pkgs.Count == 1)
+            {
+                using (Splash form = new Splash() { Message = "Displaying form...", })
+                {
+                    form.Show();
+                    mode = Mode.FromUser;
+                    fileReOpenToFix(pkgs[0]);
+                }
+            }
         }
+
+        #region Splash Form
+        class Splash : Form
+        {
+            Panel panel = new Panel()
+            {
+                BackColor = System.Drawing.SystemColors.Window,
+                BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D,
+                Dock = DockStyle.Fill,
+            };
+
+            Label label = new Label()
+            {
+                Anchor = AnchorStyles.None,
+                AutoSize = true,
+                Font = new System.Drawing.Font(new Label().Font.FontFamily, 18),
+                ForeColor = System.Drawing.SystemColors.WindowText,
+            };
+
+            public Splash()
+            {
+                BackColor = System.Drawing.SystemColors.WindowFrame;
+                ShowInTaskbar = false;
+                FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+                Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+                Height = 150;
+                Width = 400;
+                StartPosition = FormStartPosition.CenterScreen;
+
+                panel.Controls.Add(label);
+                Controls.Add(panel);
+            }
+
+            public string Message { get { return label.Text; } set { label.Text = value; } }
+        }
+        #endregion
 
         private void MainForm_LoadFormSettings()
         {
@@ -136,6 +235,9 @@ namespace ObjectCloner
             Abort(true);
             //CloseCurrent();//needed?
 
+            foreach (string temp in Directory.EnumerateFiles(Environment.GetEnvironmentVariable("TEMP"), string.Format("s3oc_0x{0:X8}_*.package", System.Diagnostics.Process.GetCurrentProcess().Id)))
+                File.Delete(temp);
+
             ObjectCloner.Properties.Settings.Default.EPsDisabled = GameFolders.EPsDisabled;
             ObjectCloner.Properties.Settings.Default.InstallDirs = GameFolders.InstallDirs;
 
@@ -171,6 +273,7 @@ namespace ObjectCloner
         {
             Diagnostics.Log("Abort abort:" + abort);
 
+            btnStart.Enabled = false;
             if (objectChooser != null)
             {
                 objectChooser.AbortFilling(abort);
@@ -248,12 +351,13 @@ namespace ObjectCloner
         {
             Options = new Dictionary<string, CmdInfo>();
             Options.Add("test", new CmdInfo(CmdLineTest, "Enable facilities still undergoing initial testing"));
+            Options.Add("select", new CmdInfo(CmdLineSelect, "Select the specified the resourceKey to clone"));
             Options.Add("help", new CmdInfo(CmdLineHelp, "Display this help"));
         }
+        List<string> pkgs = new List<string>();
         void CmdLine(params string[] args)
         {
             SetOptions();
-            List<string> pkgs = new List<string>();
             List<string> cmdline = new List<string>(args);
             while (cmdline.Count > 0)
             {
@@ -273,12 +377,43 @@ namespace ObjectCloner
                     }
                 }
                 else
+                {
+                    if (!File.Exists(cmdline[0]))
+                    {
+                        CopyableMessageBox.Show(this, "Package not found:\n'" + cmdline[0] + "'",
+                            myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
+                        Environment.Exit(1);
+                    }
                     pkgs.Add(cmdline[0]);
+                }
                 cmdline.RemoveAt(0);
             }
         }
         bool cmdlineTest = false;
         bool CmdLineTest(ref List<string> cmdline) { cmdlineTest = true; return false; }
+        bool cmdLineSelect = false;
+        IResourceKey cmdLineSelectRK = new RK(RK.NULL);
+        bool CmdLineSelect(ref List<string> cmdline)
+        {
+            if (cmdline.Count < 2)
+            {
+                CopyableMessageBox.Show(this, "Missing 'resourceKey' parameter.", "Error", CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
+                return true;
+            }
+            if (!RK.TryParse(cmdline[1], cmdLineSelectRK))
+            {
+                CopyableMessageBox.Show(this, "'resourceKey' parameter in incorrect format.", "Error", CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
+                return true;
+            }
+            if (!Enum.IsDefined(typeof(CatalogType), cmdLineSelectRK.ResourceType))
+            {
+                CopyableMessageBox.Show(this, "Resource Type 0x" + cmdLineSelectRK.ResourceType.ToString("X8") + " is not supported.", "Error", CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
+                return true;
+            }
+            cmdline.RemoveAt(1);
+            cmdLineSelect = true;
+            return false;
+        }
         bool CmdLineHelp(ref List<string> cmdline)
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
@@ -340,13 +475,32 @@ namespace ObjectCloner
                 }
             }
             if (changeValue)
-                toolStripProgressBar1.Value = value;
+            {
+                if (value > toolStripProgressBar1.Maximum) { }
+                else
+                    toolStripProgressBar1.Value = value;
+            }
         }
 
         Dictionary<UInt64, SpecificResource> CTPTBrushIndexToPair;
+        Dictionary<uint, Dictionary<SpecificResource, ListViewItem>> ListViewCache = new Dictionary<uint, Dictionary<SpecificResource, ListViewItem>>();
         public delegate void listViewAddCallBack(SpecificResource sr, ListView listView);
         public void ListViewAdd(SpecificResource sr, ListView listView)
         {
+            if (!ListViewCache.ContainsKey(sr.RequestedRK.ResourceType))
+            {
+                ListViewCache.Add(sr.RequestedRK.ResourceType, new Dictionary<SpecificResource, ListViewItem>());
+            }
+            Dictionary<SpecificResource, ListViewItem> cache = ListViewCache[sr.RequestedRK.ResourceType];
+            KeyValuePair<SpecificResource, ListViewItem> kvp = cache.Where(x => x.Key.Equals(sr)).FirstOrDefault();
+            if (kvp.Key != null)
+            {
+                if (kvp.Value.ListView != null)
+                    kvp.Value.ListView.Items.Remove(kvp.Value);
+                listView.Items.Add(kvp.Value);
+                return;
+            }
+
             #region CatalogTerrainPaintBrush pair
             if (sr.RequestedRK.CType() == CatalogType.CatalogTerrainPaintBrush)
             {
@@ -363,6 +517,25 @@ namespace ObjectCloner
             }
             #endregion
 
+            string name = GetResourceName(sr);
+
+            List<string> exts;
+            string tag = "UNKN";
+            if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + sr.ResourceIndexEntry.ResourceType.ToString("X8"), out exts)) tag = exts[0];
+
+            ListViewItem lvi = new ListViewItem(new string[] {
+                name, tag, sr.RGVsn, "" + (AResourceKey)sr.ResourceIndexEntry,
+                sr.PathPackage.Path + " (" + sr.PPSource + ")",
+            }) { Tag = sr };
+
+            listView.Items.Add(lvi);
+            //listView.EnsureVisible(listView.Items.Count - 1);
+
+            cache.Add(sr, lvi);
+        }
+
+        string GetResourceName(SpecificResource sr)
+        {
             string name = NameMap.NMap[sr.ResourceIndexEntry.Instance];
             if (name == null)
             {
@@ -390,16 +563,7 @@ namespace ObjectCloner
                     name = e.Message;// Don't crash...
                 }
             }
-
-            List<string> exts;
-            string tag = "UNKN";
-            if (s3pi.Extensions.ExtList.Ext.TryGetValue("0x" + sr.ResourceIndexEntry.ResourceType.ToString("X8"), out exts)) tag = exts[0];
-
-            listView.Items.Add(new ListViewItem(new string[] {
-                name, tag, sr.RGVsn, "" + (AResourceKey)sr.ResourceIndexEntry,
-                sr.PathPackage.Path + " (" + sr.PPSource + ")",
-            }) { Tag = sr });
-            listView.EnsureVisible(listView.Items.Count - 1);
+            return name;
         }
 
         #region flowLayoutPanel1 prompt labels and buttons
@@ -429,7 +593,6 @@ namespace ObjectCloner
             lbSaveCancel.Visible = testPrompt(which, Prompt.SaveCancel);
 
             btnStart.Visible = testPrompt(which, Prompt.CloneFix | Prompt.Search);
-            btnStart.Enabled = false;
 
             flowLayoutPanel1.ResumeLayout();
         }
@@ -445,17 +608,12 @@ namespace ObjectCloner
             StopWait();
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(listView);
-            //Ensure there's only one place for DisplayOptions to drop back to on Cancel
-            if (listView == searchPane) { searchPane.SelectedItem = null; objectChooser = null; }
-            else { objectChooser.SelectedItem = null; searchPane = null; }
             listView.Dock = DockStyle.Fill;
             listView.Focus();
         }
 
         private void listView_SelectedIndexChanged(object sender, SelectedIndexChangedEventArgs e)
         {
-            if (isFix) return;
-
             replacementForThumbs = null;// might as well be here; needed after FillTabs, really.
             rkLookup = null;//Indicate that we're not working on the same resource any more
             if (formClosing || e.SelectedItem == null)
@@ -480,7 +638,7 @@ namespace ObjectCloner
             {
                 ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(selectedItem.PathPackage.Path);
                 mode = Mode.FromUser;
-                fileReOpenToFix(selectedItem.PathPackage.Path, 0);
+                fileReOpenToFix(selectedItem.PathPackage.Path);
             }
         }
 
@@ -501,14 +659,21 @@ namespace ObjectCloner
 
             if (!CheckInstallDirs(null)) return;
 
+            //Ensure there's only one place for DisplayOptions to drop back to on Cancel
+            searchPane = null;
+            
             DisplayListView(objectChooser);
+            objectChooser.GetReady();
         }
 
         private void DisplaySearch()
         {
             Diagnostics.Log("DisplaySearch");
 
-            isFix = false;
+            //Ensure there's only one place for DisplayOptions to drop back to on Cancel
+            objectChooser = null;
+
+            searchPane.SelectedItem = null;
             DisplayListView(searchPane);
         }
 
@@ -575,10 +740,9 @@ namespace ObjectCloner
             if (mode == Mode.FromGame)
             {
                 string prefix = CreatorName;
+                string name = GetResourceName(selectedItem);
                 prefix = (prefix != null) ? prefix + "_" : "";
-                cloneFixOptions.UniqueName = prefix + (searchPane == null ?
-                    objectChooser.SelectedItem.Text
-                    : searchPane.SelectedItem.Text);
+                cloneFixOptions.UniqueName = prefix + name;
             }
             else
             {
@@ -618,7 +782,7 @@ namespace ObjectCloner
         {
             ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(e.SelectedItem.PathPackage.Path);
             mode = Mode.FromUser;
-            fileReOpenToFix(e.SelectedItem.PathPackage.Path, 0);
+            fileReOpenToFix(e.SelectedItem.PathPackage.Path);
         }
 
         private void DisplayReplaceTGIResults()
@@ -663,6 +827,9 @@ namespace ObjectCloner
         {
             Diagnostics.Log("DisplayNothing");
 
+            objectChooser = null;
+            searchPane = null;
+
             this.AcceptButton = null;
             this.CancelButton = null;
 
@@ -670,7 +837,7 @@ namespace ObjectCloner
 
             StopWait();
             ClearTabs();
-            TabEnable(false);
+            //TabEnable(false);
             splitContainer1.Panel1.Controls.Clear();
             if (cloneFixOptions != null)
             {
@@ -691,7 +858,7 @@ namespace ObjectCloner
             pleaseWait.Label = waitText;
             splitContainer1.Panel2.Enabled = false;
             TabEnable(false);//?
-            this.Text = GetMyName() + " [busy]";
+            this.Text = GetMyName() + " [busy]" + " " + waitText;
 
             splitContainer1.Panel1.Controls.Clear();
             splitContainer1.Panel1.Controls.Add(pleaseWait);
@@ -720,6 +887,7 @@ namespace ObjectCloner
 
         #region CloneFixOptions
         string uniqueName = null;
+        bool isFix = false;
         bool isRepair = false;
         bool isCreateNewPackage = false;
         bool isDeepClone = false;
@@ -766,13 +934,17 @@ namespace ObjectCloner
             TabEnable(false);
             if (searchPane != null)
                 DisplaySearch();
-            else
+            else if (objectChooser != null)
                 DisplayObjectChooser();
+            else
+                DisplayNothing();
         }
 
         void CloneStart()
         {
             Diagnostics.Log("CloneStart");
+
+            isFix = false;
 
             uniqueObject = null;
             if (UniqueObject == null)
@@ -796,6 +968,8 @@ namespace ObjectCloner
         void FixStart()
         {
             Diagnostics.Log("FixStart");
+
+            isFix = true;
 
             uniqueObject = null;
             if (isRenumber && UniqueObject == null)
@@ -937,10 +1111,11 @@ namespace ObjectCloner
 
         void InitialiseTabs(CatalogType resourceType)
         {
+            Diagnostics.Log("InitialiseTabs: " + resourceType);
             if (tabType == resourceType) return;
 
             string appWas = this.Text;
-            this.Text = GetMyName() + " [busy]";
+            this.Text = GetMyName() + " [busy] Initialising tabs...";
             Application.UseWaitCursor = true;
             Application.DoEvents();
             try
@@ -963,16 +1138,20 @@ namespace ObjectCloner
                     {
                         InitialiseDetailsTab(res);
                         this.tabControl1.TabPages.Add(this.tpDetail);
-                    }
-                    if (tabType == CatalogType.CatalogObject)
-                    {
-                        InitialiseFlagTabs(res);
-                        if (tlpOther.Visible)
-                            InitialiseOtherTab(res);
-                        this.tabControl1.TabPages.Add(this.tpFlagsRoom);
-                        this.tabControl1.TabPages.Add(this.tpFlagsFunc);
-                        this.tabControl1.TabPages.Add(this.tpFlagsBuild);
-                        this.tabControl1.TabPages.Add(this.tpFlagsMisc);
+                        if (tabType == CatalogType.CatalogObject)
+                        {
+                            using (Splash splash = new Splash() { Message = "Initialising tabs...", })
+                            {
+                                splash.Show();
+                                InitialiseFlagTabs(res);
+                                if (tlpOther.Visible)
+                                    InitialiseOtherTab(res);
+                                this.tabControl1.TabPages.Add(this.tpFlagsRoom);
+                                this.tabControl1.TabPages.Add(this.tpFlagsFunc);
+                                this.tabControl1.TabPages.Add(this.tpFlagsBuild);
+                                this.tabControl1.TabPages.Add(this.tpFlagsMisc);
+                            }
+                        }
                     }
                 }
             }
@@ -985,24 +1164,23 @@ namespace ObjectCloner
         {
             cbCASPClothingType.Items.Clear();
             cbCASPClothingType.Items.AddRange(Enum.GetNames(typeof(CASPartResource.ClothingType)));
-            clbCASPTypeFlags.Items.Clear();
-            clbCASPTypeFlags.Items.AddRange(Enum.GetNames(typeof(CASPartResource.DataTypeFlags)));
 
-            List<string> flags = new List<string>(Enum.GetNames(typeof(CASPartResource.AgeGenderFlags)));
-            flags.RemoveAt(0);
-            clbCASPAgeFlags.Items.Clear();
-            clbCASPGenderFlags.Items.Clear();
-            clbCASPSpeciesFlags.Items.Clear();
-            clbCASPHandedness.Items.Clear();
-            for (int i = 0; i < 8; i++) if (!flags[i].StartsWith("Unknown")) clbCASPAgeFlags.Items.Add(flags[i]);
-            for (int i = 8; i < 16; i++) if (!flags[i].StartsWith("Unknown")) clbCASPGenderFlags.Items.Add(flags[i]);
-            for (int i = 16; i < 20; i++) if (!flags[i].StartsWith("Unknown")) clbCASPSpeciesFlags.Items.Add(flags[i]);
-            for (int i = 20; i < 24; i++) if (!flags[i].StartsWith("Unknown")) clbCASPHandedness.Items.Add(flags[i]);
+            InitialiseCASPFlags(clbCASPTypeFlags, typeof(CASPartResource.DataTypeFlags));
+            InitialiseCASPFlags(clbCASPAgeFlags, typeof(CASPartResource.AgeFlags));
 
-            flags = new List<string>(Enum.GetNames(typeof(CASPartResource.ClothingCategoryFlags)));
-            flags.RemoveAt(0);
-            clbCASPCategory.Items.Clear();
-            clbCASPCategory.Items.AddRange(flags.FindAll(x => !x.StartsWith("Unknown")).ToArray());
+            cbCASPSpeciesType.Items.Clear();
+            cbCASPSpeciesType.Items.AddRange(Enum.GetNames(typeof(CASPartResource.SpeciesType)));
+
+            InitialiseCASPFlags(clbCASPGenderFlags, typeof(CASPartResource.GenderFlags));
+            InitialiseCASPFlags(clbCASPHandednessFlags, typeof(CASPartResource.HandednessFlags));
+            InitialiseCASPFlags(clbCASPCategory, typeof(CASPartResource.ClothingCategoryFlags));
+        }
+        void InitialiseCASPFlags(CheckedListBox clb, Type enumType)
+        {
+            clb.Items.Clear();
+            foreach (string name in Enum.GetNames(enumType))
+                if (!name.StartsWith("Unknown"))
+                    clb.Items.Add(name);
         }
 
         bool ffInitialised = false;
@@ -1153,8 +1331,10 @@ namespace ObjectCloner
 
         void ClearTabs()
         {
+            Diagnostics.Log("ClearTabs");
             string appWas = this.Text;
-            this.Text = GetMyName() + " [busy]";
+            this.Text = GetMyName() + " [busy] Clearing tabs...";
+
             Application.UseWaitCursor = true;
             Application.DoEvents();
             try
@@ -1197,9 +1377,9 @@ namespace ObjectCloner
             cbCASPClothingType.SelectedIndex = -1;
             for (int i = 0; i < clbCASPTypeFlags.Items.Count; i++) clbCASPTypeFlags.SetItemChecked(i, false);
             for (int i = 0; i < clbCASPAgeFlags.Items.Count; i++) clbCASPAgeFlags.SetItemChecked(i, false);
+            cbCASPSpeciesType.SelectedIndex = -1;
             for (int i = 0; i < clbCASPGenderFlags.Items.Count; i++) clbCASPGenderFlags.SetItemChecked(i, false);
-            for (int i = 0; i < clbCASPSpeciesFlags.Items.Count; i++) clbCASPSpeciesFlags.SetItemChecked(i, false);
-            for (int i = 0; i < clbCASPHandedness.Items.Count; i++) clbCASPHandedness.SetItemChecked(i, false);
+            for (int i = 0; i < clbCASPHandednessFlags.Items.Count; i++) clbCASPHandednessFlags.SetItemChecked(i, false);
             for (int i = 0; i < clbCASPCategory.Items.Count; i++) clbCASPCategory.SetItemChecked(i, false);
             tbCASPUnknown4.Text = "";
             tbCASPPackage.Text = "";
@@ -1223,8 +1403,10 @@ namespace ObjectCloner
 
         void FillTabs(SpecificResource item)
         {
+            Diagnostics.Log("FillTabs: " + item);
             string appWas = this.Text;
-            this.Text = GetMyName() + " [busy]";
+            this.Text = GetMyName() + " [busy] Filling tabs...";
+
             Application.UseWaitCursor = true;
             Application.DoEvents();
             try
@@ -1363,24 +1545,22 @@ namespace ObjectCloner
             tbCASPUnknown4.Text = casp.Unknown4;
 
             cbCASPClothingType.SelectedIndex = Enum.IsDefined(typeof(CASPartResource.ClothingType), casp.Clothing) ? (int)casp.Clothing : -1;
-
-            IList<CASPartResource.DataTypeFlags> dtFlags = (CASPartResource.DataTypeFlags[])Enum.GetValues(typeof(CASPartResource.DataTypeFlags));
-            for (int i = 0; i < dtFlags.Count; i++) clbCASPTypeFlags.SetItemChecked(i, (casp.DataType & dtFlags[i]) != 0);
-
-            List<string> flags = new List<string>(Enum.GetNames(typeof(CASPartResource.AgeGenderFlags)));
-            flags.RemoveAt(0);
-            int j;
-            j = 0; for (int i = 0; i < 8; i++) if (!flags[i].StartsWith("Unknown")) clbCASPAgeFlags.SetItemChecked(j++, bitset((uint)casp.AgeGender, i));
-            j = 0; for (int i = 8; i < 16; i++) if (!flags[i].StartsWith("Unknown")) clbCASPGenderFlags.SetItemChecked(j++, bitset((uint)casp.AgeGender, i));
-            j = 0; for (int i = 16; i < 20; i++) if (!flags[i].StartsWith("Unknown")) clbCASPSpeciesFlags.SetItemChecked(j++, bitset((uint)casp.AgeGender, i));
-            j = 0; for (int i = 20; i < 24; i++) if (!flags[i].StartsWith("Unknown")) clbCASPHandedness.SetItemChecked(j++, bitset((uint)casp.AgeGender, i));
-
-
-            flags = new List<string>(Enum.GetNames(typeof(CASPartResource.ClothingCategoryFlags)));
-            flags.RemoveAt(0);
-            j = 0; for (int i = 0; i < flags.Count; i++) if (!flags[i].StartsWith("Unknown")) clbCASPCategory.SetItemChecked(j++, bitset((uint)casp.ClothingCategory, i));
+            fillCASPFlags(clbCASPTypeFlags, typeof(CASPartResource.DataTypeFlags), (uint)casp.DataType);
+            fillCASPFlags(clbCASPAgeFlags, typeof(CASPartResource.AgeFlags), (uint)casp.AgeGender.Age);
+            cbCASPSpeciesType.SelectedIndex = Enum.IsDefined(typeof(CASPartResource.SpeciesType), casp.AgeGender.Species) ? (int)casp.AgeGender.Species : -1;
+            fillCASPFlags(clbCASPAgeFlags, typeof(CASPartResource.GenderFlags), (uint)casp.AgeGender.Gender);
+            fillCASPFlags(clbCASPHandednessFlags, typeof(CASPartResource.HandednessFlags), (uint)casp.AgeGender.Handedness);
+            fillCASPFlags(clbCASPCategory, typeof(CASPartResource.ClothingCategoryFlags), (uint)casp.ClothingCategory);
         }
-        bool bitset(uint value, int bit) { return (value & (uint)Math.Pow(2, bit)) != 0; }
+        void fillCASPFlags(CheckedListBox clb, Type enumType, uint value)
+        {
+            string[] names = Enum.GetNames(enumType);
+
+            int index = 0;
+            for (int bit = 0; bit < names.Length; bit++)
+                if (!names[bit].StartsWith("Unknown")) clb.SetItemChecked(index++, bitset(value, bit));
+        }
+        bool bitset(uint value, int bit) { return (value & (1 << bit)) != 0; }
 
         void fillDetails(SpecificResource item) { IterateTLP(tlpObjectDetail, (l, c) => fillControl(item, l, c)); }
         void fillOther(SpecificResource item) { IterateTLP(tlpOther, (l, c) => fillControl(item, l, c)); }
@@ -1466,8 +1646,10 @@ namespace ObjectCloner
 
         void TabEnable(bool enabled)
         {
+            Diagnostics.Log((enabled ? "En" : "Dis") + "abling tabs...");
             string appWas = this.Text;
-            this.Text = GetMyName() + " [busy]";
+            this.Text = GetMyName() + " [busy] " + (enabled ? "En" : "Dis") + "abling tabs...";
+
             Application.UseWaitCursor = true;
             Application.DoEvents();
             try
@@ -1509,8 +1691,8 @@ namespace ObjectCloner
             clbCASPTypeFlags.Enabled = enabled;
             clbCASPAgeFlags.Enabled = enabled;
             clbCASPGenderFlags.Enabled = enabled;
-            clbCASPSpeciesFlags.Enabled = enabled;
-            clbCASPHandedness.Enabled = enabled;
+            cbCASPSpeciesType.Enabled = enabled;
+            clbCASPHandednessFlags.Enabled = enabled;
             clbCASPCategory.Enabled = enabled;
             tbCASPUnknown4.ReadOnly = !enabled;
             //tbCASPPackage.Text = "";
@@ -1664,7 +1846,7 @@ namespace ObjectCloner
 
             mode = Mode.FromUser;
 
-            fileReOpenToFix(openPackageDialog.FileName, 0);
+            fileReOpenToFix(openPackageDialog.FileName);
         }
 
         private void fileReloadCurrent()
@@ -1717,7 +1899,7 @@ namespace ObjectCloner
                 CloseCurrent();//needed
                 InitialiseFileTable();
 
-                LoadObjectChooser(FromCloningMenuEntry(mn.mn), false);
+                LoadObjectChooser(FromCloningMenuEntry(mn.mn));
             }
             finally { this.Enabled = true; }
         }
@@ -2009,7 +2191,7 @@ namespace ObjectCloner
         private void helpAbout()
         {
             string copyright = "\n" +
-                this.Text + "  Copyright (C) 2009  Peter L Jones\n" +
+                myName + "  Copyright (C) 2012  Peter L Jones\n" +
                 "\n" +
                 "This program comes with ABSOLUTELY NO WARRANTY; for details see Help->Warranty.\n" +
                 "\n" +
@@ -2020,30 +2202,16 @@ namespace ObjectCloner
                 "Front-end Distribution: {1}\n" +
                 "Library Distribution: {2}"
                 , copyright
-                , getVersion(typeof(MainForm), "s3oc")
-                , getVersion(typeof(s3pi.Interfaces.AApiVersionedFields), "s3oc")
-                ), this.Text);
-        }
-
-        private string getVersion(Type type, string p)
-        {
-            string s = getString(Path.Combine(Path.GetDirectoryName(type.Assembly.Location), p + "-Version.txt"));
-            return s == null ? "Unknown" : s;
-        }
-
-        private string getString(string file)
-        {
-            if (!File.Exists(file)) return null;
-            FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read);
-            StreamReader t = new StreamReader(fs);
-            return t.ReadLine();
+                , AutoUpdate.Version.CurrentVersion
+                , AutoUpdate.Version.LibraryVersion
+                ), myName);
         }
 
         private void helpUpdate()
         {
             bool msgDisplayed = AutoUpdate.Checker.GetUpdate(false);
             if (!msgDisplayed)
-                CopyableMessageBox.Show("Your " + Application.ProductName + " is up to date", this.Text,
+                CopyableMessageBox.Show("Your " + System.Configuration.PortableSettingsProvider.ExecutableName + " is up to date", myName,
                     CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
         }
 
@@ -2093,16 +2261,17 @@ namespace ObjectCloner
 
         bool HaveUnsavedWork()
         {
-            return cloneFixOptions != null
-                || lbSaveCancel.Visible;// && splitContainer1.Panel1.Controls.Contains(cloneFixOptions);
+            return cloneFixOptions != null ||
+                lbSaveCancel.Visible;// && splitContainer1.Panel1.Controls.Contains(cloneFixOptions);
         }
         bool IsOkayToThrowAwayWork()
         {
-            int dr = CopyableMessageBox.Show("Continuing will lose any changes.", GetMyName(), CopyableMessageBoxButtons.OKCancel, CopyableMessageBoxIcon.Warning, 1);
+            return true;
+            /*int dr = CopyableMessageBox.Show("Continuing will lose any changes.", GetMyName(), CopyableMessageBoxButtons.OKCancel, CopyableMessageBoxIcon.Warning, 1);
             if (dr != 0) return false;
 
             cloneFixOptions = null;
-            return true;
+            return true;/**/
         }
 
 
@@ -2112,15 +2281,15 @@ namespace ObjectCloner
             {
                 ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(FileTable.Current.Path);
                 mode = Mode.FromUser;
-                fileReOpenToFix(FileTable.Current.Path, 0);
+                fileReOpenToFix(FileTable.Current.Path);
             }
             else
                 DisplayNothing();
         }
 
-        void fileReOpenToFix(string filename, CatalogType type)
+        void fileReOpenToFix(string filename, IResourceKey rk = null)
         {
-            Diagnostics.Log(String.Format("fileReOpenToFix filename: {0}, type: {1}", filename, type));
+            Diagnostics.Log(String.Format("fileReOpenToFix filename: {0}, rk: {1}", filename, rk));
 
             cloneFixOptions = null;//This should be a safe and sensible place to do this...
 
@@ -2142,29 +2311,29 @@ namespace ObjectCloner
 
             this.Text = GetMyName();
 
-            LoadObjectChooser(type, type != 0);
-        }
-
-        bool isFix = false;
-        void LoadObjectChooser(CatalogType resourceType, bool IsFixPass)
-        {
-            Diagnostics.Log(String.Format("LoadObjectChooser resourceType: {0}, IsFixPass: {1}", resourceType, IsFixPass));
-
-            isFix = IsFixPass;
-
-            CTPTBrushIndexToPair = new Dictionary<ulong, SpecificResource>();
-            objectChooser = new ObjectChooser(DoWait, StopWait, updateProgress, ListViewAdd, resourceType, isFix);
-            if (isFix)
+            if (rk != null)
             {
-                objectChooser.SelectedIndexChanged += new EventHandler<SelectedIndexChangedEventArgs>((sender, e) => selectedItem = e.SelectedItem);
-                objectChooser.ItemActivate += new EventHandler<ItemActivateEventArgs>((sender, e) => FixStart());
+                selectedItem = FileTable.Current.Find(rie => rk.Equals(rie));
+                if (selectedItem == null)
+                    CopyableMessageBox.Show(this, "Resource " + rk + " not found.", "Error", CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
+                else
+                    FixStart();
             }
             else
-            {
-                ClearTabs();
-                objectChooser.SelectedIndexChanged += new EventHandler<SelectedIndexChangedEventArgs>(listView_SelectedIndexChanged);
-                objectChooser.ItemActivate += new EventHandler<ItemActivateEventArgs>(listView_ItemActivate);
-            }
+                LoadObjectChooser(0);
+        }
+
+        void LoadObjectChooser(CatalogType resourceType)
+        {
+            Diagnostics.Log("LoadObjectChooser resourceType: " + resourceType);
+
+            CTPTBrushIndexToPair = new Dictionary<ulong, SpecificResource>();
+
+            ClearTabs();
+
+            btnStart.Enabled = false;
+            objectChooser = ObjectChooser.CreateObjectChooser(DoWait, StopWait, updateProgress, ListViewAdd, resourceType,
+                listView_SelectedIndexChanged, listView_ItemActivate);
 
             DisplayObjectChooser();
         }
@@ -2175,14 +2344,16 @@ namespace ObjectCloner
             Diagnostics.Log("CheckInstallDirs");
             try
             {
-                DoWait("Setting up folders...");
+                DoWait("Refreshing packages cache...");
                 if (!FileTable.IsOK)
                 {
                     CopyableMessageBox.Show("Found no packages\nPlease check your Game Folder settings.", "No objects to clone",
                         CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Stop);
                     return false;
                 }
+                DoWait("Refreshing STBL cache...");
                 bool loadedSTBLs = STBLHandler.IsOK;
+                DoWait("Refreshing _KEY cache...");
                 bool loadedNMaps = NameMap.IsOK;
                 return true;
             }
@@ -2354,6 +2525,8 @@ namespace ObjectCloner
         }
 
         #region Fetch resources
+        // This is used for both Clone and Fix
+        // Fix is basically DeepClone with a slight change in OBJD
         Dictionary<string, IResourceKey> rkLookup = null;
         void RunRKLookup()
         {
@@ -2392,75 +2565,15 @@ namespace ObjectCloner
         }
         private void SlurpRKsFromField(string key, AApiVersionedFields field)
         {
-            Type t = field.GetType();
-            if (typeof(GenericRCOLResource.ChunkEntry).IsAssignableFrom(t)) { }
-            else if (typeof(TGIBlock).IsAssignableFrom(t))
+            foreach (var tuple in field
+                .FindAll(key, x => x is TGIBlock || x is GenericRCOLResource.ChunkEntry)//Don't look inside ChunkEntries
+                .Where(x => x.Item2 is TGIBlock))//but we only actually want TGIBlocks
             {
-                Add(key, (IResourceKey)field);
-            }
-            else
-            {
-                if (typeof(IEnumerable).IsAssignableFrom(t))
-                    SlurpRKsFromIEnumerable(key, (IEnumerable)field);
-                SlurpRKsFromAApiVersionedFields(key, field);
-            }
-        }
-        private void SlurpRKsFromAApiVersionedFields(string key, AApiVersionedFields field)
-        {
-            List<string> fields = field.ContentFields;
-            foreach (string f in fields)
-            {
-                if ((new List<string>(new string[] { "Stream", "AsBytes", "Value", })).Contains(f)) continue;
-
-                Type t = AApiVersionedFields.GetContentFieldTypes(0, field.GetType())[f];
-                if (!t.IsClass || t.Equals(typeof(string))) continue;
-                if (t.IsArray && (!t.GetElementType().IsClass || t.GetElementType().Equals(typeof(string)))) continue;
-
-                if (typeof(IEnumerable).IsAssignableFrom(t))
-                    SlurpRKsFromIEnumerable(key + "." + f, (IEnumerable)field[f].Value);
-                else if (typeof(AApiVersionedFields).IsAssignableFrom(t))
-                    SlurpRKsFromField(key + "." + f, (AApiVersionedFields)field[f].Value);
-            }
-        }
-        private void SlurpRKsFromIEnumerable(string key, IEnumerable list)
-        {
-            if (list == null) return;
-            int i = 0;
-            foreach (object o in list)
-            {
-                if (typeof(AApiVersionedFields).IsAssignableFrom(o.GetType()))
-                {
-                    SlurpRKsFromField(key + "[" + i + "]", (AApiVersionedFields)o);
-                    i++;
-                }
-                else if (typeof(IEnumerable).IsAssignableFrom(o.GetType()))
-                {
-                    SlurpRKsFromIEnumerable(key + "[" + i + "]", (IEnumerable)o);
-                    i++;
-                }
-            }
-        }
-        private void SlurpRKsFromTextReader(string key, TextReader tr)
-        {
-            int j = 0;
-            string line = tr.ReadLine();
-            while (line != null)
-            {
-                int i = line.IndexOf("key:");
-                while (i >= 0 && i + 38 < line.Length)
-                {
-                    TGIN field = new TGIN();
-                    if (uint.TryParse(line.Substring(i + 4, 8), System.Globalization.NumberStyles.HexNumber, null, out field.ResType)
-                        && uint.TryParse(line.Substring(i + 13, 8), System.Globalization.NumberStyles.HexNumber, null, out field.ResGroup)
-                        && ulong.TryParse(line.Substring(i + 22, 16), System.Globalization.NumberStyles.HexNumber, null, out field.ResInstance))
-                        Add(key + "[" + (j++) + "]", (AResourceKey)field);
-                    i = line.IndexOf("key:", i + 38);
-                }
-                line = tr.ReadLine();
+                Add(tuple.Item1, tuple.Item2 as IResourceKey);
             }
         }
 
-        private void SlurpKindred(string key, Predicate<IResourceIndexEntry> Match)
+        private void SlurpKinRKs(string key, Predicate<IResourceIndexEntry> Match)
         {
             List<SpecificResource> seen = new List<SpecificResource>();
             int i = 0;
@@ -2475,6 +2588,8 @@ namespace ObjectCloner
 
         #region Steps
         SpecificResource objkItem;
+        SpecificResource geomItem;
+        SpecificResource caspXMLItem;
         List<SpecificResource> vpxyItems;
         List<SpecificResource> modlItems;
 
@@ -2687,11 +2802,23 @@ namespace ObjectCloner
             lastStepInChain = None;
             if (!JustSelf)
             {
-                stepList.AddRange(new Step[] {
-                    CASP_deepClone,
-                    CASP_getKinXML,
-                });
-                lastStepInChain = CASP_getKinXML;
+                if (IsDeepClone)
+                {
+                    stepList.AddRange(new Step[] {
+                        CASP_deepClone,
+                        CASP_SlurpKinXML,
+                    });
+                }
+                else
+                {
+                    stepList.AddRange(new Step[] {
+                        CASP_cloneNoDDS,
+                        CASP_getKinXML,
+                        CASPKinXML_getDDSes,
+                        GEOM_getNormalMap,
+                    });
+                }
+                lastStepInChain = CASP_SlurpKinXML;
                 if (WantThumbs)
                     stepList.Add(SlurpThumbnails);
             }
@@ -2738,7 +2865,11 @@ namespace ObjectCloner
             StepText.Add(CWAL_SlurpThumbnails, "Add thumbnails");
 
             StepText.Add(CASP_deepClone, "Deep clone of resources referenced by CASP");
-            StepText.Add(CASP_getKinXML, "Preset XML (same instances as CASP)");
+            StepText.Add(CASP_SlurpKinXML, "Preset XML (same instances as CASP) (method 1)");
+            StepText.Add(CASP_cloneNoDDS, "Deep clone of resources referenced by CASP, excluding DDSes, and spot the GEOM");
+            StepText.Add(CASP_getKinXML, "Preset XML (same instance as CASP) (method 2)");
+            StepText.Add(CASPKinXML_getDDSes, "Add specific XML-referenced DDSes");
+            StepText.Add(GEOM_getNormalMap, "Add GEOM-referenced NormalMap");
         }
 
         void None() { }
@@ -2963,17 +3094,17 @@ namespace ObjectCloner
                 SlurpRKsFromField("vpxy[" + i + "]", vpxyChunk);
             }
         }
-        void VPXYs_getKinMTST() { Diagnostics.Log("VPXYs_getKinMTST"); VPXYs_getKin("VPXYs_getKinMTST", 0x02019972, "mtst"); }
-        void VPXYs_getKinXML() { Diagnostics.Log("VPXYs_getKinXML"); VPXYs_getKin("VPXYs_getKinXML", 0x0333406C, "PresetXML"); }
+        void VPXYs_getKinMTST() { Diagnostics.Log("VPXYs_getKinMTST"); VPXYs_getKinRKs("VPXYs_getKinMTST", 0x02019972, "mtst"); }
+        void VPXYs_getKinXML() { Diagnostics.Log("VPXYs_getKinXML"); VPXYs_getKinRKs("VPXYs_getKinXML", 0x0333406C, "PresetXML"); }
         void VPXYKinMTST_SlurpRKs() { Diagnostics.Log("VPXYKinMTST_SlurpRKs"); VPXYKin_SlurpRKs(0x02019972, "mtst"); }
         void VPXYKinXML_SlurpRKs() { Diagnostics.Log("VPXYKinXML_SlurpRKs"); VPXYKin_SlurpRKs(0x0333406C, "PresetXML"); }
         bool IsVPXYKin(IResourceKey rk, uint type) { return rk.ResourceType == type && vpxyItems.Exists(item => item.ResourceIndexEntry.Instance == rk.Instance); }
-        void VPXYs_getKin(string log, uint type, string suffix)
+        void VPXYs_getKinRKs(string log, uint type, string suffix)
         {
             for (int i = 0; i < vpxyItems.Count; i++)
             {
                 Diagnostics.Log(String.Format(log + ": 0x{0:X8}-*-0x{1:X16}", type, vpxyItems[i].ResourceIndexEntry.Instance));
-                SlurpKindred("vpxy[" + i + "]." + suffix, rie => IsVPXYKin(rie, type));
+                SlurpKinRKs("vpxy[" + i + "]." + suffix, rie => IsVPXYKin(rie, type));
             }
         }
         void VPXYKin_SlurpRKs(uint type, string prefix)
@@ -3062,43 +3193,148 @@ namespace ObjectCloner
             Diagnostics.Show(s, "No TXTC items");
         }
 
-        void deepClone(string _key, IResourceKey _rk, Predicate<IResourceKey> _match)
+        void deepClone(Tuple<string, object> _tuple, Predicate<IResourceKey> _match)
         {
+            IResourceKey _rk = _tuple.Item2 as IResourceKey;
             if (!_match(_rk)) return;
-            Add(_key, _rk);
+            Add(_tuple.Item1, _rk);
             SpecificResource sr = new SpecificResource(FileTable.GameContent, _rk);
             if (sr.ResourceIndexEntry == null) return;
 
-            int i = 0;
-            IEnumerable<IResourceKey> ierk;
+            string key = _tuple.Item1 + ": " + sr.LongName.Substring(0, 4);
+            IEnumerable<Tuple<string, object>> iet;
             if (_rk.ResourceType == 0x0333406C)
             {
-                ierk = new EnumerableTextReader(new StreamReader(sr.Resource.Stream, true));
+                iet = (new StreamReader(sr.Resource.Stream, true)).SlurpRKs(key);
             }
             else
             {
-                ierk = new EnumerableResource(sr.Resource as AResource);
+                iet = (sr.Resource as AResource).FindAll(key, x => x is IResourceKey, (tr, k) => tr.SlurpRKs(k));
             }
-            foreach (IResourceKey rk in ierk)
-                deepClone(_key + ": " + sr.LongName.Substring(0, 4) + " RK " + i++, rk, _match);
+            foreach (var tuple in iet)
+                deepClone(tuple, _match);
         }
+
         void CASP_deepClone()
         {
             Diagnostics.Log("CASP_deepClone");
             CASPartResource.CASPartResource casp = selectedItem.Resource as CASPartResource.CASPartResource;
             if (casp == null) return;
 
-            IEnumerable<IResourceKey> ierk = new EnumerableResource(casp);
-            int i = 0;
             List<IResourceKey> seen = new List<IResourceKey>();
-            foreach (IResourceKey rk in ierk)
-                deepClone("casp RK " + i++, rk, x => { if (seen.Contains(x) || x.ResourceType == 0x034AEECB) return false; seen.Add(x); return true; });
+            foreach (var tuple in casp.FindAll("casp", x => x is IResourceKey, (tr, k) => tr.SlurpRKs(k)))
+                deepClone(tuple, x => { if (seen.Contains(x) || x.ResourceType == 0x034AEECB) return false; seen.Add(x); return true; });
+        }
+
+        void CASP_cloneNoDDS()
+        {
+            Diagnostics.Log("CASP_cloneNoDDS");
+            CASPartResource.CASPartResource casp = selectedItem.Resource as CASPartResource.CASPartResource;
+            if (casp == null) return;
+
+            geomItem = null;
+            List<IResourceKey> seen = new List<IResourceKey>();
+            foreach (var tuple in casp.FindAll("casp", x => x is IResourceKey, (tr, k) => tr.SlurpRKs(k)))
+                deepClone(tuple,
+                    x => {
+                        if (seen.Contains(x) || x.ResourceType == 0x034AEECB || x.ResourceType == 0x00B2D882)
+                            return false;
+                        seen.Add(x);
+                        if (x.ResourceType == 0x015A1849 && geomItem == null)
+                            geomItem = new SpecificResource(FileTable.GameContent, x);
+
+                        return true;
+                    });
+        }
+
+        void CASP_SlurpKinXML()
+        {
+            Diagnostics.Log(String.Format("CASP_getKinXML" + ": 0x{0:X8}-*-0x{1:X16}", 0x0333406C, selectedItem.ResourceIndexEntry.Instance));
+            SlurpKinRKs("casp.PresetXML", rie => rie.ResourceType == 0x0333406C && rie.Instance == selectedItem.ResourceIndexEntry.Instance);
         }
 
         void CASP_getKinXML()
         {
-            Diagnostics.Log(String.Format("CASP_getKinXML" + ": 0x{0:X8}-*-0x{1:X16}", 0x0333406C, selectedItem.ResourceIndexEntry.Instance));
-            SlurpKindred("casp.PresetXML", rie => rie.ResourceType == 0x0333406C && rie.Instance == selectedItem.ResourceIndexEntry.Instance);
+            Diagnostics.Log("CASP_getKinXML");
+            caspXMLItem = new SpecificResource(FileTable.GameContent, new RK(selectedItem.RequestedRK) { ResourceType = 0x0333406C });//_XML
+            if (caspXMLItem.ResourceIndexEntry != null)
+                Add("casp.PresetXML", caspXMLItem.ResourceIndexEntry);
+            else
+                Diagnostics.Show("CASP _XML resource not found");
+        }
+
+        /*
+<preset>
+  <complate name="CasRgbMask" reskey="blah">
+    <value key="..." value="key:00B2D882:00000000:B5683B98CA67ECFC" />
+  </complate>
+</preset>
+        /**/
+        static string[] CasRgbMaskWantedKeys = new string[] {
+             "Overlay"          
+            ,"Mask"             
+            ,"Transparency Map" 
+            ,"Multiplier"       
+            ,"Clothing Specular"
+            ,"Clothing Ambient" 
+            ,"Stencil A"        
+            ,"Stencil B"        
+            ,"Stencil C"        
+            ,"Stencil D"        
+            ,"Stencil E"        
+            ,"Stencil F"        
+            ,"Logo Texture"     
+            ,"Logo 2 Texture"   
+            ,"Logo 3 Texture"   
+            ,
+        };
+        void CASPKinXML_getDDSes()
+        {
+            Diagnostics.Log("CASP_getXMLDDSes");
+            if (caspXMLItem.Resource == null) return;
+            XElement casp = XElement.Load(caspXMLItem.Resource.Stream);
+            foreach (Tuple<string,string> tuple in
+                casp.Descendants("value")
+                .Where(v => CasRgbMaskWantedKeys.Contains(v.Attribute("key").Value))
+                .Select(v => Tuple.Create(v.Attribute("key").Value, v.Attribute("value").Value)))
+            {
+                IResourceKey rk;
+                string oldKey = tuple.Item2.Substring(4).Replace('-', ':');
+                string RKkey = "0x" + oldKey.Replace(":", "-0x");//translate to s3pi format
+                if (RK.TryParse(RKkey, out rk))
+                    Add("casp.PresetXML." + tuple.Item1, rk);
+            }
+        }
+
+        void GEOM_getNormalMap()
+        {
+            Diagnostics.Log("GEOM_getNormalMap");
+            if (geomItem == null) { Diagnostics.Show("GEOM reference not found"); return; }
+            if (geomItem.Resource == null) { Diagnostics.Show("GEOM resource not found"); return; }
+            if (geomItem.Resource as meshExpImp.ModelBlocks.GeometryResource == null) { Diagnostics.Show("GEOM resource is not a GeometryResource"); return; }
+            meshExpImp.ModelBlocks.GeometryResource geomResource = geomItem.Resource as meshExpImp.ModelBlocks.GeometryResource;
+            if (geomResource.ChunkEntries.Count != 1) { Diagnostics.Show("GeometryResource should have 1 Chunk, found " + geomResource.ChunkEntries.Count); return; }
+            meshExpImp.ModelBlocks.GEOM geom = geomResource.ChunkEntries[0].RCOLBlock as meshExpImp.ModelBlocks.GEOM;
+            if (geom == null) { Diagnostics.Show("GEOM RCOL block not found"); return; }
+            if (geom.Shader == 0) return;
+            MATD.MTNF mtnf = geom.Mtnf;
+            if (mtnf == null) { Diagnostics.Show("MTNF expected but was null"); return; }
+            MATD.ShaderData sd = mtnf.SData.Find(e => e.Field == MATD.FieldType.NormalMap);
+            if (sd == null) { Diagnostics.Show("NormalMap not found"); return; }
+            MATD.ElementTextureRef tr = sd as MATD.ElementTextureRef;
+            if (tr == null) { Diagnostics.Show("NormalMap not an ElementTextureRef"); return; }
+            //This will break when Data stops being a ChunkRef and turns into a plain int...
+            int index = -2;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                tr.Data.UnParse(ms);
+                ms.Position = 0;
+                index = new BinaryReader(ms).ReadInt32();
+            }
+            if (index < 0) { Diagnostics.Show(String.Format("NormalMap index read {0}, expected >= 0", index)); return; }
+            if (index >= geom.TGIBlocks.Count) { Diagnostics.Show(String.Format("NormalMap index read {0}, expected < {1}", index, geom.TGIBlocks.Count)); return; }
+            if (rkLookup.ContainsValue(geom.TGIBlocks[index])) { Diagnostics.Show("Already seen NormalMap " + geom.TGIBlocks[index]); }
+            Add("casp.GEOM.NormalMap", geom.TGIBlocks[index]);
         }
 
 
@@ -3448,15 +3684,20 @@ namespace ObjectCloner
                         foreach (var typeFlag in clbCASPTypeFlags.CheckedItems)
                             casp.DataType |= (CASPartResource.DataTypeFlags)Enum.Parse(typeof(CASPartResource.DataTypeFlags), typeFlag + "");
 
-                        casp.AgeGender = 0;
+                        casp.AgeGender.Age = 0;
                         foreach (var typeFlag in clbCASPAgeFlags.CheckedItems)
-                            casp.AgeGender |= (CASPartResource.AgeGenderFlags)Enum.Parse(typeof(CASPartResource.AgeGenderFlags), typeFlag + "");
+                            casp.AgeGender.Age |= (CASPartResource.AgeFlags)Enum.Parse(typeof(CASPartResource.AgeFlags), typeFlag + "");
+
+                        if (cbCASPSpeciesType.SelectedIndex != -1)
+                            casp.AgeGender.Species = (CASPartResource.SpeciesType)Enum.Parse(typeof(CASPartResource.SpeciesType), cbCASPSpeciesType.SelectedItem + "");
+
+                        casp.AgeGender.Gender = 0;
                         foreach (var typeFlag in clbCASPGenderFlags.CheckedItems)
-                            casp.AgeGender |= (CASPartResource.AgeGenderFlags)Enum.Parse(typeof(CASPartResource.AgeGenderFlags), typeFlag + "");
-                        foreach (var typeFlag in clbCASPSpeciesFlags.CheckedItems)
-                            casp.AgeGender |= (CASPartResource.AgeGenderFlags)Enum.Parse(typeof(CASPartResource.AgeGenderFlags), typeFlag + "");
-                        foreach (var typeFlag in clbCASPHandedness.CheckedItems)
-                            casp.AgeGender |= (CASPartResource.AgeGenderFlags)Enum.Parse(typeof(CASPartResource.AgeGenderFlags), typeFlag + "");
+                            casp.AgeGender.Gender |= (CASPartResource.GenderFlags)Enum.Parse(typeof(CASPartResource.GenderFlags), typeFlag + "");
+
+                        casp.AgeGender.Handedness = 0;
+                        foreach (var typeFlag in clbCASPHandednessFlags.CheckedItems)
+                            casp.AgeGender.Handedness |= (CASPartResource.HandednessFlags)Enum.Parse(typeof(CASPartResource.HandednessFlags), typeFlag + "");
 
                         casp.ClothingCategory = 0;
                         foreach (var typeFlag in clbCASPCategory.CheckedItems)
@@ -3649,12 +3890,14 @@ namespace ObjectCloner
                 StopWait();
             }
 
-            int dr = CopyableMessageBox.Show("Your updated package is ready.\nDo you wish to continue working\non it in s3oc?",
+            /*int dr = CopyableMessageBox.Show("Your updated package is ready.\nDo you wish to continue working\non it in s3oc?",
                 myName, CopyableMessageBoxButtons.YesNo, CopyableMessageBoxIcon.Question);
 
             if (dr == 0)
                 ReloadCurrentPackage();
-            else
+            else/**/
+                CopyableMessageBox.Show("Your updated package is ready.",
+                    myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
                 fileClose();
         }
 
@@ -3784,7 +4027,7 @@ namespace ObjectCloner
                     s3pi.Package.Package.ClosePackage(0, target.Package);
 
                     isCreateNewPackage = false;
-                    fileReOpenToFix(target.Path, selectedItem.RequestedRK.CType());
+                    fileReOpenToFix(target.Path, selectedItem.RequestedRK);
                 }
                 else
                 {
@@ -4151,197 +4394,85 @@ namespace ObjectCloner
 
     static class Extensions
     {
-        public static bool Contains(this IEnumerable<string> haystack, string needle) { foreach (var x in haystack) if (x.Equals(needle)) return true; return false; }
-
         public static CatalogType CType(this IResourceKey rk) { return (CatalogType)rk.ResourceType; }
-    }
 
-    class EnumerableResource : IEnumerable<IResourceKey>
-    {
-        AApiVersionedFields resource;
-
-        public EnumerableResource(AApiVersionedFields resource) { this.resource = resource; }
-        public static explicit operator EnumerableResource(AApiVersionedFields resource) { return new EnumerableResource(resource); }
-
-        public IEnumerator<IResourceKey> GetEnumerator() { return new Enumerator(resource); }
-        IEnumerator IEnumerable.GetEnumerator() { return (IEnumerator<IResourceKey>)GetEnumerator(); }
-
-        public struct Enumerator : IEnumerator<IResourceKey>
+        static string[] excludes = new string[] { "Value", "Stream", "AsBytes", };
+        public static IEnumerable<Tuple<string, object>> FindAll(this AApiVersionedFields resource, string key, Predicate<object> match,
+            Func<TextReader, string, IEnumerable<Tuple<string, object>>> findAllTextReader = null,
+            Func<BinaryReader, string, IEnumerable<Tuple<string, object>>> findAllBinaryReader = null)
         {
-            AApiVersionedFields resource;
-            IResourceKey rk;
-            TypedValue current;
-            IEnumerator<string> contentFieldsEnumerator;
-            DependentList<TGIBlock> tgiDependentList;
-            IEnumerator<TGIBlock> tgiEnumerator;
-            IEnumerable<IResourceKey> rkEnumerable;
-            IEnumerator<IResourceKey> rkEnumerator;
-            IEnumerable<GenericRCOLResource.ChunkEntry> ceEnumerable;
-            IEnumerator<GenericRCOLResource.ChunkEntry> ceEnumerator;
-            public Enumerator(AApiVersionedFields resource)
-            {
-                this.resource = resource;
-                rk = null;
-                current = null;
-                contentFieldsEnumerator = resource.ContentFields.GetEnumerator();
-                tgiDependentList = null;
-                tgiEnumerator = null;
-                rkEnumerable = null;
-                rkEnumerator = null;
-                ceEnumerable = null;
-                ceEnumerator = null;
-            }
+            if (match(resource))
+                yield return Tuple.Create<string, object>(key, resource);
 
-            public IResourceKey Current { get { return rk; } }
-            object IEnumerator.Current { get { return (IResourceKey)Current; } }
-
-            public void Dispose()
-            {
-                this.resource = null;
-                rk = null;
-                current = null;
-                contentFieldsEnumerator = null;
-                tgiDependentList = null;
-                tgiEnumerator = null;
-                rkEnumerable = null;
-                rkEnumerator = null;
-                ceEnumerable = null;
-                ceEnumerator = null;
-            }
-
-            public bool MoveNext()
-            {
-                while (true)
+            else foreach (string field in resource.ContentFields.Where(x => !excludes.Contains(x)))
                 {
-                    if (current == null)
+                    TypedValue tv = resource[field];
+                    string name = key + "." + field;
+
+                    // string is enumerable but we want to treat it as a single value
+                    if (typeof(string).IsAssignableFrom(tv.Type))
                     {
-                        if (!contentFieldsEnumerator.MoveNext()) break;
-                        current = resource[contentFieldsEnumerator.Current];
-                        tgiDependentList = null;
-                        rkEnumerable = null;
-                        ceEnumerable = null;
+                        if (match(tv.Value))
+                            yield return Tuple.Create<string, object>(name, tv.Value);
                     }
-                    if (typeof(IResourceKey).IsAssignableFrom(current.Type))
+
+                    else if (typeof(IEnumerable).IsAssignableFrom(tv.Type))
                     {
-                        rk = current.Value as IResourceKey;
-                        current = null;
-                        return true;
-                    }
-                    else if (typeof(DependentList<TGIBlock>).IsAssignableFrom(current.Type))
-                    {
-                        if (tgiDependentList == null)
+                        int i = 0;
+                        foreach (var e in tv.Value as IEnumerable)
                         {
-                            tgiDependentList = current.Value as DependentList<TGIBlock>;
-                            tgiEnumerator = tgiDependentList.GetEnumerator();
-                        }
-                        if (tgiEnumerator.MoveNext())
-                        {
-                            rk = tgiEnumerator.Current;
-                            return true;
-                        }
-                    }
-                    else if (typeof(TextReader).IsAssignableFrom(current.Type))
-                    {
-                        if (rkEnumerable == null)
-                        {
-                            rkEnumerable = new EnumerableTextReader(current.Value as TextReader);
-                            rkEnumerator = rkEnumerable.GetEnumerator();
-                        }
-                        if (rkEnumerator.MoveNext())
-                        {
-                            rk = rkEnumerator.Current;
-                            return true;
+                            string elem = name + "[" + (i++) + "]";
+                            if (e is AApiVersionedFields)
+                                foreach (var tuple in (e as AApiVersionedFields).FindAll(elem, match, findAllTextReader, findAllBinaryReader))
+                                    yield return tuple;
+
+                            else if (e is TextReader && findAllTextReader != null)
+                                foreach (var tuple in findAllTextReader(e as TextReader, elem))
+                                    yield return tuple;
+
+                            else if (e is BinaryReader && findAllBinaryReader != null)
+                                foreach (var tuple in findAllBinaryReader(e as BinaryReader, elem))
+                                    yield return tuple;
+
+                            else if (match(e))
+                                yield return Tuple.Create<string, object>(elem, e);
                         }
                     }
-                    else if (typeof(AApiVersionedFields).IsAssignableFrom(current.Type))
-                    {
-                        if (rkEnumerable == null)
-                        {
-                            rkEnumerable = new EnumerableResource(current.Value as AApiVersionedFields);
-                            rkEnumerator = rkEnumerable.GetEnumerator();
-                        }
-                        if (rkEnumerator.MoveNext())
-                        {
-                            rk = rkEnumerator.Current;
-                            return true;
-                        }
-                    }
-                    else if (typeof(IEnumerable<GenericRCOLResource.ChunkEntry>).IsAssignableFrom(current.Type))
-                    {
-                        if (ceEnumerable == null)
-                        {
-                            ceEnumerable = current.Value as IEnumerable<GenericRCOLResource.ChunkEntry>;
-                            ceEnumerator = ceEnumerable.GetEnumerator();
-                            rkEnumerable = null;
-                        }
-                        if (rkEnumerable == null)
-                        {
-                            if (!ceEnumerator.MoveNext())
-                            {
-                                current = null;
-                                continue;
-                            }
-                            rkEnumerable = new EnumerableResource(ceEnumerator.Current);
-                            rkEnumerator = rkEnumerable.GetEnumerator();
-                        }
-                        if (!rkEnumerator.MoveNext())
-                        {
-                            rkEnumerable = null;
-                            continue;
-                        }
-                        rk = rkEnumerator.Current;
-                        return true;
-                    }
-                    current = null;
+
+                    else if (typeof(AApiVersionedFields).IsAssignableFrom(tv.Type))
+                        foreach (var tuple in (tv.Value as AApiVersionedFields).FindAll(name, match, findAllTextReader, findAllBinaryReader))
+                            yield return tuple;
+
+                    else if (typeof(TextReader).IsAssignableFrom(tv.Type) && findAllTextReader != null)
+                        foreach (var value in findAllTextReader(tv.Value as TextReader, name))
+                            yield return value;
+
+                    else if (typeof(BinaryReader).IsAssignableFrom(tv.Type) && findAllBinaryReader != null)
+                        foreach (var tuple in findAllBinaryReader(tv.Value as BinaryReader, name))
+                            yield return tuple;
+
+                    else if (match(tv.Value))
+                        yield return Tuple.Create<string, object>(name, tv.Value);
                 }
-                return false;
-            }
-
-            public void Reset() { contentFieldsEnumerator = resource.ContentFields.GetEnumerator(); current = null; }
         }
-    }
 
-    class EnumerableTextReader : IEnumerable<IResourceKey>
-    {
-        TextReader tr;
-
-        public EnumerableTextReader(TextReader tr) { this.tr = tr; }
-        public static explicit operator EnumerableTextReader(TextReader tr) { return new EnumerableTextReader(tr); }
-
-        public IEnumerator<IResourceKey> GetEnumerator() { return new Enumerator(tr); }
-        IEnumerator IEnumerable.GetEnumerator() { return (IEnumerator<IResourceKey>)GetEnumerator(); }
-
-        public struct Enumerator : IEnumerator<IResourceKey>
+        public static IEnumerable<Tuple<string, object>> SlurpRKs(this TextReader tr, string key)
         {
             const int keyLen = 3 + 1 + 8 + 1 + 8 + 1 + 16;//key:TTTTTTTT:GGGGGGGG:IIIIIIIIIIIIIIII
-            TextReader tr;
-            string line;
-            IResourceKey rk;
-            int linePos;
-            int index;
-            public Enumerator(TextReader tr)
+            string line = tr.ReadLine();
+            IResourceKey rk = null;
+            int linePos = 0;
+            int index = -1;
+            int ctr = 0;
+
+            while (line != null)
             {
-                this.tr = tr;
-                line = tr.ReadLine();
-                rk = null;
-                linePos = 0;
-                index = -1;
-            }
-
-            public IResourceKey Current { get { return rk; } }
-            object IEnumerator.Current { get { return (IResourceKey)Current; } }
-
-            public void Dispose() { tr = null; }
-
-            public bool MoveNext()
-            {
-                if (line == null) return false;
-
                 index = line.IndexOf("key:", linePos);
                 while (index == -1)
                 {
                     line = tr.ReadLine();
-                    if (line == null) return false;
+                    if (line == null)
+                        yield break;
 
                     linePos = 0;
                     index = line.IndexOf("key:", linePos);
@@ -4350,15 +4481,14 @@ namespace ObjectCloner
                 if (linePos > line.Length)
                 {
                     line = tr.ReadLine();
-                    return MoveNext();
+                    continue;
                 }
 
                 string oldKey = line.Substring(index, keyLen).Substring(4).Replace('-', ':');
                 string RKkey = "0x" + oldKey.Replace(":", "-0x");//translate to s3pi format
-                return RK.TryParse(RKkey, out rk);
+                if (RK.TryParse(RKkey, out rk))
+                    yield return Tuple.Create<string, object>(key + "[" + (ctr++) + "]", rk);
             }
-
-            public void Reset() { throw new InvalidOperationException(); }
         }
     }
 }

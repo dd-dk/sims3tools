@@ -5,12 +5,16 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("s3pe DDS Tool")]
-[assembly: AssemblyDescription("s3pe's own tool for doing things to DDS resources")]
+[assembly: AssemblyTitle("DDS manipulation tool")]
+[assembly: AssemblyDescription("A tool to allow DDS images to be exported, imported and generally messed up.")]
+#if DEBUG
+[assembly: AssemblyConfiguration("[DEBUG]")]
+#else
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Peter L Jones + others")]
-[assembly: AssemblyProduct("s3pe DDS Tool")]
-[assembly: AssemblyCopyright("Copyright © 2011  Peter L Jones  Released under the GPL 3.0")]
+#endif
+[assembly: AssemblyCompany("Peter L Jones")]
+[assembly: AssemblyProduct("sims3tools")]
+[assembly: AssemblyCopyright("Copyright © 2011  Peter L Jones.  Released under GPL 3.  See gpl-3.0.txt")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

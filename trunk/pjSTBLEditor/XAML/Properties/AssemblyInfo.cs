@@ -7,12 +7,16 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("String Table Editor")]
-[assembly: AssemblyDescription("An editor for Sims3 Packages containing STBL resources.")]
+[assembly: AssemblyTitle("Package String Table Editor (WPF)")]
+[assembly: AssemblyDescription("A String Table Editor for packages for The Sims 3(tm)")]
+#if DEBUG
+[assembly: AssemblyConfiguration("[DEBUG]")]
+#else
 [assembly: AssemblyConfiguration("")]
+#endif
 [assembly: AssemblyCompany("Peter L Jones")]
-[assembly: AssemblyProduct("pjSTBLEditorXAML")]
-[assembly: AssemblyCopyright("Copyright © Peter L Jones 2011  Released under the GPL 3.0")]
+[assembly: AssemblyProduct("sims3tools")]
+[assembly: AssemblyCopyright("Copyright © 2011  Peter L Jones.  Released under GPL 3.  See gpl-3.0.txt")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
