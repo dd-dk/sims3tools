@@ -1548,7 +1548,7 @@ namespace ObjectCloner
             fillCASPFlags(clbCASPTypeFlags, typeof(CASPartResource.DataTypeFlags), (uint)casp.DataType);
             fillCASPFlags(clbCASPAgeFlags, typeof(CASPartResource.AgeFlags), (uint)casp.AgeGender.Age);
             cbCASPSpeciesType.SelectedIndex = Enum.IsDefined(typeof(CASPartResource.SpeciesType), casp.AgeGender.Species) ? (int)casp.AgeGender.Species : -1;
-            fillCASPFlags(clbCASPAgeFlags, typeof(CASPartResource.GenderFlags), (uint)casp.AgeGender.Gender);
+            fillCASPFlags(clbCASPGenderFlags, typeof(CASPartResource.GenderFlags), (uint)casp.AgeGender.Gender);
             fillCASPFlags(clbCASPHandednessFlags, typeof(CASPartResource.HandednessFlags), (uint)casp.AgeGender.Handedness);
             fillCASPFlags(clbCASPCategory, typeof(CASPartResource.ClothingCategoryFlags), (uint)casp.ClothingCategory);
         }
@@ -3200,6 +3200,8 @@ namespace ObjectCloner
             Add(_tuple.Item1, _rk);
             SpecificResource sr = new SpecificResource(FileTable.GameContent, _rk);
             if (sr.ResourceIndexEntry == null) return;
+            if (sr.Resource == null)
+                throw sr.Exception;
 
             string key = _tuple.Item1 + ": " + sr.LongName.Substring(0, 4);
             IEnumerable<Tuple<string, object>> iet;
@@ -3680,28 +3682,15 @@ namespace ObjectCloner
                         if (cbCASPClothingType.SelectedIndex != -1)
                             casp.Clothing = (CASPartResource.ClothingType)Enum.Parse(typeof(CASPartResource.ClothingType), cbCASPClothingType.SelectedItem + "");
 
-                        casp.DataType = 0;
-                        foreach (var typeFlag in clbCASPTypeFlags.CheckedItems)
-                            casp.DataType |= (CASPartResource.DataTypeFlags)Enum.Parse(typeof(CASPartResource.DataTypeFlags), typeFlag + "");
-
-                        casp.AgeGender.Age = 0;
-                        foreach (var typeFlag in clbCASPAgeFlags.CheckedItems)
-                            casp.AgeGender.Age |= (CASPartResource.AgeFlags)Enum.Parse(typeof(CASPartResource.AgeFlags), typeFlag + "");
+                        casp.DataType = clbCASPTypeFlags.GetValue(casp.DataType);
+                        casp.AgeGender.Age = clbCASPAgeFlags.GetValue(casp.AgeGender.Age);
 
                         if (cbCASPSpeciesType.SelectedIndex != -1)
                             casp.AgeGender.Species = (CASPartResource.SpeciesType)Enum.Parse(typeof(CASPartResource.SpeciesType), cbCASPSpeciesType.SelectedItem + "");
 
-                        casp.AgeGender.Gender = 0;
-                        foreach (var typeFlag in clbCASPGenderFlags.CheckedItems)
-                            casp.AgeGender.Gender |= (CASPartResource.GenderFlags)Enum.Parse(typeof(CASPartResource.GenderFlags), typeFlag + "");
-
-                        casp.AgeGender.Handedness = 0;
-                        foreach (var typeFlag in clbCASPHandednessFlags.CheckedItems)
-                            casp.AgeGender.Handedness |= (CASPartResource.HandednessFlags)Enum.Parse(typeof(CASPartResource.HandednessFlags), typeFlag + "");
-
-                        casp.ClothingCategory = 0;
-                        foreach (var typeFlag in clbCASPCategory.CheckedItems)
-                            casp.ClothingCategory |= (CASPartResource.ClothingCategoryFlags)Enum.Parse(typeof(CASPartResource.ClothingCategoryFlags), typeFlag + "");
+                        casp.AgeGender.Gender = clbCASPGenderFlags.GetValue(casp.AgeGender.Gender);
+                        casp.AgeGender.Handedness = clbCASPHandednessFlags.GetValue(casp.AgeGender.Handedness);
+                        casp.ClothingCategory = clbCASPCategory.GetValue(casp.ClothingCategory);
 
                         for (int i = 0; i < casp.Presets.Count; i++)
                         {
@@ -4489,6 +4478,17 @@ namespace ObjectCloner
                 if (RK.TryParse(RKkey, out rk))
                     yield return Tuple.Create<string, object>(key + "[" + (ctr++) + "]", rk);
             }
+        }
+
+        public static T GetValue<T>(this CheckedListBox clb, T value)
+        {
+            uint uValue = Convert.ToUInt32(value);
+            foreach (var typeFlag in clb.Items)
+            {
+                uint flag = Convert.ToUInt32(Enum.Parse(typeof(T), typeFlag + ""));
+                uValue = (uValue & ~flag) | (clb.CheckedItems.Contains(typeFlag) ? flag : 0);
+            }
+            return (T)Enum.ToObject(typeof(T), uValue);
         }
     }
 }
