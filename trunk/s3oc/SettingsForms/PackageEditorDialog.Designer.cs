@@ -48,7 +48,7 @@
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(75, 23);
             this.btnClose.TabIndex = 1;
-            this.btnClose.Text = "Close";
+            this.btnClose.Text = "&OK";
             this.btnClose.UseVisualStyleBackColor = true;
             // 
             // tableLayoutPanel1
@@ -72,7 +72,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(604, 46);
-            this.tableLayoutPanel1.TabIndex = 3;
+            this.tableLayoutPanel1.TabIndex = 0;
             // 
             // label9
             // 
@@ -83,7 +83,7 @@
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(53, 13);
             this.label9.TabIndex = 0;
-            this.label9.Text = "Enabled";
+            this.label9.Text = "&Enabled";
             // 
             // ckbEditor
             // 
@@ -104,7 +104,7 @@
             this.label11.Location = new System.Drawing.Point(62, 0);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(83, 13);
-            this.label11.TabIndex = 0;
+            this.label11.TabIndex = 2;
             this.label11.Text = "Program Path";
             // 
             // tbEditorPath
@@ -113,7 +113,7 @@
             this.tbEditorPath.Location = new System.Drawing.Point(62, 17);
             this.tbEditorPath.Name = "tbEditorPath";
             this.tbEditorPath.ReadOnly = true;
-            this.tbEditorPath.Size = new System.Drawing.Size(498, 20);
+            this.tbEditorPath.Size = new System.Drawing.Size(481, 20);
             this.tbEditorPath.TabIndex = 3;
             // 
             // btnPkgEdEdit
@@ -121,11 +121,11 @@
             this.btnPkgEdEdit.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnPkgEdEdit.AutoSize = true;
             this.btnPkgEdEdit.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnPkgEdEdit.Location = new System.Drawing.Point(566, 16);
+            this.btnPkgEdEdit.Location = new System.Drawing.Point(549, 16);
             this.btnPkgEdEdit.Name = "btnPkgEdEdit";
-            this.btnPkgEdEdit.Size = new System.Drawing.Size(35, 23);
-            this.btnPkgEdEdit.TabIndex = 2;
-            this.btnPkgEdEdit.Text = "Edit";
+            this.btnPkgEdEdit.Size = new System.Drawing.Size(52, 23);
+            this.btnPkgEdEdit.TabIndex = 4;
+            this.btnPkgEdEdit.Text = "&Browse";
             this.btnPkgEdEdit.UseVisualStyleBackColor = true;
             this.btnPkgEdEdit.Click += new System.EventHandler(this.btnPkgEdEdit_Click);
             // 
@@ -144,7 +144,7 @@
             this.btnReset.Name = "btnReset";
             this.btnReset.Size = new System.Drawing.Size(75, 23);
             this.btnReset.TabIndex = 2;
-            this.btnReset.Text = "Reset";
+            this.btnReset.Text = "&Reset";
             this.btnReset.UseVisualStyleBackColor = true;
             this.btnReset.Click += new System.EventHandler(this.btnReset_Click);
             // 
