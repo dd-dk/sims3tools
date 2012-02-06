@@ -141,7 +141,6 @@
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(0, 118);
             this.listView1.Margin = new System.Windows.Forms.Padding(0);
-            this.listView1.MultiSelect = false;
             this.listView1.Name = "listView1";
             this.listView1.Size = new System.Drawing.Size(800, 114);
             this.listView1.TabIndex = 5;
@@ -183,7 +182,7 @@
             this.lvcmFix,
             this.lvcmEdit});
             this.lvContextMenu.Name = "lvContextMenu";
-            this.lvContextMenu.Size = new System.Drawing.Size(205, 114);
+            this.lvContextMenu.Size = new System.Drawing.Size(205, 92);
             this.lvContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.lvContextMenu_Opening);
             // 
             // lvcmCopyRK
@@ -206,7 +205,7 @@
             // 
             this.lvcmFix.Name = "lvcmFix";
             this.lvcmFix.Size = new System.Drawing.Size(204, 22);
-            this.lvcmFix.Text = "&Open package";
+            this.lvcmFix.Text = "&Open containing package";
             this.lvcmFix.Click += new System.EventHandler(this.lvcmFix_Click);
             // 
             // lvcmEdit
@@ -214,7 +213,7 @@
             this.lvcmEdit.Name = "lvcmEdit";
             this.lvcmEdit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
             this.lvcmEdit.Size = new System.Drawing.Size(204, 22);
-            this.lvcmEdit.Text = "Open in &Editor";
+            this.lvcmEdit.Text = "Export to &Editor";
             this.lvcmEdit.Click += new System.EventHandler(this.lvcmEdit_Click);
             // 
             // label1

@@ -95,16 +95,16 @@ namespace ObjectCloner.SplitterComponents
         protected virtual void OnSelectedIndexChanged(object sender, MainForm.SelectedIndexChangedEventArgs e) { if (SelectedIndexChanged != null) SelectedIndexChanged(sender, e); }
         #endregion
 
-        #region Occurs when an item is actived or when the Clone context menu entry is used
+        #region Occurs when an item is activated for some reason
         [Browsable(true)]
         [Category("Action")]
-        [Description("Occurs when an item is actived or when the Clone context menu entry is used")]
+        [Description("Occurs when an item is activated for some reason")]
         public event EventHandler<MainForm.ItemActivateEventArgs> ItemActivate;
         protected virtual void OnItemActivate(object sender, MainForm.ItemActivateEventArgs e) { if (ItemActivate != null) ItemActivate(sender, e); }
         #endregion
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e) { OnSelectedIndexChanged(this, new MainForm.SelectedIndexChangedEventArgs(sender as ListView)); }
-        private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(sender as ListView)); }
+        private void listView1_ItemActivate(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.Action.Clone)); }
 
         #region Context menu
         private void scmCopyRK_Click(object sender, EventArgs e)
@@ -113,47 +113,15 @@ namespace ObjectCloner.SplitterComponents
                 Clipboard.SetText((SelectedItem.Tag as SpecificResource).ResourceIndexEntry + "");
         }
 
-        private void scmClone_Click(object sender, EventArgs e) { listView1_ItemActivate(listView1, e); }
 
-        private void scmFix_Click(object sender, EventArgs e)
-        {
-            SpecificResource sr = SelectedItem == null ? null : SelectedItem.Tag as SpecificResource;
-            if (sr != null
-                && sr.PPSource == "cc"
-                && System.IO.File.Exists(sr.PathPackage.Path))
-            {
-                OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.CloneFix.Fix));
-            }
-        }
+        
 
-        private void scmEdit_Click(object sender, EventArgs e)
-        {
-            SpecificResource sr = SelectedItem == null ? null : SelectedItem.Tag as SpecificResource;
-            if (sr != null
-                && sr.PPSource == "cc"
-                && System.IO.File.Exists(sr.PathPackage.Path)
-                && ObjectCloner.Properties.Settings.Default.pkgEditorEnabled
-                && ObjectCloner.Properties.Settings.Default.pkgEditorPath != null
-                && System.IO.File.Exists(ObjectCloner.Properties.Settings.Default.pkgEditorPath))
-            {
-                string command = ObjectCloner.Properties.Settings.Default.pkgEditorPath;
-                string arguments = String.Format(@"""{0}""", sr.PathPackage.Path);
+        
+        private void scmActivate_Click(object sender, EventArgs e) { listView1_ItemActivate(listView1, e); }
 
-                System.Diagnostics.Process p = new System.Diagnostics.Process();
+        private void scmFix_Click(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.Action.Fix)); }
 
-                p.StartInfo.FileName = command;
-                p.StartInfo.Arguments = arguments;
-                p.StartInfo.UseShellExecute = false;
-
-                try { p.Start(); }
-                catch (Exception ex)
-                {
-                    CopyableMessageBox.IssueException(ex,
-                        String.Format("Application failed to start:\n{0}\n{1}", command, arguments),
-                        "Launch failed");
-                }
-            }
-        }
+        private void scmEdit_Click(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.Action.Export));  }
 
         private void searchContextMenu_Opening(object sender, CancelEventArgs e)
         {
@@ -162,9 +130,9 @@ namespace ObjectCloner.SplitterComponents
             scmFix.Enabled = sr != null
                 && sr.PPSource == "cc"
                 && System.IO.File.Exists(sr.PathPackage.Path);
-            scmEdit.Enabled = sr != null
-                && sr.PPSource == "cc"
-                && System.IO.File.Exists(sr.PathPackage.Path)
+            scmEdit.Enabled = listView1.SelectedItems.Count > 0
+                //&& sr.PPSource == "cc"
+                //&& System.IO.File.Exists(sr.PathPackage.Path)
                 && ObjectCloner.Properties.Settings.Default.pkgEditorEnabled
                 && ObjectCloner.Properties.Settings.Default.pkgEditorPath != null
                 && System.IO.File.Exists(ObjectCloner.Properties.Settings.Default.pkgEditorPath);

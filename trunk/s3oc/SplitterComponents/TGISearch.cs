@@ -77,10 +77,10 @@ namespace ObjectCloner.SplitterComponents
 
 
 
-        #region Occurs when the Clone context menu entry is used
+        #region Occurs when an item is activated for some reason
         [Browsable(true)]
         [Category("Action")]
-        [Description("Occurs when the Clone context menu entry is used")]
+        [Description("Occurs when an item is activated for some reason")]
         public event EventHandler<MainForm.ItemActivateEventArgs> ItemActivate;
         protected virtual void OnItemActivate(object sender, MainForm.ItemActivateEventArgs e) { if (ItemActivate != null) ItemActivate(sender, e); }
         #endregion
@@ -88,6 +88,8 @@ namespace ObjectCloner.SplitterComponents
 
         private void listView1_ItemActivate(object sender, EventArgs e)
         {
+            OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.Action.Details));
+            /*
             if (listView1.SelectedItems.Count != 1) return;
 
             ListViewItem lvi = listView1.SelectedItems[0];
@@ -101,6 +103,7 @@ namespace ObjectCloner.SplitterComponents
                 lvi.SubItems[0].Text, lvi.SubItems[1].Text, lvi.SubItems[2].Text, lvi.SubItems[3].Text, lvi.SubItems[4].Text
                 ),
                 "Selected item");
+            /**/
         }
 
         #region Context menus
@@ -137,62 +140,9 @@ namespace ObjectCloner.SplitterComponents
 
         private void lvActivate_Click(object sender, EventArgs e) { listView1_ItemActivate(listView1, e); }
 
-        private void lvcmFix_Click(object sender, EventArgs e)
-        {
-            SpecificResource sr = listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0].Tag as SpecificResource : null;
-            if (sr != null
-                && sr.PPSource == "cc"
-                && System.IO.File.Exists(sr.PathPackage.Path))
-            {
-                OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.CloneFix.Fix));
-            }
-        }
+        private void lvcmFix_Click(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.Action.Fix)); }
 
-        private void lvcmEdit_Click(object sender, EventArgs e)
-        {
-            SpecificResource sr = listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0].Tag as SpecificResource : null;
-            if (sr != null
-                //&& sr.PPSource == "cc"
-                && System.IO.File.Exists(sr.PathPackage.Path)
-                && ObjectCloner.Properties.Settings.Default.pkgEditorEnabled
-                && ObjectCloner.Properties.Settings.Default.pkgEditorPath != null
-                && System.IO.File.Exists(ObjectCloner.Properties.Settings.Default.pkgEditorPath))
-            {
-                if (sr.ResourceIndexEntry == null)
-                {
-                    CopyableMessageBox.Show("Resource could not be found!", "Cannot open in editor", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
-                    return;
-                }
-
-                string filename = System.IO.Path.Combine(Environment.GetEnvironmentVariable("TEMP"),
-                    string.Format("s3oc_0x{0:X8}_{1}_{2}.package",
-                    System.Diagnostics.Process.GetCurrentProcess().Id,
-                    NameMap.NMap[sr.ResourceIndexEntry.Instance],
-                    Guid.NewGuid().ToString()
-                    ));
-                s3pi.Package.Package.NewPackage(0).SaveAs(filename);
-                PathPackageTuple ppt = new PathPackageTuple(filename, readwrite: true);
-                ppt.AddResource(sr.ResourceIndexEntry, sr.Resource.Stream);
-                ppt.Package.SavePackage();
-
-                string command = ObjectCloner.Properties.Settings.Default.pkgEditorPath;
-                string arguments = String.Format(@"""{0}""", filename);
-
-                System.Diagnostics.Process p = new System.Diagnostics.Process();
-
-                p.StartInfo.FileName = command;
-                p.StartInfo.Arguments = arguments;
-                p.StartInfo.UseShellExecute = false;
-
-                try { p.Start(); }
-                catch (Exception ex)
-                {
-                    CopyableMessageBox.IssueException(ex,
-                        String.Format("Application failed to start:\n{0}\n{1}", command, arguments),
-                        "Launch failed");
-                }
-            }
-        }
+        private void lvcmEdit_Click(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.Action.Export)); }
 
         private void lvContextMenu_Opening(object sender, CancelEventArgs e)
         {
@@ -201,9 +151,9 @@ namespace ObjectCloner.SplitterComponents
             lvcmFix.Enabled = sr != null
                 && sr.PPSource == "cc"
                 && System.IO.File.Exists(sr.PathPackage.Path);
-            lvcmEdit.Enabled = sr != null
+            lvcmEdit.Enabled = listView1.SelectedItems.Count > 0
                 //&& sr.PPSource == "cc"
-                && System.IO.File.Exists(sr.PathPackage.Path)
+                //&& System.IO.File.Exists(sr.PathPackage.Path)
                 && ObjectCloner.Properties.Settings.Default.pkgEditorEnabled
                 && ObjectCloner.Properties.Settings.Default.pkgEditorPath != null
                 && System.IO.File.Exists(ObjectCloner.Properties.Settings.Default.pkgEditorPath);

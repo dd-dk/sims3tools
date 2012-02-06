@@ -47,21 +47,21 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.tlpWhere = new System.Windows.Forms.TableLayoutPanel();
             this.ckbResourceName = new System.Windows.Forms.CheckBox();
+            this.rb1English = new System.Windows.Forms.RadioButton();
+            this.rb1All = new System.Windows.Forms.RadioButton();
             this.ckbObjectName = new System.Windows.Forms.CheckBox();
             this.ckbObjectDesc = new System.Windows.Forms.CheckBox();
             this.ckbCatalogName = new System.Windows.Forms.CheckBox();
             this.ckbCatalogDesc = new System.Windows.Forms.CheckBox();
             this.ckbUseEA = new System.Windows.Forms.CheckBox();
             this.ckbUseCC = new System.Windows.Forms.CheckBox();
+            this.tlpCount = new System.Windows.Forms.TableLayoutPanel();
+            this.label4 = new System.Windows.Forms.Label();
+            this.lbCount = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.tbText = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
-            this.rb1All = new System.Windows.Forms.RadioButton();
-            this.rb1English = new System.Windows.Forms.RadioButton();
-            this.tlpCount = new System.Windows.Forms.TableLayoutPanel();
-            this.label4 = new System.Windows.Forms.Label();
-            this.lbCount = new System.Windows.Forms.Label();
             this.searchContextMenu.SuspendLayout();
             this.tlpSearch.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -84,7 +84,6 @@
             this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(0, 167);
             this.listView1.Margin = new System.Windows.Forms.Padding(0);
-            this.listView1.MultiSelect = false;
             this.listView1.Name = "listView1";
             this.listView1.Size = new System.Drawing.Size(800, 131);
             this.listView1.TabIndex = 7;
@@ -143,13 +142,13 @@
             this.scmClone.ShortcutKeyDisplayString = "Enter";
             this.scmClone.Size = new System.Drawing.Size(204, 22);
             this.scmClone.Text = "Clone";
-            this.scmClone.Click += new System.EventHandler(this.scmClone_Click);
+            this.scmClone.Click += new System.EventHandler(this.scmActivate_Click);
             // 
             // scmFix
             // 
             this.scmFix.Name = "scmFix";
             this.scmFix.Size = new System.Drawing.Size(204, 22);
-            this.scmFix.Text = "&Open package";
+            this.scmFix.Text = "&Open containing package";
             this.scmFix.Click += new System.EventHandler(this.scmFix_Click);
             // 
             // scmEdit
@@ -157,7 +156,7 @@
             this.scmEdit.Name = "scmEdit";
             this.scmEdit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
             this.scmEdit.Size = new System.Drawing.Size(204, 22);
-            this.scmEdit.Text = "Open in &Editor";
+            this.scmEdit.Text = "Export to &Editor";
             this.scmEdit.Click += new System.EventHandler(this.scmEdit_Click);
             // 
             // tlpSearch
@@ -282,6 +281,30 @@
             this.ckbResourceName.UseVisualStyleBackColor = true;
             this.ckbResourceName.CheckedChanged += new System.EventHandler(this.ckb_CheckedChanged);
             // 
+            // rb1English
+            // 
+            this.rb1English.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.rb1English.AutoSize = true;
+            this.rb1English.Checked = true;
+            this.rb1English.Location = new System.Drawing.Point(3, 78);
+            this.rb1English.Name = "rb1English";
+            this.rb1English.Size = new System.Drawing.Size(81, 17);
+            this.rb1English.TabIndex = 6;
+            this.rb1English.TabStop = true;
+            this.rb1English.Text = "English only";
+            this.rb1English.UseVisualStyleBackColor = true;
+            // 
+            // rb1All
+            // 
+            this.rb1All.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.rb1All.AutoSize = true;
+            this.rb1All.Location = new System.Drawing.Point(112, 78);
+            this.rb1All.Name = "rb1All";
+            this.rb1All.Size = new System.Drawing.Size(88, 17);
+            this.rb1All.TabIndex = 7;
+            this.rb1All.Text = "All languages";
+            this.rb1All.UseVisualStyleBackColor = true;
+            // 
             // ckbObjectName
             // 
             this.ckbObjectName.Anchor = System.Windows.Forms.AnchorStyles.Left;
@@ -354,6 +377,45 @@
             this.ckbUseCC.UseVisualStyleBackColor = true;
             this.ckbUseCC.CheckedChanged += new System.EventHandler(this.ckb_CheckedChanged);
             // 
+            // tlpCount
+            // 
+            this.tlpCount.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.tlpCount.AutoSize = true;
+            this.tlpCount.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tlpCount.ColumnCount = 1;
+            this.tlpCount.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpCount.Controls.Add(this.label4, 0, 0);
+            this.tlpCount.Controls.Add(this.lbCount, 0, 1);
+            this.tlpCount.Location = new System.Drawing.Point(224, 62);
+            this.tlpCount.Name = "tlpCount";
+            this.tlpCount.RowCount = 2;
+            this.tlpWhere.SetRowSpan(this.tlpCount, 2);
+            this.tlpCount.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpCount.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpCount.Size = new System.Drawing.Size(129, 26);
+            this.tlpCount.TabIndex = 9;
+            this.tlpCount.Visible = false;
+            // 
+            // label4
+            // 
+            this.label4.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(3, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(123, 13);
+            this.label4.TabIndex = 0;
+            this.label4.Text = "Number of entries found:";
+            // 
+            // lbCount
+            // 
+            this.lbCount.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.lbCount.AutoSize = true;
+            this.lbCount.Location = new System.Drawing.Point(57, 13);
+            this.lbCount.Name = "lbCount";
+            this.lbCount.Size = new System.Drawing.Size(14, 13);
+            this.lbCount.TabIndex = 0;
+            this.lbCount.Text = "X";
+            // 
             // label1
             // 
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.Right;
@@ -393,69 +455,6 @@
             this.label3.Size = new System.Drawing.Size(75, 13);
             this.label3.TabIndex = 5;
             this.label3.Text = "Kind of object:";
-            // 
-            // rb1All
-            // 
-            this.rb1All.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.rb1All.AutoSize = true;
-            this.rb1All.Location = new System.Drawing.Point(112, 78);
-            this.rb1All.Name = "rb1All";
-            this.rb1All.Size = new System.Drawing.Size(88, 17);
-            this.rb1All.TabIndex = 7;
-            this.rb1All.Text = "All languages";
-            this.rb1All.UseVisualStyleBackColor = true;
-            // 
-            // rb1English
-            // 
-            this.rb1English.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.rb1English.AutoSize = true;
-            this.rb1English.Checked = true;
-            this.rb1English.Location = new System.Drawing.Point(3, 78);
-            this.rb1English.Name = "rb1English";
-            this.rb1English.Size = new System.Drawing.Size(81, 17);
-            this.rb1English.TabIndex = 6;
-            this.rb1English.TabStop = true;
-            this.rb1English.Text = "English only";
-            this.rb1English.UseVisualStyleBackColor = true;
-            // 
-            // tlpCount
-            // 
-            this.tlpCount.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.tlpCount.AutoSize = true;
-            this.tlpCount.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tlpCount.ColumnCount = 1;
-            this.tlpCount.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tlpCount.Controls.Add(this.label4, 0, 0);
-            this.tlpCount.Controls.Add(this.lbCount, 0, 1);
-            this.tlpCount.Location = new System.Drawing.Point(224, 62);
-            this.tlpCount.Name = "tlpCount";
-            this.tlpCount.RowCount = 2;
-            this.tlpWhere.SetRowSpan(this.tlpCount, 2);
-            this.tlpCount.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpCount.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpCount.Size = new System.Drawing.Size(129, 26);
-            this.tlpCount.TabIndex = 9;
-            this.tlpCount.Visible = false;
-            // 
-            // label4
-            // 
-            this.label4.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(3, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(123, 13);
-            this.label4.TabIndex = 0;
-            this.label4.Text = "Number of entries found:";
-            // 
-            // lbCount
-            // 
-            this.lbCount.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.lbCount.AutoSize = true;
-            this.lbCount.Location = new System.Drawing.Point(57, 13);
-            this.lbCount.Name = "lbCount";
-            this.lbCount.Size = new System.Drawing.Size(14, 13);
-            this.lbCount.TabIndex = 0;
-            this.lbCount.Text = "X";
             // 
             // Search
             // 

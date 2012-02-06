@@ -236,7 +236,8 @@ namespace ObjectCloner
             //CloseCurrent();//needed?
 
             foreach (string temp in Directory.EnumerateFiles(Environment.GetEnvironmentVariable("TEMP"), string.Format("s3oc_0x{0:X8}_*.package", System.Diagnostics.Process.GetCurrentProcess().Id)))
-                File.Delete(temp);
+                try { File.Delete(temp); }
+                catch { }//oh well
 
             ObjectCloner.Properties.Settings.Default.EPsDisabled = GameFolders.EPsDisabled;
             ObjectCloner.Properties.Settings.Default.InstallDirs = GameFolders.InstallDirs;
@@ -437,15 +438,16 @@ namespace ObjectCloner
         #region SplitterComponents
         public abstract class ItemEventArgs : EventArgs
         {
-            ListViewItem selectedItem = null;
-            public ItemEventArgs(ListView lv) { selectedItem = lv.SelectedItems.Count == 0 ? null : lv.SelectedItems[0]; }
-            public SpecificResource SelectedItem { get { return selectedItem == null ? null : selectedItem.Tag as SpecificResource; } }
+            ListView lv;
+            public ItemEventArgs(ListView lv) { this.lv = lv; }
+            public ListView ListView { get { return lv; } }
+            public SpecificResource SelectedItem { get { return lv.SelectedItems.Count != 1 ? null : lv.SelectedItems[0].Tag as SpecificResource; } }
         }
-        public enum CloneFix { Clone, Fix }
+        public enum Action { Clone, Fix, Export, Details }
         public class ItemActivateEventArgs : ItemEventArgs
         {
-            public CloneFix CloneFix { get; private set; }
-            public ItemActivateEventArgs(ListView lv, CloneFix cloneFix = CloneFix.Clone) : base(lv) { this.CloneFix = cloneFix; }
+            public Action Action { get; private set; }
+            public ItemActivateEventArgs(ListView lv, Action action = Action.Clone) : base(lv) { this.Action = action; }
         }
         public class SelectedIndexChangedEventArgs : ItemEventArgs { public SelectedIndexChangedEventArgs(ListView lv) : base(lv) { } }
 
@@ -598,20 +600,7 @@ namespace ObjectCloner
         }
         #endregion
 
-        private void DisplayListView(Control listView)
-        {
-            this.AcceptButton = btnStart;
-            this.CancelButton = null;
-
-            setPrompt(listView == searchPane ? Prompt.Search : Prompt.CloneFix);
-
-            StopWait();
-            splitContainer1.Panel1.Controls.Clear();
-            splitContainer1.Panel1.Controls.Add(listView);
-            listView.Dock = DockStyle.Fill;
-            listView.Focus();
-        }
-
+        #region ObjectChooser, Search and TGISearch common bits
         private void listView_SelectedIndexChanged(object sender, SelectedIndexChangedEventArgs e)
         {
             replacementForThumbs = null;// might as well be here; needed after FillTabs, really.
@@ -629,16 +618,26 @@ namespace ObjectCloner
                 (AcceptButton as Button).Enabled = true;
             }
         }
-        private void listView_ItemActivate(object sender, ItemActivateEventArgs e) { AcceptButton.PerformClick(); }
-        private void searchPane_ItemActivate(object sender, ItemActivateEventArgs e)
+        private void objectChooser_ItemActivate(object sender, ItemActivateEventArgs e) { AcceptButton.PerformClick(); }
+
+        private void searchResult_ItemActivate(object sender, ItemActivateEventArgs e)
         {
-            if (e.CloneFix == CloneFix.Clone)
-                AcceptButton.PerformClick();
-            else
+            Diagnostics.Log("searchResult_ItemActivate: " + e.Action);
+            switch (e.Action)
             {
-                ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(selectedItem.PathPackage.Path);
-                mode = Mode.FromUser;
-                fileReOpenToFix(selectedItem.PathPackage.Path);
+                case Action.Clone:
+                    if (AcceptButton != null)
+                        AcceptButton.PerformClick();
+                    break;
+                case Action.Fix:
+                    ActionFix(e.ListView);
+                    break;
+                case Action.Details:
+                    ActionDetails(e.ListView);
+                    break;
+                case Action.Export:
+                    ActionExport(e.ListView);
+                    break;
             }
         }
 
@@ -651,6 +650,134 @@ namespace ObjectCloner
                 fillCASPUpdateImage(selectedItem);
             TabEnable(true);
             DisplayOptions();
+        }
+
+        private void ActionFix(ListView listView1)
+        {
+            SpecificResource sr = listView1.SelectedItems.Count == 1 ? listView1.SelectedItems[0].Tag as SpecificResource : null;
+            if (sr != null
+                && sr.PPSource == "cc"
+                && System.IO.File.Exists(sr.PathPackage.Path))
+            {
+                ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(sr.PathPackage.Path);
+                mode = Mode.FromUser;
+                fileReOpenToFix(sr.PathPackage.Path);
+            }
+        }
+
+        private void ActionDetails(ListView listView1)
+        {
+            if (listView1.SelectedItems.Count != 1) return;
+
+            ListViewItem lvi = listView1.SelectedItems[0];
+
+            CopyableMessageBox.Show(String.Format(
+                "Name: {0}\n" +
+                "Tag: {1}\n" +
+                "EP/SP: {2}\n" +
+                "ResourceKey: {3}\n" +
+                "Path: {4}\n\n\n\n",
+                lvi.SubItems[0].Text, lvi.SubItems[1].Text, lvi.SubItems[2].Text, lvi.SubItems[3].Text, lvi.SubItems[4].Text
+                ),
+                "Selected item");
+        }
+
+        private void ActionExport(ListView listView1)
+        {
+            if (listView1.SelectedItems.Count == 0)
+                return;
+
+            if (!ObjectCloner.Properties.Settings.Default.pkgEditorEnabled ||
+                ObjectCloner.Properties.Settings.Default.pkgEditorPath == null ||
+                !System.IO.File.Exists(ObjectCloner.Properties.Settings.Default.pkgEditorPath))
+                return;
+
+            List<SpecificResource> lsr = new List<SpecificResource>();
+            foreach (ListViewItem lvi in listView1.SelectedItems)
+                if (lvi.Tag as SpecificResource == null ||
+                    !System.IO.File.Exists((lvi.Tag as SpecificResource).PathPackage.Path))
+                    return;
+                else
+                    lsr.Add(lvi.Tag as SpecificResource);
+
+            List<SpecificResource> missing = new List<SpecificResource>();
+            string filename = System.IO.Path.Combine(Environment.GetEnvironmentVariable("TEMP"),
+                string.Format("s3oc_0x{0:X8}_{1}.package",
+                System.Diagnostics.Process.GetCurrentProcess().Id,
+                Guid.NewGuid().ToString()
+                ));
+            bool remove = true;
+            try
+            {
+                s3pi.Package.Package.NewPackage(0).SaveAs(filename);
+                PathPackageTuple ppt = new PathPackageTuple(filename, readwrite: true);
+
+                string _keyName = Path.GetFileNameWithoutExtension(filename);
+                ulong _keyIID = FNV64.GetHash(_keyName);
+                SpecificResource _keySR = ppt.AddResource(new RK(RK.NULL) { ResourceType = 0x0166038C, Instance = _keyIID, });
+                IDictionary<ulong, string> _key = _keySR.Resource as IDictionary<ulong, string>;
+                _key.Add(_keyIID, _keyName);
+
+                foreach (var sr in lsr)
+                {
+                    if (sr.ResourceIndexEntry == null)
+                    {
+                        missing.Add(sr);
+                        continue;
+                    }
+
+                    _key.Add(sr.ResourceIndexEntry.Instance, NameMap.NMap[sr.ResourceIndexEntry.Instance]);
+                    ppt.AddResource(sr.ResourceIndexEntry, sr.Resource.Stream);
+                }
+
+                if (missing.Count != 0)
+                {
+                    CopyableMessageBox.Show("Resource(s) could not be found!", "Cannot open in editor", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                    return;
+                }
+
+                _keySR.Commit();
+
+                ppt.Package.SavePackage();
+                string command = ObjectCloner.Properties.Settings.Default.pkgEditorPath;
+                string arguments = String.Format(@"""{0}""", filename);
+
+                System.Diagnostics.Process p = new System.Diagnostics.Process();
+
+                p.StartInfo.FileName = command;
+                p.StartInfo.Arguments = arguments;
+                p.StartInfo.UseShellExecute = false;
+
+                try { p.Start(); remove = false; }
+                catch (Exception ex)
+                {
+                    CopyableMessageBox.IssueException(ex,
+                        String.Format("Application failed to start:\n{0}\n{1}", command, arguments),
+                        "Launch failed");
+                }
+            }
+            finally
+            {
+                if (remove)
+                {
+                    File.Delete(filename);
+                }
+            }
+        }
+        #endregion
+
+        private void DisplayListView(Control listView)
+        {
+            this.AcceptButton = btnStart;
+            this.CancelButton = null;
+
+            setPrompt(listView == searchPane ? Prompt.Search : Prompt.CloneFix);
+
+            StopWait();
+            splitContainer1.Panel1.Controls.Clear();
+            splitContainer1.Panel1.Controls.Add(listView);
+            listView.Dock = DockStyle.Fill;
+            listView.Focus();
         }
 
         private void DisplayObjectChooser()
@@ -692,6 +819,7 @@ namespace ObjectCloner
             tgiSearchPane.Dock = DockStyle.Fill;
             tgiSearchPane.Focus();
         }
+
 
         string creatorName = null;
         string CreatorName
@@ -761,6 +889,7 @@ namespace ObjectCloner
             cloneFixOptions.Focus();
         }
 
+
         private void DisplayReplaceTGI()
         {
             Diagnostics.Log("DisplayReplaceTGI");
@@ -777,12 +906,6 @@ namespace ObjectCloner
             splitContainer1.Panel1.Controls.Add(replaceTGIPane);
             replaceTGIPane.Dock = DockStyle.Fill;
             replaceTGIPane.Focus();
-        }
-        void tgiSearchPane_ItemActivate(object sender, ItemActivateEventArgs e)
-        {
-            ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(e.SelectedItem.PathPackage.Path);
-            mode = Mode.FromUser;
-            fileReOpenToFix(e.SelectedItem.PathPackage.Path);
         }
 
         private void DisplayReplaceTGIResults()
@@ -1942,7 +2065,7 @@ namespace ObjectCloner
             CTPTBrushIndexToPair = new Dictionary<ulong, SpecificResource>();
             searchPane = new Search(CheckInstallDirs, updateProgress, ListViewAdd);
             searchPane.SelectedIndexChanged += new EventHandler<SelectedIndexChangedEventArgs>(listView_SelectedIndexChanged);
-            searchPane.ItemActivate += new EventHandler<ItemActivateEventArgs>(searchPane_ItemActivate);
+            searchPane.ItemActivate += new EventHandler<ItemActivateEventArgs>(searchResult_ItemActivate);
             searchPane.CancelClicked += new EventHandler((x, e) => ReloadCurrentPackage());
 
             DisplaySearch();
@@ -1960,7 +2083,7 @@ namespace ObjectCloner
 
             tgiSearchPane = new TGISearch(CheckInstallDirs, updateProgress);
             tgiSearchPane.CancelClicked += new EventHandler((x, e) => ReloadCurrentPackage());
-            tgiSearchPane.ItemActivate += new EventHandler<ItemActivateEventArgs>(tgiSearchPane_ItemActivate);
+            tgiSearchPane.ItemActivate += new EventHandler<ItemActivateEventArgs>(searchResult_ItemActivate);
 
             DisplayTGISearch();
         }
@@ -2333,7 +2456,7 @@ namespace ObjectCloner
 
             btnStart.Enabled = false;
             objectChooser = ObjectChooser.CreateObjectChooser(DoWait, StopWait, updateProgress, ListViewAdd, resourceType,
-                listView_SelectedIndexChanged, listView_ItemActivate);
+                listView_SelectedIndexChanged, objectChooser_ItemActivate);
 
             DisplayObjectChooser();
         }
