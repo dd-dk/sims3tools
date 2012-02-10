@@ -1312,7 +1312,7 @@
             this.label29.Location = new System.Drawing.Point(28, 160);
             this.label29.Name = "label29";
             this.label29.Size = new System.Drawing.Size(59, 13);
-            this.label29.TabIndex = 3;
+            this.label29.TabIndex = 4;
             this.label29.Text = "Unknown1";
             // 
             // tbCASPUnknown1
@@ -1323,7 +1323,7 @@
             this.tbCASPUnknown1.Name = "tbCASPUnknown1";
             this.tbCASPUnknown1.ReadOnly = true;
             this.tbCASPUnknown1.Size = new System.Drawing.Size(608, 20);
-            this.tbCASPUnknown1.TabIndex = 4;
+            this.tbCASPUnknown1.TabIndex = 5;
             // 
             // label35
             // 
@@ -1332,7 +1332,7 @@
             this.label35.Location = new System.Drawing.Point(3, 134);
             this.label35.Name = "label35";
             this.label35.Size = new System.Drawing.Size(84, 13);
-            this.label35.TabIndex = 1;
+            this.label35.TabIndex = 2;
             this.label35.Text = "Resource Name";
             // 
             // tbCASPResourceName
@@ -1343,7 +1343,7 @@
             this.tbCASPResourceName.Name = "tbCASPResourceName";
             this.tbCASPResourceName.ReadOnly = true;
             this.tbCASPResourceName.Size = new System.Drawing.Size(608, 20);
-            this.tbCASPResourceName.TabIndex = 2;
+            this.tbCASPResourceName.TabIndex = 3;
             // 
             // label36
             // 
@@ -1352,7 +1352,7 @@
             this.label36.Location = new System.Drawing.Point(37, 512);
             this.label36.Name = "label36";
             this.label36.Size = new System.Drawing.Size(50, 13);
-            this.label36.TabIndex = 17;
+            this.label36.TabIndex = 22;
             this.label36.Text = "Package";
             // 
             // tbCASPPackage
@@ -1363,7 +1363,7 @@
             this.tbCASPPackage.Name = "tbCASPPackage";
             this.tbCASPPackage.ReadOnly = true;
             this.tbCASPPackage.Size = new System.Drawing.Size(608, 20);
-            this.tbCASPPackage.TabIndex = 18;
+            this.tbCASPPackage.TabIndex = 23;
             // 
             // tbCASPUnknown4
             // 
@@ -1373,7 +1373,7 @@
             this.tbCASPUnknown4.Name = "tbCASPUnknown4";
             this.tbCASPUnknown4.ReadOnly = true;
             this.tbCASPUnknown4.Size = new System.Drawing.Size(608, 20);
-            this.tbCASPUnknown4.TabIndex = 4;
+            this.tbCASPUnknown4.TabIndex = 21;
             // 
             // label37
             // 
@@ -1382,7 +1382,7 @@
             this.label37.Location = new System.Drawing.Point(28, 486);
             this.label37.Name = "label37";
             this.label37.Size = new System.Drawing.Size(59, 13);
-            this.label37.TabIndex = 3;
+            this.label37.TabIndex = 20;
             this.label37.Text = "Unknown4";
             // 
             // clbCASPGenderFlags
@@ -1395,7 +1395,7 @@
             this.clbCASPGenderFlags.MinimumSize = new System.Drawing.Size(0, 34);
             this.clbCASPGenderFlags.Name = "clbCASPGenderFlags";
             this.clbCASPGenderFlags.Size = new System.Drawing.Size(198, 38);
-            this.clbCASPGenderFlags.TabIndex = 12;
+            this.clbCASPGenderFlags.TabIndex = 15;
             // 
             // tableLayoutPanel7
             // 
@@ -1413,7 +1413,7 @@
             this.tableLayoutPanel7.RowCount = 1;
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel7.Size = new System.Drawing.Size(387, 128);
-            this.tableLayoutPanel7.TabIndex = 21;
+            this.tableLayoutPanel7.TabIndex = 1;
             // 
             // panel2
             // 
@@ -1468,7 +1468,7 @@
             this.cbCASPClothingType.Location = new System.Drawing.Point(93, 196);
             this.cbCASPClothingType.Name = "cbCASPClothingType";
             this.cbCASPClothingType.Size = new System.Drawing.Size(198, 21);
-            this.cbCASPClothingType.TabIndex = 6;
+            this.cbCASPClothingType.TabIndex = 7;
             // 
             // label28
             // 
@@ -1477,7 +1477,7 @@
             this.label28.Location = new System.Drawing.Point(156, 180);
             this.label28.Name = "label28";
             this.label28.Size = new System.Drawing.Size(72, 13);
-            this.label28.TabIndex = 5;
+            this.label28.TabIndex = 6;
             this.label28.Text = "Clothing Type";
             // 
             // label27
@@ -1487,7 +1487,7 @@
             this.label27.Location = new System.Drawing.Point(380, 180);
             this.label27.Name = "label27";
             this.label27.Size = new System.Drawing.Size(31, 13);
-            this.label27.TabIndex = 7;
+            this.label27.TabIndex = 8;
             this.label27.Text = "Type";
             // 
             // label33
@@ -1497,7 +1497,7 @@
             this.label33.Location = new System.Drawing.Point(578, 180);
             this.label33.Name = "label33";
             this.label33.Size = new System.Drawing.Size(45, 13);
-            this.label33.TabIndex = 13;
+            this.label33.TabIndex = 10;
             this.label33.Text = "Species";
             // 
             // cbCASPSpeciesType
@@ -1507,7 +1507,7 @@
             this.cbCASPSpeciesType.Location = new System.Drawing.Point(501, 196);
             this.cbCASPSpeciesType.Name = "cbCASPSpeciesType";
             this.cbCASPSpeciesType.Size = new System.Drawing.Size(200, 21);
-            this.cbCASPSpeciesType.TabIndex = 20;
+            this.cbCASPSpeciesType.TabIndex = 11;
             // 
             // cbCASPTypeFlags
             // 
@@ -1516,7 +1516,7 @@
             this.cbCASPTypeFlags.Location = new System.Drawing.Point(297, 196);
             this.cbCASPTypeFlags.Name = "cbCASPTypeFlags";
             this.cbCASPTypeFlags.Size = new System.Drawing.Size(198, 21);
-            this.cbCASPTypeFlags.TabIndex = 22;
+            this.cbCASPTypeFlags.TabIndex = 9;
             // 
             // label32
             // 
@@ -1526,7 +1526,7 @@
             this.label32.Location = new System.Drawing.Point(474, 220);
             this.label32.Name = "label32";
             this.label32.Size = new System.Drawing.Size(49, 13);
-            this.label32.TabIndex = 15;
+            this.label32.TabIndex = 18;
             this.label32.Text = "Category";
             // 
             // clbCASPHandednessFlags
@@ -1539,7 +1539,7 @@
             this.clbCASPHandednessFlags.MinimumSize = new System.Drawing.Size(0, 34);
             this.clbCASPHandednessFlags.Name = "clbCASPHandednessFlags";
             this.clbCASPHandednessFlags.Size = new System.Drawing.Size(198, 38);
-            this.clbCASPHandednessFlags.TabIndex = 2;
+            this.clbCASPHandednessFlags.TabIndex = 17;
             // 
             // label34
             // 
@@ -1548,7 +1548,7 @@
             this.label34.Location = new System.Drawing.Point(158, 423);
             this.label34.Name = "label34";
             this.label34.Size = new System.Drawing.Size(67, 13);
-            this.label34.TabIndex = 0;
+            this.label34.TabIndex = 16;
             this.label34.Text = "Handedness";
             // 
             // clbCASPAgeFlags
@@ -1561,7 +1561,7 @@
             this.clbCASPAgeFlags.MinimumSize = new System.Drawing.Size(0, 34);
             this.clbCASPAgeFlags.Name = "clbCASPAgeFlags";
             this.clbCASPAgeFlags.Size = new System.Drawing.Size(198, 127);
-            this.clbCASPAgeFlags.TabIndex = 10;
+            this.clbCASPAgeFlags.TabIndex = 13;
             // 
             // label30
             // 
@@ -1570,7 +1570,7 @@
             this.label30.Location = new System.Drawing.Point(179, 220);
             this.label30.Name = "label30";
             this.label30.Size = new System.Drawing.Size(26, 13);
-            this.label30.TabIndex = 9;
+            this.label30.TabIndex = 12;
             this.label30.Text = "Age";
             // 
             // clbCASPCategory
@@ -1585,7 +1585,7 @@
             this.clbCASPCategory.Name = "clbCASPCategory";
             this.tableLayoutPanel5.SetRowSpan(this.clbCASPCategory, 5);
             this.clbCASPCategory.Size = new System.Drawing.Size(404, 241);
-            this.clbCASPCategory.TabIndex = 16;
+            this.clbCASPCategory.TabIndex = 19;
             // 
             // label31
             // 
@@ -1594,7 +1594,7 @@
             this.label31.Location = new System.Drawing.Point(171, 366);
             this.label31.Name = "label31";
             this.label31.Size = new System.Drawing.Size(42, 13);
-            this.label31.TabIndex = 11;
+            this.label31.TabIndex = 14;
             this.label31.Text = "Gender";
             // 
             // menuBarWidget1
