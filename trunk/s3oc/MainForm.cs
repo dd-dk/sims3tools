@@ -61,7 +61,7 @@ namespace ObjectCloner
 
         public MainForm()
         {
-            using (Splash form = new Splash() { Message = "Starting s3oc...", })
+            using (Splash form = new Splash("Starting s3oc..."))
             {
                 form.Show();
                 Application.DoEvents();
@@ -111,14 +111,14 @@ namespace ObjectCloner
             if (pkgs.Count == 0 && cmdLineSelect)
             {
                 cmdLineSelect = false;
-                using (Splash form = new Splash() { Message = "Initialising FileTable...", })
+                using (Splash form = new Splash("Initialising FileTable..."))
                 {
                     form.Show();
                     InitialiseFileTable();
                 }
 
                 bool okay = false;
-                using (Splash form = new Splash() { Message = "Refreshing packages cache...", })
+                using (Splash form = new Splash("Refreshing packages cache..."))
                 {
                     form.Show();
                     okay = CheckInstallDirs(null);
@@ -127,7 +127,7 @@ namespace ObjectCloner
                 if (okay)
                 {
                     int i = 0;
-                    using (Splash form = new Splash() { Message = "Searching...", })
+                    using (Splash form = new Splash("Searching..."))
                     {
                         form.Show();
                         selectedItem = FileTable.GameContent.Select(ppt =>
@@ -144,7 +144,7 @@ namespace ObjectCloner
                         mode = Mode.FromGame;
                         FillTabs(selectedItem);
 
-                        using (Splash form = new Splash() { Message = "Displaying form...", })
+                        using (Splash form = new Splash("Displaying form..."))
                         {
                             form.Show();
                             btnStart_Click(this, EventArgs.Empty);
@@ -155,7 +155,7 @@ namespace ObjectCloner
             // "D:\My Documents\Sims\CreatorNameHere_ToiletExpensive_NR.package"
             else if (pkgs.Count == 1)
             {
-                using (Splash form = new Splash() { Message = "Displaying form...", })
+                using (Splash form = new Splash("Displaying form..."))
                 {
                     form.Show();
                     mode = Mode.FromUser;
@@ -163,42 +163,6 @@ namespace ObjectCloner
                 }
             }
         }
-
-        #region Splash Form
-        class Splash : Form
-        {
-            Panel panel = new Panel()
-            {
-                BackColor = System.Drawing.SystemColors.Window,
-                BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D,
-                Dock = DockStyle.Fill,
-            };
-
-            Label label = new Label()
-            {
-                Anchor = AnchorStyles.None,
-                AutoSize = true,
-                Font = new System.Drawing.Font(new Label().Font.FontFamily, 18),
-                ForeColor = System.Drawing.SystemColors.WindowText,
-            };
-
-            public Splash()
-            {
-                BackColor = System.Drawing.SystemColors.WindowFrame;
-                ShowInTaskbar = false;
-                FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-                Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-                Height = 150;
-                Width = 400;
-                StartPosition = FormStartPosition.CenterScreen;
-
-                panel.Controls.Add(label);
-                Controls.Add(panel);
-            }
-
-            public string Message { get { return label.Text; } set { label.Text = value; } }
-        }
-        #endregion
 
         private void MainForm_LoadFormSettings()
         {
