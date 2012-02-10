@@ -1252,7 +1252,9 @@ namespace ObjectCloner
             cbCASPClothingType.Items.Clear();
             cbCASPClothingType.Items.AddRange(Enum.GetNames(typeof(CASPartResource.ClothingType)));
 
-            InitialiseCASPFlags(clbCASPTypeFlags, typeof(CASPartResource.DataTypeFlags));
+            cbCASPTypeFlags.Items.Clear();
+            cbCASPTypeFlags.Items.AddRange(Enum.GetNames(typeof(CASPartResource.DataTypeFlags)));
+
             InitialiseCASPFlags(clbCASPAgeFlags, typeof(CASPartResource.AgeFlags));
 
             cbCASPSpeciesType.Items.Clear();
@@ -1462,7 +1464,7 @@ namespace ObjectCloner
             tbCASPResourceName.Text = "";
             tbCASPUnknown1.Text = "";
             cbCASPClothingType.SelectedIndex = -1;
-            for (int i = 0; i < clbCASPTypeFlags.Items.Count; i++) clbCASPTypeFlags.SetItemChecked(i, false);
+            cbCASPTypeFlags.SelectedIndex = -1;
             for (int i = 0; i < clbCASPAgeFlags.Items.Count; i++) clbCASPAgeFlags.SetItemChecked(i, false);
             cbCASPSpeciesType.SelectedIndex = -1;
             for (int i = 0; i < clbCASPGenderFlags.Items.Count; i++) clbCASPGenderFlags.SetItemChecked(i, false);
@@ -1632,7 +1634,7 @@ namespace ObjectCloner
             tbCASPUnknown4.Text = casp.Unknown4;
 
             cbCASPClothingType.SelectedIndex = Enum.IsDefined(typeof(CASPartResource.ClothingType), casp.Clothing) ? (int)casp.Clothing : -1;
-            fillCASPFlags(clbCASPTypeFlags, typeof(CASPartResource.DataTypeFlags), (uint)casp.DataType);
+            cbCASPTypeFlags.SelectedIndex = Enum.IsDefined(typeof(CASPartResource.DataTypeFlags), casp.DataType) ? (int)Math.Log((int)casp.DataType, 2) : -1;
             fillCASPFlags(clbCASPAgeFlags, typeof(CASPartResource.AgeFlags), (uint)casp.AgeGender.Age);
             cbCASPSpeciesType.SelectedIndex = Enum.IsDefined(typeof(CASPartResource.SpeciesType), casp.AgeGender.Species) ? (int)casp.AgeGender.Species : -1;
             fillCASPFlags(clbCASPGenderFlags, typeof(CASPartResource.GenderFlags), (uint)casp.AgeGender.Gender);
@@ -1775,7 +1777,7 @@ namespace ObjectCloner
             btnReplCASPThum.Enabled = enabled;
             tbCASPUnknown1.ReadOnly = !enabled;
             cbCASPClothingType.Enabled = enabled;
-            clbCASPTypeFlags.Enabled = enabled;
+            cbCASPTypeFlags.Enabled = enabled;
             clbCASPAgeFlags.Enabled = enabled;
             clbCASPGenderFlags.Enabled = enabled;
             cbCASPSpeciesType.Enabled = enabled;
@@ -3769,7 +3771,9 @@ namespace ObjectCloner
                         if (cbCASPClothingType.SelectedIndex != -1)
                             casp.Clothing = (CASPartResource.ClothingType)Enum.Parse(typeof(CASPartResource.ClothingType), cbCASPClothingType.SelectedItem + "");
 
-                        casp.DataType = clbCASPTypeFlags.GetValue(casp.DataType);
+                        if (cbCASPTypeFlags.SelectedIndex != -1)
+                            casp.DataType = (CASPartResource.DataTypeFlags)Enum.Parse(typeof(CASPartResource.ClothingType), cbCASPClothingType.SelectedItem + "");
+
                         casp.AgeGender.Age = clbCASPAgeFlags.GetValue(casp.AgeGender.Age);
 
                         if (cbCASPSpeciesType.SelectedIndex != -1)
