@@ -97,6 +97,7 @@ namespace ObjectCloner
             return myName + ": " + Path.GetFileNameWithoutExtension(FileTable.Current.Path);
         }
 
+        string cmdLineFilename = null;
         public MainForm(params string[] args)
             : this()
         {
@@ -105,62 +106,6 @@ namespace ObjectCloner
             // Settings for test mode
             if (cmdlineTest)
             {
-            }
-
-            // /select 0x319E4F1D-0x00000000-0x000000000000040B
-            if (pkgs.Count == 0 && cmdLineSelect)
-            {
-                cmdLineSelect = false;
-                using (Splash form = new Splash("Initialising FileTable..."))
-                {
-                    form.Show();
-                    InitialiseFileTable();
-                }
-
-                bool okay = false;
-                using (Splash form = new Splash("Refreshing packages cache..."))
-                {
-                    form.Show();
-                    okay = CheckInstallDirs(null);
-                }
-
-                if (okay)
-                {
-                    int i = 0;
-                    using (Splash form = new Splash("Searching..."))
-                    {
-                        form.Show();
-                        selectedItem = FileTable.GameContent.Select(ppt =>
-                            {
-                                form.Message = "Searching package " + ++i + "...";
-                                return ppt.Find(rie => cmdLineSelectRK.Equals(rie));
-                            }).Where(x => x != null).FirstOrDefault();
-                    }
-
-                    if (selectedItem == null)
-                        CopyableMessageBox.Show(this, "Resource " + cmdLineSelectRK + " not found.", "Error", CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
-                    else
-                    {
-                        mode = Mode.FromGame;
-                        FillTabs(selectedItem);
-
-                        using (Splash form = new Splash("Displaying form..."))
-                        {
-                            form.Show();
-                            btnStart_Click(this, EventArgs.Empty);
-                        }
-                    }
-                }
-            }
-            // "D:\My Documents\Sims\CreatorNameHere_ToiletExpensive_NR.package"
-            else if (pkgs.Count == 1)
-            {
-                using (Splash form = new Splash("Displaying form..."))
-                {
-                    form.Show();
-                    mode = Mode.FromUser;
-                    fileReOpenToFix(pkgs[0]);
-                }
             }
         }
 
@@ -188,6 +133,49 @@ namespace ObjectCloner
                 splitContainer1.SplitterDistance = w;
             else
                 splitContainer1.SplitterDistance = this.ClientSize.Width / 2 - 2;
+        }
+
+        private void MainForm_Shown(object sender, EventArgs e)
+        {
+            // "D:\My Documents\Sims\CreatorNameHere_ToiletExpensive_NR.package"
+            if (cmdLineFilename != null)
+            {
+                ObjectCloner.Properties.Settings.Default.LastSaveFolder = Path.GetDirectoryName(cmdLineFilename);
+                mode = Mode.FromUser;
+                fileReOpenToFix(cmdLineFilename);
+                cmdLineFilename = null;
+            }
+
+            // /select 0x319E4F1D-0x00000000-0x000000000000040B
+            if (cmdLineSelect)
+            {
+                cmdLineSelect = false;
+                
+                InitialiseFileTable();
+
+                if (CheckInstallDirs(null))
+                {
+                    int i = 0;
+                    using (Splash form = new Splash("Searching..."))
+                    {
+                        form.Show();
+                        selectedItem = FileTable.GameContent.Select(ppt =>
+                        {
+                            form.Message = "Searching package " + ++i + "...";
+                            return ppt.Find(rie => cmdLineSelectRK.Equals(rie));
+                        }).Where(x => x != null).FirstOrDefault();
+                    }
+
+                    if (selectedItem == null)
+                        CopyableMessageBox.Show(this, "Resource " + cmdLineSelectRK + " not found.", "Error", CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
+                    else
+                    {
+                        mode = selectedItem.PPSource == "current" ? Mode.FromUser : Mode.FromGame;
+                        FillTabs(selectedItem);
+                        btnStart_Click(this, EventArgs.Empty);
+                    }
+                }
+            }
         }
 
         static bool formClosing = false;
@@ -319,16 +307,18 @@ namespace ObjectCloner
             Options.Add("select", new CmdInfo(CmdLineSelect, "Select the specified the resourceKey to clone"));
             Options.Add("help", new CmdInfo(CmdLineHelp, "Display this help"));
         }
-        List<string> pkgs = new List<string>();
         void CmdLine(params string[] args)
         {
             SetOptions();
             List<string> cmdline = new List<string>(args);
+            List<string> pkgs = new List<string>();
             while (cmdline.Count > 0)
             {
-                if (cmdline[0].StartsWith("/") || cmdline[0].StartsWith("-"))
+                string option = cmdline[0];
+                cmdline.RemoveAt(0);
+                if (option.StartsWith("/") || option.StartsWith("-"))
                 {
-                    string option = cmdline[0].Substring(1);
+                    option = option.Substring(1);
                     if (Options.ContainsKey(option.ToLower()))
                     {
                         if (Options[option.ToLower()].cmd(ref cmdline))
@@ -337,21 +327,30 @@ namespace ObjectCloner
                     else
                     {
                         CopyableMessageBox.Show(this, "Invalid command line option: '" + option + "'",
-                            myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
+                            myName, CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
                         Environment.Exit(1);
                     }
                 }
                 else
                 {
-                    if (!File.Exists(cmdline[0]))
+                    if (pkgs.Count == 0)
                     {
-                        CopyableMessageBox.Show(this, "Package not found:\n'" + cmdline[0] + "'",
-                            myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
+                        if (!File.Exists(option))
+                        {
+                            CopyableMessageBox.Show(this, "File not found:\n" + option,
+                                myName, CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
+                            Environment.Exit(1);
+                        }
+                        pkgs.Add(option);
+                        cmdLineFilename = option;
+                    }
+                    else
+                    {
+                        CopyableMessageBox.Show(this, "Can only accept one package on command line",
+                            myName, CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
                         Environment.Exit(1);
                     }
-                    pkgs.Add(cmdline[0]);
                 }
-                cmdline.RemoveAt(0);
             }
         }
         bool cmdlineTest = false;
@@ -360,12 +359,12 @@ namespace ObjectCloner
         IResourceKey cmdLineSelectRK = new RK(RK.NULL);
         bool CmdLineSelect(ref List<string> cmdline)
         {
-            if (cmdline.Count < 2)
+            if (cmdline.Count < 1)
             {
                 CopyableMessageBox.Show(this, "Missing 'resourceKey' parameter.", "Error", CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
                 return true;
             }
-            if (!RK.TryParse(cmdline[1], cmdLineSelectRK))
+            if (!RK.TryParse(cmdline[0], cmdLineSelectRK))
             {
                 CopyableMessageBox.Show(this, "'resourceKey' parameter in incorrect format.", "Error", CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
                 return true;
@@ -375,7 +374,7 @@ namespace ObjectCloner
                 CopyableMessageBox.Show(this, "Resource Type 0x" + cmdLineSelectRK.ResourceType.ToString("X8") + " is not supported.", "Error", CopyableMessageBoxIcon.Error, new string[] { "OK" }, 0, 0);
                 return true;
             }
-            cmdline.RemoveAt(1);
+            cmdline.RemoveAt(0);
             cmdLineSelect = true;
             return false;
         }
@@ -1249,27 +1248,29 @@ namespace ObjectCloner
 
         void InitialiseCASP()
         {
-            cbCASPClothingType.Items.Clear();
-            cbCASPClothingType.Items.AddRange(Enum.GetNames(typeof(CASPartResource.ClothingType)));
-
-            cbCASPTypeFlags.Items.Clear();
-            cbCASPTypeFlags.Items.AddRange(Enum.GetNames(typeof(CASPartResource.DataTypeFlags)));
-
+            InitialiseCASPCombo(cbCASPClothingType, typeof(CASPartResource.ClothingType));
+            InitialiseCASPCombo(cbCASPTypeFlags, typeof(CASPartResource.DataTypeFlags));
             InitialiseCASPFlags(clbCASPAgeFlags, typeof(CASPartResource.AgeFlags));
-
-            cbCASPSpeciesType.Items.Clear();
-            cbCASPSpeciesType.Items.AddRange(Enum.GetNames(typeof(CASPartResource.SpeciesType)));
-
+            InitialiseCASPCombo(cbCASPSpeciesType, typeof(CASPartResource.SpeciesType));
             InitialiseCASPFlags(clbCASPGenderFlags, typeof(CASPartResource.GenderFlags));
             InitialiseCASPFlags(clbCASPHandednessFlags, typeof(CASPartResource.HandednessFlags));
-            InitialiseCASPFlags(clbCASPCategory, typeof(CASPartResource.ClothingCategoryFlags));
+            InitialiseCASPCombo(cbCASPRegionType, typeof(CASPartResource.RegionType));
+            InitialiseClothingCategoryFlags(clbCASPCategory, typeof(CASPartResource.ClothingCategoryFlags));
+        }
+        void InitialiseCASPCombo(ComboBox cb, Type enumType)
+        {
+            cb.Items.Clear();
+            cb.Items.AddRange(Enum.GetNames(enumType).Where(x => !x.StartsWith("Unknown")).ToArray());
         }
         void InitialiseCASPFlags(CheckedListBox clb, Type enumType)
         {
             clb.Items.Clear();
-            foreach (string name in Enum.GetNames(enumType))
-                if (!name.StartsWith("Unknown"))
-                    clb.Items.Add(name);
+            clb.Items.AddRange(Enum.GetNames(enumType).Where(x => !x.StartsWith("Unknown")).ToArray());
+        }
+        void InitialiseClothingCategoryFlags(CheckedListBox clb, Type enumType)
+        {
+            clb.Items.Clear();
+            clb.Items.AddRange(Enum.GetNames(enumType).Where(x => !x.StartsWith("Unknown") && !x.StartsWith("Region")).ToArray());
         }
 
         bool ffInitialised = false;
@@ -1469,6 +1470,7 @@ namespace ObjectCloner
             cbCASPSpeciesType.SelectedIndex = -1;
             for (int i = 0; i < clbCASPGenderFlags.Items.Count; i++) clbCASPGenderFlags.SetItemChecked(i, false);
             for (int i = 0; i < clbCASPHandednessFlags.Items.Count; i++) clbCASPHandednessFlags.SetItemChecked(i, false);
+            cbCASPRegionType.SelectedIndex = -1;
             for (int i = 0; i < clbCASPCategory.Items.Count; i++) clbCASPCategory.SetItemChecked(i, false);
             tbCASPUnknown4.Text = "";
             tbCASPPackage.Text = "";
@@ -1633,13 +1635,19 @@ namespace ObjectCloner
             tbCASPUnknown1.Text = casp.Unknown1;
             tbCASPUnknown4.Text = casp.Unknown4;
 
-            cbCASPClothingType.SelectedIndex = Enum.IsDefined(typeof(CASPartResource.ClothingType), casp.Clothing) ? (int)casp.Clothing : -1;
-            cbCASPTypeFlags.SelectedIndex = Enum.IsDefined(typeof(CASPartResource.DataTypeFlags), casp.DataType) ? (int)Math.Log((int)casp.DataType, 2) : -1;
+            cbCASPClothingType.SelectedIndex = enumIsDefinedAndNotUnknown(casp.Clothing);
+            cbCASPTypeFlags.SelectedIndex = enumIsDefinedAndNotUnknown(casp.DataType);
             fillCASPFlags(clbCASPAgeFlags, typeof(CASPartResource.AgeFlags), (uint)casp.AgeGender.Age);
-            cbCASPSpeciesType.SelectedIndex = Enum.IsDefined(typeof(CASPartResource.SpeciesType), casp.AgeGender.Species) ? (int)casp.AgeGender.Species : -1;
+            cbCASPSpeciesType.SelectedIndex = enumIsDefinedAndNotUnknown(casp.AgeGender.Species);
             fillCASPFlags(clbCASPGenderFlags, typeof(CASPartResource.GenderFlags), (uint)casp.AgeGender.Gender);
             fillCASPFlags(clbCASPHandednessFlags, typeof(CASPartResource.HandednessFlags), (uint)casp.AgeGender.Handedness);
-            fillCASPFlags(clbCASPCategory, typeof(CASPartResource.ClothingCategoryFlags), (uint)casp.ClothingCategory);
+            CASPartResource.RegionType region = CASPartResource.Extensions.GetRegionType(casp.ClothingCategory);
+            cbCASPRegionType.SelectedIndex = enumIsDefinedAndNotUnknown(region);
+            fillClothingCategoryFlags(clbCASPCategory, typeof(CASPartResource.ClothingCategoryFlags), (uint)casp.ClothingCategory);
+        }
+        static int enumIsDefinedAndNotUnknown<T>(T value)
+        {
+            return Enum.GetNames(typeof(T)).Where(x => !x.StartsWith("Unknown")).ToList().IndexOf(Enum.GetName(typeof(T), value));
         }
         void fillCASPFlags(CheckedListBox clb, Type enumType, uint value)
         {
@@ -1648,6 +1656,14 @@ namespace ObjectCloner
             int index = 0;
             for (int bit = 0; bit < names.Length; bit++)
                 if (!names[bit].StartsWith("Unknown")) clb.SetItemChecked(index++, bitset(value, bit));
+        }
+        void fillClothingCategoryFlags(CheckedListBox clb, Type enumType, uint value)
+        {
+            string[] names = Enum.GetNames(enumType);
+
+            int index = 0;
+            for (int bit = 0; bit < names.Length; bit++)
+                if (!names[bit].StartsWith("Unknown") && !names[bit].StartsWith("Region")) clb.SetItemChecked(index++, bitset(value, bit));
         }
         bool bitset(uint value, int bit) { return (value & (1 << bit)) != 0; }
 
@@ -1782,6 +1798,7 @@ namespace ObjectCloner
             clbCASPGenderFlags.Enabled = enabled;
             cbCASPSpeciesType.Enabled = enabled;
             clbCASPHandednessFlags.Enabled = enabled;
+            cbCASPRegionType.Enabled = enabled;
             clbCASPCategory.Enabled = enabled;
             tbCASPUnknown4.ReadOnly = !enabled;
             //tbCASPPackage.Text = "";
@@ -2901,7 +2918,7 @@ namespace ObjectCloner
                 else
                 {
                     stepList.AddRange(new Step[] {
-                        CASP_cloneNoDDS,
+                        CASP_clone,
                         CASP_getKinXML,
                         CASPKinXML_getDDSes,
                         GEOM_getNormalMap,
@@ -2955,7 +2972,7 @@ namespace ObjectCloner
 
             StepText.Add(CASP_deepClone, "Deep clone of resources referenced by CASP");
             StepText.Add(CASP_SlurpKinXML, "Preset XML (same instances as CASP) (method 1)");
-            StepText.Add(CASP_cloneNoDDS, "Deep clone of resources referenced by CASP, excluding DDSes, and spot the GEOM");
+            StepText.Add(CASP_clone, "Clone of several resources referenced by CASP");
             StepText.Add(CASP_getKinXML, "Preset XML (same instance as CASP) (method 2)");
             StepText.Add(CASPKinXML_getDDSes, "Add specific XML-referenced DDSes");
             StepText.Add(GEOM_getNormalMap, "Add GEOM-referenced NormalMap");
@@ -3294,7 +3311,7 @@ namespace ObjectCloner
 
             string key = _tuple.Item1 + ": " + sr.LongName.Substring(0, 4);
             IEnumerable<Tuple<string, object>> iet;
-            if (_rk.ResourceType == 0x0333406C)
+            if (_rk.ResourceType == 0x0333406C)//_XML
             {
                 iet = (new StreamReader(sr.Resource.Stream, true)).SlurpRKs(key);
             }
@@ -3317,9 +3334,9 @@ namespace ObjectCloner
                 deepClone(tuple, x => { if (seen.Contains(x) || x.ResourceType == 0x034AEECB) return false; seen.Add(x); return true; });
         }
 
-        void CASP_cloneNoDDS()
+        void CASP_clone()
         {
-            Diagnostics.Log("CASP_cloneNoDDS");
+            Diagnostics.Log("CASP_clone");
             CASPartResource.CASPartResource casp = selectedItem.Resource as CASPartResource.CASPartResource;
             if (casp == null) return;
 
@@ -3328,7 +3345,10 @@ namespace ObjectCloner
             foreach (var tuple in casp.FindAll("casp", x => x is IResourceKey, (tr, k) => tr.SlurpRKs(k)))
                 deepClone(tuple,
                     x => {
-                        if (seen.Contains(x) || x.ResourceType == 0x034AEECB || x.ResourceType == 0x00B2D882)
+                        if (x.ResourceType == 0x00B2D882 //_IMG
+                            || x.ResourceType == 0x0333406C //_XML
+                            || x.ResourceType == 0x034AEECB //CASP
+                            || seen.Contains(x))
                             return false;
                         seen.Add(x);
                         if (x.ResourceType == 0x015A1849 && geomItem == null)
@@ -3768,20 +3788,16 @@ namespace ObjectCloner
                         casp.Unknown1 = tbCASPUnknown1.Text;
                         casp.Unknown4 = tbCASPUnknown4.Text;
 
-                        if (cbCASPClothingType.SelectedIndex != -1)
-                            casp.Clothing = (CASPartResource.ClothingType)Enum.Parse(typeof(CASPartResource.ClothingType), cbCASPClothingType.SelectedItem + "");
-
-                        if (cbCASPTypeFlags.SelectedIndex != -1)
-                            casp.DataType = (CASPartResource.DataTypeFlags)Enum.Parse(typeof(CASPartResource.ClothingType), cbCASPClothingType.SelectedItem + "");
-
+                        casp.Clothing = cbCASPClothingType.GetValue(casp.Clothing);
+                        casp.DataType = cbCASPTypeFlags.GetValue(casp.DataType);
                         casp.AgeGender.Age = clbCASPAgeFlags.GetValue(casp.AgeGender.Age);
-
-                        if (cbCASPSpeciesType.SelectedIndex != -1)
-                            casp.AgeGender.Species = (CASPartResource.SpeciesType)Enum.Parse(typeof(CASPartResource.SpeciesType), cbCASPSpeciesType.SelectedItem + "");
-
+                        casp.AgeGender.Species = cbCASPSpeciesType.GetValue(casp.AgeGender.Species);
                         casp.AgeGender.Gender = clbCASPGenderFlags.GetValue(casp.AgeGender.Gender);
                         casp.AgeGender.Handedness = clbCASPHandednessFlags.GetValue(casp.AgeGender.Handedness);
-                        casp.ClothingCategory = clbCASPCategory.GetValue(casp.ClothingCategory);
+
+                        CASPartResource.RegionType region = cbCASPRegionType.GetValue(CASPartResource.RegionType.None);
+                        casp.ClothingCategory = (CASPartResource.ClothingCategoryFlags)((uint)casp.ClothingCategory & 0xE1FFFFFF);
+                        casp.ClothingCategory = clbCASPCategory.GetValue(casp.ClothingCategory) | CASPartResource.Extensions.ToClothingCategoryFlags(region);
 
                         for (int i = 0; i < casp.Presets.Count; i++)
                         {
@@ -4580,6 +4596,13 @@ namespace ObjectCloner
                 uValue = (uValue & ~flag) | (clb.CheckedItems.Contains(typeFlag) ? flag : 0);
             }
             return (T)Enum.ToObject(typeof(T), uValue);
+        }
+
+        public static T GetValue<T>(this ComboBox cb, T value)
+        {
+            if (cb.SelectedIndex != -1)
+                return (T)Enum.Parse(typeof(T), cb.SelectedItem + "");
+            return value;
         }
     }
 }
