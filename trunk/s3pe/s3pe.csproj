@@ -247,6 +247,9 @@
     <EmbeddedResource Include="Settings\OrganiseBookmarksDialog.resx">
       <DependentUpon>OrganiseBookmarksDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Splash\Splash.resx">
+      <DependentUpon>Splash.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Tools\FNVHashDialog.resx">
       <DependentUpon>FNVHashDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -291,6 +294,12 @@
     </Compile>
     <Compile Include="Settings\OrganiseBookmarksDialog.Designer.cs">
       <DependentUpon>OrganiseBookmarksDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Splash\Splash.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Splash\Splash.designer.cs">
+      <DependentUpon>Splash.cs</DependentUpon>
     </Compile>
     <Compile Include="Tools\FNVHashDialog.cs">
       <SubType>Form</SubType>
