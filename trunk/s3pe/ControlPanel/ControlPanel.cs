@@ -50,6 +50,7 @@ namespace S3PIDemoFE
             OnUseNamesChanged(this, EventArgs.Empty);
             OnUseTagsChanged(this, EventArgs.Empty);
         }
+
         public void ControlPanel_SaveSettings(object sender, EventArgs e)
         {
             S3PIDemoFE.Properties.Settings.Default.Sort = Sort;

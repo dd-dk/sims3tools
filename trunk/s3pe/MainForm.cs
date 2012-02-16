@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -48,21 +49,26 @@ namespace S3PIDemoFE
         static string tempName;
         static MainForm()
         {
-            myName = Path.GetFileNameWithoutExtension(Application.ExecutablePath);
-            tempName = "s3pe-" + System.Security.Cryptography.FNV64.GetHash(DateTime.UtcNow.ToString("O")).ToString("X16") + "-";
-            foreach (string s in unwantedFields) fields.Remove(s);
-            //fields.Sort(byElementPriority);
+            using (Splash splash = new Splash("Refreshing wrappers list..."))
+            {
+                splash.Show();
+                Application.DoEvents();
+                myName = Path.GetFileNameWithoutExtension(Application.ExecutablePath);
+                tempName = "s3pe-" + System.Security.Cryptography.FNV64.GetHash(DateTime.UtcNow.ToString("O")).ToString("X16") + "-";
+                foreach (string s in unwantedFields) fields.Remove(s);
+                //fields.Sort(byElementPriority);
 
-            List<KeyValuePair<string, Type>> typeMap = new List<KeyValuePair<string, Type>>(s3pi.WrapperDealer.WrapperDealer.TypeMap);
-            s3pi.WrapperDealer.WrapperDealer.Disabled.Clear();
-            if (S3PIDemoFE.Properties.Settings.Default.DisabledWrappers != null)
-                foreach (var v in S3PIDemoFE.Properties.Settings.Default.DisabledWrappers)
-                {
-                    string[] kv = v.Trim().Split(new char[] { ':', }, 2);
-                    KeyValuePair<string, Type> kvp = typeMap.Find(x => x.Key == kv[0] && x.Value.FullName == kv[1]);
-                    if (!kvp.Equals(default(KeyValuePair<string, Type>)))
-                        s3pi.WrapperDealer.WrapperDealer.Disabled.Add(kvp);
-                }
+                List<KeyValuePair<string, Type>> typeMap = new List<KeyValuePair<string, Type>>(s3pi.WrapperDealer.WrapperDealer.TypeMap);
+                s3pi.WrapperDealer.WrapperDealer.Disabled.Clear();
+                if (S3PIDemoFE.Properties.Settings.Default.DisabledWrappers != null)
+                    foreach (var v in S3PIDemoFE.Properties.Settings.Default.DisabledWrappers)
+                    {
+                        string[] kv = v.Trim().Split(new char[] { ':', }, 2);
+                        KeyValuePair<string, Type> kvp = typeMap.Find(x => x.Key == kv[0] && x.Value.FullName == kv[1]);
+                        if (!kvp.Equals(default(KeyValuePair<string, Type>)))
+                            s3pi.WrapperDealer.WrapperDealer.Disabled.Add(kvp);
+                    }
+            }
         }
         static int byElementPriority(string x, string y)
         {
@@ -77,37 +83,44 @@ namespace S3PIDemoFE
 
         public MainForm()
         {
-            InitializeComponent();
+            using (Splash splash = new Splash("Initialising form..."))
+            {
+                splash.Show();
+                Application.DoEvents();
+                InitializeComponent();
 
-            this.Text = myName;
+                this.Text = myName;
 
-            this.lbProgress.Text = "";
+                this.lbProgress.Text = "";
 
-            browserWidget1.Fields = new List<string>(fields.ToArray());
-            browserWidget1.ContextMenuStrip = menuBarWidget1.browserWidgetContextMenuStrip;
+                browserWidget1.Fields = new List<string>(fields.ToArray());
+                browserWidget1.ContextMenuStrip = menuBarWidget1.browserWidgetContextMenuStrip;
 
-            List<string> filterFields = new List<string>(fields);
-            foreach (string f in unwantedFilterFields)
-                filterFields.Remove(f);
-            filterFields.Insert(0, "Tag");
-            filterFields.Insert(0, "Name");
-            resourceFilterWidget1.BrowserWidget = browserWidget1;
-            resourceFilterWidget1.Fields = filterFields;
-            resourceFilterWidget1.ContextMenuStrip = menuBarWidget1.filterContextMenuStrip;
-            menuBarWidget1.CMFilter_Click += new MenuBarWidget.MBClickEventHandler(menuBarWidget1_CMFilter_Click);
+                List<string> filterFields = new List<string>(fields);
+                foreach (string f in unwantedFilterFields)
+                    filterFields.Remove(f);
+                filterFields.Insert(0, "Tag");
+                filterFields.Insert(0, "Name");
+                resourceFilterWidget1.BrowserWidget = browserWidget1;
+                resourceFilterWidget1.Fields = filterFields;
+                resourceFilterWidget1.ContextMenuStrip = menuBarWidget1.filterContextMenuStrip;
+                menuBarWidget1.CMFilter_Click += new MenuBarWidget.MBClickEventHandler(menuBarWidget1_CMFilter_Click);
 
-            packageInfoWidget1.Fields = packageInfoFields1.Fields;
-            this.PackageFilenameChanged += new EventHandler(MainForm_PackageFilenameChanged);
-            this.PackageChanged += new EventHandler(MainForm_PackageChanged);
+                packageInfoWidget1.Fields = packageInfoFields1.Fields;
+                this.PackageFilenameChanged += new EventHandler(MainForm_PackageFilenameChanged);
+                this.PackageChanged += new EventHandler(MainForm_PackageChanged);
 
-            this.SaveSettings += new EventHandler(MainForm_SaveSettings);
-            this.SaveSettings += new EventHandler(browserWidget1.BrowserWidget_SaveSettings);
-            this.SaveSettings += new EventHandler(controlPanel1.ControlPanel_SaveSettings);
-            //this.SaveSettings += new EventHandler(hexWidget1.HexWidget_SaveSettings);
+                this.SaveSettings += new EventHandler(MainForm_SaveSettings);
+                this.SaveSettings += new EventHandler(browserWidget1.BrowserWidget_SaveSettings);
+                this.SaveSettings += new EventHandler(controlPanel1.ControlPanel_SaveSettings);
+                //this.SaveSettings += new EventHandler(hexWidget1.HexWidget_SaveSettings);
 
-            MainForm_LoadFormSettings();
+                MainForm_LoadFormSettings();
+            }
         }
 
+        string cmdLineFilename = null;
+        List<string> cmdLineBatch = new List<string>();
         public MainForm(params string[] args)
             : this()
         {
@@ -176,11 +189,27 @@ namespace S3PIDemoFE
                 S3PIDemoFE.Properties.Settings.Default.DisabledWrappers.Add(kvp.Key + ":" + kvp.Value.FullName + "\n");
         }
 
+        private void MainForm_Shown(object sender, EventArgs e)
+        {
+            if (cmdLineFilename != null)
+            {
+                Filename = cmdLineFilename;
+                cmdLineFilename = null;
+            }
+            if (cmdLineBatch.Count > 0)
+            {
+                importBatch(cmdLineBatch.ToArray(), "-import");
+                cmdLineBatch = new List<string>();
+            }
+        }
+
+        public bool IsClosing = false;
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            IsClosing = true;
             this.Enabled = false;
             Filename = "";
-            if (CurrentPackage != null) { e.Cancel = true; this.Enabled = true; return; }
+            if (CurrentPackage != null) { IsClosing = false; e.Cancel = true; this.Enabled = true; return; }
 
             saveSettings();
 
@@ -228,22 +257,33 @@ namespace S3PIDemoFE
                     }
                     Filename = "";
                 }
-                catch (Exception ex)
+                catch (UnauthorizedAccessException uaex)
                 {
                     if (ReadWrite)
                     {
                         int i = CopyableMessageBox.Show(
-                            String.Format("The selected file could not be opened read-write.\n{0}\n{1}\n\nRetry as read-only?", Filename, ex.Message),
+                            String.Format("The selected file could not be opened read-write.\n{0}\n{1}\n\nRetry as read-only?", Filename, uaex.Message),
                             "Could not open file", CopyableMessageBoxButtons.RetryCancel, CopyableMessageBoxIcon.Error);
                         if (i == 0) Filename = "0:" + Filename;
                         else Filename = "";
                     }
                     else
                     {
-                        IssueException(ex, "Could not open package:\n" + Filename);
+#if DEBUG
+                        throw uaex;
+#else
+                        IssueException(uaex, "Could not open package:\n" + Filename);
                         Filename = "";
+#endif
                     }
                 }
+#if !DEBUG
+                catch (Exception ex)
+                {
+                    IssueException(ex, "Could not open package:\n" + Filename);
+                    Filename = "";
+                }
+#endif
             }
             else
             {
@@ -301,8 +341,8 @@ namespace S3PIDemoFE
         void CmdLine(params string[] args)
         {
             SetOptions();
-            List<string> pkgs = new List<string>();
             List<string> cmdline = new List<string>(args);
+            List<string> pkgs = new List<string>();
             while (cmdline.Count > 0)
             {
                 string option = cmdline[0];
@@ -325,7 +365,16 @@ namespace S3PIDemoFE
                 else
                 {
                     if (pkgs.Count == 0)
+                    {
+                        if (!File.Exists(option))
+                        {
+                            CopyableMessageBox.Show(this, "File not found:\n" + option,
+                                myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
+                            Environment.Exit(1);
+                        }
                         pkgs.Add(option);
+                        cmdLineFilename = option;
+                    }
                     else
                     {
                         CopyableMessageBox.Show(this, "Can only accept one package on command line",
@@ -333,17 +382,6 @@ namespace S3PIDemoFE
                         Environment.Exit(1);
                     }
                 }
-            }
-
-            foreach (string pkg in pkgs)
-            {
-                if (!File.Exists(pkg))
-                {
-                    CopyableMessageBox.Show(this, "File not found:\n" + pkg,
-                        myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
-                    Environment.Exit(1);
-                }
-                Filename = pkg;
             }
         }
         bool cmdlineTest = false;
@@ -356,15 +394,17 @@ namespace S3PIDemoFE
                     myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
                 Environment.Exit(1);
             }
-            List<string> batch = new List<string>();
             while (cmdline.Count > 0 && cmdline[0][0] != '/' && cmdline[0][0] != '-')
             {
-                batch.Add(cmdline[0]);
+                if (!File.Exists(cmdline[0]))
+                {
+                    CopyableMessageBox.Show(this, "File not found:\n" + cmdline[0],
+                        myName, CopyableMessageBoxIcon.Error, new List<string>(new string[] { "OK" }), 0, 0);
+                    Environment.Exit(1);
+                }
+                cmdLineBatch.Add(cmdline[0]);
                 cmdline.RemoveAt(0);
             }
-
-            this.Show();
-            importBatch(batch.ToArray(), "-import");
             return false;
         }
         bool CmdLineHelp(ref List<string> cmdline)
@@ -813,23 +853,25 @@ namespace S3PIDemoFE
         #region Resource menu
         private void resourceDropDownOpening()
         {
+            bool multiSelection = browserWidget1.SelectedResources.Count != 0;
+            bool singleSelection = browserWidget1.SelectedResource != null;
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_add, true);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copy, browserWidget1.SelectedResources.Count != 0);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copy, multiSelection);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_paste, canPasteResource());
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_duplicate, resource != null);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_replace, browserWidget1.SelectedResource != null);
-            //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_compressed, true);
-            //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_isdeleted, true);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_details, browserWidget1.SelectedResource != null);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_duplicate, singleSelection);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_replace, singleSelection);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_compressed, multiSelection);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_isdeleted, multiSelection);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_details, singleSelection);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_selectAll, true);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copyRK, browserWidget1.SelectedResources.Count == 1);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copyRK, multiSelection);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importResources, true);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importPackages, true);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importAsDBC, true);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_exportResources, browserWidget1.SelectedResources.Count != 0);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_exportToPackage, browserWidget1.SelectedResources.Count != 0);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_hexEditor, hasHexEditor && resource != null);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_textEditor, hasTextEditor && resource != null);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_exportResources, multiSelection);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_exportToPackage, multiSelection);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_hexEditor, singleSelection && hasHexEditor);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_textEditor, singleSelection && hasTextEditor);
 
             CheckState res = CompressedCheckState();
             if (res == CheckState.Indeterminate)
@@ -1052,8 +1094,9 @@ namespace S3PIDemoFE
 
         private void resourceCopyRK()
         {
-            if (browserWidget1.SelectedResources.Count != 1) return;
-            Clipboard.SetText(browserWidget1.SelectedResource + "");
+            if (browserWidget1.SelectedResources.Count == 0) return;
+            Clipboard.SetText(String.Join("\r\n",
+                browserWidget1.SelectedResources.Select(r => r.ToString())));
         }
 
         private void resourceReplace()

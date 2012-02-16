@@ -212,16 +212,20 @@ namespace S3PIDemoFE
             get { return this.listView1.ListViewItemSorter != null; }
             set
             {
-                listView1.BeginUpdate();
+                if (value == Sortable) return;
+
                 Application.UseWaitCursor = true;
+                listView1.BeginUpdate();
+                pbLabel.Text = "Sorting display...";
                 Application.DoEvents();
+
                 try
                 {
                     this.listView1.ListViewItemSorter = value ? lvwColumnSorter : null;
                     listView1.Sorting = value ? SortOrder.Ascending : SortOrder.None;
                     listView1.HeaderStyle = value ? ColumnHeaderStyle.Clickable : ColumnHeaderStyle.Nonclickable;
                 }
-                finally { Application.UseWaitCursor = false; Application.DoEvents(); listView1.EndUpdate(); }
+                finally { listView1.EndUpdate(); pbLabel.Text = ""; Application.UseWaitCursor = false; Application.DoEvents(); }
             }
         }
 
@@ -309,28 +313,6 @@ namespace S3PIDemoFE
         public Label ProgressLabel { get { return pbLabel; } set { pbLabel = value; } }
 
         /// <summary>
-        /// The single resource selected
-        /// </summary>
-        [Browsable(false)]
-        public IResourceIndexEntry SelectedResource
-        {
-            get { return selectedResource == null ? null : selectedResource.Tag as IResourceIndexEntry; }
-            set
-            {
-                ListViewItem lvi = value != null && lookup != null && lookup.ContainsKey(value) ? lookup[value] : null;
-                if (listView1.SelectedItems.Count == 0 && value == null) return;
-                if (listView1.SelectedItems.Count == 1 && listView1.SelectedItems[0] == value) return;
-
-                internalchg = true;
-                listView1.SelectedItems.Clear();
-                if (lvi != null) listView1.SelectedIndices.Add(listView1.Items.IndexOf(lvi));
-                if (listView1.SelectedItems.Count == 1) listView1.SelectedItems[0].EnsureVisible();
-                internalchg = false;
-                listView1_SelectedIndexChanged(null, null);
-            }
-        }
-
-        /// <summary>
         /// Set the Resource Key for a list entry
         /// </summary>
         [Browsable(false)]
@@ -361,6 +343,28 @@ namespace S3PIDemoFE
                 if (nameMapRIEs != null && nameMapRIEs.Contains(rie)) { ClearNameMap(); nameMap_ResourceChanged(null, null); }
 
                 BrowserWidget_ResourceIndexEntryChanged(rie, EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
+        /// The single resource selected
+        /// </summary>
+        [Browsable(false)]
+        public IResourceIndexEntry SelectedResource
+        {
+            get { return selectedResource == null ? null : selectedResource.Tag as IResourceIndexEntry; }
+            set
+            {
+                ListViewItem lvi = value != null && lookup != null && lookup.ContainsKey(value) ? lookup[value] : null;
+                if (listView1.SelectedItems.Count == 0 && value == null) return;
+                if (listView1.SelectedItems.Count == 1 && listView1.SelectedItems[0] == value) return;
+
+                internalchg = true;
+                listView1.SelectedItems.Clear();
+                if (lvi != null) listView1.SelectedIndices.Add(listView1.Items.IndexOf(lvi));
+                if (listView1.SelectedItems.Count == 1) listView1.SelectedItems[0].EnsureVisible();
+                internalchg = false;
+                listView1_SelectedIndexChanged(null, null);
             }
         }
 
@@ -468,10 +472,13 @@ namespace S3PIDemoFE
 
         void UpdateList()
         {
+            if (((MainForm)ParentForm).IsClosing) return;
+
             IResourceIndexEntry sie = (listView1.SelectedItems.Count == 0 ? null : listView1.SelectedItems[0].Tag) as IResourceIndexEntry;
             System.Collections.IComparer cmp = this.listView1.ListViewItemSorter;
 
             bool vis = listView1.Visible;
+            DateTime tick = DateTime.UtcNow.AddMilliseconds(50);
             try
             {
                 Application.UseWaitCursor = true;
@@ -484,7 +491,43 @@ namespace S3PIDemoFE
 
                 pbLabel.Text = "Clear resource list...";
                 Application.DoEvents();
-                listView1.Items.Clear();
+                if (!pbLabel.Visible)
+                {
+                    using (Splash splash = new Splash("Clear resource list..."))
+                    {
+                        splash.Show();
+                        Application.DoEvents();
+                        listView1.Items.Clear();// this can be slow and steals the main thread!
+                    }
+                }
+                else
+                {
+                    // this is slower but gives some feedback
+                    pb.Maximum = listView1.Items.Count;
+                    pb.Value = 0;
+                    try
+                    {
+                        int i = 0;
+                        while (listView1.Items.Count > 0)
+                        {
+                            try
+                            {
+                                listView1.Items.RemoveAt(listView1.Items.Count - 1);
+                            }
+                            finally
+                            {
+                                i++;
+                                if (tick < DateTime.UtcNow)
+                                {
+                                    tick = DateTime.UtcNow.AddMilliseconds(50);
+                                    if (pb != null) pb.Value = i;
+                                    Application.DoEvents();
+                                }
+                            }
+                        }
+                    }
+                    finally { if (pb != null) pb.Value = 0; }
+                }
 
                 pbLabel.Text = "Updating resource list...";
                 Application.DoEvents();
@@ -493,7 +536,7 @@ namespace S3PIDemoFE
 
                 if (pb != null)
                 {
-                    pb.Maximum = resourceList.Count / 100;
+                    pb.Maximum = resourceList.Count;
                     pb.Value = 0;
                 }
                 try
@@ -511,7 +554,12 @@ namespace S3PIDemoFE
                         finally
                         {
                             i++;
-                            if (i % 100 == 0) { if (pb != null) pb.Value++; Application.DoEvents(); }
+                            if (tick < DateTime.UtcNow)
+                            {
+                                tick = DateTime.UtcNow.AddMilliseconds(50);
+                                if (pb != null) pb.Value = i;
+                                Application.DoEvents();
+                            }
                         }
                     }
                 }
