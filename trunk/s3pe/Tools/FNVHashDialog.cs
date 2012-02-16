@@ -37,6 +37,7 @@ namespace S3PIDemoFE.Tools
         {
             tbFNV32.Text = "0x" + FNV32.GetHash(tbInput.Text).ToString("X8");
             tbFNV64.Text = "0x" + FNV64.GetHash(tbInput.Text).ToString("X16");
+            tbCLIPIID.Text = "0x" + FNV64CLIP.GetHash(tbInput.Text).ToString("X16");
         }
 
         private void btnClose_Click(object sender, EventArgs e)

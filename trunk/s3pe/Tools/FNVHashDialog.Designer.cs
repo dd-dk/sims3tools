@@ -37,14 +37,16 @@
             this.label2 = new System.Windows.Forms.Label();
             this.tbFNV64 = new System.Windows.Forms.TextBox();
             this.btnClose = new System.Windows.Forms.Button();
+            this.tbCLIPIID = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
             // 
-            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -55,15 +57,18 @@
             this.tableLayoutPanel1.Controls.Add(this.tbFNV32, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.label2, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.tbFNV64, 1, 3);
+            this.tableLayoutPanel1.Controls.Add(this.tbCLIPIID, 1, 4);
+            this.tableLayoutPanel1.Controls.Add(this.label4, 0, 4);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 12);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 5;
+            this.tableLayoutPanel1.RowCount = 6;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(292, 118);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(292, 140);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // label1
@@ -139,7 +144,7 @@
             // 
             this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnClose.Location = new System.Drawing.Point(229, 136);
+            this.btnClose.Location = new System.Drawing.Point(229, 158);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(75, 23);
             this.btnClose.TabIndex = 2;
@@ -147,13 +152,33 @@
             this.btnClose.UseVisualStyleBackColor = true;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
+            // tbCLIPIID
+            // 
+            this.tbCLIPIID.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbCLIPIID.BackColor = System.Drawing.Color.White;
+            this.tbCLIPIID.Location = new System.Drawing.Point(75, 110);
+            this.tbCLIPIID.Name = "tbCLIPIID";
+            this.tbCLIPIID.ReadOnly = true;
+            this.tbCLIPIID.Size = new System.Drawing.Size(214, 20);
+            this.tbCLIPIID.TabIndex = 7;
+            // 
+            // label4
+            // 
+            this.label4.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(22, 113);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(47, 13);
+            this.label4.TabIndex = 6;
+            this.label4.Text = "CLIP &IID";
+            // 
             // FNVHashDialog
             // 
             this.AcceptButton = this.btnCalc;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnClose;
-            this.ClientSize = new System.Drawing.Size(316, 171);
+            this.ClientSize = new System.Drawing.Size(316, 193);
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.tableLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
@@ -177,5 +202,7 @@
         private System.Windows.Forms.Button btnCalc;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox tbFNV64;
+        private System.Windows.Forms.TextBox tbCLIPIID;
+        private System.Windows.Forms.Label label4;
     }
 }

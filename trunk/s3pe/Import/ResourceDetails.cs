@@ -145,6 +145,11 @@ namespace S3PIDemoFE
             tbInstance.Text = "0x" + FNV64.GetHash(tbName.Text).ToString("X16");
         }
 
+        private void btnCLIPIID_Click(object sender, EventArgs e)
+        {
+            tbInstance.Text = "0x" + FNV64CLIP.GetHash(tbName.Text).ToString("X16");
+        }
+
         private void btnFNV32_Click(object sender, EventArgs e)
         {
             tbInstance.Text = "0x" + FNV32.GetHash(tbName.Text).ToString("X16");
