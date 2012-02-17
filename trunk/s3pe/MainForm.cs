@@ -864,7 +864,8 @@ namespace S3PIDemoFE
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_isdeleted, multiSelection);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_details, singleSelection);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_selectAll, true);
-            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copyRK, multiSelection);
+            //http://dino.drealm.info/develforums/s3pi/index.php?topic=1188.msg6889#msg6889
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copyRK, singleSelection);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importResources, true);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importPackages, true);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importAsDBC, true);
@@ -1094,7 +1095,8 @@ namespace S3PIDemoFE
 
         private void resourceCopyRK()
         {
-            if (browserWidget1.SelectedResources.Count == 0) return;
+            //http://dino.drealm.info/develforums/s3pi/index.php?topic=1188.msg6889#msg6889
+            if (browserWidget1.SelectedResources.Count != 1) return;
             Clipboard.SetText(String.Join("\r\n",
                 browserWidget1.SelectedResources.Select(r => r.ToString())));
         }
