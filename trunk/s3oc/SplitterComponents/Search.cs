@@ -387,12 +387,13 @@ namespace ObjectCloner.SplitterComponents
             btnSearch.Text = "&Search";
             tlpCount.Visible = true;
             lbCount.Text = "" + listView1.Items.Count;
- 
 
-
-            if (listView1.Items.Count > 0) { SelectedItem = listView1.Items[0]; SelectedItem.EnsureVisible(); listView1.Focus(); }
-
-
+            if (listView1.Visible && listView1.Items.Count > 0)
+            {
+                listView1.Items[0].EnsureVisible();
+                listView1.Items[0].Focused = true;
+                //listView1.Items[0].Selected = true;
+            }
         }
 
         public void AbortSearch(bool abort)
