@@ -61,6 +61,7 @@
             this.fixIntegrityToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameFoldersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.packageEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.userNameToopStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.langSearchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.automaticUpdateCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -75,7 +76,6 @@
             this.checkForUpdateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warrantyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.licenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.packageEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SuspendLayout();
             // 
             // fileToolStripMenuItem
@@ -299,7 +299,7 @@
             // 
             this.caspToolStripMenuItem.Name = "caspToolStripMenuItem";
             this.caspToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
-            this.caspToolStripMenuItem.Text = "(experimental) CAS Part";
+            this.caspToolStripMenuItem.Text = "CAS Part";
             this.caspToolStripMenuItem.Click += new System.EventHandler(this.tsMBC_Click);
             // 
             // toolsToolStripMenuItem
