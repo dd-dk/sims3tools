@@ -203,7 +203,7 @@ namespace ObjectCloner
 
         void CloseCurrent()
         {
-            Diagnostics.Log("ClosePkg");
+            Diagnostics.Log("CloseCurrent");
 
             if (FileTable.Current != null)
             {
@@ -247,6 +247,11 @@ namespace ObjectCloner
 
         public static bool SetFT(bool useCC, bool useEA, CheckInstallDirsCB checkInstallDirsCB = null, Control control = null)
         {
+            Diagnostics.Log("SetFT useCC: " + useCC
+                + "; useEA: " + useEA
+                + "; checkInstallDirsCB set? " + (checkInstallDirsCB != null)
+                + "; control set? " + (control != null));
+
             bool changed = false;
             if (useCC != FileTable.CustomContentEnabled)
             {
@@ -268,6 +273,8 @@ namespace ObjectCloner
 
         public static void SetUseCC(bool value)
         {
+            Diagnostics.Log("SetUseCC value: " + value);
+
             if (FileTable.CustomContentEnabled != value)
             {
                 FileTable.CustomContentEnabled = value;
@@ -277,6 +284,8 @@ namespace ObjectCloner
 
         public static void SetAppendEA(bool value)
         {
+            Diagnostics.Log("SetAppendEA value: " + value);
+
             if (FileTable.FileTableEnabled != value)
             {
                 FileTable.FileTableEnabled = value;
@@ -286,6 +295,8 @@ namespace ObjectCloner
 
         static void Reset()
         {
+            Diagnostics.Log("Reset");
+
             NameMap.Reset();
             STBLHandler.Reset();
         }
@@ -566,9 +577,11 @@ namespace ObjectCloner
         #region ObjectChooser, Search and TGISearch common bits
         private void listView_SelectedIndexChanged(object sender, SelectedIndexChangedEventArgs e)
         {
+            if (formClosing) return;
+
             replacementForThumbs = null;// might as well be here; needed after FillTabs, really.
             rkLookup = null;//Indicate that we're not working on the same resource any more
-            if (formClosing || e.SelectedItem == null)
+            if (e.SelectedItem == null)
             {
                 selectedItem = null;
                 ClearTabs();
@@ -898,7 +911,7 @@ namespace ObjectCloner
             setPrompt(Prompt.SaveCancel);
 
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            foreach (var s in replacements) sb.AppendLine(s);
+            foreach (string s in replacements) sb.AppendLine(s);
             fixIntegrityResults.Text = sb.ToString();
 
             StopWait();
@@ -2914,6 +2927,7 @@ namespace ObjectCloner
                         CASP_deepClone,
                         CASP_SlurpKinXML,
                     });
+                    lastStepInChain = CASP_SlurpKinXML;
                 }
                 else
                 {
@@ -2923,8 +2937,8 @@ namespace ObjectCloner
                         CASPKinXML_getDDSes,
                         GEOM_getNormalMap,
                     });
+                    lastStepInChain = GEOM_getNormalMap;
                 }
-                lastStepInChain = CASP_SlurpKinXML;
                 if (WantThumbs)
                     stepList.Add(SlurpThumbnails);
             }
