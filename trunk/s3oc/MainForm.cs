@@ -33,6 +33,7 @@ using s3pi.GenericRCOLResource;
 using ObjectCloner.SplitterComponents;
 using s3pi.Filetable;
 using System.Xml.Linq;
+using meshExpImp.ModelBlocks;
 
 namespace ObjectCloner
 {
@@ -2676,21 +2677,27 @@ namespace ObjectCloner
 
         private void Add(string key, IResourceKey referencedRK) { Diagnostics.Log("Add " + key + " '" + referencedRK + "'");/**/ rkLookup.Add(key, referencedRK); }
 
-        private void SlurpRKsFromRK(string key, IResourceKey rk)
+        private void SlurpRKsFromRK(string key, IResourceKey rk, bool includeDDSes = true)
         {
             SpecificResource item = new SpecificResource(FileTable.GameContent, rk);
-            if (item.Resource != null) SlurpRKsFromField(key, (AResource)item.Resource);
+            if (item.Resource != null) SlurpRKsFromField(key, (AResource)item.Resource, includeDDSes);
             else Diagnostics.Show(String.Format("RK {0} not found", key));
         }
-        private void SlurpRKsFromField(string key, AApiVersionedFields field)
+        private void SlurpRKsFromField(string key, AApiVersionedFields field, bool includeDDSes = true)
         {
             foreach (var tuple in field
                 .FindAll(key, x => x is TGIBlock || x is GenericRCOLResource.ChunkEntry)//Don't look inside ChunkEntries
-                .Where(x => x.Item2 is TGIBlock))//but we only actually want TGIBlocks
+                .Where(x =>
+                    x.Item2 is TGIBlock//but we only actually want TGIBlocks
+                        //http://dino.drealm.info/develforums/s3pi/index.php?topic=1190.0 and maybe not DDSes
+                    && (includeDDSes || (!ddsResources.Contains((x.Item2 as TGIBlock).ResourceType)))))
             {
                 Add(tuple.Item1, tuple.Item2 as IResourceKey);
             }
         }
+        static uint[] ddsResources = new uint[] {
+            0x00B2D882, 0x8FFB80F6,
+        };
 
         private void SlurpKinRKs(string key, Predicate<IResourceIndexEntry> Match)
         {
@@ -2811,19 +2818,24 @@ namespace ObjectCloner
             if (!JustSelf)
             {
                 stepList.AddRange(new Step[] {
+                    //NotDC: Catlg_IncludePresets,
+                    //DC:    Catlg_SlurpRKs,
+                    //DC:    Catlg_removeRefdCatlgs,
                     Catlg_getVPXYs,
                     Catlg_addVPXYs,
 
                     VPXYs_SlurpRKs,
                     VPXYs_getMODLs,
+                    //DC:    VPXYKinXML_SlurpRKs,
                     VPXYs_getKinMTST,
                     VPXYs_getKinXML,
                     VPXYKinMTST_SlurpRKs,
 
                     MODLs_SlurpRKs,
                     MODLs_SlurpMLODs,
+                    //NotDC: MODL_GetDiffuseSpecular,
+                    //DC:    MODLs_SlurpTXTCs,
                 });
-                lastStepInChain = MODLs_SlurpMLODs;
                 if (IsDeepClone)
                 {
                     stepList.InsertRange(stepList.IndexOf(Catlg_getVPXYs), new Step[] {
@@ -2841,6 +2853,8 @@ namespace ObjectCloner
                     stepList.InsertRange(stepList.IndexOf(Catlg_getVPXYs), new Step[] {
                         Catlg_IncludePresets,
                     });
+                    stepList.Add(MODL_GetDiffuseSpecular);
+                    lastStepInChain = MODL_GetDiffuseSpecular;
                 }
                 if (WantThumbs)
                     stepList.Add(SlurpThumbnails);
@@ -2857,7 +2871,8 @@ namespace ObjectCloner
                 stepList.InsertRange(stepList.IndexOf(Catlg_addVPXYs), new Step[] {
                     // OBJD_setFallback if cloning from game
                     OBJD_getOBJK,
-                    // OBJD_addOBJKref and OBJD_SlurpDDSes if default resources only
+                    //NotDC: OBJD_addOBJKref,
+                    //NotDC: OBJD_SlurpDDSes,
                     OBJK_SlurpRKs,
                     OBJK_getSPT2,
                     OBJK_getVPXYs,
@@ -2975,6 +2990,7 @@ namespace ObjectCloner
             StepText.Add(VPXYs_getMODLs, "Find VPXY-referenced MODLs");
             StepText.Add(MODLs_SlurpRKs, "MODL-referenced resources");
             StepText.Add(MODLs_SlurpMLODs, "MLOD-referenced resources");
+            StepText.Add(MODL_GetDiffuseSpecular, "MLOD-referenced diffuse and specular DDS images");
             StepText.Add(MODLs_SlurpTXTCs, "TXTC-referenced resources");
 
             StepText.Add(Item_findObjds, "Find OBJDs from MDLR/CFIR");
@@ -3265,21 +3281,21 @@ namespace ObjectCloner
             Diagnostics.Show(s, "No MODL items");
         }
 
-        void MODLs_SlurpRKs() { Diagnostics.Log("MODLs_SlurpRKs"); for (int i = 0; i < modlItems.Count; i++) SlurpRKsFromField("modl[" + i + "]", (AResource)modlItems[i].Resource); }
+        void MODLs_SlurpRKs() { Diagnostics.Log("MODLs_SlurpRKs"); for (int i = 0; i < modlItems.Count; i++) SlurpRKsFromField("modl[" + i + "]", (AResource)modlItems[i].Resource, IsDeepClone); }
         void MODLs_SlurpMLODs()
         {
             Diagnostics.Log("MODLs_SlurpMLODs");
-            int k = 0;
             string s = "";
             for (int i = 0; i < modlItems.Count; i++)
             {
                 bool found = false;
                 GenericRCOLResource rcol = (modlItems[i].Resource as GenericRCOLResource);
+                int k = 0;
                 for (int j = 0; j < rcol.Resources.Count; j++)
                 {
                     TGIBlock tgib = rcol.Resources[j];
                     if (tgib.ResourceType != 0x01D10F34) continue;
-                    SlurpRKsFromRK("modl[" + i + "].mlod[" + k + "]", tgib);
+                    SlurpRKsFromRK("modl[" + i + "].mlod[" + k + "]", tgib, IsDeepClone);
                     k++;
                     found = true;
                 }
@@ -3288,11 +3304,75 @@ namespace ObjectCloner
             }
             Diagnostics.Show(s, "No MLOD items");
         }
+        void MODL_GetDiffuseSpecular()
+        {
+            Diagnostics.Log("MODL_GetDiffuseSpecular");
+            string s = "";
+            for (int i = 0; i < modlItems.Count; i++)
+            {
+                GenericRCOLResource rcol = (modlItems[i].Resource as GenericRCOLResource);
+
+                MATD_GetDiffuseSpecular("modl[" + i + "]", rcol);
+
+                int k = 0;
+                foreach (SpecificResource mlodItem in rcol.Resources
+                    .Where(x => x.ResourceType == 0x01D10F34)
+                    .Select(mlodRK => new SpecificResource(FileTable.GameContent, mlodRK)))
+                {
+                    string key = "modl[" + i + "].mlod[" + k + "]";
+                    if (mlodItem.Resource != null) MATD_GetDiffuseSpecular(key, mlodItem.Resource as GenericRCOLResource);
+                    else s += String.Format(key + ": RK {0} not found", mlodItem.RequestedRK);
+                    k++;
+                }
+            }
+            if (s.Length > 0)
+                Diagnostics.Show(s);
+        }
+        void MATD_GetDiffuseSpecular(string key, GenericRCOLResource rcol)
+        {
+            Diagnostics.Log("MATD_GetDiffuseSpecular: " + key);
+            int i = 0;
+            foreach (MATD matd in rcol.ChunkEntries.Where(x => x.RCOLBlock is MATD).Select(x => x.RCOLBlock))
+            {
+                string myKey = key + ".matd[" + i + "]";
+
+                MATD.ShaderDataList sdataList;
+                if (matd.ContentFields.Contains("Mtnf")) sdataList = matd.Mtnf.SData;
+                else sdataList = matd.Mtrl.SData;
+
+                int j = 0;
+                foreach (MATD.ElementTextureRef sdata in sdataList
+                    .Where(x => x is MATD.ElementTextureRef && wantedImages.Contains(x.Field)))
+                {
+                    if (ddsResources.Contains(rcol.Resources[sdata.Data.TGIBlockIndex].ResourceType))
+                    {
+                        Add(key + ".ElementTextureRef[" + j + "]", rcol.Resources[sdata.Data.TGIBlockIndex]);
+                        j++;
+                    }
+                }
+
+                foreach (MATD.ElementTextureKey sdata in sdataList
+                    .Where(x => x is MATD.ElementTextureKey && wantedImages.Contains(x.Field)))
+                {
+                    if (ddsResources.Contains(sdata.Data.ResourceType))
+                    {
+                        Add(key + ".ElementTextureKey[" + j + "]", sdata.Data);
+                        j++;
+                    }
+                }
+
+                i++;
+            }
+        }
+        static MATD.FieldType[] wantedImages = new MATD.FieldType[] {
+            MATD.FieldType.DiffuseMap,
+            MATD.FieldType.SpecularMap,
+        };
 
         //This slurps all the RKs out of the TXTCs so the references get pulled in
         void MODLs_SlurpTXTCs()
         {
-            Diagnostics.Log("MODLs_SlurpMLODs");
+            Diagnostics.Log("MODLs_SlurpTXTCs");
             int k = 0;
             string s = "";
             for (int i = 0; i < modlItems.Count; i++)
