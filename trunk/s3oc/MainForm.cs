@@ -3346,7 +3346,7 @@ namespace ObjectCloner
                 {
                     if (ddsResources.Contains(rcol.Resources[sdata.Data.TGIBlockIndex].ResourceType))
                     {
-                        Add(key + ".ElementTextureRef[" + j + "]", rcol.Resources[sdata.Data.TGIBlockIndex]);
+                        Add(myKey + ".ElementTextureRef[" + j + "]", rcol.Resources[sdata.Data.TGIBlockIndex]);
                         j++;
                     }
                 }
@@ -3356,7 +3356,7 @@ namespace ObjectCloner
                 {
                     if (ddsResources.Contains(sdata.Data.ResourceType))
                     {
-                        Add(key + ".ElementTextureKey[" + j + "]", sdata.Data);
+                        Add(myKey + ".ElementTextureKey[" + j + "]", sdata.Data);
                         j++;
                     }
                 }
