@@ -157,9 +157,12 @@ namespace AutoUpdate
                 url = url.Trim();
                 try
                 {
-                    StartSplash();
-                    try { ui = new UpdateInfo(url); }
-                    finally { StopSplash(); }
+                    using (ObjectCloner.Splash splash = new ObjectCloner.Splash("Checking for updates..."))
+                    {
+                        splash.Show();
+                        Application.DoEvents();
+                        ui = new UpdateInfo(url);
+                    }
                 }
                 catch (System.Net.WebException we)
                 {
@@ -206,8 +209,6 @@ namespace AutoUpdate
             }
             return false;
         }
-        static void StartSplash() { }
-        static void StopSplash() { }
 
         private static bool UpdateApplicable(UpdateInfo ui, bool autoCheck)
         {
