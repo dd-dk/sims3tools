@@ -98,7 +98,16 @@ namespace s3pe.DDSTool
                 tlpImageSize.Visible = true;
                 ddsPanel1.Channel4 = ddsPanel1.HasAlphaChannel;
             }
-            catch { }
+            catch(Exception e) {
+                System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                Exception inex = e;
+                while (inex != null)
+                {
+                    sb.AppendLine(inex.Message + "\n" + inex.StackTrace + "\n---");
+                    inex = inex.InnerException;
+                }
+                MessageBox.Show(sb.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void importImageToolStripMenuItem_Click(object sender, EventArgs e)
@@ -424,6 +433,11 @@ namespace s3pe.DDSTool
             }
             finally { openFileDialog1.Filter = oldFilter; openFileDialog1.Title = oldCaption; }
             return openFileDialog1.FileName;
+        }
+
+        private void ddsMaskCh_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("ddsMaskCh_Click");
         }
     }
 }

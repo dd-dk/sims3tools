@@ -38,6 +38,7 @@
             this.lbImageW = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
             this.lbImageH = new System.Windows.Forms.Label();
+            this.btnResize = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
@@ -136,7 +137,6 @@
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnResize = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.hueShift)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.saturationShift)).BeginInit();
@@ -361,6 +361,20 @@
             this.lbImageH.Size = new System.Drawing.Size(37, 13);
             this.lbImageH.TabIndex = 4;
             this.lbImageH.Text = "44444";
+            // 
+            // btnResize
+            // 
+            this.btnResize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnResize.AutoSize = true;
+            this.btnResize.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tlpImageSize.SetColumnSpan(this.btnResize, 2);
+            this.btnResize.Location = new System.Drawing.Point(3, 29);
+            this.btnResize.Name = "btnResize";
+            this.btnResize.Size = new System.Drawing.Size(61, 23);
+            this.btnResize.TabIndex = 5;
+            this.btnResize.Text = "Resize";
+            this.btnResize.UseVisualStyleBackColor = true;
+            this.btnResize.Click += new System.EventHandler(this.btnResize_Click);
             // 
             // label2
             // 
@@ -1513,6 +1527,7 @@
             this.ddsMaskCh1.Size = new System.Drawing.Size(48, 48);
             this.ddsMaskCh1.TabIndex = 3;
             this.ddsMaskCh1.TabStop = false;
+            this.ddsMaskCh1.Click += new System.EventHandler(this.ddsMaskCh_Click);
             // 
             // ddsMaskCh2
             // 
@@ -1769,20 +1784,6 @@
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
-            // 
-            // btnResize
-            // 
-            this.btnResize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnResize.AutoSize = true;
-            this.btnResize.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tlpImageSize.SetColumnSpan(this.btnResize, 2);
-            this.btnResize.Location = new System.Drawing.Point(3, 29);
-            this.btnResize.Name = "btnResize";
-            this.btnResize.Size = new System.Drawing.Size(61, 23);
-            this.btnResize.TabIndex = 5;
-            this.btnResize.Text = "Resize";
-            this.btnResize.UseVisualStyleBackColor = true;
-            this.btnResize.Click += new System.EventHandler(this.btnResize_Click);
             // 
             // MainForm
             // 
