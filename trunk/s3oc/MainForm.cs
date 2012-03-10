@@ -1129,16 +1129,19 @@ namespace ObjectCloner
             if (flagFields == null)
             {
                 flagFields = new List<flagField>(new flagField[] {
-                    new flagField(tlpUnknown8, "ObjectTypeFlags", 32, 0),
-                    new flagField(tlpUnknown9, "WallPlacementFlags", 32, 0),
-                    new flagField(tlpUnknown10, "MovementFlags", 32, 0),
+                    new flagField(tlpObjectTypeFlags, "ObjectTypeFlags", 32, 0),
+                    new flagField(tlpObjectTypeFlags2, "ObjectTypeFlags2", 32, 0),//Version>=0x1a
+                    new flagField(tlpMovementFlags, "MovementFlags", 32, 0),
                     new flagField(tlpRoomSort, "RoomCategoryFlags", 32, 0),
                     new flagField(tlpRoomSubLow, "RoomSubCategoryFlags", 32, 0),
                     new flagField(tlpRoomSubHigh, "RoomSubCategoryFlags", 64, 32),
                     new flagField(tlpFuncSort, "FunctionCategoryFlags", 32, 0),
                     new flagField(tlpFuncSubLow, "FunctionSubCategoryFlags", 32, 0),
                     new flagField(tlpFuncSubHigh, "FunctionSubCategoryFlags", 64, 32),
+                    new flagField(tlpFuncSub2Low, "FunctionSubCategoryFlags2", 32, 0),//Version>=0x1c
+                    new flagField(tlpFuncSub2High, "FunctionSubCategoryFlags2", 64, 32),//Version>=0x1c
                     new flagField(tlpBuildSort, "BuildCategoryFlags", 32, 0),
+                    new flagField(tlpWallPlacementFlags, "WallPlacementFlags", 32, 0),
                 });
             }
             if (typeToLen == null)
@@ -1243,13 +1246,15 @@ namespace ObjectCloner
                             using (Splash splash = new Splash() { Message = "Initialising tabs...", })
                             {
                                 splash.Show();
+                                Application.DoEvents();
                                 InitialiseFlagTabs(res);
                                 if (tlpOther.Visible)
                                     InitialiseOtherTab(res);
                                 this.tabControl1.TabPages.Add(this.tpFlagsRoom);
-                                this.tabControl1.TabPages.Add(this.tpFlagsFunc);
-                                this.tabControl1.TabPages.Add(this.tpFlagsBuild);
-                                this.tabControl1.TabPages.Add(this.tpFlagsMisc);
+                                this.tabControl1.TabPages.Add(this.tpFlagsFunc1);
+                                this.tabControl1.TabPages.Add(this.tpFlagsFunc2);
+                                this.tabControl1.TabPages.Add(this.tpFlagsMisc1);
+                                this.tabControl1.TabPages.Add(this.tpFlagsMisc2);
                             }
                         }
                     }
@@ -1299,7 +1304,7 @@ namespace ObjectCloner
             foreach (flagField ff in flagFields)
             {
                 Application.DoEvents();
-                Type t = objd[ff.field].Type;
+                Type t = AApiVersionedFields.GetContentFieldTypes(0, objd.GetType())[ff.field];
                 CheckBox[] ackb = new CheckBox[ff.length - ff.offset];
                 for (int i = 0; i < ackb.Length; i++) ackb[i] = new CheckBox();
                 ff.tlp.RowCount = 2 + ackb.Length;
@@ -1687,13 +1692,16 @@ namespace ObjectCloner
         {
             foreach (flagField ff in flagFields)
             {
-                ulong field = getFlags(item.Resource as AResource, ff.field);
-                for (int i = 1; i < ff.tlp.RowCount - 1; i++)
+                if (item.Resource.ContentFields.Contains(ff.field))
                 {
-                    if (formClosing) return;
-                    ulong value = (ulong)Math.Pow(2, ff.offset + i - 1);
-                    CheckBox cb = (CheckBox)ff.tlp.GetControlFromPosition(0, i);
-                    cb.Checked = (field & value) != 0;
+                    ulong field = getFlags(item.Resource as AResource, ff.field);
+                    for (int i = 1; i < ff.tlp.RowCount - 1; i++)
+                    {
+                        if (formClosing) return;
+                        ulong value = (ulong)Math.Pow(2, ff.offset + i - 1);
+                        CheckBox cb = (CheckBox)ff.tlp.GetControlFromPosition(0, i);
+                        cb.Checked = (field & value) != 0;
+                    }
                 }
             }
         }
@@ -1823,10 +1831,16 @@ namespace ObjectCloner
         {
             foreach (flagField ff in flagFields)
             {
-                for (int i = 1; i < ff.tlp.RowCount - 1; i++)
+                if (enabled && !selectedItem.Resource.ContentFields.Contains(ff.field))
+                    ff.tlp.Enabled = false;
+                else
                 {
-                    CheckBox cb = (CheckBox)ff.tlp.GetControlFromPosition(0, i);
-                    cb.Enabled = enabled;
+                    ff.tlp.Enabled = true;
+                    for (int i = 1; i < ff.tlp.RowCount - 1; i++)
+                    {
+                        CheckBox cb = (CheckBox)ff.tlp.GetControlFromPosition(0, i);
+                        cb.Enabled = enabled;
+                    }
                 }
             }
         }
@@ -3995,11 +4009,14 @@ namespace ObjectCloner
                             {
                                 foreach (flagField ff in flagFields)
                                 {
-                                    ulong old = getFlags(item.Resource as AResource, ff.field);
-                                    ulong mask = (ulong)0xFFFFFFFF << ff.offset;
-                                    ulong res = getFlags(ff);
-                                    res |= (ulong)(old & ~mask);
-                                    setFlags(item.Resource as AResource, ff.field, res);
+                                    if (item.Resource.ContentFields.Contains(ff.field))
+                                    {
+                                        ulong old = getFlags(item.Resource as AResource, ff.field);
+                                        ulong mask = (ulong)0xFFFFFFFF << ff.offset;
+                                        ulong res = getFlags(ff);
+                                        res |= (ulong)(old & ~mask);
+                                        setFlags(item.Resource as AResource, ff.field, res);
+                                    }
                                 }
 
                                 if (tlpOther.Visible)
