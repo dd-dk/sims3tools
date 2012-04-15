@@ -689,33 +689,47 @@ namespace ObjectCloner
                 s3pi.Package.Package.NewPackage(0).SaveAs(filename);
                 PathPackageTuple ppt = new PathPackageTuple(filename, readwrite: true);
 
-                string _keyName = Path.GetFileNameWithoutExtension(filename);
-                ulong _keyIID = FNV64.GetHash(_keyName);
-                SpecificResource _keySR = ppt.AddResource(new RK(RK.NULL) { ResourceType = 0x0166038C, Instance = _keyIID, });
-                IDictionary<ulong, string> _key = _keySR.Resource as IDictionary<ulong, string>;
-                _key.Add(_keyIID, _keyName);
-
-                foreach (var sr in lsr)
+                try
                 {
-                    if (sr.ResourceIndexEntry == null)
+                    string _keyName = Path.GetFileNameWithoutExtension(filename);
+                    ulong _keyIID = FNV64.GetHash(_keyName);
+                    SpecificResource _keySR = ppt.AddResource(new RK(RK.NULL) { ResourceType = 0x0166038C, Instance = _keyIID, });
+                    IDictionary<ulong, string> _key = _keySR.Resource as IDictionary<ulong, string>;
+                    _key.Add(_keyIID, _keyName);
+
+                    foreach (var sr in lsr)
                     {
-                        missing.Add(sr);
-                        continue;
+                        if (sr.ResourceIndexEntry == null)
+                        {
+                            missing.Add(sr);
+                            continue;
+                        }
+
+                        string name = NameMap.NMap[sr.ResourceIndexEntry.Instance];
+                        if (name != null && !_key.ContainsKey(sr.ResourceIndexEntry.Instance))
+                            _key.Add(sr.ResourceIndexEntry.Instance, name);
+                        ppt.AddResource(sr.ResourceIndexEntry, sr.Resource.Stream);
                     }
 
-                    _key.Add(sr.ResourceIndexEntry.Instance, NameMap.NMap[sr.ResourceIndexEntry.Instance]);
-                    ppt.AddResource(sr.ResourceIndexEntry, sr.Resource.Stream);
-                }
+                    if (missing.Count != 0)
+                    {
+                        CopyableMessageBox.Show("Resource(s) could not be found!", "Cannot open in editor", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                        return;
+                    }
 
-                if (missing.Count != 0)
+                    _keySR.Commit();
+
+                }
+                catch (Exception ex)
                 {
-                    CopyableMessageBox.Show("Resource(s) could not be found!", "Cannot open in editor", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
-                    return;
+                    CopyableMessageBox.IssueException(ex, "Export failed");
+                }
+                finally
+                {
+                    ppt.Package.SavePackage();
+                    s3pi.Package.Package.ClosePackage(0, ppt.Package);
                 }
 
-                _keySR.Commit();
-
-                ppt.Package.SavePackage();
                 string command = ObjectCloner.Properties.Settings.Default.pkgEditorPath;
                 string arguments = String.Format(@"""{0}""", filename);
 
@@ -2726,10 +2740,55 @@ namespace ObjectCloner
                 }
         }
 
+        /*
+<preset>
+<complate name="CasRgbMask" reskey="blah">
+<value key="..." value="key:00B2D882:00000000:B5683B98CA67ECFC" />
+</complate>
+</preset>
+/**/
+        static string[] CasRgbMaskWantedKeys = new string[] {
+             "Overlay"          
+            ,"Mask"             
+            ,"Transparency Map" 
+            ,"Multiplier"       
+            ,"Clothing Specular"
+            ,"Clothing Ambient" 
+            ,"Stencil A"        
+            ,"Stencil B"        
+            ,"Stencil C"        
+            ,"Stencil D"        
+            ,"Stencil E"        
+            ,"Stencil F"        
+            ,"Logo Texture"     
+            ,"Logo 2 Texture"   
+            ,"Logo 3 Texture"   
+            ,
+        };
+        void CASP_getXMLRefdDDSes(string key, IEnumerable<XElement> elements, bool log = false)
+        {
+            foreach (Tuple<string, string> tuple in elements
+                .Where(v => v.Attribute("value").Value.StartsWith("key:"))
+                .Select(v => Tuple.Create(v.Attribute("key").Value, v.Attribute("value").Value)))
+            {
+                if (!CasRgbMaskWantedKeys.Contains(tuple.Item1))
+                {
+                    if (log)
+                        Diagnostics.Log(String.Format(key + ": Skipping key '{0}', value '{1}'", tuple.Item1, tuple.Item2));
+                    continue;
+                }
+
+                IResourceKey rk;
+                string oldKey = tuple.Item2.Substring(4).Replace('-', ':');
+                string RKkey = "0x" + oldKey.Replace(":", "-0x");//translate to s3pi format
+                if (RK.TryParse(RKkey, out rk))
+                    Add(key + "." + tuple.Item1, rk);
+            }
+        }
+
         #region Steps
         SpecificResource objkItem;
         SpecificResource geomItem;
-        SpecificResource caspXMLItem;
         List<SpecificResource> vpxyItems;
         List<SpecificResource> modlItems;
 
@@ -2954,20 +3013,20 @@ namespace ObjectCloner
                 {
                     stepList.AddRange(new Step[] {
                         CASP_deepClone,
-                        CASP_SlurpKinXML,
                     });
-                    lastStepInChain = CASP_SlurpKinXML;
                 }
                 else
                 {
                     stepList.AddRange(new Step[] {
                         CASP_clone,
-                        CASP_getKinXML,
-                        CASPKinXML_getDDSes,
+                        CASP_IncludePresets,
                         GEOM_getNormalMap,
                     });
-                    lastStepInChain = GEOM_getNormalMap;
                 }
+                stepList.AddRange(new Step[] {
+                    CASP_SlurpKinXML,
+                });
+                lastStepInChain = CASP_SlurpKinXML;
                 if (WantThumbs)
                     stepList.Add(SlurpThumbnails);
             }
@@ -2983,7 +3042,7 @@ namespace ObjectCloner
             StepText.Add(Catlg_getVPXYs, "Find VPXYs in the Catalog Resource TGIBlockList");
 
             StepText.Add(OBJD_setFallback, "Set fallback TGI");
-            StepText.Add(Catlg_IncludePresets, "Include Preset Images");
+            StepText.Add(Catlg_IncludePresets, "Include Preset Images (CatalogResources)");
             StepText.Add(OBJD_getOBJK, "Find OBJK");
             StepText.Add(OBJD_addOBJKref, "Add OBJK");
             StepText.Add(OBJD_SlurpDDSes, "OBJD-referenced DDSes");
@@ -3015,11 +3074,10 @@ namespace ObjectCloner
             StepText.Add(CWAL_SlurpThumbnails, "Add thumbnails");
 
             StepText.Add(CASP_deepClone, "Deep clone of resources referenced by CASP");
-            StepText.Add(CASP_SlurpKinXML, "Preset XML (same instances as CASP) (method 1)");
             StepText.Add(CASP_clone, "Clone of several resources referenced by CASP");
-            StepText.Add(CASP_getKinXML, "Preset XML (same instance as CASP) (method 2)");
-            StepText.Add(CASPKinXML_getDDSes, "Add specific XML-referenced DDSes");
+            StepText.Add(CASP_IncludePresets, "Include Preset Images (CASParts)");
             StepText.Add(GEOM_getNormalMap, "Add GEOM-referenced NormalMap");
+            StepText.Add(CASP_SlurpKinXML, "Preset XML (same instance as CASP)");
         }
 
         void None() { }
@@ -3466,62 +3524,24 @@ namespace ObjectCloner
                     });
         }
 
-        void CASP_SlurpKinXML()
+        void CASP_IncludePresets()
         {
-            Diagnostics.Log(String.Format("CASP_getKinXML" + ": 0x{0:X8}-*-0x{1:X16}", 0x0333406C, selectedItem.ResourceIndexEntry.Instance));
-            SlurpKinRKs("casp.PresetXML", rie => rie.ResourceType == 0x0333406C && rie.Instance == selectedItem.ResourceIndexEntry.Instance);
-        }
-
-        void CASP_getKinXML()
-        {
-            Diagnostics.Log("CASP_getKinXML");
-            caspXMLItem = new SpecificResource(FileTable.GameContent, new RK(selectedItem.RequestedRK) { ResourceType = 0x0333406C });//_XML
-            if (caspXMLItem.ResourceIndexEntry != null)
-                Add("casp.PresetXML", caspXMLItem.ResourceIndexEntry);
-            else
-                Diagnostics.Show("CASP _XML resource not found");
-        }
-
-        /*
-<preset>
-  <complate name="CasRgbMask" reskey="blah">
-    <value key="..." value="key:00B2D882:00000000:B5683B98CA67ECFC" />
-  </complate>
-</preset>
-        /**/
-        static string[] CasRgbMaskWantedKeys = new string[] {
-             "Overlay"          
-            ,"Mask"             
-            ,"Transparency Map" 
-            ,"Multiplier"       
-            ,"Clothing Specular"
-            ,"Clothing Ambient" 
-            ,"Stencil A"        
-            ,"Stencil B"        
-            ,"Stencil C"        
-            ,"Stencil D"        
-            ,"Stencil E"        
-            ,"Stencil F"        
-            ,"Logo Texture"     
-            ,"Logo 2 Texture"   
-            ,"Logo 3 Texture"   
-            ,
-        };
-        void CASPKinXML_getDDSes()
-        {
-            Diagnostics.Log("CASP_getXMLDDSes");
-            if (caspXMLItem.Resource == null) return;
-            XElement casp = XElement.Load(caspXMLItem.Resource.Stream);
-            foreach (Tuple<string,string> tuple in
-                casp.Descendants("value")
-                .Where(v => CasRgbMaskWantedKeys.Contains(v.Attribute("key").Value))
-                .Select(v => Tuple.Create(v.Attribute("key").Value, v.Attribute("value").Value)))
+            Diagnostics.Log("CASP_IncludePresets");
+            CASPartResource.CASPartResource casp = selectedItem.Resource as CASPartResource.CASPartResource;
+            if (casp == null)
             {
-                IResourceKey rk;
-                string oldKey = tuple.Item2.Substring(4).Replace('-', ':');
-                string RKkey = "0x" + oldKey.Replace(":", "-0x");//translate to s3pi format
-                if (RK.TryParse(RKkey, out rk))
-                    Add("casp.PresetXML." + tuple.Item1, rk);
+                Diagnostics.Show("The CASP resource has disappeared.");
+                return;
+            }
+
+            int i = 0;
+            foreach (var preset in casp.Presets)
+            {
+                XDocument xdoc = XDocument.Load(System.Xml.XmlReader.Create(preset.XmlFile));
+                var elements = xdoc.Descendants("value").Where(n => n.Ancestors("pattern").Count() == 0);
+                CASP_getXMLRefdDDSes("casp.Presets[" + i + "]", elements, true);
+
+                i++;
             }
         }
 
@@ -3556,6 +3576,25 @@ namespace ObjectCloner
             Add("casp.GEOM.NormalMap", geom.TGIBlocks[index]);
         }
 
+        void CASP_SlurpKinXML()
+        {
+            Diagnostics.Log("CASP_getKinXML");
+            List<IResourceKey> seen = new List<IResourceKey>();
+
+            int i = 0;
+            foreach (var sr in FileTable.GameContent
+                .SelectMany(ppt => ppt.FindAll(rie => rie.ResourceType == 0x0333406C && rie.Instance == selectedItem.RequestedRK.Instance))
+                .Where(sr => { if (seen.Contains(sr.RequestedRK)) return false; seen.Add(sr.RequestedRK); return true; }))
+            {
+                Add("casp.KinXML[" + i + "]", sr.ResourceIndexEntry);
+
+                XElement xdoc = XElement.Load(sr.Resource.Stream);
+                var elements = xdoc.Descendants("value");
+                CASP_getXMLRefdDDSes("casp.KinXML[" + i + "]", elements);
+
+                i++;
+            }
+        }
 
         List<SpecificResource> objdList;
         void Item_findObjds()
