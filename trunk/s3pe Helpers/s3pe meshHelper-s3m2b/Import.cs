@@ -168,7 +168,7 @@ namespace meshExpImp.Helper
             if (!int.TryParse(split[1], out count))
                 throw new InvalidDataException("'ibuf' line has invalid count.");
 
-            ibuf.SetIndices(mlod, mesh, r.Import_IBUF(mpb, MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType), count));
+            ibuf.SetIndices(mlod, mesh, r.Import_IBUF(mpb, IBUF.IndexCountFromPrimitiveType(mesh.PrimitiveType), count));
         }
 
         List<meshExpImp.ModelBlocks.Vertex[]> Import_MeshGeoStates(StreamReader r, MLOD mlod, MLOD.Mesh mesh, VRTF vrtf, bool isDefaultVRTF, IBUF ibuf)
@@ -258,7 +258,7 @@ namespace meshExpImp.Helper
             if (!int.TryParse(split[3], out primitiveCount))
                 throw new InvalidDataException(string.Format("geoState {0} 'ibuf' line has invalid PrimitiveCount.", geoStateIndex));
 
-            int sizePerPrimitive = MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType);
+            int sizePerPrimitive = IBUF.IndexCountFromPrimitiveType(mesh.PrimitiveType);
             if (startIndex + primitiveCount * sizePerPrimitive <= mesh.StartIndex + mesh.PrimitiveCount * sizePerPrimitive)
             {
                 mesh.GeometryStates[geoStateIndex].StartIndex = startIndex;
@@ -268,7 +268,7 @@ namespace meshExpImp.Helper
 
             if (startIndex != mesh.GeometryStates[geoStateIndex].StartIndex)
                 throw new InvalidDataException(string.Format("geoState {0} 'ibuf' line has unexpected StartIndex {1}; expected {2}.", geoStateIndex, startIndex, mesh.GeometryStates[geoStateIndex].StartIndex));
-            ibuf.SetIndices(mlod, mesh, geoStateIndex, r.Import_IBUF(mpb, MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType), primitiveCount));
+            ibuf.SetIndices(mlod, mesh, geoStateIndex, r.Import_IBUF(mpb, IBUF.IndexCountFromPrimitiveType(mesh.PrimitiveType), primitiveCount));
         }
 
 

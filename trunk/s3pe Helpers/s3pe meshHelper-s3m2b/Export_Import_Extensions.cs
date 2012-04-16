@@ -380,10 +380,10 @@ namespace meshExpImp.Helper
 
             mpb.Init("Import MeshGeoStates...", count);
 
-            int sizePerPrimitive = MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType);
+            int sizePerPrimitive = IBUF.IndexCountFromPrimitiveType(mesh.PrimitiveType);
             int lastMinVertexIndex = mesh.MinVertexIndex;
             int lastVertexCount = 0;
-            int lastStartIndex = mesh.PrimitiveCount * MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType);
+            int lastStartIndex = mesh.PrimitiveCount * IBUF.IndexCountFromPrimitiveType(mesh.PrimitiveType);
             int lastPrimitiveCount = 0;
             for (int g = 0; g < count; g++)
             {

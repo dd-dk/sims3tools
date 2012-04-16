@@ -42,6 +42,14 @@ namespace meshExpImp.Helper
                 w.WriteLine(";");
             }
 
+            if (mesh.Flags != 0)
+            {
+                w.WriteLine(";");
+                w.WriteLine("; Extended format: MeshFlags follow IBUF" + (mesh.GeometryStates.Count > 0 ? " and GeoStates" : ""));
+                w.WriteLine("; (They are ignored on import.)");
+                w.WriteLine(";");
+            }
+
             VRTF vrtf = GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mesh.VertexFormatIndex) as VRTF;
             bool isDefault = vrtf == null;
             if (isDefault)
@@ -59,6 +67,15 @@ namespace meshExpImp.Helper
             Export_MeshGeoStates(w, vrtf, uvScales, mlod, mesh,
                 GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mesh.VertexBufferIndex) as VBUF,
                 GenericRCOLResource.ChunkReference.GetBlock(rcolResource, mesh.IndexBufferIndex) as IBUF);
+
+            if (mesh.Flags != 0)
+            {
+                w.WriteLine(";");
+                w.WriteLine("; Extended format: MeshFlags");
+                w.WriteLine(";");
+                w.WriteLine("flags " + mesh.Flags);
+                w.Flush();
+            }
         }
 
 
@@ -77,7 +94,7 @@ namespace meshExpImp.Helper
             if (ibuf == null) { w.WriteLine("; ibuf is null"); w.WriteLine("ibuf 0"); return; }
 
             w.WriteLine(string.Format("ibuf {0}", mesh.PrimitiveCount));
-            w.Export_IBUF(mpb, ibuf.GetIndices(mesh), MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType), mesh.PrimitiveCount);
+            w.Export_IBUF(mpb, ibuf.GetIndices(mesh), IBUF.IndexCountFromPrimitiveType(mesh.PrimitiveType), mesh.PrimitiveCount);
         }
 
         void Export_MeshGeoStates(StreamWriter w, VRTF vrtf, float[] uvScales, MLOD mlod, MLOD.Mesh mesh, VBUF vbuf, IBUF ibuf)
@@ -122,7 +139,7 @@ namespace meshExpImp.Helper
         {
             if (ibuf == null) { w.WriteLine("; ibuf is null for geoState"); w.WriteLine(string.Format("ibuf {0} 0 0", geoStateIndex)); return; }
 
-            int sizePerPrimitive = MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType);
+            int sizePerPrimitive = IBUF.IndexCountFromPrimitiveType(mesh.PrimitiveType);
             MLOD.GeometryState geoState = mesh.GeometryStates[geoStateIndex];
 
             w.WriteLine(string.Format("ibuf {0} {1} {2}", geoStateIndex, geoState.StartIndex, geoState.PrimitiveCount));
