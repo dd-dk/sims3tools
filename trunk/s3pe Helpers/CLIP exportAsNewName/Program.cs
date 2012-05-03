@@ -27,6 +27,7 @@ namespace CLIPexportAsNewName
     {
         static string name = "";
         static bool isDefault = false;
+        static uint group = 0;
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -36,8 +37,10 @@ namespace CLIPexportAsNewName
             if (args.Length == 1)
             {
                 string[] split = System.IO.Path.GetFileNameWithoutExtension(args[0]).Split(new char[] { '_' }, 5);
+                // S3_{T}_{G}_{I}_{name%%+tag}
                 if (split.Length == 5)
                 {
+                    group = uint.Parse(split[2], System.Globalization.NumberStyles.HexNumber);
                     isDefault = split[3][0] < '8';
                     name = split[4].Split('%')[0];
                 }
@@ -54,6 +57,7 @@ namespace CLIPexportAsNewName
             return s3pi.Helpers.RunHelper.Run(typeof(MainForm), args);
         }
 
+        public static uint CurrentGroup { get { return group; } }
         public static string CurrentName { get { return name; } }
         public static bool IsDefault { get { return isDefault; } }
     }

@@ -58,7 +58,7 @@ namespace CLIPexportAsNewName
                 CLIPexportAsNewName.Properties.Settings.Default.Save();
 
                 string filename = Path.Combine(folderBrowserDialog1.SelectedPath, String.Format("S3_{0:X8}_{1:X8}_{2:X16}_{3}%%+CLIP.animation",
-                    0x6B20C4F3, 0, FNV64CLIP.GetHash(tbClipName.Text), tbClipName.Text));
+                    0x6B20C4F3, Program.CurrentGroup, FNV64CLIP.GetHash(tbClipName.Text), tbClipName.Text));
 
                 if (File.Exists(filename) && CopyableMessageBox.Show(String.Format("File '{0}' exists.\n\nReplace?", Path.GetFileName(filename)), "File exists",
                          CopyableMessageBoxButtons.YesNo, CopyableMessageBoxIcon.Question, 1, 1) != 0) return;
