@@ -85,6 +85,10 @@
     <Reference Include="s3pi.RCOLChunks">
       <HintPath>..\s3pi\build\bin\Release\s3pi.RCOLChunks.dll</HintPath>
     </Reference>
+    <Reference Include="s3pi.TxtcResource, Version=1204.6.1050.19506, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.TxtcResource.dll</HintPath>
+    </Reference>
     <Reference Include="s3pi.WrapperDealer">
       <HintPath>..\s3pi\build\bin\Release\s3pi.WrapperDealer.dll</HintPath>
     </Reference>
@@ -319,10 +323,6 @@
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.StblResource.dll">
       <Link>s3pi.StblResource.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\s3pi\build\bin\Release\s3pi.TxtcResource.dll">
-      <Link>s3pi.TxtcResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="gpl-3.0.txt">

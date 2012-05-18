@@ -2577,7 +2577,9 @@ namespace ObjectCloner
                         if (hasColons) newKey = newKey.Replace("-", ":");
                         line = line.Substring(0, i) + "key:" + newKey + line.Substring(i + 4 + oldKey.Length);
 
-                        replacements.Add(String.Format("{0} line {1} pos {2}: Replaced {3} with {4}", fn, ln, i, oldKey, newKey));
+                        string rpt = String.Format("{0} line {1} pos {2}: Replaced {3} with {4}", fn, ln, i, oldKey, newKey);
+                        replacements.Add(rpt);
+                        Diagnostics.Log(rpt);
                         dirty = true;
                     }
                     i = line.IndexOf("key:", i + 4 + oldKey.Length);
@@ -2621,7 +2623,9 @@ namespace ObjectCloner
                     rk.ResourceGroup = newRK.ResourceGroup;
                     rk.Instance = newRK.Instance;
 
-                    replacements.Add(String.Format("{0} {1}: Replaced {2} with {3}", item.RequestedRK + "", fn, oldRK, new RK(newRK) + ""));
+                    string rpt = String.Format("{0} {1}: Replaced {2} with {3}", item.RequestedRK + "", fn, oldRK, new RK(newRK) + "");
+                    replacements.Add(rpt);
+                    Diagnostics.Log(rpt);
                     dirty = true;
                 }
             }
@@ -2708,7 +2712,12 @@ namespace ObjectCloner
         private void SlurpRKsFromRK(string key, IResourceKey rk, bool includeDDSes = true)
         {
             SpecificResource item = new SpecificResource(FileTable.GameContent, rk);
-            if (item.Resource != null) SlurpRKsFromField(key, (AResource)item.Resource, includeDDSes);
+            if (item.Resource != null)
+            {
+                if (item.Resource.GetType().Name.EndsWith("DefaultResource"))
+                    Diagnostics.Log("item " + rk + " using DefaultResource wrapper");
+                SlurpRKsFromField(key, (AResource)item.Resource, includeDDSes);
+            }
             else Diagnostics.Show(String.Format("RK {0} not found", key));
         }
         private void SlurpRKsFromField(string key, AApiVersionedFields field, bool includeDDSes = true)
@@ -2950,7 +2959,7 @@ namespace ObjectCloner
                     OBJK_getSPT2,
                     OBJK_getVPXYs,
                 });
-                if (!isFix && mode == Mode.FromGame)
+                if (!isFix && mode == Mode.FromGame && isRenumber)
                 {
                     stepList.Insert(stepList.IndexOf(OBJD_getOBJK), OBJD_setFallback);
                 }
@@ -3734,25 +3743,39 @@ namespace ObjectCloner
             foreach (var sr in FileTable.Current.FindAll(rie => rie.ResourceType == 0x220557DA && !rkToItem.ContainsKey(rie)))
                 rkToItem.Add(sr.ResourceIndexEntry, sr);
 
-            // We may also need to process RCOL internal chunks and NameMaps but only if we're renumbering
+            // We may also need to process RCOL internal chunks, TXTFs in TXTCs and NameMaps -- but only if we're renumbering
             if (isRenumber)
             {
                 //If there are internal chunk references not covered by the above, we also need to add them
                 Dictionary<IResourceKey, SpecificResource> rcolChunks = new Dictionary<IResourceKey, SpecificResource>();
+                Dictionary<IResourceKey, SpecificResource> txtfs = new Dictionary<IResourceKey, SpecificResource>();
                 foreach (var kvp in rkToItem)
                 {
                     GenericRCOLResource rcol = kvp.Value.Resource as GenericRCOLResource;
-                    if (rcol == null) continue;
-
-                    foreach (GenericRCOLResource.ChunkEntry chunk in rcol.ChunkEntries)
+                    if (rcol != null) // it's a GenericRCOL
                     {
-                        if (chunk.TGIBlock == RK.NULL) continue;
-                        if (rkToItem.ContainsKey(chunk.TGIBlock)) continue; // External reference and we've seen it
-                        if (rcolChunks.ContainsKey(chunk.TGIBlock)) continue; // Internal reference and we've seen it
-                        rcolChunks.Add(chunk.TGIBlock, kvp.Value);
+                        foreach (GenericRCOLResource.ChunkEntry chunk in rcol.ChunkEntries)
+                        {
+                            if (chunk.TGIBlock == RK.NULL) continue;
+                            if (rkToItem.ContainsKey(chunk.TGIBlock)) continue; // External reference and we've seen it
+                            if (rcolChunks.ContainsKey(chunk.TGIBlock)) continue; // Internal reference and we've seen it
+                            rcolChunks.Add(chunk.TGIBlock, kvp.Value);
+                        }
                     }
+                    TxtcResource.TxtcResource txtc = kvp.Value.Resource as TxtcResource.TxtcResource;
+                    if (txtc != null) // it's a TXTC
+                    {
+                        foreach (var index in txtc.Root.SuperBlocks.Select(x => x.TGIIndex)) // All the referenced TXTFs
+                        {
+                            if (rkToItem.ContainsKey(txtc.Root.TGIBlocks[index])) continue; // External reference should never happen...
+                            if (txtfs.ContainsKey(txtc.Root.TGIBlocks[index])) continue; // Internal reference and we've seen it
+                            txtfs.Add(txtc.Root.TGIBlocks[index], kvp.Value);
+                        }
+                    }
+
                 }
                 foreach (var kvp in rcolChunks) rkToItem.Add(kvp.Key, kvp.Value);
+                foreach (var kvp in txtfs) rkToItem.Add(kvp.Key, kvp.Value);
 
                 // Add newest namemap
                 foreach (var sr in FileTable.Current.FindAll(rie => rie.ResourceType == 0x0166038C && !rkToItem.ContainsKey(rie)))
@@ -3778,7 +3801,7 @@ namespace ObjectCloner
                     {
                         if (rk.ResourceType == 0x736884F1 && rk.Instance >> 32 == 0)//Either it's a request for a VPXY using version...
                             oldToNew.Add(rk.Instance, oldToNew[rkToItem[rk].ResourceIndexEntry.Instance]);//So add the new number for that resource
-                        else//Or it's an RCOL chunk that needs a new IID...
+                        else//Or it's an RCOL chunk or TXTF that needs a new IID...
                             oldToNew.Add(rk.Instance, CreateInstance());//So renumber it
                     }
             }
@@ -3835,7 +3858,7 @@ namespace ObjectCloner
                         {
                             if (rk.ResourceType == 0x736884F1 && rk.Instance >> 32 == 0)//Either it's a request for a VPXY using version...
                                 oldToNew.Add(rk.Instance, oldToNew[rkToItem[rk].ResourceIndexEntry.Instance]);//So add the new number for that resource
-                            else//Or it's an RCOL chunk that needs a new IID...
+                            else//Or it's an RCOL chunk or TXTF that needs a new IID...
                                 oldToNew.Add(rk.Instance, CreateInstance());//So renumber it
                         }
             }
@@ -4464,15 +4487,19 @@ namespace ObjectCloner
 
                 if (oldToNewGUID.ContainsKey(cr.CommonBlock.NameGUID))
                 {
-                    replacements.Add(String.Format("{0}: Replaced NameGUID 0x{1:X16} with 0x{2:X16} in {3}", "" + sr.ResourceIndexEntry,
-                        cr.CommonBlock.NameGUID, oldToNewGUID[cr.CommonBlock.NameGUID], cr.GetType().Name));
+                    string rpt = String.Format("{0}: Replaced NameGUID 0x{1:X16} with 0x{2:X16} in {3}", "" + sr.ResourceIndexEntry,
+                        cr.CommonBlock.NameGUID, oldToNewGUID[cr.CommonBlock.NameGUID], cr.GetType().Name);
+                    replacements.Add(rpt);
+                    Diagnostics.Log(rpt);
                     cr.CommonBlock.NameGUID = oldToNewGUID[cr.CommonBlock.NameGUID];
                     dirty = true;
                 }
                 if (oldToNewGUID.ContainsKey(cr.CommonBlock.DescGUID))
                 {
-                    replacements.Add(String.Format("{0}: Replaced DescGUID 0x{1:X16} with 0x{2:X16} in {3}", "" + sr.ResourceIndexEntry,
-                        cr.CommonBlock.DescGUID, oldToNewGUID[cr.CommonBlock.DescGUID], cr.GetType().Name));
+                    string rpt = String.Format("{0}: Replaced DescGUID 0x{1:X16} with 0x{2:X16} in {3}", "" + sr.ResourceIndexEntry,
+                        cr.CommonBlock.DescGUID, oldToNewGUID[cr.CommonBlock.DescGUID], cr.GetType().Name);
+                    replacements.Add(rpt);
+                    Diagnostics.Log(rpt);
                     cr.CommonBlock.DescGUID = oldToNewGUID[cr.CommonBlock.DescGUID];
                     dirty = true;
                 }
@@ -4500,7 +4527,9 @@ namespace ObjectCloner
                 foreach (var kvp in oldToNewGUID)
                     if (stbl.ContainsKey(kvp.Key))
                     {
-                        replacements.Add(String.Format("{0}: Replaced GUID 0x{1:X16} with 0x{2:X16} in STBL", "" + sr.ResourceIndexEntry, kvp.Key, kvp.Value));
+                        string rpt = String.Format("{0}: Replaced GUID 0x{1:X16} with 0x{2:X16} in STBL", "" + sr.ResourceIndexEntry, kvp.Key, kvp.Value);
+                        replacements.Add(rpt);
+                        Diagnostics.Log(rpt);
                         stbl.Add(kvp.Value, stbl[kvp.Key]);
                         stbl.Remove(kvp.Key);
                         dirty = true;
@@ -4569,7 +4598,9 @@ namespace ObjectCloner
                     {
                         namemap.Add(kvp.Value, namemap[kvp.Key]);
                         namemap.Remove(kvp.Key);
-                        replacements.Add(String.Format("{0}: Replaced IID 0x{1:X16} with 0x{2:X16} in _KEY", "" + sr.ResourceIndexEntry, kvp.Key, kvp.Value));
+                        string rpt = String.Format("{0}: Replaced IID 0x{1:X16} with 0x{2:X16} in _KEY", "" + sr.ResourceIndexEntry, kvp.Key, kvp.Value);
+                        replacements.Add(rpt);
+                        Diagnostics.Log(rpt);
                         dirty = true;
                     }
 
@@ -4579,7 +4610,9 @@ namespace ObjectCloner
             // 3. Update ResourceIndexEntries
             foreach (var rie in FileTable.Current.Package.FindAll(rie => oldToNew.ContainsKey(rie.Instance)))//Only referenced resources
             {
-                replacements.Add(String.Format("{0}: Renumbered IID to 0x{1:X16}", "" + rie, oldToNew[rie.Instance]));
+                string rpt = String.Format("{0}: Renumbered IID to 0x{1:X16}", "" + rie, oldToNew[rie.Instance]);
+                replacements.Add(rpt);
+                Diagnostics.Log(rpt);
                 rie.Instance = oldToNew[rie.Instance];
             }
 
