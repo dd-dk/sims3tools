@@ -21,12 +21,13 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
 using s3pi.Interfaces;
 using s3pi.Package;
 using s3pi.Extensions;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace S3PIDemoFE
 {
@@ -181,7 +182,6 @@ namespace S3PIDemoFE
             AutoSaveState autoSaveState = AutoSaveState.Ask)
         {
             bool CPuseNames = controlPanel1.UseNames;
-            int CPautoState = controlPanel1.AutoOff ? 0 : controlPanel1.AutoHex ? 1 : 2;
             DateTime now = DateTime.UtcNow;
 
             bool autoSave = false;
@@ -199,11 +199,10 @@ namespace S3PIDemoFE
 
             try
             {
-                controlPanel1.UseNames = false;
-                controlPanel1.AutoOff = true;
                 browserWidget1.Visible = false;
-                bool skipAll = false;
+                controlPanel1.UseNames = false;
 
+                bool skipAll = false;
                 foreach (string filename in packageList)
                 {
                     if (Filename != null && Filename.Length > 0 && Path.GetFullPath(Filename).Equals(Path.GetFullPath(filename)))
@@ -234,49 +233,73 @@ namespace S3PIDemoFE
                         IList<IResourceIndexEntry> lrie = imppkg.GetResourceList;
                         progressBar1.Value = 0;
                         progressBar1.Maximum = lrie.Count;
+                        List<Tuple<myDataFormat, DuplicateHandling>> limp = new List<Tuple<myDataFormat, DuplicateHandling>>();
                         foreach (IResourceIndexEntry rie in lrie)
                         {
-                            if (rie.ResourceType == 0x0166038C)//NMAP
+                            try
                             {
-                                if (useNames) foreach (var kvp in s3pi.WrapperDealer.WrapperDealer.GetResource(0, imppkg, rie) as IDictionary<ulong, string>)
-                                        browserWidget1.ResourceName(kvp.Key, kvp.Value, true, false);
+                                if (rie.ResourceType == 0x0166038C)//NMAP
+                                {
+                                    if (useNames)
+                                        browserWidget1.MergeNamemap(s3pi.WrapperDealer.WrapperDealer.GetResource(0, imppkg, rie) as IDictionary<ulong, string>, true, false);
+                                }
+                                else
+                                {
+                                    IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, imppkg, rie, true);
+
+                                    myDataFormat impres = new myDataFormat()
+                                    {
+                                        tgin = rie as AResourceIndexEntry,
+                                        data = res.AsBytes,
+                                    };
+                                    DuplicateHandling dupThis = dupsList == null || dupsList.Contains(rie.ResourceType) ? dups
+                                        : dups == DuplicateHandling.allow ? DuplicateHandling.replace : DuplicateHandling.reject;
+                                    limp.Add(Tuple.Create(impres, dupThis));
+                                    progressBar1.Value++;
+                                    if (now.AddMilliseconds(100) < DateTime.UtcNow) { Application.DoEvents(); now = DateTime.UtcNow; }
+                                }
                             }
-                            else
+                            catch (Exception ex)
                             {
-                                DuplicateHandling dupThis = dupsList == null || dupsList.Contains(rie.ResourceType) ? dups
-                                    : dups == DuplicateHandling.allow ? DuplicateHandling.replace : DuplicateHandling.reject;
-                                myDataFormat impres;
-                                impres.tgin = rie as AResourceIndexEntry;
-                                IResource res = s3pi.WrapperDealer.WrapperDealer.GetResource(0, imppkg, rie, true);
-                                impres.data = res.AsBytes;
-                                importStream(impres, false, false, compress, dupThis);
-                                progressBar1.Value++;
-                                if (now.AddMilliseconds(100) < DateTime.UtcNow) { Application.DoEvents(); now = DateTime.UtcNow; }
+                                string rk = "";
+                                if (rie != null) rk = "(RK: " + rie + ")\n";
+                                else rk = "(RK is null)\n";
+
+                                CopyableMessageBox.IssueException(ex, "Could not import all resources - aborting.\n" + rk, title);
+                                throw new IgnoredException(ex);
                             }
                         }
+                        progressBar1.Value = 0;
+
+                        IEnumerable<IResourceIndexEntry> rieList = limp
+                            .Select(x => NewResource((AResourceKey)x.Item1.tgin, new MemoryStream(x.Item1.data), x.Item2, compress))
+                            .Where(x => x != null);
+                        browserWidget1.AddRange(rieList);
                     }
+                    catch (IgnoredException) { break; }//just the thrown exception, stop looping
                     catch (Exception ex)
                     {
                         CopyableMessageBox.IssueException(ex, "Could not import all resources - aborting.\n", title);
                         break;
                     }
-                    finally { progressBar1.Value = 0; Package.ClosePackage(0, imppkg); }
+                    finally { Package.ClosePackage(0, imppkg); }
                     if (autoSave) if (!fileSave()) break;
                 }
             }
             finally
             {
                 lbProgress.Text = "";
+                progressBar1.Value = 0;
+                progressBar1.Maximum = 0;
                 controlPanel1.UseNames = CPuseNames;
-                switch (CPautoState)
-                {
-                    case 0: controlPanel1.AutoOff = true; break;
-                    case 1: controlPanel1.AutoHex = true; break;
-                    case 2: controlPanel1.AutoValue = true; break;
-                }
                 browserWidget1.Visible = true;
                 Application.DoEvents();
             }
+        }
+
+        class IgnoredException : Exception
+        {
+            public IgnoredException(Exception innerException) : base("Ignore this", innerException) { }
         }
 
         private void resourcePaste()
@@ -351,7 +374,7 @@ namespace S3PIDemoFE
             {
                 try
                 {
-                    ImportBatch ib = new ImportBatch( new string[] { filename, }, ImportBatch.Mode.package);
+                    ImportBatch ib = new ImportBatch(new string[] { filename, }, ImportBatch.Mode.package);
                     ib.UseNames = true;
                     DialogResult dr = ib.ShowDialog();
                     if (dr != DialogResult.OK) return;
