@@ -5,7 +5,7 @@ set base=%TargetName%
 rem -%ConfigurationName%
 set src=%TargetName%-Source
 
-set out=S:\Sims3\Tools\meshHelper\
+set out=S:\Sims3\Tools\meshHelper-s3asc\
 
 
 set mydate=%date: =0%
