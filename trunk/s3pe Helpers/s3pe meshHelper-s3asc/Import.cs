@@ -151,7 +151,7 @@ namespace meshExpImp.Helper
                 throw new InvalidDataException("'vbuf' line has invalid count.");
 
             //Wes's MilkShape plug-in sends back the first line in all subsequent lines of a dropShadow.
-            return r.Import_VBUF(mpb, count, vrtf, !mesh.IsShadowCaster);
+            return r.Import_VBUF(mpb, count, vrtf, (mesh.Flags & MeshFlags.ShadowCaster) == 0);
         }
 
         void Import_IBUF_Main(StreamReader r, MLOD mlod, MLOD.Mesh mesh, IBUF ibuf)
@@ -166,7 +166,7 @@ namespace meshExpImp.Helper
             if (!int.TryParse(split[1], out count))
                 throw new InvalidDataException("'ibuf' line has invalid count.");
 
-            ibuf.SetIndices(mlod, mesh, r.Import_IBUF(mpb, MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType), count));
+            ibuf.SetIndices(mlod, mesh, r.Import_IBUF(mpb, IBUF.IndexCountFromPrimitiveType(mesh.PrimitiveType), count));
         }
 
         UIntList CreateJointReferences(MLOD.Mesh mesh, ModelBlocks.Vertex[] mverts, SKIN skin)

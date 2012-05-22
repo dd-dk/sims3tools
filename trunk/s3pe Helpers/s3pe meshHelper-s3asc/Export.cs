@@ -65,7 +65,7 @@ namespace meshExpImp.Helper
             if (ibuf == null) { w.WriteLine("; ibuf is null"); w.WriteLine("ibuf 0"); return; }
 
             w.WriteLine(string.Format("ibuf {0}", mesh.PrimitiveCount));
-            w.Export_IBUF(mpb, ibuf.GetIndices(mesh), MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType), mesh.PrimitiveCount);
+            w.Export_IBUF(mpb, ibuf.GetIndices(mesh), IBUF.IndexCountFromPrimitiveType(mesh.PrimitiveType), mesh.PrimitiveCount);
         }
     }
 }

@@ -110,7 +110,7 @@ namespace meshExpImp.Helper
 
                     for (int m = 0; m < mlod.Meshes.Count; m++)
                     {
-                        string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.s3ascg", filebase, m));
+                        string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:D2}.s3ascg", filebase, m));
 
                         using (FileStream fsMesh = new FileStream(fnMesh, FileMode.Create, FileAccess.Write))
                         {
