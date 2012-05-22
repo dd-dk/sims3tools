@@ -136,7 +136,7 @@ namespace meshExpImp.Helper
                     List<List<meshExpImp.ModelBlocks.Vertex[]>> llverts = new List<List<meshExpImp.ModelBlocks.Vertex[]>>();
                     while (true)
                     {
-                        string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:X2}.s3m2bg", filebase, m));
+                        string fnMesh = Path.Combine(folder, string.Format("{0}_group{1:D2}.s3m2bg", filebase, m));
                         if (!File.Exists(fnMesh)) break;
 
                         using (FileStream fsMesh = new FileStream(fnMesh, FileMode.Open, FileAccess.Read))
