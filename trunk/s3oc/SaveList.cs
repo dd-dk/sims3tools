@@ -154,7 +154,7 @@ namespace ObjectCloner
                             {
                                 if (stopSaving) return;
                                 newnamemap.Add(kvp.Value.Instance, name);
-                                Diagnostics.Log(String.Format("Added {0} -> \"{1}\" to name map", kvp.Value.Instance, name));
+                                Diagnostics.Log(String.Format("Added 0x{0:X16} -> \"{1}\" to name map", kvp.Value.Instance, name));
                             }
                         }
                     }
