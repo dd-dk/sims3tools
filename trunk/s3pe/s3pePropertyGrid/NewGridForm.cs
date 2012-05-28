@@ -191,7 +191,7 @@ namespace S3PIDemoFE
             int selectedIndex = listBox1.SelectedIndex;
             try
             {
-                fieldList.Add((type.GetCustomAttributes(typeof(ConstructorParametersAttribute), true)[0] as ConstructorParametersAttribute).parameters);
+                fieldList.Add(type);
                 if ("Add".Equals(contextMenuStrip1.Tag))
                     selectedIndex = fieldList.Count - 1;
                 else
