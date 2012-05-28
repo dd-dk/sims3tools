@@ -21,9 +21,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using s3pi.Interfaces;
-using System.Text.RegularExpressions;
 
 namespace S3PIDemoFE
 {
@@ -48,6 +49,8 @@ namespace S3PIDemoFE
         ListViewItem selectedResource = null;
         bool internalchg = false;
         #endregion
+
+        const int tock = 250;//ms to update progress bar
 
         public BrowserWidget()
         {
@@ -87,29 +90,93 @@ namespace S3PIDemoFE
         }
 
         #region Methods
-        public void Add(IResourceIndexEntry rie)
+        public void Add(IResourceIndexEntry rie, bool select = true)
         {
-            ListViewItem lvi = CreateItem(rie);
-            if (lvi == null) return;
-
-            listView1.SuspendLayout();
-            listView1.BeginUpdate();
-            listView1.Items.Add(lvi);
-            lookup.Add(rie, lvi);
-            SelectedResource = rie;
-
-            if (rie.ResourceType == 0x0166038C) { ClearNameMap(); nameMap_ResourceChanged(null, null); }
-            listView1.EndUpdate();
-            listView1.ResumeLayout();
+            AddRange(new[] { rie, });
+            if (select)
+                SelectedResource = rie;
         }
 
-        public bool ResourceName(ulong instance, string resourceName, bool create, bool replace)
+        public void AddRange(IEnumerable<IResourceIndexEntry> range)
+        {
+            var cmp = listView1.ListViewItemSorter;
+            string pbOldLabel = pbLabel.Text;
+            int pbOldMaximum = -1;
+            int pbOldValue = -1;
+            if (pb != null)
+            {
+                pbOldMaximum = pb.Maximum;
+                pbOldValue = pb.Value;
+            }
+
+            try
+            {
+                listView1.SuspendLayout();
+                listView1.BeginUpdate();
+                listView1.ListViewItemSorter = null;
+
+                SelectedResource = null;//not restored for AddRange
+
+                pbLabel.Text = "Reading resources...";
+                Application.DoEvents();
+
+                if (pb != null)
+                {
+                    pb.Value = 0;
+                    pb.Maximum = range.Count();
+                }
+
+                bool newNameMap = false;
+                int i = 0;
+                DateTime tick = DateTime.UtcNow.AddMilliseconds(tock);
+                List<Tuple<IResourceIndexEntry, ListViewItem>> list = new List<Tuple<IResourceIndexEntry, ListViewItem>>();
+                foreach (var pair in range.Select(x => { i++; return Tuple.Create(x, CreateItem(x)); }).Where(x => x.Item2 != null))
+                {
+                    try
+                    {
+                        list.Add(pair);
+                        lookup.Add(pair.Item1, pair.Item2);
+                        if (pair.Item1.ResourceType == 0x0166038C) newNameMap = true;
+                    }
+                    finally
+                    {
+                        if (tick < DateTime.UtcNow)
+                        {
+                            tick = DateTime.UtcNow.AddMilliseconds(tock);
+                            if (pb != null) { pb.Value = i; Application.DoEvents(); }
+                        }
+                    }
+                }
+
+                pb.Value = 0;
+                pbLabel.Text = "Updating resource list...";
+                Application.DoEvents();
+                listView1.Items.AddRange(list.Select(x => x.Item2).ToArray());
+
+                if (newNameMap) { ClearNameMap(); nameMap_ResourceChanged(null, null); }
+            }
+            finally
+            {
+                pbLabel.Text = pbOldLabel;
+                if (pb != null)
+                {
+                    pb.Value = 0;
+                    pb.Maximum = pbOldMaximum;
+                    pb.Value = pbOldValue;
+                }
+                listView1.ListViewItemSorter = cmp;
+                listView1.EndUpdate();
+                listView1.ResumeLayout();
+            }
+        }
+
+        public bool MergeNamemap(IEnumerable<KeyValuePair<ulong, string>> newMap, bool create, bool replace)
         {
             if (nameMap == null) CreateNameMap();
             if (nameMap == null || nameMap.Count == 0 && create)
             {
                 IResourceIndexEntry rie = pkg.AddResource(new TGIBlock(0, null, 0x0166038C, 0, 0), null, false);
-                if (rie != null) Add(rie);
+                if (rie != null) Add(rie, false);
                 CreateNameMap();
                 if (nameMap == null)
                 {
@@ -124,12 +191,16 @@ namespace S3PIDemoFE
                 IDictionary<ulong, string> nmap = nameMap[0] as IDictionary<ulong, string>;
                 if (nmap == null) return false;
 
-                if (nmap.ContainsKey(instance))
+                foreach (var kvp in newMap)
                 {
-                    if (replace) nmap[instance] = resourceName;
+                    if (nmap.ContainsKey(kvp.Key))
+                    {
+                        if (replace) nmap[kvp.Key] = kvp.Value;
+                    }
+                    else
+                        nmap.Add(kvp.Key, kvp.Value);
                 }
-                else
-                    nmap.Add(instance, resourceName);
+
                 pkg.ReplaceResource(nameMapRIEs[0], nameMap[0]);
 
                 if (selectedResource != null && selectedResource.Tag as IResourceIndexEntry == nameMapRIEs[0])
@@ -138,11 +209,16 @@ namespace S3PIDemoFE
             catch (Exception ex)
             {
                 string s = "Resource names cannot be added.  Other than that, you should be fine.  Carry on.";
-                s += String.Format("\n\nError updating _KEY {0}", "" + nameMapRIEs[0]);
+                s += String.Format("\n\nError updating _KEY {0}\n", "" + nameMapRIEs[0]);
                 MainForm.IssueException(ex, s);
                 return false;
             }
             return true;
+        }
+
+        public bool ResourceName(ulong instance, string resourceName, bool create, bool replace)
+        {
+            return MergeNamemap(new[] { new KeyValuePair<ulong, string>(instance, resourceName), }, create, replace);
         }
 
         public string ResourceName(IResourceIndexEntry rie)
@@ -179,7 +255,7 @@ namespace S3PIDemoFE
                 if (displayResourceNames == value) return;
                 displayResourceNames = value;
 
-                if (pkg != null && displayResourceNames) nameMap_ResourceChanged(null, null);
+                if (pkg != null && displayResourceNames) { nameMap = null; nameMap_ResourceChanged(null, null); }
                 else setResourceNameWidth();
             }
         }
@@ -474,112 +550,79 @@ namespace S3PIDemoFE
         {
             if (((MainForm)ParentForm).IsClosing) return;
 
-            IResourceIndexEntry sie = (listView1.SelectedItems.Count == 0 ? null : listView1.SelectedItems[0].Tag) as IResourceIndexEntry;
-            System.Collections.IComparer cmp = this.listView1.ListViewItemSorter;
+            var cmp = listView1.ListViewItemSorter;
+            IResourceIndexEntry sie = SelectedResource;
 
             bool vis = listView1.Visible;
-            DateTime tick = DateTime.UtcNow.AddMilliseconds(50);
+            DateTime tick = DateTime.UtcNow.AddMilliseconds(tock);
             try
             {
                 Application.UseWaitCursor = true;
                 listView1.BeginUpdate();
                 listView1.Visible = false;
 
-                pbLabel.Text = "Suspending sorter...";// As it saves time event with the listView invisible
-                Application.DoEvents();
                 listView1.ListViewItemSorter = null;
 
+                pbLabel.Text = "";
+                SelectedResource = null;
+
+                #region Clear listView1...
                 pbLabel.Text = "Clear resource list...";
                 Application.DoEvents();
-                if (!pbLabel.Visible)
+                using (Splash splash = new Splash("Clear resource list..."))
                 {
-                    using (Splash splash = new Splash("Clear resource list..."))
-                    {
-                        splash.Show();
-                        Application.DoEvents();
-                        listView1.Items.Clear();// this can be slow and steals the main thread!
-                    }
+                    splash.Show();
+                    Application.DoEvents();
+                    listView1.Items.Clear();// this can be slow and steals the main thread!
+                }
+                ForceFocus.Focus(Application.OpenForms[0]);
+                /*if (!pbLabel.Visible || listView1.Items.Count > 10000)
+                {
                 }
                 else
                 {
                     // this is slower but gives some feedback
                     pb.Maximum = listView1.Items.Count;
-                    pb.Value = 0;
+                    pb.Value = listView1.Items.Count;
                     try
                     {
-                        int i = 0;
-                        while (listView1.Items.Count > 0)
+                        int i = listView1.Items.Count;
+                        while (i > 0)
                         {
+                            i--;
                             try
                             {
-                                listView1.Items.RemoveAt(listView1.Items.Count - 1);
+                                listView1.Items.RemoveAt(i);
                             }
                             finally
                             {
-                                i++;
                                 if (tick < DateTime.UtcNow)
                                 {
-                                    tick = DateTime.UtcNow.AddMilliseconds(50);
-                                    if (pb != null) pb.Value = i;
-                                    Application.DoEvents();
+                                    tick = DateTime.UtcNow.AddMilliseconds(tock);
+                                    if (pb != null) { pb.Value = i; Application.DoEvents(); }
                                 }
                             }
                         }
                     }
                     finally { if (pb != null) pb.Value = 0; }
-                }
+                }/**/
+                #endregion
 
-                pbLabel.Text = "Updating resource list...";
-                Application.DoEvents();
                 lookup = new Dictionary<IResourceIndexEntry, ListViewItem>();
                 if (resourceList == null) return;
 
-                if (pb != null)
-                {
-                    pb.Maximum = resourceList.Count;
-                    pb.Value = 0;
-                }
-                try
-                {
-                    int i = 0;
-                    foreach (IResourceIndexEntry ie in resourceList)
-                    {
-                        try
-                        {
-                            ListViewItem lvi = CreateItem(ie);
-                            if (lvi == null) continue;
-                            listView1.Items.Add(lvi);
-                            lookup.Add(ie, lvi);
-                        }
-                        finally
-                        {
-                            i++;
-                            if (tick < DateTime.UtcNow)
-                            {
-                                tick = DateTime.UtcNow.AddMilliseconds(50);
-                                if (pb != null) pb.Value = i;
-                                Application.DoEvents();
-                            }
-                        }
-                    }
-                }
-                finally { if (pb != null) pb.Value = 0; }
+                AddRange(resourceList);
             }
             finally
             {
                 pbLabel.Text = "Restoring sorter...";
                 Application.DoEvents();
-                this.listView1.ListViewItemSorter = cmp;
+                listView1.ListViewItemSorter = cmp;
 
                 pbLabel.Text = "";
                 Application.DoEvents();
                 if (sie != null && lookup.ContainsKey(sie))
-                {
-                    listView1.SelectedIndices.Add(listView1.Items.IndexOf(lookup[sie]));
-                    if (listView1.SelectedIndices.Count > 0)
-                        listView1.SelectedItems[0].EnsureVisible();
-                }
-                SelectedResource = sie;
+                    SelectedResource = sie;
 
                 listView1.Visible = !this.Visible || !this.Created || vis;
                 listView1.EndUpdate();
@@ -687,15 +730,22 @@ namespace S3PIDemoFE
 
                 int i = 0;
                 bool hasNames = false;
+                DateTime tick = DateTime.UtcNow.AddMilliseconds(tock);
                 foreach (KeyValuePair<IResourceIndexEntry, ListViewItem> kvp in lookup)
                 {
-                    kvp.Value.Text = ResourceName(kvp.Key);
-                    hasNames = hasNames || kvp.Value.Text.Length > 0;
-                    i++;
-                    if (i % 100 == 0)
+                    try
                     {
-                        if (pb != null) pb.Value = i;
-                        Application.DoEvents();
+                        kvp.Value.Text = ResourceName(kvp.Key);
+                        hasNames = hasNames || kvp.Value.Text.Length > 0;
+                        i++;
+                    }
+                    finally
+                    {
+                        if (tick < DateTime.UtcNow)
+                        {
+                            tick = DateTime.UtcNow.AddMilliseconds(tock);
+                            if (pb != null) { pb.Value = i; Application.DoEvents(); }
+                        }
                     }
                 }
                 setResourceNameWidth();
@@ -857,6 +907,7 @@ namespace S3PIDemoFE
             int oldMaximum = pb.Maximum;
             try
             {
+                DateTime tick = DateTime.UtcNow.AddMilliseconds(tock);
                 pbLabel.Text = "Finding resources...";
                 pb.Value = 0;
                 pb.Maximum = pkg.GetResourceList.Count;
@@ -865,10 +916,23 @@ namespace S3PIDemoFE
                 Application.DoEvents();
                 return pkg.FindAll(value =>
                 {
-                    if (++i % 100 == 0) { pb.Value += 100; Application.DoEvents(); }
-                    foreach (var kvp in filter)
-                        if (!kvp.Value.IsMatch(kvp.Key.Equals("Name") ? ResourceName(value) : kvp.Key.Equals("Tag") ? ResourceTag(value) : value[kvp.Key].ToString("X"))) return false;
-                    return true;
+                    try
+                    {
+                        ++i;
+
+                        foreach (var kvp in filter)
+                            if (!kvp.Value.IsMatch(kvp.Key.Equals("Name") ? ResourceName(value) : kvp.Key.Equals("Tag") ? ResourceTag(value) : value[kvp.Key].ToString("X"))) return false;
+                        return true;
+
+                    }
+                    finally
+                    {
+                        if (tick < DateTime.UtcNow)
+                        {
+                            tick = DateTime.UtcNow.AddMilliseconds(tock);
+                            if (pb != null) { pb.Value = i; Application.DoEvents(); }
+                        }
+                    }
                 });
             }
             finally

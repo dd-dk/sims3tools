@@ -198,7 +198,12 @@ namespace S3PIDemoFE
             }
             if (cmdLineBatch.Count > 0)
             {
-                importBatch(cmdLineBatch.ToArray(), "-import");
+                try
+                {
+                    this.Enabled = false;
+                    importBatch(cmdLineBatch.ToArray(), "-import");
+                }
+                finally { this.Enabled = true; }
                 cmdLineBatch = new List<string>();
             }
         }
@@ -1174,7 +1179,7 @@ namespace S3PIDemoFE
                 if (dups == DuplicateHandling.replace) CurrentPackage.DeleteResource(rie);
             }
 
-            rie = CurrentPackage.AddResource(rk, ms, dups != DuplicateHandling.allow);
+            rie = CurrentPackage.AddResource(rk, ms, false);//we do NOT want to search again...
             if (rie == null) return null;
 
             rie.Compressed = (ushort)(compress ? 0xffff : 0);
@@ -2128,22 +2133,24 @@ namespace S3PIDemoFE
 
         private void controlPanel1_UseNamesChanged(object sender, EventArgs e)
         {
+            bool en = this.Enabled;
             try
             {
                 this.Enabled = false;
                 browserWidget1.DisplayResourceNames = controlPanel1.UseNames;
             }
-            finally { this.Enabled = true; }
+            finally { this.Enabled = en; }
         }
 
         private void controlPanel1_UseTagsChanged(object sender, EventArgs e)
         {
+            bool en = this.Enabled;
             try
             {
                 this.Enabled = false;
                 browserWidget1.DisplayResourceTags = controlPanel1.UseTags;
             }
-            finally { this.Enabled = true; }
+            finally { this.Enabled = en; }
         }
 
         private void controlPanel1_CommitClick(object sender, EventArgs e)

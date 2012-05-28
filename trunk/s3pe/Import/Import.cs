@@ -48,9 +48,9 @@ namespace S3PIDemoFE
             bool useNames = controlPanel1.UseNames;
             try
             {
+                this.Enabled = false;
                 browserWidget1.Visible = false;
                 controlPanel1.UseNames = false;
-                this.Enabled = false;
                 DialogResult dr = importResourcesDialog.ShowDialog();
                 if (dr != DialogResult.OK) return;
 
@@ -142,7 +142,7 @@ namespace S3PIDemoFE
                         if (now.AddMilliseconds(100) < DateTime.UtcNow) { Application.DoEvents(); now = DateTime.UtcNow; }
                     }
                     CurrentPackage.ReplaceResource(newRie, (IResource)newStbl);
-                    browserWidget1.Add(newRie);
+                    browserWidget1.Add(newRie, false);
                 }
 
                 // Get rid of Sims3Pack resource that sneak in
@@ -372,17 +372,12 @@ namespace S3PIDemoFE
 
             if (new List<string>(asPkgExts).Contains(filename.Substring(filename.LastIndexOf('.'))))
             {
-                try
-                {
-                    ImportBatch ib = new ImportBatch(new string[] { filename, }, ImportBatch.Mode.package);
-                    ib.UseNames = true;
-                    DialogResult dr = ib.ShowDialog();
-                    if (dr != DialogResult.OK) return;
+                ImportBatch ib = new ImportBatch(new string[] { filename, }, ImportBatch.Mode.package);
+                ib.UseNames = true;
+                DialogResult dr = ib.ShowDialog();
+                if (dr != DialogResult.OK) return;
 
-                    this.Enabled = false;
-                    importPackagesCommon(new string[] { filename, }, ib.UseNames, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, title);
-                }
-                finally { this.Enabled = true; }
+                importPackagesCommon(new string[] { filename, }, ib.UseNames, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, title);
             }
             else
             {
@@ -392,7 +387,7 @@ namespace S3PIDemoFE
                 DialogResult dr = ir.ShowDialog();
                 if (dr != DialogResult.OK) return;
 
-                importFile(ir.Filename, ir, ir.UseName, ir.AllowRename, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject);
+                importFile(ir.Filename, ir, ir.UseName, ir.AllowRename, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, true);
             }
         }
 
@@ -404,7 +399,7 @@ namespace S3PIDemoFE
             if (dr != DialogResult.OK) return;
 
             data.tgin = ir;
-            importStream(data, ir.UseName, ir.AllowRename, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject);
+            importStream(data, ir.UseName, ir.AllowRename, ir.Compress, ir.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, true);
         }
 
         string[] getFiles(string folder)
@@ -442,15 +437,13 @@ namespace S3PIDemoFE
 
             try
             {
-                this.Enabled = false;
-
                 if (pkgList.Count > 0)
                     importPackagesCommon(pkgList.ToArray(), ib.UseNames, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, title);
 
                 bool nmOK = true;
                 foreach (string filename in resList)
                 {
-                    nmOK = importFile(filename, filename, nmOK && ib.UseNames, ib.Rename, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject);
+                    nmOK = importFile(filename, filename, nmOK && ib.UseNames, ib.Rename, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, false);
                     Application.DoEvents();
                 }
             }
@@ -458,7 +451,6 @@ namespace S3PIDemoFE
             {
                 CopyableMessageBox.IssueException(ex, "Could not import all resources - aborting.\n", title);
             }
-            finally { this.Enabled = true; }
         }
 
         void importBatch(IList<myDataFormat> ldata)
@@ -480,10 +472,9 @@ namespace S3PIDemoFE
 
             try
             {
-                this.Enabled = false;
                 foreach (myDataFormat data in output)
                 {
-                    importStream(data, ib.UseNames, ib.Rename, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject);
+                    importStream(data, ib.UseNames, ib.Rename, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, false);
                     Application.DoEvents();
                 }
             }
@@ -491,10 +482,9 @@ namespace S3PIDemoFE
             {
                 CopyableMessageBox.IssueException(ex, "Could not import all resources.\n", "Aborting import");
             }
-            finally { this.Enabled = true; }
         }
 
-        bool importFile(string filename, TGIN tgin, bool useName, bool rename, bool compress, DuplicateHandling dups)
+        bool importFile(string filename, TGIN tgin, bool useName, bool rename, bool compress, DuplicateHandling dups, bool select)
         {
             IResourceKey rk = (TGIBlock)tgin;
             string resName = tgin.ResName;
@@ -510,17 +500,17 @@ namespace S3PIDemoFE
                 nmOK = browserWidget1.ResourceName(rk.Instance, resName, true, rename);
 
             IResourceIndexEntry rie = NewResource(rk, ms, dups, compress);
-            if (rie != null) browserWidget1.Add(rie);
+            if (rie != null) browserWidget1.Add(rie, select);
             return nmOK;
         }
 
-        void importStream(myDataFormat data, bool useName, bool rename, bool compress, DuplicateHandling dups)
+        void importStream(myDataFormat data, bool useName, bool rename, bool compress, DuplicateHandling dups, bool select)
         {
             if (useName && data.tgin.ResName != null && data.tgin.ResName.Length > 0)
                 browserWidget1.ResourceName(data.tgin.ResInstance, data.tgin.ResName, true, rename);
 
             IResourceIndexEntry rie = NewResource((TGIBlock)data.tgin, new MemoryStream(data.data), dups, compress);
-            if (rie != null) browserWidget1.Add(rie);
+            if (rie != null) browserWidget1.Add(rie, select);
         }
     }
 }
