@@ -124,12 +124,14 @@ namespace meshExpImp.Helper
                     "Warning", System.Windows.Forms.CopyableMessageBoxButtons.OK, System.Windows.Forms.CopyableMessageBoxIcon.Warning);
             }
 
+// with the 20120601 change to export, this warning on import has lost its severity... and been dropped.
+#if UNDEF
             if (removed.Count != 0)
             {
-#if UNDEF
+//#if UNDEF
                 // http://dino.drealm.info/den/denforum/index.php?topic=394.msg3876#msg3876
                 removed.ForEach(j => mesh.JointReferences[mesh.JointReferences.IndexOf(j)] = 0);
-#endif
+//#endif
                 // However, OM felt more comfortable if there was some indication something a little odd was going on.
                 System.Windows.Forms.CopyableMessageBox.Show(String.Format("Mesh: 0x{0:X8}\nJointReferences with no assigned (via BlendIndex) vertex: {1}\n({2})",
                     mesh.Name,
@@ -137,6 +139,7 @@ namespace meshExpImp.Helper
                     String.Join(", ", removed.ConvertAll<string>(a => "0x" + a.ToString("X8")).ToArray())),
                     "Warning", System.Windows.Forms.CopyableMessageBoxButtons.OK, System.Windows.Forms.CopyableMessageBoxIcon.Warning);
             }
+#endif
             #endregion
         }
 

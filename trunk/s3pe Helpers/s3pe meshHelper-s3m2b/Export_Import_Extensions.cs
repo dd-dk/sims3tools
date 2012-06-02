@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using s3pi.Interfaces;
 using s3pi.GenericRCOLResource;
 using meshExpImp.ModelBlocks;
@@ -68,7 +69,8 @@ namespace meshExpImp.Helper
             mpb.Init("Export SKIN...", skin.Bones.Count);
             int i = 0;
             //Referenced bones
-            foreach (var bone in skin.Bones.FindAll(x => mesh.JointReferences.Contains(x.NameHash)))
+            //pre-20120601: foreach (var bone in skin.Bones.FindAll(x => mesh.JointReferences.Contains(x.NameHash)))
+            foreach (var bone in ((IEnumerable<uint>)mesh.JointReferences).Select(hash => skin.Bones.Find(x => x.NameHash == hash)))
             {
                 w.WriteLine(string.Format(
                     //"{0} {1:X8} {2:R} {3:R} {4:R} {5:R} {6:R} {7:R} {8:R} {9:R} {10:R} {11:R} {12:R} {13:R}",
