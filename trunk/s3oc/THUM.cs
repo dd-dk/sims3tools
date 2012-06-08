@@ -78,7 +78,7 @@ namespace ObjectCloner
         {
             get
             {
-                SpecificResource item = getItem(isPNGInstance ? FileTable.GameContent : FileTable.Thumbnails, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
+                SpecificResource item = getRK(type, instance, size, isPNGInstance);
                 if (item != null && item.Resource != null)
                     return Image.FromStream(item.Resource.Stream);
                 return null;
@@ -94,6 +94,10 @@ namespace ObjectCloner
                 thumb.Save(item.Resource.Stream, System.Drawing.Imaging.ImageFormat.Png);
                 item.Commit();
             }
+        }
+        static SpecificResource getRK(uint type, ulong instance, THUMSize size, bool isPNGInstance)
+        {
+            return getItem(isPNGInstance ? FileTable.GameContent : FileTable.Thumbnails, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
         }
         static SpecificResource getItem(List<PathPackageTuple> ppts, ulong instance, uint type)
         {
@@ -143,10 +147,6 @@ namespace ObjectCloner
                 ulong png = (item.Resource != null) ? (ulong)item.Resource["CommonBlock.PngInstance"].Value : 0;
                 return getRK(item.RequestedRK.ResourceType, png != 0 ? png : item.RequestedRK.Instance, size, png != 0);
             }
-        }
-        static SpecificResource getRK(uint type, ulong instance, THUMSize size, bool isPNGInstance)
-        {
-            return getItem(isPNGInstance ? FileTable.Thumbnails : FileTable.Thumbnails, instance, (isPNGInstance ? PNGTypes : thumTypes[type])[(int)size]);
         }
 
         public static IResourceKey getNewRK(THUMSize size, SpecificResource item)
