@@ -155,8 +155,6 @@ namespace S3PIDemoFE
             tbInstance.Text = "0x" + FNV32.GetHash(tbName.Text).ToString("X16");
         }
 
-        private void btnCopy_Click(object sender, EventArgs e) { Clipboard.SetText(((AResourceKey)details) + ""); }
-
         private void tbFilename_DragOver(object sender, DragEventArgs e)
         {
             if ((new List<string>(e.Data.GetFormats())).Contains("FileDrop"))
@@ -199,5 +197,33 @@ namespace S3PIDemoFE
         }
 
         #endregion
+
+        private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
+        {
+            TGIBlock item = new TGIBlock(0, null);
+            pasteResourceKeyToolStripMenuItem.Enabled = copyResourceKeyToolStripMenuItem.Enabled && TGIBlock.TryParse(Clipboard.GetText(), item);
+        }
+
+        private void copyResourceKeyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(((AResourceKey)details) + "");
+        }
+
+        private void btnCopy_Click(object sender, EventArgs e) { copyResourceKeyToolStripMenuItem_Click(sender, e); }
+
+        private void pasteResourceKeyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TGIBlock item = new TGIBlock(0, null);
+            if (!TGIBlock.TryParse(Clipboard.GetText(), item)) return;
+
+            cbType.Value = item.ResourceType;
+            tbGroup.Text = "0x" + item.ResourceGroup.ToString("X8");
+            tbInstance.Text = "0x" + item.Instance.ToString("X16");
+        }
+
+        private void btnPaste_Click(object sender, EventArgs e)
+        {
+            pasteResourceKeyToolStripMenuItem_Click(sender, e);
+        }
     }
 }

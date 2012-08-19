@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.importSettings1 = new S3PIDemoFE.Import.ImportSettings();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
@@ -44,11 +45,16 @@
             this.tlpName = new System.Windows.Forms.TableLayoutPanel();
             this.tbName = new System.Windows.Forms.TextBox();
             this.btnFNV64 = new System.Windows.Forms.Button();
+            this.btnCLIPIID = new System.Windows.Forms.Button();
             this.btnFNV32 = new System.Windows.Forms.Button();
             this.btnCopy = new System.Windows.Forms.Button();
-            this.btnCLIPIID = new System.Windows.Forms.Button();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.btnPaste = new System.Windows.Forms.Button();
+            this.copyResourceKeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pasteResourceKeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1.SuspendLayout();
             this.tlpName.SuspendLayout();
+            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // importSettings1
@@ -58,7 +64,7 @@
             this.importSettings1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tableLayoutPanel1.SetColumnSpan(this.importSettings1, 2);
             this.importSettings1.Compress = true;
-            this.importSettings1.Location = new System.Drawing.Point(3, 68);
+            this.importSettings1.Location = new System.Drawing.Point(3, 82);
             this.importSettings1.Name = "importSettings1";
             this.importSettings1.Size = new System.Drawing.Size(480, 52);
             this.importSettings1.TabIndex = 9;
@@ -126,7 +132,7 @@
             // 
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(4, 45);
+            this.label3.Location = new System.Drawing.Point(4, 59);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(48, 13);
             this.label3.TabIndex = 5;
@@ -136,7 +142,7 @@
             // 
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(16, 19);
+            this.label2.Location = new System.Drawing.Point(16, 33);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(36, 13);
             this.label2.TabIndex = 3;
@@ -146,7 +152,7 @@
             // 
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(21, 0);
+            this.label1.Location = new System.Drawing.Point(21, 7);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(31, 13);
             this.label1.TabIndex = 1;
@@ -155,6 +161,7 @@
             // cbType
             // 
             this.cbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbType.ContextMenuStrip = this.contextMenuStrip1;
             this.cbType.Location = new System.Drawing.Point(58, 3);
             this.cbType.Name = "cbType";
             this.cbType.Size = new System.Drawing.Size(425, 21);
@@ -165,7 +172,8 @@
             // tbGroup
             // 
             this.tbGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbGroup.Location = new System.Drawing.Point(58, 16);
+            this.tbGroup.ContextMenuStrip = this.contextMenuStrip1;
+            this.tbGroup.Location = new System.Drawing.Point(58, 30);
             this.tbGroup.Name = "tbGroup";
             this.tbGroup.Size = new System.Drawing.Size(425, 20);
             this.tbGroup.TabIndex = 4;
@@ -175,7 +183,8 @@
             // tbInstance
             // 
             this.tbInstance.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbInstance.Location = new System.Drawing.Point(58, 42);
+            this.tbInstance.ContextMenuStrip = this.contextMenuStrip1;
+            this.tbInstance.Location = new System.Drawing.Point(58, 56);
             this.tbInstance.Name = "tbInstance";
             this.tbInstance.Size = new System.Drawing.Size(425, 20);
             this.tbInstance.TabIndex = 6;
@@ -186,7 +195,7 @@
             // 
             this.lbFilename.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.lbFilename.AutoSize = true;
-            this.lbFilename.Location = new System.Drawing.Point(3, 155);
+            this.lbFilename.Location = new System.Drawing.Point(3, 169);
             this.lbFilename.Name = "lbFilename";
             this.lbFilename.Size = new System.Drawing.Size(49, 13);
             this.lbFilename.TabIndex = 12;
@@ -197,7 +206,7 @@
             this.tbFilename.AllowDrop = true;
             this.tbFilename.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.tbFilename.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.tbFilename.Location = new System.Drawing.Point(58, 155);
+            this.tbFilename.Location = new System.Drawing.Point(58, 169);
             this.tbFilename.Name = "tbFilename";
             this.tbFilename.ReadOnly = true;
             this.tbFilename.Size = new System.Drawing.Size(425, 13);
@@ -209,7 +218,7 @@
             // 
             this.label4.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(17, 131);
+            this.label4.Location = new System.Drawing.Point(17, 145);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(35, 13);
             this.label4.TabIndex = 10;
@@ -230,7 +239,7 @@
             this.tlpName.Controls.Add(this.btnCLIPIID, 2, 0);
             this.tlpName.Controls.Add(this.btnFNV32, 3, 0);
             this.tlpName.Enabled = false;
-            this.tlpName.Location = new System.Drawing.Point(55, 123);
+            this.tlpName.Location = new System.Drawing.Point(55, 137);
             this.tlpName.Margin = new System.Windows.Forms.Padding(0);
             this.tlpName.Name = "tlpName";
             this.tlpName.RowCount = 1;
@@ -262,7 +271,7 @@
             // 
             this.btnCLIPIID.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnCLIPIID.Location = new System.Drawing.Point(302, 3);
-            this.btnCLIPIID.Name = "button1";
+            this.btnCLIPIID.Name = "btnCLIPIID";
             this.btnCLIPIID.Size = new System.Drawing.Size(60, 23);
             this.btnCLIPIID.TabIndex = 2;
             this.btnCLIPIID.Text = "CLIP &IID";
@@ -287,9 +296,45 @@
             this.btnCopy.Name = "btnCopy";
             this.btnCopy.Size = new System.Drawing.Size(75, 23);
             this.btnCopy.TabIndex = 4;
-            this.btnCopy.Text = "&Copy TGI";
+            this.btnCopy.Text = "&Copy RK";
             this.btnCopy.UseVisualStyleBackColor = true;
             this.btnCopy.Click += new System.EventHandler(this.btnCopy_Click);
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyResourceKeyToolStripMenuItem,
+            this.pasteResourceKeyToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(206, 48);
+            this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
+            // 
+            // btnPaste
+            // 
+            this.btnPaste.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnPaste.Location = new System.Drawing.Point(93, 204);
+            this.btnPaste.Name = "btnPaste";
+            this.btnPaste.Size = new System.Drawing.Size(75, 23);
+            this.btnPaste.TabIndex = 6;
+            this.btnPaste.Text = "&Paste RK";
+            this.btnPaste.UseVisualStyleBackColor = true;
+            this.btnPaste.Click += new System.EventHandler(this.btnPaste_Click);
+            // 
+            // copyResourceKeyToolStripMenuItem
+            // 
+            this.copyResourceKeyToolStripMenuItem.Name = "copyResourceKeyToolStripMenuItem";
+            this.copyResourceKeyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.copyResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(205, 22);
+            this.copyResourceKeyToolStripMenuItem.Text = "&Copy ResourceKey";
+            this.copyResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.copyResourceKeyToolStripMenuItem_Click);
+            // 
+            // pasteResourceKeyToolStripMenuItem
+            // 
+            this.pasteResourceKeyToolStripMenuItem.Name = "pasteResourceKeyToolStripMenuItem";
+            this.pasteResourceKeyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
+            this.pasteResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(205, 22);
+            this.pasteResourceKeyToolStripMenuItem.Text = "&Paste ResourceKey";
+            this.pasteResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.pasteResourceKeyToolStripMenuItem_Click);
             // 
             // ResourceDetails
             // 
@@ -299,6 +344,7 @@
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(510, 239);
             this.Controls.Add(this.btnCopy);
+            this.Controls.Add(this.btnPaste);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
@@ -310,6 +356,7 @@
             this.tableLayoutPanel1.PerformLayout();
             this.tlpName.ResumeLayout(false);
             this.tlpName.PerformLayout();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -335,5 +382,9 @@
         private System.Windows.Forms.Button btnCLIPIID;
         private System.Windows.Forms.Button btnFNV32;
         private System.Windows.Forms.Button btnCopy;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem copyResourceKeyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pasteResourceKeyToolStripMenuItem;
+        private System.Windows.Forms.Button btnPaste;
     }
 }
