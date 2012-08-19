@@ -60,15 +60,21 @@ namespace s3pe.DDSTool
             int width = ddsPanel1.MaskSize != Size.Empty ? ddsPanel1.MaskSize.Width : 1024;
             int height = ddsPanel1.MaskSize != Size.Empty ? ddsPanel1.MaskSize.Height : 1024;
 
-            NewDDSParameters parms = new NewDDSParameters(width, height);
+            NewDDSParameters parms = new NewDDSParameters(width, height, true);
             DialogResult dr = parms.ShowDialog();
             if (dr != DialogResult.OK) return;
 
+            NewDDSParameters.Result result = parms.Value;
+
             currentDdsFile = null;
             currentDdsFileIsDds = null;
-            ddsPanel1.CreateImage(parms.Value.Red, parms.Value.Green, parms.Value.Blue, parms.Value.Alpha, parms.Value.Width, parms.Value.Height, true);
+            ddsPanel1.CreateImage(result.Red, result.Green, result.Blue, result.Alpha, result.Width, result.Height, true);
+            ddsPanel1.UseDXT = result.UseDXT;
+            ddsPanel1.AlphaDepth = result.AlphaDepth;
             lbImageW.Text = ddsPanel1.ImageSize.Width + "";
             lbImageH.Text = ddsPanel1.ImageSize.Height + "";
+            lbUseDXT.Text = ddsPanel1.UseDXT ? "Y" : "N";
+            lbAlphaDepth.Text = "" + ddsPanel1.AlphaDepth;
             tlpImageSize.Visible = true;
         }
 
@@ -95,10 +101,13 @@ namespace s3pe.DDSTool
                 }
                 lbImageW.Text = ddsPanel1.ImageSize.Width + "";
                 lbImageH.Text = ddsPanel1.ImageSize.Height + "";
+                lbUseDXT.Text = ddsPanel1.UseDXT ? "Y" : "N";
+                lbAlphaDepth.Text = "" + ddsPanel1.AlphaDepth;
                 tlpImageSize.Visible = true;
-                ddsPanel1.Channel4 = ddsPanel1.HasAlphaChannel;
+                ddsPanel1.Channel4 = ddsPanel1.AlphaDepth > 0;
             }
-            catch(Exception e) {
+            catch (Exception e)
+            {
                 System.Text.StringBuilder sb = new System.Text.StringBuilder();
                 Exception inex = e;
                 while (inex != null)
@@ -128,8 +137,10 @@ namespace s3pe.DDSTool
                 ddsPanel1.Import(filename, true);
                 lbImageW.Text = ddsPanel1.ImageSize.Width + "";
                 lbImageH.Text = ddsPanel1.ImageSize.Height + "";
+                lbUseDXT.Text = ddsPanel1.UseDXT ? "Y" : "N";
+                lbAlphaDepth.Text = "" + ddsPanel1.AlphaDepth;
                 tlpImageSize.Visible = true;
-                ddsPanel1.Channel4 = ddsPanel1.HasAlphaChannel;
+                ddsPanel1.Channel4 = ddsPanel1.AlphaDepth > 0;
             }
             catch { }
         }
@@ -245,14 +256,19 @@ namespace s3pe.DDSTool
             int width = ddsPanel1.ImageSize.Width;
             int height = ddsPanel1.ImageSize.Height;
 
-            NewDDSParameters parms = new NewDDSParameters(ddsPanel1.ImageSize.Width, ddsPanel1.ImageSize.Height, true);
+            NewDDSParameters parms = new NewDDSParameters(ddsPanel1.ImageSize.Width, ddsPanel1.ImageSize.Height, ddsPanel1.UseDXT, ddsPanel1.AlphaDepth, true);
             DialogResult dr = parms.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            ddsPanel1.ImageSize = new System.Drawing.Size(parms.Value.Width, parms.Value.Height);
+            NewDDSParameters.Result result = parms.Value;
+            ddsPanel1.ImageSize = new System.Drawing.Size(result.Width, result.Height);
+            ddsPanel1.UseDXT = result.UseDXT;
+            ddsPanel1.AlphaDepth = result.AlphaDepth;
 
             lbImageW.Text = ddsPanel1.ImageSize.Width + "";
             lbImageH.Text = ddsPanel1.ImageSize.Height + "";
+            lbUseDXT.Text = ddsPanel1.UseDXT ? "Y" : "N";
+            lbAlphaDepth.Text = "" + ddsPanel1.AlphaDepth;
             tlpImageSize.Visible = true;
         }
 

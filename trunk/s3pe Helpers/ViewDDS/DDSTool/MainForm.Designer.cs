@@ -33,17 +33,21 @@
             this.saturationShift = new System.Windows.Forms.NumericUpDown();
             this.valueShift = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
-            this.tlpImageSize = new System.Windows.Forms.TableLayoutPanel();
-            this.label13 = new System.Windows.Forms.Label();
-            this.lbImageW = new System.Windows.Forms.Label();
-            this.label16 = new System.Windows.Forms.Label();
-            this.lbImageH = new System.Windows.Forms.Label();
-            this.btnResize = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
             this.btnHSVShift = new System.Windows.Forms.Button();
             this.btnHSVReset = new System.Windows.Forms.Button();
+            this.tlpImageSize = new System.Windows.Forms.TableLayoutPanel();
+            this.label13 = new System.Windows.Forms.Label();
+            this.lbImageW = new System.Windows.Forms.Label();
+            this.label16 = new System.Windows.Forms.Label();
+            this.lbImageH = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.label23 = new System.Windows.Forms.Label();
+            this.btnResize = new System.Windows.Forms.Button();
+            this.lbUseDXT = new System.Windows.Forms.Label();
+            this.lbAlphaDepth = new System.Windows.Forms.Label();
             this.btnOpenMask = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.numMaskCh1Hue = new System.Windows.Forms.NumericUpDown();
@@ -213,25 +217,28 @@
             // 
             // tableLayoutPanel1
             // 
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.AutoSize = true;
             this.tableLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel1.ColumnCount = 5;
+            this.tableLayoutPanel1.ColumnCount = 6;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.Controls.Add(this.hueShift, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.saturationShift, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.valueShift, 1, 3);
             this.tableLayoutPanel1.Controls.Add(this.label1, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.tlpImageSize, 4, 1);
             this.tableLayoutPanel1.Controls.Add(this.label2, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.label3, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.label17, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.btnHSVShift, 2, 3);
             this.tableLayoutPanel1.Controls.Add(this.btnHSVReset, 2, 2);
+            this.tableLayoutPanel1.Controls.Add(this.tlpImageSize, 4, 0);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -240,7 +247,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(288, 109);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(453, 103);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // saturationShift
@@ -252,7 +259,7 @@
             0,
             0,
             65536});
-            this.saturationShift.Location = new System.Drawing.Point(39, 52);
+            this.saturationShift.Location = new System.Drawing.Point(39, 49);
             this.saturationShift.Maximum = new decimal(new int[] {
             1,
             0,
@@ -276,7 +283,7 @@
             0,
             0,
             65536});
-            this.valueShift.Location = new System.Drawing.Point(39, 84);
+            this.valueShift.Location = new System.Drawing.Point(39, 78);
             this.valueShift.Maximum = new decimal(new int[] {
             1,
             0,
@@ -302,27 +309,87 @@
             this.label1.TabIndex = 2;
             this.label1.Text = "HShift";
             // 
+            // label2
+            // 
+            this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(1, 53);
+            this.label2.Margin = new System.Windows.Forms.Padding(0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(35, 13);
+            this.label2.TabIndex = 4;
+            this.label2.Text = "SShift";
+            // 
+            // label3
+            // 
+            this.label3.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(1, 82);
+            this.label3.Margin = new System.Windows.Forms.Padding(0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(35, 13);
+            this.label3.TabIndex = 6;
+            this.label3.Text = "VShift";
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.tableLayoutPanel1.SetColumnSpan(this.label17, 2);
+            this.label17.Location = new System.Drawing.Point(3, 3);
+            this.label17.Margin = new System.Windows.Forms.Padding(3);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(70, 13);
+            this.label17.TabIndex = 1;
+            this.label17.Text = "Overall shifts:";
+            // 
+            // btnHSVShift
+            // 
+            this.btnHSVShift.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnHSVShift.Location = new System.Drawing.Point(117, 77);
+            this.btnHSVShift.Name = "btnHSVShift";
+            this.btnHSVShift.Size = new System.Drawing.Size(75, 23);
+            this.btnHSVShift.TabIndex = 9;
+            this.btnHSVShift.Text = "Apply";
+            this.btnHSVShift.UseVisualStyleBackColor = true;
+            this.btnHSVShift.Click += new System.EventHandler(this.btnHSVShift_Click);
+            // 
+            // btnHSVReset
+            // 
+            this.btnHSVReset.Location = new System.Drawing.Point(117, 48);
+            this.btnHSVReset.Name = "btnHSVReset";
+            this.btnHSVReset.Size = new System.Drawing.Size(75, 23);
+            this.btnHSVReset.TabIndex = 8;
+            this.btnHSVReset.Text = "Reset";
+            this.btnHSVReset.UseVisualStyleBackColor = true;
+            this.btnHSVReset.Click += new System.EventHandler(this.btnHSVReset_Click);
+            // 
             // tlpImageSize
             // 
             this.tlpImageSize.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.tlpImageSize.AutoSize = true;
             this.tlpImageSize.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tlpImageSize.ColumnCount = 2;
+            this.tlpImageSize.ColumnCount = 4;
+            this.tlpImageSize.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlpImageSize.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpImageSize.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpImageSize.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpImageSize.Controls.Add(this.label13, 0, 0);
             this.tlpImageSize.Controls.Add(this.lbImageW, 1, 0);
             this.tlpImageSize.Controls.Add(this.label16, 0, 1);
             this.tlpImageSize.Controls.Add(this.lbImageH, 1, 1);
-            this.tlpImageSize.Controls.Add(this.btnResize, 0, 2);
-            this.tlpImageSize.Location = new System.Drawing.Point(218, 22);
+            this.tlpImageSize.Controls.Add(this.label15, 2, 0);
+            this.tlpImageSize.Controls.Add(this.label23, 2, 1);
+            this.tlpImageSize.Controls.Add(this.btnResize, 1, 2);
+            this.tlpImageSize.Controls.Add(this.lbUseDXT, 3, 0);
+            this.tlpImageSize.Controls.Add(this.lbAlphaDepth, 3, 1);
+            this.tlpImageSize.Location = new System.Drawing.Point(218, 24);
             this.tlpImageSize.Name = "tlpImageSize";
             this.tlpImageSize.RowCount = 3;
-            this.tableLayoutPanel1.SetRowSpan(this.tlpImageSize, 2);
+            this.tableLayoutPanel1.SetRowSpan(this.tlpImageSize, 4);
             this.tlpImageSize.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpImageSize.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpImageSize.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpImageSize.Size = new System.Drawing.Size(67, 55);
+            this.tlpImageSize.Size = new System.Drawing.Size(128, 55);
             this.tlpImageSize.TabIndex = 10;
             this.tlpImageSize.Visible = false;
             // 
@@ -362,73 +429,59 @@
             this.lbImageH.TabIndex = 4;
             this.lbImageH.Text = "44444";
             // 
+            // label15
+            // 
+            this.label15.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(70, 0);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(35, 13);
+            this.label15.TabIndex = 6;
+            this.label15.Text = "DXT?";
+            // 
+            // label23
+            // 
+            this.label23.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(78, 13);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(27, 13);
+            this.label23.TabIndex = 6;
+            this.label23.Text = "A/D";
+            // 
             // btnResize
             // 
             this.btnResize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.btnResize.AutoSize = true;
             this.btnResize.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tlpImageSize.SetColumnSpan(this.btnResize, 2);
-            this.btnResize.Location = new System.Drawing.Point(3, 29);
+            this.btnResize.Location = new System.Drawing.Point(27, 29);
             this.btnResize.Name = "btnResize";
-            this.btnResize.Size = new System.Drawing.Size(61, 23);
+            this.btnResize.Size = new System.Drawing.Size(78, 23);
             this.btnResize.TabIndex = 5;
-            this.btnResize.Text = "Resize";
+            this.btnResize.Text = "Edit";
             this.btnResize.UseVisualStyleBackColor = true;
             this.btnResize.Click += new System.EventHandler(this.btnResize_Click);
             // 
-            // label2
+            // lbUseDXT
             // 
-            this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(1, 56);
-            this.label2.Margin = new System.Windows.Forms.Padding(0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(35, 13);
-            this.label2.TabIndex = 4;
-            this.label2.Text = "SShift";
+            this.lbUseDXT.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.lbUseDXT.AutoSize = true;
+            this.lbUseDXT.Location = new System.Drawing.Point(111, 0);
+            this.lbUseDXT.Name = "lbUseDXT";
+            this.lbUseDXT.Size = new System.Drawing.Size(14, 13);
+            this.lbUseDXT.TabIndex = 6;
+            this.lbUseDXT.Text = "Y";
             // 
-            // label3
+            // lbAlphaDepth
             // 
-            this.label3.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(1, 88);
-            this.label3.Margin = new System.Windows.Forms.Padding(0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(35, 13);
-            this.label3.TabIndex = 6;
-            this.label3.Text = "VShift";
-            // 
-            // label17
-            // 
-            this.label17.AutoSize = true;
-            this.tableLayoutPanel1.SetColumnSpan(this.label17, 2);
-            this.label17.Location = new System.Drawing.Point(3, 3);
-            this.label17.Margin = new System.Windows.Forms.Padding(3);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(70, 13);
-            this.label17.TabIndex = 1;
-            this.label17.Text = "Overall shifts:";
-            // 
-            // btnHSVShift
-            // 
-            this.btnHSVShift.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnHSVShift.Location = new System.Drawing.Point(117, 83);
-            this.btnHSVShift.Name = "btnHSVShift";
-            this.btnHSVShift.Size = new System.Drawing.Size(75, 23);
-            this.btnHSVShift.TabIndex = 9;
-            this.btnHSVShift.Text = "Apply";
-            this.btnHSVShift.UseVisualStyleBackColor = true;
-            this.btnHSVShift.Click += new System.EventHandler(this.btnHSVShift_Click);
-            // 
-            // btnHSVReset
-            // 
-            this.btnHSVReset.Location = new System.Drawing.Point(117, 48);
-            this.btnHSVReset.Name = "btnHSVReset";
-            this.btnHSVReset.Size = new System.Drawing.Size(75, 23);
-            this.btnHSVReset.TabIndex = 8;
-            this.btnHSVReset.Text = "Reset";
-            this.btnHSVReset.UseVisualStyleBackColor = true;
-            this.btnHSVReset.Click += new System.EventHandler(this.btnHSVReset_Click);
+            this.lbAlphaDepth.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.lbAlphaDepth.AutoSize = true;
+            this.lbAlphaDepth.Location = new System.Drawing.Point(112, 13);
+            this.lbAlphaDepth.Name = "lbAlphaDepth";
+            this.lbAlphaDepth.Size = new System.Drawing.Size(13, 13);
+            this.lbAlphaDepth.TabIndex = 6;
+            this.lbAlphaDepth.Text = "8";
             // 
             // btnOpenMask
             // 
@@ -855,7 +908,7 @@
             this.groupBox1.AutoSize = true;
             this.groupBox1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.groupBox1.Controls.Add(this.tableLayoutPanel11);
-            this.groupBox1.Location = new System.Drawing.Point(3, 112);
+            this.groupBox1.Location = new System.Drawing.Point(3, 106);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(447, 388);
             this.groupBox1.TabIndex = 2;
@@ -1513,6 +1566,7 @@
             // 
             // ddsMaskCh1
             // 
+            this.ddsMaskCh1.AlphaDepth = -1;
             this.ddsMaskCh1.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ddsMaskCh1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.ddsMaskCh1.Channel2 = false;
@@ -1527,10 +1581,12 @@
             this.ddsMaskCh1.Size = new System.Drawing.Size(48, 48);
             this.ddsMaskCh1.TabIndex = 3;
             this.ddsMaskCh1.TabStop = false;
+            this.ddsMaskCh1.UseDXT = false;
             this.ddsMaskCh1.Click += new System.EventHandler(this.ddsMaskCh_Click);
             // 
             // ddsMaskCh2
             // 
+            this.ddsMaskCh2.AlphaDepth = -1;
             this.ddsMaskCh2.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ddsMaskCh2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.ddsMaskCh2.Channel1 = false;
@@ -1545,9 +1601,11 @@
             this.ddsMaskCh2.Size = new System.Drawing.Size(48, 48);
             this.ddsMaskCh2.TabIndex = 4;
             this.ddsMaskCh2.TabStop = false;
+            this.ddsMaskCh2.UseDXT = false;
             // 
             // ddsMaskCh3
             // 
+            this.ddsMaskCh3.AlphaDepth = -1;
             this.ddsMaskCh3.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ddsMaskCh3.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.ddsMaskCh3.Channel1 = false;
@@ -1562,9 +1620,11 @@
             this.ddsMaskCh3.Size = new System.Drawing.Size(48, 48);
             this.ddsMaskCh3.TabIndex = 5;
             this.ddsMaskCh3.TabStop = false;
+            this.ddsMaskCh3.UseDXT = false;
             // 
             // ddsMaskCh4
             // 
+            this.ddsMaskCh4.AlphaDepth = -1;
             this.ddsMaskCh4.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ddsMaskCh4.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.ddsMaskCh4.Channel1 = false;
@@ -1579,6 +1639,7 @@
             this.ddsMaskCh4.Size = new System.Drawing.Size(48, 48);
             this.ddsMaskCh4.TabIndex = 6;
             this.ddsMaskCh4.TabStop = false;
+            this.ddsMaskCh4.UseDXT = false;
             // 
             // tlpMaskSize
             // 
@@ -1660,21 +1721,22 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(919, 495);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(996, 528);
             this.tableLayoutPanel5.TabIndex = 0;
             // 
             // ddsPanel1
             // 
+            this.ddsPanel1.AlphaDepth = -1;
             this.ddsPanel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.ddsPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ddsPanel1.Fit = true;
             this.ddsPanel1.Location = new System.Drawing.Point(453, 0);
             this.ddsPanel1.Margin = new System.Windows.Forms.Padding(0);
-            this.ddsPanel1.MaxSize = new System.Drawing.Size(0, 0);
             this.ddsPanel1.Name = "ddsPanel1";
             this.tableLayoutPanel5.SetRowSpan(this.ddsPanel1, 2);
-            this.ddsPanel1.Size = new System.Drawing.Size(466, 528);
+            this.ddsPanel1.Size = new System.Drawing.Size(543, 528);
             this.ddsPanel1.TabIndex = 4;
+            this.ddsPanel1.UseDXT = false;
             // 
             // menuStrip1
             // 
@@ -1682,7 +1744,7 @@
             this.fileToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(919, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(996, 24);
             this.menuStrip1.TabIndex = 9;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -1789,7 +1851,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(919, 519);
+            this.ClientSize = new System.Drawing.Size(996, 552);
             this.Controls.Add(this.tableLayoutPanel5);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
@@ -1972,5 +2034,9 @@
         private System.Windows.Forms.Button btnHSVReset;
         private System.Windows.Forms.ToolStripMenuItem importAlphaToolStripMenuItem;
         private System.Windows.Forms.Button btnResize;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.Label lbUseDXT;
+        private System.Windows.Forms.Label lbAlphaDepth;
     }
 }

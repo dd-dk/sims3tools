@@ -21,42 +21,51 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace s3pe.DDSTool
 {
     public partial class NewDDSParameters : Form
     {
+        static string[] DXTitems = new string[] { "1", "3", "5", };
+        static string[] DDSitems = new string[] { "0", "1", "4", "8", };
+
         public NewDDSParameters()
         {
             InitializeComponent();
+            cbDepth.Items.Clear();
+            cbDepth.Items.AddRange(DDSitems);
+            cbDepth.SelectedIndex = cbDepth.Items.Count - 1;
         }
 
-        public NewDDSParameters(int width, int height, bool disableColour = false) : this()
+        public NewDDSParameters(int width, int height, bool useDXT, int alphaDepth = -1, bool disableColour = false) : this()
         {
             nudWidth.Value = width;
             nudHeight.Value = height;
+            ckbUseDXT.Checked = useDXT;
+
+            if (alphaDepth != -1)
+                cbDepth.SelectedIndex = (useDXT ? DXTitems : DDSitems).ToList().IndexOf("" + alphaDepth);
 
             if (disableColour)
                 nudRed.Enabled = nudGreen.Enabled = nudBlue.Enabled = nudAlpha.Enabled = false;
         }
 
-        public Result Value
+        private int GetAlphaDepth()
         {
-            get
+            switch (cbDepth.SelectedIndex)
             {
-                return new Result
-                {
-                    Red = (byte)nudRed.Value,
-                    Green = (byte)nudGreen.Value,
-                    Blue = (byte)nudBlue.Value,
-                    Alpha = (byte)nudAlpha.Value,
-                    Width = (int)nudWidth.Value,
-                    Height = (int)nudHeight.Value,
-                    DialogResult = this.DialogResult,
-                };
+                case 0: return 0;
+                case 1: return 1;
+                case 2: return 4;
+                case 3: return 8;
+                default: return -1;
             }
         }
+
+        Result _result = new Result() { DialogResult = DialogResult.Cancel };
+        public Result Value { get { return _result; } }
 
         public struct Result
         {
@@ -66,12 +75,26 @@ namespace s3pe.DDSTool
             public byte Alpha;
             public int Width;
             public int Height;
+            public bool UseDXT;
+            public int AlphaDepth;
             public DialogResult DialogResult;
         }
 
         private void btnOK_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.OK;
+            _result = new Result
+            {
+                Red = (byte)nudRed.Value,
+                Green = (byte)nudGreen.Value,
+                Blue = (byte)nudBlue.Value,
+                Alpha = (byte)nudAlpha.Value,
+                Width = (int)nudWidth.Value,
+                Height = (int)nudHeight.Value,
+                UseDXT = ckbUseDXT.Checked,
+                AlphaDepth = int.Parse((string)cbDepth.SelectedItem),
+                DialogResult = this.DialogResult,
+            };
             this.Close();
         }
 
@@ -79,6 +102,14 @@ namespace s3pe.DDSTool
         {
             DialogResult = DialogResult.Cancel;
             this.Close();
+        }
+
+        private void ckbUseDXT_CheckedChanged(object sender, EventArgs e)
+        {
+            cbDepth.SelectedIndex = -1;
+            cbDepth.Items.Clear();
+            cbDepth.Items.AddRange(ckbUseDXT.Checked ? DXTitems : DDSitems);
+            cbDepth.SelectedIndex = cbDepth.Items.Count - 1;
         }
     }
 }

@@ -44,6 +44,9 @@
             this.label3 = new System.Windows.Forms.Label();
             this.nudWidth = new System.Windows.Forms.NumericUpDown();
             this.nudHeight = new System.Windows.Forms.NumericUpDown();
+            this.ckbUseDXT = new System.Windows.Forms.CheckBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.cbDepth = new System.Windows.Forms.ComboBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudGreen)).BeginInit();
@@ -77,6 +80,9 @@
             this.tableLayoutPanel1.Controls.Add(this.label3, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.nudWidth, 3, 0);
             this.tableLayoutPanel1.Controls.Add(this.nudHeight, 3, 1);
+            this.tableLayoutPanel1.Controls.Add(this.ckbUseDXT, 2, 2);
+            this.tableLayoutPanel1.Controls.Add(this.label4, 2, 3);
+            this.tableLayoutPanel1.Controls.Add(this.cbDepth, 3, 3);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 12);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 6;
@@ -105,7 +111,7 @@
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(162, 29);
-            this.tableLayoutPanel2.TabIndex = 13;
+            this.tableLayoutPanel2.TabIndex = 16;
             // 
             // btnOK
             // 
@@ -140,7 +146,7 @@
             0,
             0});
             this.nudGreen.Name = "nudGreen";
-            this.nudGreen.Size = new System.Drawing.Size(55, 20);
+            this.nudGreen.Size = new System.Drawing.Size(50, 20);
             this.nudGreen.TabIndex = 4;
             // 
             // nudRed
@@ -153,7 +159,7 @@
             0,
             0});
             this.nudRed.Name = "nudRed";
-            this.nudRed.Size = new System.Drawing.Size(55, 20);
+            this.nudRed.Size = new System.Drawing.Size(50, 20);
             this.nudRed.TabIndex = 2;
             // 
             // nudBlue
@@ -166,7 +172,7 @@
             0,
             0});
             this.nudBlue.Name = "nudBlue";
-            this.nudBlue.Size = new System.Drawing.Size(55, 20);
+            this.nudBlue.Size = new System.Drawing.Size(50, 20);
             this.nudBlue.TabIndex = 6;
             // 
             // label12
@@ -190,7 +196,7 @@
             0,
             0});
             this.nudAlpha.Name = "nudAlpha";
-            this.nudAlpha.Size = new System.Drawing.Size(55, 20);
+            this.nudAlpha.Size = new System.Drawing.Size(50, 20);
             this.nudAlpha.TabIndex = 8;
             this.nudAlpha.Value = new decimal(new int[] {
             255,
@@ -224,7 +230,7 @@
             // 
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(2, 84);
+            this.label1.Location = new System.Drawing.Point(2, 85);
             this.label1.Margin = new System.Windows.Forms.Padding(0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(34, 13);
@@ -235,7 +241,7 @@
             // 
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(100, 6);
+            this.label2.Location = new System.Drawing.Point(106, 6);
             this.label2.Margin = new System.Windows.Forms.Padding(0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(35, 13);
@@ -246,7 +252,7 @@
             // 
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(97, 32);
+            this.label3.Location = new System.Drawing.Point(103, 32);
             this.label3.Margin = new System.Windows.Forms.Padding(0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(38, 13);
@@ -256,14 +262,14 @@
             // nudWidth
             // 
             this.nudWidth.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.nudWidth.Location = new System.Drawing.Point(138, 3);
+            this.nudWidth.Location = new System.Drawing.Point(144, 3);
             this.nudWidth.Maximum = new decimal(new int[] {
             32767,
             0,
             0,
             0});
             this.nudWidth.Name = "nudWidth";
-            this.nudWidth.Size = new System.Drawing.Size(56, 20);
+            this.nudWidth.Size = new System.Drawing.Size(50, 20);
             this.nudWidth.TabIndex = 10;
             this.nudWidth.Value = new decimal(new int[] {
             1024,
@@ -274,20 +280,59 @@
             // nudHeight
             // 
             this.nudHeight.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.nudHeight.Location = new System.Drawing.Point(138, 29);
+            this.nudHeight.Location = new System.Drawing.Point(144, 29);
             this.nudHeight.Maximum = new decimal(new int[] {
             32767,
             0,
             0,
             0});
             this.nudHeight.Name = "nudHeight";
-            this.nudHeight.Size = new System.Drawing.Size(56, 20);
+            this.nudHeight.Size = new System.Drawing.Size(50, 20);
             this.nudHeight.TabIndex = 12;
             this.nudHeight.Value = new decimal(new int[] {
             1024,
             0,
             0,
             0});
+            // 
+            // ckbUseDXT
+            // 
+            this.ckbUseDXT.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbUseDXT.AutoSize = true;
+            this.tableLayoutPanel1.SetColumnSpan(this.ckbUseDXT, 2);
+            this.ckbUseDXT.Location = new System.Drawing.Point(109, 56);
+            this.ckbUseDXT.Name = "ckbUseDXT";
+            this.ckbUseDXT.Size = new System.Drawing.Size(70, 17);
+            this.ckbUseDXT.TabIndex = 13;
+            this.ckbUseDXT.Text = "Use DXT";
+            this.ckbUseDXT.UseVisualStyleBackColor = true;
+            this.ckbUseDXT.CheckedChanged += new System.EventHandler(this.ckbUseDXT_CheckedChanged);
+            // 
+            // label4
+            // 
+            this.label4.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(92, 85);
+            this.label4.Margin = new System.Windows.Forms.Padding(0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(49, 13);
+            this.label4.TabIndex = 14;
+            this.label4.Text = "AD/DXT";
+            // 
+            // cbDepth
+            // 
+            this.cbDepth.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.cbDepth.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbDepth.FormattingEnabled = true;
+            this.cbDepth.Items.AddRange(new object[] {
+            "0",
+            "1",
+            "4",
+            "8"});
+            this.cbDepth.Location = new System.Drawing.Point(144, 81);
+            this.cbDepth.Name = "cbDepth";
+            this.cbDepth.Size = new System.Drawing.Size(50, 21);
+            this.cbDepth.TabIndex = 15;
             // 
             // NewDDSParameters
             // 
@@ -332,5 +377,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.NumericUpDown nudWidth;
         private System.Windows.Forms.NumericUpDown nudHeight;
+        private System.Windows.Forms.CheckBox ckbUseDXT;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox cbDepth;
     }
 }
