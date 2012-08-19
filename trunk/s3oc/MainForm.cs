@@ -1011,6 +1011,7 @@ namespace ObjectCloner
         bool is32bitIIDs = false;
         bool isKeepSTBLIIDs = false;
         bool disableCompression = false;
+        bool isExcludeCommon = false;
 
         bool IsDeepClone { get { return isFix || isDeepClone; } }
         bool JustSelf { get { return !isCreateNewPackage && !isRepair && !isRenumber; } }
@@ -1030,6 +1031,7 @@ namespace ObjectCloner
             is32bitIIDs = cloneFixOptions.Is32bitIIDs;
             isKeepSTBLIIDs = cloneFixOptions.IsKeepSTBLIIDs;
             disableCompression = !cloneFixOptions.IsCompress;
+            isExcludeCommon = cloneFixOptions.IsExcludeCommon;
 
             if (isRepair)
                 SetAppendEA(true);
@@ -4250,7 +4252,7 @@ namespace ObjectCloner
             SaveList sl = new SaveList(this,
                 selectedItem, rkLookup,
                 target, disableCompression, selectedItem.RequestedRK.CType() != CatalogType.CAS_Part,
-                isPadSTBLs, false/*mode == Mode.FromGame/**/, cloneFixOptions.IsExcludeCommon,
+                isPadSTBLs, false/*mode == Mode.FromGame/**/, isExcludeCommon,
                 updateProgress, () => !saving, OnSavingComplete);
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
@@ -4331,7 +4333,7 @@ namespace ObjectCloner
             DoWait("Please wait, adding missing resources...");
             SaveList sl = new SaveList(this, selectedItem, rkLookup,
                 FileTable.Current, disableCompression, selectedItem.RequestedRK.CType() != CatalogType.CAS_Part,
-                isPadSTBLs, false/*mode == Mode.FromGame/**/, cloneFixOptions.IsExcludeCommon,
+                isPadSTBLs, false/*mode == Mode.FromGame/**/, isExcludeCommon,
                 updateProgress, () => !repairing, OnRepairingComplete);
 
             repairThread = new Thread(new ThreadStart(sl.SavePackage));
