@@ -339,20 +339,8 @@
       <Link>Acknowledgements.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\s3pi\build\bin\Release\Extensions.txt">
-      <Link>Extensions.txt</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="..\s3pi\build\bin\Release\Helpers\Helpers.txt">
       <Link>Helpers\Helpers.txt</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\s3pi\build\bin\Release\ImageResources.txt">
-      <Link>ImageResources.txt</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\s3pi\build\bin\Release\RCOLResources.txt">
-      <Link>RCOLResources.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.CASPartResource.dll">
@@ -427,16 +415,16 @@
       <Link>s3pi.TxtcResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\s3pi\build\bin\Release\s3pi.VideoResource.dll">
+      <Link>s3pi.VideoResource.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\s3pi\build\bin\Release\squishinterface_Win32.dll">
       <Link>squishinterface_Win32.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\s3pi\build\bin\Release\squishinterface_x64.dll">
       <Link>squishinterface_x64.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\s3pi\build\bin\Release\TextResources.txt">
-      <Link>TextResources.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="gpl-3.0.txt">
