@@ -71,7 +71,6 @@ namespace S3PIDemoFE
                 if (dr != DialogResult.OK) return;
 
                 ImportBatch ib = new ImportBatch(importPackagesDialog.FileNames, ImportBatch.Mode.package);
-                ib.UseNames = true;
                 dr = ib.ShowDialog();
                 if (dr != DialogResult.OK) return;
 
@@ -373,7 +372,6 @@ namespace S3PIDemoFE
             if (new List<string>(asPkgExts).Contains(filename.Substring(filename.LastIndexOf('.'))))
             {
                 ImportBatch ib = new ImportBatch(new string[] { filename, }, ImportBatch.Mode.package);
-                ib.UseNames = true;
                 DialogResult dr = ib.ShowDialog();
                 if (dr != DialogResult.OK) return;
 
@@ -381,8 +379,7 @@ namespace S3PIDemoFE
             }
             else
             {
-
-                ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(_key => _key.ResourceType == 0x0166038C) != null, true);
+                ResourceDetails ir = new ResourceDetails(/*20120820 CurrentPackage.Find(x => x.ResourceType == 0x0166038C) != null/**/true, true);
                 ir.Filename = filename;
                 DialogResult dr = ir.ShowDialog();
                 if (dr != DialogResult.OK) return;
@@ -393,7 +390,7 @@ namespace S3PIDemoFE
 
         void importSingle(myDataFormat data)
         {
-            ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(_key => _key.ResourceType == 0x0166038C) != null, true);
+            ResourceDetails ir = new ResourceDetails(/*20120820 CurrentPackage.Find(x => x.ResourceType == 0x0166038C) != null/**/true, true);
             ir.Filename = data.tgin;
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;

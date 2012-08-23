@@ -60,7 +60,7 @@ namespace S3PIDemoFE.Import
         [DefaultValue(false)]
         public bool Compress { get { return ckbCompress.Checked; } set { ckbCompress.Checked = value; } }
         [Category("Appearance")]
-        [DefaultValue(false)]
+        [DefaultValue(true)]
         public bool UseName { get { return ckbUseName.Checked; } set { ckbUseName.Checked = value; } }
         [Category("Behavior")]
         [DefaultValue(false)]

@@ -55,7 +55,9 @@
             // 
             this.ckbUseName.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ckbUseName.AutoSize = true;
-            this.ckbUseName.Location = new System.Drawing.Point(3, 55);
+            this.ckbUseName.Checked = true;
+            this.ckbUseName.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.ckbUseName.Location = new System.Drawing.Point(81, 32);
             this.ckbUseName.Name = "ckbUseName";
             this.ckbUseName.Size = new System.Drawing.Size(118, 17);
             this.ckbUseName.TabIndex = 3;
@@ -67,7 +69,7 @@
             // 
             this.ckbRename.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.ckbRename.AutoSize = true;
-            this.ckbRename.Location = new System.Drawing.Point(127, 55);
+            this.ckbRename.Location = new System.Drawing.Point(3, 55);
             this.ckbRename.Name = "ckbRename";
             this.ckbRename.Size = new System.Drawing.Size(112, 17);
             this.ckbRename.TabIndex = 4;

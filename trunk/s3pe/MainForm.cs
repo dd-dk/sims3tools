@@ -973,7 +973,7 @@ namespace S3PIDemoFE
 
         private void resourceAdd()
         {
-            ResourceDetails ir = new ResourceDetails(CurrentPackage.Find(x => x.ResourceType == 0x0166038C) != null, false);
+            ResourceDetails ir = new ResourceDetails(/*20120820 CurrentPackage.Find(x => x.ResourceType == 0x0166038C) != null/**/true, false);
             DialogResult dr = ir.ShowDialog();
             if (dr != DialogResult.OK) return;
 
