@@ -251,7 +251,7 @@ namespace S3PIDemoFE
                                         tgin = rie as AResourceIndexEntry,
                                         data = res.AsBytes,
                                     };
-                                    DuplicateHandling dupThis = dupsList == null || dupsList.Contains(rie.ResourceType) ? dups
+                                    DuplicateHandling dupThis = dupsList == null || !dupsList.Contains(rie.ResourceType) ? dups
                                         : dups == DuplicateHandling.allow ? DuplicateHandling.replace : DuplicateHandling.reject;
                                     limp.Add(Tuple.Create(impres, dupThis));
                                     progressBar1.Value++;
@@ -292,6 +292,7 @@ namespace S3PIDemoFE
                 progressBar1.Maximum = 0;
                 controlPanel1.UseNames = CPuseNames;
                 browserWidget1.Visible = true;
+                ForceFocus.Focus(Application.OpenForms[0]);
                 Application.DoEvents();
             }
         }

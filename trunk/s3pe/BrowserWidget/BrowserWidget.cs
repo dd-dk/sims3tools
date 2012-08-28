@@ -120,17 +120,19 @@ namespace S3PIDemoFE
                 pbLabel.Text = "Reading resources...";
                 Application.DoEvents();
 
+                List<IResourceIndexEntry> lrie = range.ToList();
+
                 if (pb != null)
                 {
                     pb.Value = 0;
-                    pb.Maximum = range.Count();
+                    pb.Maximum = lrie.Count();
                 }
 
                 bool newNameMap = false;
                 int i = 0;
                 DateTime tick = DateTime.UtcNow.AddMilliseconds(tock);
                 List<Tuple<IResourceIndexEntry, ListViewItem>> list = new List<Tuple<IResourceIndexEntry, ListViewItem>>();
-                foreach (var pair in range.Select(x => { i++; return Tuple.Create(x, CreateItem(x)); }).Where(x => x.Item2 != null))
+                foreach (var pair in lrie.Select(x => { i++; return Tuple.Create(x, CreateItem(x)); }).Where(x => x.Item2 != null))
                 {
                     try
                     {
@@ -575,7 +577,6 @@ namespace S3PIDemoFE
                     Application.DoEvents();
                     listView1.Items.Clear();// this can be slow and steals the main thread!
                 }
-                ForceFocus.Focus(Application.OpenForms[0]);
                 /*if (!pbLabel.Visible || listView1.Items.Count > 10000)
                 {
                 }
@@ -630,6 +631,8 @@ namespace S3PIDemoFE
                 Application.DoEvents();
 
                 OnListUpdated(this, new EventArgs());
+                if (this.Visible)
+                    ForceFocus.Focus(Application.OpenForms[0]);
             }
         }
 
