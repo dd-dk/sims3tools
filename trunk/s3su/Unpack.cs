@@ -39,7 +39,11 @@ namespace S3Pack
             : this()
         {
             if (File.Exists(source))
-                setSource(Path.GetFullPath(source));
+            {
+                string fp = Path.GetFullPath(source);
+                setSource(fp);
+                setTarget(fp);
+           }
         }
 
         private void Unpack_Shown(object sender, EventArgs e)
@@ -77,7 +81,13 @@ namespace S3Pack
             sfdTarget.FileName = "Filename will be ignored";
             sfdTarget.FilterIndex = 1;
             if (sfdTarget.ShowDialog() != DialogResult.OK) return;
-            tbTarget.Text = Path.GetDirectoryName(Path.GetFullPath(sfdTarget.FileName));
+
+            setTarget(Path.GetFullPath(sfdTarget.FileName));
+        }
+
+        void setTarget(string target)
+        {
+            tbTarget.Text = Path.GetDirectoryName(target);
 
             haveTarget = true;
             OKforOK();
