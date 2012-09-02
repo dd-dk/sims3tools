@@ -27,15 +27,15 @@ namespace S3Pack
 {
     public static class Sims3Pack
     {
-        static string magic = "TS3Pack";
-        static ushort unknown1 = 0x0101;
+        const string magic = "TS3Pack";
+        const ushort unknown1 = 0x0101;
 
         /// <summary>
         /// Extracts the content of a Sims3Pack file (<paramref name="source"/>) into a folder (<paramref name="target"/>).
         /// </summary>
         /// <param name="source">A valid Sims3Pack file</param>
         /// <param name="target">An existing folder</param>
-        public static void Unpack(string source, string target)
+        public static IEnumerable<OutputFile> Unpack(string source, string target)
         {
             if (!File.Exists(source))
                 throw new FileNotFoundException("File not found", source);
@@ -48,47 +48,61 @@ namespace S3Pack
             if (!Directory.Exists(target))
                 Directory.CreateDirectory(target);
 
-            FileStream fs = new FileStream(source, FileMode.Open, FileAccess.Read);
-            BinaryReader br = new BinaryReader(fs);
 
-            magic = new string(br.ReadChars(br.ReadInt32()));
-            unknown1 = br.ReadUInt16();
-            MemoryStream ms = new MemoryStream(br.ReadBytes(br.ReadInt32()));
-
-            long basePos = fs.Position;
-
-            XPathDocument xdoc = new XPathDocument(ms);
-            XPathNavigator nav = xdoc.CreateNavigator();
-
-            string filename;
-            XPathNavigator pkgId = nav.SelectSingleNode("/Sims3Package/PackageId");
-            if (pkgId != null)
-                filename = pkgId.Value;
-            else
+            using (FileStream fs = new FileStream(source, FileMode.Open, FileAccess.Read))
+            using (BinaryReader br = new BinaryReader(fs))
             {
-                pkgId = nav.SelectSingleNode("/Sims3Package/PackagedFile[Guid!=\"0x0000000000000000\"]/Guid");
-                if (pkgId != null)
-                    filename = pkgId.Value;
-                else
-                    filename = Path.GetFileNameWithoutExtension(source);
-            }
-            filename = Path.Combine(target, filename + ".xml");
+                string shouldBeMagic = new string(br.ReadChars(br.ReadInt32()));
+                ushort shouldBeUnknown1 = br.ReadUInt16();
 
-            if (File.Exists(filename)) File.Delete(filename);
-            BinaryWriter bw = new BinaryWriter(new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write));
-            bw.Write(ms.ToArray());
-            bw.Close();
+                using (MemoryStream ms = new MemoryStream(br.ReadBytes(br.ReadInt32())))
+                using (BinaryReader msbr = new BinaryReader(new MemoryStream(ms.ToArray())))
+                {
+                    long basePos = fs.Position;
 
-            XPathNodeIterator packagedFiles = nav.Select("/Sims3Package/PackagedFile");
-            while (packagedFiles.MoveNext())
-            {
-                fs.Position = basePos + Convert.ToInt64(packagedFiles.Current.SelectSingleNode("Offset").Value);
-                filename = Path.Combine(target, packagedFiles.Current.SelectSingleNode("Name").Value);
-                if (File.Exists(filename)) File.Delete(filename);
-                bw = new BinaryWriter(new FileStream(filename, FileMode.OpenOrCreate, FileAccess.Write));
-                bw.Write(br.ReadBytes(Convert.ToInt32(packagedFiles.Current.SelectSingleNode("Length").Value)));
-                bw.Close();
+                    XPathDocument xdoc = new XPathDocument(ms);
+                    XPathNavigator nav = xdoc.CreateNavigator();
+
+                    string filename;
+                    XPathNavigator pkgId = nav.SelectSingleNode("/Sims3Package/PackageId");
+                    if (pkgId != null)
+                        filename = pkgId.Value;
+                    else
+                    {
+                        pkgId = nav.SelectSingleNode("/Sims3Package/PackagedFile[Guid!=\"0x0000000000000000\"]/Guid");
+                        if (pkgId != null)
+                            filename = pkgId.Value;
+                        else
+                            filename = Path.GetFileNameWithoutExtension(source);
+                    }
+
+                    yield return new OutputFile()
+                    {
+                        filename = Path.Combine(target, filename + ".xml"),
+                        source = msbr,
+                        length = (int)msbr.BaseStream.Length,
+                    };
+
+                    XPathNodeIterator packagedFiles = nav.Select("/Sims3Package/PackagedFile");
+                    while (packagedFiles.MoveNext())
+                    {
+                        fs.Position = basePos + Convert.ToInt64(packagedFiles.Current.SelectSingleNode("Offset").Value);
+                        yield return new OutputFile()
+                        {
+                            filename = Path.Combine(target, packagedFiles.Current.SelectSingleNode("Name").Value),
+                            source = br,
+                            length = Convert.ToInt32(packagedFiles.Current.SelectSingleNode("Length").Value),
+                        };
+                    }
+                }
             }
+        }
+
+        public struct OutputFile
+        {
+            public string filename;
+            public BinaryReader source;
+            public int length;
         }
 
         public static void Pack(string Package, string Target, XmlValues v)

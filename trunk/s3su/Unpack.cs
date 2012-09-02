@@ -100,9 +100,34 @@ namespace S3Pack
 
         private void btnOK_Click(object sender, EventArgs e)
         {
+            int prompt = 0;
             try
             {
-                S3Pack.Sims3Pack.Unpack(tbSource.Text, tbTarget.Text);
+                foreach (var outputFile in S3Pack.Sims3Pack.Unpack(tbSource.Text, tbTarget.Text))
+                {
+                    string filename = outputFile.filename;
+                    if (File.Exists(filename))
+                    {
+                        if (prompt == 0 || prompt == 2)
+                        {
+                            prompt = CopyableMessageBox.Show("File exists:\n" + filename + "\n\n" +
+                                "Do you wish to replace this file?",
+                                "Unpack Sims3Pack", CopyableMessageBoxIcon.Question, new[] { "&No", "N&o to all", "&Yes", "Yes to &all", "&Cancel", }, 0, 4);
+                        }
+                        if (prompt == 0 || prompt == 1)
+                            continue;
+                        if (prompt == 4)
+                        {
+                            CopyableMessageBox.Show("Cancelled.", "Sims3Pack unpacked", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
+                            return;
+                        }
+                    }
+                    using (BinaryWriter bw = new BinaryWriter(new FileStream(filename, FileMode.Create, FileAccess.Write)))
+                    {
+                        bw.Write(outputFile.source.ReadBytes(outputFile.length));
+                        bw.Close();
+                    }
+                }
                 CopyableMessageBox.Show("Done!", "Sims3Pack unpacked", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
             }
             catch (Exception ex)
