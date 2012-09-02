@@ -102,10 +102,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\s3pi\build\bin\Release\RCOLResources.txt">
-      <Link>RCOLResources.txt</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Helpers\s3ascExport.helper">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

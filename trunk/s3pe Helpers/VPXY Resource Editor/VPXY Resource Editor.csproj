@@ -99,16 +99,6 @@
     <None Include="Resources\s3pe.ico" />
     <Content Include="VPXYResourceEditor.helper" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\..\s3pi\build\bin\Release\Extensions.txt">
-      <Link>Extensions.txt</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\s3pi\build\bin\Release\RCOLResources.txt">
-      <Link>RCOLResources.txt</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
