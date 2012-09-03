@@ -65,27 +65,20 @@ namespace S3Pack
 
         private void btnTarget_Click(object sender, EventArgs e)
         {
-            string defaultTarget = haveSource ? Path.GetFileNameWithoutExtension(tbSource.Text) + ".Sims3Pack" : "";
-            if (xv != null)
-            {
-                string creatorName = Environment.UserName.Replace(" ", "");
-                string objectName = xv.GetInnerText(xv.DisplayName, "DisplayName", "").Replace(" ", "");
-                defaultTarget = creatorName + "_" + objectName + ".Sims3Pack";
-            }
-            defaultTarget = haveSource ? Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(tbSource.Text)), defaultTarget) : "";
+            string defaultTarget = haveTarget ? tbTarget.Text : haveSource ? getTarget(tbSource.Text) : "";
 
-            try { sfdSims3Pack.InitialDirectory = haveTarget ? Path.GetDirectoryName(tbTarget.Text) : Path.GetDirectoryName(defaultTarget); }
+            try { sfdSims3Pack.InitialDirectory = Path.GetDirectoryName(defaultTarget); }
             catch { sfdSims3Pack.InitialDirectory = ""; }
 
-            try { sfdSims3Pack.FileName = haveTarget ? Path.GetFileName(tbTarget.Text) : Path.GetFileName(defaultTarget); }
+            try { sfdSims3Pack.FileName = Path.GetFileName(defaultTarget); }
             catch { sfdSims3Pack.FileName = "*.Sims3Pack"; }
 
             sfdSims3Pack.FilterIndex = 1;
             if (sfdSims3Pack.ShowDialog() != DialogResult.OK) return;
 
             tbTarget.Text = Path.GetFullPath(sfdSims3Pack.FileName);
-            haveTarget = true;
 
+            haveTarget = true;
             OKforOK();
         }
 
@@ -112,7 +105,6 @@ namespace S3Pack
         void setSource(string source)
         {
             tbSource.Text = source;
-            haveSource = true;
 
             try
             {
@@ -126,13 +118,20 @@ namespace S3Pack
                 return;
             }
 
+            haveSource = true;
             OKforOK();
+        }
+
+        string getTarget(string source)
+        {
+            string target = Path.GetFileNameWithoutExtension(Path.GetDirectoryName(source)) + ".Sims3Pack";
+            return Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(source)), target);
         }
 
         void OKforOK()
         {
             btnOK.Enabled = haveSource && haveTarget && xv != null;
-            tbStatus.Text = btnOK.Enabled ? "Click 'Repack' to unpack the Sims3Pack." : "'From Sims3Pack XML' and 'Output Sims3Pack' are required.";
+            tbStatus.Text = btnOK.Enabled ? "Click 'Repack' to repack the Sims3Pack." : "'From Sims3Pack XML' and 'Output Sims3Pack' are required.";
         }
 
         void UpdatePackagedFiles(string folder)
