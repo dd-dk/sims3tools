@@ -50,7 +50,6 @@ namespace ObjectCloner
         Mode mode = Mode.None;
 
         SpecificResource selectedItem;
-        Image replacementForThumbs;
 
         private ObjectChooser objectChooser;
         private PleaseWait pleaseWait;
@@ -459,7 +458,8 @@ namespace ObjectCloner
             }
         }
 
-        Dictionary<UInt64, SpecificResource> CTPTBrushIndexToPair;
+        //2012-09-12 (http://dino.drealm.info/develforums/s3pi/index.php?topic=1238.0) Should only need to create this once:
+        Dictionary<UInt64, SpecificResource> CTPTBrushIndexToPair = new Dictionary<ulong, SpecificResource>();
         Dictionary<uint, Dictionary<SpecificResource, ListViewItem>> ListViewCache = new Dictionary<uint, Dictionary<SpecificResource, ListViewItem>>();
         public delegate void listViewAddCallBack(SpecificResource sr, ListView listView);
         public void ListViewAdd(SpecificResource sr, ListView listView)
@@ -473,7 +473,15 @@ namespace ObjectCloner
             if (kvp.Key != null)
             {
                 if (kvp.Value.ListView != null)
-                    kvp.Value.ListView.Items.Remove(kvp.Value);
+                {
+                    if (kvp.Value.ListView == listView)
+                        kvp.Value.ListView.Items.Remove(kvp.Value);
+                    else
+                    {
+                        listView.Items.Add(kvp.Value.Clone() as ListViewItem);
+                        return;
+                    }
+                }
                 listView.Items.Add(kvp.Value);
                 return;
             }
@@ -580,7 +588,8 @@ namespace ObjectCloner
         {
             if (formClosing) return;
 
-            replacementForThumbs = null;// might as well be here; needed after FillTabs, really.
+            thmOverview.Image = null;// might as well be here; needed after FillTabs, really.
+            thmCASPart.Image = null;// might as well be here; needed after FillTabs, really.
             rkLookup = null;//Indicate that we're not working on the same resource any more
             if (e.SelectedItem == null)
             {
@@ -763,6 +772,11 @@ namespace ObjectCloner
             this.CancelButton = null;
 
             setPrompt(listView == searchPane ? Prompt.Search : Prompt.CloneFix);
+
+            if (selectedItem != null)
+                FillTabs(selectedItem);
+            else
+                ClearTabs();
 
             StopWait();
             splitContainer1.Panel1.Controls.Clear();
@@ -950,6 +964,7 @@ namespace ObjectCloner
             setPrompt(Prompt.UseMenu);
 
             StopWait();
+            selectedItem = null;
             ClearTabs();
             //TabEnable(false);
             splitContainer1.Panel1.Controls.Clear();
@@ -1479,8 +1494,8 @@ namespace ObjectCloner
         }
         void clearOverview()
         {
-            pbCatlgThum.Image = null;
-            lbTGICatlgThum.Text = "0x00000000-0x00000000-0x0000000000000000";
+            thmOverview.Image = null;
+            thmOverview.ResourceKey = new TGIBlock(0, null);
             tbResourceName.Text = "";
             tbObjName.Text = "";
             tbNameGUID.Text = "";
@@ -1495,8 +1510,8 @@ namespace ObjectCloner
         }
         void clearCASP()
         {
-            pbCASPThum.Image = null;
-            lbTGICASPThum.Text = "0x00000000-0x00000000-0x0000000000000000";
+            thmCASPart.Image = null;
+            thmCASPart.ResourceKey = new TGIBlock(0, null);
             tbCASPResourceName.Text = "";
             tbCASPUnknown1.Text = "";
             cbCASPClothingType.SelectedIndex = -1;
@@ -1578,7 +1593,6 @@ namespace ObjectCloner
         string itemDesc = null;
         void fillOverview(SpecificResource item)
         {
-            lbTGICatlgThum.Font = new Font(lbTGICatlgThum.Font, FontStyle.Regular);
             tbObjName.Font = tbNameGUID.Font =
             tbCatlgName.Font = tbObjDesc.Font = tbDescGUID.Font =
             tbCatlgDesc.Font = tbPrice.Font = tbProductStatus.Font =
@@ -1590,13 +1604,13 @@ namespace ObjectCloner
             SpecificResource thumSR = THUM.getTHUM(THUM.THUMSize.large, item);
             if (thumSR == null)
             {
-                pbCatlgThum.Image = null;
-                lbTGICatlgThum.Text = "0x00000000-0x00000000-0x0000000000000000";
+                thmOverview.Image = null;
+                thmOverview.ResourceKey = new TGIBlock(0, null);
             }
             else
             {
-                pbCatlgThum.Image = ResizeImage(Image.FromStream(thumSR.Resource.Stream), pbCatlgThum);
-                lbTGICatlgThum.Text = "" + (AResourceKey)thumSR.RequestedRK;
+                thmOverview.Image = Image.FromStream(thumSR.Resource.Stream);
+                thmOverview.ResourceKey = thumSR.RequestedRK;
             }
 
             if (formClosing) return; else tbResourceName.Text = NameMap.NMap[item.RequestedRK.Instance];
@@ -1635,15 +1649,17 @@ namespace ObjectCloner
             tbPackage.Text = item.PathPackage.Path;
 
             tpMain.Tag = noData;
-            lbTGICatlgThum.Text = tbObjName.Text = tbNameGUID.Text =
+            tbObjName.Text = tbNameGUID.Text =
             tbCatlgName.Text = tbObjDesc.Text = tbDescGUID.Text =
             tbCatlgDesc.Text = tbPrice.Text = tbProductStatus.Text =
                 noData;
-            lbTGICatlgThum.Font = new Font(lbTGICatlgThum.Font, FontStyle.Italic);
             tbObjName.Font = tbNameGUID.Font =
             tbCatlgName.Font = tbObjDesc.Font = tbDescGUID.Font =
             tbCatlgDesc.Font = tbPrice.Font = tbProductStatus.Font =
                 new Font(tbObjName.Font, FontStyle.Italic);
+
+            thmOverview.Image = null;
+            thmOverview.ResourceKey = new TGIBlock(0, null);
         }
 
         void fillCASPTab(SpecificResource item)
@@ -1655,13 +1671,13 @@ namespace ObjectCloner
             SpecificResource thumSR = THUM.getTHUM(THUM.THUMSize.large, item);
             if (thumSR == null)
             {
-                pbCASPThum.Image = null;
-                lbTGICASPThum.Text = "0x00000000-0x00000000-0x0000000000000000";
+                thmCASPart.Image = null;
+                thmCASPart.ResourceKey = new TGIBlock(0, null);
             }
             else
             {
-                pbCASPThum.Image = ResizeImage(Image.FromStream(thumSR.Resource.Stream), pbCASPThum);
-                lbTGICASPThum.Text = "" + (AResourceKey)thumSR.RequestedRK;
+                thmCASPart.Image = Image.FromStream(thumSR.Resource.Stream);
+                thmCASPart.ResourceKey = thumSR.RequestedRK;
             }
 
             tbCASPResourceName.Text = NameMap.NMap[item.RequestedRK.Instance];
@@ -1770,20 +1786,20 @@ namespace ObjectCloner
         void fillOverviewUpdateImage(SpecificResource item)
         {
             if (formClosing) return;
-            if (pbCatlgThum.Image == null)
+            if (thmOverview.Image == null)
             {
-                pbCatlgThum.Image = ResizeImage(THUM.getLargestThumbOrDefault(item), pbCatlgThum);
-                lbTGICatlgThum.Text = (AResourceKey)THUM.getNewRK(THUM.THUMSize.large, item);
+                thmOverview.Image = THUM.getLargestThumbOrDefault(item);
+                thmOverview.ResourceKey = THUM.getNewRK(THUM.THUMSize.large, item);
             }
         }
 
         void fillCASPUpdateImage(SpecificResource item)
         {
             if (formClosing) return;
-            if (pbCASPThum.Image == null)
+            if (thmCASPart.Image == null)
             {
-                pbCASPThum.Image = ResizeImage(THUM.getLargestThumbOrDefault(item), pbCASPThum);
-                lbTGICASPThum.Text = (AResourceKey)THUM.getNewRK(THUM.THUMSize.large, item);
+                thmCASPart.Image = THUM.getLargestThumbOrDefault(item);
+                thmCASPart.ResourceKey = THUM.getNewRK(THUM.THUMSize.large, item);
             }
         }
 
@@ -1816,7 +1832,7 @@ namespace ObjectCloner
         void tabEnableOverview(bool enabled)
         {
             enabled &= !((string)tpMain.Tag == noData);
-            btnReplCatlgThum.Enabled = enabled;
+            thmOverview.Enabled = enabled;
             tbCatlgName.ReadOnly = !enabled;// || itemName == null;
             tbCatlgDesc.ReadOnly = !enabled;// || itemDesc == null;
             ckbCopyToAll.Enabled = enabled;
@@ -1828,7 +1844,7 @@ namespace ObjectCloner
         void tabEnableCASP(bool enabled)
         {
             //tbCASPResourceName.Text = "";
-            btnReplCASPThum.Enabled = enabled;
+            thmCASPart.Enabled = enabled;
             tbCASPUnknown1.ReadOnly = !enabled;
             cbCASPClothingType.Enabled = enabled;
             cbCASPTypeFlags.Enabled = enabled;
@@ -1987,6 +2003,9 @@ namespace ObjectCloner
                 if (!IsOkayToThrowAwayWork())
                     return;
 
+            selectedItem = null;
+            ClearTabs();
+
             openPackageDialog.InitialDirectory = ObjectCloner.Properties.Settings.Default.LastSaveFolder == null || ObjectCloner.Properties.Settings.Default.LastSaveFolder.Length == 0
                 ? "" : ObjectCloner.Properties.Settings.Default.LastSaveFolder;
             openPackageDialog.FileName = "*.package";
@@ -2005,6 +2024,9 @@ namespace ObjectCloner
             if (HaveUnsavedWork())
                 if (!IsOkayToThrowAwayWork())
                     return;
+
+            selectedItem = null;
+            ClearTabs();
 
             ReloadCurrentPackage();
         }
@@ -2086,10 +2108,12 @@ namespace ObjectCloner
                 if (!IsOkayToThrowAwayWork())
                     return;
 
+            selectedItem = null;
             ClearTabs();
             InitialiseFileTable();
 
-            CTPTBrushIndexToPair = new Dictionary<ulong, SpecificResource>();
+            //2012-09-12 (http://dino.drealm.info/develforums/s3pi/index.php?topic=1238.0) Should never, ever need this:
+            //CTPTBrushIndexToPair = new Dictionary<ulong, SpecificResource>();
             searchPane = new Search(CheckInstallDirs, updateProgress, ListViewAdd);
             searchPane.SelectedIndexChanged += new EventHandler<SelectedIndexChangedEventArgs>(listView_SelectedIndexChanged);
             searchPane.ItemActivate += new EventHandler<ItemActivateEventArgs>(searchResult_ItemActivate);
@@ -2105,6 +2129,7 @@ namespace ObjectCloner
                 if (!IsOkayToThrowAwayWork())
                     return;
 
+            selectedItem = null;
             ClearTabs();
             InitialiseFileTable();
 
@@ -2128,6 +2153,7 @@ namespace ObjectCloner
             replaceTGIPane.SaveClicked += new EventHandler(replaceTGIPane_SaveClicked);
             replaceTGIPane.CancelClicked += new EventHandler(replaceTGIPane_CancelClicked);
 
+            selectedItem = null;
             ClearTabs();
             DisplayReplaceTGI();
         }
@@ -2140,6 +2166,7 @@ namespace ObjectCloner
                 if (!IsOkayToThrowAwayWork())
                     return;
 
+            selectedItem = null;
             ClearTabs();
             DoWait("Renumbering all resources and references...");
             StartRenumbering();
@@ -2477,10 +2504,11 @@ namespace ObjectCloner
         {
             Diagnostics.Log("LoadObjectChooser resourceType: " + resourceType);
 
-            CTPTBrushIndexToPair = new Dictionary<ulong, SpecificResource>();
-
+            selectedItem = null;
             ClearTabs();
 
+            //2012-09-12 (http://dino.drealm.info/develforums/s3pi/index.php?topic=1238.0) Should never, ever need this:
+            //CTPTBrushIndexToPair = new Dictionary<ulong, SpecificResource>();
             btnStart.Enabled = false;
             objectChooser = ObjectChooser.CreateObjectChooser(DoWait, StopWait, updateProgress, ListViewAdd, resourceType,
                 listView_SelectedIndexChanged, objectChooser_ItemActivate);
@@ -2511,48 +2539,7 @@ namespace ObjectCloner
         }
         #endregion
 
-        private void btnReplCatlgThum_Click(object sender, EventArgs e)
-        {
-            Image rep = getReplacementForThumbs();
-            if (rep != null)
-            {
-                replacementForThumbs = rep;
-                pbCatlgThum.Image = ResizeImage(rep, pbCatlgThum);
-            }
-        }
-
-        private void pbCatlgThum_DoubleClick(object sender, EventArgs e) { btnReplCatlgThum_Click(sender, e); }
-
-        private void btnReplCASPThum_Click(object sender, EventArgs e)
-        {
-            Image rep = getReplacementForThumbs();
-            if (rep != null)
-            {
-                replacementForThumbs = rep;
-                pbCASPThum.Image = ResizeImage(rep, pbCASPThum);
-            }
-        }
-
-        private void pbCASPThum_DoubleClick(object sender, EventArgs e) { btnReplCASPThum_Click(sender, e); }
-
-        Image getReplacementForThumbs()
-        {
-            openThumbnailDialog.FilterIndex = 1;
-            openThumbnailDialog.FileName = "*.PNG";
-            DialogResult dr = openThumbnailDialog.ShowDialog();
-            if (dr != DialogResult.OK) return null;
-            try
-            {
-                return Image.FromFile(openThumbnailDialog.FileName, true);
-            }
-            catch (Exception ex)
-            {
-                CopyableMessageBox.IssueException(ex, "Could not read thumbnail:\n" + openThumbnailDialog.FileName, openThumbnailDialog.Title);
-                return null;
-            }
-        }
-
-        Image ResizeImage(Image src, PictureBox target)
+        public static Image ResizeImage(Image src, PictureBox target)
         {
             return src.GetThumbnailImage(target.Width, target.Height, () => false, System.IntPtr.Zero);
         }
@@ -4040,7 +4027,7 @@ namespace ObjectCloner
 
                             if (isIncludeThumbnails)
                             {
-                                Image img = replacementForThumbs != null ? replacementForThumbs : THUM.getLargestThumbOrDefault(item);
+                                Image img = thmOverview.IsReplaced ? thmOverview.Image : THUM.getLargestThumbOrDefault(item);
                                 ulong instance = isPng ? PngInstance : item.RequestedRK.Instance;
 
                                 //Ensure one of each size exists
@@ -4054,10 +4041,10 @@ namespace ObjectCloner
                                         rkToItemAdded.Add(rk, thum);
                                         THUM.Thumb[item.RequestedRK.ResourceType, instance, size, isPng] = img;
                                     }
-                                    else if (replacementForThumbs != null)
+                                    else if (thmOverview.IsReplaced)
                                     {
                                         //Replace existing thumbnail
-                                        THUM.Thumb[item.RequestedRK.ResourceType, instance, size, isPng] = replacementForThumbs;
+                                        THUM.Thumb[item.RequestedRK.ResourceType, instance, size, isPng] = thmOverview.Image;
                                     }
                                 }
                             }

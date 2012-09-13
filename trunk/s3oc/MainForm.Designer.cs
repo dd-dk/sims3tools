@@ -44,11 +44,6 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tpMain = new System.Windows.Forms.TabPage();
             this.tlpOverview = new System.Windows.Forms.TableLayoutPanel();
-            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.lbTGICatlgThum = new System.Windows.Forms.Label();
-            this.btnReplCatlgThum = new System.Windows.Forms.Button();
-            this.pbCatlgThum = new System.Windows.Forms.PictureBox();
             this.tbPrice = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
@@ -70,6 +65,7 @@
             this.tbObjName = new System.Windows.Forms.TextBox();
             this.label26 = new System.Windows.Forms.Label();
             this.tbPackage = new System.Windows.Forms.TextBox();
+            this.thmOverview = new ObjectCloner.CustomControls.Thumbnail();
             this.tpDetail = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.tlpOther = new System.Windows.Forms.TableLayoutPanel();
@@ -124,11 +120,6 @@
             this.tbCASPPackage = new System.Windows.Forms.TextBox();
             this.tbCASPUnknown4 = new System.Windows.Forms.TextBox();
             this.label37 = new System.Windows.Forms.Label();
-            this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.lbTGICASPThum = new System.Windows.Forms.Label();
-            this.btnReplCASPThum = new System.Windows.Forms.Button();
-            this.pbCASPThum = new System.Windows.Forms.PictureBox();
             this.cbCASPClothingType = new System.Windows.Forms.ComboBox();
             this.clbCASPAgeFlags = new System.Windows.Forms.CheckedListBox();
             this.clbCASPCategory = new System.Windows.Forms.CheckedListBox();
@@ -145,6 +136,7 @@
             this.label32 = new System.Windows.Forms.Label();
             this.cbCASPRegionType = new System.Windows.Forms.ComboBox();
             this.label38 = new System.Windows.Forms.Label();
+            this.thmCASPart = new ObjectCloner.CustomControls.Thumbnail();
             this.menuBarWidget1 = new ObjectCloner.MenuBarWidget();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -154,7 +146,6 @@
             this.label6 = new System.Windows.Forms.Label();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openPackageDialog = new System.Windows.Forms.OpenFileDialog();
-            this.openThumbnailDialog = new System.Windows.Forms.OpenFileDialog();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
@@ -166,9 +157,6 @@
             this.tabControl1.SuspendLayout();
             this.tpMain.SuspendLayout();
             this.tlpOverview.SuspendLayout();
-            this.tableLayoutPanel2.SuspendLayout();
-            this.panel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pbCatlgThum)).BeginInit();
             this.tpDetail.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.tlpOther.SuspendLayout();
@@ -198,9 +186,6 @@
             this.tlpBuildSort.SuspendLayout();
             this.tpCASP.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
-            this.tableLayoutPanel7.SuspendLayout();
-            this.panel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pbCASPThum)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
@@ -420,7 +405,6 @@
             this.tlpOverview.ColumnCount = 2;
             this.tlpOverview.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tlpOverview.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpOverview.Controls.Add(this.tableLayoutPanel2, 0, 0);
             this.tlpOverview.Controls.Add(this.tbPrice, 1, 9);
             this.tlpOverview.Controls.Add(this.label12, 0, 9);
             this.tlpOverview.Controls.Add(this.label11, 0, 7);
@@ -442,10 +426,11 @@
             this.tlpOverview.Controls.Add(this.tbObjName, 1, 2);
             this.tlpOverview.Controls.Add(this.label26, 0, 11);
             this.tlpOverview.Controls.Add(this.tbPackage, 1, 11);
+            this.tlpOverview.Controls.Add(this.thmOverview, 0, 0);
             this.tlpOverview.Location = new System.Drawing.Point(0, 0);
             this.tlpOverview.Name = "tlpOverview";
             this.tlpOverview.RowCount = 13;
-            this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 128F));
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -460,69 +445,6 @@
             this.tlpOverview.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpOverview.Size = new System.Drawing.Size(704, 532);
             this.tlpOverview.TabIndex = 0;
-            // 
-            // tableLayoutPanel2
-            // 
-            this.tableLayoutPanel2.AutoSize = true;
-            this.tableLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel2.ColumnCount = 2;
-            this.tlpOverview.SetColumnSpan(this.tableLayoutPanel2, 2);
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel2.Controls.Add(this.panel1, 1, 0);
-            this.tableLayoutPanel2.Controls.Add(this.pbCatlgThum, 0, 0);
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 1;
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(387, 128);
-            this.tableLayoutPanel2.TabIndex = 0;
-            // 
-            // panel1
-            // 
-            this.panel1.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.panel1.AutoSize = true;
-            this.panel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.panel1.Controls.Add(this.lbTGICatlgThum);
-            this.panel1.Controls.Add(this.btnReplCatlgThum);
-            this.panel1.Location = new System.Drawing.Point(131, 43);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(253, 42);
-            this.panel1.TabIndex = 0;
-            // 
-            // lbTGICatlgThum
-            // 
-            this.lbTGICatlgThum.AutoSize = true;
-            this.lbTGICatlgThum.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbTGICatlgThum.Location = new System.Drawing.Point(3, 29);
-            this.lbTGICatlgThum.Name = "lbTGICatlgThum";
-            this.lbTGICatlgThum.Size = new System.Drawing.Size(247, 13);
-            this.lbTGICatlgThum.TabIndex = 2;
-            this.lbTGICatlgThum.Text = "0x00000000-0x00000000-0x0000000000000000";
-            // 
-            // btnReplCatlgThum
-            // 
-            this.btnReplCatlgThum.Enabled = false;
-            this.btnReplCatlgThum.Location = new System.Drawing.Point(3, 3);
-            this.btnReplCatlgThum.Name = "btnReplCatlgThum";
-            this.btnReplCatlgThum.Size = new System.Drawing.Size(75, 23);
-            this.btnReplCatlgThum.TabIndex = 1;
-            this.btnReplCatlgThum.Text = "Replace...";
-            this.btnReplCatlgThum.UseVisualStyleBackColor = true;
-            this.btnReplCatlgThum.Click += new System.EventHandler(this.btnReplCatlgThum_Click);
-            // 
-            // pbCatlgThum
-            // 
-            this.pbCatlgThum.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.pbCatlgThum.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pbCatlgThum.Location = new System.Drawing.Point(0, 0);
-            this.pbCatlgThum.Margin = new System.Windows.Forms.Padding(0);
-            this.pbCatlgThum.Name = "pbCatlgThum";
-            this.pbCatlgThum.Size = new System.Drawing.Size(128, 128);
-            this.pbCatlgThum.TabIndex = 0;
-            this.pbCatlgThum.TabStop = false;
-            this.pbCatlgThum.DoubleClick += new System.EventHandler(this.pbCatlgThum_DoubleClick);
             // 
             // tbPrice
             // 
@@ -730,6 +652,18 @@
             this.tbPackage.ReadOnly = true;
             this.tbPackage.Size = new System.Drawing.Size(608, 20);
             this.tbPackage.TabIndex = 21;
+            // 
+            // thmOverview
+            // 
+            this.tlpOverview.SetColumnSpan(this.thmOverview, 2);
+            this.thmOverview.Image = null;
+            this.thmOverview.IsReplaced = false;
+            this.thmOverview.Location = new System.Drawing.Point(0, 0);
+            this.thmOverview.Margin = new System.Windows.Forms.Padding(0);
+            this.thmOverview.Name = "thmOverview";
+            this.thmOverview.ResourceKey = null;
+            this.thmOverview.Size = new System.Drawing.Size(381, 128);
+            this.thmOverview.TabIndex = 0;
             // 
             // tpDetail
             // 
@@ -1404,7 +1338,6 @@
             this.tableLayoutPanel5.Controls.Add(this.tbCASPPackage, 1, 9);
             this.tableLayoutPanel5.Controls.Add(this.tbCASPUnknown4, 1, 8);
             this.tableLayoutPanel5.Controls.Add(this.label37, 0, 8);
-            this.tableLayoutPanel5.Controls.Add(this.tableLayoutPanel7, 0, 0);
             this.tableLayoutPanel5.Controls.Add(this.cbCASPClothingType, 1, 3);
             this.tableLayoutPanel5.Controls.Add(this.clbCASPAgeFlags, 1, 5);
             this.tableLayoutPanel5.Controls.Add(this.clbCASPCategory, 3, 5);
@@ -1421,10 +1354,11 @@
             this.tableLayoutPanel5.Controls.Add(this.label32, 2, 5);
             this.tableLayoutPanel5.Controls.Add(this.cbCASPRegionType, 3, 4);
             this.tableLayoutPanel5.Controls.Add(this.label38, 2, 4);
+            this.tableLayoutPanel5.Controls.Add(this.thmCASPart, 0, 0);
             this.tableLayoutPanel5.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 11;
-            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 128F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -1435,7 +1369,6 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel5.Size = new System.Drawing.Size(704, 533);
             this.tableLayoutPanel5.TabIndex = 0;
             // 
@@ -1518,69 +1451,6 @@
             this.label37.Size = new System.Drawing.Size(59, 13);
             this.label37.TabIndex = 22;
             this.label37.Text = "Unknown4";
-            // 
-            // tableLayoutPanel7
-            // 
-            this.tableLayoutPanel7.AutoSize = true;
-            this.tableLayoutPanel7.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel7.ColumnCount = 2;
-            this.tableLayoutPanel5.SetColumnSpan(this.tableLayoutPanel7, 4);
-            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel7.Controls.Add(this.panel2, 1, 0);
-            this.tableLayoutPanel7.Controls.Add(this.pbCASPThum, 0, 0);
-            this.tableLayoutPanel7.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel7.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel7.Name = "tableLayoutPanel7";
-            this.tableLayoutPanel7.RowCount = 1;
-            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel7.Size = new System.Drawing.Size(387, 128);
-            this.tableLayoutPanel7.TabIndex = 1;
-            // 
-            // panel2
-            // 
-            this.panel2.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.panel2.AutoSize = true;
-            this.panel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.panel2.Controls.Add(this.lbTGICASPThum);
-            this.panel2.Controls.Add(this.btnReplCASPThum);
-            this.panel2.Location = new System.Drawing.Point(131, 43);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(253, 42);
-            this.panel2.TabIndex = 0;
-            // 
-            // lbTGICASPThum
-            // 
-            this.lbTGICASPThum.AutoSize = true;
-            this.lbTGICASPThum.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbTGICASPThum.Location = new System.Drawing.Point(3, 29);
-            this.lbTGICASPThum.Name = "lbTGICASPThum";
-            this.lbTGICASPThum.Size = new System.Drawing.Size(247, 13);
-            this.lbTGICASPThum.TabIndex = 2;
-            this.lbTGICASPThum.Text = "0x00000000-0x00000000-0x0000000000000000";
-            // 
-            // btnReplCASPThum
-            // 
-            this.btnReplCASPThum.Enabled = false;
-            this.btnReplCASPThum.Location = new System.Drawing.Point(3, 3);
-            this.btnReplCASPThum.Name = "btnReplCASPThum";
-            this.btnReplCASPThum.Size = new System.Drawing.Size(75, 23);
-            this.btnReplCASPThum.TabIndex = 1;
-            this.btnReplCASPThum.Text = "Replace...";
-            this.btnReplCASPThum.UseVisualStyleBackColor = true;
-            this.btnReplCASPThum.Click += new System.EventHandler(this.btnReplCASPThum_Click);
-            // 
-            // pbCASPThum
-            // 
-            this.pbCASPThum.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.pbCASPThum.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.pbCASPThum.Location = new System.Drawing.Point(0, 0);
-            this.pbCASPThum.Margin = new System.Windows.Forms.Padding(0);
-            this.pbCASPThum.Name = "pbCASPThum";
-            this.pbCASPThum.Size = new System.Drawing.Size(128, 128);
-            this.pbCASPThum.TabIndex = 0;
-            this.pbCASPThum.TabStop = false;
-            this.pbCASPThum.DoubleClick += new System.EventHandler(this.pbCASPThum_DoubleClick);
             // 
             // cbCASPClothingType
             // 
@@ -1755,6 +1625,18 @@
             this.label38.TabIndex = 12;
             this.label38.Text = "Region";
             // 
+            // thmCASPart
+            // 
+            this.tableLayoutPanel5.SetColumnSpan(this.thmCASPart, 4);
+            this.thmCASPart.Image = null;
+            this.thmCASPart.IsReplaced = false;
+            this.thmCASPart.Location = new System.Drawing.Point(0, 0);
+            this.thmCASPart.Margin = new System.Windows.Forms.Padding(0);
+            this.thmCASPart.Name = "thmCASPart";
+            this.thmCASPart.ResourceKey = null;
+            this.thmCASPart.Size = new System.Drawing.Size(381, 128);
+            this.thmCASPart.TabIndex = 1;
+            // 
             // menuBarWidget1
             // 
             this.menuBarWidget1.Dock = System.Windows.Forms.DockStyle.None;
@@ -1848,12 +1730,6 @@
             this.openPackageDialog.Filter = "DBPF Packages|*.package;*.world|All files|*.*";
             this.openPackageDialog.Title = "Select package containing object";
             // 
-            // openThumbnailDialog
-            // 
-            this.openThumbnailDialog.FileName = "*.PNG";
-            this.openThumbnailDialog.Filter = "Thumbnails|*.PNG|All files|*.*";
-            this.openThumbnailDialog.Title = "Select thumbnail";
-            // 
             // MainForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
@@ -1883,11 +1759,6 @@
             this.tpMain.ResumeLayout(false);
             this.tlpOverview.ResumeLayout(false);
             this.tlpOverview.PerformLayout();
-            this.tableLayoutPanel2.ResumeLayout(false);
-            this.tableLayoutPanel2.PerformLayout();
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pbCatlgThum)).EndInit();
             this.tpDetail.ResumeLayout(false);
             this.tpDetail.PerformLayout();
             this.tableLayoutPanel3.ResumeLayout(false);
@@ -1945,11 +1816,6 @@
             this.tpCASP.ResumeLayout(false);
             this.tableLayoutPanel5.ResumeLayout(false);
             this.tableLayoutPanel5.PerformLayout();
-            this.tableLayoutPanel7.ResumeLayout(false);
-            this.tableLayoutPanel7.PerformLayout();
-            this.panel2.ResumeLayout(false);
-            this.panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pbCASPThum)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
@@ -1972,7 +1838,6 @@
         private MenuBarWidget menuBarWidget1;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.OpenFileDialog openPackageDialog;
-        private System.Windows.Forms.OpenFileDialog openThumbnailDialog;
         private System.Windows.Forms.TableLayoutPanel tlpTask;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.Button btnStart;
@@ -1981,11 +1846,6 @@
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tpMain;
         private System.Windows.Forms.TableLayoutPanel tlpOverview;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Label lbTGICatlgThum;
-        private System.Windows.Forms.Button btnReplCatlgThum;
-        private System.Windows.Forms.PictureBox pbCatlgThum;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox tbObjName;
         private System.Windows.Forms.TextBox tbPrice;
@@ -2069,11 +1929,6 @@
         private System.Windows.Forms.Label label32;
         private System.Windows.Forms.CheckedListBox clbCASPCategory;
         private System.Windows.Forms.ComboBox cbCASPSpeciesType;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel7;
-        private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Label lbTGICASPThum;
-        private System.Windows.Forms.Button btnReplCASPThum;
-        private System.Windows.Forms.PictureBox pbCASPThum;
         private System.Windows.Forms.ComboBox cbCASPTypeFlags;
         private System.Windows.Forms.Label label38;
         private System.Windows.Forms.ComboBox cbCASPRegionType;
@@ -2087,6 +1942,8 @@
         private System.Windows.Forms.Label label40;
         private System.Windows.Forms.TableLayoutPanel tlpFuncSub2Low;
         private System.Windows.Forms.Label label41;
+        private CustomControls.Thumbnail thmOverview;
+        private CustomControls.Thumbnail thmCASPart;
     }
 }
 
