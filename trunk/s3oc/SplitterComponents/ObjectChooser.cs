@@ -98,10 +98,10 @@ namespace ObjectCloner.SplitterComponents
             listView1.ListViewItemSorter = lvwColumnSorter;
             listView1.Visible = true;
             listView1.Focus();
-            if (listView1.Visible && listView1.Items.Count > 0)
+            if (listView1.Visible && listView1.SelectedItems.Count > 0)
             {
-                listView1.Items[0].EnsureVisible();
-                listView1.Items[0].Focused = true;
+                listView1.SelectedItems[0].EnsureVisible();
+                listView1.SelectedItems[0].Focused = true;
                 //listView1.Items[0].Selected = true;
             }
         }
