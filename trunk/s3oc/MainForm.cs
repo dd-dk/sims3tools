@@ -3406,13 +3406,13 @@ namespace ObjectCloner
             {
                 string myKey = key + ".matd[" + i + "]";
 
-                MATD.ShaderDataList sdataList;
+                ShaderDataList sdataList;
                 if (matd.ContentFields.Contains("Mtnf")) sdataList = matd.Mtnf.SData;
                 else sdataList = matd.Mtrl.SData;
 
                 int j = 0;
-                foreach (MATD.ElementTextureRef sdata in sdataList
-                    .Where(x => x is MATD.ElementTextureRef && wantedImages.Contains(x.Field)))
+                foreach (ElementTextureRef sdata in sdataList
+                    .Where(x => x is ElementTextureRef && wantedImages.Contains(x.Field)))
                 {
                     if (ddsResources.Contains(rcol.Resources[sdata.Data.TGIBlockIndex].ResourceType))
                     {
@@ -3421,8 +3421,8 @@ namespace ObjectCloner
                     }
                 }
 
-                foreach (MATD.ElementTextureKey sdata in sdataList
-                    .Where(x => x is MATD.ElementTextureKey && wantedImages.Contains(x.Field)))
+                foreach (ElementTextureKey sdata in sdataList
+                    .Where(x => x is ElementTextureKey && wantedImages.Contains(x.Field)))
                 {
                     if (ddsResources.Contains(sdata.Data.ResourceType))
                     {
@@ -3434,9 +3434,9 @@ namespace ObjectCloner
                 i++;
             }
         }
-        static MATD.FieldType[] wantedImages = new MATD.FieldType[] {
-            MATD.FieldType.DiffuseMap,
-            MATD.FieldType.SpecularMap,
+        static FieldType[] wantedImages = new FieldType[] {
+            FieldType.DiffuseMap,
+            FieldType.SpecularMap,
         };
 
         //This slurps all the RKs out of the TXTCs so the references get pulled in
@@ -3554,20 +3554,13 @@ namespace ObjectCloner
             meshExpImp.ModelBlocks.GEOM geom = geomResource.ChunkEntries[0].RCOLBlock as meshExpImp.ModelBlocks.GEOM;
             if (geom == null) { Diagnostics.Show("GEOM RCOL block not found"); return; }
             if (geom.Shader == 0) return;
-            MATD.MTNF mtnf = geom.Mtnf;
+            MTNF mtnf = geom.Mtnf;
             if (mtnf == null) { Diagnostics.Show("MTNF expected but was null"); return; }
-            MATD.ShaderData sd = mtnf.SData.Find(e => e.Field == MATD.FieldType.NormalMap);
+            ShaderData sd = mtnf.SData.Find(e => e.Field == FieldType.NormalMap);
             if (sd == null) { Diagnostics.Show("NormalMap not found"); return; }
-            MATD.ElementTextureRef tr = sd as MATD.ElementTextureRef;
+            ElementTextureRef tr = sd as ElementTextureRef;
             if (tr == null) { Diagnostics.Show("NormalMap not an ElementTextureRef"); return; }
-            //This will break when Data stops being a ChunkRef and turns into a plain int...
-            int index = -2;
-            using (MemoryStream ms = new MemoryStream())
-            {
-                tr.Data.UnParse(ms);
-                ms.Position = 0;
-                index = new BinaryReader(ms).ReadInt32();
-            }
+            int index = tr.Index;
             if (index < 0) { Diagnostics.Show(String.Format("NormalMap index read {0}, expected >= 0", index)); return; }
             if (index >= geom.TGIBlocks.Count) { Diagnostics.Show(String.Format("NormalMap index read {0}, expected < {1}", index, geom.TGIBlocks.Count)); return; }
             if (rkLookup.ContainsValue(geom.TGIBlocks[index])) { Diagnostics.Show("Already seen NormalMap " + geom.TGIBlocks[index]); }
