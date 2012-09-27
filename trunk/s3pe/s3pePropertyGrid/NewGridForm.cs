@@ -132,8 +132,8 @@ namespace S3PIDemoFE
         {
             contextMenuStrip1.ItemClicked -= new ToolStripItemClickedEventHandler(contextMenuStrip1_ItemClicked);
             contextMenuStrip1.ItemClicked += new ToolStripItemClickedEventHandler(contextMenuStrip1_ItemClicked);
-            Type declaringType = abstractType.DeclaringType;
-            foreach (Type type in declaringType.GetNestedTypes())
+            System.Reflection.Assembly ass = abstractType.Assembly;
+            foreach (Type type in ass.GetTypes())
             {
                 if (!type.IsSubclassOf(abstractType)) continue;
                 object[] attrs = type.GetCustomAttributes(typeof(ConstructorParametersAttribute), true);
