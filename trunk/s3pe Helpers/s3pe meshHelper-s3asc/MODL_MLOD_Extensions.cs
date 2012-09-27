@@ -65,10 +65,10 @@ namespace meshExpImp.Helper
             MATD matd = GetMATDforMesh(rcolResource, mesh.MaterialIndex);
             if (matd != null)
             {
-                MATD.ShaderData data = (matd.Version < 0x0103 ? matd.Mtrl.SData : matd.Mtnf.SData).Find(x => x.Field == MATD.FieldType.UVScales);
+                ShaderData data = (matd.Version < 0x0103 ? matd.Mtrl.SData : matd.Mtnf.SData).Find(x => x.Field == FieldType.UVScales);
                 if (data != null)
                 {
-                    if (data is MATD.ElementFloat3) { MATD.ElementFloat3 e = data as MATD.ElementFloat3; return new float[] { e.Data0, e.Data1, e.Data2, }; }
+                    if (data is ElementFloat3) { ElementFloat3 e = data as ElementFloat3; return new float[] { e.Data0, e.Data1, e.Data2, }; }
                     else throw new InvalidOperationException(String.Format("Found UVScales of type '{0}'; expected 'ElementFloat3'.", data.GetType().Name));
                 }
             }
@@ -82,16 +82,16 @@ namespace meshExpImp.Helper
             if (matd == null)
                 throw new ArgumentException("No MATD found for requested mesh");
 
-            foreach (MATD.FieldType ft in new MATD.FieldType[] { MATD.FieldType.UVScales, MATD.FieldType.DiffuseUVSelector, MATD.FieldType.SpecularUVSelector, })
+            foreach (FieldType ft in new FieldType[] { FieldType.UVScales, FieldType.DiffuseUVSelector, FieldType.SpecularUVSelector, })
             {
-                MATD.ShaderData data = (matd.Version < 0x0103 ? matd.Mtrl.SData : matd.Mtnf.SData).Find(x => x.Field == ft);
+                ShaderData data = (matd.Version < 0x0103 ? matd.Mtrl.SData : matd.Mtnf.SData).Find(x => x.Field == ft);
                 if (data == null)
                     continue;
 
-                if (!(data is MATD.ElementFloat3))
+                if (!(data is ElementFloat3))
                     throw new InvalidOperationException(String.Format("Found " + ft + " of type '{0}'; expected 'ElementFloat3'.", data.GetType().Name));
 
-                MATD.ElementFloat3 e = data as MATD.ElementFloat3;
+                ElementFloat3 e = data as ElementFloat3;
                 e.Data0 = 1f / short.MaxValue;
                 e.Data1 = 0f;
                 e.Data2 = 0f;
