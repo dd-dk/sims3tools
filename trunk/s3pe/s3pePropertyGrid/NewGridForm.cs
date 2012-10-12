@@ -135,9 +135,7 @@ namespace S3PIDemoFE
             System.Reflection.Assembly ass = abstractType.Assembly;
             foreach (Type type in ass.GetTypes())
             {
-                if (!type.IsSubclassOf(abstractType)) continue;
-                object[] attrs = type.GetCustomAttributes(typeof(ConstructorParametersAttribute), true);
-                if (attrs == null || attrs.Length == 0) continue;
+                if (!type.IsSubclassOf(abstractType) || type.IsAbstract) continue;
 
                 ToolStripItem tsi = new ToolStripMenuItem(type.Name);
                 tsi.Tag = type;
@@ -159,10 +157,8 @@ namespace S3PIDemoFE
             if (selectedElement != null)
                 try
                 {
-                    if (fieldList.Add(selectedElement))
-                        selectedIndex = fieldList.Count - 1;
-                    else
-                        CopyableMessageBox.Show("Copy failed", this.Text, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+                    fieldList.Add(selectedElement.Clone(null));
+                    selectedIndex = fieldList.Count - 1;
                 }
                 catch (Exception ex)
                 {
@@ -197,6 +193,10 @@ namespace S3PIDemoFE
                 else
                     doInsert();
             }
+            catch (NotImplementedException)
+            {
+                CopyableMessageBox.Show("This list does not allow entries to be added this way.", "Grid", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
+            }
             catch (Exception ex)
             {
                 MainForm.IssueException(ex, "");
@@ -215,7 +215,11 @@ namespace S3PIDemoFE
                 else
                     doInsert();
             }
-            catch(Exception ex)
+            catch (NotImplementedException)
+            {
+                CopyableMessageBox.Show("This list does not allow entries to be added this way.", "Grid", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
+            }
+            catch (Exception ex)
             {
                 MainForm.IssueException(ex, "");
             }
@@ -233,7 +237,23 @@ namespace S3PIDemoFE
         private void btnDelete_Click(object sender, EventArgs e)
         {
             int selectedIndex = listBox1.SelectedIndex;
-            fieldList.RemoveAt(listBox1.SelectedIndex);
+            try
+            {
+                // We need to make sure the RemoveAt on AHandlerList<T> is used rather than on IList.
+                // IGenericAdd extends IList, so by default, the one on IList gets resolved.
+                // Using reflection we can get to the right one.
+                Type t = fieldList.GetType();
+                var mi = t.GetMethod("RemoveAt");
+                var result = mi.Invoke(fieldList, new object[] { listBox1.SelectedIndex, });
+            }
+            catch (NotImplementedException)
+            {
+                CopyableMessageBox.Show("This list does not allow entries to be deleted this way.", "Grid", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MainForm.IssueException(ex, "");
+            }
             listBox1.SelectedIndex = -1;
             fillListBox(selectedIndex);
         }

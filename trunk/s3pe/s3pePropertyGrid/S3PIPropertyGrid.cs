@@ -18,15 +18,16 @@
  *  along with s3pi.  If not, see <http://www.gnu.org/licenses/>.          *
  ***************************************************************************/
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
-using System.Windows.Forms;
-using s3pi.Interfaces;
-using System.Collections;
 using System.Drawing.Design;
+using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Windows.Forms;
 using System.Windows.Forms.Design;
+using s3pi.Interfaces;
 
 namespace S3PIDemoFE
 {
@@ -230,7 +231,6 @@ namespace S3PIDemoFE
         {
             AApiVersionedFields owner;
             int priority = int.MaxValue;
-            bool expandable = false;
             DependentList<TGIBlock> tgiBlocks = null;
             Type fieldType;
             public TypedValuePropertyDescriptor(AApiVersionedFields owner, string field, Attribute[] attrs)
@@ -247,15 +247,12 @@ namespace S3PIDemoFE
                         fieldType = GetFieldType(owner, field);
                         priority = ElementPriorityAttribute.GetPriority(owner.GetType(), name);
                         tgiBlocks = owner.GetTGIBlocks(name);
-                        expandable = DataGridExpandableAttribute.GetDataGridExpandable(owner.GetType(), name);
                     }
                 }
                 catch (Exception ex) { throw ex; }
             }
 
             public int Priority { get { return priority; } }
-
-            public bool Expandable { get { return expandable; } }
 
             public bool hasTGIBlocks { get { return tgiBlocks != null; } }
             public DependentList<TGIBlock> TGIBlocks { get { return tgiBlocks; } }
@@ -1161,6 +1158,14 @@ namespace S3PIDemoFE
 
         public class IDictionaryEditor : UITypeEditor
         {
+            DictionaryEntry getDefault(Type kvt)
+            {
+                var getter = kvt.GetMethod("GetDefault");
+                if (getter != null)
+                    return (DictionaryEntry)getter.Invoke(null, null);
+                throw new ArgumentException(string.Format("{0} does not have method 'GetDefault'.", kvt.Name));
+            }
+
             public override UITypeEditorEditStyle GetEditStyle(ITypeDescriptorContext context) { return UITypeEditorEditStyle.Modal; }
             public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
             {
@@ -1169,13 +1174,13 @@ namespace S3PIDemoFE
                 IDictionaryCTD field = (IDictionaryCTD)value;
                 if (field.Value == null) return value;
 
-                object[] attrs = field.Value.GetType().GetCustomAttributes(typeof(ConstructorParametersAttribute), true);
-                if (attrs.Length != 1 || (attrs[0] as ConstructorParametersAttribute).parameters.Length != 2) return value;
-                ConstructorParametersAttribute cpa = (attrs[0] as ConstructorParametersAttribute);
+                Type[] interfaces = field.Value.GetType().GetInterfaces().Where(x => x.Name == "IDictionary`2").ToArray();
+                if (interfaces.Length != 1) return value;
+                DictionaryEntry entry = getDefault(field.Value.GetType());
 
                 List<object> oldKeys = new List<object>();
-                AsKVPList list = new AsKVPList(cpa);
-                foreach (var k in field.Value.Keys) { list.Add(k, field.Value[k]); oldKeys.Add(k); }
+                AsKVPList list = new AsKVPList(entry);
+                foreach (var k in field.Value.Keys) { list.Add(new AsKVP(0, null, k, field.Value[k])); oldKeys.Add(k); }
 
                 NewGridForm ui = new NewGridForm(list);
                 edSvc.ShowDialog(ui);
@@ -1525,7 +1530,8 @@ namespace S3PIDemoFE
         DictionaryEntry entry;
 
         public AsKVP(int APIversion, EventHandler handler, AsKVP basis) : this(APIversion, handler, basis.entry.Key, basis.entry.Value) { }
-        public AsKVP(int APIversion, EventHandler handler, object key, object val) : base(APIversion, handler) { entry = new DictionaryEntry(key, val); }
+        public AsKVP(int APIversion, EventHandler handler, DictionaryEntry entry) : this(APIversion, handler, entry.Key, entry.Value) { }
+        public AsKVP(int APIversion, EventHandler handler, object key, object value) : base(APIversion, handler) { entry = new DictionaryEntry(key, value); }
 
         public override List<string> ContentFields { get { return contentFields; } }
         public override int RecommendedApiVersion { get { return 0; } }
@@ -1573,9 +1579,9 @@ namespace S3PIDemoFE
 
     public class AsKVPList : DependentList<AsKVP>
     {
-        ConstructorParametersAttribute cpa;
-        public AsKVPList(ConstructorParametersAttribute cpa) : base(null) { this.cpa = cpa; }
-        public override void Add() { this.Add(cpa.parameters[0], cpa.parameters[1]); }
+        DictionaryEntry entry;
+        public AsKVPList(DictionaryEntry entry) : base(null) { this.entry = entry; }
+        public override void Add() { this.Add(new AsKVP(0, null, entry)); }
         protected override AsKVP CreateElement(Stream s) { throw new NotImplementedException(); }
         protected override void WriteElement(Stream s, AsKVP element) { throw new NotImplementedException(); }
     }
