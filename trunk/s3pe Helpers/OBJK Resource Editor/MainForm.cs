@@ -87,7 +87,7 @@ namespace s3pe_OBJK_Resource_Editor
             foreach (string name in ComponentNames)
             {
                 if (!hasComponent(name)) continue;
-                objk.Components.Add(Enum.Parse(typeof(ObjKeyResource.ObjKeyResource.Component), name));
+                objk.Components.Add(new ObjKeyResource.ObjKeyResource.ComponentElement(0, null, (ObjKeyResource.ObjKeyResource.Component)Enum.Parse(typeof(ObjKeyResource.ObjKeyResource.Component), name)));
                 if (ComponentDataTypeMap.ContainsKey(name))
                 {
                     int row = ComponentNames.IndexOf(name);
@@ -100,25 +100,25 @@ namespace s3pe_OBJK_Resource_Editor
                     {
                         TextBox tb = (TextBox)tableLayoutPanel1.GetControlFromPosition(2, row);
                         string value = tb.Text;
-                        objk.ComponentData.Add(tk.key, (byte)0x00, value);
+                        objk.ComponentData.Add(new ObjKeyResource.ObjKeyResource.CDTString(0, null, tk.key, 0x00, value));
                     }
                     else if (type == "ResourceKey")
                     {
                         TGIBlockCombo cb = (TGIBlockCombo)tableLayoutPanel1.GetControlFromPosition(2, row);
                         Int32 value = cb.SelectedIndex;
-                        objk.ComponentData.Add(tk.key, (byte)0x01, value);
+                        objk.ComponentData.Add(new ObjKeyResource.ObjKeyResource.CDTResourceKey(0, null, tk.key, 0x01, value));
                     }
                     else if (type == "AssetResourceName")
                     {
                         TGIBlockCombo cb = (TGIBlockCombo)tableLayoutPanel1.GetControlFromPosition(2, row);
                         Int32 value = cb.SelectedIndex;
-                        objk.ComponentData.Add(tk.key, (byte)0x02, value);
+                        objk.ComponentData.Add(new ObjKeyResource.ObjKeyResource.CDTAssetResourceName(0, null, tk.key, 0x02, value));
                     }
                     else if (type == "SteeringInstance")
                     {
                         TextBox tb = (TextBox)tableLayoutPanel1.GetControlFromPosition(2, row);
                         string value = tb.Text;
-                        objk.ComponentData.Add(tk.key, (byte)0x03, value);
+                        objk.ComponentData.Add(new ObjKeyResource.ObjKeyResource.CDTSteeringInstance(0, null, tk.key, 0x03, value));
                     }
                     else if (type == "UInt32")
                     {
@@ -127,12 +127,12 @@ namespace s3pe_OBJK_Resource_Editor
                         UInt32 value;
                         if (s.StartsWith("0x")) value = uint.Parse(s.Substring(2), System.Globalization.NumberStyles.HexNumber);
                         else value = uint.Parse(s);
-                        objk.ComponentData.Add(tk.key, (byte)0x04, value);
+                        objk.ComponentData.Add(new ObjKeyResource.ObjKeyResource.CDTUInt32(0, null, tk.key, 0x04, value));
                     }
                 }
             }
             if (ckbAllowObjectHiding.Checked)
-                objk.ComponentData.Add("allowObjectHiding", (byte)0x04, (UInt32)0);
+                objk.ComponentData.Add(new ObjKeyResource.ObjKeyResource.CDTUInt32(0, null, "allowObjectHiding", 0x04, 0));
 
             result = (byte[])objk.AsBytes.Clone();
         }
