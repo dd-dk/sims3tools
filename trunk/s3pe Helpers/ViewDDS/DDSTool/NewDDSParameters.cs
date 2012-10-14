@@ -39,13 +39,26 @@ namespace s3pe.DDSTool
             cbDepth.SelectedIndex = cbDepth.Items.Count - 1;
         }
 
-        public NewDDSParameters(int width, int height, bool useDXT, int alphaDepth = -1, bool disableColour = false) : this()
+        public NewDDSParameters(int width, int height, bool useDXT, int alphaDepth = -1, bool disableColour = false, bool useLuminance = false) : this()
         {
             nudWidth.Value = width;
             nudHeight.Value = height;
-            ckbUseDXT.Checked = useDXT;
 
-            if (alphaDepth != -1)
+            rb1DXT.Checked = rb1RGB.Checked = rb1Luminance.Checked = false;
+            if (useDXT)
+            {
+                rb1DXT.Checked = true;
+            }
+            else if (!useLuminance)
+            {
+                rb1RGB.Checked = true;
+            }
+            else
+            {
+                rb1Luminance.Checked = true;
+            }
+
+            if (!useLuminance && alphaDepth != -1)
                 cbDepth.SelectedIndex = (useDXT ? DXTitems : DDSitems).ToList().IndexOf("" + alphaDepth);
 
             if (disableColour)
@@ -76,6 +89,7 @@ namespace s3pe.DDSTool
             public int Width;
             public int Height;
             public bool UseDXT;
+            public bool UseLuminance;
             public int AlphaDepth;
             public DialogResult DialogResult;
         }
@@ -91,8 +105,9 @@ namespace s3pe.DDSTool
                 Alpha = (byte)nudAlpha.Value,
                 Width = (int)nudWidth.Value,
                 Height = (int)nudHeight.Value,
-                UseDXT = ckbUseDXT.Checked,
-                AlphaDepth = int.Parse((string)cbDepth.SelectedItem),
+                UseDXT = rb1DXT.Checked,
+                UseLuminance = rb1Luminance.Checked,
+                AlphaDepth = rb1Luminance.Checked ? 8 : int.Parse((string)cbDepth.SelectedItem),
                 DialogResult = this.DialogResult,
             };
             this.Close();
@@ -104,12 +119,16 @@ namespace s3pe.DDSTool
             this.Close();
         }
 
-        private void ckbUseDXT_CheckedChanged(object sender, EventArgs e)
+        private void rb1_CheckedChanged(object sender, EventArgs e)
         {
             cbDepth.SelectedIndex = -1;
             cbDepth.Items.Clear();
-            cbDepth.Items.AddRange(ckbUseDXT.Checked ? DXTitems : DDSitems);
+            if (rb1DXT.Checked)
+                cbDepth.Items.AddRange(DXTitems);
+            else if (rb1RGB.Checked)
+                cbDepth.Items.AddRange(DDSitems);
             cbDepth.SelectedIndex = cbDepth.Items.Count - 1;
+            cbDepth.Enabled = !rb1Luminance.Checked;
         }
     }
 }

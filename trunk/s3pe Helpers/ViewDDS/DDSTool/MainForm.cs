@@ -256,13 +256,15 @@ namespace s3pe.DDSTool
             int width = ddsPanel1.ImageSize.Width;
             int height = ddsPanel1.ImageSize.Height;
 
-            NewDDSParameters parms = new NewDDSParameters(ddsPanel1.ImageSize.Width, ddsPanel1.ImageSize.Height, ddsPanel1.UseDXT, ddsPanel1.AlphaDepth, true);
+            NewDDSParameters parms = new NewDDSParameters(ddsPanel1.ImageSize.Width, ddsPanel1.ImageSize.Height,
+                ddsPanel1.UseDXT, ddsPanel1.AlphaDepth, true, ddsPanel1.UseLuminance);
             DialogResult dr = parms.ShowDialog();
             if (dr != DialogResult.OK) return;
 
             NewDDSParameters.Result result = parms.Value;
             ddsPanel1.ImageSize = new System.Drawing.Size(result.Width, result.Height);
             ddsPanel1.UseDXT = result.UseDXT;
+            ddsPanel1.UseLuminance = result.UseLuminance;
             ddsPanel1.AlphaDepth = result.AlphaDepth;
 
             lbImageW.Text = ddsPanel1.ImageSize.Width + "";
