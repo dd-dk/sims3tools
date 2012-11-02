@@ -48,6 +48,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.Interfaces.dll</HintPath>
     </Reference>
+    <Reference Include="s3pi.NameMapResource">
+      <HintPath>..\s3pi\build\bin\Release\s3pi.NameMapResource.dll</HintPath>
+    </Reference>
     <Reference Include="s3pi.Package">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.Package.dll</HintPath>

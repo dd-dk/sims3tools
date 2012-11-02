@@ -182,7 +182,7 @@ namespace PackageCompareUtility
                 return;
             }
 
-            Compare(pkgFiles[0], pkgA, pkgFiles[1], pkgB);
+            Compare(pkgFiles[0], pkgA, pkgFiles[1], pkgB, ckbNames.Checked);
         }
 
         // --- Help
@@ -307,25 +307,40 @@ namespace PackageCompareUtility
             public IResourceKey rightRK;
         }
 
-        void Compare(string pkgA, IPackage left, string pkgB, IPackage right)
+        void Compare(string pkgA, IPackage left, string pkgB, IPackage right, bool names)
         {
             StringWriter rkEqualMatch = new StringWriter();
             StringWriter rkEqualDiff = new StringWriter();
             StringWriter rkLeftOnly = new StringWriter();
             StringWriter rkRightOnly = new StringWriter();
 
+            Dictionary<ulong, string> bothMaps = new Dictionary<ulong, string>();
+            if (names)
+            {
+                foreach (var pkg in new[] { left, right })
+                {
+                    foreach (var rk in pkg.FindAll(x => x.ResourceType == 0x0166038C))
+                    {
+                        IDictionary<ulong, string> nmap = s3pi.WrapperDealer.WrapperDealer.GetResource(0, pkg, rk) as NameMapResource.NameMapResource;
+                        foreach (var kvp in nmap)
+                            if (!bothMaps.ContainsKey(kvp.Key))
+                                bothMaps.Add(kvp.Key, kvp.Value);
+                    }
+                }
+            }
+
             foreach (var row in Comparer(left, right))
             {
                 if (row.leftRK != null)
                 {
-                    string key = ExtList.Ext[row.leftRK.ResourceType][0] + "-" + row.leftRK;
+                    string key = ExtList.Ext[row.leftRK.ResourceType][0] + "-" + row.leftRK + (names && bothMaps.ContainsKey(row.leftRK.Instance) ? ": " + bothMaps[row.leftRK.Instance] : "");
                     if (row.rightRK != null)
                         (row.result == "=" ? rkEqualMatch : rkEqualDiff).WriteLine(key);
                     else
                         rkLeftOnly.WriteLine(key);
                 }
                 else
-                    rkRightOnly.WriteLine(ExtList.Ext[row.rightRK.ResourceType][0] + "-" + row.rightRK);
+                    rkRightOnly.WriteLine(ExtList.Ext[row.rightRK.ResourceType][0] + "-" + row.rightRK + (names && bothMaps.ContainsKey(row.rightRK.Instance) ? ": " + bothMaps[row.rightRK.Instance] : ""));
             }
             rkEqualMatch.Close();
             rkEqualDiff.Close();

@@ -57,6 +57,7 @@
             this.btnClearLog = new System.Windows.Forms.Button();
             this.tbLogFile = new System.Windows.Forms.TextBox();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.ckbNames = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -161,6 +162,7 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.Controls.Add(this.ckbNames, 2, 2);
             this.tableLayoutPanel1.Controls.Add(this.label1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.label2, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.tbPkgA, 1, 0);
@@ -211,7 +213,7 @@
             this.tbPkgA.Location = new System.Drawing.Point(62, 4);
             this.tbPkgA.Name = "tbPkgA";
             this.tbPkgA.ReadOnly = true;
-            this.tbPkgA.Size = new System.Drawing.Size(437, 20);
+            this.tbPkgA.Size = new System.Drawing.Size(433, 20);
             this.tbPkgA.TabIndex = 2;
             this.tbPkgA.Click += new System.EventHandler(this.btnBrowseLeft_Click);
             // 
@@ -221,13 +223,13 @@
             this.tbPkgB.Location = new System.Drawing.Point(62, 33);
             this.tbPkgB.Name = "tbPkgB";
             this.tbPkgB.ReadOnly = true;
-            this.tbPkgB.Size = new System.Drawing.Size(437, 20);
+            this.tbPkgB.Size = new System.Drawing.Size(433, 20);
             this.tbPkgB.TabIndex = 5;
             this.tbPkgB.Click += new System.EventHandler(this.btnBrowseRight_Click);
             // 
             // btnBrowseLeft
             // 
-            this.btnBrowseLeft.Location = new System.Drawing.Point(505, 3);
+            this.btnBrowseLeft.Location = new System.Drawing.Point(501, 3);
             this.btnBrowseLeft.Name = "btnBrowseLeft";
             this.btnBrowseLeft.Size = new System.Drawing.Size(75, 23);
             this.btnBrowseLeft.TabIndex = 3;
@@ -237,7 +239,7 @@
             // 
             // btnBrowseRight
             // 
-            this.btnBrowseRight.Location = new System.Drawing.Point(505, 32);
+            this.btnBrowseRight.Location = new System.Drawing.Point(501, 32);
             this.btnBrowseRight.Name = "btnBrowseRight";
             this.btnBrowseRight.Size = new System.Drawing.Size(75, 23);
             this.btnBrowseRight.TabIndex = 6;
@@ -274,7 +276,7 @@
             this.rtbComment.Font = new System.Drawing.Font("Consolas", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rtbComment.Location = new System.Drawing.Point(62, 61);
             this.rtbComment.Name = "rtbComment";
-            this.rtbComment.Size = new System.Drawing.Size(437, 115);
+            this.rtbComment.Size = new System.Drawing.Size(433, 115);
             this.rtbComment.TabIndex = 8;
             this.rtbComment.Text = "";
             // 
@@ -296,7 +298,7 @@
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel2.Controls.Add(this.btnLogFile, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.btnClearLog, 0, 1);
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(502, 179);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(498, 179);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 2;
@@ -331,7 +333,7 @@
             this.tbLogFile.Location = new System.Drawing.Point(62, 199);
             this.tbLogFile.Name = "tbLogFile";
             this.tbLogFile.ReadOnly = true;
-            this.tbLogFile.Size = new System.Drawing.Size(437, 20);
+            this.tbLogFile.Size = new System.Drawing.Size(433, 20);
             this.tbLogFile.TabIndex = 10;
             this.tbLogFile.Click += new System.EventHandler(this.btnBrowseRight_Click);
             // 
@@ -341,6 +343,17 @@
             this.saveFileDialog1.Filter = "Text files (*.txt)|*.txt";
             this.saveFileDialog1.OverwritePrompt = false;
             this.saveFileDialog1.Title = "Select log file";
+            // 
+            // ckbNames
+            // 
+            this.ckbNames.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ckbNames.AutoSize = true;
+            this.ckbNames.Location = new System.Drawing.Point(501, 110);
+            this.ckbNames.Name = "ckbNames";
+            this.ckbNames.Size = new System.Drawing.Size(79, 17);
+            this.ckbNames.TabIndex = 13;
+            this.ckbNames.Text = "Add &names";
+            this.ckbNames.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
@@ -395,6 +408,7 @@
         private System.Windows.Forms.Button btnClearLog;
         private System.Windows.Forms.TextBox tbLogFile;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+        private System.Windows.Forms.CheckBox ckbNames;
     }
 }
 
