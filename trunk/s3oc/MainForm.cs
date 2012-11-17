@@ -2959,6 +2959,7 @@ namespace ObjectCloner
                 {
                     stepList.InsertRange(stepList.IndexOf(OBJK_SlurpRKs), new Step[] {
                         OBJD_addOBJKref,
+                        OBJD_getBlueprintXML,
                         OBJD_SlurpDDSes,
                     });
                 }
@@ -3043,6 +3044,7 @@ namespace ObjectCloner
             StepText.Add(Catlg_IncludePresets, "Include Preset Images (CatalogResources)");
             StepText.Add(OBJD_getOBJK, "Find OBJK");
             StepText.Add(OBJD_addOBJKref, "Add OBJK");
+            StepText.Add(OBJD_getBlueprintXML, "Add BlueprintXML (if needed)");
             StepText.Add(OBJD_SlurpDDSes, "OBJD-referenced DDSes");
             StepText.Add(OBJK_SlurpRKs, "OBJK-referenced resources");
             StepText.Add(OBJK_getSPT2, "Find OBJK-referenced SPT2");
@@ -3164,6 +3166,29 @@ namespace ObjectCloner
             }
         }
         void OBJD_addOBJKref() { Diagnostics.Log("OBJD_addOBJKref"); Add("objk", objkItem.RequestedRK); }
+        void OBJD_getBlueprintXML()
+        {
+            Diagnostics.Log("OBJD_getBlueprintXML");
+            if (!selectedItem.Resource.ContentFields.Contains("BlueprintIndex"))
+            {
+                Diagnostics.Log(String.Format("OBJD_getBlueprintXML: No BlueprintIndex"));
+                return;
+            }
+
+            uint index = (uint)selectedItem.Resource["BlueprintIndex"].Value;
+            IList<TGIBlock> ltgi = (IList<TGIBlock>)selectedItem.Resource["TGIBlocks"].Value;
+            TGIBlock blueprintXMLTGI = ltgi[(int)index];
+            SpecificResource blueprintXMLItem = new SpecificResource(FileTable.GameContent, blueprintXMLTGI);
+            if (blueprintXMLItem == null || blueprintXMLItem.ResourceIndexEntry == null)
+            {
+                Diagnostics.Show(String.Format("_XML {0} -> _XML {1}: not found\n", (IResourceKey)selectedItem.ResourceIndexEntry, blueprintXMLTGI), "Missing BlueprintXML");
+            }
+            else
+            {
+                Diagnostics.Log(String.Format("OBJD_getBlueprintXML: Found {0}", blueprintXMLItem.LongName));
+                Add("blueprintXML", blueprintXMLItem.RequestedRK);
+            }
+        }
         void OBJD_SlurpDDSes()
         {
             Diagnostics.Log("OBJD_SlurpDDSes");
