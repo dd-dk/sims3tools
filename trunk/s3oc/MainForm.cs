@@ -3137,23 +3137,22 @@ namespace ObjectCloner
         {
             Diagnostics.Log("OBJD_setFallback");
             if ((selectedItem.RequestedRK.ResourceGroup >> 27) > 0) return;// Only base game objects
+            CatalogResource.ObjectCatalogResource objd = selectedItem.Resource as CatalogResource.ObjectCatalogResource;
 
-            int fallbackIndex = (int)(uint)selectedItem.Resource["FallbackIndex"].Value;
-            TGIBlockList tgiBlocks = selectedItem.Resource["TGIBlocks"].Value as TGIBlockList;
-            if (tgiBlocks[fallbackIndex].Equals(RK.NULL))
+            if (objd.TGIBlocks[(int)objd.FallbackIndex].Equals(RK.NULL))
             {
-                selectedItem.Resource["FallbackIndex"] = new TypedValue(typeof(uint), (uint)tgiBlocks.Count, "X");
-                tgiBlocks.Add(new TGIBlock(0, null, "TGI", selectedItem.RequestedRK.ResourceType, selectedItem.RequestedRK.ResourceGroup, selectedItem.RequestedRK.Instance));
+                objd.FallbackIndex = (uint)objd.TGIBlocks.Count;
+                objd.TGIBlocks.Add(new TGIBlock(0, null, "TGI", selectedItem.RequestedRK.ResourceType, selectedItem.RequestedRK.ResourceGroup, selectedItem.RequestedRK.Instance));
                 selectedItem.Commit();
-                Diagnostics.Log("OBJD_setFallback: FallbackIndex: 0x" + (tgiBlocks.Count - 1).ToString("X2") + ", Resourcekey: " + tgiBlocks[tgiBlocks.Count - 1]);
+                Diagnostics.Log("OBJD_setFallback: FallbackIndex: 0x" + (objd.TGIBlocks.Count - 1).ToString("X2") + ", Resourcekey: " + objd.TGIBlocks[objd.TGIBlocks.Count - 1]);
             }
         }
         void OBJD_getOBJK()
         {
             Diagnostics.Log("OBJD_getOBJK");
-            uint index = (uint)selectedItem.Resource["OBJKIndex"].Value;
-            IList<TGIBlock> ltgi = (IList<TGIBlock>)selectedItem.Resource["TGIBlocks"].Value;
-            TGIBlock objkTGI = ltgi[(int)index];
+            CatalogResource.ObjectCatalogResource objd = selectedItem.Resource as CatalogResource.ObjectCatalogResource;
+
+            TGIBlock objkTGI = objd.TGIBlocks[(int)objd.OBJKIndex];
             objkItem = new SpecificResource(FileTable.GameContent, objkTGI);
             if (objkItem == null || objkItem.ResourceIndexEntry == null)
             {
@@ -3169,15 +3168,15 @@ namespace ObjectCloner
         void OBJD_getBlueprintXML()
         {
             Diagnostics.Log("OBJD_getBlueprintXML");
-            if (!selectedItem.Resource.ContentFields.Contains("BlueprintIndex"))
+            CatalogResource.ObjectCatalogResource objd = selectedItem.Resource as CatalogResource.ObjectCatalogResource;
+
+            if (!objd.ContentFields.Contains("BlueprintXMLIndex"))
             {
-                Diagnostics.Log(String.Format("OBJD_getBlueprintXML: No BlueprintIndex"));
+                Diagnostics.Log(String.Format("OBJD_getBlueprintXML: No BlueprintXMLIndex"));
                 return;
             }
 
-            uint index = (uint)selectedItem.Resource["BlueprintIndex"].Value;
-            IList<TGIBlock> ltgi = (IList<TGIBlock>)selectedItem.Resource["TGIBlocks"].Value;
-            TGIBlock blueprintXMLTGI = ltgi[(int)index];
+            TGIBlock blueprintXMLTGI = objd.TGIBlocks[(int)objd.BlueprintXMLIndex];
             SpecificResource blueprintXMLItem = new SpecificResource(FileTable.GameContent, blueprintXMLTGI);
             if (blueprintXMLItem == null || blueprintXMLItem.ResourceIndexEntry == null)
             {
@@ -3192,16 +3191,17 @@ namespace ObjectCloner
         void OBJD_SlurpDDSes()
         {
             Diagnostics.Log("OBJD_SlurpDDSes");
-            IList<TGIBlock> ltgi = (IList<TGIBlock>)selectedItem.Resource["TGIBlocks"].Value;
+            CatalogResource.ObjectCatalogResource objd = selectedItem.Resource as CatalogResource.ObjectCatalogResource;
+
             int i = 0;
-            foreach (AApiVersionedFields mtdoor in (IList)selectedItem.Resource["MTDoors"].Value)
+            foreach (var wallCutout in objd.WallCutouts)
             {
-                Add("clone.wallmask[" + i + "]", ltgi[(int)(uint)mtdoor["WallMaskIndex"].Value]);
+                Add("clone.wallCutout[" + i + "]", objd.TGIBlocks[(int)wallCutout.WallMaskIndex]);
                 i++;
             }
-            Add("clone.sinkmask", ltgi[(int)(uint)selectedItem.Resource["SurfaceCutoutDDSIndex"].Value]);
+            Add("clone.surfaceCutout", objd.TGIBlocks[(int)objd.SurfaceCutoutDDSIndex]);
             if (selectedItem.Resource.ContentFields.Contains("FloorCutoutDDSIndex"))
-                Add("clone.tubmask", ltgi[(int)(uint)selectedItem.Resource["FloorCutoutDDSIndex"].Value]);
+                Add("clone.floorCutout", objd.TGIBlocks[(int)objd.FloorCutoutDDSIndex]);
         }
         void OBJK_SlurpRKs() { Diagnostics.Log("OBJK_SlurpRKs"); SlurpRKsFromField("objk", (AResource)objkItem.Resource); }
         void OBJK_getSPT2()
@@ -3236,9 +3236,11 @@ namespace ObjectCloner
         void OBJK_getVPXYs()
         {
             Diagnostics.Log("OBJK_getVPXYs");
+            ObjKeyResource.ObjKeyResource objk = objkItem.Resource as ObjKeyResource.ObjKeyResource;
+
             int index = -1;
-            if (((ObjKeyResource.ObjKeyResource)objkItem.Resource).ComponentData.ContainsKey("modelKey"))
-                index = ((ObjKeyResource.ObjKeyResource.CDTResourceKey)((ObjKeyResource.ObjKeyResource)objkItem.Resource).ComponentData["modelKey"]).Data;
+            if (objk.ComponentData.ContainsKey("modelKey"))
+                index = ((ObjKeyResource.ObjKeyResource.CDTResourceKey)objk.ComponentData["modelKey"]).Data;
 
             if (index == -1)
             {
@@ -3250,11 +3252,10 @@ namespace ObjectCloner
             vpxyItems = new List<SpecificResource>();
 
             string s = "";
-            TGIBlockList tgibl = ((ObjKeyResource.ObjKeyResource)objkItem.Resource).TGIBlocks;
 
-            Diagnostics.Log(String.Format("OBJK_getVPXYs: modelKey {0} -> {1}", index, tgibl.Count > index ? tgibl[index] : "(error)"));
+            Diagnostics.Log(String.Format("OBJK_getVPXYs: modelKey {0} -> {1}", index, objk.TGIBlocks.Count > index ? objk.TGIBlocks[index] : "(error)"));
 
-            foreach (IResourceKey rk in tgibl.FindAll(x => x.ResourceType == 0x736884F1))//VPXY
+            foreach (IResourceKey rk in objk.TGIBlocks.FindAll(x => x.ResourceType == 0x736884F1))//VPXY
             {
                 SpecificResource vpxy = new SpecificResource(FileTable.GameContent, rk);
                 if (vpxy.ResourceIndexEntry != null && vpxy.Resource != null)
