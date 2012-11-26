@@ -245,7 +245,8 @@ namespace S3PIDemoFE
                         CopyableMessageBox.Show(
                             "Could not open package:\n" + Filename + "\n\n" +
                             "This file does not contain the expected package identifier in the header.\n" +
-                            "This could be because it is a protected package (e.g. a Store item).\n\n" +
+                            "This could be because it is a protected package (e.g. a Store item), a Sims3Pack or some other random file.\n\n" +
+                            "---\nError message:\n" +
                             idex.Message, myName + ": Unable to open file", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
                     }
                     else if (idex.Message.Contains("major version"))
@@ -254,6 +255,7 @@ namespace S3PIDemoFE
                             "Could not open package:\n" + Filename + "\n\n" +
                             "This file does not contain the expected package major version number in the header.\n" +
                             "This could be because it is a package for Sims2 or Spore.\n\n" +
+                            "---\nError message:\n" +
                             idex.Message, myName + ": Unable to open file", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
                     }
                     else
@@ -267,20 +269,29 @@ namespace S3PIDemoFE
                     if (ReadWrite)
                     {
                         int i = CopyableMessageBox.Show(
-                            String.Format("The selected file could not be opened read-write.\n{0}\n{1}\n\nRetry as read-only?", Filename, uaex.Message),
-                            "Could not open file", CopyableMessageBoxButtons.RetryCancel, CopyableMessageBoxIcon.Error);
+                            "Could not open package:\n" + Filename + "\n\n" +
+                            "The file could be write-protected, in which case it might be possible to open it read-only.\n\n" +
+                            "---\nError message:\n" +
+                            uaex.Message, myName + ": Unable to open file", CopyableMessageBoxIcon.Stop, new[] { "&Read-only", "C&ancel", }, 1, 1);
                         if (i == 0) Filename = "0:" + Filename;
                         else Filename = "";
                     }
                     else
                     {
-#if DEBUG
-                        throw uaex;
-#else
                         IssueException(uaex, "Could not open package:\n" + Filename);
                         Filename = "";
-#endif
                     }
+                }
+                catch (IOException ioex)
+                {
+                    int i = CopyableMessageBox.Show(
+                        "Could not open package:\n" + Filename + "\n\n" +
+                        "There may be another process with exclusive access to the file (e.g. The Sims 3).  " +
+                        "After exiting the other process, you can retry opening the package.\n\n" +
+                        "---\nError message:\n" +
+                        ioex.Message, myName + ": Unable to open file", CopyableMessageBoxIcon.Stop, new[] { "&Retry", "C&ancel", }, 1, 1);
+                    if (i == 0) Filename = (ReadWrite ? "1:" : "0:") + Filename;
+                    else Filename = "";
                 }
 #if !DEBUG
                 catch (Exception ex)
