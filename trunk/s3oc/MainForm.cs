@@ -2954,12 +2954,16 @@ namespace ObjectCloner
                 }
                 if (IsDeepClone)
                 {
+                    stepList.InsertRange(stepList.IndexOf(OBJK_SlurpRKs), new Step[] {
+                        OBJD_getBlueprintXMLKin,
+                    });
                 }
                 else
                 {
                     stepList.InsertRange(stepList.IndexOf(OBJK_SlurpRKs), new Step[] {
                         OBJD_addOBJKref,
                         OBJD_getBlueprintXML,
+                        OBJD_getBlueprintXMLKin,
                         OBJD_SlurpDDSes,
                     });
                 }
@@ -3045,6 +3049,7 @@ namespace ObjectCloner
             StepText.Add(OBJD_getOBJK, "Find OBJK");
             StepText.Add(OBJD_addOBJKref, "Add OBJK");
             StepText.Add(OBJD_getBlueprintXML, "Add BlueprintXML (if needed)");
+            StepText.Add(OBJD_getBlueprintXMLKin, "Add any (required) kin of (any) BlueprintXML");
             StepText.Add(OBJD_SlurpDDSes, "OBJD-referenced DDSes");
             StepText.Add(OBJK_SlurpRKs, "OBJK-referenced resources");
             StepText.Add(OBJK_getSPT2, "Find OBJK-referenced SPT2");
@@ -3177,15 +3182,38 @@ namespace ObjectCloner
             }
 
             TGIBlock blueprintXMLTGI = objd.TGIBlocks[(int)objd.BlueprintXMLIndex];
-            SpecificResource blueprintXMLItem = new SpecificResource(FileTable.GameContent, blueprintXMLTGI);
+            SpecificResource blueprintXMLItem = new SpecificResource(FileTable.GameContent, blueprintXMLTGI, true);
             if (blueprintXMLItem == null || blueprintXMLItem.ResourceIndexEntry == null)
             {
-                Diagnostics.Show(String.Format("_XML {0} -> _XML {1}: not found\n", (IResourceKey)selectedItem.ResourceIndexEntry, blueprintXMLTGI), "Missing BlueprintXML");
+                Diagnostics.Show(String.Format("OBJD {0} -> _XML {1}: not found\n", (IResourceKey)selectedItem.ResourceIndexEntry, blueprintXMLTGI), "Missing BlueprintXML");
             }
             else
             {
                 Diagnostics.Log(String.Format("OBJD_getBlueprintXML: Found {0}", blueprintXMLItem.LongName));
                 Add("blueprintXML", blueprintXMLItem.RequestedRK);
+            }
+        }
+        void OBJD_getBlueprintXMLKin()
+        {
+            Diagnostics.Log("OBJD_getBlueprintXMLKin");
+            CatalogResource.ObjectCatalogResource objd = selectedItem.Resource as CatalogResource.ObjectCatalogResource;
+
+            if (!objd.ContentFields.Contains("BlueprintXMLIndex"))
+            {
+                Diagnostics.Log(String.Format("OBJD_getBlueprintXMLKin: No BlueprintXMLIndex"));
+                return;
+            }
+
+            TGIBlock blueprintXMLTGI = objd.TGIBlocks[(int)objd.BlueprintXMLIndex];
+            foreach (uint resourceType in new uint[] { 0x736884F1, 0xD382BF57, 0x01661233, })//VPXY, FTPT, MODL
+            {
+                SpecificResource xmlKin = new SpecificResource(FileTable.GameContent, new TGIBlock(0, null, resourceType, blueprintXMLTGI.ResourceGroup, blueprintXMLTGI.Instance), true);
+                if (xmlKin == null || xmlKin.ResourceIndexEntry == null)
+                {
+                    Diagnostics.Show(String.Format("_XML {0} -> {1}: not found\n", blueprintXMLTGI, resourceType.ToString("X8")), "Missing kinned resource");
+                    continue;
+                }
+                Add("blueprintXML->" + resourceType.ToString("X8"), xmlKin.RequestedRK);
             }
         }
         void OBJD_SlurpDDSes()
