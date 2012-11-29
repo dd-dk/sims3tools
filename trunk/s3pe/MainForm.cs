@@ -272,7 +272,7 @@ namespace S3PIDemoFE
                             "Could not open package:\n" + Filename + "\n\n" +
                             "The file could be write-protected, in which case it might be possible to open it read-only.\n\n" +
                             "---\nError message:\n" +
-                            uaex.Message, myName + ": Unable to open file", CopyableMessageBoxIcon.Stop, new[] { "&Read-only", "C&ancel", }, 1, 1);
+                            uaex.Message, myName + ": Unable to open file", CopyableMessageBoxIcon.Stop, new[] { "&Open read-only", "C&ancel", }, 1, 1);
                         if (i == 0) Filename = "0:" + Filename;
                         else Filename = "";
                     }
