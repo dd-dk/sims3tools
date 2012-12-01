@@ -50,7 +50,7 @@ namespace meshExpImp.Helper
                 }
                 else // adding is okay
                 {
-                    rcolResource.ChunkEntries.Add(rk, block);
+                    rcolResource.ChunkEntries.Add(new GenericRCOLResource.ChunkEntry(0, null, new TGIBlock(0, null, rk), block));
                     mesh[field] = new TypedValue(typeof(GenericRCOLResource.ChunkReference), GenericRCOLResource.ChunkReference.CreateReference(rcolResource, rk), "X");
                 }
             }

@@ -214,7 +214,7 @@ namespace meshExpImp.Helper
                 if (values.Length != 4)
                     throw new InvalidDataException(string.Format("'vrtf' line {0} has incorrect number of byte values {1}.", l, values.Length));
 
-                vrtf.Layouts.Add((VRTF.ElementFormat)values[2], values[3], (VRTF.ElementUsage)values[0], values[1]);
+                vrtf.Layouts.Add(new VRTF.ElementLayout(0, null, (VRTF.ElementFormat)values[2], values[3], (VRTF.ElementUsage)values[0], values[1]));
                 mpb.Value++;
             }
             mpb.Done();

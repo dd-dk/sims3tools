@@ -57,7 +57,7 @@ namespace meshExpImp.Helper
                 FileStream fs = new FileStream(Application.ExecutablePath, FileMode.Open, FileAccess.Read);
                 BinaryReader br = new BinaryReader(fs);
                 s3pi.GenericRCOLResource.GenericRCOLResource modl = new s3pi.GenericRCOLResource.GenericRCOLResource(0, null);
-                modl.ChunkEntries.Add(new meshExpImp.ModelBlocks.MODL(0, null));
+                modl.ChunkEntries.Add(typeof(meshExpImp.ModelBlocks.MODL));
                 Clipboard.SetData(DataFormats.Serializable, modl.Stream);
                 br.Close();
                 fs.Close();
