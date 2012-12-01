@@ -58,7 +58,8 @@ namespace ObjectCloner
         public delegate void Callback(byte lang);
         public static SpecificResource findStblFor(ulong guid, Callback callBack = null)
         {
-            if (guid == FNV64Blank) return null;
+            // Unfortunately this shortcut causes problems if EA decide to include a blank string...
+            //if (guid == FNV64Blank) return null;
 
             for (byte i = 0; i < (LangSearch ? 0x17 : 0x01); i++) { if (callBack != null) callBack(i); SpecificResource sr = findStblFor(guid, i); if (sr != null) return sr; }
             return null;
@@ -66,7 +67,9 @@ namespace ObjectCloner
 
         public static SpecificResource findStblFor(ulong guid, byte lang)
         {
-            if (guid == FNV64Blank) return null;
+            // Unfortunately this shortcut causes problems if EA decide to include a blank string...
+            //if (guid == FNV64Blank) return null;
+
             return STBLs.ContainsKey(lang) ? STBLs[lang].Find(sr =>
             {
                 var stbl = sr.Resource as IDictionary<ulong, string>;
