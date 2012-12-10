@@ -2942,11 +2942,12 @@ namespace ObjectCloner
                 stepList.InsertRange(stepList.IndexOf(Catlg_addVPXYs), new Step[] {
                     // OBJD_setFallback if cloning from game
                     OBJD_getOBJK,
+                    OBJD_blueprint_getVPXY,//if bp
                     //NotDC: OBJD_addOBJKref,
                     //NotDC: OBJD_SlurpDDSes,
-                    OBJK_SlurpRKs,
-                    OBJK_getSPT2,
-                    OBJK_getVPXYs,
+                    OBJK_SlurpRKs,//if not bp
+                    OBJK_getSPT2,//if not bp
+                    OBJK_getVPXYs,//if not bp
                 });
                 if (!isFix && mode == Mode.FromGame && isRenumber)
                 {
@@ -2954,16 +2955,11 @@ namespace ObjectCloner
                 }
                 if (IsDeepClone)
                 {
-                    stepList.InsertRange(stepList.IndexOf(OBJK_SlurpRKs), new Step[] {
-                        OBJD_getBlueprintXMLKin,
-                    });
                 }
                 else
                 {
                     stepList.InsertRange(stepList.IndexOf(OBJK_SlurpRKs), new Step[] {
                         OBJD_addOBJKref,
-                        OBJD_getBlueprintXML,
-                        OBJD_getBlueprintXMLKin,
                         OBJD_SlurpDDSes,
                     });
                 }
@@ -3047,9 +3043,8 @@ namespace ObjectCloner
             StepText.Add(OBJD_setFallback, "Set fallback TGI");
             StepText.Add(Catlg_IncludePresets, "Include Preset Images (CatalogResources)");
             StepText.Add(OBJD_getOBJK, "Find OBJK");
+            StepText.Add(OBJD_blueprint_getVPXY, "Find VPXY from Blueprint XML");
             StepText.Add(OBJD_addOBJKref, "Add OBJK");
-            StepText.Add(OBJD_getBlueprintXML, "Add BlueprintXML (if needed)");
-            StepText.Add(OBJD_getBlueprintXMLKin, "Add any (required) kin of (any) BlueprintXML");
             StepText.Add(OBJD_SlurpDDSes, "OBJD-referenced DDSes");
             StepText.Add(OBJK_SlurpRKs, "OBJK-referenced resources");
             StepText.Add(OBJK_getSPT2, "Find OBJK-referenced SPT2");
@@ -3166,56 +3161,47 @@ namespace ObjectCloner
             }
             else
             {
+                Add("objk", objkItem.RequestedRK);
                 Diagnostics.Log(String.Format("OBJD_getOBJK: Found {0}", objkItem.LongName));
             }
         }
-        void OBJD_addOBJKref() { Diagnostics.Log("OBJD_addOBJKref"); Add("objk", objkItem.RequestedRK); }
-        void OBJD_getBlueprintXML()
+        void OBJD_blueprint_getVPXY()
         {
-            Diagnostics.Log("OBJD_getBlueprintXML");
+            Diagnostics.Log("OBJD_blueprint_getVPXY");
             CatalogResource.ObjectCatalogResource objd = selectedItem.Resource as CatalogResource.ObjectCatalogResource;
 
             if (!objd.ContentFields.Contains("BlueprintXMLIndex"))
             {
-                Diagnostics.Log(String.Format("OBJD_getBlueprintXML: No BlueprintXMLIndex"));
+                Diagnostics.Log("OBJD_blueprint_getVPXY: No BlueprintXMLIndex in ContentFields.");
                 return;
             }
 
-            TGIBlock blueprintXMLTGI = objd.TGIBlocks[(int)objd.BlueprintXMLIndex];
-            SpecificResource blueprintXMLItem = new SpecificResource(FileTable.GameContent, blueprintXMLTGI, true);
-            if (blueprintXMLItem == null || blueprintXMLItem.ResourceIndexEntry == null)
+            TGIBlock blueprintXMLkey = objd.TGIBlocks[(int)objd.BlueprintXMLIndex];
+            if (blueprintXMLkey.ResourceType != 0x0333406C) //_XML
             {
-                Diagnostics.Show(String.Format("OBJD {0} -> _XML {1}: not found\n", (IResourceKey)selectedItem.ResourceIndexEntry, blueprintXMLTGI), "Missing BlueprintXML");
+                Diagnostics.Show(String.Format("OBJD_blueprint_getVPXY: BlueprintXMLIndex {0} does not refer to an XML resource: {1}.", objd.BlueprintXMLIndex, blueprintXMLkey));
+                stepNum = lastInChain;
+                return;
             }
             else
             {
-                Diagnostics.Log(String.Format("OBJD_getBlueprintXML: Found {0}", blueprintXMLItem.LongName));
-                Add("blueprintXML", blueprintXMLItem.RequestedRK);
-            }
-        }
-        void OBJD_getBlueprintXMLKin()
-        {
-            Diagnostics.Log("OBJD_getBlueprintXMLKin");
-            CatalogResource.ObjectCatalogResource objd = selectedItem.Resource as CatalogResource.ObjectCatalogResource;
-
-            if (!objd.ContentFields.Contains("BlueprintXMLIndex"))
-            {
-                Diagnostics.Log(String.Format("OBJD_getBlueprintXMLKin: No BlueprintXMLIndex"));
-                return;
+                Diagnostics.Log(String.Format("OBJD_blueprint_getVPXY: Found {0}", blueprintXMLkey));
             }
 
-            TGIBlock blueprintXMLTGI = objd.TGIBlocks[(int)objd.BlueprintXMLIndex];
-            foreach (uint resourceType in new uint[] { 0x736884F1, 0xD382BF57, 0x01661233, })//VPXY, FTPT, MODL
+            TGIBlock vpxyKey = new TGIBlock(0, null, blueprintXMLkey) { ResourceType = 0x736884F1, };//VPXY
+            SpecificResource vpxy = new SpecificResource(FileTable.GameContent, vpxyKey);
+            if (vpxy == null || vpxy.ResourceIndexEntry == null && vpxy.Resource == null)
             {
-                SpecificResource xmlKin = new SpecificResource(FileTable.GameContent, new TGIBlock(0, null, resourceType, blueprintXMLTGI.ResourceGroup, blueprintXMLTGI.Instance), true);
-                if (xmlKin == null || xmlKin.ResourceIndexEntry == null)
-                {
-                    Diagnostics.Show(String.Format("_XML {0} -> {1}: not found\n", blueprintXMLTGI, resourceType.ToString("X8")), "Missing kinned resource");
-                    continue;
-                }
-                Add("blueprintXML->" + resourceType.ToString("X8"), xmlKin.RequestedRK);
+                Diagnostics.Show(String.Format("OBJD_blueprint_getVPXY: BlueprintXMLIndex in {0} has no VPXY kin", (IResourceKey)selectedItem.ResourceIndexEntry), "No VPXY item");
+                stepNum = lastInChain;
+            }
+            else
+            {
+                vpxyItems.Add(vpxy);
+                Diagnostics.Log(String.Format("OBJD_blueprint_getVPXY: blueprintXMLkey {0}, found {1}", blueprintXMLkey, vpxy.LongName));
             }
         }
+        void OBJD_addOBJKref() { Diagnostics.Log("OBJD_addOBJKref"); }
         void OBJD_SlurpDDSes()
         {
             Diagnostics.Log("OBJD_SlurpDDSes");
@@ -3231,10 +3217,28 @@ namespace ObjectCloner
             if (selectedItem.Resource.ContentFields.Contains("FloorCutoutDDSIndex"))
                 Add("clone.floorCutout", objd.TGIBlocks[(int)objd.FloorCutoutDDSIndex]);
         }
-        void OBJK_SlurpRKs() { Diagnostics.Log("OBJK_SlurpRKs"); SlurpRKsFromField("objk", (AResource)objkItem.Resource); }
+        void OBJK_SlurpRKs()
+        {
+            Diagnostics.Log("OBJK_SlurpRKs");
+
+            if (selectedItem.Resource.ContentFields.Contains("BlueprintXMLIndex"))
+            {
+                Diagnostics.Log("OBJK_SlurpRKs: BlueprintXMLIndex in ContentFields - skipping.");
+                return;
+            }
+
+            SlurpRKsFromField("objk", (AResource)objkItem.Resource);
+        }
         void OBJK_getSPT2()
         {
             Diagnostics.Log("OBJK_getSPT2");
+
+            if (selectedItem.Resource.ContentFields.Contains("BlueprintXMLIndex"))
+            {
+                Diagnostics.Log("OBJK_getSPT2: BlueprintXMLIndex in ContentFields - skipping.");
+                return;
+            }
+
             ObjKeyResource.ObjKeyResource objk = objkItem.Resource as ObjKeyResource.ObjKeyResource;
             if (objk.Components.FindAll(x => x.Element == ObjKeyResource.ObjKeyResource.Component.Tree).Count == 0) return;
 
@@ -3264,6 +3268,13 @@ namespace ObjectCloner
         void OBJK_getVPXYs()
         {
             Diagnostics.Log("OBJK_getVPXYs");
+
+            if (selectedItem.Resource.ContentFields.Contains("BlueprintXMLIndex"))
+            {
+                Diagnostics.Log("OBJK_getVPXYs: BlueprintXMLIndex in ContentFields - skipping.");
+                return;
+            }
+
             ObjKeyResource.ObjKeyResource objk = objkItem.Resource as ObjKeyResource.ObjKeyResource;
 
             int index = -1;
