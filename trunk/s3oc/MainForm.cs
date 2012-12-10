@@ -3170,7 +3170,7 @@ namespace ObjectCloner
             Diagnostics.Log("OBJD_blueprint_getVPXY");
             CatalogResource.ObjectCatalogResource objd = selectedItem.Resource as CatalogResource.ObjectCatalogResource;
 
-            if (!objd.ContentFields.Contains("BlueprintXMLIndex"))
+            if (!objd.ContentFields.Contains("BlueprintXMLIndex") || objd.TGIBlocks[(int)objd.BlueprintXMLIndex].Instance == 0)
             {
                 Diagnostics.Log("OBJD_blueprint_getVPXY: No BlueprintXMLIndex in ContentFields.");
                 return;
@@ -3187,6 +3187,8 @@ namespace ObjectCloner
             {
                 Diagnostics.Log(String.Format("OBJD_blueprint_getVPXY: Found {0}", blueprintXMLkey));
             }
+
+            vpxyItems = new List<SpecificResource>();
 
             TGIBlock vpxyKey = new TGIBlock(0, null, blueprintXMLkey) { ResourceType = 0x736884F1, };//VPXY
             SpecificResource vpxy = new SpecificResource(FileTable.GameContent, vpxyKey);
@@ -3220,8 +3222,9 @@ namespace ObjectCloner
         void OBJK_SlurpRKs()
         {
             Diagnostics.Log("OBJK_SlurpRKs");
+            CatalogResource.ObjectCatalogResource objd = selectedItem.Resource as CatalogResource.ObjectCatalogResource;
 
-            if (selectedItem.Resource.ContentFields.Contains("BlueprintXMLIndex"))
+            if (objd.ContentFields.Contains("BlueprintXMLIndex") && objd.TGIBlocks[(int)objd.BlueprintXMLIndex].Instance != 0)
             {
                 Diagnostics.Log("OBJK_SlurpRKs: BlueprintXMLIndex in ContentFields - skipping.");
                 return;
@@ -3232,8 +3235,9 @@ namespace ObjectCloner
         void OBJK_getSPT2()
         {
             Diagnostics.Log("OBJK_getSPT2");
+            CatalogResource.ObjectCatalogResource objd = selectedItem.Resource as CatalogResource.ObjectCatalogResource;
 
-            if (selectedItem.Resource.ContentFields.Contains("BlueprintXMLIndex"))
+            if (objd.ContentFields.Contains("BlueprintXMLIndex") && objd.TGIBlocks[(int)objd.BlueprintXMLIndex].Instance != 0)
             {
                 Diagnostics.Log("OBJK_getSPT2: BlueprintXMLIndex in ContentFields - skipping.");
                 return;
@@ -3268,8 +3272,9 @@ namespace ObjectCloner
         void OBJK_getVPXYs()
         {
             Diagnostics.Log("OBJK_getVPXYs");
+            CatalogResource.ObjectCatalogResource objd = selectedItem.Resource as CatalogResource.ObjectCatalogResource;
 
-            if (selectedItem.Resource.ContentFields.Contains("BlueprintXMLIndex"))
+            if (objd.ContentFields.Contains("BlueprintXMLIndex") && objd.TGIBlocks[(int)objd.BlueprintXMLIndex].Instance != 0)
             {
                 Diagnostics.Log("OBJK_getVPXYs: BlueprintXMLIndex in ContentFields - skipping.");
                 return;
