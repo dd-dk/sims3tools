@@ -234,8 +234,76 @@ namespace S3PIDemoFE
 
         public void SelectAll()
         {
-            listView1.SelectedItems.Clear();
-            for (int i = 0; i < listView1.Items.Count; i++) listView1.Items[i].Selected = true;
+            if (((MainForm)ParentForm).IsClosing) return;
+
+            string pbOldLabel = pbLabel.Text;
+            int pbOldMaximum = -1;
+            int pbOldValue = -1;
+            if (pb != null)
+            {
+                pbOldMaximum = pb.Maximum;
+                pbOldValue = pb.Value;
+            }
+            bool lvb = listView1.Visible;
+            bool uwc = Application.UseWaitCursor;
+
+            DateTime tick = DateTime.UtcNow.AddMilliseconds(tock);
+            try
+            {
+                Application.UseWaitCursor = true;
+                listView1.SuspendLayout();
+                listView1.BeginUpdate();
+                listView1.Visible = false;
+
+                internalchg = true;
+
+                SelectedResource = null;//not restored for SelectAll
+                pbLabel.Text = "Selecting all resources...";
+                Application.DoEvents();
+                using (Splash splash = new Splash(pbLabel.Text))
+                {
+                    splash.Show();
+                    Application.DoEvents();
+
+                    if (pb != null)
+                    {
+                        pb.Value = 0;
+                        pb.Maximum = listView1.Items.Count;
+                    }
+
+                    listView1.SelectedItems.Clear();
+
+                    for (int i = 0; i < listView1.Items.Count; i++)
+                    {
+                        listView1.Items[i].Selected = true;
+                        if (DateTime.UtcNow > tick)
+                        {
+                            if (((MainForm)ParentForm).IsClosing) return;
+
+                            if (pb != null) { pb.Value = listView1.SelectedItems.Count; Application.DoEvents(); }
+                            Application.DoEvents();
+                            tick = DateTime.UtcNow.AddMilliseconds(tock);
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                pbLabel.Text = pbOldLabel;
+                if (pb != null)
+                {
+                    pb.Value = 0;
+                    pb.Maximum = pbOldMaximum;
+                    pb.Value = pbOldValue;
+                }
+                listView1.Visible = lvb;
+                listView1.EndUpdate();
+                listView1.ResumeLayout();
+                Application.UseWaitCursor = uwc;
+                internalchg = false;
+            }
+            if (listView1.SelectedItems.Count == 1)
+                listView1_SelectedIndexChanged(this, EventArgs.Empty);
         }
         #endregion
 
@@ -292,6 +360,7 @@ namespace S3PIDemoFE
             {
                 if (value == Sortable) return;
 
+                bool uwc = Application.UseWaitCursor;
                 Application.UseWaitCursor = true;
                 listView1.BeginUpdate();
                 pbLabel.Text = "Sorting display...";
@@ -303,7 +372,7 @@ namespace S3PIDemoFE
                     listView1.Sorting = value ? SortOrder.Ascending : SortOrder.None;
                     listView1.HeaderStyle = value ? ColumnHeaderStyle.Clickable : ColumnHeaderStyle.Nonclickable;
                 }
-                finally { listView1.EndUpdate(); pbLabel.Text = ""; Application.UseWaitCursor = false; Application.DoEvents(); }
+                finally { listView1.EndUpdate(); pbLabel.Text = ""; Application.UseWaitCursor = uwc; Application.DoEvents(); }
             }
         }
 
@@ -556,6 +625,7 @@ namespace S3PIDemoFE
             IResourceIndexEntry sie = SelectedResource;
 
             bool vis = listView1.Visible;
+            bool uwc = Application.UseWaitCursor;
             DateTime tick = DateTime.UtcNow.AddMilliseconds(tock);
             try
             {
@@ -568,7 +638,6 @@ namespace S3PIDemoFE
                 pbLabel.Text = "";
                 SelectedResource = null;
 
-                #region Clear listView1...
                 pbLabel.Text = "Clear resource list...";
                 Application.DoEvents();
                 using (Splash splash = new Splash("Clear resource list..."))
@@ -577,6 +646,7 @@ namespace S3PIDemoFE
                     Application.DoEvents();
                     listView1.Items.Clear();// this can be slow and steals the main thread!
                 }
+                #region Old clear listView1...
                 /*if (!pbLabel.Visible || listView1.Items.Count > 10000)
                 {
                 }
@@ -627,7 +697,7 @@ namespace S3PIDemoFE
 
                 listView1.Visible = !this.Visible || !this.Created || vis;
                 listView1.EndUpdate();
-                Application.UseWaitCursor = false;
+                Application.UseWaitCursor = uwc;
                 Application.DoEvents();
 
                 OnListUpdated(this, new EventArgs());
@@ -848,6 +918,7 @@ namespace S3PIDemoFE
                 lvwColumnSorter.Order = SortOrder.Ascending;
             }
 
+            bool uwc = Application.UseWaitCursor;
             try
             {
                 // Perform the sort with these new sort options.
@@ -860,7 +931,7 @@ namespace S3PIDemoFE
             finally
             {
                 pbLabel.Text = "";
-                Application.UseWaitCursor = false;
+                Application.UseWaitCursor = uwc;
                 Application.DoEvents();
                 listView1.EndUpdate();
             }
