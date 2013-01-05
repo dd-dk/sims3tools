@@ -161,7 +161,6 @@
             // cbType
             // 
             this.cbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.cbType.ContextMenuStrip = this.contextMenuStrip1;
             this.cbType.Location = new System.Drawing.Point(58, 3);
             this.cbType.Name = "cbType";
             this.cbType.Size = new System.Drawing.Size(425, 21);
@@ -172,7 +171,6 @@
             // tbGroup
             // 
             this.tbGroup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbGroup.ContextMenuStrip = this.contextMenuStrip1;
             this.tbGroup.Location = new System.Drawing.Point(58, 30);
             this.tbGroup.Name = "tbGroup";
             this.tbGroup.Size = new System.Drawing.Size(425, 20);
@@ -183,7 +181,6 @@
             // tbInstance
             // 
             this.tbInstance.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbInstance.ContextMenuStrip = this.contextMenuStrip1;
             this.tbInstance.Location = new System.Drawing.Point(58, 56);
             this.tbInstance.Name = "tbInstance";
             this.tbInstance.Size = new System.Drawing.Size(425, 20);
@@ -323,7 +320,6 @@
             // copyResourceKeyToolStripMenuItem
             // 
             this.copyResourceKeyToolStripMenuItem.Name = "copyResourceKeyToolStripMenuItem";
-            this.copyResourceKeyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
             this.copyResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(205, 22);
             this.copyResourceKeyToolStripMenuItem.Text = "&Copy ResourceKey";
             this.copyResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.copyResourceKeyToolStripMenuItem_Click);
@@ -331,7 +327,6 @@
             // pasteResourceKeyToolStripMenuItem
             // 
             this.pasteResourceKeyToolStripMenuItem.Name = "pasteResourceKeyToolStripMenuItem";
-            this.pasteResourceKeyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
             this.pasteResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(205, 22);
             this.pasteResourceKeyToolStripMenuItem.Text = "&Paste ResourceKey";
             this.pasteResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.pasteResourceKeyToolStripMenuItem_Click);
@@ -343,6 +338,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(510, 239);
+            this.ContextMenuStrip = this.contextMenuStrip1;
             this.Controls.Add(this.btnCopy);
             this.Controls.Add(this.btnPaste);
             this.Controls.Add(this.tableLayoutPanel1);
