@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C# Express 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unprotect", "Unprotect.csproj", "{A0539AAF-76FF-49F1-8E56-822E56B93946}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A0539AAF-76FF-49F1-8E56-822E56B93946}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0539AAF-76FF-49F1-8E56-822E56B93946}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0539AAF-76FF-49F1-8E56-822E56B93946}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0539AAF-76FF-49F1-8E56-822E56B93946}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
