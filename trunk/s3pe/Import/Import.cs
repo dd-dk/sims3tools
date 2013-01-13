@@ -251,8 +251,14 @@ namespace S3PIDemoFE
                                         tgin = rie as AResourceIndexEntry,
                                         data = res.AsBytes,
                                     };
-                                    DuplicateHandling dupThis = dupsList == null || !dupsList.Contains(rie.ResourceType) ? dups
-                                        : dups == DuplicateHandling.allow ? DuplicateHandling.replace : DuplicateHandling.reject;
+									
+									// dups Replace | Reject | Allow
+									// dupsList null | list of allowable dup types
+									DuplicateHandling dupThis =
+										dups == DuplicateHandling.allow
+											? dupsList == null || dupsList.Contains(rie.ResourceType) ? DuplicateHandling.allow : DuplicateHandling.replace
+											: dups;
+
                                     limp.Add(Tuple.Create(impres, dupThis));
                                     progressBar1.Value++;
                                     if (now.AddMilliseconds(100) < DateTime.UtcNow) { Application.DoEvents(); now = DateTime.UtcNow; }
