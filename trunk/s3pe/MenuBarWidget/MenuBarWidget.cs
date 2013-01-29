@@ -43,7 +43,7 @@ namespace S3PIDemoFE
             });
             tsMB = new List<ToolStripMenuItem>(new ToolStripMenuItem[] {
                 //File
-                newToolStripMenuItem, openToolStripMenuItem, saveToolStripMenuItem, saveAsToolStripMenuItem, saveCopyAsToolStripMenuItem, closeToolStripMenuItem,
+                newToolStripMenuItem, newSimCity5PackageToolStripMenuItem, openToolStripMenuItem, saveToolStripMenuItem, saveAsToolStripMenuItem, saveCopyAsToolStripMenuItem, closeToolStripMenuItem,
                 setMaxRecentToolStripMenuItem, bookmarkCurrentToolStripMenuItem, setMaxBookmarksToolStripMenuItem, organiseBookmarksToolStripMenuItem,
                 exitToolStripMenuItem,
                 //Edit
@@ -100,7 +100,7 @@ namespace S3PIDemoFE
 
         public enum MB
         {
-            MBF_new = 0, MBF_open, MBF_save, MBF_saveAs, MBF_saveCopyAs, MBF_close,
+            MBF_new = 0, MBF_newSC5, MBF_open, MBF_save, MBF_saveAs, MBF_saveCopyAs, MBF_close,
             MBF_setMaxRecent, MBF_bookmarkCurrent, MBF_setMaxBookmarks, MBF_organiseBookmarks,
             MBF_exit,
             MBE_copy, MBE_save, MBE_float, MBE_ote,

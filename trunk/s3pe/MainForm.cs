@@ -546,6 +546,7 @@ namespace S3PIDemoFE
                 switch (mn.mn)
                 {
                     case MenuBarWidget.MB.MBF_new: fileNew(); break;
+                    case MenuBarWidget.MB.MBF_newSC5: fileNewSimCity5Package(); break;
                     case MenuBarWidget.MB.MBF_open: fileOpen(); break;
                     case MenuBarWidget.MB.MBF_save: fileSave(); break;
                     case MenuBarWidget.MB.MBF_saveAs: fileSaveAs(); break;
@@ -565,6 +566,13 @@ namespace S3PIDemoFE
         {
             Filename = "";
             CurrentPackage = Package.NewPackage(0);
+            IsPackageDirty = true;
+        }
+
+        private void fileNewSimCity5Package()
+        {
+            Filename = "";
+            CurrentPackage = Package.NewPackage(0, 3);
             IsPackageDirty = true;
         }
 

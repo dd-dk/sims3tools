@@ -65,6 +65,7 @@
             this.detailsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
             this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyResourceKeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.fromFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fromPackageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -105,8 +106,9 @@
             this.bwcmCompressed = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmDeleted = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmDetails = new System.Windows.Forms.ToolStripMenuItem();
-            this.bwcmSelectAll = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
+            this.bwcmSelectAll = new System.Windows.Forms.ToolStripMenuItem();
+            this.bwcmCopyResourceKey = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmImport = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmFromFile = new System.Windows.Forms.ToolStripMenuItem();
             this.bwcmFromPackage = new System.Windows.Forms.ToolStripMenuItem();
@@ -124,8 +126,7 @@
             this.tpcmOTE = new System.Windows.Forms.ToolStripMenuItem();
             this.filterContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.flcmPasteResourceKey = new System.Windows.Forms.ToolStripMenuItem();
-            this.copyResourceKeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.bwcmCopyResourceKey = new System.Windows.Forms.ToolStripMenuItem();
+            this.newSimCity5PackageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.browserWidgetContextMenuStrip.SuspendLayout();
             this.previewContextMenuStrip.SuspendLayout();
@@ -151,6 +152,7 @@
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newToolStripMenuItem,
+            this.newSimCity5PackageToolStripMenuItem,
             this.openToolStripMenuItem,
             this.saveToolStripMenuItem,
             this.saveAsToolStripMenuItem,
@@ -456,6 +458,13 @@
             this.selectAllToolStripMenuItem.Text = "S&elect all";
             this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
             // 
+            // copyResourceKeyToolStripMenuItem
+            // 
+            this.copyResourceKeyToolStripMenuItem.Name = "copyResourceKeyToolStripMenuItem";
+            this.copyResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
+            this.copyResourceKeyToolStripMenuItem.Text = "&Copy ResourceKey";
+            this.copyResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
+            // 
             // importToolStripMenuItem1
             // 
             this.importToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -721,7 +730,7 @@
             this.bwcmHexEditor,
             this.bwcmTextEditor});
             this.browserWidgetContextMenuStrip.Name = "browserWidgetContextMenuStrip";
-            this.browserWidgetContextMenuStrip.Size = new System.Drawing.Size(205, 352);
+            this.browserWidgetContextMenuStrip.Size = new System.Drawing.Size(205, 330);
             this.browserWidgetContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.cmsBW_Opening);
             // 
             // bwcmAdd
@@ -796,6 +805,11 @@
             this.bwcmDetails.Text = "&Details...";
             this.bwcmDetails.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
+            // toolStripSeparator10
+            // 
+            this.toolStripSeparator10.Name = "toolStripSeparator10";
+            this.toolStripSeparator10.Size = new System.Drawing.Size(201, 6);
+            // 
             // bwcmSelectAll
             // 
             this.bwcmSelectAll.Enabled = false;
@@ -805,10 +819,14 @@
             this.bwcmSelectAll.Text = "S&elect all";
             this.bwcmSelectAll.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
-            // toolStripSeparator10
+            // bwcmCopyResourceKey
             // 
-            this.toolStripSeparator10.Name = "toolStripSeparator10";
-            this.toolStripSeparator10.Size = new System.Drawing.Size(201, 6);
+            this.bwcmCopyResourceKey.Enabled = false;
+            this.bwcmCopyResourceKey.Name = "bwcmCopyResourceKey";
+            this.bwcmCopyResourceKey.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.bwcmCopyResourceKey.Size = new System.Drawing.Size(204, 22);
+            this.bwcmCopyResourceKey.Text = "&Copy ResourceKey";
+            this.bwcmCopyResourceKey.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
             // bwcmImport
             // 
@@ -889,7 +907,7 @@
             this.bwcmTextEditor.Text = "&Text Editor";
             this.bwcmTextEditor.Click += new System.EventHandler(this.tsCMSBW_Click);
             // 
-            // textPreviewContextMenuStrip
+            // previewContextMenuStrip
             // 
             this.previewContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tpcmCopy,
@@ -938,31 +956,22 @@
             this.filterContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.flcmPasteResourceKey});
             this.filterContextMenuStrip.Name = "filterContextMenuStrip";
-            this.filterContextMenuStrip.Size = new System.Drawing.Size(206, 26);
+            this.filterContextMenuStrip.Size = new System.Drawing.Size(168, 26);
             this.filterContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.cmsFL_Opening);
             // 
             // flcmPasteResourceKey
             // 
             this.flcmPasteResourceKey.Name = "flcmPasteResourceKey";
-            this.flcmPasteResourceKey.Size = new System.Drawing.Size(205, 22);
+            this.flcmPasteResourceKey.Size = new System.Drawing.Size(167, 22);
             this.flcmPasteResourceKey.Text = "&Paste ResourceKey";
             this.flcmPasteResourceKey.Click += new System.EventHandler(this.tsCMF_Click);
             // 
-            // copyResourceKeyToolStripMenuItem
+            // newSimCity5PackageToolStripMenuItem
             // 
-            this.copyResourceKeyToolStripMenuItem.Name = "copyResourceKeyToolStripMenuItem";
-            this.copyResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
-            this.copyResourceKeyToolStripMenuItem.Text = "&Copy ResourceKey";
-            this.copyResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.tsMBR_Click);
-            // 
-            // bwcmCopyResourceKey
-            // 
-            this.bwcmCopyResourceKey.Enabled = false;
-            this.bwcmCopyResourceKey.Name = "bwcmCopyResourceKey";
-            this.bwcmCopyResourceKey.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.bwcmCopyResourceKey.Size = new System.Drawing.Size(204, 22);
-            this.bwcmCopyResourceKey.Text = "&Copy ResourceKey";
-            this.bwcmCopyResourceKey.Click += new System.EventHandler(this.tsCMSBW_Click);
+            this.newSimCity5PackageToolStripMenuItem.Name = "newSimCity5PackageToolStripMenuItem";
+            this.newSimCity5PackageToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.newSimCity5PackageToolStripMenuItem.Text = "New (SimCity&5)";
+            this.newSimCity5PackageToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
             // 
             // MenuBarWidget
             // 
@@ -1079,5 +1088,6 @@
         private System.Windows.Forms.ToolStripMenuItem copyResourceKeyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bwcmCopyResourceKey;
         public System.Windows.Forms.ContextMenuStrip filterContextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem newSimCity5PackageToolStripMenuItem;
     }
 }
