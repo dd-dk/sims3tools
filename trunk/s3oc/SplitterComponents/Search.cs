@@ -121,7 +121,11 @@ namespace ObjectCloner.SplitterComponents
 
         private void scmFix_Click(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.Action.Fix)); }
 
-        private void scmEdit_Click(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.Action.Export));  }
+        private void scmExport_Click(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.Action.Export));  }
+
+        private void scmRemove_Click(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.Action.Remove)); }
+
+        private void scmShow_Click(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.Action.Show)); }
 
         private void searchContextMenu_Opening(object sender, CancelEventArgs e)
         {
@@ -130,12 +134,7 @@ namespace ObjectCloner.SplitterComponents
             scmFix.Enabled = sr != null
                 && sr.PPSource == "cc"
                 && System.IO.File.Exists(sr.PathPackage.Path);
-            scmEdit.Enabled = listView1.SelectedItems.Count > 0
-                //&& sr.PPSource == "cc"
-                //&& System.IO.File.Exists(sr.PathPackage.Path)
-                && ObjectCloner.Properties.Settings.Default.pkgEditorEnabled
-                && ObjectCloner.Properties.Settings.Default.pkgEditorPath != null
-                && System.IO.File.Exists(ObjectCloner.Properties.Settings.Default.pkgEditorPath);
+            scmExport.Enabled = scmRemove.Enabled = scmShow.Enabled = listView1.SelectedIndices.Count > 0;
         }
         #endregion
 
@@ -168,9 +167,10 @@ namespace ObjectCloner.SplitterComponents
         
         private bool allowSearch()
         {
-            return tbText.Text.Length > 0 &&
-                (ckbUseEA.Checked || ckbUseCC.Checked) && 
-                (ckbResourceName.Checked || ckbCatalogDesc.Checked || ckbCatalogName.Checked || ckbObjectDesc.Checked || ckbObjectName.Checked);
+            tlpWhere.Enabled = (tbText.Text.Length > 0);
+            return tbText.Text.Length == 0 || (
+                (ckbUseEA.Checked || ckbUseCC.Checked) &&
+                (ckbResourceName.Checked || ckbCatalogDesc.Checked || ckbCatalogName.Checked || ckbObjectDesc.Checked || ckbObjectName.Checked));
         }
 
 
@@ -482,36 +482,40 @@ namespace ObjectCloner.SplitterComponents
                         if (stopSearch) return;
                         PathPackageTuple ppt = FileTable.GameContent[p];
 
-                        #region Fetch name map
-                        if (criteria.resourceName)
+                        if (criteria.text.Length > 0)
                         {
-                            updateProgress(true, String.Format("Retrieving name map for package {0} of {1}...", p + 1, FileTable.GameContent.Count), false, -1, false, -1);
-                            SpecificResource sr = ppt.Find(rie => rie.ResourceType == 0x0166038C);
-                            nameMap = sr == null ? null : sr.Resource as IDictionary<ulong, string>;
-                            if (stopSearch) return;
-                        }
-                        #endregion
-
-                        #region Fetch STBLs
-                        if (criteria.catalogType!= CatalogType.CAS_Part)
-                            if (criteria.catalogName || criteria.catalogDesc)
+                            #region Fetch name map
+                            if (criteria.resourceName)
                             {
-                                updateProgress(true, String.Format("Retrieving string tables for package {0} of {1}...", p + 1, FileTable.GameContent.Count), true, -1, false, 0);
-                                stbls = new List<IDictionary<ulong, string>>();
-                                foreach (var rk in ppt.Package.FindAll(rie => rie.ResourceType == 0x220557DA && (criteria.allLanguages || rie.Instance >> 56 == 0x00)))
-                                {
-                                    if (stopSearch) return;
-                                    SpecificResource sr = new SpecificResource(ppt, rk);
-                                    var stbl = sr.Resource as IDictionary<ulong, string>;
-                                    if (stbl == null) continue;
-                                    stbls.Add(stbl);
-                                }
+                                updateProgress(true, String.Format("Retrieving name map for package {0} of {1}...", p + 1, FileTable.GameContent.Count), false, -1, false, -1);
+                                SpecificResource sr = ppt.Find(rie => rie.ResourceType == 0x0166038C);//NMAP
+                                nameMap = sr == null ? null : sr.Resource as IDictionary<ulong, string>;
+                                if (stopSearch) return;
                             }
-                        #endregion
+                            #endregion
+
+                            #region Fetch STBLs
+                            if (criteria.catalogType != CatalogType.CAS_Part)
+                                if (criteria.catalogName || criteria.catalogDesc)
+                                {
+                                    updateProgress(true, String.Format("Retrieving string tables for package {0} of {1}...", p + 1, FileTable.GameContent.Count), true, -1, false, 0);
+                                    stbls = new List<IDictionary<ulong, string>>();
+                                    foreach (var rk in ppt.Package.FindAll(rie => rie.ResourceType == 0x220557DA //STBL
+                                        && (criteria.allLanguages || rie.Instance >> 56 == 0x00)))
+                                    {
+                                        if (stopSearch) return;
+                                        SpecificResource sr = new SpecificResource(ppt, rk);
+                                        var stbl = sr.Resource as IDictionary<ulong, string>;
+                                        if (stbl == null) continue;
+                                        stbls.Add(stbl);
+                                    }
+                                }
+                            #endregion
+                        }
 
                         // Find the right type of resource to search and apply matching
                         updateProgress(true, String.Format("Searching package {0} of {1}...", p + 1, FileTable.GameContent.Count), false, -1, false, -1);
-                        foreach (var match in Find(ppt).Where(sr => stopSearch || (!lres.Contains(sr.RequestedRK.Instance) && Match(sr))))
+                        foreach (var match in Find(ppt).Where(sr => stopSearch || (!lres.Contains(sr.RequestedRK.Instance) && (criteria.text.Length == 0 || Match(sr)))))
                         {
                             if (stopSearch) return;
                             lres.Add(match.RequestedRK.Instance);

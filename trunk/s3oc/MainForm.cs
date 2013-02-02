@@ -417,7 +417,7 @@ namespace ObjectCloner
             public ListView ListView { get { return lv; } }
             public SpecificResource SelectedItem { get { return lv.SelectedItems.Count != 1 ? null : lv.SelectedItems[0].Tag as SpecificResource; } }
         }
-        public enum Action { Clone, Fix, Export, Details }
+        public enum Action { Clone, Fix, Edit, Details, Export, Remove, Show }
         public class ItemActivateEventArgs : ItemEventArgs
         {
             public Action Action { get; private set; }
@@ -583,7 +583,7 @@ namespace ObjectCloner
         }
         #endregion
 
-        #region ObjectChooser, Search and TGISearch common bits
+        #region ObjectChooser, Search and TGISearch "common" bits
         private void listView_SelectedIndexChanged(object sender, SelectedIndexChangedEventArgs e)
         {
             if (formClosing) return;
@@ -621,8 +621,17 @@ namespace ObjectCloner
                 case Action.Details:
                     ActionDetails(e.ListView);
                     break;
+                case Action.Edit:
+                    ActionEdit(e.ListView);
+                    break;
                 case Action.Export:
-                    ActionExport(e.ListView);
+                    ActionExport(e.ListView, "Export to package", exportClone);
+                    break;
+                case Action.Remove:
+                    ActionExport(e.ListView, "Override package name (remove from catalog)", (a, b, c) => exportRemoveShow(a, b, c, true));
+                    break;
+                case Action.Show:
+                    ActionExport(e.ListView, "Override package name (show in catalog)", (a, b, c) => exportRemoveShow(a, b, c, false));
                     break;
             }
         }
@@ -668,57 +677,23 @@ namespace ObjectCloner
                 "Selected item");
         }
 
-        private void ActionExport(ListView listView1)
+        private void ActionEdit(ListView listView1)
         {
-            if (listView1.SelectedItems.Count == 0)
-                return;
-
             if (!ObjectCloner.Properties.Settings.Default.pkgEditorEnabled ||
                 ObjectCloner.Properties.Settings.Default.pkgEditorPath == null ||
                 !System.IO.File.Exists(ObjectCloner.Properties.Settings.Default.pkgEditorPath))
                 return;
 
-            List<SpecificResource> lsr = new List<SpecificResource>();
-            foreach (ListViewItem lvi in listView1.SelectedItems)
-                if (lvi.Tag as SpecificResource == null ||
-                    !System.IO.File.Exists((lvi.Tag as SpecificResource).PathPackage.Path))
-                    return;
-                else
-                    lsr.Add(lvi.Tag as SpecificResource);
+            string filename = getTempPackageName();
 
-            List<SpecificResource> missing = new List<SpecificResource>();
-            string filename = System.IO.Path.Combine(Environment.GetEnvironmentVariable("TEMP"),
-                string.Format("s3oc_0x{0:X8}_{1}.package",
-                System.Diagnostics.Process.GetCurrentProcess().Id,
-                Guid.NewGuid().ToString()
-                ));
             bool remove = true;
             try
             {
-                s3pi.Package.Package.NewPackage(0).SaveAs(filename);
-                PathPackageTuple ppt = new PathPackageTuple(filename, readwrite: true);
-
                 try
                 {
-                    string _keyName = Path.GetFileNameWithoutExtension(filename);
-                    ulong _keyIID = FNV64.GetHash(_keyName);
-                    SpecificResource _keySR = ppt.AddResource(new RK(RK.NULL) { ResourceType = 0x0166038C, Instance = _keyIID, });
-                    IDictionary<ulong, string> _key = _keySR.Resource as IDictionary<ulong, string>;
-                    _key.Add(_keyIID, _keyName);
-
-                    foreach (var sr in lsr)
-                    {
-                        if (sr.ResourceIndexEntry == null)
-                        {
-                            missing.Add(sr);
-                            continue;
-                        }
-
-                        string name = NameMap.NMap[sr.ResourceIndexEntry.Instance];
-                        if (name != null && !_key.ContainsKey(sr.ResourceIndexEntry.Instance))
-                            _key.Add(sr.ResourceIndexEntry.Instance, name);
-                        ppt.AddResource(sr.ResourceIndexEntry, sr.Resource.Stream);
-                    }
+                    List<SpecificResource> missing = exportToPackage(listView1, filename, exportClone);
+                    if (missing == null)
+                        return;
 
                     if (missing.Count != 0)
                     {
@@ -726,34 +701,26 @@ namespace ObjectCloner
                         return;
                     }
 
-                    _keySR.Commit();
+                    string command = ObjectCloner.Properties.Settings.Default.pkgEditorPath;
+                    string arguments = String.Format(@"""{0}""", filename);
 
+                    System.Diagnostics.Process p = new System.Diagnostics.Process();
+
+                    p.StartInfo.FileName = command;
+                    p.StartInfo.Arguments = arguments;
+                    p.StartInfo.UseShellExecute = false;
+
+                    try { p.Start(); remove = false; }
+                    catch (Exception ex)
+                    {
+                        CopyableMessageBox.IssueException(ex,
+                            String.Format("Application failed to start:\n{0}\n{1}", command, arguments),
+                            "Launch failed");
+                    }
                 }
                 catch (Exception ex)
                 {
                     CopyableMessageBox.IssueException(ex, "Export failed");
-                }
-                finally
-                {
-                    ppt.Package.SavePackage();
-                    s3pi.Package.Package.ClosePackage(0, ppt.Package);
-                }
-
-                string command = ObjectCloner.Properties.Settings.Default.pkgEditorPath;
-                string arguments = String.Format(@"""{0}""", filename);
-
-                System.Diagnostics.Process p = new System.Diagnostics.Process();
-
-                p.StartInfo.FileName = command;
-                p.StartInfo.Arguments = arguments;
-                p.StartInfo.UseShellExecute = false;
-
-                try { p.Start(); remove = false; }
-                catch (Exception ex)
-                {
-                    CopyableMessageBox.IssueException(ex,
-                        String.Format("Application failed to start:\n{0}\n{1}", command, arguments),
-                        "Launch failed");
                 }
             }
             finally
@@ -763,6 +730,166 @@ namespace ObjectCloner
                     File.Delete(filename);
                 }
             }
+        }
+
+        private void ActionExport(ListView listView1, string title, Action<PathPackageTuple, SpecificResource, IDictionary<ulong, string>> exportSR)
+        {
+            string filename = getExportPackageName(title);
+            if (filename == null)
+                return;
+
+            try
+            {
+                List<SpecificResource> missing = exportToPackage(listView1, filename, exportSR);
+                if (missing == null)
+                    return;
+
+                if (missing.Count != 0)
+                {
+                    CopyableMessageBox.Show("Resource(s) could not be found!", myName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                CopyableMessageBox.IssueException(ex, "Export failed");
+            }
+        }
+
+        // -- helpers for ActionEdit / ActionExport:
+
+        private string getTempPackageName()
+        {
+            return System.IO.Path.Combine(Environment.GetEnvironmentVariable("TEMP"),
+                string.Format("s3oc_0x{0:X8}_{1}.package",
+                    System.Diagnostics.Process.GetCurrentProcess().Id,
+                    Guid.NewGuid().ToString()
+                ));
+        }
+
+        private string getExportPackageName(string title)
+        {
+            SaveFileDialog sfd = new SaveFileDialog()
+            {
+                AddExtension = true,
+                CheckPathExists = true,
+                DefaultExt = ".package",
+                FileName = "*.package",
+                Filter = "Package|*.package",
+                FilterIndex = 1,
+                OverwritePrompt = true,
+                Title = title,
+                ValidateNames = true,
+            };
+
+            DialogResult dr = sfd.ShowDialog();
+            if (dr != System.Windows.Forms.DialogResult.OK)
+                return null;
+
+            return sfd.FileName;
+        }
+
+        private List<SpecificResource> exportToPackage(ListView listView1, string filename, Action<PathPackageTuple, SpecificResource, IDictionary<ulong, string>> exportSR)
+        {
+            List<SpecificResource> lsr = getExistingResources(listView1);
+            if (lsr.Count == 0)
+                return null;
+
+            s3pi.Package.Package.NewPackage(0).SaveAs(filename);
+            PathPackageTuple ppt = new PathPackageTuple(filename, readwrite: true);
+
+            try
+            {
+                SpecificResource _keySR = createNameMap(ppt);
+                IDictionary<ulong, string> _key = _keySR.Resource as IDictionary<ulong, string>;
+
+                try
+                {
+                    List<SpecificResource> missing = new List<SpecificResource>();
+                    foreach (var sr in lsr)
+                    {
+                        if (sr.ResourceIndexEntry == null)
+                        {
+                            missing.Add(sr);
+                            continue;
+                        }
+                        exportSR(ppt, sr, _key);
+                    }
+                    return missing;
+                }
+                finally
+                {
+                    _keySR.Commit();
+                }
+            }
+            finally
+            {
+                ppt.Package.SavePackage();
+                s3pi.Package.Package.ClosePackage(0, ppt.Package);
+            }
+        }
+
+        private List<SpecificResource> getExistingResources(ListView listView1)
+        {
+            List<SpecificResource> lsr = new List<SpecificResource>();
+            foreach (ListViewItem lvi in listView1.SelectedItems)
+                if (lvi.Tag as SpecificResource == null ||
+                    !System.IO.File.Exists((lvi.Tag as SpecificResource).PathPackage.Path))
+                    continue;
+                else
+                    lsr.Add(lvi.Tag as SpecificResource);
+            return lsr;
+        }
+
+        private SpecificResource createNameMap(PathPackageTuple ppt)
+        {
+            string _keyName = Path.GetFileNameWithoutExtension(ppt.Path);
+            ulong _keyIID = FNV64.GetHash(_keyName);
+            SpecificResource _keySR = ppt.AddResource(new RK(RK.NULL) { ResourceType = 0x0166038C, Instance = _keyIID, });
+            IDictionary<ulong, string> _key = _keySR.Resource as IDictionary<ulong, string>;
+            _key.Add(_keyIID, _keyName);
+
+            return _keySR;
+        }
+
+        private void addNametoKey(SpecificResource sr, IDictionary<ulong, string> _key)
+        {
+            string name = NameMap.NMap[sr.ResourceIndexEntry.Instance];
+            if (name != null && !_key.ContainsKey(sr.ResourceIndexEntry.Instance))
+                _key.Add(sr.ResourceIndexEntry.Instance, name);
+        }
+
+        private void exportClone(PathPackageTuple ppt, SpecificResource sr, IDictionary<ulong, string> _key)
+        {
+            addNametoKey(sr, _key);
+            ppt.AddResource(sr.ResourceIndexEntry, sr.Resource.Stream);
+        }
+
+        private void exportRemoveShow(PathPackageTuple ppt, SpecificResource item, IDictionary<ulong, string> _key, bool remove)
+        {
+            SpecificResource sr = item.ResourceIndexEntry.ResourceType == (uint)CatalogType.ModularResource ? ItemForTGIBlock0(item) : item;
+
+            if (sr.ResourceIndexEntry.ResourceType == (uint)CatalogType.CAS_Part)
+                removeShowCASP(sr, remove);
+            else
+                removeShowCatlg(sr, remove);
+
+            exportClone(ppt, sr, _key);
+        }
+
+        private void removeShowCASP(SpecificResource sr, bool remove)
+        {
+            CASPartResource.CASPartResource item = sr.Resource as CASPartResource.CASPartResource;
+            item.ClothingCategory &= ~CASPartResource.ClothingCategoryFlags.IsHiddenInCAS;
+            if (remove)
+                item.ClothingCategory |= CASPartResource.ClothingCategoryFlags.IsHiddenInCAS;
+        }
+
+        private void removeShowCatlg(SpecificResource sr, bool remove)
+        {
+            CatalogResource.CatalogResource item = sr.Resource as CatalogResource.CatalogResource;
+            item.CommonBlock.BuildBuyProductStatusFlags &= ~CatalogResource.CatalogResource.Common.BuildBuyProductStatus.ShowInCatalog;
+            if (!remove)
+                item.CommonBlock.BuildBuyProductStatusFlags |= CatalogResource.CatalogResource.Common.BuildBuyProductStatus.ShowInCatalog;
         }
         #endregion
 

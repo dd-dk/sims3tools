@@ -142,7 +142,7 @@ namespace ObjectCloner.SplitterComponents
 
         private void lvcmFix_Click(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.Action.Fix)); }
 
-        private void lvcmEdit_Click(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.Action.Export)); }
+        private void lvcmEdit_Click(object sender, EventArgs e) { OnItemActivate(this, new MainForm.ItemActivateEventArgs(listView1, MainForm.Action.Edit)); }
 
         private void lvContextMenu_Opening(object sender, CancelEventArgs e)
         {

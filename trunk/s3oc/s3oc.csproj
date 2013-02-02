@@ -55,6 +55,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.CustomForms.dll</HintPath>
     </Reference>
+    <Reference Include="s3pi.DefaultResource, Version=1301.31.813.14817, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\s3pi\build\bin\Release\s3pi.DefaultResource.dll</HintPath>
+    </Reference>
     <Reference Include="s3pi.Extensions">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\s3pi\build\bin\Release\s3pi.Extensions.dll</HintPath>
@@ -298,10 +302,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\s3pi\build\bin\Release\s3pi.DefaultResource.dll">
-      <Link>s3pi.DefaultResource.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.ImageResource.dll">
       <Link>s3pi.ImageResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

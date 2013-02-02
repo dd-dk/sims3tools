@@ -39,7 +39,9 @@
             this.scmCopyRK = new System.Windows.Forms.ToolStripMenuItem();
             this.scmClone = new System.Windows.Forms.ToolStripMenuItem();
             this.scmFix = new System.Windows.Forms.ToolStripMenuItem();
-            this.scmEdit = new System.Windows.Forms.ToolStripMenuItem();
+            this.scmExport = new System.Windows.Forms.ToolStripMenuItem();
+            this.scmRemove = new System.Windows.Forms.ToolStripMenuItem();
+            this.scmShow = new System.Windows.Forms.ToolStripMenuItem();
             this.tlpSearch = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.cbCatalogType = new System.Windows.Forms.ComboBox();
@@ -123,16 +125,18 @@
             this.scmCopyRK,
             this.scmClone,
             this.scmFix,
-            this.scmEdit});
+            this.scmExport,
+            this.scmRemove,
+            this.scmShow});
             this.searchContextMenu.Name = "searchContextMenu";
-            this.searchContextMenu.Size = new System.Drawing.Size(205, 92);
+            this.searchContextMenu.Size = new System.Drawing.Size(218, 158);
             this.searchContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.searchContextMenu_Opening);
             // 
             // scmCopyRK
             // 
             this.scmCopyRK.Name = "scmCopyRK";
             this.scmCopyRK.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.scmCopyRK.Size = new System.Drawing.Size(204, 22);
+            this.scmCopyRK.Size = new System.Drawing.Size(217, 22);
             this.scmCopyRK.Text = "&Copy ResourceKey";
             this.scmCopyRK.Click += new System.EventHandler(this.scmCopyRK_Click);
             // 
@@ -140,24 +144,40 @@
             // 
             this.scmClone.Name = "scmClone";
             this.scmClone.ShortcutKeyDisplayString = "Enter";
-            this.scmClone.Size = new System.Drawing.Size(204, 22);
+            this.scmClone.Size = new System.Drawing.Size(217, 22);
             this.scmClone.Text = "Clone";
             this.scmClone.Click += new System.EventHandler(this.scmActivate_Click);
             // 
             // scmFix
             // 
             this.scmFix.Name = "scmFix";
-            this.scmFix.Size = new System.Drawing.Size(204, 22);
+            this.scmFix.Size = new System.Drawing.Size(217, 22);
             this.scmFix.Text = "&Open containing package";
             this.scmFix.Click += new System.EventHandler(this.scmFix_Click);
             // 
-            // scmEdit
+            // scmExport
             // 
-            this.scmEdit.Name = "scmEdit";
-            this.scmEdit.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.E)));
-            this.scmEdit.Size = new System.Drawing.Size(204, 22);
-            this.scmEdit.Text = "Export to &Editor";
-            this.scmEdit.Click += new System.EventHandler(this.scmEdit_Click);
+            this.scmExport.Name = "scmExport";
+            this.scmExport.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
+            this.scmExport.Size = new System.Drawing.Size(217, 22);
+            this.scmExport.Text = "&Export to Package";
+            this.scmExport.Click += new System.EventHandler(this.scmExport_Click);
+            // 
+            // scmRemove
+            // 
+            this.scmRemove.Name = "scmRemove";
+            this.scmRemove.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
+            this.scmRemove.Size = new System.Drawing.Size(217, 22);
+            this.scmRemove.Text = "&Remove from Catalog";
+            this.scmRemove.Click += new System.EventHandler(this.scmRemove_Click);
+            // 
+            // scmShow
+            // 
+            this.scmShow.Name = "scmShow";
+            this.scmShow.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.scmShow.Size = new System.Drawing.Size(217, 22);
+            this.scmShow.Text = "&Show in Catalog";
+            this.scmShow.Click += new System.EventHandler(this.scmShow_Click);
             // 
             // tlpSearch
             // 
@@ -220,7 +240,6 @@
             // btnSearch
             // 
             this.btnSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSearch.Enabled = false;
             this.btnSearch.Location = new System.Drawing.Point(536, 3);
             this.btnSearch.Name = "btnSearch";
             this.btnSearch.Size = new System.Drawing.Size(75, 23);
@@ -258,6 +277,7 @@
             this.tlpWhere.Controls.Add(this.ckbUseEA, 3, 0);
             this.tlpWhere.Controls.Add(this.ckbUseCC, 3, 1);
             this.tlpWhere.Controls.Add(this.tlpCount, 3, 3);
+            this.tlpWhere.Enabled = false;
             this.tlpWhere.Location = new System.Drawing.Point(100, 31);
             this.tlpWhere.Name = "tlpWhere";
             this.tlpWhere.RowCount = 5;
@@ -503,12 +523,14 @@
         private System.Windows.Forms.CheckBox ckbUseEA;
         private System.Windows.Forms.ToolStripMenuItem scmClone;
         private System.Windows.Forms.ToolStripMenuItem scmFix;
-        private System.Windows.Forms.ToolStripMenuItem scmEdit;
+        private System.Windows.Forms.ToolStripMenuItem scmExport;
         private System.Windows.Forms.RadioButton rb1English;
         private System.Windows.Forms.RadioButton rb1All;
         private System.Windows.Forms.TableLayoutPanel tlpCount;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label lbCount;
+        private System.Windows.Forms.ToolStripMenuItem scmRemove;
+        private System.Windows.Forms.ToolStripMenuItem scmShow;
 
     }
 }
