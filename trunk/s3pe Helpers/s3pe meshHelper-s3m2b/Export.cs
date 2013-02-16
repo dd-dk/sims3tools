@@ -110,14 +110,14 @@ namespace meshExpImp.Helper
             for (int g = 0; g < mesh.GeometryStates.Count; g++)
             {
                 Export_VBUF_Geos(w, vbuf, vrtf, uvScales, mesh, g);
-                Export_IBUF_Geos(w, ibuf, mesh, vrtf, g);
+                Export_IBUF_Geos(w, ibuf, mesh, g);
             }
 
             w.Flush();
         }
 
 
-        bool geosIsContained(MLOD.GeometryState geoState, MLOD.Mesh mesh)
+        bool geosVBUFIsContained(MLOD.GeometryState geoState, MLOD.Mesh mesh)
         {
             return geoState.MinVertexIndex + geoState.VertexCount <= mesh.MinVertexIndex + mesh.VertexCount;
         }
@@ -126,26 +126,31 @@ namespace meshExpImp.Helper
             if (vbuf == null) { w.WriteLine("; vbuf is null for geoState"); w.WriteLine(string.Format("vbuf {0} 0 0", geoStateIndex)); return; }
 
             MLOD.GeometryState geoState = mesh.GeometryStates[geoStateIndex];
-            meshExpImp.ModelBlocks.Vertex[] av = vbuf.GetVertices(mesh, vrtf, geoState, uvScales);
 
-            if (geosIsContained(geoState, mesh)) w.WriteLine("; vbuf is contained within main mesh");
+            if (geosVBUFIsContained(geoState, mesh)) w.WriteLine("; vbuf is contained within main mesh");
             w.WriteLine(string.Format("vbuf {0} {1} {2}", geoStateIndex, geoState.MinVertexIndex, geoState.VertexCount));
-            if (geosIsContained(geoState, mesh)) return;
+            if (geosVBUFIsContained(geoState, mesh)) return;
 
-            w.Export_VBUF(mpb, av, vrtf);
+            w.Export_VBUF(mpb, vbuf.GetVertices(mesh, vrtf, geoState, uvScales), vrtf);
         }
 
-        void Export_IBUF_Geos(StreamWriter w, IBUF ibuf, MLOD.Mesh mesh, VRTF vrtf, int geoStateIndex)
+
+        bool geosIBUFIsContained(MLOD.GeometryState geoState, int sizePerPrimitive, MLOD.Mesh mesh)
+        {
+            return geoState.StartIndex + geoState.PrimitiveCount * sizePerPrimitive <= mesh.StartIndex + mesh.PrimitiveCount * sizePerPrimitive;
+        }
+        void Export_IBUF_Geos(StreamWriter w, IBUF ibuf, MLOD.Mesh mesh, int geoStateIndex)
         {
             if (ibuf == null) { w.WriteLine("; ibuf is null for geoState"); w.WriteLine(string.Format("ibuf {0} 0 0", geoStateIndex)); return; }
 
             int sizePerPrimitive = IBUF.IndexCountFromPrimitiveType(mesh.PrimitiveType);
             MLOD.GeometryState geoState = mesh.GeometryStates[geoStateIndex];
 
+            if (geosIBUFIsContained(geoState, sizePerPrimitive, mesh)) w.WriteLine("; ibuf is contained within main mesh");
             w.WriteLine(string.Format("ibuf {0} {1} {2}", geoStateIndex, geoState.StartIndex, geoState.PrimitiveCount));
-            if (geoState.StartIndex + geoState.PrimitiveCount * sizePerPrimitive <= mesh.StartIndex + mesh.PrimitiveCount * sizePerPrimitive) return;
+            if (geosIBUFIsContained(geoState, sizePerPrimitive, mesh)) return;
 
-            w.Export_IBUF(mpb, ibuf.GetIndices(mesh, vrtf, geoStateIndex), sizePerPrimitive, geoState.PrimitiveCount);
+            w.Export_IBUF(mpb, ibuf.GetIndices(mesh, geoStateIndex), sizePerPrimitive, geoState.PrimitiveCount);
         }
     }
 }
