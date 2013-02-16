@@ -3139,6 +3139,7 @@ namespace ObjectCloner
                 {
                     stepList.AddRange(new Step[] {
                         CASP_deepClone,
+                        GEOM_getGroupKin,
                     });
                 }
                 else
@@ -3201,6 +3202,7 @@ namespace ObjectCloner
             StepText.Add(CWAL_SlurpThumbnails, "Add thumbnails");
 
             StepText.Add(CASP_deepClone, "Deep clone of resources referenced by CASP");
+            StepText.Add(GEOM_getGroupKin, "Deep clone of resources group-kinned to CASP's GEOM");
             StepText.Add(CASP_clone, "Clone of several resources referenced by CASP");
             StepText.Add(CASP_IncludePresets, "Include Preset Images (CASParts)");
             StepText.Add(GEOM_getNormalMap, "Add GEOM-referenced NormalMap");
@@ -3690,9 +3692,37 @@ namespace ObjectCloner
             CASPartResource.CASPartResource casp = selectedItem.Resource as CASPartResource.CASPartResource;
             if (casp == null) return;
 
+            geomItem = null;
             List<IResourceKey> seen = new List<IResourceKey>();
             foreach (var tuple in casp.FindAll("casp", x => x is IResourceKey, (tr, k) => tr.SlurpRKs(k)))
-                deepClone(tuple, x => { if (seen.Contains(x) || x.ResourceType == 0x034AEECB) return false; seen.Add(x); return true; });
+                deepClone(tuple,
+                    x => {
+                        if (seen.Contains(x) || x.ResourceType == 0x034AEECB) return false;
+
+                        seen.Add(x);
+                        if (x.ResourceType == 0x015A1849 && geomItem == null)
+                            geomItem = new SpecificResource(FileTable.GameContent, x);
+
+                        return true;
+                    });
+        }
+
+        void GEOM_getGroupKin()
+        {
+            Diagnostics.Log("GEOM_getGroupKin");
+            if (geomItem == null) { Diagnostics.Show("GEOM reference not found"); return; }
+
+            List<IResourceKey> seen = new List<IResourceKey>();
+            seen.Add(geomItem.RequestedRK);
+
+            int i = 0;
+            foreach (var sr in FileTable.GameContent
+                .SelectMany(ppt => ppt.FindAll(rie => rie.ResourceGroup == geomItem.RequestedRK.ResourceGroup))
+                .Where(sr => { if (seen.Contains(sr.RequestedRK)) return false; seen.Add(sr.RequestedRK); return true; }))
+            {
+                Add("casp.GEOM.GroupKin[" + i + "]", sr.ResourceIndexEntry);
+                i++;
+            }
         }
 
         void CASP_clone()
