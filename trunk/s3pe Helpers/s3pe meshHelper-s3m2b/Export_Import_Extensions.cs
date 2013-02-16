@@ -292,7 +292,7 @@ namespace meshExpImp.Helper
                         throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect line index value {1}.", line, index));
                     byte usage;
                     if (!byte.TryParse(split[1], out usage))
-                        throw new InvalidDataException(string.Format("'vbuf' line {0} has invalid line index.", v));
+                        throw new InvalidDataException(string.Format("'vbuf' line {0} has invalid Usage.", v));
                     if (usage != (byte)layout.Usage)
                         throw new InvalidDataException(string.Format("'vbuf' line {0} has incorrect line Usage value {1}.", line, usage));
 
