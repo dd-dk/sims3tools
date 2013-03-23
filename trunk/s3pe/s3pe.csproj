@@ -415,10 +415,6 @@
       <Link>s3pi.TxtcResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\s3pi\build\bin\Release\s3pi.VideoResource.dll">
-      <Link>s3pi.VideoResource.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="..\s3pi\build\bin\Release\squishinterface_Win32.dll">
       <Link>squishinterface_Win32.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
