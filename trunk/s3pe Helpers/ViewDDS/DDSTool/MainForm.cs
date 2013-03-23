@@ -180,21 +180,16 @@ namespace s3pe.DDSTool
             string oldCaption = saveFileDialog1.Title;
             try
             {
-                saveFileDialog1.Filter = "Image files|*.bmp;*.jpg;*.png;*.gif|All files|*.*";
+                saveFileDialog1.Filter = "Portable Network Grapics files|*.png";//|Grapics Interchange Format files|*.gif|JPEG files|*.jpg|Bitmap files|*.bmp";
                 saveFileDialog1.Title = "Save to image file";
-                saveFileDialog1.FileName = "*.bmp;*.jpg;*.png;*.gif";
+                saveFileDialog1.FileName = "*.png";//;*.gif;*.jpg;*.bmp";
                 saveFileDialog1.FilterIndex = 0;
                 DialogResult dr = saveFileDialog1.ShowDialog();
                 if (dr != DialogResult.OK) return;
             }
             finally { saveFileDialog1.Filter = oldFilter; saveFileDialog1.Title = oldCaption; }
 
-            try
-            {
-                ddsPanel1.Image.Save(saveFileDialog1.FileName);
-                MessageBox.Show("Saved image to file.", "Export...");
-            }
-            catch { }
+            saveImage(saveFileDialog1.FileName);
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -447,6 +442,16 @@ namespace s3pe.DDSTool
                 fs.Close();
             }
             MessageBox.Show("Saved DDS file.", "Save DDS as...");
+        }
+
+        void saveImage(string filename)
+        {
+            try
+            {
+                ddsPanel1.Image.Save(filename);
+                MessageBox.Show("Saved image to file.", "Export...");
+            }
+            catch { }
         }
 
         uint? GetColour(decimal r, decimal g, decimal b, decimal a)
