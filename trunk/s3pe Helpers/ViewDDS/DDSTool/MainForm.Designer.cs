@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.hueShift = new System.Windows.Forms.NumericUpDown();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.saturationShift = new System.Windows.Forms.NumericUpDown();
@@ -141,6 +142,12 @@
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.loadDDSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importAlphaToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveDDSAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.hueShift)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.saturationShift)).BeginInit();
@@ -189,6 +196,7 @@
             this.tlpMaskSize.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // hueShift
@@ -1582,6 +1590,7 @@
             this.ddsMaskCh1.TabIndex = 3;
             this.ddsMaskCh1.TabStop = false;
             this.ddsMaskCh1.UseDXT = false;
+            this.ddsMaskCh1.UseLuminance = false;
             this.ddsMaskCh1.Click += new System.EventHandler(this.ddsMaskCh_Click);
             // 
             // ddsMaskCh2
@@ -1602,6 +1611,7 @@
             this.ddsMaskCh2.TabIndex = 4;
             this.ddsMaskCh2.TabStop = false;
             this.ddsMaskCh2.UseDXT = false;
+            this.ddsMaskCh2.UseLuminance = false;
             // 
             // ddsMaskCh3
             // 
@@ -1621,6 +1631,7 @@
             this.ddsMaskCh3.TabIndex = 5;
             this.ddsMaskCh3.TabStop = false;
             this.ddsMaskCh3.UseDXT = false;
+            this.ddsMaskCh3.UseLuminance = false;
             // 
             // ddsMaskCh4
             // 
@@ -1640,6 +1651,7 @@
             this.ddsMaskCh4.TabIndex = 6;
             this.ddsMaskCh4.TabStop = false;
             this.ddsMaskCh4.UseDXT = false;
+            this.ddsMaskCh4.UseLuminance = false;
             // 
             // tlpMaskSize
             // 
@@ -1728,6 +1740,7 @@
             // 
             this.ddsPanel1.AlphaDepth = -1;
             this.ddsPanel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.ddsPanel1.ContextMenuStrip = this.contextMenuStrip1;
             this.ddsPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ddsPanel1.Fit = true;
             this.ddsPanel1.Location = new System.Drawing.Point(453, 0);
@@ -1737,6 +1750,7 @@
             this.ddsPanel1.Size = new System.Drawing.Size(543, 528);
             this.ddsPanel1.TabIndex = 4;
             this.ddsPanel1.UseDXT = false;
+            this.ddsPanel1.UseLuminance = false;
             // 
             // menuStrip1
             // 
@@ -1847,6 +1861,52 @@
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.loadDDSToolStripMenuItem,
+            this.importToolStripMenuItem,
+            this.importAlphaToolStripMenuItem1,
+            this.saveDDSAsToolStripMenuItem,
+            this.exportToolStripMenuItem1});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 136);
+            // 
+            // loadDDSToolStripMenuItem
+            // 
+            this.loadDDSToolStripMenuItem.Name = "loadDDSToolStripMenuItem";
+            this.loadDDSToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.loadDDSToolStripMenuItem.Text = "Load DDS...";
+            this.loadDDSToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
+            // 
+            // importToolStripMenuItem
+            // 
+            this.importToolStripMenuItem.Name = "importToolStripMenuItem";
+            this.importToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.importToolStripMenuItem.Text = "Import image...";
+            this.importToolStripMenuItem.Click += new System.EventHandler(this.importImageToolStripMenuItem_Click);
+            // 
+            // importAlphaToolStripMenuItem1
+            // 
+            this.importAlphaToolStripMenuItem1.Name = "importAlphaToolStripMenuItem1";
+            this.importAlphaToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.importAlphaToolStripMenuItem1.Text = "Import alpha...";
+            this.importAlphaToolStripMenuItem1.Click += new System.EventHandler(this.importAlphaToolStripMenuItem_Click);
+            // 
+            // saveDDSAsToolStripMenuItem
+            // 
+            this.saveDDSAsToolStripMenuItem.Name = "saveDDSAsToolStripMenuItem";
+            this.saveDDSAsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveDDSAsToolStripMenuItem.Text = "Save DDS as...";
+            this.saveDDSAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
+            // 
+            // exportToolStripMenuItem1
+            // 
+            this.exportToolStripMenuItem1.Name = "exportToolStripMenuItem1";
+            this.exportToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
+            this.exportToolStripMenuItem1.Text = "Export...";
+            this.exportToolStripMenuItem1.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1918,6 +1978,7 @@
             this.tableLayoutPanel5.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2038,5 +2099,11 @@
         private System.Windows.Forms.Label label23;
         private System.Windows.Forms.Label lbUseDXT;
         private System.Windows.Forms.Label lbAlphaDepth;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem loadDDSToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem importAlphaToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem saveDDSAsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem1;
     }
 }

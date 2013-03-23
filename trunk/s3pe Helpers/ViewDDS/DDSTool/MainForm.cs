@@ -28,26 +28,28 @@ namespace s3pe.DDSTool
 {
     public partial class MainForm : Form
     {
-        string currentDdsFile = null;
-        bool? currentDdsFileIsDds = null;
+        static string myName;
+        string currentFilename = null;
+        bool? currentFilenameIsDds = null;
 
         public MainForm()
         {
             InitializeComponent();
+            myName = this.Text;
         }
 
         public MainForm(string filename, bool isDDS)
             : this()
         {
-            currentDdsFile = filename;
-            currentDdsFileIsDds = isDDS;
+            currentFilename = filename;
+            currentFilenameIsDds = isDDS;
             reloadToolStripMenuItem_Click(null, null);
         }
 
         private void fileToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
         {
-            reloadToolStripMenuItem.Enabled = currentDdsFileIsDds.HasValue;
-            saveToolStripMenuItem.Enabled = currentDdsFileIsDds.HasValue && currentDdsFileIsDds == true;
+            reloadToolStripMenuItem.Enabled = currentFilenameIsDds.HasValue;
+            saveToolStripMenuItem.Enabled = currentFilenameIsDds.HasValue && currentFilenameIsDds == true;
             importAlphaToolStripMenuItem.Enabled =
                 clearToolStripMenuItem.Enabled =
                 saveAsToolStripMenuItem.Enabled =
@@ -66,16 +68,12 @@ namespace s3pe.DDSTool
 
             NewDDSParameters.Result result = parms.Value;
 
-            currentDdsFile = null;
-            currentDdsFileIsDds = null;
             ddsPanel1.CreateImage(result.Red, result.Green, result.Blue, result.Alpha, result.Width, result.Height, true);
             ddsPanel1.UseDXT = result.UseDXT;
             ddsPanel1.AlphaDepth = result.AlphaDepth;
-            lbImageW.Text = ddsPanel1.ImageSize.Width + "";
-            lbImageH.Text = ddsPanel1.ImageSize.Height + "";
-            lbUseDXT.Text = ddsPanel1.UseDXT ? "Y" : "N";
-            lbAlphaDepth.Text = "" + ddsPanel1.AlphaDepth;
-            tlpImageSize.Visible = true;
+            currentFilename = null;
+            currentFilenameIsDds = null;
+            updateDetails();
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -85,38 +83,13 @@ namespace s3pe.DDSTool
             DialogResult dr = openFileDialog1.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            currentDdsFile = openFileDialog1.FileName;
-            currentDdsFileIsDds = true;
-            openDDS(currentDdsFile);
-        }
-
-        void openDDS(string filename)
-        {
-            try
+            if (openDDS(openFileDialog1.FileName))
             {
-                using (FileStream fs = new FileStream(filename, FileMode.Open, FileAccess.Read))
-                {
-                    ddsPanel1.DDSLoad(fs, true);
-                    fs.Close();
-                }
-                lbImageW.Text = ddsPanel1.ImageSize.Width + "";
-                lbImageH.Text = ddsPanel1.ImageSize.Height + "";
-                lbUseDXT.Text = ddsPanel1.UseDXT ? "Y" : "N";
-                lbAlphaDepth.Text = "" + ddsPanel1.AlphaDepth;
-                tlpImageSize.Visible = true;
-                ddsPanel1.Channel4 = ddsPanel1.AlphaDepth > 0;
+                currentFilename = openFileDialog1.FileName;
+                currentFilenameIsDds = true;
+                updateDetails();
             }
-            catch (Exception e)
-            {
-                System.Text.StringBuilder sb = new System.Text.StringBuilder();
-                Exception inex = e;
-                while (inex != null)
-                {
-                    sb.AppendLine(inex.Message + "\n" + inex.StackTrace + "\n---");
-                    inex = inex.InnerException;
-                }
-                MessageBox.Show(sb.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            else reloadToolStripMenuItem_Click(null, null);
         }
 
         private void importImageToolStripMenuItem_Click(object sender, EventArgs e)
@@ -125,24 +98,13 @@ namespace s3pe.DDSTool
             if (filename == null || filename == "" || !File.Exists(filename))
                 return;
 
-            currentDdsFile = filename;
-            currentDdsFileIsDds = false;
-            openImage(currentDdsFile);
-        }
-
-        void openImage(string filename)
-        {
-            try
+            if (openImage(filename))
             {
-                ddsPanel1.Import(filename, true);
-                lbImageW.Text = ddsPanel1.ImageSize.Width + "";
-                lbImageH.Text = ddsPanel1.ImageSize.Height + "";
-                lbUseDXT.Text = ddsPanel1.UseDXT ? "Y" : "N";
-                lbAlphaDepth.Text = "" + ddsPanel1.AlphaDepth;
-                tlpImageSize.Visible = true;
-                ddsPanel1.Channel4 = ddsPanel1.AlphaDepth > 0;
+                currentFilename = filename;
+                currentFilenameIsDds = false;
+                updateDetails();
             }
-            catch { }
+            else reloadToolStripMenuItem_Click(null, null);
         }
 
         private void importAlphaToolStripMenuItem_Click(object sender, EventArgs e)
@@ -169,19 +131,20 @@ namespace s3pe.DDSTool
 
         private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (currentDdsFileIsDds.HasValue)
+            if (currentFilenameIsDds.HasValue)
             {
-                if (currentDdsFileIsDds == true)
-                    openDDS(currentDdsFile);
+                if (currentFilenameIsDds == true)
+                    openDDS(currentFilename);
                 else
-                    openImage(currentDdsFile);
+                    openImage(currentFilename);
             }
+            updateDetails();
         }
 
         private void clearToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            currentDdsFile = null;
-            currentDdsFileIsDds = null;
+            currentFilename = null;
+            currentFilenameIsDds = null;
             tlpImageSize.Visible = false;
 
             ddsPanel1.Clear();
@@ -189,9 +152,9 @@ namespace s3pe.DDSTool
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!currentDdsFileIsDds.HasValue || currentDdsFileIsDds != true) return;
+            if (!currentFilenameIsDds.HasValue || currentFilenameIsDds != true) return;
 
-            saveDDS(currentDdsFile);
+            saveDDS(currentFilename);
         }
 
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -203,19 +166,10 @@ namespace s3pe.DDSTool
             DialogResult dr = saveFileDialog1.ShowDialog();
             if (dr != DialogResult.OK) return;
 
-            currentDdsFile = saveFileDialog1.FileName;
-            currentDdsFileIsDds = true;
-            saveDDS(currentDdsFile);
-        }
-
-        void saveDDS(string filename)
-        {
-            using (FileStream fs = new FileStream(filename, FileMode.Create, FileAccess.Write))
-            {
-                ddsPanel1.DDSSave(fs);
-                fs.Close();
-            }
-            MessageBox.Show("Saved DDS file.", "Save DDS as...");
+            currentFilename = saveFileDialog1.FileName;
+            currentFilenameIsDds = true;
+            saveDDS(currentFilename);
+            this.Text = myName + " - " + currentFilename;
         }
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
@@ -248,6 +202,7 @@ namespace s3pe.DDSTool
             Environment.ExitCode = 0;
             this.Close();
         }
+
 
         private void btnResize_Click(object sender, EventArgs e)
         {
@@ -355,11 +310,6 @@ namespace s3pe.DDSTool
                 ckbBlend.Checked);
         }
 
-        uint? GetColour(decimal r, decimal g, decimal b, decimal a)
-        {
-            return ((uint)a << 24) | ((uint)r << 16) | ((uint)g << 8) | (uint)b;
-        }
-
         private void btnApplyRGBA_Click(object sender, EventArgs e)
         {
             ddsPanel1.ApplyColours(
@@ -436,6 +386,74 @@ namespace s3pe.DDSTool
                 );
         }
 
+        private void ddsMaskCh_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("ddsMaskCh_Click");
+        }
+
+
+        void updateDetails()
+        {
+            this.Text = myName + ((currentFilenameIsDds.HasValue && currentFilenameIsDds.Value) ? " - " + currentFilename : "");
+            lbImageW.Text = ddsPanel1.ImageSize.Width + "";
+            lbImageH.Text = ddsPanel1.ImageSize.Height + "";
+            lbUseDXT.Text = ddsPanel1.UseDXT ? "Y" : "N";
+            lbAlphaDepth.Text = "" + ddsPanel1.AlphaDepth;
+            tlpImageSize.Visible = true;
+        }
+
+        bool openDDS(string filename)
+        {
+            try
+            {
+                using (FileStream fs = new FileStream(filename, FileMode.Open, FileAccess.Read))
+                {
+                    ddsPanel1.DDSLoad(fs, true);
+                    fs.Close();
+                }
+                ddsPanel1.Channel4 = ddsPanel1.AlphaDepth > 0;
+                return true;
+            }
+            catch (Exception e)
+            {
+                System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                Exception inex = e;
+                while (inex != null)
+                {
+                    sb.AppendLine(inex.Message + "\n" + inex.StackTrace + "\n---");
+                    inex = inex.InnerException;
+                }
+                MessageBox.Show(sb.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+        }
+
+        bool openImage(string filename)
+        {
+            try
+            {
+                ddsPanel1.Import(filename, true);
+                ddsPanel1.Channel4 = ddsPanel1.AlphaDepth > 0;
+                return true;
+            }
+            catch { return false; }
+        }
+
+        void saveDDS(string filename)
+        {
+            using (FileStream fs = new FileStream(filename, FileMode.Create, FileAccess.Write))
+            {
+                ddsPanel1.DDSSave(fs);
+                fs.Close();
+            }
+            MessageBox.Show("Saved DDS file.", "Save DDS as...");
+        }
+
+        uint? GetColour(decimal r, decimal g, decimal b, decimal a)
+        {
+            return ((uint)a << 24) | ((uint)r << 16) | ((uint)g << 8) | (uint)b;
+        }
+
         string GetImageName()
         {
             string oldFilter = openFileDialog1.Filter;
@@ -451,11 +469,6 @@ namespace s3pe.DDSTool
             }
             finally { openFileDialog1.Filter = oldFilter; openFileDialog1.Title = oldCaption; }
             return openFileDialog1.FileName;
-        }
-
-        private void ddsMaskCh_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("ddsMaskCh_Click");
         }
     }
 }
