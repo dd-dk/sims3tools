@@ -1,6 +1,6 @@
 ﻿/*
  *  Copyright 2009 Jonathan Haas
- *  Copyright (C) 2010 by Peter L Jones
+ *  Copyright (C) 2010-2013 by Peter L Jones
  * 
  *  This file is part of s3translate.
  *  
@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Windows.Forms;
 using s3pi.Interfaces;
@@ -99,7 +100,7 @@ namespace S3Translate
 
         IResourceKey stblGroupKeyToRK(IResourceKey stblGroupKey, int lang)
         {
-            return new RK(stblGroupKey.ResourceType, stblGroupKey.ResourceGroup, stblGroupKey.Instance | ((ulong)lang<<56));
+            return new RK(stblGroupKey.ResourceType, stblGroupKey.ResourceGroup, stblGroupKey.Instance | ((ulong)lang << 56));
         }
 
         IResourceKey RKTostblGroupKey(IResourceKey stblGroupKey)
@@ -107,10 +108,9 @@ namespace S3Translate
             return new RK(stblGroupKey.ResourceType, stblGroupKey.ResourceGroup, stblGroupKey.Instance & 0x00FFFFFFFFFFFFFF);
         }
 
-
         public Form1()
         {
-            ShowLicence();
+            AcceptLicence();
             InitializeComponent();
             cmbSourceLang.DataSource = locales.AsReadOnly();
             cmbTargetLang.DataSource = locales.AsReadOnly();
@@ -138,11 +138,11 @@ namespace S3Translate
             lstSTBLs.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler((sender, e) => { btnAddString.Enabled = lstSTBLs.SelectedIndices.Count == 1; ReloadStrings(); });
 
             cmbSourceLang.SelectedIndex = Settings.Default.SourceLocale;
-            lstStrings.Columns[0].Text = cmbSourceLang.Text;
+            lstStrings.Columns[0].Text = "Source: " + cmbSourceLang.Text;
             cmbSourceLang.SelectedIndexChanged += new EventHandler((sender, e) => { lstStrings.Columns[0].Text = cmbSourceLang.Text; ReloadStrings(); });
 
             cmbTargetLang.SelectedIndex = Settings.Default.UserLocale;
-            lstStrings.Columns[1].Text = cmbTargetLang.Text;
+            lstStrings.Columns[1].Text = "Target: " + cmbTargetLang.Text;
             cmbTargetLang.SelectedIndexChanged += new EventHandler((sender, e) => { lstStrings.Columns[1].Text = cmbTargetLang.Text; ReloadStrings(); });
 
             lstStrings.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler((sender, e) => { AskCommit(); SelectStrings(); });
@@ -153,42 +153,6 @@ namespace S3Translate
         private void Form1_Shown(object sender, EventArgs e)
         {
             openToolStripMenuItem_Click(null, null);
-        }
-
-        void ShowLicence()
-        {
-            if (!Settings.Default.LicenceAccepted)
-            {
-                if (MessageBox.Show(@"
-Copyright 2009 Jonathan Haas
-Copyright (C) 2010 by Peter L Jones
-
-s3translate is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published
-by the Free Software Foundation, either version 3 of the License,
-or (at your option) any later version.
-
-s3translate is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public
-License along with s3translate.
-If not, see <http://www.gnu.org/licenses/>.
-
-s3translate uses the s3pi libraries by Peter L Jones (pljones@users.sf.net)
-For details visit http://sourceforge.net/projects/s3pi/
-
-Do you accept this licence?",
-                            "Licence", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
-                {
-                    Environment.Exit(1);
-                    return;
-                }
-                Settings.Default.LicenceAccepted = true;
-                Settings.Default.Save();
-            }
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -465,6 +429,49 @@ Do you accept this licence?",
         }
         #endregion
 
+        #region Help menu
+        private void contentsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string locale = System.Globalization.CultureInfo.CurrentUICulture.Name;
+
+            string baseFolder = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "HelpFiles");
+            if (Directory.Exists(Path.Combine(baseFolder, locale)))
+                baseFolder = Path.Combine(baseFolder, locale);
+            else if (Directory.Exists(Path.Combine(baseFolder, locale.Substring(0, 2))))
+                baseFolder = Path.Combine(baseFolder, locale.Substring(0, 2));
+
+            Help.ShowHelp(this, "file:///" + Path.Combine(baseFolder, "Contents.htm"));
+        }
+
+        private void licenceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowLicence();
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string copyright = @"
+Copyright 2009 Jonathan Haas
+Copyright (C) 2010-2013 by Peter L Jones
+
+This program comes with ABSOLUTELY NO WARRANTY
+
+This is free software, and you are welcome to redistribute it
+under certain conditions; see Help->Licence for details.
+
+";
+
+            MessageBox.Show(String.Format(
+                "{0}\n" +
+                "Front-end Distribution: {1}\n" +
+                "Library Distribution: {2}"
+                , copyright
+                , Version.CurrentVersion
+                , Version.LibraryVersion
+                ), "S3Translate");
+        }
+        #endregion
+
         #region Designer-bound event handlers
         private void txtTarget_TextChanged(object sender, EventArgs e)
         {
@@ -526,10 +533,15 @@ Do you accept this licence?",
             cmbTargetLang.SelectedIndex = a;
         }
 
+        delegate void _KEYRemoveInstance(ulong instance);
+        delegate void _KEYAddInstance(ulong instance, string name);
+        delegate void _KEYCommitNameMaps();
+        
         private void btnMergeSTLBs_Click(object sender, EventArgs e)
         {
             #region Check for duplicates
             Dictionary<ulong, List<int>> allGUIDs = new Dictionary<ulong, List<int>>();
+            List<ulong> duplicates = new List<ulong>();
             foreach (var slr in StringTables)
             {
                 foreach (var lr in slr.Value)
@@ -539,10 +551,7 @@ Do you accept this licence?",
                         if (allGUIDs.ContainsKey(gs.Key))
                         {
                             if (allGUIDs[gs.Key].Contains(lr.Key))
-                            {
-                                MessageBox.Show("Cannot merge - duplicate String GUIDs exist: 0x" + gs.Key.ToString("X16"), "Merge", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                                return;
-                            }
+                                duplicates.Add(gs.Key);
                             else
                                 allGUIDs[gs.Key].Add(lr.Key);
                         }
@@ -550,6 +559,65 @@ Do you accept this licence?",
                             allGUIDs.Add(gs.Key, new List<int>(new int[] { lr.Key, }));
                     }
                 }
+            }
+            if (duplicates.Count > 0)
+            {
+                duplicates.Sort();
+                MessageBox.Show("Cannot merge - duplicate String GUIDs exist:\n\n  "
+                    + String.Join("\n  ", duplicates.Select(g => "0x" + g.ToString("X16")))
+                , "Merge", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                return;
+            }
+            #endregion
+
+            #region Prepare to add and remove instances to/from package name map _KEY files
+            /*
+             * Every time we remove a resource from the package, we should check to see if is still in use.
+             * If not, we should remove it from the _KEY resource, if one exists.
+             * The following fancy foot work gets us set up ready to rock'n'roll...
+            /**/
+
+            _KEYRemoveInstance removeInstance;
+            _KEYAddInstance addInstance;
+            _KEYCommitNameMaps commitNameMaps;
+
+            // Do we actually have anything to deal with?
+            // Set up a list of the useful NMAP/_KEY rks/resources
+            var keys = _currentPackage.FindAll(x => x.ResourceType == 0x0166038C)// NMAP (or _KEY if you prefer)
+                .Select(rk =>
+                {
+                    // So, this resource key in the index, can we get a _KEY from it?
+                    try { return new KeyValuePair<IResourceIndexEntry, NameMapResource.NameMapResource>(rk, new NameMapResource.NameMapResource(0, ((APackage)_currentPackage).GetResource(rk))); }
+                    catch { return new KeyValuePair<IResourceIndexEntry, NameMapResource.NameMapResource>(null, null); }
+                }).Where(x => x.Key != null).ToList();
+
+            if (keys.Count > 0)
+            {
+                // OK, we have one or more _KEY files, so we're going to have to keep things tidy
+
+                removeInstance = i =>
+                {
+                    // First, let's see if the instance exists (remember, this is after we've marked the STBL deleted)
+                    var lrie = _currentPackage.FindAll(x => x.Instance == i);
+                    if (lrie.Count > 0) return; // Yes, still in use elsewhere
+
+                    // OK, not found... now need to go through all the _KEYs deleting the entry.
+                    keys.ForEach(kvp => kvp.Value.Remove(i)); // and we don't care in the least if it wasn't there
+                };
+
+                // We'll just use the first file for adding (if there is one) - and handily, it knows how.
+                // Note: this *will* throw an exception of the key exists
+                addInstance = keys[0].Value.Add;
+
+                // Just assume they need cleaning...
+                commitNameMaps = () => keys.ForEach(kvp => _currentPackage.ReplaceResource(kvp.Key, kvp.Value));
+            }
+            else
+            {
+                // There is no _KEY at all, so we do nothing
+                removeInstance = i => { };
+                addInstance = (i, value) => { };
+                commitNameMaps = () => { };
             }
             #endregion
 
@@ -568,11 +636,19 @@ Do you accept this licence?",
                         foreach (var s in lr[lang])
                             stbl.Add(s.Key, s.Value);
                 }
-                _currentPackage.AddResource(new RK(STBL, group, instance | ((ulong)lang << 56)), stbl.Stream, true);
+
+                var rk = new RK(STBL, group, instance | ((ulong)lang << 56));
+                _currentPackage.AddResource(rk, stbl.Stream, true);
+                addInstance(rk.Instance, "Strings_" + locales[lang].Replace(' ', '_') + "_" + rk.Instance.ToString("x"));
             }
 
             foreach (var res in currentPackage.FindAll(x => x.ResourceType == STBL && (x.ResourceGroup != group || (x.Instance & 0x00FFFFFFFFFFFFFF) != instance)))
+            {
                 _currentPackage.DeleteResource(res);
+                removeInstance(res.Instance);// res.Instance is futile, uh, possibly unused that is.
+            }
+
+            commitNameMaps();
 
             pkgIsDirty = true;
 
@@ -665,6 +741,83 @@ Do you accept this licence?",
             Settings.Default.Save();
         }
         #endregion
+
+        void AcceptLicence()
+        {
+            if (!Settings.Default.LicenceAccepted)
+            {
+                if (ShowLicence(true))
+                {
+                    Environment.Exit(1);
+                    return;
+                }
+                Settings.Default.LicenceAccepted = true;
+                Settings.Default.Save();
+            }
+        }
+
+        bool ShowLicence(bool accept = false)
+        {
+            return (MessageBox.Show(@"
+Copyright 2009 Jonathan Haas
+Copyright (C) 2010-2013 by Peter L Jones
+
+s3translate is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published
+by the Free Software Foundation, either version 3 of the License,
+or (at your option) any later version.
+
+s3translate is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public
+License along with s3translate.
+If not, see <http://www.gnu.org/licenses/>.
+
+s3translate uses the s3pi libraries by Peter L Jones (pljones@users.sf.net)
+For details visit http://sourceforge.net/projects/s3pi/" + (accept ? @"
+
+Do you accept this licence?" : ""),
+                        "Licence",
+                        accept ? MessageBoxButtons.YesNo : MessageBoxButtons.OK,
+                        accept ? MessageBoxIcon.Question : MessageBoxIcon.Information,
+                        accept ? MessageBoxDefaultButton.Button2 : MessageBoxDefaultButton.Button1) == DialogResult.Yes || !accept);
+        }
+
+        public class Version
+        {
+            static String timestamp;
+            public static String CurrentVersion { get { return timestamp; } }
+
+            static String libraryTimestamp;
+            public static String LibraryVersion { get { return libraryTimestamp; } }
+
+            static Version()
+            {
+                timestamp = VersionFor(System.Reflection.Assembly.GetEntryAssembly());
+                libraryTimestamp = VersionFor(typeof(s3pi.Interfaces.AApiVersionedFields).Assembly);
+            }
+
+            public static String VersionFor(System.Reflection.Assembly a)
+            {
+#if DEBUG
+                string[] v = a.GetName().Version.ToString().Split('.');
+                return String.Format("{0}-{1}{2}-{3}", v[0].Substring(0, 2), v[0].Substring(2), v[1], v[2]);
+#else
+                string version_txt = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), Path.GetFileNameWithoutExtension(Application.ExecutablePath) + "-Version.txt");
+                if (!File.Exists(version_txt))
+                    return "Unknown";
+                using (System.IO.StreamReader sr = new StreamReader(version_txt))
+                {
+                    String line1 = sr.ReadLine();
+                    sr.Close();
+                    return line1.Trim();
+                }
+#endif
+            }
+        }
 
         void AskCommit()
         {
