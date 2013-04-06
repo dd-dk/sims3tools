@@ -5,9 +5,8 @@ set base=%TargetName%
 rem -%ConfigurationName%
 set src=%TargetName%-Source
 
-
 set out=S:\Sims3\Tools\S3Translate\
-
+set helpFolder=%out%HelpFiles
 
 set mydate=%date: =0%
 set dd=%mydate:~0,2%
@@ -47,28 +46,26 @@ pushd ..
 7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" "S3Translate"
 popd
 
-
 pushd bin\%ConfigurationName%
 echo %suffix% >%TargetName%-Version.txt
 attrib +r %TargetName%-Version.txt
-
-
+del /f /q HelpFiles
+xcopy "%helpFolder%\*" HelpFiles /s /i /y
 7za a -r -t7z -mx9 -ms -xr!.?* -xr!*vshost* -xr!*.Config %pdb% "%out%%base%_%suffix%.7z" *
 del /f %TargetName%-Version.txt
-
+del /f /q HelpFiles
 popd
-
 
 7za x -o"%base%-%suffix%" "%out%%base%_%suffix%.7z"
 pushd "%base%-%suffix%"
 (
 echo !cd %base%-%suffix%
 for %%f in (*) do echo File /a %%f
-
-
-
-
-
+pushd HelpFiles
+echo SetOutPath $INSTDIR\HelpFiles
+for %%f in (*) do echo File /a HelpFiles\%%f
+echo SetOutPath $INSTDIR
+popd
 
 
 
@@ -79,10 +76,10 @@ dir /-c "..\%base%-%suffix%" | find " bytes" | for /f "tokens=3" %%f in ('find /
 
 (
 for %%f in (*) do echo Delete $INSTDIR\%%f
-
-
-
-
+pushd HelpFiles
+for %%f in (*) do echo Delete $INSTDIR\HelpFiles\%%f
+echo RmDir HelpFiles
+popd
 
 
 
@@ -93,8 +90,8 @@ popd
 
 "%MAKENSIS%" "/DINSTFILES=INSTFILES.txt" "/DUNINSTFILES=UNINST.LOG" "/DVSN=%suffix%" %nsisv% mknsis.nsi "/XOutFile %out%%base%_%suffix%.exe"
 
-:done:
 rmdir /s/q %base%-%suffix%
 del INSTFILES.txt
+
 :noNSIS:
 pause
