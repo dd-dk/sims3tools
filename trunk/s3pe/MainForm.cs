@@ -1805,6 +1805,8 @@ namespace S3PIDemoFE
 
             resourceIsDirty = controlPanel1.CommitEnabled = false;
 
+            menuBarWidget1.ClearHelpers();
+
             controlPanel1_AutoChanged(null, null);
             if (resource != null)
             {
@@ -1822,7 +1824,6 @@ namespace S3PIDemoFE
                 menuBarWidget1.Enable(MenuBarWidget.MB.MBR_hexEditor, false);
                 menuBarWidget1.Enable(MenuBarWidget.MB.MBR_textEditor, false);
                 helpers = null;
-                menuBarWidget1.ClearHelpers();
             }
 
             bool selectedItems = resource != null || browserWidget1.SelectedResources.Count > 0; // one or more
@@ -1841,11 +1842,14 @@ namespace S3PIDemoFE
 
         bool hasValueContentField()
         {
-            if (ddsResources.Contains(browserWidget1.SelectedResource["ResourceType"] + "") && S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview)
+            // Do we have an in-built handler?  Overrides Value content field.
+            if (ABuiltInValueControl.Exists(browserWidget1.SelectedResource.ResourceType))
                 return true;
+
             //if (!AApiVersionedFields.GetContentFields(0, resource.GetType()).Contains("Value")) return false;
             //-prefer to use the per-resource ContentFields property:
             if (!resource.ContentFields.Contains("Value")) return false;
+
             Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
             if (typeof(String).IsAssignableFrom(t) || typeof(Image).IsAssignableFrom(t)) return true;
             return false;
@@ -1994,7 +1998,7 @@ namespace S3PIDemoFE
                 this.Enabled = false;
                 Application.DoEvents();
 
-                Control c = getValueControl();
+                Control c = hasValueContentField() ? getValueControl() : null;
                 if (c == null) return;
 
                 Form f = new Form();
@@ -2028,36 +2032,7 @@ namespace S3PIDemoFE
             if (!(sender as Form).IsDisposed) (sender as Form).Dispose();
         }
 
-        class DDSControl
-        {
-            static bool channel1 = true, channel2 = true, channel3 = true, channel4 = true, invertch4 = false;
-            DDSPanel control;
-            public DDSControl()
-            {
-                control = new DDSPanel()
-                {
-                    Fit = true,
-                    Channel1 = channel1,
-                    Channel2 = channel2,
-                    Channel3 = channel3,
-                    Channel4 = channel4,
-                    InvertCh4 = invertch4,
-                    Margin = new Padding(3),
-                };
-                control.Channel1Changed += new EventHandler(control_Channel1Changed);
-                control.Channel2Changed += new EventHandler(control_Channel2Changed);
-                control.Channel3Changed += new EventHandler(control_Channel3Changed);
-                control.Channel4Changed += new EventHandler(control_Channel4Changed);
-                control.InvertCh4Changed += new EventHandler(control_InvertCh4Changed);
-            }
-            void control_Channel1Changed(object sender, EventArgs e) { channel1 = control.Channel1; }
-            void control_Channel2Changed(object sender, EventArgs e) { channel2 = control.Channel2; }
-            void control_Channel3Changed(object sender, EventArgs e) { channel3 = control.Channel3; }
-            void control_Channel4Changed(object sender, EventArgs e) { channel4 = control.Channel4; }
-            void control_InvertCh4Changed(object sender, EventArgs e) { invertch4 = control.InvertCh4; }
 
-            public DDSPanel Control { get { return control; } }
-        }
         Control getValueControl()
         {
             bool waiting = Application.UseWaitCursor;
@@ -2068,31 +2043,20 @@ namespace S3PIDemoFE
                 Control res = null;
                 try
                 {
-                    if (ddsResources.Contains(browserWidget1.SelectedResource["ResourceType"] + "") && S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview)
+                    var ibvc = ABuiltInValueControl.Lookup(browserWidget1.SelectedResource.ResourceType, resource.Stream);
+                    if (ibvc != null)
                     {
-                        DDSControl dds = new DDSControl();
-                        dds.Control.DDSLoad(resource.Stream);
-                        res = (Control)dds.Control;
+                        res = ibvc.ValueControl;
+                        menuBarWidget1.SetValueControlItems(ibvc.GetContextMenuItems(controlPanel1_CommitClick));
                     }
-                    else if (hasValueContentField())
+                    else
                     {
                         Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
                         if (typeof(String).IsAssignableFrom(t))
                         {
-                            RichTextBox rtb = new RichTextBox();
-                            rtb.Text = "" + resource["Value"];
-                            rtb.Font = new Font(FontFamily.GenericMonospace, 8);
-                            rtb.Size = new Size(this.Width - (this.Width / 5), this.Height - (this.Height / 5));
-                            rtb.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
-                            rtb.ReadOnly = true;
-                            res = rtb;
-                        }
-                        else if (typeof(Image).IsAssignableFrom(t))
-                        {
-                            PictureBox pb = new PictureBox();
-                            pb.Image = (Image)resource["Value"].Value;
-                            pb.Size = pb.Image.Size;
-                            res = pb;
+                            TextControl tc = new TextControl("" + resource["Value"]);
+                            res = tc.ValueControl;
+                            menuBarWidget1.SetValueControlItems(tc.GetContextMenuItems(controlPanel1_CommitClick));
                         }
                     }
                 }

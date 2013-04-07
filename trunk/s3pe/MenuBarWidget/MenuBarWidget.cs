@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace S3PIDemoFE
@@ -243,8 +244,13 @@ namespace S3PIDemoFE
 
         private void SetHelpers(ToolStripItemCollection dropdown, ToolStripItem tss, string prefix, IEnumerable<s3pi.Helpers.HelperManager.Helper> helpers)
         {
+            if (helpers.Count() == 0) return;
+
             int i = dropdown.IndexOf(tss);
             int j = 0;
+
+            dropdown.Insert(++i, new ToolStripSeparator() { Name = prefix + j, });
+
             foreach (var helper in helpers)
             {
                 ToolStripMenuItem tsiHelper = new ToolStripMenuItem(helper.label, null, tsHelper_Click) { Name = prefix + j, Tag = j++, };
@@ -253,7 +259,6 @@ namespace S3PIDemoFE
         }
         public void SetHelpers(IEnumerable<s3pi.Helpers.HelperManager.Helper> helpers)
         {
-            ClearHelpers();
             SetHelpers(resourceToolStripMenuItem.DropDownItems, textEditorToolStripMenuItem, resourceHelperPrefix, helpers);
             SetHelpers(browserWidgetContextMenuStrip.Items, bwcmTextEditor, contentHelperPrefix, helpers);
         }
@@ -263,6 +268,22 @@ namespace S3PIDemoFE
         public event HelperClickEventHandler HelperClick;
         protected void OnHelperClick(object sender, int i) { if (HelperClick != null) HelperClick(sender, new HelperClickEventArgs(i)); }
         private void tsHelper_Click(object sender, EventArgs e) { OnHelperClick(sender, (int)((sender as ToolStripMenuItem).Tag)); }
+
+        private void SetValueControlItems(ToolStripItemCollection dropdown, ToolStripItem tss, string prefix, IEnumerable<ToolStripItem> items)
+        {
+            int i = dropdown.Count - 1;
+            int j = dropdown.Count - dropdown.IndexOf(tss);
+            foreach (var item in items)
+            {
+                item.Name = prefix + (++j);
+                dropdown.Insert(++i, item);
+            }
+        }
+        public void SetValueControlItems(IEnumerable<ToolStripItem> items)
+        {
+            SetValueControlItems(resourceToolStripMenuItem.DropDownItems, textEditorToolStripMenuItem, resourceHelperPrefix, items);
+            SetValueControlItems(browserWidgetContextMenuStrip.Items, bwcmTextEditor, contentHelperPrefix, items);
+        }
 
 
         public void AddRecentFile(string value)

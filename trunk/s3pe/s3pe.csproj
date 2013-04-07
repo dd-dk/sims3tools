@@ -83,6 +83,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuiltInValueControl.cs" />
     <Compile Include="ForceFocus.cs" />
     <Compile Include="Import\ExperimentalDBCWarning.cs">
       <SubType>Form</SubType>
@@ -363,10 +364,6 @@
       <Link>s3pi.GenericRCOLResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\s3pi\build\bin\Release\s3pi.ImageResource.dll">
-      <Link>s3pi.ImageResource.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.JazzResource.dll">
       <Link>s3pi.JazzResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -405,10 +402,6 @@
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.StblResource.dll">
       <Link>s3pi.StblResource.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\s3pi\build\bin\Release\s3pi.TextResource.dll">
-      <Link>s3pi.TextResource.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\s3pi\build\bin\Release\s3pi.TxtcResource.dll">
