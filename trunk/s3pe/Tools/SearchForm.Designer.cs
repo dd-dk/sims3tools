@@ -36,6 +36,9 @@
             this.btnSearch = new System.Windows.Forms.Button();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.lbxHits = new System.Windows.Forms.ListBox();
+            this.searchContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyResourceKeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pasteResourceKeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnCopy = new System.Windows.Forms.Button();
             this.btnGo = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -58,16 +61,13 @@
             this.label17 = new System.Windows.Forms.Label();
             this.label18 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.searchContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.copyResourceKeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pasteResourceKeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label2 = new System.Windows.Forms.Label();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
-            this.ckbFilter = new System.Windows.Forms.CheckBox();
             this.cbType = new System.Windows.Forms.ResourceTypeCombo();
+            this.ckbFilter = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
-            this.tableLayoutPanel2.SuspendLayout();
             this.searchContextMenuStrip.SuspendLayout();
+            this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -85,8 +85,8 @@
             // 
             // tableLayoutPanel1
             // 
-            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.ColumnCount = 3;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -138,9 +138,9 @@
             // 
             // lbxHits
             // 
-            this.lbxHits.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.lbxHits.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lbxHits.ContextMenuStrip = this.searchContextMenuStrip;
             this.lbxHits.FormattingEnabled = true;
             this.lbxHits.IntegralHeight = false;
@@ -151,6 +151,31 @@
             this.lbxHits.TabIndex = 2;
             this.lbxHits.SelectedIndexChanged += new System.EventHandler(this.lbxHits_SelectedIndexChanged);
             this.lbxHits.DoubleClick += new System.EventHandler(this.lbxHits_DoubleClick);
+            // 
+            // searchContextMenuStrip
+            // 
+            this.searchContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyResourceKeyToolStripMenuItem,
+            this.pasteResourceKeyToolStripMenuItem});
+            this.searchContextMenuStrip.Name = "searchContextMenuStrip";
+            this.searchContextMenuStrip.Size = new System.Drawing.Size(215, 48);
+            this.searchContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.searchContextMenuStrip_Opening);
+            // 
+            // copyResourceKeyToolStripMenuItem
+            // 
+            this.copyResourceKeyToolStripMenuItem.Name = "copyResourceKeyToolStripMenuItem";
+            this.copyResourceKeyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.copyResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.copyResourceKeyToolStripMenuItem.Text = "&Copy TGIs";
+            this.copyResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.copyResourceKeyToolStripMenuItem_Click);
+            // 
+            // pasteResourceKeyToolStripMenuItem
+            // 
+            this.pasteResourceKeyToolStripMenuItem.Name = "pasteResourceKeyToolStripMenuItem";
+            this.pasteResourceKeyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
+            this.pasteResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
+            this.pasteResourceKeyToolStripMenuItem.Text = "&Paste Resource Type";
+            this.pasteResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.pasteResourceKeyToolStripMenuItem_Click);
             // 
             // btnCopy
             // 
@@ -396,31 +421,6 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "in \"file order\" (little endian) or \"integer order\" (big endian).";
             // 
-            // searchContextMenuStrip
-            // 
-            this.searchContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.copyResourceKeyToolStripMenuItem,
-            this.pasteResourceKeyToolStripMenuItem});
-            this.searchContextMenuStrip.Name = "searchContextMenuStrip";
-            this.searchContextMenuStrip.Size = new System.Drawing.Size(215, 48);
-            this.searchContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.searchContextMenuStrip_Opening);
-            // 
-            // copyResourceKeyToolStripMenuItem
-            // 
-            this.copyResourceKeyToolStripMenuItem.Name = "copyResourceKeyToolStripMenuItem";
-            this.copyResourceKeyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.copyResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
-            this.copyResourceKeyToolStripMenuItem.Text = "&Copy TGIs";
-            this.copyResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.copyResourceKeyToolStripMenuItem_Click);
-            // 
-            // pasteResourceKeyToolStripMenuItem
-            // 
-            this.pasteResourceKeyToolStripMenuItem.Name = "pasteResourceKeyToolStripMenuItem";
-            this.pasteResourceKeyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
-            this.pasteResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(214, 22);
-            this.pasteResourceKeyToolStripMenuItem.Text = "&Paste Resource Type";
-            this.pasteResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.pasteResourceKeyToolStripMenuItem_Click);
-            // 
             // label2
             // 
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Left;
@@ -451,6 +451,16 @@
             this.tableLayoutPanel3.Size = new System.Drawing.Size(372, 40);
             this.tableLayoutPanel3.TabIndex = 11;
             // 
+            // cbType
+            // 
+            this.cbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbType.Enabled = false;
+            this.cbType.Location = new System.Drawing.Point(90, 16);
+            this.cbType.Name = "cbType";
+            this.cbType.Size = new System.Drawing.Size(279, 21);
+            this.cbType.TabIndex = 3;
+            this.cbType.Value = ((uint)(0u));
+            // 
             // ckbFilter
             // 
             this.ckbFilter.Anchor = System.Windows.Forms.AnchorStyles.None;
@@ -464,16 +474,6 @@
             this.ckbFilter.UseVisualStyleBackColor = true;
             this.ckbFilter.CheckedChanged += new System.EventHandler(this.ckbFilter_CheckedChanged);
             // 
-            // cbType
-            // 
-            this.cbType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.cbType.Enabled = false;
-            this.cbType.Location = new System.Drawing.Point(90, 16);
-            this.cbType.Name = "cbType";
-            this.cbType.Size = new System.Drawing.Size(279, 21);
-            this.cbType.TabIndex = 3;
-            this.cbType.Value = ((uint)(0u));
-            // 
             // SearchForm
             // 
             this.AcceptButton = this.btnSearch;
@@ -481,7 +481,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnClose;
             this.ClientSize = new System.Drawing.Size(801, 472);
-            this.ContextMenuStrip = this.searchContextMenuStrip;
             this.Controls.Add(this.tableLayoutPanel2);
             this.Controls.Add(this.tableLayoutPanel3);
             this.Controls.Add(this.statusStrip1);
@@ -496,9 +495,9 @@
             this.Text = "Package Search";
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
+            this.searchContextMenuStrip.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
-            this.searchContextMenuStrip.ResumeLayout(false);
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel3.PerformLayout();
             this.ResumeLayout(false);
