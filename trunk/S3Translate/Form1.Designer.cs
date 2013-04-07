@@ -77,8 +77,8 @@ namespace S3Translate
             this.label9 = new System.Windows.Forms.Label();
             this.btnMergeSTBLs = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
-            this.btnRevertLang = new System.Windows.Forms.Button();
-            this.btnRevertAll = new System.Windows.Forms.Button();
+            this.btnCopyToTarget = new System.Windows.Forms.Button();
+            this.btnCopyToAll = new System.Windows.Forms.Button();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.label7 = new System.Windows.Forms.Label();
@@ -448,8 +448,8 @@ namespace S3Translate
             this.tableLayoutPanel2.Controls.Add(this.label9, 0, 3);
             this.tableLayoutPanel2.Controls.Add(this.btnMergeSTBLs, 1, 3);
             this.tableLayoutPanel2.Controls.Add(this.label8, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.btnRevertLang, 1, 0);
-            this.tableLayoutPanel2.Controls.Add(this.btnRevertAll, 1, 1);
+            this.tableLayoutPanel2.Controls.Add(this.btnCopyToTarget, 1, 0);
+            this.tableLayoutPanel2.Controls.Add(this.btnCopyToAll, 1, 1);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 190);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -500,34 +500,34 @@ namespace S3Translate
             this.label8.Text = "Copy all Source Lang strings\r\nin selected String Set to:";
             this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // btnRevertLang
+            // btnCopyToTarget
             // 
-            this.btnRevertLang.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnRevertLang.AutoSize = true;
-            this.btnRevertLang.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnRevertLang.Enabled = false;
-            this.btnRevertLang.Location = new System.Drawing.Point(150, 3);
-            this.btnRevertLang.Name = "btnRevertLang";
-            this.btnRevertLang.Size = new System.Drawing.Size(53, 23);
-            this.btnRevertLang.TabIndex = 1;
-            this.btnRevertLang.Text = "Ta&rget";
-            this.btnRevertLang.UseVisualStyleBackColor = true;
-            this.btnRevertLang.Click += new System.EventHandler(this.btnOverwriteLang_Click);
+            this.btnCopyToTarget.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnCopyToTarget.AutoSize = true;
+            this.btnCopyToTarget.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnCopyToTarget.Enabled = false;
+            this.btnCopyToTarget.Location = new System.Drawing.Point(150, 3);
+            this.btnCopyToTarget.Name = "btnCopyToTarget";
+            this.btnCopyToTarget.Size = new System.Drawing.Size(53, 23);
+            this.btnCopyToTarget.TabIndex = 1;
+            this.btnCopyToTarget.Text = "Ta&rget";
+            this.btnCopyToTarget.UseVisualStyleBackColor = true;
+            this.btnCopyToTarget.Click += new System.EventHandler(this.btnCopyToTarget_Click);
             // 
-            // btnRevertAll
+            // btnCopyToAll
             // 
-            this.btnRevertAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnRevertAll.AutoSize = true;
-            this.btnRevertAll.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnRevertAll.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnRevertAll.Enabled = false;
-            this.btnRevertAll.Location = new System.Drawing.Point(150, 32);
-            this.btnRevertAll.Name = "btnRevertAll";
-            this.btnRevertAll.Size = new System.Drawing.Size(53, 23);
-            this.btnRevertAll.TabIndex = 2;
-            this.btnRevertAll.Text = "All";
-            this.btnRevertAll.UseVisualStyleBackColor = true;
-            this.btnRevertAll.Click += new System.EventHandler(this.btnOverwriteAll_Click);
+            this.btnCopyToAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnCopyToAll.AutoSize = true;
+            this.btnCopyToAll.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnCopyToAll.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnCopyToAll.Enabled = false;
+            this.btnCopyToAll.Location = new System.Drawing.Point(150, 32);
+            this.btnCopyToAll.Name = "btnCopyToAll";
+            this.btnCopyToAll.Size = new System.Drawing.Size(53, 23);
+            this.btnCopyToAll.TabIndex = 2;
+            this.btnCopyToAll.Text = "All";
+            this.btnCopyToAll.UseVisualStyleBackColor = true;
+            this.btnCopyToAll.Click += new System.EventHandler(this.btnCopyToAll_Click);
             // 
             // tableLayoutPanel5
             // 
@@ -931,7 +931,7 @@ namespace S3Translate
             this.AcceptButton = this.btnCommit;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.btnRevertAll;
+            this.CancelButton = this.btnCopyToAll;
             this.ClientSize = new System.Drawing.Size(905, 716);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStripContainer1);
@@ -1019,8 +1019,8 @@ namespace S3Translate
         private System.Windows.Forms.ToolStripProgressBar prg;
         private System.Windows.Forms.ToolStripMenuItem preferencesToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.Button btnRevertAll;
-        private System.Windows.Forms.Button btnRevertLang;
+        private System.Windows.Forms.Button btnCopyToAll;
+        private System.Windows.Forms.Button btnCopyToTarget;
         private System.Windows.Forms.Button btnMergeSTBLs;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button btnFindNext;

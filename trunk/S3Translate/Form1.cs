@@ -132,7 +132,7 @@ namespace S3Translate
                 _pkgDirty = _txtDirty = false;
                 SetText();
                 ReloadStringTables();
-                btnRevertAll.Enabled = btnRevertLang.Enabled = tlpFind.Enabled = currentPackage != null;
+                btnCopyToAll.Enabled = btnCopyToTarget.Enabled = tlpFind.Enabled = currentPackage != null;
             });
 
             lstSTBLs.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler((sender, e) => { btnAddString.Enabled = lstSTBLs.SelectedIndices.Count == 1; ReloadStrings(); });
@@ -483,54 +483,44 @@ under certain conditions; see Help->Licence for details.
                 txtIsDirty = true;
         }
 
-        private void btnOverwriteLang_Click(object sender, EventArgs e)
+        private void btnCopyToTarget_Click(object sender, EventArgs e)
         {
-            if (sender != null)
-                if (MessageBox.Show("This will overwrite all " + locales[cmbTargetLang.SelectedIndex]
-                + " texts from the " + locales[cmbSourceLang.SelectedIndex] + " defaults.\n\nContinue?",
+            if (MessageBox.Show(
+                "This will overwrite all " + locales[cmbTargetLang.SelectedIndex] + " texts from the " + locales[cmbSourceLang.SelectedIndex] + " defaults.\n\nContinue?",
                 "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
-                    return;
+                return;
 
             var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
-            if (!StringTables[stblgroup.Key].ContainsKey(cmbSourceLang.SelectedIndex))
-            {
-                int rlocale = StringTables[stblgroup.Key].Keys.GetEnumerator().Current;
-                if (MessageBox.Show("The current source language doesn't exist in this string table. Use \"" + locales[rlocale] + "\" instead ?", "Language missing", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
-                {
-                    cmbSourceLang.SelectedIndex = rlocale;
-                    lstStrings.Items.Clear();
-                }
-                else
-                    return;
-            }
+            int source = _getSource(stblgroup.Key, cmbSourceLang.SelectedIndex);
+            if (source == -1)
+                return;
 
-            MemoryStream ms = new MemoryStream(StringTables[stblgroup.Key][cmbSourceLang.SelectedIndex].AsBytes, true);
-            StblResource.StblResource targetSTBL = new StblResource.StblResource(0, ms);
-
-            IResourceKey rk = stblGroupKeyToRK(stblgroup.Key, cmbTargetLang.SelectedIndex);
-            IResourceIndexEntry rie = _currentPackage.Find(x => x.Equals(rk));
-            if (rie != null)
-                _currentPackage.ReplaceResource(rie, targetSTBL);
-            else
-                _currentPackage.AddResource(rk, targetSTBL.Stream, true);
-            StringTables[stblgroup.Key][cmbTargetLang.SelectedIndex] = targetSTBL;
+            _copyToTarget(stblgroup.Key, source, cmbTargetLang.SelectedIndex);
 
             pkgIsDirty = true;
             ReloadStrings();
             SelectStrings();
         }
 
-        private void btnOverwriteAll_Click(object sender, EventArgs e)
+        private void btnCopyToAll_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("This will overwrite all(!) texts in all(!) languages from the " + locales[cmbSourceLang.SelectedIndex] + " defaults. Continue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
+            if (MessageBox.Show(
+                "This will overwrite all(!) texts in all(!) languages from the " + locales[cmbSourceLang.SelectedIndex] + " defaults.\n\nContinue?",
+                "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2
+                ) == DialogResult.No)
                 return;
-            var a = cmbTargetLang.SelectedIndex;
+
+            var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
+            int source = _getSource(stblgroup.Key, cmbSourceLang.SelectedIndex);
+            if (source == -1)
+                return;
+
             for (var i = 0; i < locales.Count; i++)
-            {
-                cmbTargetLang.SelectedIndex = i;
-                btnOverwriteLang_Click(null, null);
-            }
-            cmbTargetLang.SelectedIndex = a;
+                _copyToTarget(stblgroup.Key, source, i);
+
+            pkgIsDirty = true;
+            ReloadStrings();
+            SelectStrings();
         }
 
         delegate void _KEYRemoveInstance(ulong instance);
@@ -948,17 +938,30 @@ Do you accept this licence?" : ""),
                 if (!StringTables[stblgroup.Key].ContainsKey(cmbSourceLang.SelectedIndex))
                 {
                     int rlocale = StringTables[stblgroup.Key].Keys.GetEnumerator().Current;
-                    if (MessageBox.Show("The current source language doesn't exist in this string table. Use \"" + locales[rlocale] + "\" instead ?", "Language missing", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+
+                    // Give up!
+                    if (rlocale == cmbSourceLang.SelectedIndex)
+                        return;
+
+                    if (MessageBox.Show(
+                        string.Format("The current source language, {0}, does not exist in this string table.\n\n" +
+                        "Use {1} instead?", locales[cmbSourceLang.SelectedIndex], locales[rlocale]),
+                        "Language missing", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
                     {
-                        cmbSourceLang.SelectedIndex = rlocale;
-                        lstStrings.Items.Clear();
+                        cmbSourceLang.SelectedIndex = rlocale;// we get called!
+                        return;
                     }
                     else
                         return;
                 }
+
+
                 if (!StringTables[stblgroup.Key].ContainsKey(cmbTargetLang.SelectedIndex))
                 {
-                    if (MessageBox.Show("The current target language doesn't exist in this string table. Create it?", "Language missing", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+                    if (MessageBox.Show(
+                        string.Format("The current target language, {0}, does not exist in this string table.\n\n" +
+                        "Create it?", locales[cmbTargetLang.SelectedIndex]),
+                        "Language missing", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
                     {
                         MemoryStream ms = new MemoryStream(StringTables[stblgroup.Key][cmbSourceLang.SelectedIndex].AsBytes, true);
                         _currentPackage.AddResource(stblGroupKeyToRK(stblgroup.Key, cmbTargetLang.SelectedIndex), ms, true);
@@ -967,6 +970,7 @@ Do you accept this licence?" : ""),
                     else
                         return;
                 }
+
                 var sourceSTBL = StringTables[stblgroup.Key][cmbSourceLang.SelectedIndex];
                 var targetSTBL = StringTables[stblgroup.Key][cmbTargetLang.SelectedIndex];
                 prg.Value = 0;
@@ -1007,6 +1011,38 @@ Do you accept this licence?" : ""),
                 tgt.ContainsKey(item) ? tgt[item] : "",
                 FormatHex(item)
             }) { Tag = item, UseItemStyleForSubItems = false };
+        }
+
+        int _getSource(IResourceKey stblgroupKey, int source)
+        {
+            if (!StringTables[stblgroupKey].ContainsKey(source))
+            {
+                int rlocale = StringTables[stblgroupKey].Keys.GetEnumerator().Current;//wtf?
+                if (MessageBox.Show(
+                    string.Format("Source language {0} does not exist in this string table.\n\n" +
+                    "Use {1} instead?", locales[source], locales[rlocale]),
+                    "Language missing", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+                {
+                    return rlocale;
+                }
+                else
+                    return -1;
+            }
+            return source;
+        }
+
+        void _copyToTarget(IResourceKey stblgroupKey, int source, int target)
+        {
+            MemoryStream ms = new MemoryStream(StringTables[stblgroupKey][source].AsBytes, true);
+            StblResource.StblResource targetSTBL = new StblResource.StblResource(0, ms);
+
+            IResourceKey rk = stblGroupKeyToRK(stblgroupKey, source);
+            IResourceIndexEntry rie = _currentPackage.Find(x => x.Equals(rk));
+            if (rie != null)
+                _currentPackage.ReplaceResource(rie, targetSTBL);
+            else
+                _currentPackage.AddResource(rk, targetSTBL.Stream, true);
+            StringTables[stblgroupKey][target] = targetSTBL;
         }
 
         private string FormatHex(ulong a)
