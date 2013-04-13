@@ -79,6 +79,11 @@ namespace S3Translate
         private bool _pkgDirty;
         private bool pkgIsDirty { get { return _pkgDirty; } set { _pkgDirty = value; SetText(); } }
 
+        private int _sourceLang;
+        private int sourceLang { get { return _sourceLang; } set { _sourceLang = cmbSourceLang.SelectedIndex = value; } }
+        private int _targetLang;
+        private int targetLang { get { return _targetLang; } set { AskCommit(); _targetLang = cmbTargetLang.SelectedIndex = value; } }
+
         private bool _txtDirty;
         private bool txtIsDirty { get { return _txtDirty; } set { _txtDirty = value; SetText(); btnCommit.Enabled = _txtDirty; } }
 
@@ -116,8 +121,8 @@ namespace S3Translate
             cmbTargetLang.DataSource = locales.AsReadOnly();
             try
             {
-                cmbSourceLang.SelectedIndex = Settings.Default.SourceLocale;
-                cmbTargetLang.SelectedIndex = Settings.Default.UserLocale;
+                sourceLang = Settings.Default.SourceLocale;
+                targetLang = Settings.Default.UserLocale;
                 ckbAutoCommit.Checked = Settings.Default.AutoCommit;
             }
             catch (Exception)
@@ -135,15 +140,15 @@ namespace S3Translate
                 btnCopyToAll.Enabled = btnCopyToTarget.Enabled = tlpFind.Enabled = currentPackage != null;
             });
 
-            lstSTBLs.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler((sender, e) => { btnAddString.Enabled = lstSTBLs.SelectedIndices.Count == 1; ReloadStrings(); });
+            lstSTBLs.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler((sender, e) => { AskCommit(); btnAddString.Enabled = lstSTBLs.SelectedIndices.Count == 1; ReloadStrings(); });
 
-            cmbSourceLang.SelectedIndex = Settings.Default.SourceLocale;
+            sourceLang = Settings.Default.SourceLocale;
             lstStrings.Columns[0].Text = "Source: " + cmbSourceLang.Text;
-            cmbSourceLang.SelectedIndexChanged += new EventHandler((sender, e) => { lstStrings.Columns[0].Text = cmbSourceLang.Text; ReloadStrings(); });
+            cmbSourceLang.SelectedIndexChanged += new EventHandler((sender, e) => { sourceLang = cmbSourceLang.SelectedIndex; lstStrings.Columns[0].Text = "Source: " + cmbSourceLang.Text; ReloadStrings(); });
 
-            cmbTargetLang.SelectedIndex = Settings.Default.UserLocale;
+            targetLang = Settings.Default.UserLocale;
             lstStrings.Columns[1].Text = "Target: " + cmbTargetLang.Text;
-            cmbTargetLang.SelectedIndexChanged += new EventHandler((sender, e) => { lstStrings.Columns[1].Text = cmbTargetLang.Text; ReloadStrings(); });
+            cmbTargetLang.SelectedIndexChanged += new EventHandler((sender, e) => { targetLang = cmbTargetLang.SelectedIndex; lstStrings.Columns[1].Text = "Target: " + cmbTargetLang.Text; ReloadStrings(); });
 
             lstStrings.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler((sender, e) => { AskCommit(); SelectStrings(); });
 
@@ -485,33 +490,43 @@ under certain conditions; see Help->Licence for details.
 
         private void btnCopyToTarget_Click(object sender, EventArgs e)
         {
+            if (sourceLang == targetLang)
+                AskCommit();
+            txtIsDirty = false;
+
             if (MessageBox.Show(
-                "This will overwrite all " + locales[cmbTargetLang.SelectedIndex] + " texts from the " + locales[cmbSourceLang.SelectedIndex] + " defaults.\n\nContinue?",
-                "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
+                "This will overwrite all(!) texts in " + locales[targetLang] + " from the " + locales[sourceLang] + " defaults.\n\nContinue?",
+                "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2
+                ) == DialogResult.No)
                 return;
 
             var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
-            int source = _getSource(stblgroup.Key, cmbSourceLang.SelectedIndex);
+            int source = _getSource(stblgroup.Key, sourceLang);
             if (source == -1)
                 return;
 
-            _copyToTarget(stblgroup.Key, source, cmbTargetLang.SelectedIndex);
+            _copyToTarget(stblgroup.Key, source, targetLang);
 
             pkgIsDirty = true;
+
             ReloadStrings();
             SelectStrings();
         }
 
         private void btnCopyToAll_Click(object sender, EventArgs e)
         {
+            if (sourceLang == targetLang)
+                AskCommit();
+            txtIsDirty = false;
+
             if (MessageBox.Show(
-                "This will overwrite all(!) texts in all(!) languages from the " + locales[cmbSourceLang.SelectedIndex] + " defaults.\n\nContinue?",
+                "This will overwrite all(!) texts in all(!) languages from the " + locales[sourceLang] + " defaults.\n\nContinue?",
                 "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2
                 ) == DialogResult.No)
                 return;
 
             var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
-            int source = _getSource(stblgroup.Key, cmbSourceLang.SelectedIndex);
+            int source = _getSource(stblgroup.Key, sourceLang);
             if (source == -1)
                 return;
 
@@ -519,6 +534,7 @@ under certain conditions; see Help->Licence for details.
                 _copyToTarget(stblgroup.Key, source, i);
 
             pkgIsDirty = true;
+
             ReloadStrings();
             SelectStrings();
         }
@@ -562,7 +578,7 @@ under certain conditions; see Help->Licence for details.
 
             #region Prepare to add and remove instances to/from package name map _KEY files
             /*
-             * Every time we remove a resource from the package, we should check to see if is still in use.
+             * Every time we remove a resource from the package, we should check to see if it is still in use.
              * If not, we should remove it from the _KEY resource, if one exists.
              * The following fancy foot work gets us set up ready to rock'n'roll...
             /**/
@@ -649,11 +665,15 @@ under certain conditions; see Help->Licence for details.
 
         private void btnFindFirst_Click(object sender, EventArgs e)
         {
+            AskCommit();
+
             findText(txtFind.Text);
         }
 
         private void btnFindNext_Click(object sender, EventArgs e)
         {
+            AskCommit();
+
             if (foundItems == null || foundItems.Count == 0)
                 return;
             bool q = false;
@@ -677,6 +697,8 @@ under certain conditions; see Help->Licence for details.
 
         private void btnDelString_Click(object sender, EventArgs e)
         {
+            AskCommit();
+
             var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
             var instance = (ulong)txtInstance.Tag;
 
@@ -691,6 +713,8 @@ under certain conditions; see Help->Licence for details.
 
         private void btnAddString_Click(object sender, EventArgs e)
         {
+            AskCommit();
+
             AddInstance ag = new AddInstance();
             if (ag.ShowDialog() != DialogResult.OK) return;
 
@@ -725,7 +749,12 @@ under certain conditions; see Help->Licence for details.
 
         private void ckbAutoCommit_CheckedChanged(object sender, EventArgs e)
         {
-            if (ckbAutoCommit.Checked) btnCommit.Enabled = false;
+            if (ckbAutoCommit.Checked)
+            {
+                btnCommit.Enabled = false;
+                if (txtIsDirty)
+                    CommitText();
+            }
 
             Settings.Default.AutoCommit = ckbAutoCommit.Checked;
             Settings.Default.Save();
@@ -839,7 +868,7 @@ Do you accept this licence?" : ""),
             AskCommit();
             if (pkgIsDirty)
             {
-                var r = MessageBox.Show("Save changes before closing file?", "Close Package", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
+                var r = MessageBox.Show("Save changes before closing file?", "Save Package", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
                 if (r == DialogResult.Yes)
                 {
                     currentPackage.SavePackage();
@@ -853,7 +882,7 @@ Do you accept this licence?" : ""),
 
         private void OpenPackage(string path)
         {
-            if (fileName == path) return;
+            //if (fileName == path) return;
 
             ClosePackage();
             currentPackage = Package.OpenPackage(0, path, true);
@@ -920,7 +949,7 @@ Do you accept this licence?" : ""),
 
         ListViewItem CreateLVISTBL(KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>> stbl)
         {
-            return new ListViewItem(new string[] { FormatHex(stbl.Key.Instance, true) }) { Tag = stbl };
+            return new ListViewItem(new string[] { String.Format("0x__{0:X14}", stbl.Key.Instance & 0x00FFFFFFFFFFFFFF) }) { Tag = stbl };
         }
 
         private void ReloadStrings()
@@ -934,21 +963,20 @@ Do you accept this licence?" : ""),
                     return;
 
                 var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
-                prg.Visible = true;
-                if (!StringTables[stblgroup.Key].ContainsKey(cmbSourceLang.SelectedIndex))
+                if (!StringTables[stblgroup.Key].ContainsKey(sourceLang))
                 {
                     int rlocale = StringTables[stblgroup.Key].Keys.GetEnumerator().Current;
 
                     // Give up!
-                    if (rlocale == cmbSourceLang.SelectedIndex)
+                    if (rlocale == sourceLang)
                         return;
 
                     if (MessageBox.Show(
                         string.Format("The current source language, {0}, does not exist in this string table.\n\n" +
-                        "Use {1} instead?", locales[cmbSourceLang.SelectedIndex], locales[rlocale]),
+                        "Use {1} instead?", locales[sourceLang], locales[rlocale]),
                         "Language missing", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
                     {
-                        cmbSourceLang.SelectedIndex = rlocale;// we get called!
+                        sourceLang = rlocale;// we get called!
                         return;
                     }
                     else
@@ -956,23 +984,25 @@ Do you accept this licence?" : ""),
                 }
 
 
-                if (!StringTables[stblgroup.Key].ContainsKey(cmbTargetLang.SelectedIndex))
+                if (!StringTables[stblgroup.Key].ContainsKey(targetLang))
                 {
                     if (MessageBox.Show(
                         string.Format("The current target language, {0}, does not exist in this string table.\n\n" +
-                        "Create it?", locales[cmbTargetLang.SelectedIndex]),
+                        "Create it?", locales[targetLang]),
                         "Language missing", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
                     {
-                        MemoryStream ms = new MemoryStream(StringTables[stblgroup.Key][cmbSourceLang.SelectedIndex].AsBytes, true);
-                        _currentPackage.AddResource(stblGroupKeyToRK(stblgroup.Key, cmbTargetLang.SelectedIndex), ms, true);
-                        StringTables[stblgroup.Key].Add(cmbTargetLang.SelectedIndex, new StblResource.StblResource(0, ms));
+                        MemoryStream ms = new MemoryStream(StringTables[stblgroup.Key][sourceLang].AsBytes, true);
+                        _currentPackage.AddResource(stblGroupKeyToRK(stblgroup.Key, targetLang), ms, true);
+                        StringTables[stblgroup.Key].Add(targetLang, new StblResource.StblResource(0, ms));
                     }
                     else
                         return;
                 }
 
-                var sourceSTBL = StringTables[stblgroup.Key][cmbSourceLang.SelectedIndex];
-                var targetSTBL = StringTables[stblgroup.Key][cmbTargetLang.SelectedIndex];
+                var sourceSTBL = StringTables[stblgroup.Key][sourceLang];
+                var targetSTBL = StringTables[stblgroup.Key][targetLang];
+
+                prg.Visible = true;
                 prg.Value = 0;
                 prg.Maximum = sourceSTBL.Keys.Count + targetSTBL.Keys.Count;
                 foreach (var item in sourceSTBL.Keys)
@@ -1009,7 +1039,7 @@ Do you accept this licence?" : ""),
             return new ListViewItem(new string[] {
                 src.ContainsKey(item) ? src[item] : "",
                 tgt.ContainsKey(item) ? tgt[item] : "",
-                FormatHex(item)
+                "0x" + item.ToString("X16")
             }) { Tag = item, UseItemStyleForSubItems = false };
         }
 
@@ -1036,31 +1066,13 @@ Do you accept this licence?" : ""),
             MemoryStream ms = new MemoryStream(StringTables[stblgroupKey][source].AsBytes, true);
             StblResource.StblResource targetSTBL = new StblResource.StblResource(0, ms);
 
-            IResourceKey rk = stblGroupKeyToRK(stblgroupKey, source);
+            IResourceKey rk = stblGroupKeyToRK(stblgroupKey, target);
             IResourceIndexEntry rie = _currentPackage.Find(x => x.Equals(rk));
             if (rie != null)
                 _currentPackage.ReplaceResource(rie, targetSTBL);
             else
                 _currentPackage.AddResource(rk, targetSTBL.Stream, true);
             StringTables[stblgroupKey][target] = targetSTBL;
-        }
-
-        private string FormatHex(ulong a)
-        {
-            return "0x" + a.ToString("X").PadLeft(16, '0');
-        }
-
-        private string FormatHex(ulong a, bool skipByte)
-        {
-            if (skipByte)
-                return "0x__" + a.ToString("X").PadLeft(16, '0').Substring(2);
-            else
-                return FormatHex(a);
-        }
-
-        private string FormatHex(uint a)
-        {
-            return "0x" + a.ToString("X").PadLeft(8, '0');
         }
 
         #region class RK
@@ -1080,6 +1092,7 @@ Do you accept this licence?" : ""),
                 if (res == 0) res = this.Instance.CompareTo(other.Instance);
                 return res;
             }
+            public override string ToString() { return String.Format("0x{0:X8}-0x{1:X8}-0x{2:X16}", ResourceType, ResourceGroup, Instance); }
         }
         #endregion
 
@@ -1113,7 +1126,7 @@ Do you accept this licence?" : ""),
             if (inChangeHandler) return;
 
             var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
-            var targetSTBL = StringTables[stblgroup.Key][cmbTargetLang.SelectedIndex];
+            var targetSTBL = StringTables[stblgroup.Key][targetLang];
             var text = txtTarget.Text;
             var instance = (ulong)txtInstance.Tag;
 
@@ -1128,13 +1141,13 @@ Do you accept this licence?" : ""),
                 targetSTBL.Add(instance, text);
             }
 
-            if (cmbSourceLang.SelectedIndex == cmbTargetLang.SelectedIndex)
+            if (sourceLang == targetLang)
             {
                 lstStrings.SelectedItems[0].SubItems[0].Text = text;
             }
             lstStrings.SelectedItems[0].SubItems[1].Text = text;
 
-            IResourceKey rk = stblGroupKeyToRK(stblgroup.Key, cmbTargetLang.SelectedIndex);
+            IResourceKey rk = stblGroupKeyToRK(stblgroup.Key, targetLang);
             IResourceIndexEntry rie = _currentPackage.Find(x => x.Equals(rk));
             _currentPackage.ReplaceResource(rie, targetSTBL);
             pkgIsDirty = true;
@@ -1162,7 +1175,7 @@ Do you accept this licence?" : ""),
                     if (!foundItems.Contains(i))
                         foundItems.Add(i);
                 }
-                if (i.SubItems[2].Text.Contains(FormatHex(FNV64.GetHash(text))))
+                if (i.SubItems[2].Text.Contains("0x" + FNV64.GetHash(text).ToString("X16")))
                 {
                     if (!foundItems.Contains(i))
                         foundItems.Add(i);
