@@ -75,10 +75,10 @@ namespace S3Translate
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.label9 = new System.Windows.Forms.Label();
-            this.btnMergeSTBLs = new System.Windows.Forms.Button();
+            this.btnMergeSets = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
-            this.btnCopyToTarget = new System.Windows.Forms.Button();
-            this.btnCopyToAll = new System.Windows.Forms.Button();
+            this.btnSetToTarget = new System.Windows.Forms.Button();
+            this.btnSetToAll = new System.Windows.Forms.Button();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.label7 = new System.Windows.Forms.Label();
@@ -88,6 +88,9 @@ namespace S3Translate
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.btnDelString = new System.Windows.Forms.Button();
             this.btnAddString = new System.Windows.Forms.Button();
+            this.btnStringToTarget = new System.Windows.Forms.Button();
+            this.btnStringToAll = new System.Windows.Forms.Button();
+            this.label10 = new System.Windows.Forms.Label();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
             this.label4 = new System.Windows.Forms.Label();
@@ -336,7 +339,7 @@ namespace S3Translate
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(30, 13);
             this.label5.TabIndex = 0;
-            this.label5.Text = "Fin&d:";
+            this.label5.Text = "F&ind:";
             // 
             // tableLayoutPanel4
             // 
@@ -379,7 +382,7 @@ namespace S3Translate
             this.btnFindFirst.Padding = new System.Windows.Forms.Padding(1, 0, 1, 0);
             this.btnFindFirst.Size = new System.Drawing.Size(39, 23);
             this.btnFindFirst.TabIndex = 0;
-            this.btnFindFirst.Text = "&Find";
+            this.btnFindFirst.Text = "Fin&d";
             this.btnFindFirst.UseVisualStyleBackColor = true;
             this.btnFindFirst.Click += new System.EventHandler(this.btnFindFirst_Click);
             // 
@@ -446,10 +449,10 @@ namespace S3Translate
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel2.Controls.Add(this.label9, 0, 3);
-            this.tableLayoutPanel2.Controls.Add(this.btnMergeSTBLs, 1, 3);
+            this.tableLayoutPanel2.Controls.Add(this.btnMergeSets, 1, 3);
             this.tableLayoutPanel2.Controls.Add(this.label8, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.btnCopyToTarget, 1, 0);
-            this.tableLayoutPanel2.Controls.Add(this.btnCopyToAll, 1, 1);
+            this.tableLayoutPanel2.Controls.Add(this.btnSetToTarget, 1, 0);
+            this.tableLayoutPanel2.Controls.Add(this.btnSetToAll, 1, 1);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 190);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -472,21 +475,21 @@ namespace S3Translate
             this.label9.Text = "Combine all String Sets\r\ninto a single Set:";
             this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // btnMergeSTBLs
+            // btnMergeSets
             // 
-            this.btnMergeSTBLs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnMergeSTBLs.AutoSize = true;
-            this.btnMergeSTBLs.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnMergeSTBLs.Enabled = false;
-            this.btnMergeSTBLs.Location = new System.Drawing.Point(150, 69);
-            this.btnMergeSTBLs.Name = "btnMergeSTBLs";
-            this.btnMergeSTBLs.Size = new System.Drawing.Size(53, 23);
-            this.btnMergeSTBLs.TabIndex = 4;
-            this.btnMergeSTBLs.Text = "Mer&ge";
-            this.mainToolTip.SetToolTip(this.btnMergeSTBLs, "Where there are multiple STBL resources\r\nin the package, they will be merged into" +
+            this.btnMergeSets.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnMergeSets.AutoSize = true;
+            this.btnMergeSets.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnMergeSets.Enabled = false;
+            this.btnMergeSets.Location = new System.Drawing.Point(150, 69);
+            this.btnMergeSets.Name = "btnMergeSets";
+            this.btnMergeSets.Size = new System.Drawing.Size(53, 23);
+            this.btnMergeSets.TabIndex = 4;
+            this.btnMergeSets.Text = "Mer&ge";
+            this.mainToolTip.SetToolTip(this.btnMergeSets, "Where there are multiple STBL resources\r\nin the package, they will be merged into" +
         " a\r\nsingle new resource\r\n");
-            this.btnMergeSTBLs.UseVisualStyleBackColor = true;
-            this.btnMergeSTBLs.Click += new System.EventHandler(this.btnMergeSTLBs_Click);
+            this.btnMergeSets.UseVisualStyleBackColor = true;
+            this.btnMergeSets.Click += new System.EventHandler(this.btnMergeSets_Click);
             // 
             // label8
             // 
@@ -500,34 +503,34 @@ namespace S3Translate
             this.label8.Text = "Copy all Source Lang strings\r\nin selected String Set to:";
             this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // btnCopyToTarget
+            // btnSetToTarget
             // 
-            this.btnCopyToTarget.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCopyToTarget.AutoSize = true;
-            this.btnCopyToTarget.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnCopyToTarget.Enabled = false;
-            this.btnCopyToTarget.Location = new System.Drawing.Point(150, 3);
-            this.btnCopyToTarget.Name = "btnCopyToTarget";
-            this.btnCopyToTarget.Size = new System.Drawing.Size(53, 23);
-            this.btnCopyToTarget.TabIndex = 1;
-            this.btnCopyToTarget.Text = "Ta&rget";
-            this.btnCopyToTarget.UseVisualStyleBackColor = true;
-            this.btnCopyToTarget.Click += new System.EventHandler(this.btnCopyToTarget_Click);
+            this.btnSetToTarget.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSetToTarget.AutoSize = true;
+            this.btnSetToTarget.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnSetToTarget.Enabled = false;
+            this.btnSetToTarget.Location = new System.Drawing.Point(150, 3);
+            this.btnSetToTarget.Name = "btnSetToTarget";
+            this.btnSetToTarget.Size = new System.Drawing.Size(53, 23);
+            this.btnSetToTarget.TabIndex = 1;
+            this.btnSetToTarget.Text = "Ta&rget";
+            this.btnSetToTarget.UseVisualStyleBackColor = true;
+            this.btnSetToTarget.Click += new System.EventHandler(this.btnSetToTarget_Click);
             // 
-            // btnCopyToAll
+            // btnSetToAll
             // 
-            this.btnCopyToAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCopyToAll.AutoSize = true;
-            this.btnCopyToAll.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnCopyToAll.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCopyToAll.Enabled = false;
-            this.btnCopyToAll.Location = new System.Drawing.Point(150, 32);
-            this.btnCopyToAll.Name = "btnCopyToAll";
-            this.btnCopyToAll.Size = new System.Drawing.Size(53, 23);
-            this.btnCopyToAll.TabIndex = 2;
-            this.btnCopyToAll.Text = "All";
-            this.btnCopyToAll.UseVisualStyleBackColor = true;
-            this.btnCopyToAll.Click += new System.EventHandler(this.btnCopyToAll_Click);
+            this.btnSetToAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSetToAll.AutoSize = true;
+            this.btnSetToAll.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnSetToAll.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnSetToAll.Enabled = false;
+            this.btnSetToAll.Location = new System.Drawing.Point(150, 32);
+            this.btnSetToAll.Name = "btnSetToAll";
+            this.btnSetToAll.Size = new System.Drawing.Size(53, 23);
+            this.btnSetToAll.TabIndex = 2;
+            this.btnSetToAll.Text = "All";
+            this.btnSetToAll.UseVisualStyleBackColor = true;
+            this.btnSetToAll.Click += new System.EventHandler(this.btnSetToAll_Click);
             // 
             // tableLayoutPanel5
             // 
@@ -557,17 +560,25 @@ namespace S3Translate
             this.tableLayoutPanel6.Controls.Add(this.ckbAutoCommit, 0, 4);
             this.tableLayoutPanel6.Controls.Add(this.btnCommit, 0, 5);
             this.tableLayoutPanel6.Controls.Add(this.tableLayoutPanel3, 0, 2);
+            this.tableLayoutPanel6.Controls.Add(this.btnStringToTarget, 0, 8);
+            this.tableLayoutPanel6.Controls.Add(this.btnStringToAll, 0, 9);
+            this.tableLayoutPanel6.Controls.Add(this.label10, 0, 7);
+            this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel6.Location = new System.Drawing.Point(768, 3);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
-            this.tableLayoutPanel6.RowCount = 7;
+            this.tableLayoutPanel6.RowCount = 11;
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(134, 140);
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(134, 299);
             this.tableLayoutPanel6.TabIndex = 2;
             // 
             // label7
@@ -666,6 +677,38 @@ namespace S3Translate
             this.btnAddString.UseVisualStyleBackColor = true;
             this.btnAddString.Click += new System.EventHandler(this.btnAddString_Click);
             // 
+            // btnStringToTarget
+            // 
+            this.btnStringToTarget.Enabled = false;
+            this.btnStringToTarget.Location = new System.Drawing.Point(3, 176);
+            this.btnStringToTarget.Name = "btnStringToTarget";
+            this.btnStringToTarget.Size = new System.Drawing.Size(53, 23);
+            this.btnStringToTarget.TabIndex = 6;
+            this.btnStringToTarget.Text = "Target";
+            this.btnStringToTarget.UseVisualStyleBackColor = true;
+            this.btnStringToTarget.Click += new System.EventHandler(this.btnStringToTarget_Click);
+            // 
+            // btnStringToAll
+            // 
+            this.btnStringToAll.Enabled = false;
+            this.btnStringToAll.Location = new System.Drawing.Point(3, 205);
+            this.btnStringToAll.Name = "btnStringToAll";
+            this.btnStringToAll.Size = new System.Drawing.Size(53, 23);
+            this.btnStringToAll.TabIndex = 7;
+            this.btnStringToAll.Text = "All";
+            this.btnStringToAll.UseVisualStyleBackColor = true;
+            this.btnStringToAll.Click += new System.EventHandler(this.btnStringToAll_Click);
+            // 
+            // label10
+            // 
+            this.label10.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(3, 160);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(111, 13);
+            this.label10.TabIndex = 5;
+            this.label10.Text = "Copy Source string to:";
+            // 
             // splitContainer2
             // 
             this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -704,9 +747,9 @@ namespace S3Translate
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(3, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(68, 13);
+            this.label4.Size = new System.Drawing.Size(72, 13);
             this.label4.TabIndex = 0;
-            this.label4.Text = "Source Text:";
+            this.label4.Text = "Source string:";
             // 
             // txtSource
             // 
@@ -753,9 +796,9 @@ namespace S3Translate
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(3, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(65, 13);
+            this.label3.Size = new System.Drawing.Size(69, 13);
             this.label3.TabIndex = 0;
-            this.label3.Text = "Target Text:";
+            this.label3.Text = "Target string:";
             // 
             // menuStrip1
             // 
@@ -931,7 +974,7 @@ namespace S3Translate
             this.AcceptButton = this.btnCommit;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.btnCopyToAll;
+            this.CancelButton = this.btnSetToAll;
             this.ClientSize = new System.Drawing.Size(905, 716);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStripContainer1);
@@ -1019,9 +1062,9 @@ namespace S3Translate
         private System.Windows.Forms.ToolStripProgressBar prg;
         private System.Windows.Forms.ToolStripMenuItem preferencesToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.Button btnCopyToAll;
-        private System.Windows.Forms.Button btnCopyToTarget;
-        private System.Windows.Forms.Button btnMergeSTBLs;
+        private System.Windows.Forms.Button btnSetToAll;
+        private System.Windows.Forms.Button btnSetToTarget;
+        private System.Windows.Forms.Button btnMergeSets;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button btnFindNext;
         private System.Windows.Forms.TextBox txtFind;
@@ -1051,6 +1094,9 @@ namespace S3Translate
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.Button btnStringToTarget;
+        private System.Windows.Forms.Button btnStringToAll;
+        private System.Windows.Forms.Label label10;
 
     }
 }

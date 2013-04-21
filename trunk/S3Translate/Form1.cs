@@ -103,16 +103,6 @@ namespace S3Translate
             public int GetHashCode(IResourceKey obj) { return obj.GetHashCode(obj); }
         }
 
-        IResourceKey stblGroupKeyToRK(IResourceKey stblGroupKey, int lang)
-        {
-            return new RK(stblGroupKey.ResourceType, stblGroupKey.ResourceGroup, stblGroupKey.Instance | ((ulong)lang << 56));
-        }
-
-        IResourceKey RKTostblGroupKey(IResourceKey stblGroupKey)
-        {
-            return new RK(stblGroupKey.ResourceType, stblGroupKey.ResourceGroup, stblGroupKey.Instance & 0x00FFFFFFFFFFFFFF);
-        }
-
         public Form1()
         {
             AcceptLicence();
@@ -137,7 +127,7 @@ namespace S3Translate
                 _pkgDirty = _txtDirty = false;
                 SetText();
                 ReloadStringTables();
-                btnCopyToAll.Enabled = btnCopyToTarget.Enabled = tlpFind.Enabled = currentPackage != null;
+                btnSetToAll.Enabled = btnSetToTarget.Enabled = tlpFind.Enabled = currentPackage != null;
             });
 
             lstSTBLs.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler((sender, e) => { AskCommit(); btnAddString.Enabled = lstSTBLs.SelectedIndices.Count == 1; ReloadStrings(); });
@@ -488,14 +478,14 @@ under certain conditions; see Help->Licence for details.
                 txtIsDirty = true;
         }
 
-        private void btnCopyToTarget_Click(object sender, EventArgs e)
+        private void btnSetToTarget_Click(object sender, EventArgs e)
         {
             if (sourceLang == targetLang)
                 AskCommit();
             txtIsDirty = false;
 
             if (MessageBox.Show(
-                "This will overwrite all(!) texts in " + locales[targetLang] + " from the " + locales[sourceLang] + " defaults.\n\nContinue?",
+                "This will copy all " + locales[sourceLang] + " strings to " + locales[targetLang] + ".\n\nContinue?",
                 "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2
                 ) == DialogResult.No)
                 return;
@@ -505,7 +495,7 @@ under certain conditions; see Help->Licence for details.
             if (source == -1)
                 return;
 
-            _copyToTarget(stblgroup.Key, source, targetLang);
+            _setToTarget(stblgroup.Key, source, targetLang);
 
             pkgIsDirty = true;
 
@@ -513,14 +503,14 @@ under certain conditions; see Help->Licence for details.
             SelectStrings();
         }
 
-        private void btnCopyToAll_Click(object sender, EventArgs e)
+        private void btnSetToAll_Click(object sender, EventArgs e)
         {
             if (sourceLang == targetLang)
                 AskCommit();
             txtIsDirty = false;
 
             if (MessageBox.Show(
-                "This will overwrite all(!) texts in all(!) languages from the " + locales[sourceLang] + " defaults.\n\nContinue?",
+                "This will copy all " + locales[sourceLang] + " strings to all other languages.\n\nContinue?",
                 "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2
                 ) == DialogResult.No)
                 return;
@@ -531,7 +521,7 @@ under certain conditions; see Help->Licence for details.
                 return;
 
             for (var i = 0; i < locales.Count; i++)
-                _copyToTarget(stblgroup.Key, source, i);
+                _setToTarget(stblgroup.Key, source, i);
 
             pkgIsDirty = true;
 
@@ -543,7 +533,7 @@ under certain conditions; see Help->Licence for details.
         delegate void _KEYAddInstance(ulong instance, string name);
         delegate void _KEYCommitNameMaps();
         
-        private void btnMergeSTLBs_Click(object sender, EventArgs e)
+        private void btnMergeSets_Click(object sender, EventArgs e)
         {
             #region Check for duplicates
             Dictionary<ulong, List<int>> allGUIDs = new Dictionary<ulong, List<int>>();
@@ -759,6 +749,57 @@ under certain conditions; see Help->Licence for details.
             Settings.Default.AutoCommit = ckbAutoCommit.Checked;
             Settings.Default.Save();
         }
+
+        private void btnStringToTarget_Click(object sender, EventArgs e)
+        {
+            AskCommit();
+            txtIsDirty = false;
+
+            var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
+            int source = _getSource(stblgroup.Key, sourceLang);
+            if (source == -1)
+                return;
+
+            _stringToTarget(stblgroup.Key, source, targetLang);
+
+            pkgIsDirty = true;
+            lstStrings.SelectedItems[0].SubItems[1].Text = lstStrings.SelectedItems[0].SubItems[0].Text;
+            try
+            {
+                inChangeHandler = true;
+                txtTarget.Text = lstStrings.SelectedItems[0].SubItems[0].Text;
+            }
+            finally { inChangeHandler = false; }
+        }
+
+        private void btnStringToAll_Click(object sender, EventArgs e)
+        {
+            AskCommit();
+            txtIsDirty = false;
+
+            if (MessageBox.Show(
+                "This will copy the selected " + locales[sourceLang] + " string to all other languages.\n\nContinue?",
+                "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2
+                ) == DialogResult.No)
+                return;
+
+            var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
+            int source = _getSource(stblgroup.Key, sourceLang);
+            if (source == -1)
+                return;
+
+            for (var i = 0; i < locales.Count; i++)
+                _stringToTarget(stblgroup.Key, source, i);
+
+            pkgIsDirty = true;
+            lstStrings.SelectedItems[0].SubItems[1].Text = lstStrings.SelectedItems[0].SubItems[0].Text;
+            try
+            {
+                inChangeHandler = true;
+                txtTarget.Text = lstStrings.SelectedItems[0].SubItems[0].Text;
+            }
+            finally { inChangeHandler = false; }
+        }
         #endregion
 
         void AcceptLicence()
@@ -805,6 +846,7 @@ Do you accept this licence?" : ""),
                         accept ? MessageBoxDefaultButton.Button2 : MessageBoxDefaultButton.Button1) == DialogResult.Yes || !accept);
         }
 
+        #region class Version
         public class Version
         {
             static String timestamp;
@@ -837,22 +879,7 @@ Do you accept this licence?" : ""),
 #endif
             }
         }
-
-        void AskCommit()
-        {
-            if (txtIsDirty)
-            {
-                var r = MessageBox.Show("Commit changes to target?", "Text has changed",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (r == DialogResult.Yes)
-                    CommitText();
-                else
-                {
-                    txtIsDirty = false;
-                    SelectStrings();
-                }
-            }
-        }
+        #endregion
 
         void SetText()
         {
@@ -918,7 +945,7 @@ Do you accept this licence?" : ""),
 
             loadAllLanguagesFromPackage(currentPackage);
 
-            btnMergeSTBLs.Enabled = (lstSTBLs.Items.Count > 1);
+            btnMergeSets.Enabled = (lstSTBLs.Items.Count > 1);
 
             if (lstSTBLs.Items.Count > 0)
                 lstSTBLs.SelectedIndices.Add(0);
@@ -954,6 +981,7 @@ Do you accept this licence?" : ""),
 
         private void ReloadStrings()
         {
+            int i = lstStrings.SelectedIndices.Count > 0 ? lstStrings.SelectedIndices[0] : -1;
             try
             {
                 lstStrings.BeginUpdate();
@@ -1030,7 +1058,7 @@ Do you accept this licence?" : ""),
             {
                 lstStrings.EndUpdate();
                 prg.Visible = false;
-                if (lstStrings.Items.Count > 0) lstStrings.SelectedIndices.Add(0);
+                if (lstStrings.Items.Count > 0) lstStrings.SelectedIndices.Add(i >= 0 && i < lstStrings.Items.Count ? i : 0);
             }
         }
 
@@ -1061,8 +1089,11 @@ Do you accept this licence?" : ""),
             return source;
         }
 
-        void _copyToTarget(IResourceKey stblgroupKey, int source, int target)
+        void _setToTarget(IResourceKey stblgroupKey, int source, int target)
         {
+            if (source == target)
+                return;
+
             MemoryStream ms = new MemoryStream(StringTables[stblgroupKey][source].AsBytes, true);
             StblResource.StblResource targetSTBL = new StblResource.StblResource(0, ms);
 
@@ -1071,8 +1102,57 @@ Do you accept this licence?" : ""),
             if (rie != null)
                 _currentPackage.ReplaceResource(rie, targetSTBL);
             else
+            {
+                if (MessageBox.Show(
+                    locales[target] + " does not exist.\n\nCreate it?",
+                    "Create " + locales[target], MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1
+                    ) != DialogResult.Yes)
+                    return;
+
                 _currentPackage.AddResource(rk, targetSTBL.Stream, true);
+            }
             StringTables[stblgroupKey][target] = targetSTBL;
+        }
+
+        void _stringToTarget(IResourceKey stblgroupKey, int source, int target)
+        {
+            if (source == target)
+                return;
+
+            IResourceKey rk = stblGroupKeyToRK(stblgroupKey, target);
+            IResourceIndexEntry rie = _currentPackage.Find(x => x.Equals(rk));
+            StblResource.StblResource targetSTBL;
+            if (rie == null)
+            {
+                if (MessageBox.Show(
+                    locales[target] + " does not exist.\n\nCreate it?",
+                    "Create " + locales[target], MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1
+                    ) != DialogResult.Yes)
+                    return;
+
+                targetSTBL = new StblResource.StblResource(0, null);
+                StringTables[stblgroupKey][target] = targetSTBL;
+                rie = _currentPackage.AddResource(rk, targetSTBL.Stream, true);
+            }
+            else
+            {
+                targetSTBL = StringTables[stblgroupKey][target];
+            }
+
+            var text = txtSource.Text;
+            var instance = (ulong)txtInstance.Tag;
+
+            if (targetSTBL.ContainsKey(instance))
+            {
+                if (targetSTBL[instance] == text)
+                    return;
+                targetSTBL[instance] = text;
+            }
+            else
+            {
+                targetSTBL.Add(instance, text);
+            }
+            _currentPackage.ReplaceResource(rie, targetSTBL);
         }
 
         #region class RK
@@ -1094,6 +1174,16 @@ Do you accept this licence?" : ""),
             }
             public override string ToString() { return String.Format("0x{0:X8}-0x{1:X8}-0x{2:X16}", ResourceType, ResourceGroup, Instance); }
         }
+
+        IResourceKey stblGroupKeyToRK(IResourceKey stblGroupKey, int lang)
+        {
+            return new RK(stblGroupKey.ResourceType, stblGroupKey.ResourceGroup, stblGroupKey.Instance | ((ulong)lang << 56));
+        }
+
+        IResourceKey RKTostblGroupKey(IResourceKey stblGroupKey)
+        {
+            return new RK(stblGroupKey.ResourceType, stblGroupKey.ResourceGroup, stblGroupKey.Instance & 0x00FFFFFFFFFFFFFF);
+        }
         #endregion
 
         bool inChangeHandler = false;
@@ -1105,7 +1195,7 @@ Do you accept this licence?" : ""),
                 if (lstStrings.SelectedItems.Count != 1)
                 {
                     txtSource.Text = txtTarget.Text = txtInstance.Text = "";
-                    btnDelString.Enabled = txtTarget.Enabled = false;
+                    btnStringToTarget.Enabled = btnStringToAll.Enabled = btnDelString.Enabled = txtTarget.Enabled = false;
                     txtInstance.Tag = null;
                     return;
                 }
@@ -1113,12 +1203,28 @@ Do you accept this licence?" : ""),
                 {
                     txtSource.Text = lstStrings.SelectedItems[0].SubItems[0].Text;
                     txtTarget.Text = lstStrings.SelectedItems[0].SubItems[1].Text;
-                    btnDelString.Enabled = txtTarget.Enabled = true;
+                    btnStringToTarget.Enabled = btnStringToAll.Enabled = btnDelString.Enabled = txtTarget.Enabled = true;
                     txtInstance.Text = lstStrings.SelectedItems[0].SubItems[2].Text;
                     txtInstance.Tag = lstStrings.SelectedItems[0].Tag;
                 }
             }
             finally { inChangeHandler = false; }
+        }
+
+        private void AskCommit()
+        {
+            if (txtIsDirty)
+            {
+                var r = MessageBox.Show("Commit changes to " + locales[targetLang] + "?", "Text has changed",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (r == DialogResult.Yes)
+                    CommitText();
+                else
+                {
+                    txtIsDirty = false;
+                    SelectStrings();
+                }
+            }
         }
 
         private void CommitText()
@@ -1141,11 +1247,18 @@ Do you accept this licence?" : ""),
                 targetSTBL.Add(instance, text);
             }
 
-            if (sourceLang == targetLang)
+            foreach (var item in lstStrings.Items.Cast<ListViewItem>().Where(x => ((ulong)x.Tag) == instance))
             {
-                lstStrings.SelectedItems[0].SubItems[0].Text = text;
+                item.SubItems[1].Text = text;
+                if (sourceLang == targetLang)
+                    item.SubItems[0].Text = text;
             }
-            lstStrings.SelectedItems[0].SubItems[1].Text = text;
+
+            if (sourceLang == targetLang)
+                if (lstStrings.SelectedIndices.Count > 0)
+                {
+                    txtSource.Text = text;
+                }
 
             IResourceKey rk = stblGroupKeyToRK(stblgroup.Key, targetLang);
             IResourceIndexEntry rie = _currentPackage.Find(x => x.Equals(rk));
