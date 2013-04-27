@@ -5,16 +5,16 @@ using System.Runtime.InteropServices;
 // Allgemeine Informationen über eine Assembly werden über die folgenden 
 // Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
 // die mit einer Assembly verknüpft sind.
-[assembly: AssemblyTitle("JonHa's Sims3 String Table Editor")]
+[assembly: AssemblyTitle("s3se - Sims3 String Editor")]
 [assembly: AssemblyDescription("A string table editor for packages for The Sims 3(tm)")]
 #if DEBUG
 [assembly: AssemblyConfiguration("[DEBUG]")]
 #else
 [assembly: AssemblyConfiguration("")]
 #endif
-[assembly: AssemblyCompany("JonHa")]
+[assembly: AssemblyCompany("Peter L Jones")]
 [assembly: AssemblyProduct("sims3tools")]
-[assembly: AssemblyCopyright("Copyright © 2011  Peter L Jones.  Released under GPL 3.  See gpl-3.0.txt")]
+[assembly: AssemblyCopyright("Copyright © 2013  Peter L Jones.  Released under GPL 3.  See gpl-3.0.txt")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

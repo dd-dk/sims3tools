@@ -145,11 +145,6 @@ namespace S3Translate
             btnCommit.Click += new EventHandler((sender, e) => { CommitText(); });
         }
 
-        private void Form1_Shown(object sender, EventArgs e)
-        {
-            openToolStripMenuItem_Click(null, null);
-        }
-
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!AskSavePackage()) { e.Cancel = true; return; }
@@ -806,7 +801,7 @@ under certain conditions; see Help->Licence for details.
         {
             if (!Settings.Default.LicenceAccepted)
             {
-                if (ShowLicence(true))
+                if (!ShowLicence(true))
                 {
                     Environment.Exit(1);
                     return;
@@ -818,7 +813,11 @@ under certain conditions; see Help->Licence for details.
 
         bool ShowLicence(bool accept = false)
         {
-            return (MessageBox.Show(@"
+            var btns = accept ? MessageBoxButtons.YesNo : MessageBoxButtons.OK;
+            var icon = accept ? MessageBoxIcon.Question : MessageBoxIcon.Information;
+            var defBtn = accept ? MessageBoxDefaultButton.Button2 : MessageBoxDefaultButton.Button1;
+
+            var res = MessageBox.Show(@"
 Copyright 2009 Jonathan Haas
 Copyright (C) 2010-2013 by Peter L Jones
 
@@ -840,10 +839,9 @@ s3translate uses the s3pi libraries by Peter L Jones (pljones@users.sf.net)
 For details visit http://sourceforge.net/projects/s3pi/" + (accept ? @"
 
 Do you accept this licence?" : ""),
-                        "Licence",
-                        accept ? MessageBoxButtons.YesNo : MessageBoxButtons.OK,
-                        accept ? MessageBoxIcon.Question : MessageBoxIcon.Information,
-                        accept ? MessageBoxDefaultButton.Button2 : MessageBoxDefaultButton.Button1) == DialogResult.Yes || !accept);
+                    "Licence", btns, icon, defBtn);
+
+            return accept && res == DialogResult.Yes;
         }
 
         #region class Version
