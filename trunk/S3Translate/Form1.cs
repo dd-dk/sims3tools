@@ -210,18 +210,20 @@ namespace S3Translate
         private void savePackageToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AskCommit();
+
             _currentPackage.SavePackage();
             pkgIsDirty = false;
         }
 
         private void savePackageAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            AskCommit();
             var sfd = new SaveFileDialog();
             sfd.Filter = packageFilter;
             sfd.FileName = fileName;
             if (sfd.ShowDialog() == DialogResult.OK)
             {
+                AskCommit();
+
                 _currentPackage.SaveAs(sfd.FileName);
                 fileName = sfd.FileName;
             }
@@ -245,12 +247,14 @@ namespace S3Translate
         private void sTBLsToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
         {
             createNewSetToolStripMenuItem.Enabled =
-                deleteSetToolStripMenuItem.Enabled =
                 importFromPackageToolStripMenuItem.Enabled =
                 importFromSTBLFileToolStripMenuItem.Enabled =
+                _currentPackage != null;
+
+            deleteSetToolStripMenuItem.Enabled =
                 exportToPackageToolStripMenuItem.Enabled =
                 exportToSTBLFileToolStripMenuItem.Enabled =
-                (_currentPackage != null);
+                cmbSetPicker.SelectedIndex >= 0;
 
             mergeAllSetsToolStripMenuItem.Enabled = cmbSetPicker.Items.Count > 1;
         }
@@ -325,7 +329,7 @@ namespace S3Translate
             if (ofd.ShowDialog() != DialogResult.OK) return;
             if (ofd.FileName == fileName)
             {
-                MessageBox.Show("That is the current package.", "S3Translate", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("That is the current package.", myName, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -334,7 +338,7 @@ namespace S3Translate
 
             if (lrie.Count == 0)
             {
-                MessageBox.Show("The selected package contains no STBLs.", "S3Translate", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("The selected package contains no STBLs.", myName, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             #endregion
@@ -366,7 +370,7 @@ namespace S3Translate
             //    lrie = new List<IResourceIndexEntry>(importFrom.FindAll(x => x.ResourceType == STBL && lb.Contains((byte)(x.Instance >> 56))));
             //    if (lrie.Count == 0)
             //    {
-            //        MessageBox.Show("No languages selected.", "S3Translate", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //        MessageBox.Show("No languages selected.", "Import", MessageBoxButtons.OK, MessageBoxIcon.Information);
             //        return;
             //    }
             //}
@@ -380,7 +384,7 @@ namespace S3Translate
                 return false;
             }).Count > 0)
             {
-                MessageBox.Show("Duplicate resources detected.", "S3Translate", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Duplicate resources detected.", "Import", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             #endregion
@@ -470,7 +474,7 @@ namespace S3Translate
                 }
                 if (found)
                 {
-                    MessageBox.Show("Duplicate resources detected.", "S3Translate", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Duplicate resources detected.", "Import", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
             }
@@ -478,7 +482,7 @@ namespace S3Translate
             {
                 if (currentPackage.Find(x => x.ResourceType == STBL && x.Equals(rk)) != null)
                 {
-                    MessageBox.Show("Duplicate resources detected.", "S3Translate", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Duplicate resources detected.", "Import", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
             }
@@ -515,7 +519,98 @@ namespace S3Translate
 
         private void exportToPackageToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Hello world");
+            IPackage targetPackage;
+
+            #region Get the filename
+            var sfd = new SaveFileDialog() { Title = "Export To Package" };
+            sfd.Filter = packageFilter;
+            sfd.FileName = Path.GetFileNameWithoutExtension(fileName) + cmbSetPicker.Text.Substring(3);
+            if (sfd.ShowDialog() != DialogResult.OK)
+                return;
+            #endregion
+
+            #region Get the package
+            try
+            {
+                if (File.Exists(sfd.FileName))
+                {
+                    targetPackage = Package.OpenPackage(0, sfd.FileName, true);
+
+                    #region Check for duplicates
+                    var lrie = currentPackage.FindAll(x => x.ResourceType == STBL);
+                    if (targetPackage.FindAll(x =>
+                    {
+                        if (x.ResourceType != STBL) return false;
+                        foreach (var rie in lrie) if (x.Equals(rie)) return true;
+                        return false;
+                    }).Count > 0)
+                    {
+                        MessageBox.Show("Duplicate resources detected.",
+                            "Export", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    #endregion
+                }
+                else
+                {
+                    targetPackage = Package.NewPackage(0);
+                    targetPackage.SaveAs(sfd.FileName);
+                    targetPackage = Package.OpenPackage(0, sfd.FileName, true);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not open package for export.\nPackage: " + sfd.FileName + "\nError:\n" + ex.Message,
+                    "Export", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            #endregion
+
+            #region Handle the NameMap/_KEY bits
+            _KEYAddInstance targetAddInstance;
+            _KEYCommitNameMaps targetCommitNameMaps;
+
+            // Do we actually have anything to deal with?
+            // Set up a list of the useful NMAP/_KEY rks/resources
+            var keys = targetPackage.FindAll(x => x.ResourceType == 0x0166038C)// NMAP (or _KEY if you prefer)
+                .Select(rk =>
+                {
+                    // So, this resource key in the index, can we get a _KEY from it?
+                    try { return new KeyValuePair<IResourceIndexEntry, NameMapResource.NameMapResource>(rk,
+                        new NameMapResource.NameMapResource(0, ((APackage)targetPackage).GetResource(rk))); }
+                    catch { return new KeyValuePair<IResourceIndexEntry, NameMapResource.NameMapResource>(null, null); }
+                }).Where(x => x.Key != null).ToList();
+
+            if (keys.Count > 0)
+            {
+                // We'll just use the first file for adding (if there is one) - and handily, it knows how.
+                // Note: this *will* throw an exception of the key exists
+                targetAddInstance = keys[0].Value.Add;
+
+                // Just assume they need cleaning...
+                targetCommitNameMaps = () => keys.ForEach(kvp => targetPackage.ReplaceResource(kvp.Key, kvp.Value));
+            }
+            else
+            {
+                // There is no _KEY at all, so we do nothing
+                targetAddInstance = (i, value) => { };
+                targetCommitNameMaps = () => { };
+            }
+            #endregion
+
+            AskCommit();
+
+            foreach (var rk in currentPackage
+                .FindAll(x => x.ResourceType == STBL && (x.Instance & 0x00FFFFFFFFFFFFFF) == STBLGroupKey.Key.Instance))
+            {
+                var stbl = new StblResource.StblResource(0, ((APackage)currentPackage).GetResource(rk));
+
+                targetPackage.AddResource(rk, stbl.Stream, true);
+                targetAddInstance(rk.Instance, "Strings_" + locales[(int)(rk.Instance >> 56)].Replace(' ', '_') + "_" + rk.Instance.ToString("x"));
+            }
+
+            targetCommitNameMaps();
+            targetPackage.SavePackage();
         }
 
         private void exportLanguageToolStripMenuItem_Click(object sender, EventArgs e)
@@ -651,7 +746,7 @@ under certain conditions; see Help->Licence for details.
                 , copyright
                 , Version.CurrentVersion
                 , Version.LibraryVersion
-                ), "S3Translate");
+                ), myName);
         }
         #endregion
 
@@ -867,21 +962,21 @@ under certain conditions; see Help->Licence for details.
 Copyright 2009 Jonathan Haas
 Copyright (C) 2010-2013 by Peter L Jones
 
-s3translate is free software: you can redistribute it and/or modify
+" + myName + @" is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published
 by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
 
-s3translate is distributed in the hope that it will be useful, but
+" + myName + @" is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public
-License along with s3translate.
+License along with " + myName + @".
 If not, see <http://www.gnu.org/licenses/>.
 
-s3translate uses the s3pi libraries by Peter L Jones (pljones@users.sf.net)
+" + myName + @" uses the s3pi libraries by Peter L Jones (pljones@users.sf.net)
 For details visit http://sourceforge.net/projects/s3pi/" + (accept ? @"
 
 Do you accept this licence?" : ""),
@@ -1011,14 +1106,20 @@ Do you accept this licence?" : ""),
             ClosePackage();
 
             fileName = path;
-            currentPackage = Package.OpenPackage(0, path, true);
+            try
+            {
+                currentPackage = Package.OpenPackage(0, path, true);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not open package.\nPackage: " + path + "\nError:\n" + ex.Message,
+                    "Open", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             if (StringTables.Count == 0)
             {
-                MessageBox.Show("There are no STBLs in the chosen package. It is not translateable using this tool.");
-                ClosePackage();
-                fileName = "";
-                return;
+                MessageBox.Show("There are no STBLs in the selected package.", "Open", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
@@ -1081,8 +1182,6 @@ Do you accept this licence?" : ""),
                     StringTables[stblGroupKey].Add(language, new StblResource.StblResource(0, ((APackage)currentPackage).GetResource(res)));
                 }
             }
-
-            mergeAllSetsToolStripMenuItem.Enabled = (cmbSetPicker.Items.Count > 1);
 
             if (cmbSetPicker.Items.Count > 0)
                 cmbSetPicker.SelectedIndex = 0;
