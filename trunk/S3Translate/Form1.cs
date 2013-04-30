@@ -989,7 +989,7 @@ Do you accept this licence?" : ""),
             comboBox_SetPicker.SelectedIndex = -1;
             comboBox_SetPicker.Items.Clear();
             StringTables.Clear();
-
+            mergeAllSetsToolStripMenuItem.Enabled = false;
 
             if (currentPackage == null)
                 return;
@@ -1022,7 +1022,7 @@ Do you accept this licence?" : ""),
                 }
             }
 
-            mergeAllSetsToolStripMenuItem.Enabled = btnMergeSets.Enabled = (comboBox_SetPicker.Items.Count > 1);
+            mergeAllSetsToolStripMenuItem.Enabled = (comboBox_SetPicker.Items.Count > 1);
 
             if (comboBox_SetPicker.Items.Count > 0)
                 comboBox_SetPicker.SelectedIndex = 0;
