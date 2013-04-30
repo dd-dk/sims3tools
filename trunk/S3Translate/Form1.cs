@@ -144,17 +144,32 @@ namespace S3Translate
                 btnSetToAll.Enabled = btnSetToTarget.Enabled = tlpFind.Enabled = currentPackage != null;
             });
 
-            comboBox_SetPicker.SelectedIndexChanged += new EventHandler((sender, e) => { AskCommit(); btnAddString.Enabled = comboBox_SetPicker.SelectedIndex >= 0; ReloadStrings(); });
+            comboBox_SetPicker.SelectedIndexChanged += new EventHandler((sender, e) => {
+                AskCommit();
+                btnAddString.Enabled = comboBox_SetPicker.SelectedIndex >= 0;
+                ReloadStrings();
+            });
 
             sourceLang = Settings.Default.SourceLocale;
-            lstStrings.Columns[0].Text = "Source: " + cmbSourceLang.Text;
-            cmbSourceLang.SelectedIndexChanged += new EventHandler((sender, e) => { sourceLang = cmbSourceLang.SelectedIndex; lstStrings.Columns[0].Text = "Source: " + cmbSourceLang.Text; ReloadStrings(); });
+            lstStrings.Columns[1].Text = "Source: " + cmbSourceLang.Text;
+            cmbSourceLang.SelectedIndexChanged += new EventHandler((sender, e) => {
+                sourceLang = cmbSourceLang.SelectedIndex;
+                lstStrings.Columns[1].Text = "Source: " + cmbSourceLang.Text;
+                ReloadStrings();
+            });
 
             targetLang = Settings.Default.UserLocale;
-            lstStrings.Columns[1].Text = "Target: " + cmbTargetLang.Text;
-            cmbTargetLang.SelectedIndexChanged += new EventHandler((sender, e) => { targetLang = cmbTargetLang.SelectedIndex; lstStrings.Columns[1].Text = "Target: " + cmbTargetLang.Text; ReloadStrings(); });
+            lstStrings.Columns[2].Text = "Target: " + cmbTargetLang.Text;
+            cmbTargetLang.SelectedIndexChanged += new EventHandler((sender, e) => {
+                targetLang = cmbTargetLang.SelectedIndex;
+                lstStrings.Columns[2].Text = "Target: " + cmbTargetLang.Text;
+                ReloadStrings();
+            });
 
-            lstStrings.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler((sender, e) => { AskCommit(); SelectStrings(); });
+            lstStrings.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler((sender, e) => {
+                AskCommit();
+                SelectStrings();
+            });
 
             btnCommit.Click += new EventHandler((sender, e) => { CommitText(); });
         }
@@ -169,15 +184,10 @@ namespace S3Translate
         #region File menu
         private void fileToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
         {
-            bool isopen = (_currentPackage != null);
             closeToolStripMenuItem.Enabled =
                 savePackageAsToolStripMenuItem.Enabled =
                 savePackageToolStripMenuItem.Enabled =
-                importFromPackageToolStripMenuItem.Enabled =
-                importFromSTBLFileToolStripMenuItem.Enabled =
-                exportToPackageToolStripMenuItem.Enabled =
-                exportToSTBLFileToolStripMenuItem.Enabled =
-                isopen;
+                (_currentPackage != null);
             savePackageToolStripMenuItem.Enabled = savePackageToolStripMenuItem.Enabled && pkgIsDirty;
         }
 
@@ -430,6 +440,26 @@ namespace S3Translate
 
             ClosePackage();
             Application.Exit();
+        }
+        #endregion
+
+        #region STBL menu
+        private void sTBLsToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            createNewSetToolStripMenuItem.Enabled =
+                deleteSetToolStripMenuItem.Enabled =
+                importFromPackageToolStripMenuItem.Enabled =
+                importFromSTBLFileToolStripMenuItem.Enabled =
+                exportToPackageToolStripMenuItem.Enabled =
+                exportToSTBLFileToolStripMenuItem.Enabled =
+                (_currentPackage != null);
+
+            mergeAllSetsToolStripMenuItem.Enabled = comboBox_SetPicker.Items.Count > 1;
+        }
+
+        private void exportToPackageToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Hello world");
         }
         #endregion
 
@@ -696,50 +726,28 @@ under certain conditions; see Help->Licence for details.
         {
             AskCommit();
 
-            var instance = (ulong)txtInstance.Tag;
+            var guid = (ulong)txtInstance.Tag;
 
-            for (var i = 0; i < locales.Count; i++)
-                if (StringTables[STBLGroupKey.Key].ContainsKey(i) && StringTables[STBLGroupKey.Key][i].ContainsKey(instance))
-                    StringTables[STBLGroupKey.Key][i].Remove(instance);
+            foreach (var locale in StringTables[STBLGroupKey.Key].Keys)
+            {
+                var stbl = StringTables[STBLGroupKey.Key][locale];
+                stbl.Remove(guid);
+                commitLocaleInSet(locale, STBLGroupKey.Key, stbl);
+            }
 
             pkgIsDirty = true;
             ReloadStrings();
             SelectStrings();
         }
 
+        private void btnChangeGUID_Click(object sender, EventArgs e)
+        {
+            EditAddGUID((ulong)txtInstance.Tag);
+        }
+
         private void btnAddString_Click(object sender, EventArgs e)
         {
-            AskCommit();
-
-            AddInstance ag = new AddInstance();
-            if (ag.ShowDialog() != DialogResult.OK) return;
-
-            ulong guid = ag.Instance;
-
-            #region Check for duplicate
-            for (var i = 0; i < locales.Count; i++)
-                if (StringTables[STBLGroupKey.Key].ContainsKey(i))
-                    {
-                        for (var j = 0; j < lstStrings.Items.Count; j++)
-                        {
-                            if (((ulong)lstStrings.Items[j].Tag) == guid)
-                            {
-                                MessageBox.Show(String.Format("GUID 0x{0:X16} already present.", guid), "Cannot add GUID", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                                lstStrings.SelectedIndices.Clear();
-                                lstStrings.SelectedIndices.Add(j);
-                                return;
-                            }
-                        }
-                    }
-            #endregion
-
-            for (var i = 0; i < locales.Count; i++)
-                if (StringTables[STBLGroupKey.Key].ContainsKey(i))
-                    StringTables[STBLGroupKey.Key][i].Add(new KeyValuePair<ulong, string>(guid, ""));
-
-            pkgIsDirty = true;
-            ReloadStrings();
-            SelectStrings();
+            EditAddGUID(0);
         }
 
         private void ckbAutoCommit_CheckedChanged(object sender, EventArgs e)
@@ -767,11 +775,11 @@ under certain conditions; see Help->Licence for details.
             _stringToTarget(STBLGroupKey.Key, source, targetLang);
 
             pkgIsDirty = true;
-            lstStrings.SelectedItems[0].SubItems[1].Text = lstStrings.SelectedItems[0].SubItems[0].Text;
+            lstStrings.SelectedItems[0].SubItems[2].Text = lstStrings.SelectedItems[0].SubItems[1].Text;
             try
             {
                 inChangeHandler = true;
-                txtTarget.Text = lstStrings.SelectedItems[0].SubItems[0].Text;
+                txtTarget.Text = lstStrings.SelectedItems[0].SubItems[1].Text;
             }
             finally { inChangeHandler = false; }
         }
@@ -795,11 +803,11 @@ under certain conditions; see Help->Licence for details.
                 _stringToTarget(STBLGroupKey.Key, source, i);
 
             pkgIsDirty = true;
-            lstStrings.SelectedItems[0].SubItems[1].Text = lstStrings.SelectedItems[0].SubItems[0].Text;
+            lstStrings.SelectedItems[0].SubItems[2].Text = lstStrings.SelectedItems[0].SubItems[1].Text;
             try
             {
                 inChangeHandler = true;
-                txtTarget.Text = lstStrings.SelectedItems[0].SubItems[0].Text;
+                txtTarget.Text = lstStrings.SelectedItems[0].SubItems[1].Text;
             }
             finally { inChangeHandler = false; }
         }
@@ -900,6 +908,7 @@ Do you accept this licence?" : ""),
         bool AskSavePackage()
         {
             AskCommit();
+
             if (pkgIsDirty)
             {
                 var r = MessageBox.Show("Save changes before closing file?", "Save Package", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
@@ -1082,9 +1091,9 @@ Do you accept this licence?" : ""),
         ListViewItem CreateLVIStrings(StblResource.StblResource src, StblResource.StblResource tgt, ulong item)
         {
             return new ListViewItem(new string[] {
+                "0x" + item.ToString("X16"),
                 src.ContainsKey(item) ? src[item] : "",
-                tgt.ContainsKey(item) ? tgt[item] : "",
-                "0x" + item.ToString("X16")
+                tgt.ContainsKey(item) ? tgt[item] : ""
             }) { Tag = item, UseItemStyleForSubItems = false };
         }
 
@@ -1157,19 +1166,56 @@ Do you accept this licence?" : ""),
             }
 
             var text = txtSource.Text;
-            var instance = (ulong)txtInstance.Tag;
+            var guid = (ulong)txtInstance.Tag;
 
-            if (targetSTBL.ContainsKey(instance))
+            if (targetSTBL.ContainsKey(guid))
             {
-                if (targetSTBL[instance] == text)
+                if (targetSTBL[guid] == text)
                     return;
-                targetSTBL[instance] = text;
+                targetSTBL[guid] = text;
             }
             else
             {
-                targetSTBL.Add(instance, text);
+                targetSTBL.Add(guid, text);
             }
             _currentPackage.ReplaceResource(rie, targetSTBL);
+        }
+
+        void EditAddGUID(ulong orig)
+        {
+            AskCommit();
+
+            AddInstance ag = new AddInstance(orig);
+            if (ag.ShowDialog() != DialogResult.OK) return;
+
+            var guid = ag.Instance;
+            if (guid == 0 || guid == orig)
+                return;
+
+            // Check for duplicate before changing anything
+            if (StringTables[STBLGroupKey.Key].Any(kvp => kvp.Value.ContainsKey(guid)))
+            {
+                MessageBox.Show(String.Format("GUID 0x{0:X16} already present.", guid), "Cannot add GUID", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Now we are happy to start updating
+            foreach(var locale in StringTables[STBLGroupKey.Key].Keys)
+            {
+                var stbl = StringTables[STBLGroupKey.Key][locale];
+                var value = "";
+                if (orig != 0)
+                {
+                    value = StringTables[STBLGroupKey.Key][locale][orig];
+                    stbl.Remove(orig);
+                }
+                stbl.Add(guid, value);
+                commitLocaleInSet(locale, STBLGroupKey.Key, stbl);
+            }
+
+            pkgIsDirty = true;
+            ReloadStrings();
+            SelectStrings();
         }
 
         #region class RK
@@ -1211,17 +1257,18 @@ Do you accept this licence?" : ""),
                 inChangeHandler = true;
                 if (lstStrings.SelectedItems.Count != 1)
                 {
-                    txtSource.Text = txtTarget.Text = txtInstance.Text = "";
-                    btnStringToTarget.Enabled = btnStringToAll.Enabled = btnDelString.Enabled = txtTarget.Enabled = false;
+                    txtInstance.Text = "";
+                    txtSource.Text = txtTarget.Text = "";
+                    btnStringToTarget.Enabled = btnStringToAll.Enabled = btnDelString.Enabled = btnChangeGUID.Enabled = txtTarget.Enabled = false;
                     txtInstance.Tag = null;
                     return;
                 }
                 else
                 {
-                    txtSource.Text = lstStrings.SelectedItems[0].SubItems[0].Text;
-                    txtTarget.Text = lstStrings.SelectedItems[0].SubItems[1].Text;
-                    btnStringToTarget.Enabled = btnStringToAll.Enabled = btnDelString.Enabled = txtTarget.Enabled = true;
-                    txtInstance.Text = lstStrings.SelectedItems[0].SubItems[2].Text;
+                    txtInstance.Text = lstStrings.SelectedItems[0].SubItems[0].Text;
+                    txtSource.Text = lstStrings.SelectedItems[0].SubItems[1].Text;
+                    txtTarget.Text = lstStrings.SelectedItems[0].SubItems[2].Text;
+                    btnStringToTarget.Enabled = btnStringToAll.Enabled = btnDelString.Enabled = btnChangeGUID.Enabled = txtTarget.Enabled = true;
                     txtInstance.Tag = lstStrings.SelectedItems[0].Tag;
                 }
             }
@@ -1250,24 +1297,24 @@ Do you accept this licence?" : ""),
 
             var targetSTBL = StringTables[STBLGroupKey.Key][targetLang];
             var text = txtTarget.Text;
-            var instance = (ulong)txtInstance.Tag;
+            var guid = (ulong)txtInstance.Tag;
 
-            if (targetSTBL.ContainsKey(instance))
+            if (targetSTBL.ContainsKey(guid))
             {
-                if (targetSTBL[instance] == text)
+                if (targetSTBL[guid] == text)
                     return;
-                targetSTBL[instance] = text;
+                targetSTBL[guid] = text;
             }
             else
             {
-                targetSTBL.Add(instance, text);
+                targetSTBL.Add(guid, text);
             }
 
-            foreach (var item in lstStrings.Items.Cast<ListViewItem>().Where(x => ((ulong)x.Tag) == instance))
+            foreach (var item in lstStrings.Items.Cast<ListViewItem>().Where(x => ((ulong)x.Tag) == guid))
             {
-                item.SubItems[1].Text = text;
+                item.SubItems[2].Text = text;
                 if (sourceLang == targetLang)
-                    item.SubItems[0].Text = text;
+                    item.SubItems[1].Text = text;
             }
 
             if (sourceLang == targetLang)
@@ -1276,11 +1323,17 @@ Do you accept this licence?" : ""),
                     txtSource.Text = text;
                 }
 
-            IResourceKey rk = stblGroupKeyToRK(STBLGroupKey.Key, targetLang);
-            IResourceIndexEntry rie = _currentPackage.Find(x => x.Equals(rk));
-            _currentPackage.ReplaceResource(rie, targetSTBL);
+            commitLocaleInSet(targetLang, STBLGroupKey.Key, targetSTBL);
+
             pkgIsDirty = true;
             txtIsDirty = false;
+        }
+
+        void commitLocaleInSet(int lang, IResourceKey stblGroupKey, IResource targetSTBL)
+        {
+            IResourceKey rk = stblGroupKeyToRK(stblGroupKey, lang);
+            IResourceIndexEntry rie = _currentPackage.Find(x => x.Equals(rk));
+            _currentPackage.ReplaceResource(rie, targetSTBL);
         }
 
         private void findText(string text)
@@ -1294,17 +1347,17 @@ Do you accept this licence?" : ""),
                     if (!foundItems.Contains(i))
                         foundItems.Add(i);
                 }
+                if (i.SubItems[0].Text.Contains("0x" + FNV64.GetHash(text).ToString("X16")))
+                {
+                    if (!foundItems.Contains(i))
+                        foundItems.Add(i);
+                }
                 if (i.SubItems[1].Text.ToLower().Contains(text))
                 {
                     if (!foundItems.Contains(i))
                         foundItems.Add(i);
                 }
                 if (i.SubItems[2].Text.ToLower().Contains(text))
-                {
-                    if (!foundItems.Contains(i))
-                        foundItems.Add(i);
-                }
-                if (i.SubItems[2].Text.Contains("0x" + FNV64.GetHash(text).ToString("X16")))
                 {
                     if (!foundItems.Contains(i))
                         foundItems.Add(i);
