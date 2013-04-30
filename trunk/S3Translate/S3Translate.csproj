@@ -84,11 +84,11 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddInstance.cs">
+    <Compile Include="AddEditGUID.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AddInstance.Designer.cs">
-      <DependentUpon>AddInstance.cs</DependentUpon>
+    <Compile Include="AddEditGUID.Designer.cs">
+      <DependentUpon>AddEditGUID.cs</DependentUpon>
     </Compile>
     <Compile Include="Export.cs">
       <SubType>Form</SubType>
@@ -104,8 +104,8 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="AddInstance.resx">
-      <DependentUpon>AddInstance.cs</DependentUpon>
+    <EmbeddedResource Include="AddEditGUID.resx">
+      <DependentUpon>AddEditGUID.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Export.resx">
       <DependentUpon>Export.cs</DependentUpon>
