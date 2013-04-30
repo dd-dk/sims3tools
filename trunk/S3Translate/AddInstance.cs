@@ -26,19 +26,21 @@ using System.Windows.Forms;
 
 namespace S3Translate
 {
-    public partial class AddInstance : Form
+    public partial class AddEditGUID : Form
     {
-        public AddInstance()
+        public AddEditGUID()
         {
             InitializeComponent();
         }
 
-        public AddInstance(ulong guid) : this()
+        public AddEditGUID(ulong GUID) : this()
         {
-            tbInstance.Text = "0x" + guid.ToString("X16");
+            this.Text = GUID == 0 ? "Add GUID" : "Edit GUID";
+            textBox_StringToHash.Text = "";
+            tbInstance.Text = "0x" + GUID.ToString("X16");
         }
 
-        private void AddGUID_Shown(object sender, EventArgs e)
+        private void AddEditGUID_Shown(object sender, EventArgs e)
         {
             tbInstance.Focus();
             tbInstance.SelectAll();
@@ -59,7 +61,7 @@ namespace S3Translate
             tbInstance.Text = "0x" + hash.ToString("X16");
         }
 
-        public ulong Instance
+        public ulong GUID
         {
             get
             {
