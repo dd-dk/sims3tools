@@ -96,10 +96,10 @@ namespace S3Translate
         {
             get
             {
-                if (comboBox_SetPicker.SelectedIndex < 0)
+                if (cmbSetPicker.SelectedIndex < 0)
                     return default(KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>);
 
-                ulong stblGroupKeyInstance = Convert.ToUInt64(comboBox_SetPicker.SelectedItem.ToString().Substring(4), 16);
+                ulong stblGroupKeyInstance = Convert.ToUInt64(cmbSetPicker.SelectedItem.ToString().Substring(4), 16);
                 var stblgroup = StringTables.Where(x => x.Key.Instance == stblGroupKeyInstance).First();
                 return stblgroup;
             }
@@ -133,7 +133,7 @@ namespace S3Translate
             {
                 new SettingsDialog().ShowDialog();
             }
-            
+
             FileNameChanged += new EventHandler((sender, e) => SetFormTitle());
 
             CurrentPackageChanged += new EventHandler((sender, e) =>
@@ -144,9 +144,9 @@ namespace S3Translate
                 btnSetToAll.Enabled = btnSetToTarget.Enabled = tlpFind.Enabled = currentPackage != null;
             });
 
-            comboBox_SetPicker.SelectedIndexChanged += new EventHandler((sender, e) => {
+            cmbSetPicker.SelectedIndexChanged += new EventHandler((sender, e) => {
                 AskCommit();
-                btnAddString.Enabled = comboBox_SetPicker.SelectedIndex >= 0;
+                btnAddString.Enabled = cmbSetPicker.SelectedIndex >= 0;
                 ReloadStrings();
             });
 
@@ -454,7 +454,7 @@ namespace S3Translate
                 exportToSTBLFileToolStripMenuItem.Enabled =
                 (_currentPackage != null);
 
-            mergeAllSetsToolStripMenuItem.Enabled = comboBox_SetPicker.Items.Count > 1;
+            mergeAllSetsToolStripMenuItem.Enabled = cmbSetPicker.Items.Count > 1;
         }
 
         private void exportToPackageToolStripMenuItem_Click(object sender, EventArgs e)
@@ -723,7 +723,7 @@ under certain conditions; see Help->Licence for details.
         {
             AskCommit();
 
-            var guid = (ulong)txtInstance.Tag;
+            var guid = (ulong)tbGUID.Tag;
 
             foreach (var locale in StringTables[STBLGroupKey.Key].Keys)
             {
@@ -739,7 +739,7 @@ under certain conditions; see Help->Licence for details.
 
         private void btnChangeGUID_Click(object sender, EventArgs e)
         {
-            EditAddGUID((ulong)txtInstance.Tag);
+            EditAddGUID((ulong)tbGUID.Tag);
         }
 
         private void btnAddString_Click(object sender, EventArgs e)
@@ -960,8 +960,8 @@ Do you accept this licence?" : ""),
         {
             lstStrings.SelectedIndices.Clear();
             lstStrings.Items.Clear();
-            comboBox_SetPicker.SelectedIndex = -1;
-            comboBox_SetPicker.Items.Clear();
+            cmbSetPicker.SelectedIndex = -1;
+            cmbSetPicker.Items.Clear();
             StringTables.Clear();
             mergeAllSetsToolStripMenuItem.Enabled = false;
 
@@ -982,7 +982,7 @@ Do you accept this licence?" : ""),
             foreach (var stblGroupKey in stblGroupKeys)
             {
                 StringTables.Add(stblGroupKey, new Dictionary<int, StblResource.StblResource>());
-                comboBox_SetPicker.Items.Add("0x__" + stblGroupKey.Instance.ToString("X14"));
+                cmbSetPicker.Items.Add("0x__" + stblGroupKey.Instance.ToString("X14"));
 
                 var languages = stbls
                     .Where(x => x.Item1.Equals(stblGroupKey))
@@ -996,10 +996,10 @@ Do you accept this licence?" : ""),
                 }
             }
 
-            mergeAllSetsToolStripMenuItem.Enabled = (comboBox_SetPicker.Items.Count > 1);
+            mergeAllSetsToolStripMenuItem.Enabled = (cmbSetPicker.Items.Count > 1);
 
-            if (comboBox_SetPicker.Items.Count > 0)
-                comboBox_SetPicker.SelectedIndex = 0;
+            if (cmbSetPicker.Items.Count > 0)
+                cmbSetPicker.SelectedIndex = 0;
         }
 
         private void ReloadStrings()
@@ -1011,7 +1011,7 @@ Do you accept this licence?" : ""),
                 lstStrings.SelectedIndices.Clear();
                 lstStrings.Items.Clear();
 
-                if (comboBox_SetPicker.SelectedIndex == -1)
+                if (cmbSetPicker.SelectedIndex == -1)
                     return;
 
                 if (!StringTables[STBLGroupKey.Key].ContainsKey(sourceLang))
@@ -1163,7 +1163,7 @@ Do you accept this licence?" : ""),
             }
 
             var text = txtSource.Text;
-            var guid = (ulong)txtInstance.Tag;
+            var guid = (ulong)tbGUID.Tag;
 
             if (targetSTBL.ContainsKey(guid))
             {
@@ -1254,19 +1254,19 @@ Do you accept this licence?" : ""),
                 inChangeHandler = true;
                 if (lstStrings.SelectedItems.Count != 1)
                 {
-                    txtInstance.Text = "";
+                    tbGUID.Text = "";
                     txtSource.Text = txtTarget.Text = "";
                     btnStringToTarget.Enabled = btnStringToAll.Enabled = btnDelString.Enabled = btnChangeGUID.Enabled = txtTarget.Enabled = false;
-                    txtInstance.Tag = null;
+                    tbGUID.Tag = null;
                     return;
                 }
                 else
                 {
-                    txtInstance.Text = lstStrings.SelectedItems[0].SubItems[0].Text;
+                    tbGUID.Text = lstStrings.SelectedItems[0].SubItems[0].Text;
                     txtSource.Text = lstStrings.SelectedItems[0].SubItems[1].Text;
                     txtTarget.Text = lstStrings.SelectedItems[0].SubItems[2].Text;
                     btnStringToTarget.Enabled = btnStringToAll.Enabled = btnDelString.Enabled = btnChangeGUID.Enabled = txtTarget.Enabled = true;
-                    txtInstance.Tag = lstStrings.SelectedItems[0].Tag;
+                    tbGUID.Tag = lstStrings.SelectedItems[0].Tag;
                 }
             }
             finally { inChangeHandler = false; }
@@ -1299,7 +1299,7 @@ Do you accept this licence?" : ""),
 
             var targetSTBL = StringTables[STBLGroupKey.Key][targetLang];
             var text = txtTarget.Text;
-            var guid = (ulong)txtInstance.Tag;
+            var guid = (ulong)tbGUID.Tag;
 
             if (targetSTBL.ContainsKey(guid))
             {
