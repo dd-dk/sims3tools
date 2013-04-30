@@ -36,7 +36,7 @@ namespace S3Translate
         public AddEditGUID(ulong GUID) : this()
         {
             this.Text = GUID == 0 ? "Add GUID" : "Edit GUID";
-            textBox_StringToHash.Text = "";
+            tbStringToHash.Text = "";
             tbInstance.Text = "0x" + GUID.ToString("X16");
         }
 
@@ -46,12 +46,12 @@ namespace S3Translate
             tbInstance.SelectAll();
         }
 
-        private void btnFNV_Click(object sender, EventArgs e)
+        private void btnGenerate_Click(object sender, EventArgs e)
         {
             string toHash;
-            if (textBox_StringToHash.Text.Trim().Length > 0)
+            if (tbStringToHash.Text.Trim().Length > 0)
             {
-                toHash = textBox_StringToHash.Text;
+                toHash = tbStringToHash.Text;
             }
             else
             {

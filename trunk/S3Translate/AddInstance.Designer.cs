@@ -29,15 +29,15 @@
         private void InitializeComponent()
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.label1 = new System.Windows.Forms.Label();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.tbStringToHash = new System.Windows.Forms.TextBox();
             this.tbInstance = new System.Windows.Forms.TextBox();
-            this.btnFNV = new System.Windows.Forms.Button();
-            this.textBox_StringToHash = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.btnGenerate = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -110,10 +110,10 @@
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel3.Controls.Add(this.label1, 0, 0);
-            this.tableLayoutPanel3.Controls.Add(this.textBox_StringToHash, 1, 0);
+            this.tableLayoutPanel3.Controls.Add(this.tbStringToHash, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.tbInstance, 1, 1);
             this.tableLayoutPanel3.Controls.Add(this.label2, 0, 1);
-            this.tableLayoutPanel3.Controls.Add(this.btnFNV, 2, 1);
+            this.tableLayoutPanel3.Controls.Add(this.btnGenerate, 2, 1);
             this.tableLayoutPanel3.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 2;
@@ -133,15 +133,15 @@
             this.label1.Text = "Text to hash:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // textBox_StringToHash
+            // tbStringToHash
             // 
-            this.textBox_StringToHash.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel3.SetColumnSpan(this.textBox_StringToHash, 2);
-            this.textBox_StringToHash.Location = new System.Drawing.Point(96, 3);
-            this.textBox_StringToHash.Name = "textBox_StringToHash";
-            this.textBox_StringToHash.Size = new System.Drawing.Size(480, 20);
-            this.textBox_StringToHash.TabIndex = 4;
-            this.textBox_StringToHash.Text = "WxWWWWWWWWWWWWWWWW";
+            this.tbStringToHash.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.tableLayoutPanel3.SetColumnSpan(this.tbStringToHash, 2);
+            this.tbStringToHash.Location = new System.Drawing.Point(96, 3);
+            this.tbStringToHash.Name = "tbStringToHash";
+            this.tbStringToHash.Size = new System.Drawing.Size(480, 20);
+            this.tbStringToHash.TabIndex = 4;
+            this.tbStringToHash.Text = "WxWWWWWWWWWWWWWWWW";
             // 
             // tbInstance
             // 
@@ -165,16 +165,16 @@
             this.label2.Text = "GUID as number:";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // btnFNV
+            // btnGenerate
             // 
-            this.btnFNV.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnFNV.Location = new System.Drawing.Point(501, 29);
-            this.btnFNV.Name = "btnFNV";
-            this.btnFNV.Size = new System.Drawing.Size(75, 23);
-            this.btnFNV.TabIndex = 3;
-            this.btnFNV.Text = "&Generate";
-            this.btnFNV.UseVisualStyleBackColor = true;
-            this.btnFNV.Click += new System.EventHandler(this.btnFNV_Click);
+            this.btnGenerate.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnGenerate.Location = new System.Drawing.Point(501, 29);
+            this.btnGenerate.Name = "btnGenerate";
+            this.btnGenerate.Size = new System.Drawing.Size(75, 23);
+            this.btnGenerate.TabIndex = 3;
+            this.btnGenerate.Text = "&Generate";
+            this.btnGenerate.UseVisualStyleBackColor = true;
+            this.btnGenerate.Click += new System.EventHandler(this.btnGenerate_Click);
             // 
             // AddEditGUID
             // 
@@ -206,8 +206,8 @@
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.TextBox tbInstance;
-        private System.Windows.Forms.Button btnFNV;
-        private System.Windows.Forms.TextBox textBox_StringToHash;
+        private System.Windows.Forms.Button btnGenerate;
+        private System.Windows.Forms.TextBox tbStringToHash;
         private System.Windows.Forms.Label label2;
     }
 }
