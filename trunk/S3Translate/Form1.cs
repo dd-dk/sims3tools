@@ -96,10 +96,10 @@ namespace S3Translate
         {
             get
             {
-                if (combobox_StringSet.SelectedIndex < 0)
+                if (comboBox_SetPicker.SelectedIndex < 0)
                     return default(KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>);
 
-                ulong stblGroupKeyInstance = Convert.ToUInt64(combobox_StringSet.SelectedItem.ToString().Substring(4), 16);
+                ulong stblGroupKeyInstance = Convert.ToUInt64(comboBox_SetPicker.SelectedItem.ToString().Substring(4), 16);
                 var stblgroup = StringTables.Where(x => x.Key.Instance == stblGroupKeyInstance).First();
                 return stblgroup;
             }
@@ -134,6 +134,8 @@ namespace S3Translate
                 new SettingsDialog().ShowDialog();
             }
 
+            ClosePackage();
+            
             FileNameChanged += new EventHandler((sender, e) => SetFormTitle());
 
             CurrentPackageChanged += new EventHandler((sender, e) =>
@@ -144,7 +146,7 @@ namespace S3Translate
                 btnSetToAll.Enabled = btnSetToTarget.Enabled = tlpFind.Enabled = currentPackage != null;
             });
 
-            combobox_StringSet.SelectedIndexChanged += new EventHandler((sender, e) => { AskCommit(); btnAddString.Enabled = combobox_StringSet.SelectedIndex >= 0; ReloadStrings(); });
+            comboBox_SetPicker.SelectedIndexChanged += new EventHandler((sender, e) => { AskCommit(); btnAddString.Enabled = comboBox_SetPicker.SelectedIndex >= 0; ReloadStrings(); });
 
             sourceLang = Settings.Default.SourceLocale;
             lstStrings.Columns[0].Text = "Source: " + cmbSourceLang.Text;
@@ -920,6 +922,22 @@ Do you accept this licence?" : ""),
             fileName = path;
             currentPackage = Package.OpenPackage(0, path, true);
 
+            closeToolStripMenuItem.Enabled =
+                savePackageToolStripMenuItem.Enabled =
+                savePackageAsToolStripMenuItem.Enabled =
+                true;
+
+            importPackageToolStripMenuItem.Enabled =
+                importSTBLToolStripMenuItem.Enabled =
+                exportLanguageToolStripMenuItem.Enabled =
+                true;
+
+            importFromPackageToolStripMenuItem.Enabled =
+                importFromSTBLFileToolStripMenuItem.Enabled =
+                exportToPackageToolStripMenuItem.Enabled =
+                exportToSTBLFileToolStripMenuItem.Enabled =
+                true;
+
             if (StringTables.Count == 0)
             {
                 MessageBox.Show("There are no STBLs in the chosen package. It is not translateable using this tool.");
@@ -935,6 +953,21 @@ Do you accept this licence?" : ""),
                 Package.ClosePackage(0, _currentPackage);
 
             currentPackage = null;
+            closeToolStripMenuItem.Enabled =
+                savePackageToolStripMenuItem.Enabled =
+                savePackageAsToolStripMenuItem.Enabled =
+                false;
+
+            importPackageToolStripMenuItem.Enabled =
+                importSTBLToolStripMenuItem.Enabled =
+                exportLanguageToolStripMenuItem.Enabled =
+                false;
+
+            importFromPackageToolStripMenuItem.Enabled =
+                importFromSTBLFileToolStripMenuItem.Enabled =
+                exportToPackageToolStripMenuItem.Enabled =
+                exportToSTBLFileToolStripMenuItem.Enabled =
+                false;
         }
 
 
@@ -953,8 +986,8 @@ Do you accept this licence?" : ""),
         {
             lstStrings.SelectedIndices.Clear();
             lstStrings.Items.Clear();
-            combobox_StringSet.SelectedIndex = -1;
-            combobox_StringSet.Items.Clear();
+            comboBox_SetPicker.SelectedIndex = -1;
+            comboBox_SetPicker.Items.Clear();
             StringTables.Clear();
 
 
@@ -975,7 +1008,7 @@ Do you accept this licence?" : ""),
             foreach (var stblGroupKey in stblGroupKeys)
             {
                 StringTables.Add(stblGroupKey, new Dictionary<int, StblResource.StblResource>());
-                combobox_StringSet.Items.Add("0x__" + stblGroupKey.Instance.ToString("X14"));
+                comboBox_SetPicker.Items.Add("0x__" + stblGroupKey.Instance.ToString("X14"));
 
                 var languages = stbls
                     .Where(x => x.Item1.Equals(stblGroupKey))
@@ -989,10 +1022,10 @@ Do you accept this licence?" : ""),
                 }
             }
 
-            mergeAllSetsToolStripMenuItem.Enabled = btnMergeSets.Enabled = (combobox_StringSet.Items.Count > 1);
+            mergeAllSetsToolStripMenuItem.Enabled = btnMergeSets.Enabled = (comboBox_SetPicker.Items.Count > 1);
 
-            if (combobox_StringSet.Items.Count > 0)
-                combobox_StringSet.SelectedIndex = 0;
+            if (comboBox_SetPicker.Items.Count > 0)
+                comboBox_SetPicker.SelectedIndex = 0;
         }
 
         private void ReloadStrings()
@@ -1004,7 +1037,7 @@ Do you accept this licence?" : ""),
                 lstStrings.SelectedIndices.Clear();
                 lstStrings.Items.Clear();
 
-                if (combobox_StringSet.SelectedIndex == -1)
+                if (comboBox_SetPicker.SelectedIndex == -1)
                     return;
 
                 if (!StringTables[STBLGroupKey.Key].ContainsKey(sourceLang))
