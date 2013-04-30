@@ -147,7 +147,7 @@ namespace S3Translate
             CurrentPackageChanged += new EventHandler((sender, e) => packageChangeHandler());
 
             cmbSetPicker.SelectedIndexChanged += new EventHandler((sender, e) => {
-                AskCommit();
+                lstStrings.SelectedIndices.Clear();
                 btnAddString.Enabled = cmbSetPicker.SelectedIndex >= 0;
                 ReloadStrings();
             });
@@ -293,7 +293,6 @@ namespace S3Translate
             cmbSetPicker.SelectedIndex = i;
 
             ReloadStrings();
-            SelectStrings();
         }
 
         private void deleteSetToolStripMenuItem_Click(object sender, EventArgs e)
@@ -318,8 +317,6 @@ namespace S3Translate
             pkgIsDirty = true;
 
             ReloadStringTables();
-            ReloadStrings();
-            SelectStrings();
         }
 
         private void importPackageToolStripMenuItem_Click(object sender, EventArgs e)
@@ -341,39 +338,6 @@ namespace S3Translate
                 MessageBox.Show("The selected package contains no STBLs.", myName, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-            #endregion
-
-            #region Get the languages
-            //bool all = true;
-            //
-            //List<byte> lb = new List<byte>();
-            //foreach (var rie in lrie) { byte x = (byte)(rie.Instance >> 56); if (!lb.Contains(x)) lb.Add(x); }
-            //if (lb.Count > 1)
-            //{
-            //    DialogResult dr = MessageBox.Show("Import all languages?", "Import", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
-            //    if (dr == DialogResult.Cancel) return;
-            //    all = dr == DialogResult.Yes;
-            //}
-            //
-            //if (!all)
-            //{
-            //    var imp = new Export() { Text = "Import" };
-            //    for (byte i = 0; i < locales.Count; i++)
-            //        imp.checkList.SetItemChecked(i, lb.Contains(i));
-            //
-            //    if (imp.ShowDialog() != DialogResult.OK) return;
-            //
-            //    lb.Clear();
-            //    foreach (int i in imp.checkList.CheckedIndices)
-            //        lb.Add((byte)i);
-            //
-            //    lrie = new List<IResourceIndexEntry>(importFrom.FindAll(x => x.ResourceType == STBL && lb.Contains((byte)(x.Instance >> 56))));
-            //    if (lrie.Count == 0)
-            //    {
-            //        MessageBox.Show("No languages selected.", "Import", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            //        return;
-            //    }
-            //}
             #endregion
 
             #region Check for duplicates
@@ -702,8 +666,6 @@ namespace S3Translate
             pkgIsDirty = true;
 
             ReloadStringTables();
-            ReloadStrings();
-            SelectStrings();
         }
         #endregion
 
@@ -779,7 +741,6 @@ under certain conditions; see Help->Licence for details.
             pkgIsDirty = true;
 
             ReloadStrings();
-            SelectStrings();
         }
 
         private void btnSetToAll_Click(object sender, EventArgs e)
@@ -804,7 +765,6 @@ under certain conditions; see Help->Licence for details.
             pkgIsDirty = true;
 
             ReloadStrings();
-            SelectStrings();
         }
 
         private void btnFindFirst_Click(object sender, EventArgs e)
@@ -852,7 +812,6 @@ under certain conditions; see Help->Licence for details.
 
             pkgIsDirty = true;
             ReloadStrings();
-            SelectStrings();
         }
 
         private void btnChangeGUID_Click(object sender, EventArgs e)
@@ -1150,7 +1109,6 @@ Do you accept this licence?" : ""),
             cmbSetPicker.SelectedIndex = -1;
             cmbSetPicker.Items.Clear();
             StringTables.Clear();
-            mergeAllSetsToolStripMenuItem.Enabled = false;
 
             if (currentPackage == null)
                 return;
@@ -1365,10 +1323,9 @@ Do you accept this licence?" : ""),
 
         void EditAddGUID(ulong orig)
         {
-            AskCommit();
-
             AddEditGUID ag = new AddEditGUID(orig);
-            if (ag.ShowDialog() != DialogResult.OK) return;
+            if (ag.ShowDialog() != DialogResult.OK)
+                return;
 
             var guid = ag.GUID;
             if (guid == 0 || guid == orig)
@@ -1382,6 +1339,9 @@ Do you accept this licence?" : ""),
             }
 
             // Now we are happy to start updating
+            if (orig == 0)
+                lstStrings.SelectedIndices.Clear();
+
             foreach(var locale in StringTables[STBLGroupKey.Key].Keys)
             {
                 var stbl = StringTables[STBLGroupKey.Key][locale];
@@ -1397,7 +1357,18 @@ Do you accept this licence?" : ""),
 
             pkgIsDirty = true;
             ReloadStrings();
-            SelectStrings();
+
+            // If we added one, select it
+            if (orig == 0)
+            {
+                lstStrings.SelectedIndices.Clear();
+                var res = lstStrings.Items.Cast<ListViewItem>().Where(x => x.SubItems[0].Text == "0x" + guid.ToString("X16")).SingleOrDefault();
+                if (res != null)
+                {
+                    res.Selected = true;
+                    res.EnsureVisible();
+                }
+            }
         }
 
         #region class RK
