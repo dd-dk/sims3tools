@@ -31,7 +31,11 @@ namespace S3Translate
         public AddInstance()
         {
             InitializeComponent();
-            tbInstance.Text = "0x" + 0.ToString("X16");
+        }
+
+        public AddInstance(ulong guid) : this()
+        {
+            tbInstance.Text = "0x" + guid.ToString("X16");
         }
 
         private void AddGUID_Shown(object sender, EventArgs e)
@@ -42,7 +46,16 @@ namespace S3Translate
 
         private void btnFNV_Click(object sender, EventArgs e)
         {
-            ulong hash = System.Security.Cryptography.FNV64.GetHash(Environment.UserName + DateTime.Now.ToBinary().ToString());
+            string toHash;
+            if (textBox_StringToHash.Text.Trim().Length > 0)
+            {
+                toHash = textBox_StringToHash.Text;
+            }
+            else
+            {
+                toHash = Environment.UserName + DateTime.Now.ToBinary().ToString();
+            }
+            ulong hash = System.Security.Cryptography.FNV64.GetHash(toHash);
             tbInstance.Text = "0x" + hash.ToString("X16");
         }
 
