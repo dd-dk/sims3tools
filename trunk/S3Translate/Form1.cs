@@ -66,6 +66,11 @@ namespace S3Translate
         #endregion
 
 
+        private const string myName = "Sims 3 Translate";
+        private const string packageFilter = "Sims 3 Packages|*.package|All Files|*.*";
+        private const string stblFilter = "Exported String Tables|S3_220557DA_*.stbl|Any stbl (*.stbl)|*.stbl|All Files|*.*";
+        private const uint STBL = 0x220557DA;
+
         string _fname;
         EventHandler FileNameChanged;
         void OnFileNameChanged() { if (FileNameChanged != null) FileNameChanged(this, EventArgs.Empty); }
@@ -77,36 +82,45 @@ namespace S3Translate
         IPackage currentPackage { get { return _currentPackage; } set { if (_currentPackage != value) { _currentPackage = value; OnCurrentPackageChanged(); } } }
 
         private bool _pkgDirty;
-        private bool pkgIsDirty { get { return _pkgDirty; } set { _pkgDirty = value; SetText(); } }
+        private bool pkgIsDirty { get { return _pkgDirty; } set { _pkgDirty = value; SetFormTitle(); } }
+
+        private bool _txtDirty;
+        private bool txtIsDirty { get { return _txtDirty; } set { _txtDirty = value; SetFormTitle(); btnCommit.Enabled = _txtDirty; } }
 
         private int _sourceLang;
         private int sourceLang { get { return _sourceLang; } set { _sourceLang = cmbSourceLang.SelectedIndex = value; } }
         private int _targetLang;
         private int targetLang { get { return _targetLang; } set { AskCommit(); _targetLang = cmbTargetLang.SelectedIndex = value; } }
 
-        private bool _txtDirty;
-        private bool txtIsDirty { get { return _txtDirty; } set { _txtDirty = value; SetText(); btnCommit.Enabled = _txtDirty; } }
+        KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>> STBLGroupKey
+        {
+            get
+            {
+                if (combobox_StringSet.SelectedIndex < 0)
+                    return default(KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>);
+
+                ulong stblGroupKeyInstance = Convert.ToUInt64(combobox_StringSet.SelectedItem.ToString().Substring(4), 16);
+                var stblgroup = StringTables.Where(x => x.Key.Instance == stblGroupKeyInstance).First();
+                return stblgroup;
+            }
+        }
 
 
-        private const string packageFilter = "Sims 3 Packages|*.package|All Files|*.*";
-        private const string stblFilter = "Exported String Tables|S3_220557DA_*.stbl|Any stbl (*.stbl)|*.stbl|All Files|*.*";
-
-        const uint STBL = 0x220557DA;
         private List<ListViewItem> foundItems = null;
 
-        // Dictionary<stblIID, Dictionary<lang, stbl>>
-        Dictionary<IResourceKey, Dictionary<int, StblResource.StblResource>> StringTables = new Dictionary<IResourceKey, Dictionary<int, StblResource.StblResource>>(new rkMatch());
-
-        class rkMatch : IEqualityComparer<IResourceKey>
+        // Dictionary<STBLGroupKey, Dictionary<lang, stbl>>
+        Dictionary<IResourceKey, Dictionary<int, StblResource.StblResource>> StringTables = new Dictionary<IResourceKey, Dictionary<int, StblResource.StblResource>>(new STBLGroupKeyEqualityComparer());
+        class STBLGroupKeyEqualityComparer : IEqualityComparer<IResourceKey>
         {
-            public bool Equals(IResourceKey x, IResourceKey y) { return x.Equals(y); }
-            public int GetHashCode(IResourceKey obj) { return obj.GetHashCode(obj); }
+            public bool Equals(IResourceKey x, IResourceKey y) { return x.Instance == y.Instance; }
+            public int GetHashCode(IResourceKey obj) { return obj.Instance.GetHashCode(); }
         }
 
         public Form1()
         {
             AcceptLicence();
             InitializeComponent();
+
             cmbSourceLang.DataSource = locales.AsReadOnly();
             cmbTargetLang.DataSource = locales.AsReadOnly();
             try
@@ -120,17 +134,17 @@ namespace S3Translate
                 new SettingsDialog().ShowDialog();
             }
 
-            FileNameChanged += new EventHandler((sender, e) => SetText());
+            FileNameChanged += new EventHandler((sender, e) => SetFormTitle());
 
             CurrentPackageChanged += new EventHandler((sender, e) =>
             {
                 _pkgDirty = _txtDirty = false;
-                SetText();
+                SetFormTitle();
                 ReloadStringTables();
                 btnSetToAll.Enabled = btnSetToTarget.Enabled = tlpFind.Enabled = currentPackage != null;
             });
 
-            lstSTBLs.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler((sender, e) => { AskCommit(); btnAddString.Enabled = lstSTBLs.SelectedIndices.Count == 1; ReloadStrings(); });
+            combobox_StringSet.SelectedIndexChanged += new EventHandler((sender, e) => { AskCommit(); btnAddString.Enabled = combobox_StringSet.SelectedIndex >= 0; ReloadStrings(); });
 
             sourceLang = Settings.Default.SourceLocale;
             lstStrings.Columns[0].Text = "Source: " + cmbSourceLang.Text;
@@ -392,14 +406,13 @@ namespace S3Translate
             var fd = new FolderBrowserDialog();
             if (fd.ShowDialog() != DialogResult.OK) return;
 
-            var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
             foreach (int lang in ef.checkList.CheckedIndices)
             {
                 using (var fs = new FileStream(Path.Combine(fd.SelectedPath,
-                    String.Format("S3_{0:X8}_{1:X8}_{2:X2}{3:X14}_{4}.stbl", stblgroup.Key.ResourceType, stblgroup.Key.ResourceGroup, lang, stblgroup.Key.Instance, locales[lang])
+                    String.Format("S3_{0:X8}_{1:X8}_{2:X2}{3:X14}_{4}.stbl", STBLGroupKey.Key.ResourceType, STBLGroupKey.Key.ResourceGroup, lang, STBLGroupKey.Key.Instance, locales[lang])
                     ), FileMode.CreateNew))
                 {
-                    new BinaryWriter(fs).Write(StringTables[stblgroup.Key][lang].AsBytes);
+                    new BinaryWriter(fs).Write(StringTables[STBLGroupKey.Key][lang].AsBytes);
                     fs.Close();
                 }
             }
@@ -485,12 +498,11 @@ under certain conditions; see Help->Licence for details.
                 ) == DialogResult.No)
                 return;
 
-            var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
-            int source = _getSource(stblgroup.Key, sourceLang);
+            int source = _getSource(STBLGroupKey.Key, sourceLang);
             if (source == -1)
                 return;
 
-            _setToTarget(stblgroup.Key, source, targetLang);
+            _setToTarget(STBLGroupKey.Key, source, targetLang);
 
             pkgIsDirty = true;
 
@@ -510,13 +522,12 @@ under certain conditions; see Help->Licence for details.
                 ) == DialogResult.No)
                 return;
 
-            var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
-            int source = _getSource(stblgroup.Key, sourceLang);
+            int source = _getSource(STBLGroupKey.Key, sourceLang);
             if (source == -1)
                 return;
 
             for (var i = 0; i < locales.Count; i++)
-                _setToTarget(stblgroup.Key, source, i);
+                _setToTarget(STBLGroupKey.Key, source, i);
 
             pkgIsDirty = true;
 
@@ -684,12 +695,11 @@ under certain conditions; see Help->Licence for details.
         {
             AskCommit();
 
-            var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
             var instance = (ulong)txtInstance.Tag;
 
             for (var i = 0; i < locales.Count; i++)
-                if (StringTables[stblgroup.Key].ContainsKey(i) && StringTables[stblgroup.Key][i].ContainsKey(instance))
-                    StringTables[stblgroup.Key][i].Remove(instance);
+                if (StringTables[STBLGroupKey.Key].ContainsKey(i) && StringTables[STBLGroupKey.Key][i].ContainsKey(instance))
+                    StringTables[STBLGroupKey.Key][i].Remove(instance);
 
             pkgIsDirty = true;
             ReloadStrings();
@@ -703,12 +713,11 @@ under certain conditions; see Help->Licence for details.
             AddInstance ag = new AddInstance();
             if (ag.ShowDialog() != DialogResult.OK) return;
 
-            var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
             ulong guid = ag.Instance;
 
             #region Check for duplicate
             for (var i = 0; i < locales.Count; i++)
-                if (StringTables[stblgroup.Key].ContainsKey(i))
+                if (StringTables[STBLGroupKey.Key].ContainsKey(i))
                     {
                         for (var j = 0; j < lstStrings.Items.Count; j++)
                         {
@@ -724,8 +733,8 @@ under certain conditions; see Help->Licence for details.
             #endregion
 
             for (var i = 0; i < locales.Count; i++)
-                if (StringTables[stblgroup.Key].ContainsKey(i))
-                    StringTables[stblgroup.Key][i].Add(new KeyValuePair<ulong, string>(guid, ""));
+                if (StringTables[STBLGroupKey.Key].ContainsKey(i))
+                    StringTables[STBLGroupKey.Key][i].Add(new KeyValuePair<ulong, string>(guid, ""));
 
             pkgIsDirty = true;
             ReloadStrings();
@@ -750,12 +759,11 @@ under certain conditions; see Help->Licence for details.
             AskCommit();
             txtIsDirty = false;
 
-            var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
-            int source = _getSource(stblgroup.Key, sourceLang);
+            int source = _getSource(STBLGroupKey.Key, sourceLang);
             if (source == -1)
                 return;
 
-            _stringToTarget(stblgroup.Key, source, targetLang);
+            _stringToTarget(STBLGroupKey.Key, source, targetLang);
 
             pkgIsDirty = true;
             lstStrings.SelectedItems[0].SubItems[1].Text = lstStrings.SelectedItems[0].SubItems[0].Text;
@@ -778,13 +786,12 @@ under certain conditions; see Help->Licence for details.
                 ) == DialogResult.No)
                 return;
 
-            var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
-            int source = _getSource(stblgroup.Key, sourceLang);
+            int source = _getSource(STBLGroupKey.Key, sourceLang);
             if (source == -1)
                 return;
 
             for (var i = 0; i < locales.Count; i++)
-                _stringToTarget(stblgroup.Key, source, i);
+                _stringToTarget(STBLGroupKey.Key, source, i);
 
             pkgIsDirty = true;
             lstStrings.SelectedItems[0].SubItems[1].Text = lstStrings.SelectedItems[0].SubItems[0].Text;
@@ -879,9 +886,10 @@ Do you accept this licence?" : ""),
         }
         #endregion
 
-        void SetText()
+        void SetFormTitle()
         {
-            Text = String.Format("Sims 3 Translate{0}{1}{2}"
+            Text = String.Format("{0}{1}{2}{3}"
+                , myName
                 , _fname != "" ? " - " + _fname : ""
                 , _pkgDirty ? " (unsaved)" : ""
                 , _txtDirty ? " (uncommitted)" : ""
@@ -907,9 +915,9 @@ Do you accept this licence?" : ""),
 
         private void OpenPackage(string path)
         {
-            //if (fileName == path) return;
-
             ClosePackage();
+
+            fileName = path;
             currentPackage = Package.OpenPackage(0, path, true);
 
             if (StringTables.Count == 0)
@@ -919,8 +927,6 @@ Do you accept this licence?" : ""),
                 fileName = "";
                 return;
             }
-
-            fileName = path;
         }
 
         private void ClosePackage()
@@ -931,50 +937,62 @@ Do you accept this licence?" : ""),
             currentPackage = null;
         }
 
+
+        class TupleComparer<T, U> : IComparer<Tuple<T, U>>
+            where T : IComparable<T>
+            where U : IComparable<U>
+        {
+            public int Compare(Tuple<T, U> x, Tuple<T, U> y)
+            {
+                var res = x.Item1.CompareTo(y.Item1);
+                return res == 0 ? x.Item2.CompareTo(y.Item2) : res;
+            }
+        }
+
         private void ReloadStringTables()
         {
             lstStrings.SelectedIndices.Clear();
             lstStrings.Items.Clear();
-            lstSTBLs.SelectedIndices.Clear();
-            lstSTBLs.Items.Clear();
+            combobox_StringSet.SelectedIndex = -1;
+            combobox_StringSet.Items.Clear();
             StringTables.Clear();
 
-            if (currentPackage == null) return;
 
-            loadAllLanguagesFromPackage(currentPackage);
+            if (currentPackage == null)
+                return;
 
-            btnMergeSets.Enabled = (lstSTBLs.Items.Count > 1);
 
-            if (lstSTBLs.Items.Count > 0)
-                lstSTBLs.SelectedIndices.Add(0);
-        }
+            var stbls = currentPackage
+                .FindAll(x => x.ResourceType == STBL)
+                .Select(x => new Tuple<IResourceKey, int>(RKTostblGroupKey(x), (int)(x.Instance >> 56)))
+                .OrderBy(x => x, new TupleComparer<IResourceKey, int>())
+            ;
 
-        private void loadAllLanguagesFromPackage(IPackage package)
-        {
-            for (byte i = 0; i < locales.Count; i++)
-                loadLanguageFromPackage(i, package);
-        }
+            var stblGroupKeys = stbls
+                .Select(x => x.Item1)
+                .Distinct(new STBLGroupKeyEqualityComparer());
 
-        private void loadLanguageFromPackage(byte language, IPackage package)
-        {
-            foreach (var res in package.FindAll(x => x.ResourceType == STBL && x.Instance >> 56 == language))
+            foreach (var stblGroupKey in stblGroupKeys)
             {
-                IResourceKey rk = RKTostblGroupKey(res);
-                List<IResourceKey> l = new List<IResourceKey>(StringTables.Keys).FindAll(x => { bool match = x.Equals(rk); return match; });
-                if (l.Count == 0)
-                {
-                    KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>> kvp
-                        = new KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>(rk, new Dictionary<int, StblResource.StblResource>());
-                    StringTables.Add(kvp.Key, kvp.Value);
-                    lstSTBLs.Items.Add(CreateLVISTBL(kvp));
-                }
-                StringTables[rk].Add(language, new StblResource.StblResource(0, ((APackage)package).GetResource(res)));
-            }
-        }
+                StringTables.Add(stblGroupKey, new Dictionary<int, StblResource.StblResource>());
+                combobox_StringSet.Items.Add("0x__" + stblGroupKey.Instance.ToString("X14"));
 
-        ListViewItem CreateLVISTBL(KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>> stbl)
-        {
-            return new ListViewItem(new string[] { String.Format("0x__{0:X14}", stbl.Key.Instance & 0x00FFFFFFFFFFFFFF) }) { Tag = stbl };
+                var languages = stbls
+                    .Where(x => x.Item1.Equals(stblGroupKey))
+                    .Select(x => x.Item2);
+
+                foreach (var language in languages)
+                {
+                    var res = currentPackage
+                        .Find(x => x.ResourceType == STBL && x.Instance == (ulong)(stblGroupKey.Instance | ((ulong)language << 56)));
+                    StringTables[stblGroupKey].Add(language, new StblResource.StblResource(0, ((APackage)currentPackage).GetResource(res)));
+                }
+            }
+
+            mergeAllSetsToolStripMenuItem.Enabled = btnMergeSets.Enabled = (combobox_StringSet.Items.Count > 1);
+
+            if (combobox_StringSet.Items.Count > 0)
+                combobox_StringSet.SelectedIndex = 0;
         }
 
         private void ReloadStrings()
@@ -985,13 +1003,13 @@ Do you accept this licence?" : ""),
                 lstStrings.BeginUpdate();
                 lstStrings.SelectedIndices.Clear();
                 lstStrings.Items.Clear();
-                if (lstSTBLs.SelectedItems.Count != 1)
+
+                if (combobox_StringSet.SelectedIndex == -1)
                     return;
 
-                var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
-                if (!StringTables[stblgroup.Key].ContainsKey(sourceLang))
+                if (!StringTables[STBLGroupKey.Key].ContainsKey(sourceLang))
                 {
-                    int rlocale = StringTables[stblgroup.Key].Keys.GetEnumerator().Current;
+                    int rlocale = StringTables[STBLGroupKey.Key].Keys.GetEnumerator().Current;
 
                     // Give up!
                     if (rlocale == sourceLang)
@@ -1010,23 +1028,23 @@ Do you accept this licence?" : ""),
                 }
 
 
-                if (!StringTables[stblgroup.Key].ContainsKey(targetLang))
+                if (!StringTables[STBLGroupKey.Key].ContainsKey(targetLang))
                 {
                     if (MessageBox.Show(
                         string.Format("The current target language, {0}, does not exist in this string table.\n\n" +
                         "Create it?", locales[targetLang]),
                         "Language missing", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
                     {
-                        MemoryStream ms = new MemoryStream(StringTables[stblgroup.Key][sourceLang].AsBytes, true);
-                        _currentPackage.AddResource(stblGroupKeyToRK(stblgroup.Key, targetLang), ms, true);
-                        StringTables[stblgroup.Key].Add(targetLang, new StblResource.StblResource(0, ms));
+                        MemoryStream ms = new MemoryStream(StringTables[STBLGroupKey.Key][sourceLang].AsBytes, true);
+                        _currentPackage.AddResource(stblGroupKeyToRK(STBLGroupKey.Key, targetLang), ms, true);
+                        StringTables[STBLGroupKey.Key].Add(targetLang, new StblResource.StblResource(0, ms));
                     }
                     else
                         return;
                 }
 
-                var sourceSTBL = StringTables[stblgroup.Key][sourceLang];
-                var targetSTBL = StringTables[stblgroup.Key][targetLang];
+                var sourceSTBL = StringTables[STBLGroupKey.Key][sourceLang];
+                var targetSTBL = StringTables[STBLGroupKey.Key][targetLang];
 
                 prg.Visible = true;
                 prg.Value = 0;
@@ -1229,8 +1247,7 @@ Do you accept this licence?" : ""),
         {
             if (inChangeHandler) return;
 
-            var stblgroup = (KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>)lstSTBLs.SelectedItems[0].Tag;
-            var targetSTBL = StringTables[stblgroup.Key][targetLang];
+            var targetSTBL = StringTables[STBLGroupKey.Key][targetLang];
             var text = txtTarget.Text;
             var instance = (ulong)txtInstance.Tag;
 
@@ -1258,7 +1275,7 @@ Do you accept this licence?" : ""),
                     txtSource.Text = text;
                 }
 
-            IResourceKey rk = stblGroupKeyToRK(stblgroup.Key, targetLang);
+            IResourceKey rk = stblGroupKeyToRK(STBLGroupKey.Key, targetLang);
             IResourceIndexEntry rie = _currentPackage.Find(x => x.Equals(rk));
             _currentPackage.ReplaceResource(rie, targetSTBL);
             pkgIsDirty = true;
