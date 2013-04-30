@@ -140,7 +140,6 @@ namespace S3Translate
             {
                 sourceLang = Settings.Default.SourceLocale;
                 targetLang = Settings.Default.UserLocale;
-                ckbAutoCommit.Checked = Settings.Default.AutoCommit;
             }
             catch (Exception)
             {
@@ -151,7 +150,8 @@ namespace S3Translate
 
             CurrentPackageChanged += new EventHandler((sender, e) => packageChangeHandler());
 
-            cmbSetPicker.SelectedIndexChanged += new EventHandler((sender, e) => {
+            cmbSetPicker.SelectedIndexChanged += new EventHandler((sender, e) =>
+            {
                 lstStrings.SelectedIndices.Clear();
 
                 if (cmbSetPicker.SelectedIndex < 0)
@@ -163,14 +163,16 @@ namespace S3Translate
                 }
             });
 
-            STBLGroupKeyChanged += new EventHandler((sender, e) => {
+            STBLGroupKeyChanged += new EventHandler((sender, e) =>
+            {
                 btnAddString.Enabled = cmbSetPicker.SelectedIndex >= 0;
                 ReloadStrings();
             });
 
             sourceLang = Settings.Default.SourceLocale;
             lstStrings.Columns[1].Text = "Source: " + cmbSourceLang.Text;
-            cmbSourceLang.SelectedIndexChanged += new EventHandler((sender, e) => {
+            cmbSourceLang.SelectedIndexChanged += new EventHandler((sender, e) =>
+            {
                 sourceLang = cmbSourceLang.SelectedIndex;
                 lstStrings.Columns[1].Text = "Source: " + cmbSourceLang.Text;
                 ReloadStrings();
@@ -178,16 +180,20 @@ namespace S3Translate
 
             targetLang = Settings.Default.UserLocale;
             lstStrings.Columns[2].Text = "Target: " + cmbTargetLang.Text;
-            cmbTargetLang.SelectedIndexChanged += new EventHandler((sender, e) => {
+            cmbTargetLang.SelectedIndexChanged += new EventHandler((sender, e) =>
+            {
                 targetLang = cmbTargetLang.SelectedIndex;
                 lstStrings.Columns[2].Text = "Target: " + cmbTargetLang.Text;
                 ReloadStrings();
             });
 
-            lstStrings.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler((sender, e) => {
+            lstStrings.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler((sender, e) =>
+            {
                 AskCommit();
                 SelectStrings();
             });
+
+            txtTarget.TextChanged += new EventHandler((sender, e) => { if (inChangeHandler) return; txtIsDirty = true; });
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -732,13 +738,6 @@ under certain conditions; see Help->Licence for details.
         #endregion
 
         #region Designer-bound event handlers
-        private void txtTarget_TextChanged(object sender, EventArgs e)
-        {
-            if (inChangeHandler) return;
-
-            txtIsDirty = true;
-        }
-
         private void btnSetToTarget_Click(object sender, EventArgs e)
         {
             if (sourceLang == targetLang)
@@ -843,19 +842,6 @@ under certain conditions; see Help->Licence for details.
             EditAddGUID(0);
         }
 
-        private void ckbAutoCommit_CheckedChanged(object sender, EventArgs e)
-        {
-            if (ckbAutoCommit.Checked)
-            {
-                button_AbandonEdit.Enabled = btnCommit.Enabled = false;
-                if (txtIsDirty)
-                    CommitText();
-            }
-
-            Settings.Default.AutoCommit = ckbAutoCommit.Checked;
-            Settings.Default.Save();
-        }
-
         private void btnCommit_Click(object sender, EventArgs e)
         {
             CommitText();
@@ -864,7 +850,7 @@ under certain conditions; see Help->Licence for details.
 
         private void button_AbandonEdit_Click(object sender, EventArgs e)
         {
-            txtTarget.Text = lstStrings.SelectedItems[0].SubItems[2].Text;
+            AbandonText();
             lstStrings.Focus();
         }
 
@@ -1453,20 +1439,12 @@ Do you accept this licence?" : ""),
         {
             if (txtIsDirty)
             {
-                if (ckbAutoCommit.Checked)
+                var r = MessageBox.Show("Commit changes to " + locales[targetLang] + "?", "Text has changed",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (r == DialogResult.Yes)
                     CommitText();
                 else
-                {
-                    var r = MessageBox.Show("Commit changes to " + locales[targetLang] + "?", "Text has changed",
-                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (r == DialogResult.Yes)
-                        CommitText();
-                    else
-                    {
-                        txtIsDirty = false;
-                        SelectStrings();
-                    }
-                }
+                    AbandonText();
             }
         }
 
@@ -1510,7 +1488,13 @@ Do you accept this licence?" : ""),
             txtIsDirty = false;
         }
 
-        void commitLocaleInSet(int lang, IResourceKey stblGroupKey, IResource targetSTBL)
+        private void AbandonText()
+        {
+            txtIsDirty = false;
+            SelectStrings();
+        }
+
+        private void commitLocaleInSet(int lang, IResourceKey stblGroupKey, IResource targetSTBL)
         {
             IResourceKey rk = stblGroupKeyToRK(stblGroupKey, lang);
             IResourceIndexEntry rie = _currentPackage.Find(x => x.Equals(rk));

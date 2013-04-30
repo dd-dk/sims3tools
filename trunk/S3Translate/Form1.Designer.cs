@@ -666,7 +666,6 @@ namespace S3Translate
             this.txtTarget.Size = new System.Drawing.Size(248, 167);
             this.txtTarget.TabIndex = 1;
             this.mainToolTip.SetToolTip(this.txtTarget, "Target Text");
-            this.txtTarget.TextChanged += new System.EventHandler(this.txtTarget_TextChanged);
             // 
             // label3
             // 
@@ -727,7 +726,6 @@ namespace S3Translate
             this.mainToolTip.SetToolTip(this.ckbAutoCommit, "When unchecked, any changes made to the target text\r\nbox require \"Commit\" to be c" +
         "licked to write back to the\r\nTarget string itself.");
             this.ckbAutoCommit.UseVisualStyleBackColor = true;
-            this.ckbAutoCommit.CheckedChanged += new System.EventHandler(this.ckbAutoCommit_CheckedChanged);
             // 
             // btnCommit
             // 
