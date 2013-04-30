@@ -133,8 +133,6 @@ namespace S3Translate
             {
                 new SettingsDialog().ShowDialog();
             }
-
-            ClosePackage();
             
             FileNameChanged += new EventHandler((sender, e) => SetFormTitle());
 
@@ -172,13 +170,14 @@ namespace S3Translate
         private void fileToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
         {
             bool isopen = (_currentPackage != null);
-            closeToolStripMenuItem.Enabled
-                = exportLanguageToolStripMenuItem.Enabled
-                = savePackageAsToolStripMenuItem.Enabled
-                = savePackageToolStripMenuItem.Enabled
-                = importPackageToolStripMenuItem.Enabled
-                = importSTBLToolStripMenuItem.Enabled
-                = isopen;
+            closeToolStripMenuItem.Enabled =
+                savePackageAsToolStripMenuItem.Enabled =
+                savePackageToolStripMenuItem.Enabled =
+                importFromPackageToolStripMenuItem.Enabled =
+                importFromSTBLFileToolStripMenuItem.Enabled =
+                exportToPackageToolStripMenuItem.Enabled =
+                exportToSTBLFileToolStripMenuItem.Enabled =
+                isopen;
             savePackageToolStripMenuItem.Enabled = savePackageToolStripMenuItem.Enabled && pkgIsDirty;
         }
 
@@ -922,22 +921,6 @@ Do you accept this licence?" : ""),
             fileName = path;
             currentPackage = Package.OpenPackage(0, path, true);
 
-            closeToolStripMenuItem.Enabled =
-                savePackageToolStripMenuItem.Enabled =
-                savePackageAsToolStripMenuItem.Enabled =
-                true;
-
-            importPackageToolStripMenuItem.Enabled =
-                importSTBLToolStripMenuItem.Enabled =
-                exportLanguageToolStripMenuItem.Enabled =
-                true;
-
-            importFromPackageToolStripMenuItem.Enabled =
-                importFromSTBLFileToolStripMenuItem.Enabled =
-                exportToPackageToolStripMenuItem.Enabled =
-                exportToSTBLFileToolStripMenuItem.Enabled =
-                true;
-
             if (StringTables.Count == 0)
             {
                 MessageBox.Show("There are no STBLs in the chosen package. It is not translateable using this tool.");
@@ -953,21 +936,6 @@ Do you accept this licence?" : ""),
                 Package.ClosePackage(0, _currentPackage);
 
             currentPackage = null;
-            closeToolStripMenuItem.Enabled =
-                savePackageToolStripMenuItem.Enabled =
-                savePackageAsToolStripMenuItem.Enabled =
-                false;
-
-            importPackageToolStripMenuItem.Enabled =
-                importSTBLToolStripMenuItem.Enabled =
-                exportLanguageToolStripMenuItem.Enabled =
-                false;
-
-            importFromPackageToolStripMenuItem.Enabled =
-                importFromSTBLFileToolStripMenuItem.Enabled =
-                exportToPackageToolStripMenuItem.Enabled =
-                exportToSTBLFileToolStripMenuItem.Enabled =
-                false;
         }
 
 
