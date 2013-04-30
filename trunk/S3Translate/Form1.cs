@@ -511,10 +511,7 @@ under certain conditions; see Help->Licence for details.
         {
             if (inChangeHandler) return;
 
-            if (ckbAutoCommit.Checked)
-                CommitText();
-            else
-                txtIsDirty = true;
+            txtIsDirty = true;
         }
 
         private void btnSetToTarget_Click(object sender, EventArgs e)
@@ -1185,10 +1182,10 @@ Do you accept this licence?" : ""),
         {
             AskCommit();
 
-            AddInstance ag = new AddInstance(orig);
+            AddEditGUID ag = new AddEditGUID(orig);
             if (ag.ShowDialog() != DialogResult.OK) return;
 
-            var guid = ag.Instance;
+            var guid = ag.GUID;
             if (guid == 0 || guid == orig)
                 return;
 
@@ -1279,14 +1276,19 @@ Do you accept this licence?" : ""),
         {
             if (txtIsDirty)
             {
-                var r = MessageBox.Show("Commit changes to " + locales[targetLang] + "?", "Text has changed",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (r == DialogResult.Yes)
+                if (ckbAutoCommit.Checked)
                     CommitText();
                 else
                 {
-                    txtIsDirty = false;
-                    SelectStrings();
+                    var r = MessageBox.Show("Commit changes to " + locales[targetLang] + "?", "Text has changed",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (r == DialogResult.Yes)
+                        CommitText();
+                    else
+                    {
+                        txtIsDirty = false;
+                        SelectStrings();
+                    }
                 }
             }
         }
