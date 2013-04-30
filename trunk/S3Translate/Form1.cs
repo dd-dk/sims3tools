@@ -100,16 +100,21 @@ namespace S3Translate
         private int _targetLang;
         private int targetLang { get { return _targetLang; } set { AskCommit(); _targetLang = cmbTargetLang.SelectedIndex = value; } }
 
+        KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>> _STBLGroupKey;
+        EventHandler STBLGroupKeyChanged;
+        void OnSTBLGroupKeyChanged() { if (STBLGroupKeyChanged != null) STBLGroupKeyChanged(this, EventArgs.Empty); }
         KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>> STBLGroupKey
         {
             get
             {
-                if (cmbSetPicker.SelectedIndex < 0)
-                    return default(KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>);
-
-                ulong stblGroupKeyInstance = Convert.ToUInt64(cmbSetPicker.SelectedItem.ToString().Substring(4), 16);
-                var stblgroup = StringTables.Where(x => x.Key.Instance == stblGroupKeyInstance).First();
-                return stblgroup;
+                return _STBLGroupKey;
+            }
+            set
+            {
+                if (_STBLGroupKey.Equals(value))
+                    return;
+                _STBLGroupKey = value;
+                OnSTBLGroupKeyChanged();
             }
         }
 
@@ -148,6 +153,17 @@ namespace S3Translate
 
             cmbSetPicker.SelectedIndexChanged += new EventHandler((sender, e) => {
                 lstStrings.SelectedIndices.Clear();
+
+                if (cmbSetPicker.SelectedIndex < 0)
+                    STBLGroupKey = default(KeyValuePair<IResourceKey, Dictionary<int, StblResource.StblResource>>);
+                else
+                {
+                    ulong stblGroupKeyInstance = Convert.ToUInt64(cmbSetPicker.SelectedItem.ToString().Substring(4), 16);
+                    STBLGroupKey = StringTables.Where(x => x.Key.Instance == stblGroupKeyInstance).Single();
+                }
+            });
+
+            STBLGroupKeyChanged += new EventHandler((sender, e) => {
                 btnAddString.Enabled = cmbSetPicker.SelectedIndex >= 0;
                 ReloadStrings();
             });
@@ -186,17 +202,20 @@ namespace S3Translate
         {
             closeToolStripMenuItem.Enabled =
                 savePackageAsToolStripMenuItem.Enabled =
-                savePackageToolStripMenuItem.Enabled =
-                (_currentPackage != null);
-            savePackageToolStripMenuItem.Enabled = savePackageToolStripMenuItem.Enabled && pkgIsDirty;
+                _currentPackage != null;
+            savePackageToolStripMenuItem.Enabled = _currentPackage != null && pkgIsDirty;
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!AskSavePackage()) return;
-
             var ofd = new OpenFileDialog() { Filter = packageFilter };
-            if (ofd.ShowDialog() == DialogResult.OK) OpenPackage(ofd.FileName);
+            if (ofd.ShowDialog() != DialogResult.OK)
+                return;
+
+            if (!AskSavePackage())
+                return;
+
+            OpenPackage(ofd.FileName);
         }
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -840,11 +859,13 @@ under certain conditions; see Help->Licence for details.
         private void btnCommit_Click(object sender, EventArgs e)
         {
             CommitText();
+            lstStrings.Focus();
         }
 
         private void button_AbandonEdit_Click(object sender, EventArgs e)
         {
             txtTarget.Text = lstStrings.SelectedItems[0].SubItems[2].Text;
+            lstStrings.Focus();
         }
 
         private void btnStringToTarget_Click(object sender, EventArgs e)
@@ -1452,6 +1473,8 @@ Do you accept this licence?" : ""),
         private void CommitText()
         {
             if (inChangeHandler) return;
+            if (STBLGroupKey.Key == null)
+                return;
 
             var targetSTBL = StringTables[STBLGroupKey.Key][targetLang];
             var text = txtTarget.Text;
