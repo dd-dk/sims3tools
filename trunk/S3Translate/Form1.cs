@@ -66,6 +66,14 @@ namespace S3Translate
         #endregion
 
 
+        delegate void _KEYRemoveInstance(ulong instance);
+        delegate void _KEYAddInstance(ulong instance, string name);
+        delegate void _KEYCommitNameMaps();
+
+        _KEYRemoveInstance removeInstance;
+        _KEYAddInstance addInstance;
+        _KEYCommitNameMaps commitNameMaps;
+
         private const string myName = "Sims 3 Translate";
         private const string packageFilter = "Sims 3 Packages|*.package|All Files|*.*";
         private const string stblFilter = "Exported String Tables|S3_220557DA_*.stbl|Any stbl (*.stbl)|*.stbl|All Files|*.*";
@@ -85,7 +93,7 @@ namespace S3Translate
         private bool pkgIsDirty { get { return _pkgDirty; } set { _pkgDirty = value; SetFormTitle(); } }
 
         private bool _txtDirty;
-        private bool txtIsDirty { get { return _txtDirty; } set { _txtDirty = value; SetFormTitle(); btnCommit.Enabled = _txtDirty; } }
+        private bool txtIsDirty { get { return _txtDirty; } set { _txtDirty = value; SetFormTitle(); button_AbandonEdit.Enabled = btnCommit.Enabled = _txtDirty; } }
 
         private int _sourceLang;
         private int sourceLang { get { return _sourceLang; } set { _sourceLang = cmbSourceLang.SelectedIndex = value; } }
@@ -136,13 +144,7 @@ namespace S3Translate
 
             FileNameChanged += new EventHandler((sender, e) => SetFormTitle());
 
-            CurrentPackageChanged += new EventHandler((sender, e) =>
-            {
-                _pkgDirty = _txtDirty = false;
-                SetFormTitle();
-                ReloadStringTables();
-                btnSetToAll.Enabled = btnSetToTarget.Enabled = tlpFind.Enabled = currentPackage != null;
-            });
+            CurrentPackageChanged += new EventHandler((sender, e) => packageChangeHandler());
 
             cmbSetPicker.SelectedIndexChanged += new EventHandler((sender, e) => {
                 AskCommit();
@@ -170,8 +172,6 @@ namespace S3Translate
                 AskCommit();
                 SelectStrings();
             });
-
-            btnCommit.Click += new EventHandler((sender, e) => { CommitText(); });
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -227,10 +227,99 @@ namespace S3Translate
             }
         }
 
+        private void preferencesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            new SettingsDialog().ShowDialog();
+        }
+
+        private void quitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!AskSavePackage()) return;
+
+            ClosePackage();
+            Application.Exit();
+        }
+        #endregion
+
+        #region STBL menu
+        private void sTBLsToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            createNewSetToolStripMenuItem.Enabled =
+                deleteSetToolStripMenuItem.Enabled =
+                importFromPackageToolStripMenuItem.Enabled =
+                importFromSTBLFileToolStripMenuItem.Enabled =
+                exportToPackageToolStripMenuItem.Enabled =
+                exportToSTBLFileToolStripMenuItem.Enabled =
+                (_currentPackage != null);
+
+            mergeAllSetsToolStripMenuItem.Enabled = cmbSetPicker.Items.Count > 1;
+        }
+
+        private void createNewSetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AskCommit();
+
+            var instance = FNV64.GetHash(fileName + DateTime.Now.ToBinary().ToString());
+            instance = (instance >> 8) ^ (instance & 0xFF);
+
+            uint group = 0;
+            foreach (var rk in StringTables.Keys) if (rk.ResourceGroup > group) group = rk.ResourceGroup;
+
+            for (int lang = 0; lang < locales.Count; lang++)
+            {
+                var stbl = new StblResource.StblResource(0, null);
+
+                var rk = new RK(STBL, group, instance | ((ulong)lang << 56));
+                _currentPackage.AddResource(rk, stbl.Stream, true);
+                addInstance(rk.Instance, "Strings_" + locales[lang].Replace(' ', '_') + "_" + rk.Instance.ToString("x"));
+            }
+
+            commitNameMaps();
+
+            pkgIsDirty = true;
+
+            ReloadStringTables();
+            int i = 0;
+            foreach (var key in StringTables.Keys)
+            {
+                if (key.Instance == instance)
+                    break;
+                i++;
+            }
+            cmbSetPicker.SelectedIndex = i;
+
+            ReloadStrings();
+            SelectStrings();
+        }
+
+        private void deleteSetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show(
+                "This will delete all strings in all languages for the selected string set.\n\nContinue?",
+                "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2
+                ) == DialogResult.No)
+                return;
+
+            foreach (var res in currentPackage.FindAll(x =>
+                x.ResourceType == STBL &&
+                x.ResourceGroup == STBLGroupKey.Key.ResourceGroup &&
+                (x.Instance & 0x00FFFFFFFFFFFFFF) == STBLGroupKey.Key.Instance))
+            {
+                _currentPackage.DeleteResource(res);
+                removeInstance(res.Instance);
+            }
+
+            commitNameMaps();
+
+            pkgIsDirty = true;
+
+            ReloadStringTables();
+            ReloadStrings();
+            SelectStrings();
+        }
+
         private void importPackageToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            lstStrings.SelectedIndices.Clear();
-
             #region Get the file name
             var ofd = new OpenFileDialog() { Filter = packageFilter };
             if (ofd.ShowDialog() != DialogResult.OK) return;
@@ -250,30 +339,38 @@ namespace S3Translate
             }
             #endregion
 
-            List<byte> lb = new List<byte>();
-            foreach (var rie in lrie) { byte x = (byte)(rie.Instance >> 56); if (!lb.Contains(x)) lb.Add(x); }
-            bool all = true;
-            if (lb.Count > 1)
-            {
-                DialogResult dr = MessageBox.Show("Import all languages?", "Import", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
-                if (dr == DialogResult.Cancel) return;
-                all = dr == DialogResult.Yes;
-            }
-
-            if (!all)
-            {
-                var imp = new Export() { Text = "Import" };
-                for (byte i = 0; i < locales.Count; i++)
-                    imp.checkList.SetItemChecked(i, lb.Contains(i));
-
-                if (imp.ShowDialog() != DialogResult.OK) return;
-
-                lb.Clear();
-                foreach (int i in imp.checkList.CheckedIndices)
-                    lb.Add((byte)i);
-
-                lrie = new List<IResourceIndexEntry>(importFrom.FindAll(x => x.ResourceType == STBL && lb.Contains((byte)(x.Instance >> 56))));
-            }
+            #region Get the languages
+            //bool all = true;
+            //
+            //List<byte> lb = new List<byte>();
+            //foreach (var rie in lrie) { byte x = (byte)(rie.Instance >> 56); if (!lb.Contains(x)) lb.Add(x); }
+            //if (lb.Count > 1)
+            //{
+            //    DialogResult dr = MessageBox.Show("Import all languages?", "Import", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            //    if (dr == DialogResult.Cancel) return;
+            //    all = dr == DialogResult.Yes;
+            //}
+            //
+            //if (!all)
+            //{
+            //    var imp = new Export() { Text = "Import" };
+            //    for (byte i = 0; i < locales.Count; i++)
+            //        imp.checkList.SetItemChecked(i, lb.Contains(i));
+            //
+            //    if (imp.ShowDialog() != DialogResult.OK) return;
+            //
+            //    lb.Clear();
+            //    foreach (int i in imp.checkList.CheckedIndices)
+            //        lb.Add((byte)i);
+            //
+            //    lrie = new List<IResourceIndexEntry>(importFrom.FindAll(x => x.ResourceType == STBL && lb.Contains((byte)(x.Instance >> 56))));
+            //    if (lrie.Count == 0)
+            //    {
+            //        MessageBox.Show("No languages selected.", "S3Translate", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //        return;
+            //    }
+            //}
+            #endregion
 
             #region Check for duplicates
             if (currentPackage.FindAll(x =>
@@ -288,6 +385,8 @@ namespace S3Translate
             }
             #endregion
 
+            lstStrings.SelectedIndices.Clear();
+
             foreach (var rie in lrie)
             {
                 currentPackage.AddResource(rie, ((APackage)importFrom).GetResource(rie), true);
@@ -299,8 +398,6 @@ namespace S3Translate
 
         private void importSTBLToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            lstStrings.SelectedIndices.Clear();
-
             var ofd = new OpenFileDialog() { Filter = stblFilter };
             if (ofd.ShowDialog() != DialogResult.OK) return;
             List<string> fns = new List<string>(new string[] { ofd.FileName, });
@@ -314,21 +411,25 @@ namespace S3Translate
             if (fn.Length > 3 && fn[0] == "S3")
             {
                 if (fn[1].Length != 8 || fn[1] != STBL.ToString("X8"))
-                    if (MessageBox.Show("This does not appear to be a STBL.\n\nContinue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+                    if (MessageBox.Show("This does not appear to be a STBL.\n\nContinue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                        return;
 
                 uint g = 0;
                 if (fn[2].Length != 8 || !uint.TryParse(fn[2], System.Globalization.NumberStyles.HexNumber, null, out g))
-                    if (MessageBox.Show("Invalid Group number.\n\nContinue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+                    if (MessageBox.Show("Invalid Group number.\n\nContinue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                        return;
                 rk.ResourceGroup = g;
 
                 ulong i = 0;
                 if (fn.Length > 3 && !ulong.TryParse(fn[3], System.Globalization.NumberStyles.HexNumber, null, out i))
                 {
-                    if (MessageBox.Show("Invalid STBL Instance.\n\nContinue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
-                    else i = instance;
+                    if (MessageBox.Show("Invalid STBL Instance.\n\nContinue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                        return;
+                    i = instance;// the new instance, as this is invalid hex
                 }
                 if ((int)(i >> 56) > locales.Count)
-                    if (MessageBox.Show("Invalid Language ID.\n\nContinue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+                    if (MessageBox.Show("Invalid Language ID.\n\nContinue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                        return;
                 rk.Instance = i;
 
                 if (MessageBox.Show("Attempt to add all languages?", "Import", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
@@ -343,7 +444,8 @@ namespace S3Translate
                 }
             }
             else
-                if (MessageBox.Show("File name is not in export format.\n\nContinue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+                if (MessageBox.Show("File name is not in export format.\n\nContinue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                    return;
             #endregion
 
             #region Check for duplicates
@@ -382,6 +484,8 @@ namespace S3Translate
             }
             #endregion
 
+            lstStrings.SelectedIndices.Clear();
+
             using (FileStream fs = new FileStream(fns[0], FileMode.Open, FileAccess.Read))
             {
                 byte[] stbl = new byte[fs.Length];
@@ -389,7 +493,7 @@ namespace S3Translate
                 currentPackage.AddResource(rk, new MemoryStream(stbl), true);
                 fs.Close();
             }
-            for(int i = 1; i< fns.Count;i++)
+            for (int i = 1; i < fns.Count; i++)
             {
                 string f = fns[i];
                 string[] afn = f.Split('_');
@@ -409,6 +513,11 @@ namespace S3Translate
             ReloadStringTables();
         }
 
+        private void exportToPackageToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Hello world");
+        }
+
         private void exportLanguageToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var ef = new Export() { Text = "Export" };
@@ -416,6 +525,8 @@ namespace S3Translate
 
             var fd = new FolderBrowserDialog();
             if (fd.ShowDialog() != DialogResult.OK) return;
+
+            AskCommit();
 
             foreach (int lang in ef.checkList.CheckedIndices)
             {
@@ -429,37 +540,75 @@ namespace S3Translate
             }
         }
 
-        private void preferencesToolStripMenuItem_Click(object sender, EventArgs e)
+        private void mergeAllSetsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            new SettingsDialog().ShowDialog();
-        }
+            #region Check for duplicates
+            Dictionary<ulong, List<int>> allGUIDs = new Dictionary<ulong, List<int>>();
+            List<ulong> duplicates = new List<ulong>();
+            foreach (var slr in StringTables)
+            {
+                foreach (var lr in slr.Value)
+                {
+                    foreach (var gs in lr.Value)
+                    {
+                        if (allGUIDs.ContainsKey(gs.Key))
+                        {
+                            if (allGUIDs[gs.Key].Contains(lr.Key))
+                                duplicates.Add(gs.Key);
+                            else
+                                allGUIDs[gs.Key].Add(lr.Key);
+                        }
+                        else
+                            allGUIDs.Add(gs.Key, new List<int>(new int[] { lr.Key, }));
+                    }
+                }
+            }
+            if (duplicates.Count > 0)
+            {
+                duplicates.Sort();
+                MessageBox.Show("Cannot merge - duplicate String GUIDs exist:\n\n  "
+                    + String.Join("\n  ", duplicates.Select(g => "0x" + g.ToString("X16")))
+                , "Merge", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                return;
+            }
+            #endregion
 
-        private void quitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (!AskSavePackage()) return;
+            AskCommit();
 
-            ClosePackage();
-            Application.Exit();
-        }
-        #endregion
+            var instance = FNV64.GetHash(fileName + DateTime.Now.ToBinary().ToString());
+            instance = (instance >> 8) ^ (instance & 0xFF);
 
-        #region STBL menu
-        private void sTBLsToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
-        {
-            createNewSetToolStripMenuItem.Enabled =
-                deleteSetToolStripMenuItem.Enabled =
-                importFromPackageToolStripMenuItem.Enabled =
-                importFromSTBLFileToolStripMenuItem.Enabled =
-                exportToPackageToolStripMenuItem.Enabled =
-                exportToSTBLFileToolStripMenuItem.Enabled =
-                (_currentPackage != null);
+            uint group = 0;
+            foreach (var rk in StringTables.Keys) if (rk.ResourceGroup > group) group = rk.ResourceGroup;
 
-            mergeAllSetsToolStripMenuItem.Enabled = cmbSetPicker.Items.Count > 1;
-        }
+            for (int lang = 0; lang < locales.Count; lang++)
+            {
+                var stbl = new StblResource.StblResource(0, null);
+                foreach (var lr in StringTables.Values)
+                {
+                    if (lr.ContainsKey(lang))
+                        foreach (var s in lr[lang])
+                            stbl.Add(s.Key, s.Value);
+                }
 
-        private void exportToPackageToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Hello world");
+                var rk = new RK(STBL, group, instance | ((ulong)lang << 56));
+                _currentPackage.AddResource(rk, stbl.Stream, true);
+                addInstance(rk.Instance, "Strings_" + locales[lang].Replace(' ', '_') + "_" + rk.Instance.ToString("x"));
+            }
+
+            foreach (var res in currentPackage.FindAll(x => x.ResourceType == STBL && (x.ResourceGroup != group || (x.Instance & 0x00FFFFFFFFFFFFFF) != instance)))
+            {
+                _currentPackage.DeleteResource(res);
+                removeInstance(res.Instance);// res.Instance is futile, uh, possibly unused that is.
+            }
+
+            commitNameMaps();
+
+            pkgIsDirty = true;
+
+            ReloadStringTables();
+            ReloadStrings();
+            SelectStrings();
         }
         #endregion
 
@@ -563,130 +712,6 @@ under certain conditions; see Help->Licence for details.
             SelectStrings();
         }
 
-        delegate void _KEYRemoveInstance(ulong instance);
-        delegate void _KEYAddInstance(ulong instance, string name);
-        delegate void _KEYCommitNameMaps();
-        
-        private void btnMergeSets_Click(object sender, EventArgs e)
-        {
-            #region Check for duplicates
-            Dictionary<ulong, List<int>> allGUIDs = new Dictionary<ulong, List<int>>();
-            List<ulong> duplicates = new List<ulong>();
-            foreach (var slr in StringTables)
-            {
-                foreach (var lr in slr.Value)
-                {
-                    foreach (var gs in lr.Value)
-                    {
-                        if (allGUIDs.ContainsKey(gs.Key))
-                        {
-                            if (allGUIDs[gs.Key].Contains(lr.Key))
-                                duplicates.Add(gs.Key);
-                            else
-                                allGUIDs[gs.Key].Add(lr.Key);
-                        }
-                        else
-                            allGUIDs.Add(gs.Key, new List<int>(new int[] { lr.Key, }));
-                    }
-                }
-            }
-            if (duplicates.Count > 0)
-            {
-                duplicates.Sort();
-                MessageBox.Show("Cannot merge - duplicate String GUIDs exist:\n\n  "
-                    + String.Join("\n  ", duplicates.Select(g => "0x" + g.ToString("X16")))
-                , "Merge", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                return;
-            }
-            #endregion
-
-            #region Prepare to add and remove instances to/from package name map _KEY files
-            /*
-             * Every time we remove a resource from the package, we should check to see if it is still in use.
-             * If not, we should remove it from the _KEY resource, if one exists.
-             * The following fancy foot work gets us set up ready to rock'n'roll...
-            /**/
-
-            _KEYRemoveInstance removeInstance;
-            _KEYAddInstance addInstance;
-            _KEYCommitNameMaps commitNameMaps;
-
-            // Do we actually have anything to deal with?
-            // Set up a list of the useful NMAP/_KEY rks/resources
-            var keys = _currentPackage.FindAll(x => x.ResourceType == 0x0166038C)// NMAP (or _KEY if you prefer)
-                .Select(rk =>
-                {
-                    // So, this resource key in the index, can we get a _KEY from it?
-                    try { return new KeyValuePair<IResourceIndexEntry, NameMapResource.NameMapResource>(rk, new NameMapResource.NameMapResource(0, ((APackage)_currentPackage).GetResource(rk))); }
-                    catch { return new KeyValuePair<IResourceIndexEntry, NameMapResource.NameMapResource>(null, null); }
-                }).Where(x => x.Key != null).ToList();
-
-            if (keys.Count > 0)
-            {
-                // OK, we have one or more _KEY files, so we're going to have to keep things tidy
-
-                removeInstance = i =>
-                {
-                    // First, let's see if the instance exists (remember, this is after we've marked the STBL deleted)
-                    var lrie = _currentPackage.FindAll(x => x.Instance == i);
-                    if (lrie.Count > 0) return; // Yes, still in use elsewhere
-
-                    // OK, not found... now need to go through all the _KEYs deleting the entry.
-                    keys.ForEach(kvp => kvp.Value.Remove(i)); // and we don't care in the least if it wasn't there
-                };
-
-                // We'll just use the first file for adding (if there is one) - and handily, it knows how.
-                // Note: this *will* throw an exception of the key exists
-                addInstance = keys[0].Value.Add;
-
-                // Just assume they need cleaning...
-                commitNameMaps = () => keys.ForEach(kvp => _currentPackage.ReplaceResource(kvp.Key, kvp.Value));
-            }
-            else
-            {
-                // There is no _KEY at all, so we do nothing
-                removeInstance = i => { };
-                addInstance = (i, value) => { };
-                commitNameMaps = () => { };
-            }
-            #endregion
-
-            var instance = FNV64.GetHash(fileName + DateTime.Now.ToBinary().ToString());
-            instance = (instance >> 8) ^ (instance & 0xFF);
-
-            uint group = 0;
-            foreach (var rk in StringTables.Keys) if (rk.ResourceGroup > group) group = rk.ResourceGroup;
-
-            for (int lang = 0; lang < locales.Count; lang++)
-            {
-                var stbl = new StblResource.StblResource(0, null);
-                foreach (var lr in StringTables.Values)
-                {
-                    if (lr.ContainsKey(lang))
-                        foreach (var s in lr[lang])
-                            stbl.Add(s.Key, s.Value);
-                }
-
-                var rk = new RK(STBL, group, instance | ((ulong)lang << 56));
-                _currentPackage.AddResource(rk, stbl.Stream, true);
-                addInstance(rk.Instance, "Strings_" + locales[lang].Replace(' ', '_') + "_" + rk.Instance.ToString("x"));
-            }
-
-            foreach (var res in currentPackage.FindAll(x => x.ResourceType == STBL && (x.ResourceGroup != group || (x.Instance & 0x00FFFFFFFFFFFFFF) != instance)))
-            {
-                _currentPackage.DeleteResource(res);
-                removeInstance(res.Instance);// res.Instance is futile, uh, possibly unused that is.
-            }
-
-            commitNameMaps();
-
-            pkgIsDirty = true;
-
-            ReloadStringTables();
-            ReloadStrings();
-            SelectStrings();
-        }
-
         private void btnFindFirst_Click(object sender, EventArgs e)
         {
             AskCommit();
@@ -721,8 +746,6 @@ under certain conditions; see Help->Licence for details.
 
         private void btnDelString_Click(object sender, EventArgs e)
         {
-            AskCommit();
-
             var guid = (ulong)tbGUID.Tag;
 
             foreach (var locale in StringTables[STBLGroupKey.Key].Keys)
@@ -751,13 +774,23 @@ under certain conditions; see Help->Licence for details.
         {
             if (ckbAutoCommit.Checked)
             {
-                btnCommit.Enabled = false;
+                button_AbandonEdit.Enabled = btnCommit.Enabled = false;
                 if (txtIsDirty)
                     CommitText();
             }
 
             Settings.Default.AutoCommit = ckbAutoCommit.Checked;
             Settings.Default.Save();
+        }
+
+        private void btnCommit_Click(object sender, EventArgs e)
+        {
+            CommitText();
+        }
+
+        private void button_AbandonEdit_Click(object sender, EventArgs e)
+        {
+            txtTarget.Text = lstStrings.SelectedItems[0].SubItems[2].Text;
         }
 
         private void btnStringToTarget_Click(object sender, EventArgs e)
@@ -891,6 +924,59 @@ Do you accept this licence?" : ""),
             }
         }
         #endregion
+
+        void packageChangeHandler()
+        {
+            _pkgDirty = _txtDirty = false;
+            SetFormTitle();
+            ReloadStringTables();
+            btnSetToAll.Enabled = btnSetToTarget.Enabled = tlpFind.Enabled = currentPackage != null;
+
+            /*
+                * Every time we remove a resource from the package, we should check to see if it is still in use.
+                * If not, we should remove it from the _KEY resource, if one exists.
+                * The following fancy foot work gets us set up ready to rock'n'roll...
+            /**/
+
+            // Do we actually have anything to deal with?
+            // Set up a list of the useful NMAP/_KEY rks/resources
+            var keys = (_currentPackage == null ? new List<IResourceIndexEntry>() : _currentPackage.FindAll(x => x.ResourceType == 0x0166038C))// NMAP (or _KEY if you prefer)
+                .Select(rk =>
+                {
+                    // So, this resource key in the index, can we get a _KEY from it?
+                    try { return new KeyValuePair<IResourceIndexEntry, NameMapResource.NameMapResource>(rk, new NameMapResource.NameMapResource(0, ((APackage)_currentPackage).GetResource(rk))); }
+                    catch { return new KeyValuePair<IResourceIndexEntry, NameMapResource.NameMapResource>(null, null); }
+                }).Where(x => x.Key != null).ToList();
+
+            if (keys.Count > 0)
+            {
+                // OK, we have one or more _KEY files, so we're going to have to keep things tidy
+
+                removeInstance = i =>
+                {
+                    // First, let's see if the instance exists (remember, this is after we've marked the STBL deleted)
+                    var lrie = _currentPackage.FindAll(x => x.Instance == i);
+                    if (lrie.Count > 0) return; // Yes, still in use elsewhere
+
+                    // OK, not found... now need to go through all the _KEYs deleting the entry.
+                    keys.ForEach(kvp => kvp.Value.Remove(i)); // and we don't care in the least if it wasn't there
+                };
+
+                // We'll just use the first file for adding (if there is one) - and handily, it knows how.
+                // Note: this *will* throw an exception of the key exists
+                addInstance = keys[0].Value.Add;
+
+                // Just assume they need cleaning...
+                commitNameMaps = () => keys.ForEach(kvp => _currentPackage.ReplaceResource(kvp.Key, kvp.Value));
+            }
+            else
+            {
+                // There is no _KEY at all, so we do nothing
+                removeInstance = i => { };
+                addInstance = (i, value) => { };
+                commitNameMaps = () => { };
+            }
+        }
 
         void SetFormTitle()
         {

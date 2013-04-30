@@ -84,20 +84,22 @@ namespace S3Translate
             this.chTarget = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tlp_EditAndRef = new System.Windows.Forms.TableLayoutPanel();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
-            this.tlp_SourceRef = new System.Windows.Forms.TableLayoutPanel();
-            this.label4 = new System.Windows.Forms.Label();
-            this.txtSource = new System.Windows.Forms.TextBox();
             this.tlp_TargetEdit = new System.Windows.Forms.TableLayoutPanel();
             this.txtTarget = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.tlp_CommitCancel = new System.Windows.Forms.TableLayoutPanel();
+            this.button_AbandonEdit = new System.Windows.Forms.Button();
+            this.ckbAutoCommit = new System.Windows.Forms.CheckBox();
+            this.btnCommit = new System.Windows.Forms.Button();
+            this.tlp_SourceRef = new System.Windows.Forms.TableLayoutPanel();
+            this.label4 = new System.Windows.Forms.Label();
+            this.txtSource = new System.Windows.Forms.TextBox();
             this.tlpFind = new System.Windows.Forms.TableLayoutPanel();
             this.txtFind = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.btnFindNext = new System.Windows.Forms.Button();
             this.btnFindFirst = new System.Windows.Forms.Button();
-            this.btnCommit = new System.Windows.Forms.Button();
-            this.ckbAutoCommit = new System.Windows.Forms.CheckBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -126,8 +128,6 @@ namespace S3Translate
             this.mainToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.prg = new System.Windows.Forms.ToolStripProgressBar();
-            this.tlp_CommitCancel = new System.Windows.Forms.TableLayoutPanel();
-            this.button_AbandonEdit = new System.Windows.Forms.Button();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
@@ -148,13 +148,13 @@ namespace S3Translate
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
-            this.tlp_SourceRef.SuspendLayout();
             this.tlp_TargetEdit.SuspendLayout();
+            this.tlp_CommitCancel.SuspendLayout();
+            this.tlp_SourceRef.SuspendLayout();
             this.tlpFind.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
-            this.tlp_CommitCancel.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStripContainer1
@@ -167,21 +167,19 @@ namespace S3Translate
             // toolStripContainer1.ContentPanel
             // 
             this.toolStripContainer1.ContentPanel.Controls.Add(this.tableLayoutPanel_MainInge);
-            this.toolStripContainer1.ContentPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(1187, 722);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(890, 585);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             // 
             // toolStripContainer1.LeftToolStripPanel
             // 
             this.toolStripContainer1.LeftToolStripPanel.Enabled = false;
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 0);
-            this.toolStripContainer1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.toolStripContainer1.Name = "toolStripContainer1";
             // 
             // toolStripContainer1.RightToolStripPanel
             // 
             this.toolStripContainer1.RightToolStripPanel.Enabled = false;
-            this.toolStripContainer1.Size = new System.Drawing.Size(1187, 749);
+            this.toolStripContainer1.Size = new System.Drawing.Size(890, 609);
             this.toolStripContainer1.TabIndex = 0;
             this.toolStripContainer1.Text = "toolStripContainer1";
             // 
@@ -198,12 +196,12 @@ namespace S3Translate
             this.tableLayoutPanel_MainInge.Controls.Add(this.tableLayoutPanel_RightInge, 1, 0);
             this.tableLayoutPanel_MainInge.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_MainInge.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_MainInge.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tableLayoutPanel_MainInge.Margin = new System.Windows.Forms.Padding(2);
             this.tableLayoutPanel_MainInge.Name = "tableLayoutPanel_MainInge";
             this.tableLayoutPanel_MainInge.RowCount = 2;
             this.tableLayoutPanel_MainInge.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_MainInge.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel_MainInge.Size = new System.Drawing.Size(1187, 722);
+            this.tableLayoutPanel_MainInge.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 16F));
+            this.tableLayoutPanel_MainInge.Size = new System.Drawing.Size(890, 585);
             this.tableLayoutPanel_MainInge.TabIndex = 0;
             // 
             // tableLayoutPanel_LeftInge
@@ -214,14 +212,15 @@ namespace S3Translate
             this.tableLayoutPanel_LeftInge.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_LeftInge.Controls.Add(this.tableLayoutPanel6, 0, 1);
             this.tableLayoutPanel_LeftInge.Controls.Add(this.tableLayoutPanel2, 0, 0);
-            this.tableLayoutPanel_LeftInge.Location = new System.Drawing.Point(3, 3);
+            this.tableLayoutPanel_LeftInge.Location = new System.Drawing.Point(2, 2);
+            this.tableLayoutPanel_LeftInge.Margin = new System.Windows.Forms.Padding(2);
             this.tableLayoutPanel_LeftInge.Name = "tableLayoutPanel_LeftInge";
             this.tableLayoutPanel_LeftInge.RowCount = 4;
             this.tableLayoutPanel_LeftInge.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_LeftInge.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_LeftInge.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_LeftInge.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_LeftInge.Size = new System.Drawing.Size(431, 457);
+            this.tableLayoutPanel_LeftInge.Size = new System.Drawing.Size(341, 377);
             this.tableLayoutPanel_LeftInge.TabIndex = 0;
             // 
             // tableLayoutPanel6
@@ -229,7 +228,7 @@ namespace S3Translate
             this.tableLayoutPanel6.AutoSize = true;
             this.tableLayoutPanel6.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tableLayoutPanel6.ColumnCount = 2;
-            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 200F));
+            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel6.Controls.Add(this.btnChangeGUID, 1, 1);
             this.tableLayoutPanel6.Controls.Add(this.btnAddString, 1, 2);
@@ -243,21 +242,20 @@ namespace S3Translate
             this.tableLayoutPanel6.Controls.Add(this.btnSetToTarget, 1, 7);
             this.tableLayoutPanel6.Controls.Add(this.btnDelString, 1, 0);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel6.Location = new System.Drawing.Point(4, 176);
-            this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 147);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 10;
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 10F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 8F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 16F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(423, 277);
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(335, 227);
             this.tableLayoutPanel6.TabIndex = 1;
             // 
             // btnChangeGUID
@@ -266,10 +264,9 @@ namespace S3Translate
             this.btnChangeGUID.AutoSize = true;
             this.btnChangeGUID.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnChangeGUID.Enabled = false;
-            this.btnChangeGUID.Location = new System.Drawing.Point(204, 39);
-            this.btnChangeGUID.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnChangeGUID.Location = new System.Drawing.Point(153, 32);
             this.btnChangeGUID.Name = "btnChangeGUID";
-            this.btnChangeGUID.Size = new System.Drawing.Size(215, 27);
+            this.btnChangeGUID.Size = new System.Drawing.Size(179, 23);
             this.btnChangeGUID.TabIndex = 3;
             this.btnChangeGUID.Text = "&Edit GUID...";
             this.btnChangeGUID.UseVisualStyleBackColor = true;
@@ -281,10 +278,9 @@ namespace S3Translate
             this.btnAddString.AutoSize = true;
             this.btnAddString.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnAddString.Enabled = false;
-            this.btnAddString.Location = new System.Drawing.Point(204, 74);
-            this.btnAddString.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnAddString.Location = new System.Drawing.Point(153, 61);
             this.btnAddString.Name = "btnAddString";
-            this.btnAddString.Size = new System.Drawing.Size(215, 27);
+            this.btnAddString.Size = new System.Drawing.Size(179, 23);
             this.btnAddString.TabIndex = 4;
             this.btnAddString.Text = "&Add string...";
             this.btnAddString.UseVisualStyleBackColor = true;
@@ -297,10 +293,9 @@ namespace S3Translate
             this.btnSetToAll.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnSetToAll.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnSetToAll.Enabled = false;
-            this.btnSetToAll.Location = new System.Drawing.Point(204, 246);
-            this.btnSetToAll.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnSetToAll.Location = new System.Drawing.Point(153, 201);
             this.btnSetToAll.Name = "btnSetToAll";
-            this.btnSetToAll.Size = new System.Drawing.Size(215, 27);
+            this.btnSetToAll.Size = new System.Drawing.Size(179, 23);
             this.btnSetToAll.TabIndex = 10;
             this.btnSetToAll.Text = "All  &4";
             this.btnSetToAll.UseVisualStyleBackColor = true;
@@ -310,11 +305,10 @@ namespace S3Translate
             // 
             this.label8.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(7, 225);
-            this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label8.Location = new System.Drawing.Point(6, 185);
             this.label8.Name = "label8";
             this.tableLayoutPanel6.SetRowSpan(this.label8, 2);
-            this.label8.Size = new System.Drawing.Size(189, 34);
+            this.label8.Size = new System.Drawing.Size(141, 26);
             this.label8.TabIndex = 8;
             this.label8.Text = "Copy all Source Lang strings\r\nin selected String Set to:";
             this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -323,32 +317,30 @@ namespace S3Translate
             // 
             this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(0, 18);
+            this.label7.Location = new System.Drawing.Point(0, 16);
             this.label7.Margin = new System.Windows.Forms.Padding(0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(146, 17);
+            this.label7.Size = new System.Drawing.Size(112, 13);
             this.label7.TabIndex = 0;
             this.label7.Text = "Selected String GUID:";
             // 
             // tbGUID
             // 
             this.tbGUID.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbGUID.Location = new System.Drawing.Point(4, 41);
-            this.tbGUID.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tbGUID.Location = new System.Drawing.Point(3, 33);
             this.tbGUID.Name = "tbGUID";
             this.tbGUID.ReadOnly = true;
-            this.tbGUID.Size = new System.Drawing.Size(192, 22);
+            this.tbGUID.Size = new System.Drawing.Size(144, 20);
             this.tbGUID.TabIndex = 1;
             // 
             // label10
             // 
             this.label10.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(48, 142);
-            this.label10.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label10.Location = new System.Drawing.Point(36, 117);
             this.label10.Name = "label10";
             this.tableLayoutPanel6.SetRowSpan(this.label10, 2);
-            this.label10.Size = new System.Drawing.Size(148, 17);
+            this.label10.Size = new System.Drawing.Size(111, 13);
             this.label10.TabIndex = 5;
             this.label10.Text = "Copy Source string to:";
             this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -357,10 +349,9 @@ namespace S3Translate
             // 
             this.btnStringToTarget.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.btnStringToTarget.Enabled = false;
-            this.btnStringToTarget.Location = new System.Drawing.Point(204, 119);
-            this.btnStringToTarget.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnStringToTarget.Location = new System.Drawing.Point(153, 98);
             this.btnStringToTarget.Name = "btnStringToTarget";
-            this.btnStringToTarget.Size = new System.Drawing.Size(215, 28);
+            this.btnStringToTarget.Size = new System.Drawing.Size(179, 23);
             this.btnStringToTarget.TabIndex = 6;
             this.btnStringToTarget.Text = "Target  &1";
             this.btnStringToTarget.UseVisualStyleBackColor = true;
@@ -370,10 +361,9 @@ namespace S3Translate
             // 
             this.btnStringToAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.btnStringToAll.Enabled = false;
-            this.btnStringToAll.Location = new System.Drawing.Point(204, 155);
-            this.btnStringToAll.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnStringToAll.Location = new System.Drawing.Point(153, 127);
             this.btnStringToAll.Name = "btnStringToAll";
-            this.btnStringToAll.Size = new System.Drawing.Size(215, 28);
+            this.btnStringToAll.Size = new System.Drawing.Size(179, 23);
             this.btnStringToAll.TabIndex = 7;
             this.btnStringToAll.Text = "All  &2";
             this.btnStringToAll.UseVisualStyleBackColor = true;
@@ -385,10 +375,9 @@ namespace S3Translate
             this.btnSetToTarget.AutoSize = true;
             this.btnSetToTarget.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnSetToTarget.Enabled = false;
-            this.btnSetToTarget.Location = new System.Drawing.Point(204, 211);
-            this.btnSetToTarget.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnSetToTarget.Location = new System.Drawing.Point(153, 172);
             this.btnSetToTarget.Name = "btnSetToTarget";
-            this.btnSetToTarget.Size = new System.Drawing.Size(215, 27);
+            this.btnSetToTarget.Size = new System.Drawing.Size(179, 23);
             this.btnSetToTarget.TabIndex = 9;
             this.btnSetToTarget.Text = "Target  &3";
             this.btnSetToTarget.UseVisualStyleBackColor = true;
@@ -400,10 +389,9 @@ namespace S3Translate
             this.btnDelString.AutoSize = true;
             this.btnDelString.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnDelString.Enabled = false;
-            this.btnDelString.Location = new System.Drawing.Point(204, 4);
-            this.btnDelString.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnDelString.Location = new System.Drawing.Point(153, 3);
             this.btnDelString.Name = "btnDelString";
-            this.btnDelString.Size = new System.Drawing.Size(215, 27);
+            this.btnDelString.Size = new System.Drawing.Size(179, 23);
             this.btnDelString.TabIndex = 2;
             this.btnDelString.Text = "&Remove string";
             this.btnDelString.UseVisualStyleBackColor = true;
@@ -415,18 +403,18 @@ namespace S3Translate
             this.tableLayoutPanel2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.tableLayoutPanel2.ColumnCount = 2;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel_SourceTarget, 0, 1);
             this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel_SetPicking, 0, 0);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 2);
-            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(2, 2);
+            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(2);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 3;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(425, 168);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(337, 140);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // tableLayoutPanel_SourceTarget
@@ -442,24 +430,22 @@ namespace S3Translate
             this.tableLayoutPanel_SourceTarget.Controls.Add(this.cmbTargetLang, 1, 1);
             this.tableLayoutPanel_SourceTarget.Controls.Add(this.cmbSourceLang, 1, 0);
             this.tableLayoutPanel_SourceTarget.Controls.Add(this.label2, 0, 0);
-            this.tableLayoutPanel_SourceTarget.Location = new System.Drawing.Point(4, 100);
-            this.tableLayoutPanel_SourceTarget.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel_SourceTarget.Location = new System.Drawing.Point(3, 83);
             this.tableLayoutPanel_SourceTarget.Name = "tableLayoutPanel_SourceTarget";
             this.tableLayoutPanel_SourceTarget.RowCount = 2;
             this.tableLayoutPanel_SourceTarget.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_SourceTarget.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_SourceTarget.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel_SourceTarget.Size = new System.Drawing.Size(377, 64);
+            this.tableLayoutPanel_SourceTarget.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 16F));
+            this.tableLayoutPanel_SourceTarget.Size = new System.Drawing.Size(301, 54);
             this.tableLayoutPanel_SourceTarget.TabIndex = 2;
             // 
             // label1
             // 
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 39);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(6, 34);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(90, 17);
+            this.label1.Size = new System.Drawing.Size(68, 13);
             this.label1.TabIndex = 2;
             this.label1.Text = "&Target Lang:";
             // 
@@ -468,10 +454,10 @@ namespace S3Translate
             this.cmbTargetLang.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbTargetLang.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbTargetLang.FormattingEnabled = true;
-            this.cmbTargetLang.Location = new System.Drawing.Point(101, 36);
-            this.cmbTargetLang.Margin = new System.Windows.Forms.Padding(0, 4, 0, 4);
+            this.cmbTargetLang.Location = new System.Drawing.Point(77, 30);
+            this.cmbTargetLang.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.cmbTargetLang.Name = "cmbTargetLang";
-            this.cmbTargetLang.Size = new System.Drawing.Size(276, 24);
+            this.cmbTargetLang.Size = new System.Drawing.Size(224, 21);
             this.cmbTargetLang.TabIndex = 3;
             this.mainToolTip.SetToolTip(this.cmbTargetLang, "Select the language you want to create translations in");
             // 
@@ -480,10 +466,10 @@ namespace S3Translate
             this.cmbSourceLang.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbSourceLang.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbSourceLang.FormattingEnabled = true;
-            this.cmbSourceLang.Location = new System.Drawing.Point(101, 4);
-            this.cmbSourceLang.Margin = new System.Windows.Forms.Padding(0, 4, 0, 4);
+            this.cmbSourceLang.Location = new System.Drawing.Point(77, 3);
+            this.cmbSourceLang.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
             this.cmbSourceLang.Name = "cmbSourceLang";
-            this.cmbSourceLang.Size = new System.Drawing.Size(276, 24);
+            this.cmbSourceLang.Size = new System.Drawing.Size(224, 21);
             this.cmbSourceLang.TabIndex = 1;
             this.mainToolTip.SetToolTip(this.cmbSourceLang, "Select the language to use as comparison\r\nand base (where the target does not exi" +
         "st)");
@@ -492,10 +478,9 @@ namespace S3Translate
             // 
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(4, 7);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Location = new System.Drawing.Point(3, 7);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(93, 17);
+            this.label2.Size = new System.Drawing.Size(71, 13);
             this.label2.TabIndex = 0;
             this.label2.Text = "&Source Lang:";
             // 
@@ -509,24 +494,24 @@ namespace S3Translate
             this.tableLayoutPanel_SetPicking.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_SetPicking.Controls.Add(this.label16, 0, 0);
             this.tableLayoutPanel_SetPicking.Controls.Add(this.cmbSetPicker, 0, 1);
-            this.tableLayoutPanel_SetPicking.Location = new System.Drawing.Point(3, 2);
-            this.tableLayoutPanel_SetPicking.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tableLayoutPanel_SetPicking.Location = new System.Drawing.Point(2, 2);
+            this.tableLayoutPanel_SetPicking.Margin = new System.Windows.Forms.Padding(2);
             this.tableLayoutPanel_SetPicking.Name = "tableLayoutPanel_SetPicking";
             this.tableLayoutPanel_SetPicking.RowCount = 3;
             this.tableLayoutPanel_SetPicking.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_SetPicking.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_SetPicking.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_SetPicking.Size = new System.Drawing.Size(379, 92);
+            this.tableLayoutPanel_SetPicking.Size = new System.Drawing.Size(303, 76);
             this.tableLayoutPanel_SetPicking.TabIndex = 1;
             // 
             // label16
             // 
             this.label16.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(4, 10);
-            this.label16.Margin = new System.Windows.Forms.Padding(4, 10, 4, 0);
+            this.label16.Location = new System.Drawing.Point(3, 8);
+            this.label16.Margin = new System.Windows.Forms.Padding(3, 8, 3, 0);
             this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(117, 17);
+            this.label16.Size = new System.Drawing.Size(89, 13);
             this.label16.TabIndex = 0;
             this.label16.Text = "Se&lect Strin&g Set:";
             // 
@@ -534,10 +519,10 @@ namespace S3Translate
             // 
             this.cmbSetPicker.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbSetPicker.FormattingEnabled = true;
-            this.cmbSetPicker.Location = new System.Drawing.Point(3, 29);
-            this.cmbSetPicker.Margin = new System.Windows.Forms.Padding(3, 2, 3, 39);
+            this.cmbSetPicker.Location = new System.Drawing.Point(2, 23);
+            this.cmbSetPicker.Margin = new System.Windows.Forms.Padding(2, 2, 2, 32);
             this.cmbSetPicker.Name = "cmbSetPicker";
-            this.cmbSetPicker.Size = new System.Drawing.Size(373, 24);
+            this.cmbSetPicker.Size = new System.Drawing.Size(299, 21);
             this.cmbSetPicker.TabIndex = 1;
             // 
             // tableLayoutPanel_RightInge
@@ -547,19 +532,19 @@ namespace S3Translate
             this.tableLayoutPanel_RightInge.Controls.Add(this.splitContainer1, 0, 1);
             this.tableLayoutPanel_RightInge.Controls.Add(this.tlpFind, 0, 0);
             this.tableLayoutPanel_RightInge.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel_RightInge.Location = new System.Drawing.Point(440, 3);
+            this.tableLayoutPanel_RightInge.Location = new System.Drawing.Point(347, 2);
+            this.tableLayoutPanel_RightInge.Margin = new System.Windows.Forms.Padding(2);
             this.tableLayoutPanel_RightInge.Name = "tableLayoutPanel_RightInge";
             this.tableLayoutPanel_RightInge.RowCount = 2;
             this.tableLayoutPanel_RightInge.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_RightInge.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_RightInge.Size = new System.Drawing.Size(744, 696);
+            this.tableLayoutPanel_RightInge.Size = new System.Drawing.Size(541, 565);
             this.tableLayoutPanel_RightInge.TabIndex = 1;
             // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(4, 97);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.splitContainer1.Location = new System.Drawing.Point(3, 80);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -570,25 +555,23 @@ namespace S3Translate
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.tlp_EditAndRef);
-            this.splitContainer1.Size = new System.Drawing.Size(736, 595);
-            this.splitContainer1.SplitterDistance = 313;
-            this.splitContainer1.SplitterWidth = 5;
+            this.splitContainer1.Size = new System.Drawing.Size(535, 482);
+            this.splitContainer1.SplitterDistance = 253;
             this.splitContainer1.TabIndex = 1;
             // 
             // tableLayoutPanel9
             // 
             this.tableLayoutPanel9.ColumnCount = 1;
             this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 15F));
             this.tableLayoutPanel9.Controls.Add(this.lstStrings, 0, 1);
             this.tableLayoutPanel9.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel9.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel9.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tableLayoutPanel9.Name = "tableLayoutPanel9";
             this.tableLayoutPanel9.RowCount = 2;
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel9.Size = new System.Drawing.Size(736, 313);
+            this.tableLayoutPanel9.Size = new System.Drawing.Size(535, 253);
             this.tableLayoutPanel9.TabIndex = 0;
             // 
             // lstStrings
@@ -602,10 +585,9 @@ namespace S3Translate
             this.lstStrings.GridLines = true;
             this.lstStrings.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.lstStrings.HideSelection = false;
-            this.lstStrings.Location = new System.Drawing.Point(4, 4);
-            this.lstStrings.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.lstStrings.Location = new System.Drawing.Point(3, 3);
             this.lstStrings.Name = "lstStrings";
-            this.lstStrings.Size = new System.Drawing.Size(728, 305);
+            this.lstStrings.Size = new System.Drawing.Size(529, 247);
             this.lstStrings.TabIndex = 0;
             this.lstStrings.UseCompatibleStateImageBehavior = false;
             this.lstStrings.View = System.Windows.Forms.View.Details;
@@ -630,22 +612,20 @@ namespace S3Translate
             this.tlp_EditAndRef.ColumnCount = 2;
             this.tlp_EditAndRef.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tlp_EditAndRef.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tlp_EditAndRef.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 27F));
+            this.tlp_EditAndRef.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tlp_EditAndRef.Controls.Add(this.splitContainer2, 0, 0);
             this.tlp_EditAndRef.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tlp_EditAndRef.Location = new System.Drawing.Point(0, 0);
-            this.tlp_EditAndRef.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tlp_EditAndRef.Name = "tlp_EditAndRef";
             this.tlp_EditAndRef.RowCount = 1;
             this.tlp_EditAndRef.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlp_EditAndRef.Size = new System.Drawing.Size(736, 277);
+            this.tlp_EditAndRef.Size = new System.Drawing.Size(535, 225);
             this.tlp_EditAndRef.TabIndex = 0;
             // 
             // splitContainer2
             // 
             this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer2.Location = new System.Drawing.Point(4, 4);
-            this.splitContainer2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.splitContainer2.Location = new System.Drawing.Point(3, 3);
             this.splitContainer2.Name = "splitContainer2";
             // 
             // splitContainer2.Panel1
@@ -655,49 +635,9 @@ namespace S3Translate
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.tlp_SourceRef);
-            this.splitContainer2.Size = new System.Drawing.Size(728, 269);
-            this.splitContainer2.SplitterDistance = 351;
-            this.splitContainer2.SplitterWidth = 5;
+            this.splitContainer2.Size = new System.Drawing.Size(529, 219);
+            this.splitContainer2.SplitterDistance = 254;
             this.splitContainer2.TabIndex = 1;
-            // 
-            // tlp_SourceRef
-            // 
-            this.tlp_SourceRef.ColumnCount = 1;
-            this.tlp_SourceRef.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlp_SourceRef.Controls.Add(this.label4, 0, 0);
-            this.tlp_SourceRef.Controls.Add(this.txtSource, 0, 1);
-            this.tlp_SourceRef.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tlp_SourceRef.Location = new System.Drawing.Point(0, 0);
-            this.tlp_SourceRef.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.tlp_SourceRef.Name = "tlp_SourceRef";
-            this.tlp_SourceRef.RowCount = 2;
-            this.tlp_SourceRef.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlp_SourceRef.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlp_SourceRef.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
-            this.tlp_SourceRef.Size = new System.Drawing.Size(372, 269);
-            this.tlp_SourceRef.TabIndex = 0;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(4, 0);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(161, 17);
-            this.label4.TabIndex = 0;
-            this.label4.Text = "Source string reference:";
-            // 
-            // txtSource
-            // 
-            this.txtSource.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtSource.Location = new System.Drawing.Point(4, 21);
-            this.txtSource.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.txtSource.Multiline = true;
-            this.txtSource.Name = "txtSource";
-            this.txtSource.ReadOnly = true;
-            this.txtSource.Size = new System.Drawing.Size(364, 244);
-            this.txtSource.TabIndex = 1;
-            this.mainToolTip.SetToolTip(this.txtSource, "Source Text");
             // 
             // tlp_TargetEdit
             // 
@@ -708,24 +648,22 @@ namespace S3Translate
             this.tlp_TargetEdit.Controls.Add(this.tlp_CommitCancel, 0, 2);
             this.tlp_TargetEdit.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tlp_TargetEdit.Location = new System.Drawing.Point(0, 0);
-            this.tlp_TargetEdit.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tlp_TargetEdit.Name = "tlp_TargetEdit";
             this.tlp_TargetEdit.RowCount = 3;
             this.tlp_TargetEdit.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlp_TargetEdit.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tlp_TargetEdit.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlp_TargetEdit.Size = new System.Drawing.Size(351, 269);
+            this.tlp_TargetEdit.Size = new System.Drawing.Size(254, 219);
             this.tlp_TargetEdit.TabIndex = 1;
             // 
             // txtTarget
             // 
             this.txtTarget.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txtTarget.Enabled = false;
-            this.txtTarget.Location = new System.Drawing.Point(4, 21);
-            this.txtTarget.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtTarget.Location = new System.Drawing.Point(3, 16);
             this.txtTarget.Multiline = true;
             this.txtTarget.Name = "txtTarget";
-            this.txtTarget.Size = new System.Drawing.Size(343, 203);
+            this.txtTarget.Size = new System.Drawing.Size(248, 167);
             this.txtTarget.TabIndex = 1;
             this.mainToolTip.SetToolTip(this.txtTarget, "Target Text");
             this.txtTarget.TextChanged += new System.EventHandler(this.txtTarget_TextChanged);
@@ -733,12 +671,115 @@ namespace S3Translate
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(4, 0);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Location = new System.Drawing.Point(3, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(116, 17);
+            this.label3.Size = new System.Drawing.Size(86, 13);
             this.label3.TabIndex = 0;
             this.label3.Text = "Edit target string:";
+            // 
+            // tlp_CommitCancel
+            // 
+            this.tlp_CommitCancel.AutoSize = true;
+            this.tlp_CommitCancel.ColumnCount = 3;
+            this.tlp_CommitCancel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlp_CommitCancel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlp_CommitCancel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tlp_CommitCancel.Controls.Add(this.button_AbandonEdit, 2, 0);
+            this.tlp_CommitCancel.Controls.Add(this.ckbAutoCommit, 0, 0);
+            this.tlp_CommitCancel.Controls.Add(this.btnCommit, 1, 0);
+            this.tlp_CommitCancel.Dock = System.Windows.Forms.DockStyle.Right;
+            this.tlp_CommitCancel.Location = new System.Drawing.Point(2, 188);
+            this.tlp_CommitCancel.Margin = new System.Windows.Forms.Padding(2);
+            this.tlp_CommitCancel.Name = "tlp_CommitCancel";
+            this.tlp_CommitCancel.RowCount = 1;
+            this.tlp_CommitCancel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlp_CommitCancel.Size = new System.Drawing.Size(250, 29);
+            this.tlp_CommitCancel.TabIndex = 2;
+            // 
+            // button_AbandonEdit
+            // 
+            this.button_AbandonEdit.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.button_AbandonEdit.AutoSize = true;
+            this.button_AbandonEdit.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.button_AbandonEdit.Enabled = false;
+            this.button_AbandonEdit.Location = new System.Drawing.Point(175, 3);
+            this.button_AbandonEdit.Name = "button_AbandonEdit";
+            this.button_AbandonEdit.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
+            this.button_AbandonEdit.Size = new System.Drawing.Size(84, 23);
+            this.button_AbandonEdit.TabIndex = 4;
+            this.button_AbandonEdit.Text = "A&bandon";
+            this.mainToolTip.SetToolTip(this.button_AbandonEdit, "Write changes to Target string");
+            this.button_AbandonEdit.UseVisualStyleBackColor = true;
+            this.button_AbandonEdit.Click += new System.EventHandler(this.button_AbandonEdit_Click);
+            // 
+            // ckbAutoCommit
+            // 
+            this.ckbAutoCommit.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.ckbAutoCommit.AutoSize = true;
+            this.ckbAutoCommit.Checked = true;
+            this.ckbAutoCommit.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.ckbAutoCommit.Location = new System.Drawing.Point(3, 6);
+            this.ckbAutoCommit.Name = "ckbAutoCommit";
+            this.ckbAutoCommit.Size = new System.Drawing.Size(85, 17);
+            this.ckbAutoCommit.TabIndex = 4;
+            this.ckbAutoCommit.Text = "A&uto Commit";
+            this.ckbAutoCommit.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.mainToolTip.SetToolTip(this.ckbAutoCommit, "When unchecked, any changes made to the target text\r\nbox require \"Commit\" to be c" +
+        "licked to write back to the\r\nTarget string itself.");
+            this.ckbAutoCommit.UseVisualStyleBackColor = true;
+            this.ckbAutoCommit.CheckedChanged += new System.EventHandler(this.ckbAutoCommit_CheckedChanged);
+            // 
+            // btnCommit
+            // 
+            this.btnCommit.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.btnCommit.AutoSize = true;
+            this.btnCommit.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnCommit.Enabled = false;
+            this.btnCommit.Location = new System.Drawing.Point(94, 3);
+            this.btnCommit.Name = "btnCommit";
+            this.btnCommit.Padding = new System.Windows.Forms.Padding(12, 0, 12, 0);
+            this.btnCommit.Size = new System.Drawing.Size(75, 23);
+            this.btnCommit.TabIndex = 3;
+            this.btnCommit.Text = "&Commit";
+            this.mainToolTip.SetToolTip(this.btnCommit, "Write changes to Target string");
+            this.btnCommit.UseVisualStyleBackColor = true;
+            this.btnCommit.Click += new System.EventHandler(this.btnCommit_Click);
+            // 
+            // tlp_SourceRef
+            // 
+            this.tlp_SourceRef.ColumnCount = 1;
+            this.tlp_SourceRef.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlp_SourceRef.Controls.Add(this.label4, 0, 0);
+            this.tlp_SourceRef.Controls.Add(this.txtSource, 0, 1);
+            this.tlp_SourceRef.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tlp_SourceRef.Location = new System.Drawing.Point(0, 0);
+            this.tlp_SourceRef.Name = "tlp_SourceRef";
+            this.tlp_SourceRef.RowCount = 2;
+            this.tlp_SourceRef.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlp_SourceRef.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tlp_SourceRef.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tlp_SourceRef.Size = new System.Drawing.Size(271, 219);
+            this.tlp_SourceRef.TabIndex = 0;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(3, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(120, 13);
+            this.label4.TabIndex = 0;
+            this.label4.Text = "Source string reference:";
+            // 
+            // txtSource
+            // 
+            this.txtSource.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtSource.Location = new System.Drawing.Point(3, 16);
+            this.txtSource.Multiline = true;
+            this.txtSource.Name = "txtSource";
+            this.txtSource.ReadOnly = true;
+            this.txtSource.Size = new System.Drawing.Size(265, 200);
+            this.txtSource.TabIndex = 1;
+            this.mainToolTip.SetToolTip(this.txtSource, "Source Text");
             // 
             // tlpFind
             // 
@@ -752,23 +793,22 @@ namespace S3Translate
             this.tlpFind.Controls.Add(this.tableLayoutPanel4, 1, 1);
             this.tlpFind.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tlpFind.Enabled = false;
-            this.tlpFind.Location = new System.Drawing.Point(4, 4);
-            this.tlpFind.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tlpFind.Location = new System.Drawing.Point(3, 3);
             this.tlpFind.Name = "tlpFind";
             this.tlpFind.RowCount = 3;
             this.tlpFind.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpFind.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpFind.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tlpFind.Size = new System.Drawing.Size(736, 85);
+            this.tlpFind.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 16F));
+            this.tlpFind.Size = new System.Drawing.Size(535, 71);
             this.tlpFind.TabIndex = 0;
             // 
             // txtFind
             // 
             this.txtFind.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtFind.Location = new System.Drawing.Point(51, 4);
-            this.txtFind.Margin = new System.Windows.Forms.Padding(4, 4, 40, 4);
+            this.txtFind.Location = new System.Drawing.Point(39, 3);
+            this.txtFind.Margin = new System.Windows.Forms.Padding(3, 3, 30, 3);
             this.txtFind.Name = "txtFind";
-            this.txtFind.Size = new System.Drawing.Size(645, 22);
+            this.txtFind.Size = new System.Drawing.Size(466, 20);
             this.txtFind.TabIndex = 1;
             this.mainToolTip.SetToolTip(this.txtFind, "Text entered will be searched for in\r\nsource, target and instance number");
             // 
@@ -776,10 +816,9 @@ namespace S3Translate
             // 
             this.label5.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(4, 6);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label5.Location = new System.Drawing.Point(3, 6);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(39, 17);
+            this.label5.Size = new System.Drawing.Size(30, 13);
             this.label5.TabIndex = 0;
             this.label5.Text = "F&ind:";
             // 
@@ -793,23 +832,22 @@ namespace S3Translate
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel4.Controls.Add(this.btnFindNext, 1, 0);
             this.tableLayoutPanel4.Controls.Add(this.btnFindFirst, 0, 0);
-            this.tableLayoutPanel4.Location = new System.Drawing.Point(51, 34);
-            this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(39, 29);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 2;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(105, 27);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(87, 23);
             this.tableLayoutPanel4.TabIndex = 2;
             // 
             // btnFindNext
             // 
             this.btnFindNext.AutoSize = true;
             this.btnFindNext.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnFindNext.Location = new System.Drawing.Point(55, 0);
-            this.btnFindNext.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.btnFindNext.Location = new System.Drawing.Point(45, 0);
+            this.btnFindNext.Margin = new System.Windows.Forms.Padding(3, 0, 3, 0);
             this.btnFindNext.Name = "btnFindNext";
-            this.btnFindNext.Size = new System.Drawing.Size(46, 27);
+            this.btnFindNext.Size = new System.Drawing.Size(39, 23);
             this.btnFindNext.TabIndex = 1;
             this.btnFindNext.Text = "&Next";
             this.btnFindNext.UseVisualStyleBackColor = true;
@@ -820,48 +858,14 @@ namespace S3Translate
             this.btnFindFirst.AutoSize = true;
             this.btnFindFirst.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnFindFirst.Location = new System.Drawing.Point(0, 0);
-            this.btnFindFirst.Margin = new System.Windows.Forms.Padding(0, 0, 4, 0);
+            this.btnFindFirst.Margin = new System.Windows.Forms.Padding(0, 0, 3, 0);
             this.btnFindFirst.Name = "btnFindFirst";
             this.btnFindFirst.Padding = new System.Windows.Forms.Padding(1, 0, 1, 0);
-            this.btnFindFirst.Size = new System.Drawing.Size(47, 27);
+            this.btnFindFirst.Size = new System.Drawing.Size(39, 23);
             this.btnFindFirst.TabIndex = 0;
             this.btnFindFirst.Text = "Fin&d";
             this.btnFindFirst.UseVisualStyleBackColor = true;
             this.btnFindFirst.Click += new System.EventHandler(this.btnFindFirst_Click);
-            // 
-            // btnCommit
-            // 
-            this.btnCommit.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.btnCommit.AutoSize = true;
-            this.btnCommit.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnCommit.Enabled = false;
-            this.btnCommit.Location = new System.Drawing.Point(121, 4);
-            this.btnCommit.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.btnCommit.Name = "btnCommit";
-            this.btnCommit.Padding = new System.Windows.Forms.Padding(16, 0, 16, 0);
-            this.btnCommit.Size = new System.Drawing.Size(96, 27);
-            this.btnCommit.TabIndex = 3;
-            this.btnCommit.Text = "&Commit";
-            this.mainToolTip.SetToolTip(this.btnCommit, "Write changes to Target string");
-            this.btnCommit.UseVisualStyleBackColor = true;
-            // 
-            // ckbAutoCommit
-            // 
-            this.ckbAutoCommit.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.ckbAutoCommit.AutoSize = true;
-            this.ckbAutoCommit.Checked = true;
-            this.ckbAutoCommit.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.ckbAutoCommit.Location = new System.Drawing.Point(4, 7);
-            this.ckbAutoCommit.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.ckbAutoCommit.Name = "ckbAutoCommit";
-            this.ckbAutoCommit.Size = new System.Drawing.Size(109, 21);
-            this.ckbAutoCommit.TabIndex = 4;
-            this.ckbAutoCommit.Text = "A&uto Commit";
-            this.ckbAutoCommit.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.mainToolTip.SetToolTip(this.ckbAutoCommit, "When unchecked, any changes made to the target text\r\nbox require \"Commit\" to be c" +
-        "licked to write back to the\r\nTarget string itself.");
-            this.ckbAutoCommit.UseVisualStyleBackColor = true;
-            this.ckbAutoCommit.CheckedChanged += new System.EventHandler(this.ckbAutoCommit_CheckedChanged);
             // 
             // menuStrip1
             // 
@@ -872,7 +876,7 @@ namespace S3Translate
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1187, 27);
+            this.menuStrip1.Size = new System.Drawing.Size(890, 24);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -889,7 +893,7 @@ namespace S3Translate
             this.toolStripSeparator1,
             this.quitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(47, 23);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
             this.fileToolStripMenuItem.Text = "&File";
             this.fileToolStripMenuItem.DropDownOpening += new System.EventHandler(this.fileToolStripMenuItem_DropDownOpening);
             // 
@@ -897,7 +901,7 @@ namespace S3Translate
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(238, 24);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
             this.openToolStripMenuItem.Text = "&Open...";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -905,53 +909,53 @@ namespace S3Translate
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
             this.closeToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(238, 24);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
             this.closeToolStripMenuItem.Text = "&Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(235, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(179, 6);
             // 
             // savePackageToolStripMenuItem
             // 
             this.savePackageToolStripMenuItem.Name = "savePackageToolStripMenuItem";
             this.savePackageToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.savePackageToolStripMenuItem.Size = new System.Drawing.Size(238, 24);
+            this.savePackageToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
             this.savePackageToolStripMenuItem.Text = "&Save Package";
             this.savePackageToolStripMenuItem.Click += new System.EventHandler(this.savePackageToolStripMenuItem_Click);
             // 
             // savePackageAsToolStripMenuItem
             // 
             this.savePackageAsToolStripMenuItem.Name = "savePackageAsToolStripMenuItem";
-            this.savePackageAsToolStripMenuItem.Size = new System.Drawing.Size(238, 24);
+            this.savePackageAsToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
             this.savePackageAsToolStripMenuItem.Text = "Save Package &As...";
             this.savePackageAsToolStripMenuItem.Click += new System.EventHandler(this.savePackageAsToolStripMenuItem_Click);
             // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(235, 6);
+            this.toolStripMenuItem3.Size = new System.Drawing.Size(179, 6);
             // 
             // preferencesToolStripMenuItem
             // 
             this.preferencesToolStripMenuItem.Name = "preferencesToolStripMenuItem";
             this.preferencesToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
-            this.preferencesToolStripMenuItem.Size = new System.Drawing.Size(238, 24);
+            this.preferencesToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
             this.preferencesToolStripMenuItem.Text = "&Preferences...";
             this.preferencesToolStripMenuItem.Click += new System.EventHandler(this.preferencesToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(235, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(179, 6);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
             this.quitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(238, 24);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(182, 22);
             this.quitToolStripMenuItem.Text = "&Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
@@ -968,67 +972,69 @@ namespace S3Translate
             this.toolStripSeparator2,
             this.mergeAllSetsToolStripMenuItem});
             this.sTBLsToolStripMenuItem.Name = "sTBLsToolStripMenuItem";
-            this.sTBLsToolStripMenuItem.Size = new System.Drawing.Size(69, 23);
+            this.sTBLsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
             this.sTBLsToolStripMenuItem.Text = "STB&Ls";
             this.sTBLsToolStripMenuItem.DropDownOpening += new System.EventHandler(this.sTBLsToolStripMenuItem_DropDownOpening);
             // 
             // createNewSetToolStripMenuItem
             // 
             this.createNewSetToolStripMenuItem.Name = "createNewSetToolStripMenuItem";
-            this.createNewSetToolStripMenuItem.Size = new System.Drawing.Size(300, 24);
+            this.createNewSetToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.createNewSetToolStripMenuItem.Text = "&Create new set";
+            this.createNewSetToolStripMenuItem.Click += new System.EventHandler(this.createNewSetToolStripMenuItem_Click);
             // 
             // deleteSetToolStripMenuItem
             // 
             this.deleteSetToolStripMenuItem.Name = "deleteSetToolStripMenuItem";
-            this.deleteSetToolStripMenuItem.Size = new System.Drawing.Size(300, 24);
+            this.deleteSetToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.deleteSetToolStripMenuItem.Text = "&Delete selected set";
+            this.deleteSetToolStripMenuItem.Click += new System.EventHandler(this.deleteSetToolStripMenuItem_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(297, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(220, 6);
             // 
             // importFromPackageToolStripMenuItem
             // 
             this.importFromPackageToolStripMenuItem.Name = "importFromPackageToolStripMenuItem";
-            this.importFromPackageToolStripMenuItem.Size = new System.Drawing.Size(300, 24);
+            this.importFromPackageToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.importFromPackageToolStripMenuItem.Text = "&Import STBLs from package";
             this.importFromPackageToolStripMenuItem.Click += new System.EventHandler(this.importPackageToolStripMenuItem_Click);
             // 
             // importFromSTBLFileToolStripMenuItem
             // 
             this.importFromSTBLFileToolStripMenuItem.Name = "importFromSTBLFileToolStripMenuItem";
-            this.importFromSTBLFileToolStripMenuItem.Size = new System.Drawing.Size(300, 24);
+            this.importFromSTBLFileToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.importFromSTBLFileToolStripMenuItem.Text = "Import &from .STBL file/s";
             this.importFromSTBLFileToolStripMenuItem.Click += new System.EventHandler(this.importSTBLToolStripMenuItem_Click);
             // 
             // exportToPackageToolStripMenuItem
             // 
             this.exportToPackageToolStripMenuItem.Name = "exportToPackageToolStripMenuItem";
-            this.exportToPackageToolStripMenuItem.Size = new System.Drawing.Size(300, 24);
+            this.exportToPackageToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.exportToPackageToolStripMenuItem.Text = "&Export selected set to package";
             this.exportToPackageToolStripMenuItem.Click += new System.EventHandler(this.exportToPackageToolStripMenuItem_Click);
             // 
             // exportToSTBLFileToolStripMenuItem
             // 
             this.exportToSTBLFileToolStripMenuItem.Name = "exportToSTBLFileToolStripMenuItem";
-            this.exportToSTBLFileToolStripMenuItem.Size = new System.Drawing.Size(300, 24);
+            this.exportToSTBLFileToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.exportToSTBLFileToolStripMenuItem.Text = "Export &to .STBL file/s";
             this.exportToSTBLFileToolStripMenuItem.Click += new System.EventHandler(this.exportLanguageToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(297, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(220, 6);
             // 
             // mergeAllSetsToolStripMenuItem
             // 
             this.mergeAllSetsToolStripMenuItem.Name = "mergeAllSetsToolStripMenuItem";
             this.mergeAllSetsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.M)));
-            this.mergeAllSetsToolStripMenuItem.Size = new System.Drawing.Size(300, 24);
+            this.mergeAllSetsToolStripMenuItem.Size = new System.Drawing.Size(223, 22);
             this.mergeAllSetsToolStripMenuItem.Text = "&Merge all sets";
-            this.mergeAllSetsToolStripMenuItem.Click += new System.EventHandler(this.btnMergeSets_Click);
+            this.mergeAllSetsToolStripMenuItem.Click += new System.EventHandler(this.mergeAllSetsToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -1037,28 +1043,28 @@ namespace S3Translate
             this.licenceToolStripMenuItem,
             this.aboutToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(53, 23);
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(40, 20);
             this.helpToolStripMenuItem.Text = "&Help";
             // 
             // contentsToolStripMenuItem
             // 
             this.contentsToolStripMenuItem.Name = "contentsToolStripMenuItem";
             this.contentsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F1;
-            this.contentsToolStripMenuItem.Size = new System.Drawing.Size(185, 24);
+            this.contentsToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             this.contentsToolStripMenuItem.Text = "&Contents...";
             this.contentsToolStripMenuItem.Click += new System.EventHandler(this.contentsToolStripMenuItem_Click);
             // 
             // licenceToolStripMenuItem
             // 
             this.licenceToolStripMenuItem.Name = "licenceToolStripMenuItem";
-            this.licenceToolStripMenuItem.Size = new System.Drawing.Size(185, 24);
+            this.licenceToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             this.licenceToolStripMenuItem.Text = "&Licence...";
             this.licenceToolStripMenuItem.Click += new System.EventHandler(this.licenceToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(185, 24);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             this.aboutToolStripMenuItem.Text = "&About...";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -1066,63 +1072,27 @@ namespace S3Translate
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.prg});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 727);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 587);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(1187, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(890, 22);
             this.statusStrip1.TabIndex = 3;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // prg
             // 
             this.prg.Name = "prg";
-            this.prg.Size = new System.Drawing.Size(133, 20);
+            this.prg.Size = new System.Drawing.Size(100, 16);
             this.prg.Visible = false;
-            // 
-            // tlp_CommitCancel
-            // 
-            this.tlp_CommitCancel.AutoSize = true;
-            this.tlp_CommitCancel.ColumnCount = 3;
-            this.tlp_CommitCancel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tlp_CommitCancel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tlp_CommitCancel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tlp_CommitCancel.Controls.Add(this.button_AbandonEdit, 2, 0);
-            this.tlp_CommitCancel.Controls.Add(this.ckbAutoCommit, 0, 0);
-            this.tlp_CommitCancel.Controls.Add(this.btnCommit, 1, 0);
-            this.tlp_CommitCancel.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tlp_CommitCancel.Location = new System.Drawing.Point(12, 231);
-            this.tlp_CommitCancel.Name = "tlp_CommitCancel";
-            this.tlp_CommitCancel.RowCount = 1;
-            this.tlp_CommitCancel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlp_CommitCancel.Size = new System.Drawing.Size(336, 35);
-            this.tlp_CommitCancel.TabIndex = 2;
-            // 
-            // button_AbandonEdit
-            // 
-            this.button_AbandonEdit.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.button_AbandonEdit.AutoSize = true;
-            this.button_AbandonEdit.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.button_AbandonEdit.Enabled = false;
-            this.button_AbandonEdit.Location = new System.Drawing.Point(225, 4);
-            this.button_AbandonEdit.Margin = new System.Windows.Forms.Padding(4);
-            this.button_AbandonEdit.Name = "button_AbandonEdit";
-            this.button_AbandonEdit.Padding = new System.Windows.Forms.Padding(16, 0, 16, 0);
-            this.button_AbandonEdit.Size = new System.Drawing.Size(107, 27);
-            this.button_AbandonEdit.TabIndex = 4;
-            this.button_AbandonEdit.Text = "A&bandon";
-            this.mainToolTip.SetToolTip(this.button_AbandonEdit, "Write changes to Target string");
-            this.button_AbandonEdit.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AcceptButton = this.btnCommit;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnSetToAll;
-            this.ClientSize = new System.Drawing.Size(1187, 749);
+            this.ClientSize = new System.Drawing.Size(890, 609);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStripContainer1);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "Form1";
             this.Text = "s3se";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
@@ -1155,10 +1125,12 @@ namespace S3Translate
             this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
-            this.tlp_SourceRef.ResumeLayout(false);
-            this.tlp_SourceRef.PerformLayout();
             this.tlp_TargetEdit.ResumeLayout(false);
             this.tlp_TargetEdit.PerformLayout();
+            this.tlp_CommitCancel.ResumeLayout(false);
+            this.tlp_CommitCancel.PerformLayout();
+            this.tlp_SourceRef.ResumeLayout(false);
+            this.tlp_SourceRef.PerformLayout();
             this.tlpFind.ResumeLayout(false);
             this.tlpFind.PerformLayout();
             this.tableLayoutPanel4.ResumeLayout(false);
@@ -1167,8 +1139,6 @@ namespace S3Translate
             this.menuStrip1.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
-            this.tlp_CommitCancel.ResumeLayout(false);
-            this.tlp_CommitCancel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
