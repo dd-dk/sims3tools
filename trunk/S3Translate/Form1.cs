@@ -374,7 +374,7 @@ namespace S3Translate
 
         private void importPackageToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            #region Get the file name
+            // Get the file name
             var ofd = new OpenFileDialog() { Filter = packageFilter };
             if (ofd.ShowDialog() != DialogResult.OK) return;
             if (ofd.FileName == fileName)
@@ -382,13 +382,10 @@ namespace S3Translate
                 MessageBox.Show("That is the current package.", myName, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-            #endregion
+
+            var newSTBLs = new List<Tuple<String, IResourceKey, IDictionary<ulong, string>>>();
 
             #region Parse the input
-            // Tell "newSTBLs" what type it is but leave it empty for now
-            var newSTBLs = (new[] { 0, })
-                .Select(x => new { rk = new RK(0, 0, 0), stbl = new StblResource.StblResource(0, null), })
-                .Where(x => x.rk.ResourceType == STBL);
 
             // Find out what we have got to deal with
             try
@@ -397,11 +394,19 @@ namespace S3Translate
 
                 newSTBLs = importFrom
                     .FindAll(x => x.ResourceType == STBL)
-                    .Select(x => new { rk = new RK(x.ResourceType, x.ResourceGroup, x.Instance), stbl = new StblResource.StblResource(0, ((APackage)importFrom).GetResource(x)), });
+                    .Select(x =>
+                    {
+                        return Tuple.Create(
+                            NameMapName(x.Instance),
+                            (IResourceKey)new RK(x.ResourceType, x.ResourceGroup, x.Instance),
+                            (IDictionary<ulong, string>)new StblResource.StblResource(0, ((APackage)importFrom).GetResource(x))
+                        );
+                    })
+                    .ToList();
 
-                if (newSTBLs.FirstOrDefault() == null)
+                if (newSTBLs.Count == 0)
                 {
-                    MessageBox.Show("The selected package contains no STBLs.", myName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("The selected package contains no STBLs.", "Import", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
             }
@@ -413,65 +418,17 @@ namespace S3Translate
             }
             #endregion
 
-            #region Check for duplicate resources
-            var dupRKs = newSTBLs
-                .Where(x => currentPackage.Find(y => x.rk.Equals(y)) != null)
-                .Select(x => x.rk)
-                .Distinct(RK.Default)
-                .OrderBy(x => x);
-            if (dupRKs.FirstOrDefault() != null)
-            {
-                MessageBox.Show("Cannot import - duplicate resource keys exist:\n\n  "
-                    + String.Join("\n  ", dupRKs)
-                    , "Import", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-            #endregion
-
-            #region Check for duplicate GUIDs
-            /*
-            var newGUIDs = newSTBLs.SelectMany(x => x.stbl.Keys).Distinct();
-
-            var dupGUIDs = newGUIDs
-                .SelectMany(x => StringTables
-                    .SelectMany(y => y.Value.Values
-                        .Where(z => z.Keys.Contains(x))
-                        .SelectMany(z => z.Keys)
-                        )
-                )
-                .Distinct()
-                .OrderBy(x => x)
-            ;
-            if (dupGUIDs.Count() != 0)
-            {
-                MessageBox.Show("Cannot import - duplicate String GUIDs exist:\n\n  "
-                    + String.Join("\n  ", dupGUIDs.Select(g => "0x" + g.ToString("X16")))
-                    , "Import", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                return;
-            }
-            /**/
-            #endregion
-
-            lstStrings.SelectedIndices.Clear();
-
-            foreach (var newSTBL in newSTBLs)
-            {
-                _currentPackage.AddResource(newSTBL.rk, newSTBL.stbl.Stream, true);
-                addInstance(newSTBL.rk.Instance, NameMapName(newSTBL.rk.Instance));
-            }
-
-            pkgIsDirty = true;
-            ReloadStringTables();
+            ImportNewSTBLList(newSTBLs);
         }
 
         private void importSTBLToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            importFromFile(stblFilter, _getFilesSTBL, _parseSTBL);
+            ImportFromFile(stblFilter, _getFilesSTBL, _parseSTBL);
         }
 
         private void importFromNraasPackerFormatToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            importFromFile(nraasFilter, _getFilesNRaas, _parseNRaas);
+            ImportFromFile(nraasFilter, _getFilesNRaas, _parseNRaas);
         }
 
         private void exportToPackageToolStripMenuItem_Click(object sender, EventArgs e)
@@ -963,41 +920,6 @@ Do you accept this licence?" : ""),
 
             return accept && res == DialogResult.Yes;
         }
-
-        #region class Version
-        public class Version
-        {
-            static String timestamp;
-            public static String CurrentVersion { get { return timestamp; } }
-
-            static String libraryTimestamp;
-            public static String LibraryVersion { get { return libraryTimestamp; } }
-
-            static Version()
-            {
-                timestamp = VersionFor(System.Reflection.Assembly.GetEntryAssembly());
-                libraryTimestamp = VersionFor(typeof(s3pi.Interfaces.AApiVersionedFields).Assembly);
-            }
-
-            public static String VersionFor(System.Reflection.Assembly a)
-            {
-#if DEBUG
-                string[] v = a.GetName().Version.ToString().Split('.');
-                return String.Format("{0}-{1}{2}-{3}", v[0].Substring(0, 2), v[0].Substring(2), v[1], v[2]);
-#else
-                string version_txt = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), Path.GetFileNameWithoutExtension(Application.ExecutablePath) + "-Version.txt");
-                if (!File.Exists(version_txt))
-                    return "Unknown";
-                using (System.IO.StreamReader sr = new StreamReader(version_txt))
-                {
-                    String line1 = sr.ReadLine();
-                    sr.Close();
-                    return line1.Trim();
-                }
-#endif
-            }
-        }
-        #endregion
 
         void packageChangeHandler()
         {
@@ -1522,19 +1444,18 @@ Do you accept this licence?" : ""),
             return String.Format("StringTableStrings_{0}_{1:x16}.txt", nraas_locales[getLanguage(instance)], instance);
         }
 
-        void importFromFile(string filter, _ImportGetFiles getFiles, _ImportParse parser)
+        void ImportFromFile(string filter, _ImportGetFiles getFiles, _ImportParse parser)
         {
             // Get the file name(s)
             var ofd = new OpenFileDialog() { Filter = filter, };
             if (ofd.ShowDialog() != DialogResult.OK) return;
 
-            var newSTBLs = new[] { 0, }.Select(x => new { name = "", rk = (IResourceKey)RK.Default, stbl = (IDictionary<ulong, string>)null, });
+            List<Tuple<String, IResourceKey, IDictionary<ulong, string>>> newSTBLs;
 
             try
             {
                 newSTBLs = getFiles(ofd.FileName)// Get RK from chosen filename and add other languages
                     .Select(x => parser(x.Item1, x.Item2))// Parse each input file
-                    .Select(x => new { name = x.Item1, rk = x.Item2, stbl = x.Item3, })// Name the nameless Tuple<> into an anonymous class
                     .ToList() // Force execution inside an exception handler scope
                     ;
             }
@@ -1544,6 +1465,20 @@ Do you accept this licence?" : ""),
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+
+            if (newSTBLs.Count == 0)
+            {
+                MessageBox.Show("No strings were found.", "Import", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            ImportNewSTBLList(newSTBLs);
+        }
+
+        void ImportNewSTBLList(List<Tuple<String, IResourceKey, IDictionary<ulong, string>>> newSTBLList)
+        {
+            // Name the nameless Tuple Items any place in an anonymous class
+            var newSTBLs = newSTBLList.Select(x => new { name = x.Item1, rk = x.Item2, stbl = x.Item3, });
 
             #region Check for duplicate GUIDs
             var newGUIDs = newSTBLs.SelectMany(x => x.stbl.Keys).Distinct();
@@ -1631,7 +1566,7 @@ Do you accept this licence?" : ""),
                         .Select(y => y.stblGroupKeyRK)
                         .DefaultIfEmpty(RKTostblGroupKey(newLangGUIDs
                             .Where(y => y.guid == x.guid)
-                            .Select(y => y.rk)
+                            .Select(y => RKTostblGroupKey(y.rk))
                             .Distinct(RK.Default)
                             .Single()
                         ))
@@ -1680,46 +1615,35 @@ Do you accept this licence?" : ""),
             {
                 foreach (var lang in newStringTables.Select(x => x.dict.lang).Distinct())
                 {
+                    // We have no entries for this newSTBLGroupKeyRK or the language is missing
+                    var targetSTBL = new StblResource.StblResource(0, null);
+                    var rk = stblGroupKeyToRK(newSTBLGroupKeyRK, lang);
+                    var name = newSTBLs
+                        .Where(x => x.rk.Equals(rk))
+                        .Select(x => x.name)
+                        .DefaultIfEmpty(NameMapName(rk.Instance))
+                        .Single();
+
+                    var newSTBL = newStringTables
+                        .Where(x => x.rk.Equals(newSTBLGroupKeyRK))
+                        .Select(x => x.dict);
+
+                    var newStrings = newSTBL
+                        .Where(x => x.lang == lang)
+                        .Select(x => x.stbl);
+
+                    foreach (var kvp in newStrings)
+                    {
+                        targetSTBL.Add(kvp.guid, kvp.value);
+                    }
+
                     if (!StringTables.ContainsKey(newSTBLGroupKeyRK) || !StringTables[newSTBLGroupKeyRK].ContainsKey(lang))
                     {
-                        // We have no entries for this newSTBLGroupKeyRK or the language is missing
-                        var targetSTBL = new StblResource.StblResource(0, null);
-                        var rk = stblGroupKeyToRK(newSTBLGroupKeyRK, lang);
-                        var name = newSTBLs
-                            .Where(x => x.rk.Equals(rk))
-                            .Select(x => x.name)
-                            .DefaultIfEmpty(NameMapName(rk.Instance))
-                            .Single();
-
-                        var newSTBL = newStringTables
-                            .Where(x => x.rk.Equals(newSTBLGroupKeyRK))
-                            .Select(x => x.dict);
-
-                        var newStrings = newSTBL
-                            .Where(x => x.lang == lang)
-                            .Select(x => x.stbl);
-
-                        foreach (var kvp in newStrings)
-                        {
-                            targetSTBL.Add(kvp.guid, kvp.value);
-                        }
-
                         _currentPackage.AddResource(rk, targetSTBL.Stream, true);
                         addInstance(rk.Instance, name);
                     }
                     else
                     {
-                        // We have the newSTBLGroupKeyRK and the language exists
-                        var targetSTBL = StringTables[newSTBLGroupKeyRK][lang];
-                        var rk = stblGroupKeyToRK(newSTBLGroupKeyRK, lang);
-
-                        foreach (var kvp in newStringTables
-                            .Where(x => x.rk.Equals(rk) && x.dict.lang.Equals(lang))
-                            .Select(x => new { Key = x.dict.stbl.guid, Value = x.dict.stbl.value, }))
-                        {
-                            targetSTBL.Add(kvp.Key, kvp.Value);
-                        }
-
                         IResourceIndexEntry rie = _currentPackage.Find(x => rk.Equals(x));
                         _currentPackage.ReplaceResource(rie, targetSTBL);
                     }
@@ -1807,7 +1731,8 @@ Do you accept this licence?" : ""),
                 if (MessageBox.Show("File name is not in Nraas Packer format.  " +
                     "Content will be imported into the target language in the current string set.\n\nContinue?",
                     "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
-                    yield return Tuple.Create(f, rk);
+                    yield break;
+                yield return Tuple.Create(f, rk);
             }
             else
             {
@@ -1864,6 +1789,41 @@ Do you accept this licence?" : ""),
             catch (Exception ex) { throw new Exception(ex.Message + "\nFile: " + f, ex); }
         }
 
+
+        #region class Version
+        public class Version
+        {
+            static String timestamp;
+            public static String CurrentVersion { get { return timestamp; } }
+
+            static String libraryTimestamp;
+            public static String LibraryVersion { get { return libraryTimestamp; } }
+
+            static Version()
+            {
+                timestamp = VersionFor(System.Reflection.Assembly.GetEntryAssembly());
+                libraryTimestamp = VersionFor(typeof(s3pi.Interfaces.AApiVersionedFields).Assembly);
+            }
+
+            public static String VersionFor(System.Reflection.Assembly a)
+            {
+#if DEBUG
+                string[] v = a.GetName().Version.ToString().Split('.');
+                return String.Format("{0}-{1}{2}-{3}", v[0].Substring(0, 2), v[0].Substring(2), v[1], v[2]);
+#else
+                string version_txt = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), Path.GetFileNameWithoutExtension(Application.ExecutablePath) + "-Version.txt");
+                if (!File.Exists(version_txt))
+                    return "Unknown";
+                using (System.IO.StreamReader sr = new StreamReader(version_txt))
+                {
+                    String line1 = sr.ReadLine();
+                    sr.Close();
+                    return line1.Trim();
+                }
+#endif
+            }
+        }
+        #endregion
 
         class RK : IResourceKey
         {
