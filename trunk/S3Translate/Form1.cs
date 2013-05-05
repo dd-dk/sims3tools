@@ -41,7 +41,7 @@ namespace S3Translate
 
         private const string packageFilter = "Sims 3 Packages|*.package|All Files|*.*";
         private const string stblFilter = "Exported String Tables|S3_220557DA_*.stbl|Any stbl (*.stbl)|*.stbl|All Files|*.*";
-        private const string nraasFilter = "NraasPacker format|StringTableStrings_*.txt|All Files|*.*";
+        private const string nraasFilter = "Nraas Packer format|StringTableStrings_*.txt|Any text file (*.txt)|All Files|*.*";
 
         #region locales
         public static List<String> locales = new List<String> {
@@ -1712,7 +1712,8 @@ Do you accept this licence?" : ""),
                 if (MessageBox.Show("File name is not in expected format.  " +
                     "Content will be imported into the target language in the current string set.\n\nContinue?",
                     "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
-                    yield return Tuple.Create(f, rk);
+                    yield break;
+                yield return Tuple.Create(f, rk);
             }
             else
             {
