@@ -37,6 +37,12 @@ namespace S3Translate
 {
     public partial class Form1 : Form
     {
+        private const string myName = "Sims 3 Translate";
+
+        private const string packageFilter = "Sims 3 Packages|*.package|All Files|*.*";
+        private const string stblFilter = "Exported String Tables|S3_220557DA_*.stbl|Any stbl (*.stbl)|*.stbl|All Files|*.*";
+        private const string nraasFilter = "NraasPacker format|StringTableStrings_*.txt|All Files|*.*";
+
         #region locales
         public static List<String> locales = new List<String> {
             "English (en-us)",
@@ -63,8 +69,32 @@ namespace S3Translate
             "Swedish (sv-se)",
             "Thai (th-th)"
         };
+        public static List<String> nraas_locales = new List<String> {
+            "ENG_US",
+            "CHI_CN", //ZHO_CH?
+            "CHO_TW", //ZHO_TW?
+            "CZE_CZ", //CES_CZ?
+            "DAN_DK",
+            "DUT_NL", //NLD_NL?
+            "FIN_FI",
+            "FRE_FR", //FRA_FR?
+            "GER_DE", //DEU_DE?
+            "GRE_GR", //ELL_GR?
+            "HUN_HU",
+            "ITA_IT",
+            "JPN_JA",
+            "KOR_KR",
+            "NOR_NO",
+            "POL_PL",
+            "POR_PT",
+            "POR_BR",
+            "RUS_RU",
+            "SPA_ES",
+            "SPA_MX",
+            "SWE_SE",
+            "THA_TH"
+        };
         #endregion
-
 
         delegate void _KEYRemoveInstance(ulong instance);
         delegate void _KEYAddInstance(ulong instance, string name);
@@ -74,9 +104,6 @@ namespace S3Translate
         _KEYAddInstance addInstance;
         _KEYCommitNameMaps commitNameMaps;
 
-        private const string myName = "Sims 3 Translate";
-        private const string packageFilter = "Sims 3 Packages|*.package|All Files|*.*";
-        private const string stblFilter = "Exported String Tables|S3_220557DA_*.stbl|Any stbl (*.stbl)|*.stbl|All Files|*.*";
         private const uint STBL = 0x220557DA;
 
         string _fname;
@@ -122,12 +149,7 @@ namespace S3Translate
         private List<ListViewItem> foundItems = null;
 
         // Dictionary<STBLGroupKey, Dictionary<lang, stbl>>
-        Dictionary<IResourceKey, Dictionary<int, StblResource.StblResource>> StringTables = new Dictionary<IResourceKey, Dictionary<int, StblResource.StblResource>>(new STBLGroupKeyEqualityComparer());
-        class STBLGroupKeyEqualityComparer : IEqualityComparer<IResourceKey>
-        {
-            public bool Equals(IResourceKey x, IResourceKey y) { return x.Instance == y.Instance; }
-            public int GetHashCode(IResourceKey obj) { return obj.Instance.GetHashCode(); }
-        }
+        Dictionary<IResourceKey, Dictionary<int, StblResource.StblResource>> StringTables = new Dictionary<IResourceKey, Dictionary<int, StblResource.StblResource>>(RK.Default);
 
         public Form1()
         {
@@ -214,7 +236,7 @@ namespace S3Translate
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var ofd = new OpenFileDialog() { Filter = packageFilter };
+            var ofd = new OpenFileDialog() { Filter = packageFilter, };
             if (ofd.ShowDialog() != DialogResult.OK)
                 return;
 
@@ -274,11 +296,13 @@ namespace S3Translate
             createNewSetToolStripMenuItem.Enabled =
                 importFromPackageToolStripMenuItem.Enabled =
                 importFromSTBLFileToolStripMenuItem.Enabled =
+                importFromNraasPackerFormatToolStripMenuItem.Enabled =
                 _currentPackage != null;
 
             deleteSetToolStripMenuItem.Enabled =
                 exportToPackageToolStripMenuItem.Enabled =
                 exportToSTBLFileToolStripMenuItem.Enabled =
+                exportToNraasPackerFormatToolStripMenuItem.Enabled =
                 cmbSetPicker.SelectedIndex >= 0;
 
             mergeAllSetsToolStripMenuItem.Enabled = cmbSetPicker.Items.Count > 1;
@@ -292,15 +316,19 @@ namespace S3Translate
             instance = (instance >> 8) ^ (instance & 0xFF);
 
             uint group = 0;
-            foreach (var rk in StringTables.Keys) if (rk.ResourceGroup > group) group = rk.ResourceGroup;
+            foreach (var rk in StringTables.Keys)
+                if (rk.ResourceGroup > group)
+                    group = rk.ResourceGroup;
+
+            var stblGroupKeyRK = new RK(STBL, group, instance);
 
             for (int lang = 0; lang < locales.Count; lang++)
             {
                 var stbl = new StblResource.StblResource(0, null);
 
-                var rk = new RK(STBL, group, instance | ((ulong)lang << 56));
+                var rk = stblGroupKeyToRK(stblGroupKeyRK, lang);
                 _currentPackage.AddResource(rk, stbl.Stream, true);
-                addInstance(rk.Instance, "Strings_" + locales[lang].Replace(' ', '_') + "_" + rk.Instance.ToString("x"));
+                addInstance(rk.Instance, NameMapName(rk.Instance));
             }
 
             commitNameMaps();
@@ -354,35 +382,82 @@ namespace S3Translate
                 MessageBox.Show("That is the current package.", myName, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
+            #endregion
 
-            IPackage importFrom = Package.OpenPackage(0, ofd.FileName);
-            List<IResourceIndexEntry> lrie = new List<IResourceIndexEntry>(importFrom.FindAll(x => x.ResourceType == STBL));
+            #region Parse the input
+            // Tell "newSTBLs" what type it is but leave it empty for now
+            var newSTBLs = (new[] { 0, })
+                .Select(x => new { rk = new RK(0, 0, 0), stbl = new StblResource.StblResource(0, null), })
+                .Where(x => x.rk.ResourceType == STBL);
 
-            if (lrie.Count == 0)
+            // Find out what we have got to deal with
+            try
             {
-                MessageBox.Show("The selected package contains no STBLs.", myName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                IPackage importFrom = Package.OpenPackage(0, ofd.FileName);
+
+                newSTBLs = importFrom
+                    .FindAll(x => x.ResourceType == STBL)
+                    .Select(x => new { rk = new RK(x.ResourceType, x.ResourceGroup, x.Instance), stbl = new StblResource.StblResource(0, ((APackage)importFrom).GetResource(x)), });
+
+                if (newSTBLs.FirstOrDefault() == null)
+                {
+                    MessageBox.Show("The selected package contains no STBLs.", myName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error whilst trying to import from " + ofd.FileName + ".\n" + ex.Message,
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             #endregion
 
-            #region Check for duplicates
-            if (currentPackage.FindAll(x =>
+            #region Check for duplicate resources
+            var dupRKs = newSTBLs
+                .Where(x => currentPackage.Find(y => x.rk.Equals(y)) != null)
+                .Select(x => x.rk)
+                .Distinct(RK.Default)
+                .OrderBy(x => x);
+            if (dupRKs.FirstOrDefault() != null)
             {
-                if (x.ResourceType != STBL) return false;
-                foreach (var rie in lrie) if (x.Equals(rie)) return true;
-                return false;
-            }).Count > 0)
-            {
-                MessageBox.Show("Duplicate resources detected.", "Import", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Cannot import - duplicate resource keys exist:\n\n  "
+                    + String.Join("\n  ", dupRKs)
+                    , "Import", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+            #endregion
+
+            #region Check for duplicate GUIDs
+            /*
+            var newGUIDs = newSTBLs.SelectMany(x => x.stbl.Keys).Distinct();
+
+            var dupGUIDs = newGUIDs
+                .SelectMany(x => StringTables
+                    .SelectMany(y => y.Value.Values
+                        .Where(z => z.Keys.Contains(x))
+                        .SelectMany(z => z.Keys)
+                        )
+                )
+                .Distinct()
+                .OrderBy(x => x)
+            ;
+            if (dupGUIDs.Count() != 0)
+            {
+                MessageBox.Show("Cannot import - duplicate String GUIDs exist:\n\n  "
+                    + String.Join("\n  ", dupGUIDs.Select(g => "0x" + g.ToString("X16")))
+                    , "Import", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                return;
+            }
+            /**/
             #endregion
 
             lstStrings.SelectedIndices.Clear();
 
-            foreach (var rie in lrie)
+            foreach (var newSTBL in newSTBLs)
             {
-                currentPackage.AddResource(rie, ((APackage)importFrom).GetResource(rie), true);
+                _currentPackage.AddResource(newSTBL.rk, newSTBL.stbl.Stream, true);
+                addInstance(newSTBL.rk.Instance, NameMapName(newSTBL.rk.Instance));
             }
 
             pkgIsDirty = true;
@@ -391,119 +466,12 @@ namespace S3Translate
 
         private void importSTBLToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var ofd = new OpenFileDialog() { Filter = stblFilter };
-            if (ofd.ShowDialog() != DialogResult.OK) return;
-            List<string> fns = new List<string>(new string[] { ofd.FileName, });
+            importFromFile(stblFilter, _getFilesSTBL, _parseSTBL);
+        }
 
-            ulong instance = FNV64.GetHash(ofd.FileName + DateTime.Now.ToBinary().ToString());
-            instance = (instance >> 8) ^ (instance & 0xFF);
-            RK rk = new RK(STBL, 0, instance);
-
-            #region Get RK from chosen filename and add other languages
-            string[] fn = Path.GetFileName(ofd.FileName).Split('_');
-            if (fn.Length > 3 && fn[0] == "S3")
-            {
-                if (fn[1].Length != 8 || fn[1] != STBL.ToString("X8"))
-                    if (MessageBox.Show("This does not appear to be a STBL.\n\nContinue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
-                        return;
-
-                uint g = 0;
-                if (fn[2].Length != 8 || !uint.TryParse(fn[2], System.Globalization.NumberStyles.HexNumber, null, out g))
-                    if (MessageBox.Show("Invalid Group number.\n\nContinue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
-                        return;
-                rk.ResourceGroup = g;
-
-                ulong i = 0;
-                if (fn.Length > 3 && !ulong.TryParse(fn[3], System.Globalization.NumberStyles.HexNumber, null, out i))
-                {
-                    if (MessageBox.Show("Invalid STBL Instance.\n\nContinue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
-                        return;
-                    i = instance;// the new instance, as this is invalid hex
-                }
-                if ((int)(i >> 56) > locales.Count)
-                    if (MessageBox.Show("Invalid Language ID.\n\nContinue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
-                        return;
-                rk.Instance = i;
-
-                if (MessageBox.Show("Attempt to add all languages?", "Import", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                {
-                    string stblInstance = (rk.Instance & 0x00FFFFFFFFFFFFFF).ToString("X14");
-                    foreach (var f in Directory.GetFiles(Path.GetDirectoryName(ofd.FileName), String.Format("S3_{0:X8}_{1:X8}_*.stbl", STBL, rk.ResourceGroup)))
-                    {
-                        string[] afn = f.Split('_');
-                        if (afn[3].Substring(2).Equals(stblInstance) && !fns.Contains(f))
-                            fns.Add(f);
-                    }
-                }
-            }
-            else
-                if (MessageBox.Show("File name is not in export format.\n\nContinue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
-                    return;
-            #endregion
-
-            #region Check for duplicates
-            if (fns.Count > 1)
-            {
-                bool found = false;
-                if (currentPackage.Find(x => x.ResourceType == STBL && x.Equals(rk)) != null)
-                {
-                    found = true;
-                }
-                else
-                {
-                    for (int i = 1; i < fns.Count; i++)
-                    {
-                        string[] afn = fns[i].Split('_');
-                        if (currentPackage.Find(x => x.ResourceType == STBL && x.ResourceGroup.ToString("X8").Equals(afn[2]) && x.Instance.ToString("X16").Equals(afn[3])) != null)
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-                if (found)
-                {
-                    MessageBox.Show("Duplicate resources detected.", "Import", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-            }
-            else
-            {
-                if (currentPackage.Find(x => x.ResourceType == STBL && x.Equals(rk)) != null)
-                {
-                    MessageBox.Show("Duplicate resources detected.", "Import", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-            }
-            #endregion
-
-            lstStrings.SelectedIndices.Clear();
-
-            using (FileStream fs = new FileStream(fns[0], FileMode.Open, FileAccess.Read))
-            {
-                byte[] stbl = new byte[fs.Length];
-                fs.Read(stbl, 0, (int)fs.Length);
-                currentPackage.AddResource(rk, new MemoryStream(stbl), true);
-                fs.Close();
-            }
-            for (int i = 1; i < fns.Count; i++)
-            {
-                string f = fns[i];
-                string[] afn = f.Split('_');
-                rk.ResourceGroup = uint.Parse(afn[2], System.Globalization.NumberStyles.HexNumber);
-                rk.Instance = ulong.Parse(afn[3], System.Globalization.NumberStyles.HexNumber);
-
-                using (FileStream fs = new FileStream(f, FileMode.Open, FileAccess.Read))
-                {
-                    byte[] stbl = new byte[fs.Length];
-                    fs.Read(stbl, 0, (int)fs.Length);
-                    currentPackage.AddResource(rk, new MemoryStream(stbl), true);
-                    fs.Close();
-                }
-            }
-
-            pkgIsDirty = true;
-            ReloadStringTables();
+        private void importFromNraasPackerFormatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            importFromFile(nraasFilter, _getFilesNRaas, _parseNRaas);
         }
 
         private void exportToPackageToolStripMenuItem_Click(object sender, EventArgs e)
@@ -565,8 +533,11 @@ namespace S3Translate
                 .Select(rk =>
                 {
                     // So, this resource key in the index, can we get a _KEY from it?
-                    try { return new KeyValuePair<IResourceIndexEntry, NameMapResource.NameMapResource>(rk,
-                        new NameMapResource.NameMapResource(0, ((APackage)targetPackage).GetResource(rk))); }
+                    try
+                    {
+                        return new KeyValuePair<IResourceIndexEntry, NameMapResource.NameMapResource>(rk,
+                            new NameMapResource.NameMapResource(0, ((APackage)targetPackage).GetResource(rk)));
+                    }
                     catch { return new KeyValuePair<IResourceIndexEntry, NameMapResource.NameMapResource>(null, null); }
                 }).Where(x => x.Key != null).ToList();
 
@@ -595,7 +566,7 @@ namespace S3Translate
                 var stbl = new StblResource.StblResource(0, ((APackage)currentPackage).GetResource(rk));
 
                 targetPackage.AddResource(rk, stbl.Stream, true);
-                targetAddInstance(rk.Instance, "Strings_" + locales[(int)(rk.Instance >> 56)].Replace(' ', '_') + "_" + rk.Instance.ToString("x"));
+                targetAddInstance(rk.Instance, NameMapName(rk.Instance));
             }
 
             targetCommitNameMaps();
@@ -604,22 +575,63 @@ namespace S3Translate
 
         private void exportLanguageToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var ef = new Export() { Text = "Export" };
+            var ef = new Export() { Text = "Export (S3 stbl)" };
             if (ef.ShowDialog() != DialogResult.OK) return;
 
-            var fd = new FolderBrowserDialog();
+            var fd = new FolderBrowserDialog() { Description = "Export (S3 stbl)", };
             if (fd.ShowDialog() != DialogResult.OK) return;
 
             AskCommit();
 
+            bool overwrite = false;
             foreach (int lang in ef.checkList.CheckedIndices)
             {
-                using (var fs = new FileStream(Path.Combine(fd.SelectedPath,
-                    String.Format("S3_{0:X8}_{1:X8}_{2:X2}{3:X14}_{4}.stbl", STBLGroupKey.Key.ResourceType, STBLGroupKey.Key.ResourceGroup, lang, STBLGroupKey.Key.Instance, locales[lang])
-                    ), FileMode.CreateNew))
+                var fn = Path.Combine(fd.SelectedPath, STBLName(stblGroupKeyToRK(STBLGroupKey.Key, lang)));
+                if (!overwrite && File.Exists(fn))
+                {
+                    if (MessageBox.Show("Proceeding will overwrite existing files in the selected folder.\n\nContinue?",
+                        "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != System.Windows.Forms.DialogResult.Yes)
+                        return;
+                    overwrite = true;
+                }
+                using (var fs = new FileStream(fn, FileMode.CreateNew))
                 {
                     new BinaryWriter(fs).Write(StringTables[STBLGroupKey.Key][lang].AsBytes);
                     fs.Close();
+                }
+            }
+        }
+
+        private void exportToNraasPackerFormatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var ef = new Export() { Text = "Export (Nraas Packer)", };
+            if (ef.ShowDialog() != DialogResult.OK) return;
+
+            var fd = new FolderBrowserDialog() { Description = "Export (Nraas Packer)", };
+            if (fd.ShowDialog() != DialogResult.OK) return;
+
+            AskCommit();
+
+            bool overwrite = false;
+            foreach (int lang in ef.checkList.CheckedIndices)
+            {
+                //StringTableStrings_ENG_US_000f16b00ba8342f.txt
+                var fn = Path.Combine(fd.SelectedPath, NRaasName(stblGroupKeyToRK(STBLGroupKey.Key, lang).Instance));
+                if (!overwrite && File.Exists(fn))
+                {
+                    if (MessageBox.Show("Proceeding will overwrite existing files in the selected folder.\n\nContinue?",
+                        "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != System.Windows.Forms.DialogResult.Yes)
+                        return;
+                    overwrite = true;
+                }
+                using (var fs = new FileStream(fn, FileMode.Create))
+                using (var w = new StreamWriter(fs, System.Text.Encoding.Unicode))
+                {
+                    foreach (var kvp in STBLGroupKey.Value[lang])
+                    {
+                        w.WriteLine(String.Format("<KEY>0x{0:X16}</KEY>", kvp.Key));
+                        w.WriteLine(String.Format("<STR>{0}</STR>", kvp.Value));
+                    }
                 }
             }
         }
@@ -665,19 +677,20 @@ namespace S3Translate
             uint group = 0;
             foreach (var rk in StringTables.Keys) if (rk.ResourceGroup > group) group = rk.ResourceGroup;
 
+            var stblGroupKeyRK = new RK(STBL, group, instance);
+
             for (int lang = 0; lang < locales.Count; lang++)
             {
                 var stbl = new StblResource.StblResource(0, null);
-                foreach (var lr in StringTables.Values)
+                foreach (var lr in StringTables.Values.Where(x => x.ContainsKey(lang)))
                 {
-                    if (lr.ContainsKey(lang))
-                        foreach (var s in lr[lang])
-                            stbl.Add(s.Key, s.Value);
+                    foreach (var s in lr[lang])
+                        stbl.Add(s.Key, s.Value);
                 }
 
-                var rk = new RK(STBL, group, instance | ((ulong)lang << 56));
+                var rk = stblGroupKeyToRK(stblGroupKeyRK, lang);
                 _currentPackage.AddResource(rk, stbl.Stream, true);
-                addInstance(rk.Instance, "Strings_" + locales[lang].Replace(' ', '_') + "_" + rk.Instance.ToString("x"));
+                addInstance(rk.Instance, NameMapName(rk.Instance));
             }
 
             foreach (var res in currentPackage.FindAll(x => x.ResourceType == STBL && (x.ResourceGroup != group || (x.Instance & 0x00FFFFFFFFFFFFFF) != instance)))
@@ -737,7 +750,7 @@ under certain conditions; see Help->Licence for details.
         }
         #endregion
 
-        #region Designer-bound event handlers
+        #region Form controls
         private void btnSetToTarget_Click(object sender, EventArgs e)
         {
             if (sourceLang == targetLang)
@@ -1097,18 +1110,6 @@ Do you accept this licence?" : ""),
             currentPackage = null;
         }
 
-
-        class TupleComparer<T, U> : IComparer<Tuple<T, U>>
-            where T : IComparable<T>
-            where U : IComparable<U>
-        {
-            public int Compare(Tuple<T, U> x, Tuple<T, U> y)
-            {
-                var res = x.Item1.CompareTo(y.Item1);
-                return res == 0 ? x.Item2.CompareTo(y.Item2) : res;
-            }
-        }
-
         private void ReloadStringTables()
         {
             lstStrings.SelectedIndices.Clear();
@@ -1123,13 +1124,13 @@ Do you accept this licence?" : ""),
 
             var stbls = currentPackage
                 .FindAll(x => x.ResourceType == STBL)
-                .Select(x => new Tuple<IResourceKey, int>(RKTostblGroupKey(x), (int)(x.Instance >> 56)))
-                .OrderBy(x => x, new TupleComparer<IResourceKey, int>())
+                .Select(x => new Tuple<IResourceKey, int>(RKTostblGroupKey(x), getLanguage(x.Instance)))
+                .OrderBy(x => x.Item1.Instance)
             ;
 
             var stblGroupKeys = stbls
                 .Select(x => x.Item1)
-                .Distinct(new STBLGroupKeyEqualityComparer());
+                .Distinct(RK.Default);
 
             foreach (var stblGroupKey in stblGroupKeys)
             {
@@ -1143,7 +1144,7 @@ Do you accept this licence?" : ""),
                 foreach (var language in languages)
                 {
                     var res = currentPackage
-                        .Find(x => x.ResourceType == STBL && x.Instance == (ulong)(stblGroupKey.Instance | ((ulong)language << 56)));
+                        .Find(x => x.ResourceType == STBL && x.Instance == stblGroupKeyToRK(stblGroupKey, language).Instance);
                     StringTables[stblGroupKey].Add(language, new StblResource.StblResource(0, ((APackage)currentPackage).GetResource(res)));
                 }
             }
@@ -1349,7 +1350,7 @@ Do you accept this licence?" : ""),
             if (orig == 0)
                 lstStrings.SelectedIndices.Clear();
 
-            foreach(var locale in StringTables[STBLGroupKey.Key].Keys)
+            foreach (var locale in StringTables[STBLGroupKey.Key].Keys)
             {
                 var stbl = StringTables[STBLGroupKey.Key][locale];
                 var value = "";
@@ -1377,37 +1378,6 @@ Do you accept this licence?" : ""),
                 }
             }
         }
-
-        #region class RK
-        class RK : IResourceKey
-        {
-            public RK(uint rt, uint rg, ulong i) { ResourceType = rt; ResourceGroup = rg; Instance = i; }
-            public uint ResourceType { get; set; }
-            public uint ResourceGroup { get; set; }
-            public ulong Instance { get; set; }
-            public bool Equals(IResourceKey x, IResourceKey y) { return x.Equals(y); }
-            public int GetHashCode(IResourceKey obj) { return obj.ResourceType.GetHashCode() ^ obj.ResourceGroup.GetHashCode() ^ obj.Instance.GetHashCode(); }
-            public bool Equals(IResourceKey other) { return this.CompareTo(other) == 0; }
-            public int CompareTo(IResourceKey other)
-            {
-                int res = this.ResourceType.CompareTo(other.ResourceType);
-                if (res == 0) res = this.ResourceGroup.CompareTo(other.ResourceGroup);
-                if (res == 0) res = this.Instance.CompareTo(other.Instance);
-                return res;
-            }
-            public override string ToString() { return String.Format("0x{0:X8}-0x{1:X8}-0x{2:X16}", ResourceType, ResourceGroup, Instance); }
-        }
-
-        IResourceKey stblGroupKeyToRK(IResourceKey stblGroupKey, int lang)
-        {
-            return new RK(stblGroupKey.ResourceType, stblGroupKey.ResourceGroup, stblGroupKey.Instance | ((ulong)lang << 56));
-        }
-
-        IResourceKey RKTostblGroupKey(IResourceKey stblGroupKey)
-        {
-            return new RK(stblGroupKey.ResourceType, stblGroupKey.ResourceGroup, stblGroupKey.Instance & 0x00FFFFFFFFFFFFFF);
-        }
-        #endregion
 
         bool inChangeHandler = false;
         private void SelectStrings()
@@ -1534,6 +1504,467 @@ Do you accept this licence?" : ""),
 
             foundItems[0].Selected = true;
             lstStrings.EnsureVisible(foundItems[0].Index);
+        }
+
+        String NameMapName(ulong instance)
+        {
+            return String.Format("Strings_{0}_{1:x16}", locales[getLanguage(instance)].Replace(' ', '_'), instance);
+        }
+
+        String STBLName(IResourceKey rk)
+        {
+            return String.Format("S3_{0:X8}_{1:X8}_{2:X16}_{3}%%+STBL.stbl", STBL, rk.ResourceGroup, rk.Instance, NameMapName(rk.Instance));
+        }
+
+        String NRaasName(ulong instance)
+        {
+            //StringTableStrings_ENG_US_000f16b00ba8342f.txt
+            return String.Format("StringTableStrings_{0}_{1:x16}.txt", nraas_locales[getLanguage(instance)], instance);
+        }
+
+        void importFromFile(string filter, _ImportGetFiles getFiles, _ImportParse parser)
+        {
+            // Get the file name(s)
+            var ofd = new OpenFileDialog() { Filter = filter, };
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+
+            var newSTBLs = new[] { 0, }.Select(x => new { name = "", rk = (IResourceKey)RK.Default, stbl = (IDictionary<ulong, string>)null, });
+
+            try
+            {
+                newSTBLs = getFiles(ofd.FileName)// Get RK from chosen filename and add other languages
+                    .Select(x => parser(x.Item1, x.Item2))// Parse each input file
+                    .Select(x => new { name = x.Item1, rk = x.Item2, stbl = x.Item3, })// Name the nameless Tuple<> into an anonymous class
+                    .ToList() // Force execution inside an exception handler scope
+                    ;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error whilst trying to import:\n\n" + ex.Message,
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            #region Check for duplicate GUIDs
+            var newGUIDs = newSTBLs.SelectMany(x => x.stbl.Keys).Distinct();
+
+            // If we find a duplicate GUID, note its existing StringSet
+            var dupGUIDs = newGUIDs
+                .SelectMany(x => StringTables
+                    .Where(y => y.Value
+                        .Any(z => z.Value.ContainsKey(x)))
+                    .Select(y => new Tuple<ulong, IResourceKey>(x, y.Key))
+                )
+                .Distinct(TupleEquals<ulong, IResourceKey>.Default)
+                .Select(x => new { guid = x.Item1, stblGroupKeyRK = x.Item2 })
+                .OrderBy(x => x.guid)
+            ;
+
+            // If we end up with multiple existing StringSets, refuse to import and tell the user to resolve existing merge conflicts
+            var conflicts = dupGUIDs
+                .Where(x => dupGUIDs
+                    .Where(y => y.guid == x.guid)
+                    .Select(y => y.stblGroupKeyRK)
+                    .Distinct(RK.Default)
+                    .Skip(1)
+                    .FirstOrDefault() != null
+                );
+            if (conflicts.FirstOrDefault() != null)
+            {
+                MessageBox.Show("One or more GUIDs being imported exists in more than one of the existing String Sets.  " +
+                    "This conflict cannot be resolved automatically.\n\n" +
+                    "Please manually ensure a GUID only exists in one String Set by deleting from one and editing the other.  The GUIDs/String Sets are:\n\n  " +
+                    String.Join("\n  ", conflicts
+                        .Select(x => x.guid)
+                        .Distinct()
+                        .Select(x => new
+                        {
+                            guid = x,
+                            stringSets = conflicts
+                                .Where(y => y.guid == x)
+                                .Select(y => y.stblGroupKeyRK)
+                        })
+                        .Select(x => String.Format("GUID: {0:X16} in String Sets {1}.",
+                            x.guid, String.Join(", ", x.stringSets.Select(y => "0x__" + y.Instance.ToString("X14")))))),
+                    "Import", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                return;
+            }
+
+            if (dupGUIDs.FirstOrDefault() != null)
+            {
+                if (MessageBox.Show("Duplicate String GUIDs exist.  If you continue, existing values will be overwritten.\n\nContinue?",
+                    "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                    return;
+            }
+            #endregion
+
+            // OK, go ahead
+            lstStrings.SelectedIndices.Clear();
+
+            #region Make sure we have one string per GUID per language
+            // We want each GUID in each language STBL, so find all the languages and GUIDs
+            var newLangGUIDs = newGUIDs
+                .SelectMany(x => newSTBLs
+                    .Where(y => y.stbl.ContainsKey(x))
+                    .Select(y => new { lang = getLanguage(y.rk.Instance), guid = x, rk = y.rk, })
+                )
+            ;
+
+            // Now make sure the default values exists for all combinations of language and GUID
+            var newStringTables = newLangGUIDs
+                .Select(x => x.lang)
+                .Distinct()
+                .SelectMany(x => newGUIDs
+                    .Select(y => new Tuple<int, ulong>(x, y))
+                )
+                .Distinct(TupleEquals<int, ulong>.Default)
+                .Select(x => new { lang = x.Item1, guid = x.Item2 })
+                .Select(x =>
+                {
+                    // If we end up with a single stblGroupKeyRK for a GUID, import into that
+                    // If we end up with no existing stblGroupKeyRK, create a new one
+                    // OK, for dupGUIDs we know the target stblGroupKeyRK
+                    // But for everything else we need to create a stblGroupKeyRK
+                    var stblGroupKeyRK =
+                        dupGUIDs
+                        .Where(y => y.guid == x.guid)
+                        .Select(y => y.stblGroupKeyRK)
+                        .DefaultIfEmpty(RKTostblGroupKey(newLangGUIDs
+                            .Where(y => y.guid == x.guid)
+                            .Select(y => y.rk)
+                            .Distinct(RK.Default)
+                            .Single()
+                        ))
+                        .Single();
+
+                    // Grab the existing value or create a default
+                    var value = StringTables
+                        .Where(y => y.Key.Equals(stblGroupKeyRK))
+                        .Select(y => y.Value)
+                        .Where(y => y.Keys.Contains(x.lang) && y[x.lang].ContainsKey(x.guid))
+                        .Select(y => y[x.lang][x.guid])
+                        .DefaultIfEmpty(String.Format("0x{0:X16}: {1}", x.guid, locales[x.lang]))
+                        .Single()
+                    ;
+
+                    // Replace with any imported value
+                    value = newLangGUIDs
+                        .Where(y => y.lang == x.lang && y.guid == x.guid)
+                        .Select(y => newSTBLs
+                            .Where(z => z.rk.Equals(y.rk))
+                            .Select(z => z.stbl)
+                            .Single()
+                        )
+                        .Select(y => y[x.guid])
+                        .DefaultIfEmpty(value)
+                        .Single()
+                    ;
+
+                    // This should now look like StringTables, right?
+                    return new
+                    {
+                        rk = stblGroupKeyRK,
+                        dict = new
+                        {
+                            lang = x.lang,
+                            stbl = new { guid = x.guid, value = value, },
+                        },
+                    };
+                }
+                )
+            ;
+            #endregion
+
+            #region Write the values to the current package
+            foreach (var newSTBLGroupKeyRK in newStringTables.Select(x => x.rk).Distinct(RK.Default))
+            {
+                foreach (var lang in newStringTables.Select(x => x.dict.lang).Distinct())
+                {
+                    if (!StringTables.ContainsKey(newSTBLGroupKeyRK) || !StringTables[newSTBLGroupKeyRK].ContainsKey(lang))
+                    {
+                        // We have no entries for this newSTBLGroupKeyRK or the language is missing
+                        var targetSTBL = new StblResource.StblResource(0, null);
+                        var rk = stblGroupKeyToRK(newSTBLGroupKeyRK, lang);
+                        var name = newSTBLs
+                            .Where(x => x.rk.Equals(rk))
+                            .Select(x => x.name)
+                            .DefaultIfEmpty(NameMapName(rk.Instance))
+                            .Single();
+
+                        var newSTBL = newStringTables
+                            .Where(x => x.rk.Equals(newSTBLGroupKeyRK))
+                            .Select(x => x.dict);
+
+                        var newStrings = newSTBL
+                            .Where(x => x.lang == lang)
+                            .Select(x => x.stbl);
+
+                        foreach (var kvp in newStrings)
+                        {
+                            targetSTBL.Add(kvp.guid, kvp.value);
+                        }
+
+                        _currentPackage.AddResource(rk, targetSTBL.Stream, true);
+                        addInstance(rk.Instance, name);
+                    }
+                    else
+                    {
+                        // We have the newSTBLGroupKeyRK and the language exists
+                        var targetSTBL = StringTables[newSTBLGroupKeyRK][lang];
+                        var rk = stblGroupKeyToRK(newSTBLGroupKeyRK, lang);
+
+                        foreach (var kvp in newStringTables
+                            .Where(x => x.rk.Equals(rk) && x.dict.lang.Equals(lang))
+                            .Select(x => new { Key = x.dict.stbl.guid, Value = x.dict.stbl.value, }))
+                        {
+                            targetSTBL.Add(kvp.Key, kvp.Value);
+                        }
+
+                        IResourceIndexEntry rie = _currentPackage.Find(x => rk.Equals(x));
+                        _currentPackage.ReplaceResource(rie, targetSTBL);
+                    }
+                }
+            }
+            #endregion
+
+            pkgIsDirty = true;
+            ReloadStringTables();
+        }
+
+        delegate IEnumerable<Tuple<String, IResourceKey>> _ImportGetFiles(String f);
+
+        delegate Tuple<String, IResourceKey, IDictionary<ulong, string>> _ImportParse(String f, IResourceKey rk);
+
+        IEnumerable<Tuple<String, IResourceKey>> _getFilesSTBL(String f)
+        {
+            // We default to adding to the currently selected STBLGroup and target language
+            uint g = STBLGroupKey.Key == null ? StringTables.Keys.Select(x => x.ResourceGroup).DefaultIfEmpty().Max() : STBLGroupKey.Key.ResourceGroup;
+            ulong i = (STBLGroupKey.Key == null ? FNV64.GetHash(fileName + DateTime.Now.ToBinary().ToString()) >> 8 : STBLGroupKey.Key.Instance) | (ulong)targetLang << 56;
+            IResourceKey rk = new RK(STBL, g, i);
+
+            string[] fn = Path.GetFileName(f).Split('_');
+            if (fn.Length < 4
+                || fn[0] != "S3"
+                || fn[1].Length != 8
+                || fn[1] != STBL.ToString("X8")
+                || fn[2].Length != 8
+                || !uint.TryParse(fn[2], System.Globalization.NumberStyles.HexNumber, null, out g)
+                || fn[3].Length != 16
+                || !ulong.TryParse(fn[3], System.Globalization.NumberStyles.HexNumber, null, out i)
+                || getLanguage(i) > locales.Count
+                )
+            {
+                if (MessageBox.Show("File name is not in expected format.  " +
+                    "Content will be imported into the target language in the current string set.\n\nContinue?",
+                    "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                    yield return Tuple.Create(f, rk);
+            }
+            else
+            {
+                // Everything looked good, so use the values (type is okay)
+                rk.ResourceGroup = g;
+                rk.Instance = i;
+
+                // Ask about slurping languages
+                if (MessageBox.Show("Attempt to import files for all languages?", "Import", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    rk.Instance = i & 0x00FFFFFFFFFFFFFF;
+                    for (int l = 0; l < locales.Count; l++)
+                    {
+                        // Generate the instance per locale
+                        var langRK = stblGroupKeyToRK(rk, l);
+
+                        var stbl = Directory.GetFiles(Path.GetDirectoryName(f), String.Format("S3_{0:X8}_{1:X8}_{2:X16}*.stbl", STBL, langRK.ResourceGroup, langRK.Instance))
+                            .SingleOrDefault();
+                        if (stbl != null)
+                        {
+                            yield return Tuple.Create(stbl, langRK);
+                        }
+                    }
+                }
+                else
+                    yield return Tuple.Create(f, rk);
+            }
+        }
+
+        IEnumerable<Tuple<String, IResourceKey>> _getFilesNRaas(String f)
+        {
+            // We default to adding to the currently selected STBLGroup and target language
+            // If there isn't a currently selected STBLGroup, create one
+            uint g = STBLGroupKey.Key == null ? StringTables.Keys.Select(x => x.ResourceGroup).DefaultIfEmpty().Max() : STBLGroupKey.Key.ResourceGroup;
+            ulong i = (STBLGroupKey.Key == null ? FNV64.GetHash(fileName + DateTime.Now.ToBinary().ToString()) >> 8 : STBLGroupKey.Key.Instance) | (ulong)targetLang << 56;
+            IResourceKey rk = new RK(STBL, g, i);
+
+            string[] fn = Path.GetFileNameWithoutExtension(f).Split('_');
+            //StringTableStrings_ENG_US_000f16b00ba8342f.txt
+            if (fn.Length < 4
+                || fn[0] != "StringTableStrings"
+                || !nraas_locales.Contains(fn[1] + "_" + fn[2])
+                || !ulong.TryParse(fn[3], System.Globalization.NumberStyles.HexNumber, null, out i)
+                || getLanguage(i) > nraas_locales.Count
+                )
+            {
+                if (MessageBox.Show("File name is not in Nraas Packer format.  " +
+                    "Content will be imported into the target language in the current string set.\n\nContinue?",
+                    "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+                    yield return Tuple.Create(f, rk);
+            }
+            else
+            {
+                // Everything looked good, so use the values
+                rk.Instance = i;
+
+                // Ask about slurping languages
+                if (MessageBox.Show("Attempt to import files for all languages?", "Import", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    rk.Instance = i & 0x00FFFFFFFFFFFFFF;
+                    for (int l = 0; l < nraas_locales.Count; l++)
+                    {
+                        // Generate the instance per locale
+                        var langRK = stblGroupKeyToRK(rk, l);
+
+                        f = Path.Combine(Path.GetDirectoryName(f), NRaasName(langRK.Instance));
+                        if (File.Exists(f))
+                        {
+                            yield return Tuple.Create(f, langRK);
+                        }
+                    }
+                }
+                else
+                    yield return Tuple.Create(f, rk);
+            }
+        }
+
+        Tuple<String, IResourceKey, IDictionary<ulong, string>> _parseSTBL(String f, IResourceKey rk)
+        {
+            using (FileStream fs = new FileStream(f, FileMode.Open, FileAccess.Read))
+            {
+                var name = Path.GetFileNameWithoutExtension(f);
+                var prefix = new RK(0, 0, 0).ToString();
+                name = name.Replace(String.Format("S3_{0:X8}_{1:X8}_{2:X16}", rk.ResourceType, rk.ResourceGroup, rk.Instance), "").TrimStart('_');
+                int i = name.IndexOf("%%+");
+                if (i >= 0)
+                    name = name.Substring(0, i);
+                if (name == "")
+                    name = NameMapName(rk.Instance);
+                return Tuple.Create(name, rk, (IDictionary<ulong, string>)new StblResource.StblResource(0, fs));
+            }
+        }
+
+        Tuple<String, IResourceKey, IDictionary<ulong, string>> _parseNRaas(String f, IResourceKey rk)
+        {
+            // Extend any exception with the file name and rethrow
+            try
+            {
+                using (FileStream fs = new FileStream(f, FileMode.Open, FileAccess.Read))
+                {
+                    return Tuple.Create(Path.GetFileNameWithoutExtension(f), rk, (IDictionary<ulong, string>)fs.ReadKeyStr().ToDictionary(x => x.Item1, x => x.Item2));
+                }
+            }
+            catch (Exception ex) { throw new Exception(ex.Message + "\nFile: " + f, ex); }
+        }
+
+
+        class RK : IResourceKey
+        {
+            public RK(uint rt, uint rg, ulong i) { ResourceType = rt; ResourceGroup = rg; Instance = i; }
+            public static RK Default { get { return new RK(0, 0, 0); } }
+            public uint ResourceType { get; set; }
+            public uint ResourceGroup { get; set; }
+            public ulong Instance { get; set; }
+            public bool Equals(IResourceKey x, IResourceKey y) { return x.Equals(y); }
+            public int GetHashCode(IResourceKey obj) { return obj.ResourceType.GetHashCode() ^ obj.ResourceGroup.GetHashCode() ^ obj.Instance.GetHashCode(); }
+            public bool Equals(IResourceKey other) { return this.CompareTo(other) == 0; }
+            public int CompareTo(IResourceKey other)
+            {
+                int res = this.ResourceType.CompareTo(other.ResourceType);
+                if (res == 0) res = this.ResourceGroup.CompareTo(other.ResourceGroup);
+                if (res == 0) res = this.Instance.CompareTo(other.Instance);
+                return res;
+            }
+            public override string ToString() { return String.Format("0x{0:X8}-0x{1:X8}-0x{2:X16}", ResourceType, ResourceGroup, Instance); }
+        }
+
+        IResourceKey stblGroupKeyToRK(IResourceKey stblGroupKey, int lang)
+        {
+            return new RK(stblGroupKey.ResourceType, stblGroupKey.ResourceGroup, stblGroupKey.Instance | ((ulong)lang << 56));
+        }
+
+        IResourceKey RKTostblGroupKey(IResourceKey rk)
+        {
+            return new RK(rk.ResourceType, rk.ResourceGroup, rk.Instance & 0x00FFFFFFFFFFFFFF);
+        }
+
+        int getLanguage(ulong instance)
+        {
+            return (int)(instance >> 56);
+        }
+
+        class TupleEquals<T, U> : EqualityComparer<Tuple<T, U>>
+            where T : IEquatable<T>
+            where U : IEquatable<U>
+        {
+            public override bool Equals(Tuple<T, U> x, Tuple<T, U> y)
+            {
+                return x.Item1.Equals(y.Item1) && x.Item2.Equals(y.Item2);
+            }
+
+            public override int GetHashCode(Tuple<T, U> obj)
+            {
+                return obj.Item1.GetHashCode() ^ obj.Item2.GetHashCode();
+            }
+        }
+
+        //class STBLGroupKeyEqualityComparer : EqualityComparer<IResourceKey>
+        //{
+        //    public override bool Equals(IResourceKey x, IResourceKey y)
+        //    {
+        //        return x.Instance == y.Instance;
+        //    }
+        //
+        //    public override int GetHashCode(IResourceKey obj)
+        //    {
+        //        return obj.Instance.GetHashCode();
+        //    }
+        //}
+    }
+
+    static class Extensions
+    {
+        public static IEnumerable<Tuple<ulong, string>> ReadKeyStr(this FileStream fs)
+        {
+            using (StreamReader sr = new StreamReader(fs, System.Text.Encoding.Unicode))
+            {
+                int line = 0;
+                while (!sr.EndOfStream)
+                {
+                    // Read the guid
+                    var _key = sr.ReadLine();
+                    if (!_key.StartsWith("<KEY>") || !_key.EndsWith("</KEY>"))
+                    {
+                        throw new InvalidDataException("Expected KEY delimiters missing at line " + line + ".");
+                    }
+                    _key = _key.Substring(5, _key.Length - 11);
+
+                    line++;
+
+                    ulong guid = 0;
+                    if (!_key.StartsWith("0x") || !ulong.TryParse(_key.Substring(2), System.Globalization.NumberStyles.HexNumber, null, out guid))
+                        guid = System.Security.Cryptography.FNV64.GetHash(_key);
+
+                    // Read the string
+                    var _str = sr.ReadLine();
+                    if (!_str.StartsWith("<STR>") || !_str.EndsWith("</STR>"))
+                    {
+                        throw new InvalidDataException("Expected STR delimiters missing at line " + line + ".");
+                    }
+                    _str = _str.Substring(5, _str.Length - 11);
+
+                    line++;
+
+                    yield return Tuple.Create(guid, _str);
+                }
+            }
         }
     }
 }
