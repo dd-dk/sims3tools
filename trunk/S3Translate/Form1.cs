@@ -41,7 +41,7 @@ namespace S3Translate
 
         private const string packageFilter = "Sims 3 Packages|*.package|All Files|*.*";
         private const string stblFilter = "Exported String Tables|S3_220557DA_*.stbl|Any stbl (*.stbl)|*.stbl|All Files|*.*";
-        private const string nraasFilter = "Nraas Packer format|StringTableStrings_*.txt|Any text file (*.txt)|All Files|*.*";
+        private const string nraasFilter = "Nraas Packer format|StringTableStrings_*.txt|Any text file (*.txt)|*.txt|All Files|*.*";
 
         #region locales
         public static List<String> locales = new List<String> {
