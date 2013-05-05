@@ -87,5 +87,29 @@ namespace S3Translate.Properties {
                 this["LicenceShown"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastOpenPackageFolder {
+            get {
+                return ((string)(this["LastOpenPackageFolder"]));
+            }
+            set {
+                this["LastOpenPackageFolder"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastImportFileFolder {
+            get {
+                return ((string)(this["LastImportFileFolder"]));
+            }
+            set {
+                this["LastImportFileFolder"] = value;
+            }
+        }
     }
 }

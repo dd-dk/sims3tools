@@ -167,6 +167,16 @@ namespace S3Translate
             {
                 new SettingsDialog().ShowDialog();
             }
+            if (Settings.Default.LastOpenPackageFolder == "")
+            {
+                Settings.Default.LastOpenPackageFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                Settings.Default.Save();
+            }
+            if (Settings.Default.LastImportFileFolder == "")
+            {
+                Settings.Default.LastImportFileFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                Settings.Default.Save();
+            }
 
             FileNameChanged += new EventHandler((sender, e) => SetFormTitle());
 
@@ -236,7 +246,7 @@ namespace S3Translate
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var ofd = new OpenFileDialog() { Filter = packageFilter, };
+            var ofd = new OpenFileDialog() { Filter = packageFilter, InitialDirectory = Settings.Default.LastOpenPackageFolder, };
             if (ofd.ShowDialog() != DialogResult.OK)
                 return;
 
@@ -244,6 +254,8 @@ namespace S3Translate
                 return;
 
             OpenPackage(ofd.FileName);
+            Settings.Default.LastOpenPackageFolder = Path.GetDirectoryName(ofd.FileName);
+            Settings.Default.Save();
         }
 
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -264,9 +276,7 @@ namespace S3Translate
 
         private void savePackageAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var sfd = new SaveFileDialog();
-            sfd.Filter = packageFilter;
-            sfd.FileName = fileName;
+            var sfd = new SaveFileDialog() { Filter = packageFilter, InitialDirectory = Settings.Default.LastOpenPackageFolder, FileName = fileName, };
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 AskCommit();
@@ -375,7 +385,7 @@ namespace S3Translate
         private void importPackageToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Get the file name
-            var ofd = new OpenFileDialog() { Filter = packageFilter };
+            var ofd = new OpenFileDialog() { Title = "Import From Package", Filter = packageFilter, InitialDirectory = Settings.Default.LastImportFileFolder, };
             if (ofd.ShowDialog() != DialogResult.OK) return;
             if (ofd.FileName == fileName)
             {
@@ -419,6 +429,8 @@ namespace S3Translate
             #endregion
 
             ImportNewSTBLList(newSTBLs);
+            Settings.Default.LastImportFileFolder = Path.GetDirectoryName(ofd.FileName);
+            Settings.Default.Save();
         }
 
         private void importSTBLToolStripMenuItem_Click(object sender, EventArgs e)
@@ -436,9 +448,13 @@ namespace S3Translate
             IPackage targetPackage;
 
             #region Get the filename
-            var sfd = new SaveFileDialog() { Title = "Export To Package" };
-            sfd.Filter = packageFilter;
-            sfd.FileName = Path.GetFileNameWithoutExtension(fileName) + cmbSetPicker.Text.Substring(3);
+            var sfd = new SaveFileDialog()
+            {
+                Title = "Export To Package",
+                Filter = packageFilter,
+                InitialDirectory = Settings.Default.LastImportFileFolder,
+                FileName = Path.GetFileNameWithoutExtension(fileName) + cmbSetPicker.Text.Substring(3),
+            };
             if (sfd.ShowDialog() != DialogResult.OK)
                 return;
             #endregion
@@ -528,6 +544,8 @@ namespace S3Translate
 
             targetCommitNameMaps();
             targetPackage.SavePackage();
+            Settings.Default.LastImportFileFolder = Path.GetDirectoryName(sfd.FileName);
+            Settings.Default.Save();
         }
 
         private void exportLanguageToolStripMenuItem_Click(object sender, EventArgs e)
@@ -535,7 +553,7 @@ namespace S3Translate
             var ef = new Export() { Text = "Export (S3 stbl)" };
             if (ef.ShowDialog() != DialogResult.OK) return;
 
-            var fd = new FolderBrowserDialog() { Description = "Export (S3 stbl)", };
+            var fd = new FolderBrowserDialog() { Description = "Export (S3 stbl)", SelectedPath = Settings.Default.LastImportFileFolder, };
             if (fd.ShowDialog() != DialogResult.OK) return;
 
             AskCommit();
@@ -557,6 +575,9 @@ namespace S3Translate
                     fs.Close();
                 }
             }
+
+            Settings.Default.LastImportFileFolder = fd.SelectedPath;
+            Settings.Default.Save();
         }
 
         private void exportToNraasPackerFormatToolStripMenuItem_Click(object sender, EventArgs e)
@@ -564,7 +585,7 @@ namespace S3Translate
             var ef = new Export() { Text = "Export (Nraas Packer)", };
             if (ef.ShowDialog() != DialogResult.OK) return;
 
-            var fd = new FolderBrowserDialog() { Description = "Export (Nraas Packer)", };
+            var fd = new FolderBrowserDialog() { Description = "Export (Nraas Packer)", SelectedPath = Settings.Default.LastImportFileFolder, };
             if (fd.ShowDialog() != DialogResult.OK) return;
 
             AskCommit();
@@ -591,6 +612,9 @@ namespace S3Translate
                     }
                 }
             }
+
+            Settings.Default.LastImportFileFolder = fd.SelectedPath;
+            Settings.Default.Save();
         }
 
         private void mergeAllSetsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -926,7 +950,7 @@ Do you accept this licence?" : ""),
             _pkgDirty = _txtDirty = false;
             SetFormTitle();
             ReloadStringTables();
-            btnSetToAll.Enabled = btnSetToTarget.Enabled = tlpFind.Enabled = currentPackage != null;
+            tlpFind.Enabled = currentPackage != null;
 
             /*
                 * Every time we remove a resource from the package, we should check to see if it is still in use.
@@ -1311,7 +1335,9 @@ Do you accept this licence?" : ""),
                 {
                     tbGUID.Text = "";
                     txtSource.Text = txtTarget.Text = "";
-                    btnStringToTarget.Enabled = btnStringToAll.Enabled = btnDelString.Enabled = btnChangeGUID.Enabled = txtTarget.Enabled = false;
+                    btnStringToTarget.Enabled = btnStringToAll.Enabled =
+                        btnDelString.Enabled = btnChangeGUID.Enabled =
+                        txtTarget.Enabled = false;
                     tbGUID.Tag = null;
                     return;
                 }
@@ -1320,9 +1346,12 @@ Do you accept this licence?" : ""),
                     tbGUID.Text = lstStrings.SelectedItems[0].SubItems[0].Text;
                     txtSource.Text = lstStrings.SelectedItems[0].SubItems[1].Text;
                     txtTarget.Text = lstStrings.SelectedItems[0].SubItems[2].Text;
-                    btnStringToTarget.Enabled = btnStringToAll.Enabled = btnDelString.Enabled = btnChangeGUID.Enabled = txtTarget.Enabled = true;
+                    btnStringToTarget.Enabled = btnStringToAll.Enabled =
+                        btnDelString.Enabled = btnChangeGUID.Enabled =
+                        txtTarget.Enabled = true;
                     tbGUID.Tag = lstStrings.SelectedItems[0].Tag;
                 }
+                btnSetToTarget.Enabled = btnSetToAll.Enabled = cmbSetPicker.SelectedIndex >= 0;
             }
             finally { inChangeHandler = false; }
         }
@@ -1447,7 +1476,7 @@ Do you accept this licence?" : ""),
         void ImportFromFile(string filter, _ImportGetFiles getFiles, _ImportParse parser)
         {
             // Get the file name(s)
-            var ofd = new OpenFileDialog() { Filter = filter, };
+            var ofd = new OpenFileDialog() { Title = "Import", Filter = filter, InitialDirectory = Settings.Default.LastImportFileFolder, };
             if (ofd.ShowDialog() != DialogResult.OK) return;
 
             List<Tuple<String, IResourceKey, IDictionary<ulong, string>>> newSTBLs;
@@ -1473,6 +1502,8 @@ Do you accept this licence?" : ""),
             }
 
             ImportNewSTBLList(newSTBLs);
+            Settings.Default.LastImportFileFolder = Path.GetDirectoryName(ofd.FileName);
+            Settings.Default.Save();
         }
 
         void ImportNewSTBLList(List<Tuple<String, IResourceKey, IDictionary<ulong, string>>> newSTBLList)
