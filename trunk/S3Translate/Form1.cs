@@ -338,7 +338,7 @@ namespace S3Translate
 
                 var rk = stblGroupKeyToRK(stblGroupKeyRK, lang);
                 _currentPackage.AddResource(rk, stbl.Stream, true);
-                addInstance(rk.Instance, NameMapName(rk.Instance));
+                addInstance(rk.Instance, NameMapName(rk));
             }
 
             commitNameMaps();
@@ -407,7 +407,7 @@ namespace S3Translate
                     .Select(x =>
                     {
                         return Tuple.Create(
-                            NameMapName(x.Instance),
+                            NameMapName(x),
                             (IResourceKey)new RK(x.ResourceType, x.ResourceGroup, x.Instance),
                             (IDictionary<ulong, string>)new StblResource.StblResource(0, ((APackage)importFrom).GetResource(x))
                         );
@@ -539,7 +539,7 @@ namespace S3Translate
                 var stbl = new StblResource.StblResource(0, ((APackage)currentPackage).GetResource(rk));
 
                 targetPackage.AddResource(rk, stbl.Stream, true);
-                targetAddInstance(rk.Instance, NameMapName(rk.Instance));
+                targetAddInstance(rk.Instance, NameMapName(rk));
             }
 
             targetCommitNameMaps();
@@ -594,7 +594,7 @@ namespace S3Translate
             foreach (int lang in ef.checkList.CheckedIndices)
             {
                 //StringTableStrings_ENG_US_000f16b00ba8342f.txt
-                var fn = Path.Combine(fd.SelectedPath, NRaasName(stblGroupKeyToRK(STBLGroupKey.Key, lang).Instance));
+                var fn = Path.Combine(fd.SelectedPath, NRaasName(stblGroupKeyToRK(STBLGroupKey.Key, lang)));
                 if (!overwrite && File.Exists(fn))
                 {
                     if (MessageBox.Show("Proceeding will overwrite existing files in the selected folder.\n\nContinue?",
@@ -671,7 +671,7 @@ namespace S3Translate
 
                 var rk = stblGroupKeyToRK(stblGroupKeyRK, lang);
                 _currentPackage.AddResource(rk, stbl.Stream, true);
-                addInstance(rk.Instance, NameMapName(rk.Instance));
+                addInstance(rk.Instance, NameMapName(rk));
             }
 
             foreach (var res in currentPackage.FindAll(x => x.ResourceType == STBL && (x.ResourceGroup != group || (x.Instance & 0x00FFFFFFFFFFFFFF) != instance)))
@@ -1457,22 +1457,6 @@ Do you accept this licence?" : ""),
             lstStrings.EnsureVisible(foundItems[0].Index);
         }
 
-        String NameMapName(ulong instance)
-        {
-            return String.Format("Strings_{0}_{1:x16}", locales[getLanguage(instance)].Replace(' ', '_'), instance);
-        }
-
-        String STBLName(IResourceKey rk)
-        {
-            return String.Format("S3_{0:X8}_{1:X8}_{2:X16}_{3}%%+STBL.stbl", STBL, rk.ResourceGroup, rk.Instance, NameMapName(rk.Instance));
-        }
-
-        String NRaasName(ulong instance)
-        {
-            //StringTableStrings_ENG_US_000f16b00ba8342f.txt
-            return String.Format("StringTableStrings_{0}_{1:x16}.txt", nraas_locales[getLanguage(instance)], instance);
-        }
-
         void ImportFromFile(string filter, _ImportGetFiles getFiles, _ImportParse parser)
         {
             // Get the file name(s)
@@ -1511,44 +1495,59 @@ Do you accept this licence?" : ""),
             // Name the nameless Tuple Items any place in an anonymous class
             var newSTBLs = newSTBLList.Select(x => new { name = x.Item1, rk = x.Item2, stbl = x.Item3, });
 
-            #region Check for duplicate GUIDs
-            var newGUIDs = newSTBLs.SelectMany(x => x.stbl.Keys).Distinct();
-
-            // If we find a duplicate GUID, note its existing StringSet
-            var dupGUIDs = newGUIDs
-                .SelectMany(x => StringTables
-                    .Where(y => y.Value
-                        .Any(z => z.Value.ContainsKey(x)))
-                    .Select(y => new Tuple<ulong, IResourceKey>(x, y.Key))
+            // Where do the new GUIDs come from
+            var newGUIDStblGroupKeyRKs = newSTBLs
+                .SelectMany(x => x.stbl
+                    .Select(y => new { guid = y.Key, stblGroupKeyRK = RKTostblGroupKey(x.rk), })
                 )
-                .Distinct(TupleEquals<ulong, IResourceKey>.Default)
-                .Select(x => new { guid = x.Item1, stblGroupKeyRK = x.Item2 })
-                .OrderBy(x => x.guid)
+                .Select(x => new guidRK(x.guid, x.stblGroupKeyRK))
+                .Distinct(guidRK.Default)
+                .Select(x => new { guid = x.guid, stblGroupKeyRK = x.rk, })
+                ;
+
+            // Where do the existing GUIDs come from
+            var oldGUIDStblGroupKeyRKs = StringTables
+                .SelectMany(x => x.Value
+                    .SelectMany(y => y.Value
+                        .Select(z => new { guid = z.Key, stblGroupKeyRK = x.Key, })
+                    )
+                )
+                .Select(x => new guidRK(x.guid, x.stblGroupKeyRK))
+                .Distinct(guidRK.Default)
+                .Select(x => new { guid = x.guid, stblGroupKeyRK = x.rk, })
             ;
 
-            // If we end up with multiple existing StringSets, refuse to import and tell the user to resolve existing merge conflicts
-            var conflicts = dupGUIDs
-                .Where(x => dupGUIDs
+            #region Check for duplicate GUIDs
+            // Do any new GUIDs already exist?
+            var dupGUIDStblGroupKeyRKs = newGUIDStblGroupKeyRKs
+                .Where(x => oldGUIDStblGroupKeyRKs
+                    .Any(y => y.guid == x.guid)
+                )
+                .SelectMany(x => oldGUIDStblGroupKeyRKs
                     .Where(y => y.guid == x.guid)
-                    .Select(y => y.stblGroupKeyRK)
-                    .Distinct(RK.Default)
-                    .Skip(1)
-                    .FirstOrDefault() != null
-                );
-            if (conflicts.FirstOrDefault() != null)
+                    .Select(y => new { guid = x.guid, newGUIDStblGroupKeyRK = x.stblGroupKeyRK, oldGUIDStblGroupKeyRK = y.stblGroupKeyRK, })
+                )
+            ;
+
+            // Do any new GUIDs exist with a different stblGroupKeyRK?
+            var conflictGUIDStblGroupKeyRKs = dupGUIDStblGroupKeyRKs
+                .Where(x => !x.oldGUIDStblGroupKeyRK.Equals(x.newGUIDStblGroupKeyRK))
+            ;
+
+            if (conflictGUIDStblGroupKeyRKs.FirstOrDefault() != null)
             {
                 MessageBox.Show("One or more GUIDs being imported exists in more than one of the existing String Sets.  " +
                     "This conflict cannot be resolved automatically.\n\n" +
                     "Please manually ensure a GUID only exists in one String Set by deleting from one and editing the other.  The GUIDs/String Sets are:\n\n  " +
-                    String.Join("\n  ", conflicts
+                    String.Join("\n  ", conflictGUIDStblGroupKeyRKs
                         .Select(x => x.guid)
                         .Distinct()
                         .Select(x => new
                         {
                             guid = x,
-                            stringSets = conflicts
+                            stringSets = conflictGUIDStblGroupKeyRKs
                                 .Where(y => y.guid == x)
-                                .Select(y => y.stblGroupKeyRK)
+                                .Select(y => y.oldGUIDStblGroupKeyRK)
                         })
                         .Select(x => String.Format("GUID: {0:X16} in String Sets {1}.",
                             x.guid, String.Join(", ", x.stringSets.Select(y => "0x__" + y.Instance.ToString("X14")))))),
@@ -1556,7 +1555,7 @@ Do you accept this licence?" : ""),
                 return;
             }
 
-            if (dupGUIDs.FirstOrDefault() != null)
+            if (dupGUIDStblGroupKeyRKs.FirstOrDefault() != null)
             {
                 if (MessageBox.Show("Duplicate String GUIDs exist.  If you continue, existing values will be overwritten.\n\nContinue?",
                     "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
@@ -1568,113 +1567,126 @@ Do you accept this licence?" : ""),
             lstStrings.SelectedIndices.Clear();
 
             #region Make sure we have one string per GUID per language
-            // We want each GUID in each language STBL, so find all the languages and GUIDs
-            var newLangGUIDs = newGUIDs
-                .SelectMany(x => newSTBLs
-                    .Where(y => y.stbl.ContainsKey(x))
-                    .Select(y => new { lang = getLanguage(y.rk.Instance), guid = x, rk = y.rk, })
+
+            // All GUIDs we are touching across all StblGroups affected
+            var mergeGUIDStblGroupKeyRKs = oldGUIDStblGroupKeyRKs
+                .Where(x => newGUIDStblGroupKeyRKs.Any(y => y.stblGroupKeyRK.Equals(x.stblGroupKeyRK)))
+                .Select(x => new guidRK(x.guid, x.stblGroupKeyRK))
+                .Union(newGUIDStblGroupKeyRKs.Select(x => new guidRK(x.guid, x.stblGroupKeyRK)), guidRK.Default)
+                .Select(x => new { guid = x.guid, stblGroupKeyRK = x.rk, })
+            ;
+
+            // Get the language list
+            var langs = newSTBLs
+                .Select(x => getLanguage(x.rk.Instance))
+                .Distinct()
+                .Union(StringTables
+                    .Where(x => mergeGUIDStblGroupKeyRKs
+                        .Any(y => y.stblGroupKeyRK.Equals(x.Key))
+                    )
+                    .SelectMany(x => x.Value.Keys)
+                    .Distinct()
                 )
             ;
 
-            // Now make sure the default values exists for all combinations of language and GUID
-            var newStringTables = newLangGUIDs
-                .Select(x => x.lang)
-                .Distinct()
-                .SelectMany(x => newGUIDs
-                    .Select(y => new Tuple<int, ulong>(x, y))
+            // Create the default entries
+            var defaultStringTables = langs
+                .SelectMany(x => mergeGUIDStblGroupKeyRKs
+                    .Select(y => new
+                        {
+                            stblGroupKeyRK = y.stblGroupKeyRK,
+                            lang = x,
+                            guid = y.guid,
+                            value = String.Format("0x{0:X16}: {1}", y.guid, locales[x]),
+                        }
+                    )
                 )
-                .Distinct(TupleEquals<int, ulong>.Default)
-                .Select(x => new { lang = x.Item1, guid = x.Item2 })
+
+            ;
+
+            // Overwrite defaults with old values, if present
+            var oldValues = defaultStringTables
                 .Select(x =>
                 {
-                    // If we end up with a single stblGroupKeyRK for a GUID, import into that
-                    // If we end up with no existing stblGroupKeyRK, create a new one
-                    // OK, for dupGUIDs we know the target stblGroupKeyRK
-                    // But for everything else we need to create a stblGroupKeyRK
-                    var stblGroupKeyRK =
-                        dupGUIDs
-                        .Where(y => y.guid == x.guid)
-                        .Select(y => y.stblGroupKeyRK)
-                        .DefaultIfEmpty(RKTostblGroupKey(newLangGUIDs
-                            .Where(y => y.guid == x.guid)
-                            .Select(y => RKTostblGroupKey(y.rk))
-                            .Distinct(RK.Default)
-                            .Single()
-                        ))
-                        .Single();
+                    if (!StringTables.ContainsKey(x.stblGroupKeyRK))
+                        return x;
 
-                    // Grab the existing value or create a default
-                    var value = StringTables
-                        .Where(y => y.Key.Equals(stblGroupKeyRK))
-                        .Select(y => y.Value)
-                        .Where(y => y.Keys.Contains(x.lang) && y[x.lang].ContainsKey(x.guid))
-                        .Select(y => y[x.lang][x.guid])
-                        .DefaultIfEmpty(String.Format("0x{0:X16}: {1}", x.guid, locales[x.lang]))
-                        .Single()
-                    ;
+                    var stblGroup = StringTables[x.stblGroupKeyRK];
+                    if (!stblGroup.ContainsKey(x.lang))
+                        return x;
 
-                    // Replace with any imported value
-                    value = newLangGUIDs
-                        .Where(y => y.lang == x.lang && y.guid == x.guid)
-                        .Select(y => newSTBLs
-                            .Where(z => z.rk.Equals(y.rk))
-                            .Select(z => z.stbl)
-                            .Single()
-                        )
-                        .Select(y => y[x.guid])
-                        .DefaultIfEmpty(value)
-                        .Single()
-                    ;
+                    var stbl = stblGroup[x.lang];
+                    if (!stbl.ContainsKey(x.guid))
+                        return x;
+
+                    return new { stblGroupKeyRK = x.stblGroupKeyRK, lang = x.lang, guid = x.guid, value = stbl[x.guid], };
+                }
+                )
+            ;
+
+            // Overwrite old or default values with new values, if present
+            var newStringTables = oldValues
+                .Select(x =>
+                {
+                    var stbl = newSTBLs
+                        .Where(y => y.rk.Equals(stblGroupKeyToRK(x.stblGroupKeyRK, x.lang)))
+                        .Select(y => y.stbl)
+                        .SingleOrDefault();
+
+                    var value = (stbl == null || !stbl.ContainsKey(x.guid))
+                        ? x.value
+                        : stbl[x.guid];
 
                     // This should now look like StringTables, right?
-                    return new
-                    {
-                        rk = stblGroupKeyRK,
-                        dict = new
-                        {
-                            lang = x.lang,
-                            stbl = new { guid = x.guid, value = value, },
-                        },
-                    };
+                    return new { rk = x.stblGroupKeyRK, dict = new { lang = x.lang, stbl = new { guid = x.guid, value = value, } } };
                 }
                 )
             ;
             #endregion
 
             #region Write the values to the current package
-            foreach (var newSTBLGroupKeyRK in newStringTables.Select(x => x.rk).Distinct(RK.Default))
+            foreach (var stblGroupKeyRK in newStringTables
+                .Select(x => x.rk)
+                .Distinct(RK.Default)
+                .OrderBy(x => x)
+                )
             {
-                foreach (var lang in newStringTables.Select(x => x.dict.lang).Distinct())
+                foreach (var lang in newStringTables
+                    .Select(x => x.dict.lang)
+                    .Distinct()
+                    .OrderBy(x => x)
+                    )
                 {
-                    // We have no entries for this newSTBLGroupKeyRK or the language is missing
                     var targetSTBL = new StblResource.StblResource(0, null);
-                    var rk = stblGroupKeyToRK(newSTBLGroupKeyRK, lang);
+                    var rk = stblGroupKeyToRK(stblGroupKeyRK, lang);
                     var name = newSTBLs
                         .Where(x => x.rk.Equals(rk))
                         .Select(x => x.name)
-                        .DefaultIfEmpty(NameMapName(rk.Instance))
+                        .DefaultIfEmpty(NameMapName(rk))
                         .Single();
 
                     var newSTBL = newStringTables
-                        .Where(x => x.rk.Equals(newSTBLGroupKeyRK))
+                        .Where(x => x.rk.Equals(stblGroupKeyRK))
                         .Select(x => x.dict);
 
                     var newStrings = newSTBL
                         .Where(x => x.lang == lang)
-                        .Select(x => x.stbl);
+                        .Select(x => x.stbl)
+                        ;
 
+                    // Create this language
                     foreach (var kvp in newStrings)
-                    {
                         targetSTBL.Add(kvp.guid, kvp.value);
-                    }
 
-                    if (!StringTables.ContainsKey(newSTBLGroupKeyRK) || !StringTables[newSTBLGroupKeyRK].ContainsKey(lang))
+                    if (!StringTables.ContainsKey(stblGroupKeyRK) || !StringTables[stblGroupKeyRK].ContainsKey(lang))
                     {
+                        // We're creating a new resource
                         _currentPackage.AddResource(rk, targetSTBL.Stream, true);
                         addInstance(rk.Instance, name);
                     }
                     else
                     {
+                        // We already have the resource, so replace it
                         IResourceIndexEntry rie = _currentPackage.Find(x => rk.Equals(x));
                         _currentPackage.ReplaceResource(rie, targetSTBL);
                     }
@@ -1780,7 +1792,7 @@ Do you accept this licence?" : ""),
                         // Generate the instance per locale
                         var langRK = stblGroupKeyToRK(rk, l);
 
-                        f = Path.Combine(Path.GetDirectoryName(f), NRaasName(langRK.Instance));
+                        f = Path.Combine(Path.GetDirectoryName(f), NRaasName(langRK));
                         if (File.Exists(f))
                         {
                             yield return Tuple.Create(f, langRK);
@@ -1803,7 +1815,7 @@ Do you accept this licence?" : ""),
                 if (i >= 0)
                     name = name.Substring(0, i);
                 if (name == "")
-                    name = NameMapName(rk.Instance);
+                    name = NameMapName(rk);
                 return Tuple.Create(name, rk, (IDictionary<ulong, string>)new StblResource.StblResource(0, fs));
             }
         }
@@ -1892,33 +1904,43 @@ Do you accept this licence?" : ""),
             return (int)(instance >> 56);
         }
 
-        class TupleEquals<T, U> : EqualityComparer<Tuple<T, U>>
-            where T : IEquatable<T>
-            where U : IEquatable<U>
+        String NameMapName(IResourceKey rk)
         {
-            public override bool Equals(Tuple<T, U> x, Tuple<T, U> y)
-            {
-                return x.Item1.Equals(y.Item1) && x.Item2.Equals(y.Item2);
-            }
-
-            public override int GetHashCode(Tuple<T, U> obj)
-            {
-                return obj.Item1.GetHashCode() ^ obj.Item2.GetHashCode();
-            }
+            return String.Format("Strings_{0}_{1:x16}", locales[getLanguage(rk.Instance)].Replace(' ', '_'), rk.Instance);
         }
 
-        //class STBLGroupKeyEqualityComparer : EqualityComparer<IResourceKey>
-        //{
-        //    public override bool Equals(IResourceKey x, IResourceKey y)
-        //    {
-        //        return x.Instance == y.Instance;
-        //    }
-        //
-        //    public override int GetHashCode(IResourceKey obj)
-        //    {
-        //        return obj.Instance.GetHashCode();
-        //    }
-        //}
+        String STBLName(IResourceKey rk)
+        {
+            return String.Format("S3_{0:X8}_{1:X8}_{2:X16}_{3}%%+STBL.stbl", STBL, rk.ResourceGroup, rk.Instance, NameMapName(rk));
+        }
+
+        String NRaasName(IResourceKey rk)
+        {
+            //StringTableStrings_ENG_US_000f16b00ba8342f.txt
+            return String.Format("StringTableStrings_{0}_{1:x16}.txt", nraas_locales[getLanguage(rk.Instance)], rk.Instance);
+        }
+
+
+        class guidRK : Tuple<ulong, IResourceKey>, IEqualityComparer<guidRK>, IEquatable<guidRK>, IComparable<guidRK>
+        {
+            static guidRK _defaultGuidRK = new guidRK(0, new RK(0, 0, 0));
+            public static guidRK Default { get { return _defaultGuidRK; } }
+
+            public guidRK(ulong guid, IResourceKey rk) : base(guid, rk) { }
+            public ulong guid { get { return Item1; } }
+            public IResourceKey rk { get { return Item2; } }
+
+            public bool Equals(guidRK x, guidRK y) { return x.CompareTo(y) == 0; }
+            public bool Equals(guidRK other) { return guid.Equals(other.guid) && rk.Equals(other.rk); }
+            public int GetHashCode(guidRK obj) { return guid.GetHashCode() ^ rk.GetHashCode(); }
+
+            public int CompareTo(guidRK other)
+            {
+                var res = guid.CompareTo(other.guid);
+                if (res != 0) return res;
+                return rk.CompareTo(other.rk);
+            }
+        }
     }
 
     static class Extensions
