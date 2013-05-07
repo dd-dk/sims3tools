@@ -1,7 +1,7 @@
 ;!include "MUI.nsh"
 
 
-!define tla "S3Translate"
+!define tla "s3se"
 !ifndef INSTFILES
   !error "Caller didn't define INSTFILES"
 !endif
@@ -19,7 +19,7 @@ Var wantSM
 
 
 InstallDir $PROGRAMFILES64\${tla}
-!define PROGRAM_NAME "jonha's S3Translate"
+!define PROGRAM_NAME "s3se - Sims3 String Editor"
 !define INSTREGKEY "${tla}"
 !define SMDIR "$SMPROGRAMS\${tla}"
 !define EXE ${tla}.exe
@@ -29,8 +29,8 @@ SetCompressor /SOLID LZMA
 XPStyle on
 Name "${PROGRAM_NAME}"
 AddBrandingImage top 0
-; Icon Resources\${tla}.ico
-; UninstallIcon Resources\${tla}.ico
+Icon Resources\${tla}.ico
+UninstallIcon Resources\${tla}.ico
 
 ; Request application privileges for Windows Vista and above
 RequestExecutionLevel admin
@@ -113,10 +113,10 @@ noWantSM:
 SectionEnd
 
 Function .onGUIInit
-;  SetOutPath $TEMP
-;  File ..\Resources\${tla}.ico
-;  SetBrandingImage $TEMP\${tla}.ico
-;  Delete $TEMP\${tla}.ico
+  SetOutPath $TEMP
+  File ..\Resources\${tla}.ico
+  SetBrandingImage $TEMP\${tla}.ico
+  Delete $TEMP\${tla}.ico
   Call GetInstDir
   Call CheckInUse
   Call CheckOldVersion
