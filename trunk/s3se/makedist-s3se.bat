@@ -1,11 +1,11 @@
 @echo off
-set TargetName=S3Translate
+set TargetName=s3se
 set ConfigurationName=Release
 set base=%TargetName%
 rem -%ConfigurationName%
 set src=%TargetName%-Source
 
-set out=S:\Sims3\Tools\S3Translate\
+set out=S:\Sims3\Tools\s3se\
 set helpFolder=%out%HelpFiles
 
 set mydate=%date: =0%
@@ -43,7 +43,7 @@ rem there shouldn't be any to delete...
 del /q /f %out%%TargetName%*%suffix%.*
 
 pushd ..
-7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" "S3Translate"
+7za a -r -t7z -mx9 -ms -xr!.?* -xr!*.suo -xr!zzOld -xr!bin -xr!obj -xr!Makefile -xr!*.Config "%out%%src%_%suffix%.7z" "s3se"
 popd
 
 pushd bin\%ConfigurationName%

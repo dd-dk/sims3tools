@@ -8,8 +8,8 @@
     <ProjectGuid>{C1DF2D91-11CA-4464-9A1A-D8C95C0DAA58}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>S3Translate</RootNamespace>
-    <AssemblyName>S3Translate</AssemblyName>
+    <RootNamespace>s3se</RootNamespace>
+    <AssemblyName>s3se</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>

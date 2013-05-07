@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2012 for Windows Desktop
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "S3Translate", "S3Translate.csproj", "{C1DF2D91-11CA-4464-9A1A-D8C95C0DAA58}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3se", "s3se.csproj", "{C1DF2D91-11CA-4464-9A1A-D8C95C0DAA58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
