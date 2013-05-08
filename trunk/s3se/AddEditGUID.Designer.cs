@@ -1,4 +1,4 @@
-﻿namespace S3Translate
+﻿namespace s3se
 {
     partial class AddEditGUID
     {

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace S3Translate.Properties {
+namespace s3se.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
