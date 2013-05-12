@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.tableLayoutPanel_MainInge = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel_LeftInge = new System.Windows.Forms.TableLayoutPanel();
@@ -55,7 +56,9 @@
             this.cmbSetPicker = new System.Windows.Forms.ComboBox();
             this.tableLayoutPanel_RightInge = new System.Windows.Forms.TableLayoutPanel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.tableLayoutPanel9 = new System.Windows.Forms.TableLayoutPanel();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.label_SourceLanguageMissing = new System.Windows.Forms.Label();
+            this.label_TargetLanguageMissing = new System.Windows.Forms.Label();
             this.lstStrings = new System.Windows.Forms.ListView();
             this.chInstance = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.chSource = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -121,7 +124,7 @@
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
-            this.tableLayoutPanel9.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.tlp_EditAndRef.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
             this.splitContainer2.Panel1.SuspendLayout();
@@ -551,7 +554,7 @@
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.tableLayoutPanel9);
+            this.splitContainer1.Panel1.Controls.Add(this.panel1);
             // 
             // splitContainer1.Panel2
             // 
@@ -562,21 +565,46 @@
             this.splitContainer1.TabIndex = 3;
             this.splitContainer1.TabStop = false;
             // 
-            // tableLayoutPanel9
+            // panel1
             // 
-            this.tableLayoutPanel9.ColumnCount = 1;
-            this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel9.Controls.Add(this.lstStrings, 0, 1);
-            this.tableLayoutPanel9.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel9.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel9.Margin = new System.Windows.Forms.Padding(4);
-            this.tableLayoutPanel9.Name = "tableLayoutPanel9";
-            this.tableLayoutPanel9.RowCount = 2;
-            this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel9.Size = new System.Drawing.Size(738, 324);
-            this.tableLayoutPanel9.TabIndex = 0;
+            this.panel1.Controls.Add(this.label_SourceLanguageMissing);
+            this.panel1.Controls.Add(this.label_TargetLanguageMissing);
+            this.panel1.Controls.Add(this.lstStrings);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel1.Location = new System.Drawing.Point(0, 0);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(738, 324);
+            this.panel1.TabIndex = 2;
+            // 
+            // label_SourceLanguageMissing
+            // 
+            this.label_SourceLanguageMissing.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.label_SourceLanguageMissing.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.label_SourceLanguageMissing.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.label_SourceLanguageMissing.Location = new System.Drawing.Point(138, 91);
+            this.label_SourceLanguageMissing.Name = "label_SourceLanguageMissing";
+            this.label_SourceLanguageMissing.Padding = new System.Windows.Forms.Padding(10);
+            this.label_SourceLanguageMissing.Size = new System.Drawing.Size(400, 60);
+            this.label_SourceLanguageMissing.TabIndex = 2;
+            this.label_SourceLanguageMissing.Text = "Source language does not exist in selected set";
+            this.label_SourceLanguageMissing.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.mainToolTip.SetToolTip(this.label_SourceLanguageMissing, "Use dropdown to select existant language.");
+            this.label_SourceLanguageMissing.Visible = false;
+            // 
+            // label_TargetLanguageMissing
+            // 
+            this.label_TargetLanguageMissing.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.label_TargetLanguageMissing.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.label_TargetLanguageMissing.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.label_TargetLanguageMissing.Location = new System.Drawing.Point(138, 167);
+            this.label_TargetLanguageMissing.Name = "label_TargetLanguageMissing";
+            this.label_TargetLanguageMissing.Padding = new System.Windows.Forms.Padding(10);
+            this.label_TargetLanguageMissing.Size = new System.Drawing.Size(400, 60);
+            this.label_TargetLanguageMissing.TabIndex = 3;
+            this.label_TargetLanguageMissing.Text = "Target language does not exist in selected set";
+            this.label_TargetLanguageMissing.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.mainToolTip.SetToolTip(this.label_TargetLanguageMissing, "Use dropdown to select existant language or get a chance to create it");
+            this.label_TargetLanguageMissing.Visible = false;
             // 
             // lstStrings
             // 
@@ -589,10 +617,10 @@
             this.lstStrings.GridLines = true;
             this.lstStrings.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.lstStrings.HideSelection = false;
-            this.lstStrings.Location = new System.Drawing.Point(4, 4);
+            this.lstStrings.Location = new System.Drawing.Point(0, 0);
             this.lstStrings.Margin = new System.Windows.Forms.Padding(4);
             this.lstStrings.Name = "lstStrings";
-            this.lstStrings.Size = new System.Drawing.Size(730, 316);
+            this.lstStrings.Size = new System.Drawing.Size(738, 324);
             this.lstStrings.TabIndex = 0;
             this.lstStrings.UseCompatibleStateImageBehavior = false;
             this.lstStrings.View = System.Windows.Forms.View.Details;
@@ -1112,6 +1140,7 @@
             this.ClientSize = new System.Drawing.Size(1113, 770);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStripContainer1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "Form1";
             this.Tag = "-";
@@ -1140,7 +1169,7 @@
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
-            this.tableLayoutPanel9.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
             this.tlp_EditAndRef.ResumeLayout(false);
             this.splitContainer2.Panel1.ResumeLayout(false);
             this.splitContainer2.Panel2.ResumeLayout(false);
@@ -1200,7 +1229,6 @@
         private System.Windows.Forms.TextBox txtFind;
         private System.Windows.Forms.Button btnFindFirst;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel9;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_SourceTarget;
         private System.Windows.Forms.TableLayoutPanel tlpFind;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
@@ -1245,6 +1273,9 @@
         private System.Windows.Forms.Button button_AbandonEdit;
         private System.Windows.Forms.ToolStripMenuItem importFromNraasPackerFormatToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportToNraasPackerFormatToolStripMenuItem;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Label label_SourceLanguageMissing;
+        private System.Windows.Forms.Label label_TargetLanguageMissing;
 
     }
 }

@@ -37,7 +37,7 @@ namespace s3se
 {
     public partial class Form1 : Form
     {
-        private const string myName = "s3se - Sims 3 String Editor";
+        private const string myName = "s3se";
 
         private const string packageFilter = "Sims 3 Packages|*.package|All Files|*.*";
         private const string stblFilter = "Exported String Tables|S3_220557DA_*.stbl|Any stbl (*.stbl)|*.stbl|All Files|*.*";
@@ -1107,15 +1107,20 @@ Do you accept this licence?" : ""),
                 lstStrings.BeginUpdate();
                 lstStrings.SelectedIndices.Clear();
                 lstStrings.Items.Clear();
+                label_SourceLanguageMissing.Visible =
+                    label_TargetLanguageMissing.Visible =
+                    btnSetToTarget.Enabled =
+                    btnSetToAll.Enabled =
+                    false;
 
                 if (cmbSetPicker.SelectedIndex == -1)
                     return;
 
                 if (!StringTables[STBLGroupKey.Key].ContainsKey(sourceLang))
                 {
-                    int rlocale = StringTables[STBLGroupKey.Key].Keys.GetEnumerator().Current;
+                    int rlocale = StringTables[STBLGroupKey.Key].Keys.DefaultIfEmpty(-1).First();
 
-                    // Give up!
+                    // Give up! (This should never happen)
                     if (rlocale == sourceLang)
                         return;
 
@@ -1178,7 +1183,20 @@ Do you accept this licence?" : ""),
             {
                 lstStrings.EndUpdate();
                 prg.Visible = false;
-                if (lstStrings.Items.Count > 0) lstStrings.SelectedIndices.Add(i >= 0 && i < lstStrings.Items.Count ? i : 0);
+                if (lstStrings.Items.Count > 0)
+                {
+                    lstStrings.SelectedIndices.Add(i >= 0 && i < lstStrings.Items.Count ? i : 0);
+                }
+                if (cmbSetPicker.SelectedIndex != -1)
+                {
+                    btnSetToTarget.Enabled =
+                        btnSetToAll.Enabled =
+                        StringTables[STBLGroupKey.Key].ContainsKey(sourceLang);
+                    label_SourceLanguageMissing.Visible =
+                        !StringTables[STBLGroupKey.Key].ContainsKey(sourceLang);
+                    label_TargetLanguageMissing.Visible =
+                        !StringTables[STBLGroupKey.Key].ContainsKey(targetLang);
+                }
             }
         }
 

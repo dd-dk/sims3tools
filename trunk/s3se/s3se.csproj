@@ -54,6 +54,9 @@
   <PropertyGroup>
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\s3se.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="s3pi.NameMapResource">
       <HintPath>..\s3pi\build\bin\Release\s3pi.NameMapResource.dll</HintPath>
@@ -170,6 +173,7 @@
     <Content Include="HelpFiles\Contents.htm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Resources\s3se.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
