@@ -2234,6 +2234,7 @@ namespace ObjectCloner
             if (HaveUnsavedWork())
                 if (!IsOkayToThrowAwayWork())
                     return;
+            CloseCurrent();//needed
 
             selectedItem = null;
             ClearTabs();
@@ -2255,6 +2256,7 @@ namespace ObjectCloner
             if (HaveUnsavedWork())
                 if (!IsOkayToThrowAwayWork())
                     return;
+            CloseCurrent();//needed
 
             selectedItem = null;
             ClearTabs();

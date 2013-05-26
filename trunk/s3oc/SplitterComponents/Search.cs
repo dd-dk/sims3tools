@@ -40,7 +40,6 @@ namespace ObjectCloner.SplitterComponents
 
         bool useEA = FileTable.FileTableEnabled;
         bool useCC = FileTable.CustomContentEnabled;
-        PathPackageTuple current = FileTable.Current;
         public Search()
         {
             InitializeComponent();
@@ -186,8 +185,6 @@ namespace ObjectCloner.SplitterComponents
             {
                 useEA = FileTable.FileTableEnabled;
                 useCC = FileTable.CustomContentEnabled;
-                current = FileTable.Current;
-                FileTable.Current = null;
                 if (!MainForm.SetFT(ckbUseCC.Checked, ckbUseEA.Checked, checkInstallDirsCB, this))
                     return;
 
@@ -378,7 +375,6 @@ namespace ObjectCloner.SplitterComponents
             while (searchThread != null && searchThread.IsAlive)
                 searchThread.Join(100);
             searchThread = null;
-            FileTable.Current = current;
             MainForm.SetFT(useCC, useEA, checkInstallDirsCB, this);
 
             updateProgressCB(true, "", true, -1, false, 0);
