@@ -1058,6 +1058,9 @@ Do you accept this licence?" : ""),
 
         private void ReloadStringTables()
         {
+            // Remember where in the list we were... but do not hold references...
+            ulong currentSTBLGroupIID = STBLGroupKey.Key == null ? 0 : STBLGroupKey.Key.Instance;
+
             lstStrings.SelectedIndices.Clear();
             lstStrings.Items.Clear();
             cmbSetPicker.SelectedIndex = -1;
@@ -1096,7 +1099,10 @@ Do you accept this licence?" : ""),
             }
 
             if (cmbSetPicker.Items.Count > 0)
-                cmbSetPicker.SelectedIndex = 0;
+            {
+                var oldSTBLGroupIndex = currentSTBLGroupIID == 0 ? -1 : StringTables.Keys.Select(rk => rk.Instance).ToList().IndexOf(currentSTBLGroupIID);
+                cmbSetPicker.SelectedIndex = oldSTBLGroupIndex == -1 ? 0 : oldSTBLGroupIndex;
+            }
         }
 
         private void ReloadStrings()
@@ -1845,10 +1851,10 @@ Do you accept this licence?" : ""),
             {
                 using (FileStream fs = new FileStream(f, FileMode.Open, FileAccess.Read))
                 {
-                    return Tuple.Create(Path.GetFileNameWithoutExtension(f), rk, (IDictionary<ulong, string>)fs.ReadKeyStr().ToDictionary(x => x.Item1, x => x.Item2));
+                    return Tuple.Create(Path.GetFileNameWithoutExtension(f), rk, (IDictionary<ulong, string>)fs.ReadKeyStr().checkDuplicates().ToDictionary(x => x.Item1, x => x.Item2));
                 }
             }
-            catch (Exception ex) { throw new Exception(ex.Message + "\nFile: " + f, ex); }
+            catch (Exception ex) { throw new Exception(ex.Message + "\n\nFile not imported: " + f, ex); }
         }
 
 
@@ -1965,38 +1971,130 @@ Do you accept this licence?" : ""),
     {
         public static IEnumerable<Tuple<ulong, string>> ReadKeyStr(this FileStream fs)
         {
-            using (StreamReader sr = new StreamReader(fs, System.Text.Encoding.Unicode))
+            // This was originally Unicode.  That gets weird Chinese symbols on some files.  So we'll use UTF-8.
+            using (LineReader sr = new LineReader(fs))
             {
-                int line = 0;
-                while (!sr.EndOfStream)
+                string _key;
+                while ((_key = sr.ReadNonBlankLine()) != null)
                 {
-                    // Read the guid
-                    var _key = sr.ReadLine();
+                    // Read the guid okay
+                    _key = _key.Trim();
                     if (!_key.StartsWith("<KEY>") || !_key.EndsWith("</KEY>"))
                     {
-                        throw new InvalidDataException("Expected KEY delimiters missing at line " + line + ".");
+                        throw new InvalidDataException("Expected KEY delimiters missing at line " + sr.Line + ".");
                     }
-                    _key = _key.Substring(5, _key.Length - 11);
-
-                    line++;
+                    var start = _key.IndexOf("<KEY>") + 5;
+                    var length = _key.LastIndexOf("</KEY>") - start;
+                    _key = _key.Substring(start, length);
 
                     ulong guid = 0;
                     if (!_key.StartsWith("0x") || !ulong.TryParse(_key.Substring(2), System.Globalization.NumberStyles.HexNumber, null, out guid))
                         guid = System.Security.Cryptography.FNV64.GetHash(_key);
 
                     // Read the string
-                    var _str = sr.ReadLine();
-                    if (!_str.StartsWith("<STR>") || !_str.EndsWith("</STR>"))
+                    string _str = sr.ReadNonBlankLine();
+                    if (_str == null)
                     {
-                        throw new InvalidDataException("Expected STR delimiters missing at line " + line + ".");
+                        throw new InvalidDataException("Missing STR at line " + sr.Line + ".");
                     }
-                    _str = _str.Substring(5, _str.Length - 11);
+                    if (!_str.TrimStart().StartsWith("<STR>"))
+                    {
+                        throw new InvalidDataException("Expected STR start delimiter missing at line " + sr.Line + ".");
+                    }
 
-                    line++;
+                    System.Text.StringBuilder value = new System.Text.StringBuilder();
+                    start = _str.IndexOf("<STR>") + 5;
+                    value.AppendLine(_str.Substring(start));
 
-                    yield return Tuple.Create(guid, _str);
+                    while (!_str.TrimEnd().EndsWith("</STR>") && (_str = sr.ReadLine()) != null)
+                    {
+                        value.AppendLine(_str);
+                    }
+                    if (_str == null || !_str.TrimEnd().EndsWith("</STR>"))
+                    {
+                        throw new InvalidDataException("Expected STR end delimiter missing at 0x" + sr.BaseStream.Position.ToString("X") + ".");
+                    }
+                    _str = value.ToString().TrimEnd();
+
+                    yield return Tuple.Create(guid, _str.Substring(0, _str.LastIndexOf("</STR>")));
                 }
             }
         }
+
+        public static string ReadNonBlankLine(this LineReader lr)
+        {
+            foreach (var line in lr)
+            {
+                if (line != "")
+                    return line;
+            }
+
+            return null;
+        }
+
+        // This is simply to blow up helpfully if there are duplicates
+        public static IEnumerable<Tuple<ulong, string>> checkDuplicates(this IEnumerable<Tuple<ulong, string>> _nraasFile)
+        {
+            var seen = new List<ulong>();
+            var dups = new List<ulong>();
+            foreach (var item in _nraasFile)
+                if (!seen.Contains(item.Item1))
+                {
+                    seen.Add(item.Item1);
+                    yield return item;
+                }
+                else
+                    dups.Add(item.Item1);
+
+            if (dups.Count > 0)
+            {
+                string values = String.Join(", ", dups.Distinct().Select(i => "0x" + i.ToString("X")));
+                throw new InvalidDataException("The following hashed key values appear more than once:\n" + values + "\n\nPlease resolve duplicates and try again.");
+            }
+        }
+    }
+
+    class LineReader : StreamReader, IEnumerable<string>
+    {
+        class LineEnumerator : IEnumerator<string>
+        {
+            StreamReader StreamReader { get; set; }
+            int _line = 0;
+            string _current = null;
+
+            public LineEnumerator(StreamReader r) { StreamReader = r; }
+
+            public int Line { get { return _line; } }
+
+            public string Current { get { return _current; } }
+
+            /// <summary>
+            /// No dispose here - we only wrap the stream reader passed in.
+            /// </summary>
+            public void Dispose() { }
+
+            object System.Collections.IEnumerator.Current { get { return this.Current; } }
+
+            public bool MoveNext()
+            {
+                if (StreamReader.EndOfStream)
+                    return false;
+
+                _current = StreamReader.ReadLine();
+                _line++;
+                return true;
+            }
+
+            public void Reset() { throw new NotSupportedException(); }
+        }
+
+        LineEnumerator _enumerator { get; set; }
+
+        public LineReader(Stream s) : base(s, System.Text.Encoding.UTF8) { _enumerator = new LineEnumerator(this); }
+
+        public IEnumerator<string> GetEnumerator() { return _enumerator; }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { return _enumerator; }
+
+        public int Line { get { return _enumerator.Line; } }
     }
 }
