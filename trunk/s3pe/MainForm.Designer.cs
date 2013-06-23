@@ -194,7 +194,7 @@
             // controlPanel1
             // 
             this.controlPanel1.AutoOff = false;
-            this.controlPanel1.AutoValue = true;
+            this.controlPanel1.AutoPreview = true;
             this.controlPanel1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.controlPanel1.Location = new System.Drawing.Point(0, 74);
             this.controlPanel1.Margin = new System.Windows.Forms.Padding(0);
@@ -209,7 +209,7 @@
             this.controlPanel1.HexClick += new System.EventHandler(this.controlPanel1_HexClick);
             this.controlPanel1.AutoChanged += new System.EventHandler(this.controlPanel1_AutoChanged);
             this.controlPanel1.HexOnlyChanged += new System.EventHandler(this.controlPanel1_HexOnlyChanged);
-            this.controlPanel1.ValueClick += new System.EventHandler(this.controlPanel1_ValueClick);
+            this.controlPanel1.ValueClick += new System.EventHandler(this.controlPanel1_PreviewClick);
             this.controlPanel1.GridClick += new System.EventHandler(this.controlPanel1_GridClick);
             this.controlPanel1.UseNamesChanged += new System.EventHandler(this.controlPanel1_UseNamesChanged);
             this.controlPanel1.UseTagsChanged += new System.EventHandler(this.controlPanel1_UseTagsChanged);

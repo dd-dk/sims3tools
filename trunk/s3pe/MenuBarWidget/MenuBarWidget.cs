@@ -57,7 +57,7 @@ namespace S3PIDemoFE
                 //Tools
                 fNVHashToolStripMenuItem, searchToolStripMenuItem,
                 //Settings
-                automaticUpdateChecksToolStripMenuItem, enableDDSPreviewToolStripMenuItem, askToAutosaveDBCToolStripMenuItem,
+                automaticUpdateChecksToolStripMenuItem, enableDDSPreviewToolStripMenuItem, enableFallbackTextPreviewToolStripMenuItem, enableFallbackHexPreviewToolStripMenuItem, askToAutosaveDBCToolStripMenuItem,
                 organiseBookmarksSettingsToolStripMenuItem, externalProgramsToolStripMenuItem, manageWrappersToolStripMenuItem,
                 saveSettingsToolStripMenuItem,
                 //Help
@@ -82,6 +82,8 @@ namespace S3PIDemoFE
             Checker_AutoUpdateChoice_Changed(null, null);
 
             Checked(MenuBarWidget.MB.MBS_previewDDS, S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview);
+            Checked(MenuBarWidget.MB.MBS_fallbackTextPreview, S3PIDemoFE.Properties.Settings.Default.EnableFallbackTextPreview);
+            Checked(MenuBarWidget.MB.MBS_fallbackHexPreview, S3PIDemoFE.Properties.Settings.Default.EnableFallbackHexPreview);
         }
 
         void Checker_AutoUpdateChoice_Changed(object sender, EventArgs e)
@@ -110,7 +112,7 @@ namespace S3PIDemoFE
             MBR_importResources, MBR_importPackages, MBR_importAsDBC, MBR_exportResources, MBR_exportToPackage,
             MBR_hexEditor, MBR_textEditor,
             MBT_fnvHash, MBT_search,
-            MBS_updates, MBS_previewDDS, MBS_askAutoSaveDBC,
+            MBS_updates, MBS_previewDDS, MBS_fallbackTextPreview, MBS_fallbackHexPreview, MBS_askAutoSaveDBC,
             MBS_bookmarks, MBS_externals, MBS_wrappers,
             MBS_saveSettings,
             MBH_contents, MBH_about, MBH_update, MBH_warranty, MBH_licence,
@@ -269,7 +271,7 @@ namespace S3PIDemoFE
         protected void OnHelperClick(object sender, int i) { if (HelperClick != null) HelperClick(sender, new HelperClickEventArgs(i)); }
         private void tsHelper_Click(object sender, EventArgs e) { OnHelperClick(sender, (int)((sender as ToolStripMenuItem).Tag)); }
 
-        private void SetValueControlItems(ToolStripItemCollection dropdown, ToolStripItem tss, string prefix, IEnumerable<ToolStripItem> items)
+        private void SetPreviewControlItems(ToolStripItemCollection dropdown, ToolStripItem tss, string prefix, IEnumerable<ToolStripItem> items)
         {
             int i = dropdown.Count - 1;
             int j = dropdown.Count - dropdown.IndexOf(tss);
@@ -279,10 +281,10 @@ namespace S3PIDemoFE
                 dropdown.Insert(++i, item);
             }
         }
-        public void SetValueControlItems(IEnumerable<ToolStripItem> items)
+        public void SetPreviewControlItems(IEnumerable<ToolStripItem> items)
         {
-            SetValueControlItems(resourceToolStripMenuItem.DropDownItems, textEditorToolStripMenuItem, resourceHelperPrefix, items);
-            SetValueControlItems(browserWidgetContextMenuStrip.Items, bwcmTextEditor, contentHelperPrefix, items);
+            SetPreviewControlItems(resourceToolStripMenuItem.DropDownItems, textEditorToolStripMenuItem, resourceHelperPrefix, items);
+            SetPreviewControlItems(browserWidgetContextMenuStrip.Items, bwcmTextEditor, contentHelperPrefix, items);
         }
 
 

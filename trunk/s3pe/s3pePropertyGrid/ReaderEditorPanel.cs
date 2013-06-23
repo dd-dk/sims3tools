@@ -158,21 +158,18 @@ namespace S3PIDemoFE
                 (new BinaryWriter(resource.Stream)).Write(r.ReadBytes((int)r.BaseStream.Length));
                 if (resource.Stream.CanSeek) resource.Stream.Position = 0;
 
+                Control c = (new HexControl(resource.Stream)).ValueControl;
+
                 Form f = new Form();
-                HexWidget hw = new HexWidget();
-
                 f.SuspendLayout();
-                f.Controls.Add(hw);
+                f.Controls.Add(c);
+                c.Dock = DockStyle.Fill;
                 f.Icon = ((System.Drawing.Icon)(new System.ComponentModel.ComponentResourceManager(typeof(MainForm)).GetObject("$this.Icon")));
-
-                hw.Dock = DockStyle.Fill;
-                hw.Resource = resource == null ? null : resource;
-
-                f.ClientSize = new Size(640, 480);
                 f.Text = "Hex view";
+                f.ClientSize = new Size(this.ClientSize.Width - (this.ClientSize.Width / 5), this.ClientSize.Height - (this.ClientSize.Height / 5));
                 f.StartPosition = FormStartPosition.CenterParent;
-
                 f.ResumeLayout();
+                f.FormClosed += new FormClosedEventHandler((s, fce) => { if (!(s as Form).IsDisposed) (s as Form).Dispose(); });
                 f.Show(this);
             }
             finally { this.Enabled = true; edSvc.CloseDropDown(); }

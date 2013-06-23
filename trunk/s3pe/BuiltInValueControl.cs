@@ -48,7 +48,7 @@ namespace S3PIDemoFE
 
         protected ABuiltInValueControl(Stream s) { }
 
-        static List<KeyValuePair<List<uint>, Type>> builtInValueControlLookup = new List<KeyValuePair<List<uint>,Type>>();
+        static List<KeyValuePair<List<uint>, Type>> builtInValueControlLookup = new List<KeyValuePair<List<uint>, Type>>();
         static ABuiltInValueControl()
         {
             var types = typeof(ABuiltInValueControl).Assembly.GetTypes().Where(t => !t.IsAbstract && typeof(ABuiltInValueControl).IsAssignableFrom(t));
@@ -199,7 +199,7 @@ namespace S3PIDemoFE
     }
 
 
-    public class ImageControl : ABuiltInValueControl
+    class ImageControl : ABuiltInValueControl
     {
         //TODO: static constructor read this from file
         //TODO: temporarily use the one from s3pi ImageResource wrapper source
@@ -278,6 +278,7 @@ namespace S3PIDemoFE
     }
 
 
+    //Used directly by MainForm, so needs to be public
     public class TextControl : ABuiltInValueControl
     {
         //TODO: static constructor read this from file
@@ -333,19 +334,73 @@ namespace S3PIDemoFE
             rtb.Text = s;
         }
 
-        public override bool IsAvailable
+        public override bool IsAvailable { get { return true; } }
+
+        public override Control ValueControl { get { return rtb; } }
+
+        public override IEnumerable<ToolStripItem> GetContextMenuItems(EventHandler cbk) { yield break; }
+    }
+
+    //Used directly by MainForm, so needs to be public
+    public class HexControl : ABuiltInValueControl
+    {
+        int rowLength = 16;
+
+        RichTextBox rtb = new RichTextBox()
         {
-            get { return true; }
+            Font = new Font(FontFamily.GenericMonospace, 10),
+            Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top,
+            ReadOnly = true,
+        };
+ 
+        public HexControl(Stream s)
+            : base(s)
+        {
+            if (s == null || s == Stream.Null)
+                return;
+
+            rtb.Text = GetHex(s);
         }
 
-        public override Control ValueControl
-        {
-            get { return rtb; }
-        }
+        public override bool IsAvailable { get { return true; } }
 
-        public override IEnumerable<ToolStripItem> GetContextMenuItems(EventHandler cbk)
+        public override Control ValueControl { get { return rtb; } }
+
+        public override IEnumerable<ToolStripItem> GetContextMenuItems(EventHandler cbk) { yield break; }
+
+        private String GetHex(Stream s)
         {
-            yield break;
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+            byte[] b = new byte[s.Length];
+            s.Read(b, 0, b.Length);
+
+            int padLength = 8;// +b.Length.ToString("X").Length;
+            string rowFmt = "X" + padLength;
+
+            sb.Append("".PadLeft(padLength + 2));
+            for (int col = 0; col < rowLength; col++) sb.Append(col.ToString("X2") + " ");
+            sb.AppendLine();
+            sb.Append("".PadLeft(padLength + 2));
+            for (int col = 0; col < rowLength; col++) sb.Append("---");
+            sb.AppendLine();
+
+            for (int row = 0; row < b.Length; row += rowLength)
+            {
+                sb.Append(row.ToString(rowFmt) + ": ");
+
+                int col = 0;
+                for (; col < rowLength && row + col < b.Length; col++) sb.Append(b[row + col].ToString("X2") + " ");
+                for (; col < rowLength; col++) sb.Append("   ");
+
+                sb.Append(" : ");
+                for (col = 0; col < rowLength && row + col < b.Length; col++)
+                    sb.Append(b[row + col] < 0x20 || b[row + col] > 0x7e ? '.' : (char)b[row + col]);
+
+                sb.AppendLine();
+            }
+
+            return sb.ToString();
         }
     }
 }

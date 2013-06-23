@@ -32,6 +32,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newSimCity5PackageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -82,6 +83,7 @@
             this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.automaticUpdateChecksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.enableDDSPreviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.enableFallbackHexPreviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.askToAutosaveDBCToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator11 = new System.Windows.Forms.ToolStripSeparator();
             this.organiseBookmarksSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -126,7 +128,7 @@
             this.tpcmOTE = new System.Windows.Forms.ToolStripMenuItem();
             this.filterContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.flcmPasteResourceKey = new System.Windows.Forms.ToolStripMenuItem();
-            this.newSimCity5PackageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.enableFallbackTextPreviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.browserWidgetContextMenuStrip.SuspendLayout();
             this.previewContextMenuStrip.SuspendLayout();
@@ -175,6 +177,13 @@
             this.newToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.newToolStripMenuItem.Text = "&New";
             this.newToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
+            // 
+            // newSimCity5PackageToolStripMenuItem
+            // 
+            this.newSimCity5PackageToolStripMenuItem.Name = "newSimCity5PackageToolStripMenuItem";
+            this.newSimCity5PackageToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.newSimCity5PackageToolStripMenuItem.Text = "New (SimCity&5)";
+            this.newSimCity5PackageToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
             // 
             // openToolStripMenuItem
             // 
@@ -582,6 +591,8 @@
             this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.automaticUpdateChecksToolStripMenuItem,
             this.enableDDSPreviewToolStripMenuItem,
+            this.enableFallbackTextPreviewToolStripMenuItem,
+            this.enableFallbackHexPreviewToolStripMenuItem,
             this.askToAutosaveDBCToolStripMenuItem,
             this.toolStripSeparator11,
             this.organiseBookmarksSettingsToolStripMenuItem,
@@ -597,59 +608,66 @@
             // automaticUpdateChecksToolStripMenuItem
             // 
             this.automaticUpdateChecksToolStripMenuItem.Name = "automaticUpdateChecksToolStripMenuItem";
-            this.automaticUpdateChecksToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.automaticUpdateChecksToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.automaticUpdateChecksToolStripMenuItem.Text = "Automatic &Update Checks";
             this.automaticUpdateChecksToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // enableDDSPreviewToolStripMenuItem
             // 
             this.enableDDSPreviewToolStripMenuItem.Name = "enableDDSPreviewToolStripMenuItem";
-            this.enableDDSPreviewToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
-            this.enableDDSPreviewToolStripMenuItem.Text = "Enable &DDS Preview";
+            this.enableDDSPreviewToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.enableDDSPreviewToolStripMenuItem.Text = "Enable &DDS preview";
             this.enableDDSPreviewToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
+            // 
+            // enableFallbackHexPreviewToolStripMenuItem
+            // 
+            this.enableFallbackHexPreviewToolStripMenuItem.Name = "enableFallbackHexPreviewToolStripMenuItem";
+            this.enableFallbackHexPreviewToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.enableFallbackHexPreviewToolStripMenuItem.Text = "Enable fallback &Hex preview";
+            this.enableFallbackHexPreviewToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // askToAutosaveDBCToolStripMenuItem
             // 
             this.askToAutosaveDBCToolStripMenuItem.Name = "askToAutosaveDBCToolStripMenuItem";
-            this.askToAutosaveDBCToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.askToAutosaveDBCToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.askToAutosaveDBCToolStripMenuItem.Text = "Pro&mpt for dbc autosaving";
             this.askToAutosaveDBCToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // toolStripSeparator11
             // 
             this.toolStripSeparator11.Name = "toolStripSeparator11";
-            this.toolStripSeparator11.Size = new System.Drawing.Size(198, 6);
+            this.toolStripSeparator11.Size = new System.Drawing.Size(208, 6);
             // 
             // organiseBookmarksSettingsToolStripMenuItem
             // 
             this.organiseBookmarksSettingsToolStripMenuItem.Name = "organiseBookmarksSettingsToolStripMenuItem";
-            this.organiseBookmarksSettingsToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.organiseBookmarksSettingsToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.organiseBookmarksSettingsToolStripMenuItem.Text = "Organise Boo&kmarks...";
             this.organiseBookmarksSettingsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // externalProgramsToolStripMenuItem
             // 
             this.externalProgramsToolStripMenuItem.Name = "externalProgramsToolStripMenuItem";
-            this.externalProgramsToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.externalProgramsToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.externalProgramsToolStripMenuItem.Text = "External &Programs...";
             this.externalProgramsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // manageWrappersToolStripMenuItem
             // 
             this.manageWrappersToolStripMenuItem.Name = "manageWrappersToolStripMenuItem";
-            this.manageWrappersToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.manageWrappersToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.manageWrappersToolStripMenuItem.Text = "Manage &Wrappers...";
             this.manageWrappersToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // toolStripSeparator8
             // 
             this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(198, 6);
+            this.toolStripSeparator8.Size = new System.Drawing.Size(208, 6);
             // 
             // saveSettingsToolStripMenuItem
             // 
             this.saveSettingsToolStripMenuItem.Name = "saveSettingsToolStripMenuItem";
-            this.saveSettingsToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+            this.saveSettingsToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.saveSettingsToolStripMenuItem.Text = "&Save settings";
             this.saveSettingsToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
@@ -966,12 +984,12 @@
             this.flcmPasteResourceKey.Text = "&Paste ResourceKey";
             this.flcmPasteResourceKey.Click += new System.EventHandler(this.tsCMF_Click);
             // 
-            // newSimCity5PackageToolStripMenuItem
+            // enableFallbackTextPreviewToolStripMenuItem
             // 
-            this.newSimCity5PackageToolStripMenuItem.Name = "newSimCity5PackageToolStripMenuItem";
-            this.newSimCity5PackageToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.newSimCity5PackageToolStripMenuItem.Text = "New (SimCity&5)";
-            this.newSimCity5PackageToolStripMenuItem.Click += new System.EventHandler(this.tsMBF_Click);
+            this.enableFallbackTextPreviewToolStripMenuItem.Name = "enableFallbackTextPreviewToolStripMenuItem";
+            this.enableFallbackTextPreviewToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.enableFallbackTextPreviewToolStripMenuItem.Text = "Enable fallback &Text preview";
+            this.enableFallbackTextPreviewToolStripMenuItem.Click += new System.EventHandler(this.tsMBS_Click);
             // 
             // MenuBarWidget
             // 
@@ -1089,5 +1107,7 @@
         private System.Windows.Forms.ToolStripMenuItem bwcmCopyResourceKey;
         public System.Windows.Forms.ContextMenuStrip filterContextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem newSimCity5PackageToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem enableFallbackHexPreviewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem enableFallbackTextPreviewToolStripMenuItem;
     }
 }

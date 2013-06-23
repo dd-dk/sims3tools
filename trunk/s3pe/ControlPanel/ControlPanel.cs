@@ -39,7 +39,7 @@ namespace S3PIDemoFE
             {
                 case 0: AutoOff = true; break;
                 case 1: AutoHex = true; break;
-                case 2: AutoValue = true; break;
+                case 2: AutoPreview = true; break;
             }
             UseNames = S3PIDemoFE.Properties.Settings.Default.UseNames;
             UseTags = S3PIDemoFE.Properties.Settings.Default.UseTags;
@@ -54,7 +54,7 @@ namespace S3PIDemoFE
         public void ControlPanel_SaveSettings(object sender, EventArgs e)
         {
             S3PIDemoFE.Properties.Settings.Default.Sort = Sort;
-            S3PIDemoFE.Properties.Settings.Default.AutoChoice = (short)(AutoHex ? 1 : AutoValue ? 2 : 0);
+            S3PIDemoFE.Properties.Settings.Default.AutoChoice = (short)(AutoHex ? 1 : AutoPreview ? 2 : 0);
             S3PIDemoFE.Properties.Settings.Default.HexOnly = HexOnly;
             S3PIDemoFE.Properties.Settings.Default.UseNames = UseNames;
             S3PIDemoFE.Properties.Settings.Default.UseTags = UseTags;
@@ -121,8 +121,8 @@ namespace S3PIDemoFE
         [Browsable(true)]
         [Category("Appearance")]
         [DefaultValue(false)]
-        [Description("The state of the Auto Value radio button")]
-        public bool AutoValue { get { return rb1Value.Checked; } set { rb1Value.Checked = value; } }
+        [Description("The state of the Auto Preview radio button")]
+        public bool AutoPreview { get { return rb1Preview.Checked; } set { rb1Preview.Checked = value; } }
         #endregion
 
         #region HexOnly checkbox
@@ -145,7 +145,7 @@ namespace S3PIDemoFE
         [Category("Behavior")]
         [DefaultValue(false)]
         [Description("The state of the Value button")]
-        public bool ValueEnabled { get { return btnValue.Enabled; } set { btnValue.Enabled = value; } }
+        public bool ValueEnabled { get { return btnPreview.Enabled; } set { btnPreview.Enabled = value; } }
 
         [Browsable(true)]
         [Category("Action")]

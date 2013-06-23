@@ -723,7 +723,6 @@ namespace S3PIDemoFE
         {
             if (pnAuto.Controls.Count != 1) return false;
             if (pnAuto.Controls[0] is RichTextBox) return (pnAuto.Controls[0] as RichTextBox).SelectedText.Length > 0;
-            if (pnAuto.Controls[0] is HexWidget) return (pnAuto.Controls[0] as HexWidget).SelectedText.Length > 0;
             if (pnAuto.Controls[0] is PictureBox) return (pnAuto.Controls[0] as PictureBox).Image != null;
             return false;
         }
@@ -739,7 +738,6 @@ namespace S3PIDemoFE
 
             string selectedText = "";
             if (pnAuto.Controls[0] is RichTextBox) selectedText = (pnAuto.Controls[0] as RichTextBox).SelectedText;
-            else if (pnAuto.Controls[0] is HexWidget) selectedText = (pnAuto.Controls[0] as HexWidget).SelectedText;
             else return;
             if (selectedText.Length == 0) return;
 
@@ -755,7 +753,6 @@ namespace S3PIDemoFE
             if (pnAuto.Controls.Count < 1) return false;
 
             if (pnAuto.Controls[0] is RichTextBox) return true;
-            if (pnAuto.Controls[0] is HexWidget) return true;
             return false;
         }
         private void editSavePreview()
@@ -783,7 +780,6 @@ namespace S3PIDemoFE
             using (StreamWriter sw = new StreamWriter(sfd.FileName))
             {
                 if (pnAuto.Controls[0] is RichTextBox) { sw.Write((pnAuto.Controls[0] as RichTextBox).Text.Replace("\n", "\r\n")); }
-                else { sw.Write((pnAuto.Controls[0] as HexWidget).Text.Replace("\n", "\r\n")); }
                 sw.Flush();
                 sw.Close();
             }
@@ -795,7 +791,7 @@ namespace S3PIDemoFE
         }
         private void editFloat()
         {
-            if (!controlPanel1.HexOnly && controlPanel1.AutoValue) controlPanel1_ValueClick(null, EventArgs.Empty);
+            if (!controlPanel1.HexOnly && controlPanel1.AutoPreview) controlPanel1_PreviewClick(null, EventArgs.Empty);
             else controlPanel1_HexClick(null, EventArgs.Empty);
         }
 
@@ -804,7 +800,6 @@ namespace S3PIDemoFE
             if (!hasTextEditor) return false;
             if (pnAuto.Controls.Count != 1) return false;
             if (pnAuto.Controls[0] is RichTextBox) return true;
-            else if (pnAuto.Controls[0] is HexWidget) return true;
             return false;
         }
         private void editOTE()
@@ -814,7 +809,6 @@ namespace S3PIDemoFE
 
             string text = "";
             if (pnAuto.Controls[0] is RichTextBox) { text = (pnAuto.Controls[0] as RichTextBox).Text; }
-            else if (pnAuto.Controls[0] is HexWidget) { text = (pnAuto.Controls[0] as HexWidget).Text; }
             else return;
 
             System.Text.StringBuilder s = new StringBuilder();
@@ -1484,6 +1478,8 @@ namespace S3PIDemoFE
                 {
                     case MenuBarWidget.MB.MBS_updates: settingsAutomaticUpdates(); break;
                     case MenuBarWidget.MB.MBS_previewDDS: settingsEnableDDSPreview(); break;
+                    case MenuBarWidget.MB.MBS_fallbackTextPreview: settingseEnableFallbackTextPreview(); break;
+                    case MenuBarWidget.MB.MBS_fallbackHexPreview: settingseEnableFallbackHexPreview(); break;
                     case MenuBarWidget.MB.MBS_askAutoSaveDBC: settingsMBS_askAutoSaveDBC(); break;
                     case MenuBarWidget.MB.MBS_bookmarks: settingsOrganiseBookmarks(); break;
                     case MenuBarWidget.MB.MBS_externals: settingsExternalPrograms(); break;
@@ -1503,12 +1499,34 @@ namespace S3PIDemoFE
         {
             S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_previewDDS);
             menuBarWidget1.Checked(MenuBarWidget.MB.MBS_previewDDS, S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview);
-            if (S3PIDemoFE.Properties.Settings.Default.EnableDDSPreview)
+            if (browserWidget1.SelectedResource != null)
+                controlPanel1_AutoChanged(this, EventArgs.Empty);
+        }
+
+        private void settingseEnableFallbackTextPreview()
+        {
+            S3PIDemoFE.Properties.Settings.Default.EnableFallbackTextPreview = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_fallbackTextPreview);
+            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_fallbackTextPreview, S3PIDemoFE.Properties.Settings.Default.EnableFallbackTextPreview);
+            if (S3PIDemoFE.Properties.Settings.Default.EnableFallbackTextPreview && S3PIDemoFE.Properties.Settings.Default.EnableFallbackHexPreview)
             {
-                IResourceIndexEntry rie = browserWidget1.SelectedResource;
-                browserWidget1.SelectedResource = null;
-                browserWidget1.SelectedResource = rie;
+                S3PIDemoFE.Properties.Settings.Default.EnableFallbackHexPreview = false;
+                menuBarWidget1.Checked(MenuBarWidget.MB.MBS_fallbackHexPreview, false);
             }
+            if (browserWidget1.SelectedResource != null)
+                controlPanel1_AutoChanged(this, EventArgs.Empty);
+        }
+
+        private void settingseEnableFallbackHexPreview()
+        {
+            S3PIDemoFE.Properties.Settings.Default.EnableFallbackHexPreview = !menuBarWidget1.IsChecked(MenuBarWidget.MB.MBS_fallbackHexPreview);
+            menuBarWidget1.Checked(MenuBarWidget.MB.MBS_fallbackHexPreview, S3PIDemoFE.Properties.Settings.Default.EnableFallbackHexPreview);
+            if (S3PIDemoFE.Properties.Settings.Default.EnableFallbackTextPreview && S3PIDemoFE.Properties.Settings.Default.EnableFallbackHexPreview)
+            {
+                S3PIDemoFE.Properties.Settings.Default.EnableFallbackTextPreview = false;
+                menuBarWidget1.Checked(MenuBarWidget.MB.MBS_fallbackTextPreview, false);
+            }
+            if (browserWidget1.SelectedResource != null)
+                controlPanel1_AutoChanged(this, EventArgs.Empty);
         }
 
         bool dbcWarningIssued = false;
@@ -1811,7 +1829,7 @@ namespace S3PIDemoFE
             if (resource != null)
             {
                 controlPanel1.HexEnabled = true;
-                controlPanel1.ValueEnabled = hasValueContentField();
+                controlPanel1.ValueEnabled = hasStringValueContentField();
                 controlPanel1.GridEnabled = resource.ContentFields.Find(x => !x.Equals("AsBytes") && !x.Equals("Stream") && !x.Equals("Value")) != null;
                 setHexEditor();
                 setTextEditor();
@@ -1840,18 +1858,14 @@ namespace S3PIDemoFE
             resourceFilterWidget1.IndexEntry = browserWidget1.SelectedResource;
         }
 
-        bool hasValueContentField()
+        // Does the resource wrapper parse to a string value?
+        bool hasStringValueContentField()
         {
-            // Do we have an in-built handler?  Overrides Value content field.
-            if (ABuiltInValueControl.Exists(browserWidget1.SelectedResource.ResourceType))
-                return true;
-
-            //if (!AApiVersionedFields.GetContentFields(0, resource.GetType()).Contains("Value")) return false;
-            //-prefer to use the per-resource ContentFields property:
             if (!resource.ContentFields.Contains("Value")) return false;
 
             Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
-            if (typeof(String).IsAssignableFrom(t) || typeof(Image).IsAssignableFrom(t)) return true;
+            if (typeof(String).IsAssignableFrom(t)) return true;
+
             return false;
         }
 
@@ -1916,41 +1930,59 @@ namespace S3PIDemoFE
 
         private void controlPanel1_AutoChanged(object sender, EventArgs e)
         {
-            pnAuto.SuspendLayout();
-            pnAutoCleanUp();
-
-            if (resException != null)
-                pnAuto.Controls.Add(getExceptionControl(resException));
-            else
+            bool waiting = Application.UseWaitCursor;
+            try
             {
-                if (controlPanel1.AutoOff) { }
-                else if (resource != null)
+                Application.UseWaitCursor = true;
+                Application.DoEvents();
+                pnAuto.SuspendLayout();
+                pnAutoCleanUp();
+
+                if (!controlPanel1.AutoOff)
                 {
-                    if (controlPanel1.AutoHex)
+
+                    IBuiltInValueControl c = null;
+                    if (resException != null)
+                        c = getExceptionControl(resException);
+                    else if (resource != null)
                     {
-                        HexWidget hw = new HexWidget();
-                        hw.Resource = resource;
-                        pnAuto.Controls.Add(hw);
-                    }
-                    else
-                    {
-                        if (controlPanel1.AutoValue && hasValueContentField())
+
+                        if (controlPanel1.AutoHex)
                         {
-                            Control c = getValueControl();
-                            if (c != null)
-                                pnAuto.Controls.Add(c);
+                            c = new HexControl(resource.Stream);
                         }
+                        else if (controlPanel1.AutoPreview)
+                        {
+                            c = getPreviewControl();
+                        }
+
+                    }
+                    if (c != null)
+                    {
+                        menuBarWidget1.SetPreviewControlItems(c.GetContextMenuItems(controlPanel1_CommitClick));
+                        pnAuto.Controls.Add(c.ValueControl);
+                    }
+
+                }
+
+                foreach (Control c in pnAuto.Controls)
+                {
+                    c.ContextMenuStrip = menuBarWidget1.previewContextMenuStrip;
+                    c.Dock = DockStyle.Fill;
+                    if (c is RichTextBox)
+                    {
+                        (c as RichTextBox).ZoomFactor = S3PIDemoFE.Properties.Settings.Default.PreviewZoomFactor;
+                        (c as RichTextBox).ContentsResized += (s, cre) => { S3PIDemoFE.Properties.Settings.Default.PreviewZoomFactor = (s as RichTextBox).ZoomFactor; };
                     }
                 }
-            }
 
-            foreach (Control c in pnAuto.Controls)
+            }
+            finally
             {
-                c.ContextMenuStrip = menuBarWidget1.previewContextMenuStrip;
-                c.Dock = DockStyle.Fill;
+                pnAuto.ResumeLayout();
+                Application.UseWaitCursor = waiting;
+                Application.DoEvents();
             }
-
-            pnAuto.ResumeLayout();
         }
 
         private void pnAutoCleanUp()
@@ -1971,60 +2003,50 @@ namespace S3PIDemoFE
                 this.Enabled = false;
                 Application.DoEvents();
 
-                Form f = new Form();
-                HexWidget hw = new HexWidget();
-
-                f.SuspendLayout();
-                f.Controls.Add(hw);
-                f.Icon = this.Icon;
-
-                hw.Dock = DockStyle.Fill;
-                hw.Resource = resource == null ? null : resource;
-
-                f.ClientSize = new Size(this.ClientSize.Width - (this.ClientSize.Width / 5), this.ClientSize.Height - (this.ClientSize.Height / 5));
-                f.Text = this.Text + ((resourceName != null && resourceName.Length > 0) ? " - " + resourceName : "");
-                f.StartPosition = FormStartPosition.CenterParent;
-
-                f.ResumeLayout();
-                f.Show(this);
+                f_FloatControl((new HexControl(resource.Stream)).ValueControl);
             }
             finally { this.Enabled = true; }
         }
 
-        private void controlPanel1_ValueClick(object sender, EventArgs e)
+        private void controlPanel1_PreviewClick(object sender, EventArgs e)
         {
             try
             {
                 this.Enabled = false;
                 Application.DoEvents();
 
-                Control c = hasValueContentField() ? getValueControl() : null;
+                IBuiltInValueControl c = getPreviewControl();
                 if (c == null) return;
 
-                Form f = new Form();
-                f.SuspendLayout();
-                f.Controls.Add(c);
-                c.Dock = DockStyle.Fill;
-                f.Icon = this.Icon;
-
-                f.Text = this.Text + ((resourceName != null && resourceName.Length > 0) ? " - " + resourceName : "");
-
-                if (c.GetType().Equals(typeof(RichTextBox)))
-                {
-                    f.ClientSize = new Size(this.ClientSize.Width - (this.ClientSize.Width / 5), this.ClientSize.Height - (this.ClientSize.Height / 5));
-                }
-                else if (c.GetType().Equals(typeof(PictureBox)))
-                {
-                    f.ClientSize = c.Size;
-                    f.SizeGripStyle = SizeGripStyle.Hide;
-                }
-
-                f.StartPosition = FormStartPosition.CenterParent;
-                f.ResumeLayout();
-                f.FormClosed += new FormClosedEventHandler(f_FormClosed);
-                f.Show(this);
+                f_FloatControl(c.ValueControl);
             }
             finally { this.Enabled = true; }
+        }
+
+        void f_FloatControl(Control c)
+        {
+            Form f = new Form();
+            f.SuspendLayout();
+            f.Controls.Add(c);
+            c.Dock = DockStyle.Fill;
+            f.Icon = this.Icon;
+
+            f.Text = this.Text + ((resourceName != null && resourceName.Length > 0) ? " - " + resourceName : "");
+
+            if (c.GetType().Equals(typeof(RichTextBox)))
+            {
+                f.ClientSize = new Size(this.ClientSize.Width - (this.ClientSize.Width / 5), this.ClientSize.Height - (this.ClientSize.Height / 5));
+            }
+            else if (c.GetType().Equals(typeof(PictureBox)))
+            {
+                f.ClientSize = c.Size;
+                f.SizeGripStyle = SizeGripStyle.Hide;
+            }
+
+            f.StartPosition = FormStartPosition.CenterParent;
+            f.ResumeLayout();
+            f.FormClosed += new FormClosedEventHandler(f_FormClosed);
+            f.Show(this);
         }
 
         void f_FormClosed(object sender, FormClosedEventArgs e)
@@ -2032,48 +2054,44 @@ namespace S3PIDemoFE
             if (!(sender as Form).IsDisposed) (sender as Form).Dispose();
         }
 
-
-        Control getValueControl()
+        IBuiltInValueControl getPreviewControl()
         {
-            bool waiting = Application.UseWaitCursor;
             try
             {
-                Application.UseWaitCursor = true;
-                Application.DoEvents();
-                Control res = null;
-                try
+                if (hasStringValueContentField())
                 {
-                    var ibvc = ABuiltInValueControl.Lookup(browserWidget1.SelectedResource.ResourceType, resource.Stream);
-                    if (ibvc != null)
-                    {
-                        res = ibvc.ValueControl;
-                        menuBarWidget1.SetValueControlItems(ibvc.GetContextMenuItems(controlPanel1_CommitClick));
-                    }
-                    else
-                    {
-                        Type t = AApiVersionedFields.GetContentFieldTypes(0, resource.GetType())["Value"];
-                        if (typeof(String).IsAssignableFrom(t))
-                        {
-                            TextControl tc = new TextControl("" + resource["Value"]);
-                            res = tc.ValueControl;
-                            menuBarWidget1.SetValueControlItems(tc.GetContextMenuItems(controlPanel1_CommitClick));
-                        }
-                    }
+                    return new TextControl("" + resource["Value"]);
                 }
-                catch (Exception ex)
+
+                IBuiltInValueControl ibvc = ABuiltInValueControl.Lookup(browserWidget1.SelectedResource.ResourceType, resource.Stream);
+                if (ibvc != null)
                 {
-                    res = getExceptionControl(ex);
+                    return ibvc;
                 }
-                if (res != null) res.Dock = DockStyle.Fill;
-                return res;
+
+                if (S3PIDemoFE.Properties.Settings.Default.EnableFallbackHexPreview)
+                {
+                    return new HexControl(resource.Stream);
+                }
+
+                if (S3PIDemoFE.Properties.Settings.Default.EnableFallbackTextPreview)
+                {
+                    return new TextControl(
+                        "== == == == == == == == == == == == == == == == ==\n" +
+                        " **  Fallback preview:  data may be incomplete  ** \n" +
+                        "== == == == == == == == == == == == == == == == ==\n\n\n" +
+                        (new StreamReader(resource.Stream)).ReadToEnd());
+                }
             }
-            finally
+            catch (Exception ex)
             {
-                Application.UseWaitCursor = waiting;
-                Application.DoEvents();
+                return getExceptionControl(ex);
             }
+
+            return null;
         }
-        Control getExceptionControl(Exception ex)
+
+        IBuiltInValueControl getExceptionControl(Exception ex)
         {
             IResourceIndexEntry rie = browserWidget1.SelectedResource;
             string s = "";
@@ -2087,13 +2105,8 @@ namespace S3PIDemoFE
                 s += "\r\n" + inex.Message;
                 s += "\r\n----\r\nStack trace:\r\n" + inex.StackTrace + "\r\n----\r\n";
             }
-            TextBox tb = new TextBox();
-            tb.Multiline = true;
-            tb.ReadOnly = true;
-            tb.ScrollBars = ScrollBars.Vertical;
-            tb.Text = s;
 
-            return tb;
+            return new TextControl(s);
         }
 
 
