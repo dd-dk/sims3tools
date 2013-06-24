@@ -431,6 +431,13 @@ namespace ObjectCloner
             public BoolEventArgs(bool arg) { this.arg = arg; }
         }
 
+        public class CompletionEventArgs : EventArgs
+        {
+            public bool arg;
+            public List<string> errors;
+            public CompletionEventArgs(bool arg, List<string> errors) { this.arg = arg; this.errors = errors; }
+        }
+
         public delegate void updateProgressCallback(bool changeText, string text, bool changeMax, int max, bool changeValue, int value);
         void updateProgress(bool changeText, string text, bool changeMax, int max, bool changeValue, int value)
         {
@@ -458,7 +465,7 @@ namespace ObjectCloner
             }
         }
 
-        //2012-09-12 (http://dino.drealm.info/develforums/s3pi/index.php?topic=1238.0) Should only need to create this once:
+        //2012-09-12 (http://private/s3pi/index.php?topic=1238.0) Should only need to create this once:
         Dictionary<UInt64, SpecificResource> CTPTBrushIndexToPair = new Dictionary<ulong, SpecificResource>();
         Dictionary<uint, Dictionary<SpecificResource, ListViewItem>> ListViewCache = new Dictionary<uint, Dictionary<SpecificResource, ListViewItem>>();
         public delegate void listViewAddCallBack(SpecificResource sr, ListView listView);
@@ -2938,7 +2945,6 @@ namespace ObjectCloner
             {
                 case CatalogType.CatalogProxyProduct:
                 case CatalogType.CatalogFountainPool:
-                case CatalogType.CatalogFoundation:
                 case CatalogType.CatalogWallStyle:
                 case CatalogType.CatalogRoofStyle:
                     ThumbnailsOnly_Steps(stepList, out lastStepInChain); break;
@@ -2948,6 +2954,7 @@ namespace ObjectCloner
                 case CatalogType.CatalogTerrainPaintBrush:
                     CTPT_Steps(stepList, out lastStepInChain); break;
 
+                case CatalogType.CatalogFoundation:
                 case CatalogType.CatalogFence:
                 case CatalogType.CatalogStairs:
                 case CatalogType.CatalogRailing:
@@ -3015,6 +3022,10 @@ namespace ObjectCloner
         {
             Diagnostics.Log("CatlgHasVPXY_Steps");
             lastStepInChain = None;
+
+            // Do this just the once...
+            vpxyItems = new List<SpecificResource>();
+
             if (!JustSelf)
             {
                 stepList.AddRange(new Step[] {
@@ -3061,13 +3072,14 @@ namespace ObjectCloner
             }
         }
 
+
         void OBJD_Steps(List<Step> stepList, out Step lastStepInChain)
         {
             Diagnostics.Log("OBJD_Steps");
             CatlgHasVPXY_Steps(stepList, out lastStepInChain);
             if (!JustSelf)
             {
-                stepList.Remove(Catlg_getVPXYs);
+                // As of Island Paradise Modular Arches, we have direct VPXY references! stepList.Remove(Catlg_getVPXYs);
                 stepList.InsertRange(stepList.IndexOf(Catlg_addVPXYs), new Step[] {
                     // OBJD_setFallback if cloning from game
                     OBJD_getOBJK,
@@ -3243,7 +3255,6 @@ namespace ObjectCloner
         void Catlg_getVPXYs()
         {
             Diagnostics.Log("Catlg_getVPXYs");
-            vpxyItems = new List<SpecificResource>();
 
             string s = "";
             foreach (IResourceKey rk in (TGIBlockList)selectedItem.Resource["TGIBlocks"].Value)
@@ -3256,11 +3267,6 @@ namespace ObjectCloner
                     s += String.Format("Catalog Resource {0} -> RK {1}: not found\n", (IResourceKey)selectedItem.ResourceIndexEntry, rk);
             }
             Diagnostics.Show(s, "Missing VPXYs");
-            if (vpxyItems.Count == 0)
-            {
-                Diagnostics.Show(String.Format("Catalog Resource {0} has no VPXY items", (IResourceKey)selectedItem.ResourceIndexEntry), "No VPXY items");
-                stepNum = lastInChain;
-            }
         }
 
         #region OBJD Steps
@@ -3318,8 +3324,6 @@ namespace ObjectCloner
             {
                 Diagnostics.Log(String.Format("OBJD_blueprint_getVPXY: Found {0}", blueprintXMLkey));
             }
-
-            vpxyItems = new List<SpecificResource>();
 
             TGIBlock vpxyKey = new TGIBlock(0, null, blueprintXMLkey) { ResourceType = 0x736884F1, };//VPXY
             SpecificResource vpxy = new SpecificResource(FileTable.GameContent, vpxyKey);
@@ -3424,8 +3428,6 @@ namespace ObjectCloner
                 return;
             }
 
-            vpxyItems = new List<SpecificResource>();
-
             string s = "";
 
             Diagnostics.Log(String.Format("OBJK_getVPXYs: modelKey {0} -> {1}", index, objk.TGIBlocks.Count > index ? objk.TGIBlocks[index] : "(error)"));
@@ -3442,11 +3444,6 @@ namespace ObjectCloner
                     s += String.Format("OBJK {0} -> RK {1}: not found\n", (IResourceKey)objkItem.ResourceIndexEntry, rk);
             }
             Diagnostics.Show(s, "Missing VPXYs");
-            if (vpxyItems.Count == 0)
-            {
-                Diagnostics.Show(String.Format("OBJK {0} has no VPXY items", (IResourceKey)selectedItem.ResourceIndexEntry), "No VPXY items");
-                stepNum = lastInChain;
-            }
         }
         #endregion
 
@@ -3490,7 +3487,21 @@ namespace ObjectCloner
                 }
             }
         }
-        void Catlg_addVPXYs() { Diagnostics.Log("Catlg_addVPXYs"); for (int i = 0; i < vpxyItems.Count; i++) Add("vpxy[" + i + "]", vpxyItems[i].RequestedRK); }
+        void Catlg_addVPXYs()
+        {
+            Diagnostics.Log("Catlg_addVPXYs");
+
+            // Do this just once, too!
+            if (vpxyItems.Count == 0)
+            {
+                Diagnostics.Show(String.Format("Catalog Resource {0} has no VPXY items", (IResourceKey)selectedItem.ResourceIndexEntry), "No VPXY items");
+                stepNum = lastInChain;
+                return;
+            }
+            
+            for (int i = 0; i < vpxyItems.Count; i++)
+                Add("vpxy[" + i + "]", vpxyItems[i].RequestedRK);
+        }
 
         void VPXYs_SlurpRKs()
         {
