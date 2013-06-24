@@ -360,7 +360,7 @@ namespace ObjectCloner.SplitterComponents
             listView1.Items.Clear();
 
             SearchThread st = new SearchThread(this, Add, updateProgressCB, stopSearch, OnSearchComplete);
-            SearchComplete += new EventHandler<MainForm.BoolEventArgs>(Search_SearchComplete);
+            SearchComplete += new EventHandler<MainForm.CompletionEventArgs>(Search_SearchComplete);
 
             searchThread = new Thread(new ThreadStart(st.Search));
             searching = true;
@@ -368,7 +368,7 @@ namespace ObjectCloner.SplitterComponents
             searchThread.Start();
         }
 
-        void Search_SearchComplete(object sender, MainForm.BoolEventArgs e)
+        void Search_SearchComplete(object sender, MainForm.CompletionEventArgs e)
         {
             Diagnostics.Log(String.Format("Search_SearchComplete {0}", e.arg));
             searching = false;
@@ -383,6 +383,12 @@ namespace ObjectCloner.SplitterComponents
             btnSearch.Text = "&Search";
             tlpCount.Visible = true;
             lbCount.Text = "" + listView1.Items.Count;
+
+            if (e.errors.Count > 0)
+            {
+                CopyableMessageBox.Show("The following resources could not be processed:\n\n  " + String.Join("\n  ", e.errors),
+                    "Errors during Search", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Warning);
+            }
 
             if (listView1.Visible && listView1.Items.Count > 0)
             {
@@ -404,7 +410,7 @@ namespace ObjectCloner.SplitterComponents
             }
             else
             {
-                if (!searching) Search_SearchComplete(null, new MainForm.BoolEventArgs(false));
+                if (!searching) Search_SearchComplete(null, new MainForm.CompletionEventArgs(false, new List<string>()));
                 else searching = false;
             }
         }
@@ -416,9 +422,15 @@ namespace ObjectCloner.SplitterComponents
             listViewAddCB(item, listView1);
         }
 
-        event EventHandler<MainForm.BoolEventArgs> SearchComplete;
-        delegate void searchCompleteCallback(bool complete);
-        void OnSearchComplete(bool complete) { if (SearchComplete != null) { SearchComplete(this, new MainForm.BoolEventArgs(complete)); } }
+        event EventHandler<MainForm.CompletionEventArgs> SearchComplete;
+        delegate void searchCompleteCallback(bool complete, List<string> errors);
+        void OnSearchComplete(bool complete, List<string> errors)
+        {
+            if (SearchComplete != null)
+            {
+                SearchComplete(this, new MainForm.CompletionEventArgs(complete, errors));
+            }
+        }
 
         public delegate bool stopSearchCallback();
         private bool stopSearch() { return !searching; }
@@ -470,6 +482,7 @@ namespace ObjectCloner.SplitterComponents
                 bool complete = false;
                 bool abort = false;
                 List<ulong> lres = new List<ulong>();
+                List<string> errors = new List<string>();
                 try
                 {
                     updateProgress(true, "Searching...", true, FileTable.GameContent.Count + 1, true, 1);
@@ -511,7 +524,7 @@ namespace ObjectCloner.SplitterComponents
 
                         // Find the right type of resource to search and apply matching
                         updateProgress(true, String.Format("Searching package {0} of {1}...", p + 1, FileTable.GameContent.Count), false, -1, false, -1);
-                        foreach (var match in Find(ppt).Where(sr => stopSearch || (!lres.Contains(sr.RequestedRK.Instance) && (criteria.text.Length == 0 || Match(sr)))))
+                        foreach (var match in Find(ppt).Where(sr => stopSearch || (!lres.Contains(sr.RequestedRK.Instance) && (criteria.text.Length == 0 || Match(sr, errors)))))
                         {
                             if (stopSearch) return;
                             lres.Add(match.RequestedRK.Instance);
@@ -528,7 +541,7 @@ namespace ObjectCloner.SplitterComponents
                     if (!abort)
                     {
                         updateProgress(true, "Search ended", true, -1, false, 0);
-                        searchComplete(complete);
+                        searchComplete(complete, errors);
                     }
                 }
             }
@@ -542,12 +555,20 @@ namespace ObjectCloner.SplitterComponents
                     : criteria.catalogType == (CatalogType)rie.ResourceType);
             }
 
-            bool Match(SpecificResource match)
+            bool Match(SpecificResource match, List<string> errors)
             {
                 match = match.ResourceIndexEntry.ResourceType == (uint)CatalogType.ModularResource ? MainForm.ItemForTGIBlock0(match) : match;
                 if (criteria.resourceName && MatchResourceName(match)) return true;
 
                 if (criteria.catalogType == CatalogType.CAS_Part || match.RequestedRK.ResourceType == (uint)CatalogType.CAS_Part) return false;
+
+                if ((criteria.objectName || criteria.objectDesc || criteria.catalogName || criteria.catalogDesc) && match.Resource == null)
+                {
+                    errors.Add(match.LongName + ": " + (match.Exception != null ?
+                        (match.Exception.InnerException != null ? match.Exception.InnerException.Message : match.Exception.Message) :
+                        "unknown error"));
+                    return false;
+                }
 
                 if (criteria.objectName && MatchObjectName(match)) return true;
                 if (criteria.objectDesc && MatchObjectDesc(match)) return true;
@@ -570,7 +591,7 @@ namespace ObjectCloner.SplitterComponents
 
             bool stopSearch { get { Thread.Sleep(0); return !(control.IsHandleCreated && !control.IsDisposed) || (bool)control.Invoke(stopSearchCB); } }
 
-            void searchComplete(bool complete) { Thread.Sleep(0); if (control.IsHandleCreated && !control.IsDisposed) control.BeginInvoke(searchCompleteCB, new object[] { complete, }); }
+            void searchComplete(bool complete, List<string> errors) { Thread.Sleep(0); if (control.IsHandleCreated && !control.IsDisposed) control.BeginInvoke(searchCompleteCB, new object[] { complete, errors, }); }
             #endregion
         }
         #endregion
