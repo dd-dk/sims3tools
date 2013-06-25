@@ -45,6 +45,8 @@ namespace ObjectCloner.SplitterComponents
                 ckbClone.Checked = true;
             }
 
+            ckbExclCommon.Checked = true;
+
             if (isCASP)
             {
                 //ckbDeepClone.Checked = true;
@@ -71,7 +73,7 @@ namespace ObjectCloner.SplitterComponents
         public bool IsRepair { get { return ckbRepair.Checked; } }
         public bool IsClone { get { return ckbClone.Checked; } }
         public bool IsDeepClone { get { return ckbDeepClone.Checked; } }
-        public bool IsExcludeCommon { get { return false /*ckbExclCommon.Checked/**/; } }
+        public bool IsExcludeCommon { get { return ckbExclCommon.Checked; } }
         //public bool IsIncludePresets { get { return ckbIncludePresets.Checked; } }
         public bool IsPadSTBLs { get { return ckbPadSTBLs.Checked; } }
         public bool IsIncludeThumbnails { get { return ckbThumbs.Checked; } }
@@ -85,8 +87,9 @@ namespace ObjectCloner.SplitterComponents
 
         private void ckbClone_CheckedChanged(object sender, EventArgs e)
         {
-            ckbDeepClone.Enabled = !ckbClone.Enabled && ckbClone.Checked;
-            if (!ckbDeepClone.Enabled) ckbDeepClone.CheckState = CheckState.Indeterminate;// ckbDeepClone.Checked = false;
+            ckbExclCommon.Enabled = ckbDeepClone.Enabled = !ckbClone.Enabled && ckbClone.Checked;
+            if (!ckbDeepClone.Enabled)
+                ckbExclCommon.CheckState = ckbDeepClone.CheckState = CheckState.Indeterminate;// ckbDeepClone.Checked = false;
         }
 
         private void ckbRenumber_CheckedChanged(object sender, EventArgs e)
