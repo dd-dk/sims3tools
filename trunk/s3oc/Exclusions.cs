@@ -44,7 +44,7 @@ namespace ObjectCloner
         {
             string folder = Path.GetDirectoryName(typeof(Exclusions).Assembly.Location);
             string exclusionsList = Path.Combine(folder, ExclusionsList);
-            List<MatchRK> ExcludedResources = new List<MatchRK>();
+            ExcludedResources = new List<MatchRK>();
 
             if (!File.Exists(exclusionsList)) return;
             using (TextReader tr = new StreamReader(exclusionsList))
@@ -62,18 +62,30 @@ namespace ObjectCloner
                     MatchRK mrk = new MatchRK();
                     uint tg = 0;
                     ulong i = 0;
-                    if (split[0].Trim() == "*") mrk.ResourceType = null;
-                    else if (!split[0].Trim().ToLower().StartsWith("0x") || !uint.TryParse(split[0].Trim().Substring(2), System.Globalization.NumberStyles.HexNumber, null, out tg))
-                        continue;
-                    mrk.ResourceType = tg;
-                    if (split[1] == "*") mrk.ResourceGroup = null;
-                    else if (!split[1].Trim().ToLower().StartsWith("0x") || !uint.TryParse(split[1].Trim().Substring(2), System.Globalization.NumberStyles.HexNumber, null, out tg))
-                        continue;
-                    mrk.ResourceGroup = tg;
+                    if (split[0].Trim() == "*")
+                        mrk.ResourceType = null;
+                    else
+                    {
+                        if (!split[0].Trim().ToLower().StartsWith("0x") || !uint.TryParse(split[0].Trim().Substring(2), System.Globalization.NumberStyles.HexNumber, null, out tg))
+                            continue;
+                        mrk.ResourceType = tg;
+                    }
+                    if (split[1].Trim() == "*")
+                        mrk.ResourceGroup = null;
+                    else
+                    {
+                        if (!split[1].Trim().ToLower().StartsWith("0x") || !uint.TryParse(split[1].Trim().Substring(2), System.Globalization.NumberStyles.HexNumber, null, out tg))
+                            continue;
+                        mrk.ResourceGroup = tg;
+                    }
                     if (split[2] == "*") mrk.Instance = null;
-                    else if (!split[2].Trim().ToLower().StartsWith("0x") || !ulong.TryParse(split[2].Trim().Substring(2), System.Globalization.NumberStyles.HexNumber, null, out i))
-                        continue;
-                    mrk.Instance = i;
+                    else
+                    {
+                        if (!split[2].Trim().ToLower().StartsWith("0x") || !ulong.TryParse(split[2].Trim().Substring(2), System.Globalization.NumberStyles.HexNumber, null, out i))
+                            continue;
+                        mrk.Instance = i;
+                    }
+                    ExcludedResources.Add(mrk);
                 }
                 tr.Close();
             }
@@ -81,11 +93,10 @@ namespace ObjectCloner
 
         public static bool Contains(IResourceKey rk)
         {
-            return ExcludedResources != null && ExcludedResources.Exists(ex =>
-                (!ex.ResourceType.HasValue || ex.ResourceType.Value == rk.ResourceType) &&
-                (!ex.ResourceGroup.HasValue || ex.ResourceGroup.Value == rk.ResourceGroup) &&
-                (!ex.Instance.HasValue || ex.Instance.Value == rk.Instance)
-                );
+            return ExcludedResources != null && ExcludedResources.Exists(mrk =>
+                (!mrk.ResourceType.HasValue || mrk.ResourceType.Value == rk.ResourceType) &&
+                (!mrk.ResourceGroup.HasValue || mrk.ResourceGroup.Value == rk.ResourceGroup) &&
+                (!mrk.Instance.HasValue || mrk.Instance.Value == rk.Instance));
         }
     }
 }
