@@ -1163,6 +1163,7 @@ namespace ObjectCloner
         bool isExcludeCommon = false;
 
         bool IsDeepClone { get { return isFix || isDeepClone; } }
+        bool IsExcludeCommon { get { return !IsDeepClone && isExcludeCommon; } }
         bool JustSelf { get { return !isCreateNewPackage && !isRepair && !isRenumber; } }
         bool WantThumbs { get { return isIncludeThumbnails || (!(isCreateNewPackage || isRepair) && isRenumber); } }
 
@@ -4472,7 +4473,7 @@ namespace ObjectCloner
             SaveList sl = new SaveList(this,
                 selectedItem, rkLookup,
                 target, disableCompression, selectedItem.RequestedRK.CType() != CatalogType.CAS_Part,
-                isPadSTBLs, false/*mode == Mode.FromGame/**/, isExcludeCommon,
+                isPadSTBLs, false/*mode == Mode.FromGame/**/, IsExcludeCommon,
                 updateProgress, () => !saving, OnSavingComplete);
 
             saveThread = new Thread(new ThreadStart(sl.SavePackage));
@@ -4551,9 +4552,10 @@ namespace ObjectCloner
             this.RepairingComplete += new EventHandler<BoolEventArgs>(MainForm_RepairComplete);
 
             DoWait("Please wait, adding missing resources...");
-            SaveList sl = new SaveList(this, selectedItem, rkLookup,
+            SaveList sl = new SaveList(this,
+                selectedItem, rkLookup,
                 FileTable.Current, disableCompression, selectedItem.RequestedRK.CType() != CatalogType.CAS_Part,
-                isPadSTBLs, false/*mode == Mode.FromGame/**/, isExcludeCommon,
+                isPadSTBLs, false/*mode == Mode.FromGame/**/, IsExcludeCommon,
                 updateProgress, () => !repairing, OnRepairingComplete);
 
             repairThread = new Thread(new ThreadStart(sl.SavePackage));
