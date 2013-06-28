@@ -46,7 +46,10 @@ namespace S3PIDemoFE
             this.owner = owner;
             this.field = field;
             btnImport.Enabled = owner.GetType().GetProperty(field).CanWrite;
-            btnViewHex.Enabled = btnExport.Enabled = owner.GetType().GetProperty(field).CanRead;
+            btnExport.Enabled = owner.GetType().GetProperty(field).CanRead;
+
+            //TextReader does not have BaseStream, which is needed for ViewHex
+            btnViewHex.Enabled = typeof(BinaryReader).IsAssignableFrom(type);
 
             btnEdit.Enabled = false;
             if (btnExport.Enabled && btnImport.Enabled)
@@ -151,7 +154,6 @@ namespace S3PIDemoFE
                 this.Enabled = false;
                 Application.DoEvents();
 
-                // Set up an IResource for HexWidget to eat
                 IResource resource = s3pi.WrapperDealer.WrapperDealer.CreateNewResource(0, "0x00000000");
                 BinaryReader r = owner[field].Value as BinaryReader;
                 if (r.BaseStream.CanSeek) r.BaseStream.Position = 0;
