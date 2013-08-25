@@ -49,9 +49,9 @@
             this.btnFNV32 = new System.Windows.Forms.Button();
             this.btnCopy = new System.Windows.Forms.Button();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.btnPaste = new System.Windows.Forms.Button();
             this.copyResourceKeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pasteResourceKeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnPaste = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.tlpName.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
@@ -167,6 +167,7 @@
             this.cbType.TabIndex = 2;
             this.cbType.Value = ((uint)(0u));
             this.cbType.ValidChanged += new System.EventHandler(this.cbType_ValidChanged);
+            this.cbType.ValueChanged += new System.EventHandler(this.cbType_ValueChanged);
             // 
             // tbGroup
             // 
@@ -176,7 +177,7 @@
             this.tbGroup.Size = new System.Drawing.Size(425, 20);
             this.tbGroup.TabIndex = 4;
             this.tbGroup.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.tbGroup.TextChanged += new System.EventHandler(this.tbTGI_TextChanged);
+            this.tbGroup.TextChanged += new System.EventHandler(this.tbGroupInstance_TextChanged);
             // 
             // tbInstance
             // 
@@ -186,7 +187,7 @@
             this.tbInstance.Size = new System.Drawing.Size(425, 20);
             this.tbInstance.TabIndex = 6;
             this.tbInstance.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.tbInstance.TextChanged += new System.EventHandler(this.tbTGI_TextChanged);
+            this.tbInstance.TextChanged += new System.EventHandler(this.tbGroupInstance_TextChanged);
             // 
             // lbFilename
             // 
@@ -303,8 +304,22 @@
             this.copyResourceKeyToolStripMenuItem,
             this.pasteResourceKeyToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(206, 48);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(168, 48);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
+            // 
+            // copyResourceKeyToolStripMenuItem
+            // 
+            this.copyResourceKeyToolStripMenuItem.Name = "copyResourceKeyToolStripMenuItem";
+            this.copyResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.copyResourceKeyToolStripMenuItem.Text = "&Copy ResourceKey";
+            this.copyResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.copyResourceKeyToolStripMenuItem_Click);
+            // 
+            // pasteResourceKeyToolStripMenuItem
+            // 
+            this.pasteResourceKeyToolStripMenuItem.Name = "pasteResourceKeyToolStripMenuItem";
+            this.pasteResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
+            this.pasteResourceKeyToolStripMenuItem.Text = "&Paste ResourceKey";
+            this.pasteResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.pasteResourceKeyToolStripMenuItem_Click);
             // 
             // btnPaste
             // 
@@ -316,20 +331,6 @@
             this.btnPaste.Text = "&Paste RK";
             this.btnPaste.UseVisualStyleBackColor = true;
             this.btnPaste.Click += new System.EventHandler(this.btnPaste_Click);
-            // 
-            // copyResourceKeyToolStripMenuItem
-            // 
-            this.copyResourceKeyToolStripMenuItem.Name = "copyResourceKeyToolStripMenuItem";
-            this.copyResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(205, 22);
-            this.copyResourceKeyToolStripMenuItem.Text = "&Copy ResourceKey";
-            this.copyResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.copyResourceKeyToolStripMenuItem_Click);
-            // 
-            // pasteResourceKeyToolStripMenuItem
-            // 
-            this.pasteResourceKeyToolStripMenuItem.Name = "pasteResourceKeyToolStripMenuItem";
-            this.pasteResourceKeyToolStripMenuItem.Size = new System.Drawing.Size(205, 22);
-            this.pasteResourceKeyToolStripMenuItem.Text = "&Paste ResourceKey";
-            this.pasteResourceKeyToolStripMenuItem.Click += new System.EventHandler(this.pasteResourceKeyToolStripMenuItem_Click);
             // 
             // ResourceDetails
             // 

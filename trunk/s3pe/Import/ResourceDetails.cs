@@ -111,7 +111,21 @@ namespace S3PIDemoFE
             this.DialogResult = (sender as Button).DialogResult;
         }
 
-        private void tbTGI_TextChanged(object sender, EventArgs e)
+        private void cbType_ValidChanged(object sender, EventArgs e)
+        {
+            if (internalchg) return;
+            btnOK.Enabled = btnOKCanEnable;
+            if (btnOK.Enabled) UpdateTGIN();
+        }
+
+        private void cbType_ValueChanged(object sender, EventArgs e)
+        {
+            if (internalchg) return;
+            btnOK.Enabled = btnOKCanEnable;
+            if (btnOK.Enabled) UpdateTGIN();
+        }
+
+        private void tbGroupInstance_TextChanged(object sender, EventArgs e)
         {
             if (internalchg) return;
             TextBox tb = sender as TextBox;
@@ -166,13 +180,6 @@ namespace S3PIDemoFE
             string[] fileDrop = e.Data.GetData("FileDrop") as String[];
             if (fileDrop != null && fileDrop.Length > 0)
                 Filename = fileDrop[0];
-        }
-
-        private void cbType_ValidChanged(object sender, EventArgs e)
-        {
-            if (internalchg) return;
-            btnOK.Enabled = btnOKCanEnable;
-            if (btnOK.Enabled) UpdateTGIN();
         }
 
         #region IEqualityComparer<IResourceKey> Members
