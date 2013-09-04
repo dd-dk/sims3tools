@@ -12,7 +12,10 @@ namespace Unprotect
 {
     class Program
     {
-        static string dotNetInstall = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\.NETFramework",
+        static string dotNetInstall64 = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\.NETFramework",
+            "InstallRoot",
+            @"C:\Windows\Microsoft.NET\Framework\") as string;
+        static string dotNetInstall32 = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework",
             "InstallRoot",
             @"C:\Windows\Microsoft.NET\Framework\") as string;
 
@@ -62,6 +65,7 @@ namespace Unprotect
                 #endregion
 
                 #region Find the ilasm exe
+                string dotNetInstall = Directory.Exists(dotNetInstall64) ? dotNetInstall64 : dotNetInstall32;
                 if (!Directory.Exists(dotNetInstall))
                 {
                     Console.WriteLine("Could not find .Net installation.");
