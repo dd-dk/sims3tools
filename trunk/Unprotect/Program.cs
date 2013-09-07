@@ -95,7 +95,7 @@ namespace Unprotect
             try
             {
                 List<Tuple<string, string>> regEx = new List<Tuple<string, string>>();
-                regEx.Add(new Tuple<string, string>("\\.field private (.*)\\s(\\S*EventHandler)", ".field Simlogical $1 $2"));
+                regEx.Add(new Tuple<string, string>("\\.field private (.*)\\s(\\S*)(Callback|EventHandler)", ".field DoNotUnprotect $1 $2$3"));
                 regEx.Add(new Tuple<string, string>("(\\s)assembly(\\s)", "$1public$2"));
                 regEx.Add(new Tuple<string, string>("(\\s)family(\\s)", "$1public$2"));
                 regEx.Add(new Tuple<string, string>("(\\s)private(\\s)", "$1public$2"));
@@ -108,7 +108,7 @@ namespace Unprotect
                 //regEx.Add(new Tuple<string, string>("\\.method public hidebysig newslot specialname virtual(| final)(\\s*\\n\\s*instance void  remove_)", ".method private hidebysig newslot specialname virtual $1$2"));
                 //regEx.Add(new Tuple<string, string>("\\.method public hidebysig specialname static(\\s*\\n\\s*void  add_)", ".method private hidebysig specialname static$1"));
                 //regEx.Add(new Tuple<string, string>("\\.method public hidebysig specialname static(\\s*\\n\\s*void  remove_)", ".method private hidebysig specialname static$1"));
-                regEx.Add(new Tuple<string, string>("\\.field Simlogical (.*)\\s(\\S*EventHandler)", ".field private $1 $2"));
+                regEx.Add(new Tuple<string, string>("\\.field DoNotUnprotect (.*)\\s(\\S*)(Callback|EventHandler)", ".field private $1 $2$3"));
 
                 string contents = null;
 
