@@ -4,6 +4,7 @@ set ConfigurationName=Release
 set base=%TargetName%
 rem -%ConfigurationName%
 set src=%TargetName%-Source
+set MAKENSIS=D:\Program Files (x86)\NSIS\makensis.exe
 
 set out=S:\Sims3\Tools\s3su\
 
@@ -18,16 +19,10 @@ set m=%mytime:~3,2%
 set s=%mytime:~6,2%
 set suffix=%yy%-%mm%%dd%-%h%%m%
 
-if EXIST "%PROGRAMFILES%\nsis\makensis.exe" goto gotNotX86
-if EXIST "%PROGRAMFILES(x86)%\nsis\makensis.exe" goto gotX86
+if EXIST "%MAKENSIS%" goto gotNSIS
 echo "Could not find makensis."
 goto noNSIS
 
-:gotNotX86:
-set MAKENSIS=%PROGRAMFILES%\nsis\makensis.exe
-goto gotNSIS
-:gotX86:
-set MAKENSIS=%PROGRAMFILES(x86)%\nsis\makensis.exe
 :gotNSIS:
 set nsisv=/V3
 
