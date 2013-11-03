@@ -451,6 +451,14 @@
       <Link>Helpers\CLIPexportAsNewName.helper</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\s3pe Helpers\S3SA DLL ExpImp\S3SADLLViewer_Go.helper">
+      <Link>Helpers\S3SADLLViewer_Go.helper</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\s3pe Helpers\S3SA DLL ExpImp\S3SADLLViewer_Setup.helper">
+      <Link>Helpers\S3SADLLViewer_Setup.helper</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>

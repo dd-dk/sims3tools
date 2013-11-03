@@ -27,6 +27,15 @@ namespace S3SA_DLL_ExpImp
 {
     static class Program
     {
+        static bool view_go = false;
+
+        [Flags]
+        enum Option
+        {
+            export = 1,
+            import = 2,
+            view = 4,
+        }
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -35,13 +44,34 @@ namespace S3SA_DLL_ExpImp
         {
             List<string> largs = new List<string>(args);
 
-            bool export = largs.Contains("/export");
-            if (export) largs.Remove("/export");
+            Option option = 0;
+            if (largs.Contains("/export"))
+            {
+                largs.Remove("/export");
+                option |= Option.export;
+            }
+            if (largs.Contains("/import"))
+            {
+                largs.Remove("/import");
+                option |= Option.import;
+            }
+            if (largs.Contains("/view"))
+            {
+                largs.Remove("/view");
+                option |= Option.view;
 
-            bool import = largs.Contains("/import");
-            if (import) largs.Remove("/import");
+                if (largs.Contains("/go"))
+                {
+                    largs.Remove("/go");
+                    view_go = true;
+                }
+                else
+                {
+                    view_go = false;
+                }
+            }
 
-            if ((!export && !import) || (export && import))
+            if (!Enum.IsDefined(typeof(Option), option))
             {
                 CopyableMessageBox.Show("Invalid command line.", Application.ProductName, CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
                 Environment.Exit(1);
@@ -60,7 +90,14 @@ namespace S3SA_DLL_ExpImp
             }
 #endif
 
-            return s3pi.Helpers.RunHelper.Run(export ? typeof(Export) : typeof(Import), args);
+            Type mainForm = typeof(object);
+            switch (option)
+            {
+                case Option.export: mainForm = typeof(Export); break;
+                case Option.import: mainForm = typeof(Import); break;
+                case Option.view: mainForm = typeof(View); break;
+            }
+            return s3pi.Helpers.RunHelper.Run(mainForm, args);
         }
 
         public static string getAssemblyName(ScriptResource.ScriptResource s3sa)
@@ -78,5 +115,7 @@ namespace S3SA_DLL_ExpImp
             }
             return "*.dll";
         }
+
+        public static bool ViewGo { get { return view_go; } }
     }
 }
