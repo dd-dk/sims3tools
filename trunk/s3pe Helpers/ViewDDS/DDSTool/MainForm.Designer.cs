@@ -129,6 +129,12 @@
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
             this.ddsPanel1 = new System.Windows.Forms.DDSPanel();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.loadDDSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importAlphaToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveDDSAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -142,12 +148,8 @@
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.loadDDSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.importAlphaToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveDDSAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exportToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.hueShift)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.saturationShift)).BeginInit();
@@ -195,8 +197,8 @@
             this.tableLayoutPanel4.SuspendLayout();
             this.tlpMaskSize.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
-            this.menuStrip1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // hueShift
@@ -1591,7 +1593,6 @@
             this.ddsMaskCh1.TabStop = false;
             this.ddsMaskCh1.UseDXT = false;
             this.ddsMaskCh1.UseLuminance = false;
-            this.ddsMaskCh1.Click += new System.EventHandler(this.ddsMaskCh_Click);
             // 
             // ddsMaskCh2
             // 
@@ -1752,10 +1753,57 @@
             this.ddsPanel1.UseDXT = false;
             this.ddsPanel1.UseLuminance = false;
             // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.loadDDSToolStripMenuItem,
+            this.importToolStripMenuItem,
+            this.importAlphaToolStripMenuItem1,
+            this.saveDDSAsToolStripMenuItem,
+            this.exportToolStripMenuItem1});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(156, 114);
+            // 
+            // loadDDSToolStripMenuItem
+            // 
+            this.loadDDSToolStripMenuItem.Name = "loadDDSToolStripMenuItem";
+            this.loadDDSToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.loadDDSToolStripMenuItem.Text = "Load DDS...";
+            this.loadDDSToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
+            // 
+            // importToolStripMenuItem
+            // 
+            this.importToolStripMenuItem.Name = "importToolStripMenuItem";
+            this.importToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.importToolStripMenuItem.Text = "Import image...";
+            this.importToolStripMenuItem.Click += new System.EventHandler(this.importImageToolStripMenuItem_Click);
+            // 
+            // importAlphaToolStripMenuItem1
+            // 
+            this.importAlphaToolStripMenuItem1.Name = "importAlphaToolStripMenuItem1";
+            this.importAlphaToolStripMenuItem1.Size = new System.Drawing.Size(155, 22);
+            this.importAlphaToolStripMenuItem1.Text = "Import alpha...";
+            this.importAlphaToolStripMenuItem1.Click += new System.EventHandler(this.importAlphaToolStripMenuItem_Click);
+            // 
+            // saveDDSAsToolStripMenuItem
+            // 
+            this.saveDDSAsToolStripMenuItem.Name = "saveDDSAsToolStripMenuItem";
+            this.saveDDSAsToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.saveDDSAsToolStripMenuItem.Text = "Save DDS as...";
+            this.saveDDSAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
+            // 
+            // exportToolStripMenuItem1
+            // 
+            this.exportToolStripMenuItem1.Name = "exportToolStripMenuItem1";
+            this.exportToolStripMenuItem1.Size = new System.Drawing.Size(155, 22);
+            this.exportToolStripMenuItem1.Text = "Export...";
+            this.exportToolStripMenuItem1.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
+            // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem});
+            this.fileToolStripMenuItem,
+            this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(996, 24);
@@ -1777,7 +1825,7 @@
             this.toolStripSeparator1,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(35, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "&File";
             this.fileToolStripMenuItem.DropDownOpening += new System.EventHandler(this.fileToolStripMenuItem_DropDownOpening);
             // 
@@ -1785,7 +1833,7 @@
             // 
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
             this.newToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.newToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.newToolStripMenuItem.Text = "&New...";
             this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click);
             // 
@@ -1793,28 +1841,28 @@
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openToolStripMenuItem.Text = "&Open DDS...";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
             // importImageToolStripMenuItem
             // 
             this.importImageToolStripMenuItem.Name = "importImageToolStripMenuItem";
-            this.importImageToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.importImageToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.importImageToolStripMenuItem.Text = "&Import image...";
             this.importImageToolStripMenuItem.Click += new System.EventHandler(this.importImageToolStripMenuItem_Click);
             // 
             // importAlphaToolStripMenuItem
             // 
             this.importAlphaToolStripMenuItem.Name = "importAlphaToolStripMenuItem";
-            this.importAlphaToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.importAlphaToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.importAlphaToolStripMenuItem.Text = "Import &Alpha...";
             this.importAlphaToolStripMenuItem.Click += new System.EventHandler(this.importAlphaToolStripMenuItem_Click);
             // 
             // reloadToolStripMenuItem
             // 
             this.reloadToolStripMenuItem.Name = "reloadToolStripMenuItem";
-            this.reloadToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.reloadToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.reloadToolStripMenuItem.Text = "&Reload";
             this.reloadToolStripMenuItem.Click += new System.EventHandler(this.reloadToolStripMenuItem_Click);
             // 
@@ -1822,7 +1870,7 @@
             // 
             this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
             this.clearToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
-            this.clearToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.clearToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.clearToolStripMenuItem.Text = "&Clear";
             this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
             // 
@@ -1830,82 +1878,51 @@
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveToolStripMenuItem.Text = "&Save DDS";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // saveAsToolStripMenuItem
             // 
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.saveAsToolStripMenuItem.Text = "S&ave DDS as...";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // exportToolStripMenuItem
             // 
             this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exportToolStripMenuItem.Text = "&Export...";
             this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(172, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
-            // contextMenuStrip1
+            // helpToolStripMenuItem
             // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.loadDDSToolStripMenuItem,
-            this.importToolStripMenuItem,
-            this.importAlphaToolStripMenuItem1,
-            this.saveDDSAsToolStripMenuItem,
-            this.exportToolStripMenuItem1});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 136);
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.aboutToolStripMenuItem});
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Text = "&Help";
             // 
-            // loadDDSToolStripMenuItem
+            // aboutToolStripMenuItem
             // 
-            this.loadDDSToolStripMenuItem.Name = "loadDDSToolStripMenuItem";
-            this.loadDDSToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.loadDDSToolStripMenuItem.Text = "Load DDS...";
-            this.loadDDSToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
-            // 
-            // importToolStripMenuItem
-            // 
-            this.importToolStripMenuItem.Name = "importToolStripMenuItem";
-            this.importToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.importToolStripMenuItem.Text = "Import image...";
-            this.importToolStripMenuItem.Click += new System.EventHandler(this.importImageToolStripMenuItem_Click);
-            // 
-            // importAlphaToolStripMenuItem1
-            // 
-            this.importAlphaToolStripMenuItem1.Name = "importAlphaToolStripMenuItem1";
-            this.importAlphaToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
-            this.importAlphaToolStripMenuItem1.Text = "Import alpha...";
-            this.importAlphaToolStripMenuItem1.Click += new System.EventHandler(this.importAlphaToolStripMenuItem_Click);
-            // 
-            // saveDDSAsToolStripMenuItem
-            // 
-            this.saveDDSAsToolStripMenuItem.Name = "saveDDSAsToolStripMenuItem";
-            this.saveDDSAsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.saveDDSAsToolStripMenuItem.Text = "Save DDS as...";
-            this.saveDDSAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
-            // 
-            // exportToolStripMenuItem1
-            // 
-            this.exportToolStripMenuItem1.Name = "exportToolStripMenuItem1";
-            this.exportToolStripMenuItem1.Size = new System.Drawing.Size(152, 22);
-            this.exportToolStripMenuItem1.Text = "Export...";
-            this.exportToolStripMenuItem1.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem.Text = "&About...";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -1976,9 +1993,9 @@
             this.tlpMaskSize.PerformLayout();
             this.tableLayoutPanel5.ResumeLayout(false);
             this.tableLayoutPanel5.PerformLayout();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2105,5 +2122,7 @@
         private System.Windows.Forms.ToolStripMenuItem importAlphaToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem saveDDSAsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
     }
 }

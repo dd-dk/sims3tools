@@ -199,6 +199,54 @@ namespace s3pe.DDSTool
         }
 
 
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string my_version;
+            string dds_version;
+            string version_txt = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), Application.ProductName + "-Version.txt");
+            if (!File.Exists(version_txt))
+            {
+                string[] v = this.GetType().Assembly.GetName().Version.ToString().Split('.');
+                my_version = v[0].Last(4, "0").Substring(0, 2) + "-" +
+                    v[0].Last(2, "0") +
+                    v[1].Last(2, "0") + "-" +
+                    v[2].Last(4, "0");
+            }
+            else
+            {
+                using (System.IO.StreamReader sr = new StreamReader(version_txt))
+                {
+                    String line1 = sr.ReadLine();
+                    sr.Close();
+                    my_version = line1.Trim();
+                }
+            }
+
+            string[] dv = typeof(DDSPanel).Assembly.GetName().Version.ToString().Split('.');
+            dds_version = dv[0].Last(4, "0").Substring(0, 2) + "-" +
+                dv[0].Last(2, "0") +
+                dv[1].Last(2, "0") + "-" +
+                dv[2].Last(4, "0");
+
+            string copyright = "\n" +
+                myName + "  Copyright (C) 2013  Peter L Jones\n" +
+                "\n" +
+                "This program comes with ABSOLUTELY NO WARRANTY.\n" +
+                "\n" +
+                "This is free software, and you are welcome to redistribute it\n" +
+                "under certain conditions.\n";
+            MessageBox.Show(String.Format(
+                "{0}\n" +
+                "{1} version: {2}\n" +
+                "Library version: {3}"
+                , copyright
+                , myName
+                , my_version
+                , dds_version
+                ), myName);
+        }
+
+
         private void btnResize_Click(object sender, EventArgs e)
         {
             if (ddsPanel1.ImageSize == Size.Empty) return;
@@ -381,11 +429,6 @@ namespace s3pe.DDSTool
                 );
         }
 
-        private void ddsMaskCh_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("ddsMaskCh_Click");
-        }
-
 
         void updateDetails()
         {
@@ -474,6 +517,16 @@ namespace s3pe.DDSTool
             }
             finally { openFileDialog1.Filter = oldFilter; openFileDialog1.Title = oldCaption; }
             return openFileDialog1.FileName;
+        }
+    }
+
+    public static class StringExtension
+    {
+        public static string Last(this string source, int tail_length, string padding = "")
+        {
+            for (int i = tail_length; i > source.Length; i--)
+                source = padding + source;
+            return source.Substring(source.Length - Math.Min(source.Length, tail_length));
         }
     }
 }
