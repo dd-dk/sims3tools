@@ -534,7 +534,8 @@ namespace ObjectCloner.SplitterComponents
                 try
                 {
                     List<string> pathsSeen = new List<string>();
-                    List<PathPackageTuple> pptList = (new List<PathPackageTuple>[] { FileTable.GameContent, FileTable.DDSImages, FileTable.Thumbnails, }).SelectMany(x => x).ToList();
+                    List<PathPackageTuple> pptList = (new List<PathPackageTuple>[] { FileTable.GameContent, FileTable.DDSImages, FileTable.Thumbnails, })
+                        .Where(x => x != null).SelectMany(x => x).ToList();
 
                     updateProgress(true, "Searching " + pptList.Count + " packages...", true, pptList.Count + 1, true, 1);
 
