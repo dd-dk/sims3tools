@@ -882,7 +882,7 @@ namespace S3PIDemoFE
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_isdeleted, multiSelection);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_details, singleSelection);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_selectAll, true);
-            //http://dino.drealm.info/develforums/s3pi/index.php?topic=1188.msg6889#msg6889
+            //http://private/s3pi/index.php?topic=1188.msg6889#msg6889
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copyRK, singleSelection);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importResources, true);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importPackages, true);
@@ -1362,22 +1362,66 @@ namespace S3PIDemoFE
                 return;
             }
 
+            // http://private/s3pi/index.php?topic=1377
+            Dictionary<ulong, string> sourceNames = new Dictionary<ulong, string>();
             try
             {
                 Application.UseWaitCursor = true;
                 lbProgress.Text = "Exporting to " + Path.GetFileNameWithoutExtension(exportToPackageDialog.FileName) + "...";
                 Application.DoEvents();
 
-
                 progressBar1.Value = 0;
                 progressBar1.Maximum = browserWidget1.SelectedResources.Count;
                 foreach (IResourceIndexEntry rie in browserWidget1.SelectedResources)
                 {
+                    if (!sourceNames.ContainsKey(rie.Instance))
+                    {
+                        string name = browserWidget1.ResourceName(rie);
+                        if (name != "")
+                            sourceNames.Add(rie.Instance, name);
+                    }
                     exportResourceToPackage(target, rie, replace);
                     progressBar1.Value++;
                     if (progressBar1.Value % 100 == 0)
                         Application.DoEvents();
                 }
+
+                if (sourceNames.Count > 0)
+                {
+                    IResourceIndexEntry nmrie = target.Find(_key => _key.ResourceType == 0x0166038C);
+                    if (nmrie == null)
+                    {
+                        TGIBlock newnmrk = new TGIBlock(0, null, 0x0166038C, 0, System.Security.Cryptography.FNV64.GetHash(exportToPackageDialog.FileName + DateTime.Now.ToString()));
+                        nmrie = target.AddResource(newnmrk, null, true);
+                        if (nmrie == null)
+                        {
+                            Application.UseWaitCursor = false;
+
+                            CopyableMessageBox.Show(
+                                "Name map could not be created in target package.\n\nNames will not be exported.",
+                                "Export to package", CopyableMessageBoxButtons.OK, CopyableMessageBoxIcon.Error);
+
+                            Application.UseWaitCursor = true;
+                            Application.DoEvents();
+                        }
+                    }
+
+                    if (nmrie != null)
+                    {
+                        IResource newnmap = s3pi.WrapperDealer.WrapperDealer.GetResource(0, target, nmrie);
+                        if (newnmap != null && typeof(IDictionary<ulong, string>).IsAssignableFrom(newnmap.GetType()))
+                        {
+                            IDictionary<ulong, string> targetNames = (IDictionary<ulong, string>)newnmap;
+                            sourceNames.Where(_kv => targetNames.ContainsKey(_kv.Key))
+                                .Select(_kv => targetNames[_kv.Key] = _kv.Value);
+                            foreach (var _kv in sourceNames)
+                                if (!targetNames.ContainsKey(_kv.Key))
+                                    targetNames.Add(_kv);
+                            target.ReplaceResource(nmrie, newnmap);
+                        }
+                    }
+                }
+
                 progressBar1.Value = 0;
 
                 lbProgress.Text = "Saving...";
