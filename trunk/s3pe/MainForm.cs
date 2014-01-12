@@ -886,6 +886,7 @@ namespace S3PIDemoFE
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_copyRK, singleSelection);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importResources, true);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importPackages, true);
+            menuBarWidget1.Enable(MenuBarWidget.MB.MBR_replaceFrom, multiSelection);
             //menuBarWidget1.Enable(MenuBarWidget.MB.MBR_importAsDBC, true);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_exportResources, multiSelection);
             menuBarWidget1.Enable(MenuBarWidget.MB.MBR_exportToPackage, multiSelection);
@@ -974,6 +975,7 @@ namespace S3PIDemoFE
                     case MenuBarWidget.MB.MBR_copyRK: resourceCopyRK(); break;
                     case MenuBarWidget.MB.MBR_importResources: resourceImport(); break;
                     case MenuBarWidget.MB.MBR_importPackages: resourceImportPackages(); break;
+                    case MenuBarWidget.MB.MBR_replaceFrom: resourceReplaceFrom(); break;
                     case MenuBarWidget.MB.MBR_importAsDBC: resourceImportAsDBC(); break;
                     case MenuBarWidget.MB.MBR_exportResources: resourceExport(); break;
                     case MenuBarWidget.MB.MBR_exportToPackage: resourceExportToPackage(); break;

@@ -32,7 +32,8 @@ namespace S3PIDemoFE
         {
             file = 0,
             package,
-            paste
+            paste,
+            replaceFrom,
         }
         private string[] batch = null;
         private Mode mode = Mode.file;
@@ -48,6 +49,16 @@ namespace S3PIDemoFE
             this.mode = mode;
             this.AllowDrop = this.mode == Mode.file;
             //importSettings1[S3PIDemoFE.Import.ImportSettings.ImportSettingsControl.UseName] = this.mode != Mode.package;
+            if (mode == Mode.package || mode == Mode.replaceFrom)
+            {
+                importSettings1[S3PIDemoFE.Import.ImportSettings.ImportSettingsControl.AllowRename] = false;
+                importSettings1.AllowRename = false;
+            }
+            if (mode == Mode.replaceFrom)
+            {
+                importSettings1[S3PIDemoFE.Import.ImportSettings.ImportSettingsControl.Replace] = false;
+                importSettings1.Replace = true;
+            }
         }
 
         public ImportBatch(string[] batch, Mode mode) : this(mode) { addDrop(batch); }

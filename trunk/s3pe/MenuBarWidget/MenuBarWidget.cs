@@ -52,7 +52,7 @@ namespace S3PIDemoFE
                 //Resource
                 addToolStripMenuItem, resCopyToolStripMenuItem1, resPasteToolStripMenuItem1, duplicateToolStripMenuItem, replaceToolStripMenuItem,
                 compressedToolStripMenuItem, deletedToolStripMenuItem, detailsToolStripMenuItem, copyResourceKeyToolStripMenuItem, selectAllToolStripMenuItem,
-                fromFileToolStripMenuItem, fromPackageToolStripMenuItem, asDBCToolStripMenuItem, toFileToolStripMenuItem, toPackageToolStripMenuItem,
+                fromFileToolStripMenuItem, fromPackageToolStripMenuItem, replaceSelectedToolStripMenuItem, asDBCToolStripMenuItem, toFileToolStripMenuItem, toPackageToolStripMenuItem,
                 hexEditorToolStripMenuItem, textEditorToolStripMenuItem,
                 //Tools
                 fNVHashToolStripMenuItem, searchToolStripMenuItem,
@@ -73,7 +73,7 @@ namespace S3PIDemoFE
                 //BrowserWidgetContextMenuStrip
                 bwcmAdd, bwcmCopy, bwcmPaste, bwcmDuplicate, bwcmReplace,
                 bwcmCompressed, bwcmDeleted, bwcmDetails, bwcmCopyResourceKey, bwcmSelectAll,
-                bwcmFromFile, bwcmFromPackage, bwcmAsDBC, bwcmToFile, bwcmToPackage,
+                bwcmFromFile, bwcmFromPackage, bwcmReplaceSelected, bwcmAsDBC, bwcmToFile, bwcmToPackage,
                 bwcmHexEditor, bwcmTextEditor,
             });
             UpdateMRUList();
@@ -109,7 +109,7 @@ namespace S3PIDemoFE
             MBE_copy, MBE_save, MBE_float, MBE_ote,
             MBR_add, MBR_copy, MBR_paste, MBR_duplicate, MBR_replace,
             MBR_compressed, MBR_isdeleted, MBR_details, MBR_copyRK, MBR_selectAll,
-            MBR_importResources, MBR_importPackages, MBR_importAsDBC, MBR_exportResources, MBR_exportToPackage,
+            MBR_importResources, MBR_importPackages, MBR_replaceFrom, MBR_importAsDBC, MBR_exportResources, MBR_exportToPackage,
             MBR_hexEditor, MBR_textEditor,
             MBT_fnvHash, MBT_search,
             MBS_updates, MBS_previewDDS, MBS_fallbackTextPreview, MBS_fallbackHexPreview, MBS_askAutoSaveDBC,

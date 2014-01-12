@@ -74,10 +74,32 @@ namespace S3PIDemoFE
                 dr = ib.ShowDialog();
                 if (dr != DialogResult.OK) return;
 
-                importPackagesCommon(ib.Batch, ib.UseNames, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, importPackagesDialog.Title);
+                importPackagesCommon(ib.Batch, ib.UseNames, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject,
+                    null, importPackagesDialog.Title);
             }
             finally { this.Enabled = true; }
         }
+
+        private void resourceReplaceFrom()
+        {
+            var savedTitle = importPackagesDialog.Title;
+            try
+            {
+                this.Enabled = false;
+                importPackagesDialog.Title = "Replace Selected Resources from Package(s)";
+                DialogResult dr = importPackagesDialog.ShowDialog();
+                if (dr != DialogResult.OK) return;
+
+                ImportBatch ib = new ImportBatch(importPackagesDialog.FileNames, ImportBatch.Mode.replaceFrom);
+                dr = ib.ShowDialog();
+                if (dr != DialogResult.OK) return;
+
+                importPackagesCommon(ib.Batch, ib.UseNames, ib.Compress, DuplicateHandling.replace,
+                    null, importPackagesDialog.Title, selection: browserWidget1.SelectedResources);
+            }
+            finally { this.Enabled = true; importPackagesDialog.Title = savedTitle; }
+        }
+
 
         static List<uint> xmlList = new List<uint>(new uint[] {
             0x025C95B6, //xml: UI Layout definitions
@@ -178,7 +200,7 @@ namespace S3PIDemoFE
             Always,
         }
         private void importPackagesCommon(string[] packageList, bool useNames, bool compress, DuplicateHandling dups, List<uint> dupsList, string title,
-            AutoSaveState autoSaveState = AutoSaveState.Ask)
+            AutoSaveState autoSaveState = AutoSaveState.Ask, IList<IResourceIndexEntry> selection = null)
         {
             bool CPuseNames = controlPanel1.UseNames;
             DateTime now = DateTime.UtcNow;
@@ -229,10 +251,12 @@ namespace S3PIDemoFE
                     }
                     try
                     {
-                        IList<IResourceIndexEntry> lrie = imppkg.GetResourceList;
+                        List<Tuple<myDataFormat, DuplicateHandling>> limp = new List<Tuple<myDataFormat, DuplicateHandling>>();
+                        List<IResourceIndexEntry> lrie = selection == null
+                            ? imppkg.GetResourceList
+                            : imppkg.FindAll(rie => selection.Any(tgt => ((AResourceKey)tgt).Equals(rie)));
                         progressBar1.Value = 0;
                         progressBar1.Maximum = lrie.Count;
-                        List<Tuple<myDataFormat, DuplicateHandling>> limp = new List<Tuple<myDataFormat, DuplicateHandling>>();
                         foreach (IResourceIndexEntry rie in lrie)
                         {
                             try
