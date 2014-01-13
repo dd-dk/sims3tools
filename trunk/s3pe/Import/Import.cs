@@ -74,8 +74,8 @@ namespace S3PIDemoFE
                 dr = ib.ShowDialog();
                 if (dr != DialogResult.OK) return;
 
-                importPackagesCommon(ib.Batch, ib.UseNames, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject,
-                    null, importPackagesDialog.Title);
+                importPackagesCommon(ib.Batch, importPackagesDialog.Title, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, ib.Compress, ib.UseNames,
+                    rename: ib.Rename);
             }
             finally { this.Enabled = true; }
         }
@@ -94,8 +94,7 @@ namespace S3PIDemoFE
                 dr = ib.ShowDialog();
                 if (dr != DialogResult.OK) return;
 
-                importPackagesCommon(ib.Batch, ib.UseNames, ib.Compress, DuplicateHandling.replace,
-                    null, importPackagesDialog.Title, selection: browserWidget1.SelectedResources);
+                importPackagesCommon(ib.Batch, importPackagesDialog.Title, DuplicateHandling.replace, ib.Compress, selection: browserWidget1.SelectedResources);
             }
             finally { this.Enabled = true; importPackagesDialog.Title = savedTitle; }
         }
@@ -142,7 +141,10 @@ namespace S3PIDemoFE
                 AutoSaveState autoSaveState = AutoSaveState.Always;
                 if (S3PIDemoFE.Properties.Settings.Default.AskDBCAutoSave)
                     autoSaveState = AutoSaveState.Ask;
-                importPackagesCommon(importPackagesDialog.FileNames, true, true, DuplicateHandling.allow, allowList, importPackagesDialog.Title, autoSaveState);
+                importPackagesCommon(importPackagesDialog.FileNames, importPackagesDialog.Title, DuplicateHandling.allow, true,
+                    useNames: true,
+                    dupsList: allowList,
+                    autoSaveState: autoSaveState);
 
                 browserWidget1.Visible = false;
                 lbProgress.Text = "Doing DBC clean up...";
@@ -199,8 +201,13 @@ namespace S3PIDemoFE
             Ask,
             Always,
         }
-        private void importPackagesCommon(string[] packageList, bool useNames, bool compress, DuplicateHandling dups, List<uint> dupsList, string title,
-            AutoSaveState autoSaveState = AutoSaveState.Ask, IList<IResourceIndexEntry> selection = null)
+        private void importPackagesCommon(string[] packageList, string title, DuplicateHandling dups, bool compress,
+            bool useNames = false,
+            bool rename = false,
+            List<uint> dupsList = null,
+            AutoSaveState autoSaveState = AutoSaveState.Ask,
+            IList<IResourceIndexEntry> selection = null
+            )
         {
             bool CPuseNames = controlPanel1.UseNames;
             DateTime now = DateTime.UtcNow;
@@ -264,7 +271,7 @@ namespace S3PIDemoFE
                                 if (rie.ResourceType == 0x0166038C)//NMAP
                                 {
                                     if (useNames)
-                                        browserWidget1.MergeNamemap(s3pi.WrapperDealer.WrapperDealer.GetResource(0, imppkg, rie) as IDictionary<ulong, string>, true, false);
+                                        browserWidget1.MergeNamemap(s3pi.WrapperDealer.WrapperDealer.GetResource(0, imppkg, rie) as IDictionary<ulong, string>, true, rename);
                                 }
                                 else
                                 {
@@ -406,7 +413,7 @@ namespace S3PIDemoFE
                 DialogResult dr = ib.ShowDialog();
                 if (dr != DialogResult.OK) return;
 
-                importPackagesCommon(new string[] { filename, }, ib.UseNames, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, title);
+                importPackagesCommon(new string[] { filename, }, title, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, ib.Compress, ib.UseNames);
             }
             else
             {
@@ -466,7 +473,7 @@ namespace S3PIDemoFE
             try
             {
                 if (pkgList.Count > 0)
-                    importPackagesCommon(pkgList.ToArray(), ib.UseNames, ib.Compress, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, null, title);
+                    importPackagesCommon(pkgList.ToArray(), title, ib.Replace ? DuplicateHandling.replace : DuplicateHandling.reject, ib.Compress, ib.UseNames);
 
                 bool nmOK = true;
                 foreach (string filename in resList)

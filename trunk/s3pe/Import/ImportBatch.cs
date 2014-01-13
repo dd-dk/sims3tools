@@ -48,16 +48,14 @@ namespace S3PIDemoFE
         {
             this.mode = mode;
             this.AllowDrop = this.mode == Mode.file;
-            //importSettings1[S3PIDemoFE.Import.ImportSettings.ImportSettingsControl.UseName] = this.mode != Mode.package;
-            if (mode == Mode.package || mode == Mode.replaceFrom)
-            {
-                importSettings1[S3PIDemoFE.Import.ImportSettings.ImportSettingsControl.AllowRename] = false;
-                importSettings1.AllowRename = false;
-            }
             if (mode == Mode.replaceFrom)
             {
                 importSettings1[S3PIDemoFE.Import.ImportSettings.ImportSettingsControl.Replace] = false;
                 importSettings1.Replace = true;
+                importSettings1[S3PIDemoFE.Import.ImportSettings.ImportSettingsControl.UseName] = false;
+                importSettings1.UseName = false;
+                importSettings1[S3PIDemoFE.Import.ImportSettings.ImportSettingsControl.AllowRename] = false;
+                importSettings1.AllowRename = false;
             }
         }
 
